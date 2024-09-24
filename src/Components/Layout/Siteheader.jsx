@@ -1,4 +1,5 @@
 import React from "react";
+
 import { Link } from "react-router-dom";
 
 
@@ -14,38 +15,37 @@ export function Siteheader(params) {
 
           <ul className="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0 ml-5">
 
-            <li><a href="/" className="nav-link px-2 link-secondary">Dashboard</a></li>
+            <li className=" nav-item px-2 link-secondary activeM">
+              <Link className="nav-link" to="/">Dashboard </Link></li>
 
             <li className="nav-item dropdown">
-              <a className="nav-link dropdown-toggle " href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Master
-              </a>
+              <Link className="nav-link dropdown-toggle activeM " to="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Master</Link>
+               
 
-              <ul className="dropdown-menu" aria-labelledby="navbarDropdown">
-                <li className="dropdown-item" >
-                  <Link className="dropdown-item" to="/"></Link></li>
+              <ul className="dropdown-menu activeM" aria-labelledby="navbarDropdown">
                 <li className="dropdown-item">
                   <Link className="dropdown-item" to="/location">Location</Link></li>
                 <li className="dropdown-item">
-                  <Link classname="dropdown-item" to="/endcustomer" ></Link> End Customer Master</li>
+                  <Link className="dropdown-item" to="/endcustomer">End Customer Master</Link></li>
                 <li className="dropdown-item">
-                  <Link classname="dropdown-item" to="/channelpartner" ></Link>Channel Partner Master</li>
+                  <Link className="dropdown-item" to="/channelpartner">Channel Partner Master</Link></li>
                 <li className="dropdown-item">
-                  <Link className="dropdown-item" to="/serviceagent" ></Link>Service Agent Master</li>
+                  <Link className="dropdown-item" to="/serviceagent">Service Agent Master</Link></li>
                 <li className="dropdown-item">
-                  <Link className="dropdown-item" to="/callstatus"></Link>Call Status Code Master</li>
+                  <Link className="dropdown-item" to="/callstatus">Call Status Code Master</Link></li>
                 <li className="dropdown-item">
-                  <Link className="dropdown-item" to="/pincode"></Link>Pincode Master</li>
+                  <Link className="dropdown-item" to="/pincode">Pincode Master</Link></li>
                 <li className="dropdown-item">
-                  <Link className="dropdown-item" to="/lhiuser"></Link>LHI User Master</li>
+                  <Link className="dropdown-item" to="/lhiuser">LHI User Master</Link></li>
                 <li className="dropdown-item">
-                  <Link className="dropdown-item" to="/serviceproduct"></Link>Service Product Master</li>
+                  <Link className="dropdown-item" to="/serviceproduct">Service Product Master</Link></li>
                 <li className="dropdown-item">
-                  <Link className="dropdown-item" to="/complaincode"></Link>Complain code, Reason code & Action code</li>
+                  <Link className="dropdown-item" to="/complaincode">Complain code, Reason code & Action code</Link></li>
                 <li className="dropdown-item">
-                  <Link className="dropdown-item" to="/ratecard"></Link>Rate card Matrix</li>
+                  <Link className="dropdown-item" to="/ratecard">Rate card Matrix</Link></li>
                 <li className="dropdown-item">
-                  <Link className="dropdown-item" to="/productspare"></Link>Product & Spare mapping master</li>
+                  <Link className="dropdown-item" to="/productspare">Product & Spare mapping master</Link></li>
               </ul>
             </li>
             <li className="nav-item dropdown">
@@ -53,8 +53,10 @@ export function Siteheader(params) {
                 Complaints
               </a>
               <ul className="dropdown-menu" aria-labelledby="navbarDropdown">
-                <li><a className="dropdown-item " href="Complaintlist.jsx">Layout 1</a></li>
-                <li><a className="dropdown-item " href="Complaintgrid.jsx">Layout 2</a></li>
+                <li className="dropdown-item ">
+                  <Link className="dropdown-item" to="/Complaintlist.jsx">Layout 1</Link></li>
+                <li className="dropdown-item ">
+                  <Link className="dropdown-item" to="/Complaintgrid.jsx">Layout 2</Link></li>
               </ul>
             </li>
             <li className="nav-item dropdown">
@@ -62,8 +64,10 @@ export function Siteheader(params) {
                 Reports
               </a>
               <ul className="dropdown-menu" aria-labelledby="navbarDropdown">
-                <li><a className="dropdown-item" href="#">Complaint Report</a></li>
-                <li><a className="dropdown-item" href="#">Claim Report</a></li>
+                <li className="dropdown-item" >
+                  <Link className="dropdown-item" to="#">Complaint Report</Link></li>
+                <li className="dropdown-item" >
+                  <Link className="dropdown-item" to="#">Claim Report</Link></li>
               </ul>
             </li>
           </ul>
@@ -75,15 +79,19 @@ export function Siteheader(params) {
           <div className="dropdown text-end">
             <a className="btn btn-primary newcomplaint" href="Registercomplaint.jsx">New Complaint</a>
 
-            <a href="#" className="link-dark text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+            <a href="#" className="link-dark text-decoration-none dropdown-toggle" id="dropdownUser1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               <img src="https://github.com/mdo.png" alt="mdo" width="32" height="32" className="rounded-circle" />
             </a>
             <ul className="dropdown-menu text-small" aria-labelledby="dropdownUser1">
-              <li><a className="dropdown-item" href="#">New project...</a></li>
-              <li><a className="dropdown-item" href="#">Settings</a></li>
-              <li><a className="dropdown-item" href="#">Profile</a></li>
+              <li className="dropdown-item" role="button">
+                <Link className="dropdown-item" to="#">New project...</Link></li>
+              <li className="dropdown-item" role="button">
+                <Link className="dropdown-item" to="#">Settings</Link></li>
+              <li className="dropdown-item" role="button">
+                <Link className="dropdown-item" to="#">Profile</Link></li>
               <li><hr className="dropdown-divider" /></li>
-              <li><a className="dropdown-item" href="#">Sign out</a></li>
+              <li className="dropdown-item" role="button">
+                <Link className="dropdown-item" to="/login" tabIndex="0">Sign out</Link></li>
             </ul>
           </div>
         </div>

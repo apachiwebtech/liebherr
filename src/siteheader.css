@@ -1,0 +1,12 @@
+.nav-link{
+    color: #000 !important;
+    
+}
+.nav-link.dropdown-toggle:hover,
+.nav-link.dropdown-toggle:focus{
+    color: #0a58ca !important;
+}
+.activeM{
+    color: #000;
+    background-color: #FF5F15;
+}
