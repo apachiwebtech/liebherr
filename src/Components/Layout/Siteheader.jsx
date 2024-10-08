@@ -10,13 +10,13 @@ export function Siteheader(params) {
       <div className="container-fuild">
         <div className="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
           <a href="/" className="d-flex align-items-center  mb-2 mb-lg-0 mr-5 text-dark text-decoration-none img" >
-            <img src="images/blum.png.png" style={{ height: '50px', width: '130px' }} />
+            <img src="images\Liebherr-logo-768x432.png"  />
           </a>
 
           <ul className="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0 ml-5">
 
-            <li className=" nav-item px-2 link-secondary activeM">
-              <Link className="nav-link" to="/">Dashboard </Link></li>
+            <li>
+              <Link className="nav-link   px-2 link-secondary activeM" to="/" >Dashboard </Link></li>
 
             <li className="nav-item dropdown">
               <Link className="nav-link dropdown-toggle activeM " to="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -24,49 +24,49 @@ export function Siteheader(params) {
                
 
               <ul className="dropdown-menu activeM" aria-labelledby="navbarDropdown">
-                <li className="dropdown-item">
+                <li >
                   <Link className="dropdown-item" to="/location">Location</Link></li>
-                <li className="dropdown-item">
+                <li>
                   <Link className="dropdown-item" to="/endcustomer">End Customer Master</Link></li>
-                <li className="dropdown-item">
+                <li>
                   <Link className="dropdown-item" to="/channelpartner">Channel Partner Master</Link></li>
-                <li className="dropdown-item">
+                <li>
                   <Link className="dropdown-item" to="/serviceagent">Service Agent Master</Link></li>
-                <li className="dropdown-item">
+                <li>
                   <Link className="dropdown-item" to="/callstatus">Call Status Code Master</Link></li>
-                <li className="dropdown-item">
+                <li>
                   <Link className="dropdown-item" to="/pincode">Pincode Master</Link></li>
-                <li className="dropdown-item">
+                <li>
                   <Link className="dropdown-item" to="/lhiuser">LHI User Master</Link></li>
-                <li className="dropdown-item">
+                <li>
                   <Link className="dropdown-item" to="/serviceproduct">Service Product Master</Link></li>
-                <li className="dropdown-item">
+                <li>
                   <Link className="dropdown-item" to="/complaincode">Complain code, Reason code & Action code</Link></li>
-                <li className="dropdown-item">
+                <li>
                   <Link className="dropdown-item" to="/ratecard">Rate card Matrix</Link></li>
-                <li className="dropdown-item">
+                <li>
                   <Link className="dropdown-item" to="/productspare">Product & Spare mapping master</Link></li>
               </ul>
             </li>
             <li className="nav-item dropdown">
-              <a className="nav-link dropdown-toggle " href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" >
+              <a className="nav-link dropdown-toggle activeM" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" >
                 Complaints
               </a>
-              <ul className="dropdown-menu" aria-labelledby="navbarDropdown">
-                <li className="dropdown-item ">
+              <ul className="dropdown-menu activeM" aria-labelledby="navbarDropdown">
+                <li>
                   <Link className="dropdown-item" to="/Complaintlist.jsx">Layout 1</Link></li>
-                <li className="dropdown-item ">
+                <li>
                   <Link className="dropdown-item" to="/Complaintgrid.jsx">Layout 2</Link></li>
               </ul>
             </li>
             <li className="nav-item dropdown">
-              <a className="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <a className="nav-link dropdown-toggle activeM" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 Reports
               </a>
-              <ul className="dropdown-menu" aria-labelledby="navbarDropdown">
-                <li className="dropdown-item" >
+              <ul className="dropdown-menu activeM" aria-labelledby="navbarDropdown">
+                <li>
                   <Link className="dropdown-item" to="#">Complaint Report</Link></li>
-                <li className="dropdown-item" >
+                <li>
                   <Link className="dropdown-item" to="#">Claim Report</Link></li>
               </ul>
             </li>

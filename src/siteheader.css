@@ -1,12 +1,276 @@
-.nav-link{
-    color: #000 !important;
+
+
+body {
+    background-color: #eee;
+    font-family: 'Nunito';
+    color:#222;
+    font-size: 14px;
+}
+
+a {
+    color:#222;
+}
+
+input::placeholder {
+    font-size: 0.85rem;
+}
+
+textarea::placeholder {
+    font-size: 0.85rem;
+}
+
+select{
+    font-size: 14px !important;
+}
+
+select option{
+    font-family: 'Nunito';
+}
+
+
+
+header {
+    background:#fff;
+}
+
+.mp0 {
+    margin:0;
+    padding:0;
+}
+
+.mt-25 {
+    margin-top:25px;
+}
+
+.mr-5 {
+    margin-right:50px;
+}
+
+.mb-3 {
+    margin-bottom:25px;
+}
+
+.card{
+    border-radius: 0.55rem !important;
+}
+
+.nav-link {
+    color: #222 !important;
+}
+
+.nav-link:focus, .nav-link:hover {
+    color: #222;
+}
+.nav-logo{
+    height:50px;
+    width:80px;
+}
+
+.btn-liebherr {
+    color: #222;
+    background-color: #ffd000ea;
+    border-color: #ffd000ea;
+    text-transform: uppercase;
+}
+
+.btn-liebherr:hover {
+    color: #222;
+    background-color: #ffd000ea;
+    border-color: #ffd000ea;
+    text-transform: uppercase;
+}
+.newcomplaint {
+    display: inline-block;
+    margin-right: 50px;
+  }
+
+.width100 {
+    width:100%;
+}
+
+.activeM {
+    color: #222;
+    background-color: #ffd000ea; 
+    padding:8px;
+    font-size: 14px;
+    font-family: 'Nunito';
+}
+
+.complbread{
+    background: aliceblue;
     
+  }
+
+.breadMain {
+    background: #ffd000ea;
+    padding: 15px;
 }
-.nav-link.dropdown-toggle:hover,
-.nav-link.dropdown-toggle:focus{
-    color: #0a58ca !important;
+
+.breadcrumbc{
+    background: #ffd000ea;
+    margin-bottom: 15px;
+    padding: 5px 15px;
+    font-size: 18px;
+    font-weight: 600;
+    text-transform: uppercase;
+    box-shadow: 0 0 4px #ddd;
 }
-.activeM{
-    color: #000;
-    background-color: #FF5F15;
+
+.breadcrumb {
+    margin-bottom:0;
+} 
+
+.breadcrumb li.active {
+    background-color: #ffd000ea; 
+    color:#222;
+    padding:5px;
+ }
+
+.tab_box {
+    border-top: none;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+
+#tabsMenu a {
+    text-transform:uppercase;
+}
+
+#tabsMenu a.active {
+    font-weight: 600;
+}
+
+.text-right {
+    text-align: right;
+  }
+  .deletehelper img {
+    width: 20%;
+    color: red;
+  }
+  .edithelper img {
+    width: 20%;
+    color: blue;
+  }
+
+.pname {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+#searchResult {
+    display:none;
+}
+
+#formInfo {
+    display:none;
+}
+
+#productInfo {
+    display:none;
+}
+
+#engineerInfo {
+    display:none;
+}
+
+#attachmentInfo {
+    display:none;
+}
+
+h3.mainheade{
+    font-size: 16px;
+    margin-bottom: 20px;
+    background: #f3f3f3;
+    padding: 10px;
+    font-weight: 700;
+}
+
+#compaintno {
+    display:none;
+}
+
+.ticketBox {
+    max-height: 400px;
+    overflow: auto;
+}
+
+.bg-green {
+    background-color: green;
+    color: #fff;
+    padding: 5px;
+    border-radius: 3px;
+    margin-bottom: 15px;
+}
+
+.bg-green h2{
+    font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 0;
+}
+
+.bg-warntick {
+    background-color: #ffd000ea;
+    color: #222;
+    padding: 5px;
+    border-radius: 3px;
+    margin-bottom: 15px;
+}
+
+.bg-sparetick h2{
+    font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 0;
+}
+
+.bg-sparetick {
+    background-color: bisque;
+    color: #222;
+    padding: 5px;
+    border-radius: 3px;
+    margin-bottom: 15px;
+}
+
+.bg-warntick h2{
+    font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 0;
+}
+
+
+.ticketSet {
+    background-color: #f3f3f3;
+    padding:5px;
+    border-radius: 5px;
+    margin-bottom:7px;
+    border:1px solid #f3f3f3;
+    cursor: pointer;
+}
+
+.ticketSetAlt {
+    background-color: aliceblue;
+    padding:5px;
+    border-radius: 5px;
+    margin-bottom:7px;
+    border:1px solid #f3f3f3;
+    cursor: pointer;
+}
+
+.ticketSet h4{
+    font-size:16px;
+    font-weight: 700;
+}
+
+.ticketSet h5{
+    font-size:14px;
+    font-weight: 500;
+}
+
+.ticketSetAlt h4{
+    font-size:16px;
+    font-weight: 700;
+}
+
+.ticketSetAlt h5{
+    font-size:14px;
+    font-weight: 500;
 }
