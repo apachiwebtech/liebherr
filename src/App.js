@@ -29,13 +29,17 @@ import { Pincode } from './Components/Pages/Master/Pincode';
 import { Product } from './Components/Pages/Master/Product';
 import { Productspare } from './Components/Pages/Master/Productspare';
 import { Ratecard } from './Components/Pages/Master/Ratecard';
-import { Region } from './Components/Pages/Master/Region';
 import { Registercomplaint } from './Components/Pages/Complaint/Registercomplaint';
 import { Serviceagent } from './Components/Pages/Master/Serviceagent';
 import { Serviceproduct } from './Components/Pages/Master/Serviceproduct';
 import { Subcategory } from './Components/Pages/Master/Subcategory';
 import { Siteheader } from './Components/Layout/Siteheader';
 import { Sitefooter } from './Components/Layout/Sitefooter';
+import Location from './Components/Pages/Master/Location';
+import Regions from './Components/Pages/Master/Regions';
+import LocationTabs from './Components/Pages/Master/LocationTabs'
+
+
 
 const Router = createBrowserRouter([
   {
@@ -61,6 +65,21 @@ const Router = createBrowserRouter([
       {
         path: "/category",
         element: <Category />,
+        
+      },
+      {
+        path: "/locationtabs",
+        element: <LocationTabs />,
+        
+      },
+      {
+        path: "/regions",
+        element: <Regions />,
+        
+      },
+      {
+        path: "/location",
+        element: <Location />,
         
       },
       {
@@ -146,11 +165,7 @@ const Router = createBrowserRouter([
         path: "/ratecard",
         element: <Ratecard />,
         
-      },  {
-        path: "/region",
-        element: <Region />,
-        
-      },
+      }, 
       {
         path: "/register-complaint",
         element: <Registercomplaint />,
