@@ -9,7 +9,6 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import { Login } from './Components/Authenticate/Login';
-import { Area } from './Components/Pages/Master/Area';
 import { Callstatus } from './Components/Pages/Master/Callstatus';
 import { Category } from './Components/Pages/Master/Category';
 import { Channelpartner } from './Components/Pages/Master/Channelpartner';
@@ -21,8 +20,6 @@ import { Country } from './Components/Pages/Master/Country';
 import { Customerlocation } from './Components/Pages/Master/Customerlocation';
 import { Dashboard } from './Components/Pages/Dashboard';
 import { Endcustomer } from './Components/Pages/Master/Endcustomer';
-import { Geocity } from './Components/Pages/Master/Geocity';
-import { Geostate } from './Components/Pages/Master/Geostate';
 import { Lhiuser } from './Components/Pages/Master/Lhiuser';
 import { Linklocation } from './Components/Pages/Master/Linklocation';
 import { Pincode } from './Components/Pages/Master/Pincode';
@@ -38,6 +35,9 @@ import { Sitefooter } from './Components/Layout/Sitefooter';
 import Location from './Components/Pages/Master/Location';
 import Regions from './Components/Pages/Master/Regions';
 import LocationTabs from './Components/Pages/Master/LocationTabs'
+import Geostate from './Components/Pages/Master/Geostate';
+import Geocity from './Components/Pages/Master/Geocity';
+import Area from './Components/Pages/Master/Area';
 
 
 

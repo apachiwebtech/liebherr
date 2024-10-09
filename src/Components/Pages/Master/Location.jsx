@@ -1,25 +1,28 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
+import { Base_Url } from '../../Utils/Base_Url';
 
 const Location = () => {
- 
-
+ // Step 1: Add this state to track errors
+  const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [isEdit, setIsEdit] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
+  const [duplicateError, setDuplicateError] = useState(''); // State to track duplicate error
+
 
   const [formData, setFormData] = useState({ 
     title: ''
   });
 
-
+  
   const fetchUsers = async () => {
     try {
-      const response = await axios.get('http://localhost:8081/getdata');
+      const response = await axios.get(`${Base_Url}/getdata`);
       console.log(response.data); 
       setUsers(response.data);
       setFilteredUsers(response.data);
@@ -41,33 +44,72 @@ const Location = () => {
     const value = e.target.value.toLowerCase();
     setSearchTerm(value);
     const filtered = users.filter((user) =>
-      user.title.toLowerCase().includes(value)
+      user.title && user.title.toLowerCase().includes(value)
     );
     setFilteredUsers(filtered);
     setCurrentPage(0);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const confirmSubmission = window.confirm("Do you want to submit the data?");
-      if (confirmSubmission) {
-        if (isEdit) {
-          await axios.put('http://localhost:8081/putdata', { ...formData });
-        } else {
-          await axios.post('http://localhost:8081/postdata', { ...formData });
-        }
-        window.location.href = 'http://localhost:3000/locationtabs';
+   
+    // Step 2: Add form validation function
+    const validateForm = () => {
+      const newErrors = {}; // Initialize an empty error object
+      if (!formData.title.trim()) { // Check if the title is empty
+        newErrors.title = "Country Field is required."; // Set error message if title is empty
       }
-    } catch (error) {
-      console.error('Error during form submission:', error);
-    }
-  };
+      return newErrors; // Return the error object
+    };
+  
+
+      //handlesubmit form
+      const handleSubmit = async (e) => {
+        e.preventDefault();
+      
+        const validationErrors = validateForm();
+        if (Object.keys(validationErrors).length > 0) {
+          setErrors(validationErrors);
+          return;
+        }
+      
+        setDuplicateError(''); // Clear duplicate error before submitting
+      
+        try {
+          const confirmSubmission = window.confirm("Do you want to submit the data?");
+          if (confirmSubmission) {
+            if (isEdit) {
+              // For update, include duplicate check
+              await axios.put(`${Base_Url}/putdata`, { ...formData })
+                .then(response => {
+                  window.location.reload();
+                })
+                .catch(error => {
+                  if (error.response && error.response.status === 409) {
+                    setDuplicateError('Duplicate entry, Country already exists!'); // Show duplicate error for update
+                  }
+                });
+            } else {
+              // For insert, include duplicate check
+              await axios.post(`${Base_Url}/postdata`, { ...formData })
+                .then(response => {
+                  window.location.reload();
+                })
+                .catch(error => {
+                  if (error.response && error.response.status === 409) {
+                    setDuplicateError('Duplicate entry, Country already exists!'); // Show duplicate error for insert
+                  }
+                });
+            }
+          }
+        } catch (error) {
+          console.error('Error during form submission:', error);
+        }
+      };
+      
 
   const deleted = async (id) => {
     try {
-      const response = await axios.post(`http://localhost:8081/deletedata`, { id });
-      alert(response.data[0]);
+      const response = await axios.post(`${Base_Url}/deletedata`, { id });
+      // alert(response.data[0]);
       window.location.reload();
     } catch (error) {
       console.error('Error deleting user:', error);
@@ -76,7 +118,7 @@ const Location = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`http://localhost:8081/requestdata/${id}`);
+      const response = await axios.get(`${Base_Url}/requestdata/${id}`);
       setFormData(response.data)
       setIsEdit(true);
       console.log(response.data);
@@ -93,21 +135,23 @@ const Location = () => {
   return (
     <div className="row">
       <div className="col-md-6">
-        <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="countryInput" style={{ marginBottom: '15px', fontSize: '18px' }}>Add Country</label>
             <input
               type="text"
-              className='form-control'
+              className="form-control"
+              name="title"
               id="countryInput"
-              placeholder="Enter country"
-              name='title'
               value={formData.title}
               onChange={handleChange}
+              placeholder="Enter country"
             />
+            {errors.title && <small className="text-danger">{errors.title}</small>}
+            {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
           </div>
-          <button type="submit" className="btn btn-warning mt-2">
-            Submit
+          <button className="btn btn-primary btn-sm" type="submit" style={{ marginTop: '15px' }}>
+            {isEdit ? "Update" : "Submit"}
           </button>
         </form>
       </div>
