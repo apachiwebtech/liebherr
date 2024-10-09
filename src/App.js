@@ -10,7 +10,7 @@ import {
 } from "react-router-dom";
 import { Login } from './Components/Authenticate/Login';
 import { Callstatus } from './Components/Pages/Master/Callstatus';
-import { Category } from './Components/Pages/Master/Category';
+import  Category  from './Components/Pages/Master/Category';
 import { Channelpartner } from './Components/Pages/Master/Channelpartner';
 import { Complaintcode } from './Components/Pages/Master/Complaintcode';
 import { Complaintgrid } from './Components/Pages/Complaint/Complaintgrid';
@@ -29,7 +29,7 @@ import { Ratecard } from './Components/Pages/Master/Ratecard';
 import { Registercomplaint } from './Components/Pages/Complaint/Registercomplaint';
 import { Serviceagent } from './Components/Pages/Master/Serviceagent';
 import { Serviceproduct } from './Components/Pages/Master/Serviceproduct';
-import { Subcategory } from './Components/Pages/Master/Subcategory';
+import  Subcategory  from './Components/Pages/Master/Subcategory';
 import { Siteheader } from './Components/Layout/Siteheader';
 import { Sitefooter } from './Components/Layout/Sitefooter';
 import Location from './Components/Pages/Master/Location';
@@ -38,6 +38,7 @@ import LocationTabs from './Components/Pages/Master/LocationTabs'
 import Geostate from './Components/Pages/Master/Geostate';
 import Geocity from './Components/Pages/Master/Geocity';
 import Area from './Components/Pages/Master/Area';
+import ProMaster from './Components/Pages/Master/ProMaster';
 
 
 
@@ -60,6 +61,11 @@ const Router = createBrowserRouter([
       {
         path: "/callstatus",
         element: <Callstatus />,
+        
+      },
+      {
+        path: "/promaster",
+        element: <ProMaster />,
         
       },
       {

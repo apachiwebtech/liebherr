@@ -15,14 +15,14 @@ function LocationTabs() {
         return <Location />;
       case 'regions':
         return <Regions />;
-        case 'geostate':
-          return <Geostate />;
-          case 'geocity':
-            return <Geocity />;
-            case 'area':
-              return <Area />;
-       
-     
+      case 'geostate':
+        return <Geostate />;
+      case 'geocity':
+        return <Geocity />;
+      case 'area':
+        return <Area />;
+
+
       default:
         return <Location />;
     }
@@ -58,66 +58,66 @@ function LocationTabs() {
 
         {/* Nav Tabs */}
         <div class="row">
-          <div className="gray-tab"> 
-              <div className="col-sm-6 p-3" style={{width:'100%'}}>
-                
-                <ul className="nav nav-tabs mb-3">
-                  <li className="nav-item">
-                    <button
-                      className={`nav-link ${activeTab === 'country' ? 'active' : ''}`}
-                      onClick={() => setActiveTab('country')}
-                    >
-                      COUNTRY
-                    </button>
-                  </li>
-                  <li className="nav-item">
-                    <button
-                      className={`nav-link ${activeTab === 'regions' ? 'active' : ''}`}
-                      onClick={() => setActiveTab('regions')}
-                    >
-                      REGIONS
-                    </button>
-                  </li>
-                  <li className="nav-item">
-                    <button
-                      className={`nav-link ${activeTab === 'geostate' ? 'active' : ''}`}
-                      onClick={() => setActiveTab('geostate')}
-                    >
-                      GEO STATE
-                    </button>
-                  </li>
-                  <li className="nav-item">
-                    <button
-                      className={`nav-link ${activeTab === 'geocity' ? 'active' : ''}`}
-                      onClick={() => setActiveTab('geocity')}
-                    >
-                      GEO CITY
-                    </button>
-                  </li>
-                  <li className="nav-item">
-                    <button
-                      className={`nav-link ${activeTab === 'area' ? 'active' : ''}`}
-                      onClick={() => setActiveTab('area')}
-                    >
-                      AREA
-                    </button>
-                  </li>
-                  {/* Add other tabs like GEO STATE, GEO CITY, AREA */}
-                </ul>
-              </div>
-      
+          <div className="gray-tab">
+            <div className="col-sm-6 p-3" style={{ width: '100%' }}>
 
-        {/* Tab Content */}
-        <div className="row justify-content-center no-gutters">
-          <div className="col-12 col-lg-10 col-custom">
-            <div className="tab-content">
-              {renderTabContent()}
+              <ul className="nav nav-tabs mb-3">
+                <li className="nav-item">
+                  <button
+                    className={`nav-link ${activeTab === 'country' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('country')}
+                  >
+                    COUNTRY
+                  </button>
+                </li>
+                <li className="nav-item">
+                  <button
+                    className={`nav-link ${activeTab === 'regions' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('regions')}
+                  >
+                    REGIONS
+                  </button>
+                </li>
+                <li className="nav-item">
+                  <button
+                    className={`nav-link ${activeTab === 'geostate' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('geostate')}
+                  >
+                    GEO STATE
+                  </button>
+                </li>
+                <li className="nav-item">
+                  <button
+                    className={`nav-link ${activeTab === 'geocity' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('geocity')}
+                  >
+                    GEO CITY
+                  </button>
+                </li>
+                <li className="nav-item">
+                  <button
+                    className={`nav-link ${activeTab === 'area' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('area')}
+                  >
+                    AREA
+                  </button>
+                </li>
+                {/* Add other tabs like GEO STATE, GEO CITY, AREA */}
+              </ul>
+            </div>
+
+
+            {/* Tab Content */}
+            <div className="row justify-content-center no-gutters">
+              <div className="col-12 col-lg-10 col-custom">
+                <div className="tab-content">
+                  {renderTabContent()}
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-      </div>
-  </div>
     </>
   );
 }

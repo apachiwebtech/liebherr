@@ -25,7 +25,9 @@ export function Siteheader(params) {
 
               <ul className="dropdown-menu activeM" aria-labelledby="navbarDropdown">
                 <li >
-                  <Link className="dropdown-item" to="/location">Location</Link></li>
+                  <Link className="dropdown-item" to="/locationtabs">Location</Link></li>
+                <li>
+                  <Link className="dropdown-item" to="/promaster">Product Master</Link></li>
                 <li>
                   <Link className="dropdown-item" to="/endcustomer">End Customer Master</Link></li>
                 <li>
