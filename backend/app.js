@@ -785,3 +785,116 @@ app.get('/getcategory', (req, res) => {
     }
   });
 });
+// 
+
+app.get('/getcdata', (req, res) => {
+  const sql = "SELECT * FROM awt_channelpartner WHERE deleted = 0"; // Users table se sabhi users ko fetch karne ki query jinke 'deleted' column me 0 hai
+  con.query(sql, (err, data) => { // SQL query ko execute kar rahe hain
+    if (err) {
+      return res.json(err); // Agar koi error aata hai to error message return karenge
+    } else {
+      return res.json(data); // Agar query successful hoti hai to users ka data JSON format me return karenge
+    }
+  });
+});
+// Insert for Channelpartner
+app.post('/postcdata', (req, res) => {
+  const { Channel_partner } = req.body;
+
+  // Step 1: Check if the same channel_partner exists and is not soft-deleted
+  const checkDuplicateSql = `SELECT * FROM awt_channelpartner WHERE Channel_partner = ? AND deleted = 0`;
+  con.query(checkDuplicateSql, [ Channel_partner], (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    }
+
+    if (data.length > 0) {
+      // If duplicate data exists (not soft-deleted)
+      return res.status(409).json({ message: 'Duplicate entry, Channel_partner already exists!' });
+    } else {
+      // Step 2: Check if the same channel_partner exists but is soft-deleted
+      const checkSoftDeletedSql = `SELECT * FROM awt_channelpartner WHERE Channel_partner = ? AND deleted = 1`;
+      con.query(checkSoftDeletedSql, [ Channel_partner], (err, softDeletedData) => {
+        if (err) {
+          return res.status(500).json(err);
+        }
+
+        if (softDeletedData.length > 0) {
+          // If soft-deleted data exists, restore the entry
+          const restoreSoftDeletedSql = `UPDATE awt_channelpartner SET deleted = 0 WHERE Channel_partner = ?`;
+          con.query(restoreSoftDeletedSql, [ Channel_partner], (err) => {
+            if (err) {
+              return res.status(500).json(err);
+            }
+            return res.json({ message: 'Soft-deleted data restored successfully!' });
+          });
+        } else {
+          // Step 3: Insert new entry if no duplicates found
+          const sql = `INSERT INTO awt_channelpartner (Channel_partner) VALUES (?)`; // User data ko database me insert karne ki SQL query
+          con.query(sql, [ Channel_partner], (err, data) => { // SQL query ko execute kar rahe hain, user ke data ko parameters ke roop me pass kar rahe hain
+            if (err) {
+              return res.json(err); // Agar koi error aata hai to error message return karenge
+            } else {
+              return res.json({ message: 'Channel partner added successfully!' }); // Agar query successful hoti hai to success message return karenge
+            }
+          });
+        }
+      });
+    }
+  });
+});
+
+// edit for Channelpartner
+
+app.get('/requestcdata/:id', (req, res) => {
+  const { id } = req.params; // URL se user ki id ko extract kar rahe hain
+  const sql = "SELECT * FROM awt_channelpartner WHERE id = ? AND deleted = 0"; // User ko uske ID aur soft-delete status ke base par fetch karne ki query
+  con.query(sql, [id], (err, data) => { // SQL query ko execute kar rahe hain, id ko parameter ke roop me pass kar rahe hain
+    if (err) {
+      return res.status(500).json(err); // Agar koi error aata hai to 500 status ke sath error message return karenge
+    } else {
+      return res.json(data[0]); // Agar query successful hoti hai to specific user ka data (index 0) return karenge
+    }
+  });
+});
+
+// update for Channelpartner
+app.put('/putcdata', (req, res) => {
+  const { Channel_partner, id } = req.body;
+
+  // Step 1: Check if the same channel_partner exists for another record (other than the current one) and is not soft-deleted
+  const checkDuplicateSql = `SELECT * FROM awt_channelpartner WHERE Channel_partner = ? AND id != ? AND deleted = 0`;
+  con.query(checkDuplicateSql, [ Channel_partner, id], (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    }
+
+    if (data.length > 0) {
+      // If a duplicate exists (other than the current record)
+      return res.status(409).json({ message: 'Duplicate entry, Channel_partner already exists!' });
+    } else {
+      // Step 2: Update the record if no duplicates are found
+      const updateSql = `UPDATE awt_channelpartner SET Channel_partner = ? WHERE id = ?`;
+      con.query(updateSql, [ Channel_partner, id], (err, data) => {
+        if (err) {
+          return res.status(500).json(err);
+        }
+        return res.json({ message: ' Channel_partner updated successfully!' });
+      });
+    }
+  });
+});
+
+// delete for Channel_partner 
+app.post('/deletecdata', (req, res) => {
+  const { id } = req.body; // Request body se user ki ID ko extract kar rahe hain
+  const sql = `UPDATE awt_channelpartner SET deleted = 1 WHERE id = ?`; // User ko soft-delete karne ki SQL query (deleted column ko 1 kar dena)
+  con.query(sql, [id], (err, data) => { // SQL query ko execute kar rahe hain, id ko parameter ke roop me pass kar rahe hain
+    if (err) {
+      console.error(err); // Agar koi error aata hai to usse console me print karenge
+      return res.status(500).json({ message: 'Error updating user' }); // Error message ke sath 500 status return karenge
+    } else {
+      return res.json(data); // Agar query successful hoti hai to updated data return karenge
+    }
+  });
+})
