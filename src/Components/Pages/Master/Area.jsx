@@ -7,8 +7,10 @@ const Area = () => {
   const [countries, setCountries] = useState([]);
   const [regions, setRegions] = useState([]);
   const [geoStates, setGeoStates] = useState([]);
+  const [geoCities, setGeoCities] = useState([]);
   const [areas, setAreas] = useState([]);
   const [errors, setErrors] = useState({});
+  const [filteredUsers, setFilteredUsers] = useState([]);
   const [filteredAreas, setFilteredAreas] = useState([]);
   const [isEdit, setIsEdit] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
@@ -20,8 +22,10 @@ const Area = () => {
     country_id: '',
     region_id: '',
     geostate_id: '',
+    geocity_id: '', // Added geocity_id to formData
     area_id: '' // Added area_id to formData
   });
+  
 
   const fetchCountries = async () => {
     try {
@@ -49,6 +53,17 @@ const Area = () => {
       console.error('Error fetching geo states:', error);
     }
   };
+
+
+    const fetchGeoCities = async (geostate_id) => {
+        try {
+        const response = await axios.get(`${Base_Url}/getgeocities_a/${geostate_id}`);
+        console.log('Geo Cities:', response.data); // Add this line to debug
+        setGeoCities(response.data);
+        } catch (error) {
+        console.error('Error fetching geo cities:', error);
+        }
+    };
 
   const fetchAreas = async () => {
     try {
@@ -105,17 +120,21 @@ const Area = () => {
     }
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-
-    if (name === 'country_id') {
-      fetchRegions(value);
-    }
-    if (name === 'region_id') {
-      fetchGeoStates(value);
-    }
-  };
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
+    
+        if (name === 'country_id') {
+        fetchRegions(value);
+        }
+        if (name === 'region_id') {
+        fetchGeoStates(value);
+        }
+        if (name === 'geostate_id') {
+        fetchGeoCities(value); // Fetch Geo Cities when Geo State is selected
+        }
+    };
+  
 
   const handleSearch = (e) => {
     const searchValue = e.target.value.toLowerCase();
@@ -144,6 +163,9 @@ const Area = () => {
     if (!formData.geostate_id) {
       newErrors.geostate_id = 'Geo State selection is required.';
     }
+    if (!formData.geocity_id) { // Validate Geo City
+        newErrors.geocity_id = 'Geo City selection is required.';
+    }
     return newErrors;
   };
 
@@ -159,9 +181,11 @@ const Area = () => {
   const edit = async (id) => {
     try {
       const response = await axios.get(`${Base_Url}/requestarea/${id}`);
+      console.log(response.data)
       setFormData(response.data);
       fetchRegions(response.data.country_id);
       fetchGeoStates(response.data.region_id);
+      fetchGeoCities(response.data.geostate_id);
       setIsEdit(true);
     } catch (error) {
       console.error('Error editing area:', error);
@@ -169,14 +193,18 @@ const Area = () => {
   };
 
   return (
-    <div className="row">
-      <div className="col-md-6">
-        <form onSubmit={handleSubmit}>
+    <div className="row mp0" >
+    <div className="col-12">
+      <div className="card mb-3 tab_box">
+        <div className="card-body" style={{flex: "1 1 auto",padding: "13px 28px"}}>
+          <div className="row mp0">
+            <div className="col-6">   
+        <form onSubmit={handleSubmit} style={{width:"50%"}} className="text-left">
           {/* Country Dropdown */}
           <div className="form-group">
-            <label htmlFor="country">Country</label>
+            <label htmlFor="country" className="form-label pb-0 dropdown-label" >Country</label>
             <select
-              className="form-control"
+              className="form-control dropdown-select"
               name="country_id"
               value={formData.country_id}
               onChange={handleChange}
@@ -195,9 +223,9 @@ const Area = () => {
 
           {/* Region Dropdown */}
           <div className="form-group">
-            <label htmlFor="region">Region</label>
+            <label htmlFor="region" className="form-label pb-0 dropdown-label">Region</label>
             <select
-              className="form-control"
+              className="form-control dropdown-select"
               name="region_id"
               value={formData.region_id}
               onChange={handleChange}
@@ -216,9 +244,9 @@ const Area = () => {
 
           {/* Geo State Dropdown */}
           <div className="form-group">
-            <label htmlFor="geostate_id">Geo State</label>
+            <label htmlFor="geostate_id" className="form-label pb-0 dropdown-label">Geo State</label>
             <select
-              className="form-control"
+              className="form-control dropdown-select"
               name="geostate_id"
               value={formData.geostate_id}
               onChange={handleChange}
@@ -235,11 +263,32 @@ const Area = () => {
             )}
           </div>
 
+                {/* Geo City Dropdown */}
+                <div className="form-group">
+                <label htmlFor="geocity_id" className="form-label pb-0 dropdown-label">Geo City</label>
+                <select
+                    className="form-control dropdown-select"
+                    name="geocity_id" // Ensure the name matches formData
+                    value={formData.geocity_id}
+                    onChange={handleChange}
+                >
+                    <option value="">Select Geo City</option>
+                    {geoCities.map((geoCity) => (
+                    <option key={geoCity.id} value={geoCity.id}>
+                        {geoCity.title}
+                    </option>
+                    ))}
+                </select>
+                {errors.geocity_id && (
+                    <small className="text-danger">{errors.geocity_id}</small>
+                )}
+                </div>
+
           {/* Title Input */}
           <div className="form-group">
             <label
               htmlFor="areaInput"
-              style={{ marginBottom: '15px', fontSize: '18px' }}
+              className="input-field"
             >
               Add Area
             </label>
@@ -259,25 +308,33 @@ const Area = () => {
               <small className="text-danger">{duplicateError}</small>
             )}
           </div>
+          <div className="text-right">
           <button
-            className="btn btn-primary btn-sm"
+            className="btn btn-liebherr"
             type="submit"
             style={{ marginTop: '15px' }}
           >
             {isEdit ? 'Update' : 'Submit'}
           </button>
+          </div>
         </form>
       </div>
 
-      <div className="col-md-6">
-        <div className="d-flex justify-content-between align-items-center mb-3">
+
+    <div className="col-md-6">
+    <div className="d-flex justify-content-between align-items-center mb-3">
           <span>
             Show
             <select
               value={itemsPerPage}
-              onChange={(e) => setItemsPerPage(e.target.value)}
-              className="form-control"
-              style={{ width: 'auto', display: 'inline-block', marginLeft: '5px' }}
+              onChange={(e) => setItemsPerPage(Number(e.target.value))}
+              className="form-control d-inline-block"
+              style={{
+                width: '51px',
+                display: 'inline-block',
+                marginLeft: '5px',
+                marginRight: '5px',
+              }}
             >
               <option value={10}>10</option>
               <option value={15}>15</option>
@@ -285,54 +342,92 @@ const Area = () => {
             </select>
             entries
           </span>
+
           <input
             type="text"
             placeholder="Search..."
             value={searchTerm}
             onChange={handleSearch}
-            className="form-control"
-            style={{ width: '200px' }}
+            className="form-control d-inline-block"
+            style={{ width: '300px' }}
           />
         </div>
 
-        <table className="table table-striped">
-          <thead>
-            <tr>
-              <th>Area</th>
-              <th>Country</th>
-              <th>Region</th>
-              <th>Geo State</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredAreas.slice(currentPage * itemsPerPage, currentPage * itemsPerPage + itemsPerPage).map((area) => (
-              <tr key={area.id}>
-                <td>{area.title}</td>
-                <td>{area.country_title}</td>
-                <td>{area.region_title}</td>
-                <td>{area.geostate_title}</td>
-                <td>
-                  <FaPencilAlt
-                    onClick={() => edit(area.id)}
-                    style={{ cursor: 'pointer', marginRight: '10px', color: 'blue' }}
-                  />
-                  <FaTrash
-                    onClick={() => deleted(area.id)}
-                    style={{ cursor: 'pointer', color: 'red' }}
-                  />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <table
+  className="table table-bordered"
+  style={{ marginTop: '20px', tableLayout: 'auto', width: '100%' }}
+>
+  <thead>
+    <tr>
+      <th style={{ padding: '12px 15px', textAlign: 'center', width: '30px' }}>#</th>
+      <th style={{ padding: '12px 15px', textAlign: 'center', minWidth: '70px' }}>Country</th>
+      <th style={{ padding: '12px 15px', textAlign: 'center', minWidth: '70px' }}>Region</th>
+      <th style={{ padding: '12px 15px', textAlign: 'center', minWidth: '70px' }}>Geo State</th>
+      <th style={{ padding: '12px 15px', textAlign: 'center', minWidth: '70px' }}>Geo City</th>
+      <th style={{ padding: '12px 15px', textAlign: 'center', minWidth: '70px' }}>Area</th>
+      <th style={{ padding: '12px 15px', textAlign: 'center', width: '30px' }}>Edit</th>
+      <th style={{ padding: '12px 15px', textAlign: 'center', width: '30px' }}>Delete</th>
+    </tr>
+  </thead>
+  <tbody>
+    {filteredAreas
+      .slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage)
+      .map((area, index) => (
+        <tr key={area.id}>
+          <td style={{ padding: '10px', textAlign: 'center', width: '30px' }}>
+            {currentPage * itemsPerPage + index + 1}
+          </td>
+          <td style={{ padding: '10px', textAlign: 'center', minWidth: '70px' }}>{area.country_title}</td>
+          <td style={{ padding: '10px', textAlign: 'center', minWidth: '70px' }}>{area.region_title}</td>
+          <td style={{ padding: '10px', textAlign: 'center', minWidth: '70px' }}>{area.geostate_title}</td>
+          <td style={{ padding: '10px', textAlign: 'center', minWidth: '70px' }}>{area.geocity_title}</td>
+          <td style={{ padding: '10px', textAlign: 'center', minWidth: '70px' }}>{area.title}</td>
+          <td style={{ padding: '10px', textAlign: 'center', width: '30px' }}>
+            <button
+              className="btn btn-sm"
+              onClick={() => edit(area.id)}
+              style={{
+                fontSize: '14px',
+                color: 'blue',
+                background: 'transparent',
+              }}
+            >
+              <FaPencilAlt />
+            </button>
+          </td>
+          <td style={{ padding: '10px', textAlign: 'center', width: '30px' }}>
+            <button
+              className="btn btn-sm"
+              onClick={() => deleted(area.id)}
+              style={{
+                fontSize: '14px',
+                color: 'red',
+                background: 'transparent',
+              }}
+            >
+              <FaTrash />
+            </button>
+          </td>
+        </tr>
+      ))}
+  </tbody>
+</table>
+
+
+
 
         <div>
           Showing {currentPage * itemsPerPage + 1} to {Math.min((currentPage + 1) * itemsPerPage, filteredAreas.length)} of {filteredAreas.length} entries
-        </div>
+    </div>
       </div>
+    </div>
+    </div>
+    </div>
+    </div>
     </div>
   );
 };
 
 export default Area;
+
+

@@ -134,7 +134,7 @@ const Geostate = () => {
 
   const deleted = async (id) => {
     try {
-      await axios.post(`${Base_Url}/deleteregion`, { id });
+      await axios.post(`${Base_Url}/deletegeostate`, { id });
       window.location.reload();
     } catch (error) {
       console.error('Error deleting user:', error);
@@ -157,13 +157,17 @@ const Geostate = () => {
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
   return (
-    <div className="row">
-      <div className="col-md-6">
-        <form onSubmit={handleSubmit}>
+    <div className="row mp0" >
+      <div className="col-12">
+        <div className="card mb-3 tab_box">
+          <div className="card-body" style={{flex: "1 1 auto",padding: "13px 28px"}}>
+            <div className="row mp0">
+              <div className="col-6">  
+        <form onSubmit={handleSubmit} style={{width:"50%"}} className="text-left">
           {/* Country Dropdown */}
           <div className="form-group">
-            <label htmlFor="country">Country</label>
-            <select className='form-control' name='country_id' value={formData.country_id} onChange={handleChange}>
+            <label htmlFor="country" className="form-label pb-0 dropdown-label">Country</label>
+            <select className='form-control dropdown-select' name='country_id' value={formData.country_id} onChange={handleChange}>
               <option value="">Select Country</option>
               {countries.map((country) => (
                 <option key={country.id} value={country.id}>{country.title}</option>
@@ -174,8 +178,8 @@ const Geostate = () => {
 
           {/* Region Dropdown */}
           <div className="form-group">
-            <label htmlFor="region">Region</label>
-            <select className='form-control' name='region_id' value={formData.region_id} onChange={handleChange}>
+            <label htmlFor="region" className="form-label pb-0 dropdown-label">Region</label>
+            <select className='form-control dropdown-select' name='region_id' value={formData.region_id} onChange={handleChange}>
               <option value="">Select Region</option>
               {regions.map((region) => (
                 <option key={region.id} value={region.id}>{region.title}</option>
@@ -186,7 +190,7 @@ const Geostate = () => {
 
           {/* Region Input */}
           <div className="form-group">
-            <label htmlFor="geoStateInput" style={{ marginBottom: '15px', fontSize: '18px' }}>Add Geo State</label>
+            <label htmlFor="geoStateInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>Add Geo State</label>
             <input
               type="text"
               className="form-control"
@@ -199,9 +203,11 @@ const Geostate = () => {
             {errors.title && <small className="text-danger">{errors.title}</small>}
             {duplicateError && <small className="text-danger">{duplicateError}</small>}
           </div>
-          <button className="btn btn-primary btn-sm" type="submit" style={{ marginTop: '15px' }}>
+          <div className="text-right">
+          <button className="btn btn-liebherr" type="submit" style={{ marginTop: '15px' }}>
             {isEdit ? "Update" : "Submit"}
           </button>
+          </div>
         </form>
       </div>
 
@@ -278,6 +284,10 @@ const Geostate = () => {
           </nav>
         </div>
       </div>
+    </div>
+    </div>
+    </div>
+    </div>
     </div>
   );
 };

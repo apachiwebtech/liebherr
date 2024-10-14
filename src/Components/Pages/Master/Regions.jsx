@@ -150,13 +150,17 @@ const Location = () => {
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
   return (
-    <div className="row">
-      <div className="col-md-6">
-      <form onSubmit={handleSubmit}>
+    <div className="row mp0" >
+    <div className="col-12">
+      <div className="card mb-3 tab_box">
+        <div className="card-body" style={{flex: "1 1 auto",padding: "13px 28px"}}>
+          <div className="row mp0">
+            <div className="col-6">  
+      <form onSubmit={handleSubmit} style={{width:"50%"}} className="text-left">
            {/* Step 2.1: Country Dropdown */}
            <div className="form-group">
-              <label htmlFor="country">Country</label>
-              <select className='form-control' name='country_id' value={formData.country_id} onChange={handleChange} >
+              <label htmlFor="country" className="form-label pb-0 dropdown-label">Country</label>
+              <select className='form-control dropdown-select' name='country_id' value={formData.country_id} onChange={handleChange} >
                 <option value="">Select Country</option>
                 {countries.map((country) => (
                   <option key={country.id} value={country.id}>{country.title}</option>
@@ -166,7 +170,7 @@ const Location = () => {
             </div>
             {/* Step 2.2: Region Input */}
           <div className="form-group">
-            <label htmlFor="regionInput" style={{ marginBottom: '15px', fontSize: '18px' }}>Add Region</label>
+            <label htmlFor="regionInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>Add Region</label>
             <input
               type="text"
               className="form-control"
@@ -179,9 +183,11 @@ const Location = () => {
             {errors.title && <small className="text-danger">{errors.title}</small>}
             {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
           </div>
-          <button className="btn btn-primary btn-sm" type="submit" style={{ marginTop: '15px' }}>
+          <div className="text-right">
+          <button className="btn btn-liebherr" type="submit" style={{ marginTop: '15px' }}>
             {isEdit ? "Update" : "Submit"}
           </button>
+          </div>
         </form>
       </div>
 
@@ -287,6 +293,10 @@ const Location = () => {
           </div>
         </div>
       </div>
+    </div>
+    </div>
+    </div>
+    </div>
     </div>
   );
 };

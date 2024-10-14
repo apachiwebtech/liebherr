@@ -22,7 +22,7 @@ import { Dashboard } from './Components/Pages/Dashboard';
 import { Endcustomer } from './Components/Pages/Master/Endcustomer';
 import { Lhiuser } from './Components/Pages/Master/Lhiuser';
 import { Linklocation } from './Components/Pages/Master/Linklocation';
-import { Pincode } from './Components/Pages/Master/Pincode';
+import  Pincode  from './Components/Pages/Master/Pincode';
 import { Product } from './Components/Pages/Master/Product';
 import { Productspare } from './Components/Pages/Master/Productspare';
 import { Ratecard } from './Components/Pages/Master/Ratecard';

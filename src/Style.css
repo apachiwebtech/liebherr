@@ -1,5 +1,5 @@
 body {
-    background-color: #eee;
+    background-color: #eee !important;
     font-family: 'Nunito';
     color:#222;
     font-size: 14px;
@@ -19,10 +19,12 @@ textarea::placeholder {
 
 select{
     font-size: 14px !important;
+    
 }
 
 select option{
     font-family: 'Nunito';
+
 }
 
 
@@ -54,6 +56,7 @@ header {
 
 .nav-link {
     color: #222;
+    width: auto !important;
 }
 
 .nav-link:focus, .nav-link:hover {
@@ -125,6 +128,7 @@ header {
 
 #tabsMenu a {
     text-transform:uppercase;
+    
 }
 
 #tabsMenu a.active {
@@ -265,3 +269,46 @@ h3.mainheade{
     font-size:14px;
     font-weight: 500;
 }
+
+.input-class{
+    margin-bottom: 15px !important; 
+    font-size: 18px !important; 
+}
+
+.table-css{
+    margin-top: 20px !important;
+  table-layout: fixed !important;
+}
+
+
+.input-field {
+    margin-bottom: 8px !important; /* Space below the element */
+    font-size: 14px !important; /* Font size */
+    font-family: 'Nunito', sans-serif !important; /* Font family */
+  }
+
+  .btn-liebherr {
+    margin-top: 15px !important; /* Space above the element */
+    background-color: rgba(255, 208, 0, 0.917) !important; /* Background color with opacity */
+  }
+
+  .dropdown-label{
+    margin-bottom: 0.5rem; /* Space below the element */
+    display: inline-block; /* Element behaves like an inline element but maintains block properties */
+    font-family: 'Nunito', sans-serif; /* Font family */
+    font-size: 14px; /* Font size */
+    padding-top: 0; /* No padding above */
+    padding-bottom: 0; /* No padding below */
+  }
+
+  .dropdown-select{
+    appearance: menulist-button; /* Default appearance for dropdowns */
+  padding-right: 30px; /* Padding on the right */
+  padding-left: 8px; /* Padding on the left */
+  background-color: #fff; /* Background color */
+  border: 0.5px solid #ccc; /* Border color and thickness */
+  border-radius: 4px; /* Rounded corners */
+  font-family: 'Nunito', sans-serif; /* Font family */
+  font-size: 14px; /* Font size */
+  margin-bottom: 11px; /* Space below the element */
+  }

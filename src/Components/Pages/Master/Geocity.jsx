@@ -95,7 +95,7 @@ const Geostate = () => {
         } else {
             await axios.post(`${Base_Url}/postgeocity`, { ...formData })
             .then(response => {
-            //   window.location.reload();
+              window.location.reload();
             })
             .catch(error => {
               if (error.response && error.response.status === 409) {
@@ -173,14 +173,18 @@ const Geostate = () => {
   };
 
   return (
-    <div className="row">
-      <div className="col-md-6">
-        <form onSubmit={handleSubmit}>
+    <div className="row mp0" >
+    <div className="col-12">
+      <div className="card mb-3 tab_box">
+        <div className="card-body" style={{flex: "1 1 auto",padding: "13px 28px"}}>
+          <div className="row mp0">
+            <div className="col-6">   
+        <form onSubmit={handleSubmit} style={{width:"50%"}} className="text-left">
           {/* Country Dropdown */}
           <div className="form-group">
-            <label htmlFor="country">Country</label>
+            <label htmlFor="country" className="form-label pb-0 dropdown-label">Country</label>
             <select
-              className="form-control"
+               className="form-control dropdown-select"
               name="country_id"
               value={formData.country_id}
               onChange={handleChange}
@@ -199,9 +203,9 @@ const Geostate = () => {
 
           {/* Region Dropdown */}
           <div className="form-group">
-            <label htmlFor="region">Region</label>
+            <label htmlFor="region" className="form-label pb-0 dropdown-label">Region</label>
             <select
-              className="form-control"
+               className="form-control dropdown-select"
               name="region_id"
               value={formData.region_id}
               onChange={handleChange}
@@ -220,9 +224,9 @@ const Geostate = () => {
 
           {/* Geo State Dropdown */}
           <div className="form-group">
-            <label htmlFor="geostate_id">Geo State</label>
+            <label htmlFor="geostate_id" className="form-label pb-0 dropdown-label">Geo State</label>
             <select
-              className="form-control"
+               className="form-control dropdown-select"
               name="geostate_id"
               value={formData.geostate_id}
               onChange={handleChange}
@@ -243,7 +247,7 @@ const Geostate = () => {
           <div className="form-group">
             <label
               htmlFor="geoStateInput"
-              style={{ marginBottom: '15px', fontSize: '18px' }}
+              className="input-field"
             >
               Add Geo City
             </label>
@@ -263,13 +267,15 @@ const Geostate = () => {
               <small className="text-danger">{duplicateError}</small>
             )}
           </div>
+          <div className="text-right">
           <button
-            className="btn btn-primary btn-sm"
+            className="btn btn-liebherr"
             type="submit"
             style={{ marginTop: '15px' }}
           >
             {isEdit ? 'Update' : 'Submit'}
           </button>
+          </div>
         </form>
       </div>
 
@@ -378,6 +384,10 @@ const Geostate = () => {
           </div>
         </div>
       </div>
+    </div>
+    </div>
+    </div>
+    </div>
     </div>
   );
 };

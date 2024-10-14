@@ -544,6 +544,380 @@ app.post('/deletegeocity', (req, res) => {
   });
 });
 // Geo City End
+      
+// Area Master Start
+// API to fetch all countries (for the country dropdown)
+app.get('/getcountries', (req, res) => {
+  const sql = 'SELECT * FROM awt_country WHERE deleted = 0';
+  con.query(sql, (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    } else {
+      return res.json(data);
+    }
+  });
+});
+
+
+// API to fetch regions based on selected country (for the region dropdown)
+app.get('/getregions/:country_id', (req, res) => {
+  const { country_id } = req.params;
+  const sql = 'SELECT * FROM awt_region WHERE country_id = ? AND deleted = 0';
+  con.query(sql, [country_id], (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    }
+    return res.json(data);
+  });
+});
+
+
+// API to fetch geostates based on selected region (for the geostate dropdown)
+app.get('/getgeostates/:region_id', (req, res) => {
+  const { region_id } = req.params;
+  const sql = 'SELECT * FROM awt_geostate WHERE region_id = ? AND deleted = 0';
+  con.query(sql, [region_id], (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    }
+    return res.json(data);
+  });
+});
+
+
+// API to fetch geocities based on selected geostate (for the geocity dropdown)
+app.get('/getgeocities_a/:geostate_id', (req, res) => {
+  const { geostate_id } = req.params;
+  const sql = 'SELECT * FROM awt_geocity WHERE geostate_id = ? AND deleted = 0';
+  con.query(sql, [geostate_id], (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    }
+    return res.json(data);
+  });
+});
+
+
+// API to fetch all areas (joining country, region, geostate, geocity)
+app.get('/getareas', (req, res) => {
+  const sql = `
+    SELECT a.*, c.title as country_title, r.title as region_title, gs.title as geostate_title, gc.title as geocity_title
+    FROM awt_area a
+    JOIN awt_country c ON a.country_id = c.id
+    JOIN awt_region r ON a.region_id = r.id
+    JOIN awt_geostate gs ON a.geostate_id = gs.id
+    JOIN awt_geocity gc ON a.geocity_id = gc.id
+    WHERE a.deleted = 0
+  `;
+
+  con.query(sql, (err, data) => {
+    if (err) {
+      return res.json(err);
+    } else {
+      return res.json(data);
+    }
+  });
+});
+
+
+// API to fetch a specific area by ID (joining country, region, geostate, geocity)
+app.get('/requestarea/:id', (req, res) => {
+  const areaId = req.params.id; // Get the area ID from the URL parameters
+
+  const sql = `
+    SELECT a.*,   
+           c.title AS country_title, 
+           r.title AS region_title, 
+           gs.title AS geostate_title, 
+           gc.title AS geocity_title
+    FROM awt_area a
+    JOIN awt_country c ON a.country_id = c.id
+    JOIN awt_region r ON a.region_id = r.id
+    JOIN awt_geostate gs ON a.geostate_id = gs.id
+    JOIN awt_geocity gc ON a.geocity_id = gc.id
+    WHERE a.id = ? AND a.deleted = 0
+  `;
+
+  // Using parameterized queries to prevent SQL injection
+  con.query(sql, [areaId], (err, data) => {
+    if (err) {
+      console.error('Error fetching area:', err);
+      return res.status(500).json({ message: 'Internal Server Error', error: err });
+    }
+
+    if (data.length === 0) {
+      return res.status(404).json({ message: 'Area not found' });
+    }
+
+    return res.status(200).json(data[0]); // Return the area data
+  });
+});
+
+
+// Insert new area with duplicate check
+app.post('/postarea', (req, res) => {
+  const { title, country_id, region_id, geostate_id, geocity_id } = req.body;
+
+  // Check for duplicates
+  const checkDuplicateSql = `SELECT * FROM awt_area WHERE title = ? AND deleted = 0`;
+  con.query(checkDuplicateSql, [title], (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    }
+
+    if (data.length > 0) {
+      return res.status(409).json({ message: 'Duplicate entry, Area already exists!' });
+    } else {
+      const sql = `INSERT INTO awt_area (title, country_id, region_id, geostate_id, geocity_id) VALUES (?, ?, ?, ?, ?)`;
+      con.query(sql, [title, country_id, region_id, geostate_id, geocity_id], (err, data) => {
+        if (err) {
+          return res.json(err);
+        } else {
+          return res.json({ message: 'Area added successfully!' });
+        }
+      });
+    }
+  });
+});
+
+// Update existing area with duplicate check
+app.put('/putarea', (req, res) => {
+  const { title, id, country_id, region_id, geostate_id, geocity_id } = req.body;
+
+  // Check for duplicates
+  const checkDuplicateSql = `SELECT * FROM awt_area WHERE title = ? AND id != ? AND deleted = 0`;
+  con.query(checkDuplicateSql, [title, id], (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    }
+
+    if (data.length > 0) {
+      return res.status(409).json({ message: 'Duplicate entry, Area already exists!' });
+    } else {
+      const updateSql = `UPDATE awt_area SET title = ?, country_id = ?, region_id = ?, geostate_id = ?, geocity_id = ? WHERE id = ?`;
+      con.query(updateSql, [title, country_id, region_id, geostate_id, geocity_id, id], (err, data) => {
+        if (err) {
+          return res.status(500).json(err);
+        }
+        return res.json({ message: 'Area updated successfully!' });
+      });
+    }
+  });
+});
+
+
+// API to soft delete an area
+app.post('/deletearea', (req, res) => {
+  const { id } = req.body;
+  const sql = `UPDATE awt_area SET deleted = 1 WHERE id = ?`;
+  con.query(sql, [id], (err, data) => {
+    if (err) {
+      return res.status(500).json({ message: 'Error deleting area' });
+    } else {
+      return res.json(data);
+    }
+  });
+});
+// Area Start
+
+
+// Pincode Master Start
+
+// API to fetch all countries (for the country dropdown)
+app.get('/getcountries', (req, res) => {
+  const sql = 'SELECT * FROM awt_country WHERE deleted = 0';
+  con.query(sql, (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    } else {
+      return res.json(data);
+    }
+  });
+});
+
+// API to fetch regions based on selected country (for the region dropdown)
+app.get('/getregions/:country_id', (req, res) => {
+  const { country_id } = req.params;
+  const sql = 'SELECT * FROM awt_region WHERE country_id = ? AND deleted = 0';
+  con.query(sql, [country_id], (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    }
+    return res.json(data);
+  });
+});
+
+// API to fetch geostates based on selected region (for the geostate dropdown)
+app.get('/getgeostates/:region_id', (req, res) => {
+  const { region_id } = req.params;
+  const sql = 'SELECT * FROM awt_geostate WHERE region_id = ? AND deleted = 0';
+  con.query(sql, [region_id], (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    }
+    return res.json(data);
+  });
+});
+
+// API to fetch geocities based on selected geostate (for the geocity dropdown)
+app.get('/getgeocities_a/:geostate_id', (req, res) => {
+  const { geostate_id } = req.params;
+  const sql = 'SELECT * FROM awt_geocity WHERE geostate_id = ? AND deleted = 0';
+  con.query(sql, [geostate_id], (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    }
+    return res.json(data);
+  });
+});
+
+// API to fetch areas based on selected geocity (for the area dropdown)
+app.get('/getareas/:geocity_id', (req, res) => {
+  const { geocity_id } = req.params;
+  const sql = 'SELECT * FROM awt_area WHERE geocity_id = ? AND deleted = 0';
+  
+  con.query(sql, [geocity_id], (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    }
+    return res.json(data);
+  });
+});
+
+
+// API to fetch all pincodes (joining country, region, geostate, geocity, area)
+app.get('/getpincodes', (req, res) => {
+  const sql = `
+    SELECT p.*, 
+           c.title as country_title, 
+           r.title as region_title, 
+           gs.title as geostate_title, 
+           gc.title as geocity_title,
+           a.title as area_title
+    FROM awt_pincode p
+    JOIN awt_country c ON p.country_id = c.id
+    JOIN awt_region r ON p.region_id = r.id
+    JOIN awt_geostate gs ON p.geostate_id = gs.id
+    JOIN awt_geocity gc ON p.geocity_id = gc.id
+    JOIN awt_area a ON p.area_id = a.id
+    WHERE p.deleted = 0
+  `;
+
+  con.query(sql, (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    } else {
+      return res.json(data);
+    }
+  });
+});
+
+// API to fetch a specific pincode by ID (joining country, region, geostate, geocity, area)
+app.get('/requestpincode/:id', (req, res) => {
+  const pincodeId = req.params.id;
+
+  const sql = `
+    SELECT p.*, 
+           c.title AS country_title, 
+           r.title AS region_title, 
+           gs.title AS geostate_title, 
+           gc.title AS geocity_title,
+           a.title AS area_title
+    FROM awt_pincode p
+    JOIN awt_country c ON p.country_id = c.id
+    JOIN awt_region r ON p.region_id = r.id
+    JOIN awt_geostate gs ON p.geostate_id = gs.id
+    JOIN awt_geocity gc ON p.geocity_id = gc.id
+    JOIN awt_area a ON p.area_id = a.id
+    WHERE p.id = ? AND p.deleted = 0
+  `;
+
+  con.query(sql, [pincodeId], (err, data) => {
+    if (err) {
+      console.error('Error fetching pincode:', err);
+      return res.status(500).json({ message: 'Internal Server Error', error: err });
+    }
+
+    if (data.length === 0) {
+      return res.status(404).json({ message: 'Pincode not found' });
+    }
+
+    return res.status(200).json(data[0]);
+  });
+});
+
+
+// Insert new pincode with duplicate check (considering country_id)
+app.post('/postpincode', (req, res) => {
+  const { pincode, country_id, region_id, geostate_id, geocity_id, area_id } = req.body;
+
+  // Check for duplicates based on pincode and country_id
+  const checkDuplicateSql = `SELECT * FROM awt_pincode WHERE pincode = ? AND country_id = ? AND deleted = 0`;
+  con.query(checkDuplicateSql, [pincode, country_id], (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    }
+
+    if (data.length > 0) {
+      return res.status(409).json({ message: 'Duplicate entry, Pincode already exists in this country!' });
+    } else {
+      const sql = `INSERT INTO awt_pincode (pincode, country_id, region_id, geostate_id, geocity_id, area_id) VALUES (?, ?, ?, ?, ?, ?)`;
+      con.query(sql, [pincode, country_id, region_id, geostate_id, geocity_id, area_id], (err, data) => {
+        if (err) {
+          return res.json(err);
+        } else {
+          return res.json({ message: 'Pincode added successfully!' });
+        }
+      });
+    }
+  });
+});
+
+
+// Update existing pincode with duplicate check (considering country_id)
+app.put('/putpincode', (req, res) => {
+  const { pincode, id, country_id, region_id, geostate_id, geocity_id, area_id } = req.body;
+
+  // Check for duplicates based on pincode and country_id
+  const checkDuplicateSql = `SELECT * FROM awt_pincode WHERE pincode = ? AND country_id = ? AND id != ? AND deleted = 0`;
+  con.query(checkDuplicateSql, [pincode, country_id, id], (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    }
+
+    if (data.length > 0) {
+      return res.status(409).json({ message: 'Duplicate entry, Pincode already exists in this country!' });
+    } else {
+      const updateSql = `UPDATE awt_pincode SET pincode = ?, country_id = ?, region_id = ?, geostate_id = ?, geocity_id = ?, area_id = ? WHERE id = ?`;
+      con.query(updateSql, [pincode, country_id, region_id, geostate_id, geocity_id, area_id, id], (err, data) => {
+        if (err) {
+          return res.status(500).json(err);
+        }
+        return res.json({ message: 'Pincode updated successfully!' });
+      });
+    }
+  });
+});
+
+
+// API to soft delete a pincode
+app.post('/deletepincode', (req, res) => {
+  const { id } = req.body;
+  const sql = `UPDATE awt_pincode SET deleted = 1 WHERE id = ?`;
+  con.query(sql, [id], (err, data) => {
+    if (err) {
+      return res.status(500).json({ message: 'Error deleting pincode' });
+    } else {
+      return res.json(data);
+    }
+  });
+});
+// Pincode Master End
+
+
+
+
+
 
 //yadnesh
 // API jo sabhi users ko fetch karegi jinhone soft delete nahi kiya gaya hai

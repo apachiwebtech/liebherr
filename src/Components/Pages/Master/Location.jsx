@@ -133,11 +133,15 @@ const Location = () => {
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
   return (
-    <div className="row">
-      <div className="col-md-6">
-      <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="countryInput" style={{ marginBottom: '15px', fontSize: '18px' }}>Add Country</label>
+    <div className="row mp0" >
+    <div className="col-12">
+      <div className="card mb-3 tab_box">
+        <div className="card-body" style={{flex: "1 1 auto",padding: "13px 28px"}}>
+          <div className="row mp0">
+            <div className="col-6">   
+      <form onSubmit={handleSubmit} style={{width:"50%"}} className="text-left">
+          <div className="mb-3">
+            <label htmlFor="countryInput" className= "input-field" >Add Country</label>
             <input
               type="text"
               className="form-control"
@@ -150,9 +154,11 @@ const Location = () => {
             {errors.title && <small className="text-danger">{errors.title}</small>}
             {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
           </div>
-          <button className="btn btn-primary btn-sm" type="submit" style={{ marginTop: '15px' }}>
+          <div className="text-right">
+          <button className="btn btn-liebherr" type="submit" >
             {isEdit ? "Update" : "Submit"}
           </button>
+          </div>
         </form>
       </div>
 
@@ -184,7 +190,7 @@ const Location = () => {
         </div>
 
         {/* Adjust table padding and spacing */}
-        <table className='table table-bordered' style={{ marginTop: '20px', tableLayout: 'fixed' }}>
+        <table className='table table-bordered table dt-responsive nowrap w-100 table-css'>
           <thead>
             <tr>
               <th style={{ padding: '12px 15px', textAlign: 'center' }}>#</th>
@@ -256,6 +262,10 @@ const Location = () => {
           </div>
         </div>
       </div>
+    </div>
+    </div>
+    </div>
+    </div>
     </div>
   );
 };
