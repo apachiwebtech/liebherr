@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Channelpartner from './Channelpartner';
+import Serviceagent from './Serviceagent';
 
-function Channelpartnertabs() {
-  const [activeTab, setActiveTab] = useState('Channelpartner');
+function Serviceagenttabs() {
+  const [activeTab, setActiveTab] = useState('Serviceagent');
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'Channelpartner':
-        return <Channelpartner />;
+      case 'Serviceagent':
+        return <Serviceagent />;
   
       default:
-        return <Channelpartner />;
+        return <Serviceagent />;
     }
   };
 
@@ -47,7 +47,7 @@ function Channelpartnertabs() {
       <div className="container-fluid p-0">
         {/* Top Header */}
         <div className="text-left headings">
-          <span style={{paddingLeft:"20px"}}>Channel Partner Master </span>
+          <span style={{paddingLeft:"20px"}}>Service Agent Master </span>
         </div>
 
         {/* Nav Tabs */}
@@ -58,10 +58,10 @@ function Channelpartnertabs() {
               <ul className="nav nav-tabs ">
                 <li className="nav-item">
                   <button
-                    className={`nav-link ${activeTab === 'Channelpartner' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('Channelpartner')}
+                    className={`nav-link ${activeTab === 'Serviceagent' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('Serviceagent')}
                   >
-                  CHANNEL PARTNER 
+                  SERVICE AGENT
                   </button>
                 </li>
         
@@ -84,4 +84,4 @@ function Channelpartnertabs() {
   );
 }
 
-export default Channelpartnertabs;
+export default Serviceagenttabs;

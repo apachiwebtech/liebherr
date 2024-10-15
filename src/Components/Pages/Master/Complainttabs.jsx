@@ -1,18 +1,25 @@
 import React, { useState } from 'react';
-
+import ComplaintCode from './Complaintcode';
+import ActionCode from './Actioncode';
+import ReasonCode from './Reasoncode';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Channelpartner from './Channelpartner';
 
-function Channelpartnertabs() {
-  const [activeTab, setActiveTab] = useState('Channelpartner');
+function Complainttabs() {
+  const [activeTab, setActiveTab] = useState('complaintCode');
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'Channelpartner':
-        return <Channelpartner />;
-  
+      case 'complaintCode':
+        return <ComplaintCode />;
+      case 'reasonCode':
+        return <ReasonCode />;
+      case 'actionCode':
+        return <ActionCode />;
+     
+
+
       default:
-        return <Channelpartner />;
+        return <ComplaintCode />;
     }
   };
 
@@ -47,7 +54,7 @@ function Channelpartnertabs() {
       <div className="container-fluid p-0">
         {/* Top Header */}
         <div className="text-left headings">
-          <span style={{paddingLeft:"20px"}}>Channel Partner Master </span>
+          <span style={{paddingLeft:"20px"}}>Complain code, Reason code & Action code</span>
         </div>
 
         {/* Nav Tabs */}
@@ -58,14 +65,28 @@ function Channelpartnertabs() {
               <ul className="nav nav-tabs ">
                 <li className="nav-item">
                   <button
-                    className={`nav-link ${activeTab === 'Channelpartner' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('Channelpartner')}
+                    className={`nav-link ${activeTab === 'complaintCode' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('complaintCode')}
                   >
-                  CHANNEL PARTNER 
+                  COMPLAINT CODE
                   </button>
                 </li>
-        
-          
+                <li className="nav-item">
+                  <button
+                    className={`nav-link ${activeTab === 'reasonCode' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('reasonCode')}
+                  >
+                    REASON CODE
+                  </button>
+                </li>
+                <li className="nav-item">
+                  <button
+                    className={`nav-link ${activeTab === 'actionCode' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('actionCode')}
+                  >
+                   ACTION CODE 
+                  </button>
+                </li>
               </ul>
             </div> 
             </div>
@@ -84,4 +105,4 @@ function Channelpartnertabs() {
   );
 }
 
-export default Channelpartnertabs;
+export default Complainttabs;

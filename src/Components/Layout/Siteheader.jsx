@@ -33,9 +33,9 @@ export function Siteheader(params) {
                 <li>
                   <Link className="dropdown-item" to="/channelpartnertabs">Channel Partner Master</Link></li>
                 <li>
-                  <Link className="dropdown-item" to="/serviceagent">Service Agent Master</Link></li>
+                  <Link className="dropdown-item" to="/serviceagenttabs">Service Agent Master</Link></li>
                 <li>
-                  <Link className="dropdown-item" to="/callstatus">Call Status Code Master</Link></li>
+                  <Link className="dropdown-item" to="/callstatuscodetabs">Call Status Code Master</Link></li>
                 <li>
                   <Link className="dropdown-item" to="/pincode">Pincode Master</Link></li>
                 <li>
@@ -43,7 +43,7 @@ export function Siteheader(params) {
                 <li>
                   <Link className="dropdown-item" to="/serviceproduct">Service Product Master</Link></li>
                 <li>
-                  <Link className="dropdown-item" to="/complaincode">Complain code, Reason code & Action code</Link></li>
+                  <Link className="dropdown-item" to="/complainttabs">Complain code, Reason code & Action code</Link></li>
                 <li>
                   <Link className="dropdown-item" to="/ratecard">Rate card Matrix</Link></li>
                 <li>

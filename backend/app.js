@@ -1173,30 +1173,30 @@ app.get('/getcdata', (req, res) => {
 });
 // Insert for Channelpartner
 app.post('/postcdata', (req, res) => {
-  const { Channel_partner } = req.body;
+  const { Channelpartner } = req.body;
 
-  // Step 1: Check if the same channel_partner exists and is not soft-deleted
-  const checkDuplicateSql = `SELECT * FROM awt_channelpartner WHERE Channel_partner = ? AND deleted = 0`;
-  con.query(checkDuplicateSql, [ Channel_partner], (err, data) => {
+  // Step 1: Check if the same channelpartner exists and is not soft-deleted
+  const checkDuplicateSql = `SELECT * FROM awt_channelpartner WHERE Channelpartner = ? AND deleted = 0`;
+  con.query(checkDuplicateSql, [ Channelpartner], (err, data) => {
     if (err) {
       return res.status(500).json(err);
     }
 
     if (data.length > 0) {
       // If duplicate data exists (not soft-deleted)
-      return res.status(409).json({ message: 'Duplicate entry, Channel_partner already exists!' });
+      return res.status(409).json({ message: 'Duplicate entry, Channelpartner already exists!' });
     } else {
-      // Step 2: Check if the same channel_partner exists but is soft-deleted
-      const checkSoftDeletedSql = `SELECT * FROM awt_channelpartner WHERE Channel_partner = ? AND deleted = 1`;
-      con.query(checkSoftDeletedSql, [ Channel_partner], (err, softDeletedData) => {
+      // Step 2: Check if the same channelpartner exists but is soft-deleted
+      const checkSoftDeletedSql = `SELECT * FROM awt_channelpartner WHERE Channelpartner = ? AND deleted = 1`;
+      con.query(checkSoftDeletedSql, [ Channelpartner], (err, softDeletedData) => {
         if (err) {
           return res.status(500).json(err);
         }
 
         if (softDeletedData.length > 0) {
           // If soft-deleted data exists, restore the entry
-          const restoreSoftDeletedSql = `UPDATE awt_channelpartner SET deleted = 0 WHERE Channel_partner = ?`;
-          con.query(restoreSoftDeletedSql, [ Channel_partner], (err) => {
+          const restoreSoftDeletedSql = `UPDATE awt_channelpartner SET deleted = 0 WHERE Channelpartner = ?`;
+          con.query(restoreSoftDeletedSql, [ Channelpartner], (err) => {
             if (err) {
               return res.status(500).json(err);
             }
@@ -1204,8 +1204,8 @@ app.post('/postcdata', (req, res) => {
           });
         } else {
           // Step 3: Insert new entry if no duplicates found
-          const sql = `INSERT INTO awt_channelpartner (Channel_partner) VALUES (?)`; // User data ko database me insert karne ki SQL query
-          con.query(sql, [ Channel_partner], (err, data) => { // SQL query ko execute kar rahe hain, user ke data ko parameters ke roop me pass kar rahe hain
+          const sql = `INSERT INTO awt_channelpartner (Channelpartner) VALUES (?)`; // User data ko database me insert karne ki SQL query
+          con.query(sql, [ Channelpartner], (err, data) => { // SQL query ko execute kar rahe hain, user ke data ko parameters ke roop me pass kar rahe hain
             if (err) {
               return res.json(err); // Agar koi error aata hai to error message return karenge
             } else {
@@ -1234,35 +1234,715 @@ app.get('/requestcdata/:id', (req, res) => {
 
 // update for Channelpartner
 app.put('/putcdata', (req, res) => {
-  const { Channel_partner, id } = req.body;
+  const { Channelpartner, id } = req.body;
 
-  // Step 1: Check if the same channel_partner exists for another record (other than the current one) and is not soft-deleted
-  const checkDuplicateSql = `SELECT * FROM awt_channelpartner WHERE Channel_partner = ? AND id != ? AND deleted = 0`;
-  con.query(checkDuplicateSql, [ Channel_partner, id], (err, data) => {
+  // Step 1: Check if the same channelpartner exists for another record (other than the current one) and is not soft-deleted
+  const checkDuplicateSql = `SELECT * FROM awt_channelpartner WHERE Channelpartner = ? AND id != ? AND deleted = 0`;
+  con.query(checkDuplicateSql, [ Channelpartner, id], (err, data) => {
     if (err) {
       return res.status(500).json(err);
     }
 
     if (data.length > 0) {
       // If a duplicate exists (other than the current record)
-      return res.status(409).json({ message: 'Duplicate entry, Channel_partner already exists!' });
+      return res.status(409).json({ message: 'Duplicate entry, Channelpartner already exists!' });
     } else {
       // Step 2: Update the record if no duplicates are found
-      const updateSql = `UPDATE awt_channelpartner SET Channel_partner = ? WHERE id = ?`;
-      con.query(updateSql, [ Channel_partner, id], (err, data) => {
+      const updateSql = `UPDATE awt_channelpartner SET Channelpartner = ? WHERE id = ?`;
+      con.query(updateSql, [ Channelpartner, id], (err, data) => {
         if (err) {
           return res.status(500).json(err);
         }
-        return res.json({ message: ' Channel_partner updated successfully!' });
+        return res.json({ message: ' Channelpartner updated successfully!' });
       });
     }
   });
 });
 
-// delete for Channel_partner 
+// delete for Channelpartner 
 app.post('/deletecdata', (req, res) => {
   const { id } = req.body; // Request body se user ki ID ko extract kar rahe hain
   const sql = `UPDATE awt_channelpartner SET deleted = 1 WHERE id = ?`; // User ko soft-delete karne ki SQL query (deleted column ko 1 kar dena)
+  con.query(sql, [id], (err, data) => { // SQL query ko execute kar rahe hain, id ko parameter ke roop me pass kar rahe hain
+    if (err) {
+      console.error(err); // Agar koi error aata hai to usse console me print karenge
+      return res.status(500).json({ message: 'Error updating user' }); // Error message ke sath 500 status return karenge
+    } else {
+      return res.json(data); // Agar query successful hoti hai to updated data return karenge
+    }
+  });
+})
+
+
+// complaint code 
+app.get('/getcom', (req, res) => {
+  const sql = "SELECT * FROM complaint_code WHERE deleted = 0"; // Users table se sabhi users ko fetch karne ki query jinke 'deleted' column me 0 hai
+  con.query(sql, (err, data) => { // SQL query ko execute kar rahe hain
+    if (err) {
+      return res.json(err); // Agar koi error aata hai to error message return karenge
+    } else {
+      return res.json(data); // Agar query successful hoti hai to users ka data JSON format me return karenge
+    }
+  });
+});
+// Insert for complaintcode
+app.post('/postdatacom', (req, res) => {
+  const { id, complaintcode, created_by } = req.body;
+
+  if (id) {
+    // Step 1: Check if the same complaintcode exists and is not soft-deleted for other IDs
+    const checkDuplicateSql = `SELECT * FROM complaint_code WHERE complaintcode = ? AND id != ? AND deleted = 0`;
+    con.query(checkDuplicateSql, [complaintcode, id], (err, data) => {
+      if (err) {
+        return res.status(500).json(err);
+      }
+
+      if (data.length > 0) {
+        // If duplicate data exists for another ID
+        return res.status(409).json({ message: 'Duplicate entry, complaintcode already exists!' });
+      } else {
+        // Step 2: Update the entry with the given ID
+        const updateSql = `UPDATE complaint_code SET complaintcode = ?, updated_date = NOW(), updated_by = ? WHERE id = ?`;
+        con.query(updateSql, [complaintcode, created_by, id], (err, result) => {
+          if (err) {
+            return res.status(500).json(err);
+          } else {
+            return res.json({ message: 'complaintcode updated successfully!' });
+          }
+        });
+      }
+    });
+  } else {
+    // Step 3: Same logic as before for insert if ID is not provided
+    // Check if the same complaintcode exists and is not soft-deleted
+    const checkDuplicateSql = `SELECT * FROM complaint_code WHERE complaintcode = ? AND deleted = 0`;
+    con.query(checkDuplicateSql, [complaintcode], (err, data) => {
+      if (err) {
+        return res.status(500).json(err);
+      }
+
+      if (data.length > 0) {
+        // If duplicate data exists (not soft-deleted)
+        return res.status(409).json({ message: 'Duplicate entry, complaintcode already exists!' });
+      } else {
+        // Check if the same complaintcode exists but is soft-deleted
+        const checkSoftDeletedSql = `SELECT * FROM complaint_code WHERE complaintcode = ? AND deleted = 1`;
+        con.query(checkSoftDeletedSql, [complaintcode], (err, softDeletedData) => {
+          if (err) {
+            return res.status(500).json(err);
+          }
+
+          if (softDeletedData.length > 0) {
+            // If soft-deleted data exists, restore the entry
+            const restoreSoftDeletedSql = `UPDATE complaint_code SET deleted = 0, updated_date = NOW(), updated_by = ? WHERE complaintcode = ?`;
+            con.query(restoreSoftDeletedSql, [created_by, complaintcode], (err) => {
+              if (err) {
+                return res.status(500).json(err);
+              }
+              return res.json({ message: 'Soft-deleted data restored successfully!' });
+            });
+          } else {
+            // Insert new entry if no duplicates found
+            const sql = `INSERT INTO complaint_code (complaintcode, created_date, created_by) VALUES (?, NOW(), ?)`;
+            con.query(sql, [complaintcode, created_by], (err, data) => {
+              if (err) {
+                return res.json(err);
+              } else {
+                return res.json({ message: 'complaintcode added successfully!' });
+              }
+            });
+          }
+        });
+      }
+    });
+  }
+});
+
+
+// edit for complaintcode
+
+app.get('/requestdatacom/:id', (req, res) => {
+  const { id } = req.params; // URL se user ki id ko extract kar rahe hain
+  const sql = "SELECT * FROM complaint_code WHERE id = ? AND deleted = 0"; // User ko uske ID aur soft-delete status ke base par fetch karne ki query
+  con.query(sql, [id], (err, data) => { // SQL query ko execute kar rahe hain, id ko parameter ke roop me pass kar rahe hain
+    if (err) {
+      return res.status(500).json(err); // Agar koi error aata hai to 500 status ke sath error message return karenge
+    } else {
+      return res.json(data[0]); // Agar query successful hoti hai to specific user ka data (index 0) return karenge
+    }
+  });
+});
+
+// update for complaintcode
+app.put('/putcomdata', (req, res) => {
+  const { id, complaintcode, updated_by } = req.body; // id, complaintcode, and updated_by fields ko extract kar rahe hain
+  
+  // Step 1: Check if the updated complaintcode already exists and is not soft-deleted
+  const checkDuplicateSql = `SELECT * FROM complaint_code WHERE complaintcode = ? AND deleted = 0 AND id != ?`;
+  con.query(checkDuplicateSql, [complaintcode, id], (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    }
+
+    if (data.length > 0) {
+      // If duplicate data exists
+      return res.status(409).json({ message: 'Duplicate entry, complaintcode already exists!' });
+    } else {
+      // Step 2: Update complaintcode data if no duplicates found
+      const sql = `UPDATE complaint_code SET complaintcode = ?, updated_by = ?, updated_date = NOW() WHERE id = ? AND deleted = 0`; // Update query with 'updated_by' field
+      con.query(sql, [complaintcode, updated_by, id], (err, data) => {
+        if (err) {
+          return res.status(500).json(err); // Error handling
+        } else {
+          return res.json({ message: 'complaintcode updated successfully!' }); // Success message
+        }
+      });
+    }
+  });
+});
+
+
+// delete for complaintcode 
+app.post('/deletecomdata', (req, res) => {
+  const { id } = req.body; // Request body se user ki ID ko extract kar rahe hain
+  const sql = `UPDATE complaint_code SET deleted = 1 WHERE id = ?`; // User ko soft-delete karne ki SQL query (deleted column ko 1 kar dena)
+  con.query(sql, [id], (err, data) => { // SQL query ko execute kar rahe hain, id ko parameter ke roop me pass kar rahe hain
+    if (err) {
+      console.error(err); // Agar koi error aata hai to usse console me print karenge
+      return res.status(500).json({ message: 'Error updating user' }); // Error message ke sath 500 status return karenge
+    } else {
+      return res.json(data); // Agar query successful hoti hai to updated data return karenge
+    }
+  });
+})
+
+//reason code 
+app.get('/getreason', (req, res) => {
+  const sql = "SELECT * FROM reason_code WHERE deleted = 0"; // Users table se sabhi users ko fetch karne ki query jinke 'deleted' column me 0 hai
+  con.query(sql, (err, data) => { // SQL query ko execute kar rahe hain
+    if (err) {
+      return res.json(err); // Agar koi error aata hai to error message return karenge
+    } else {
+      return res.json(data); // Agar query successful hoti hai to users ka data JSON format me return karenge
+    }
+  });
+});
+// Insert for reasoncode
+app.post('/postdatareason', (req, res) => {
+  const { id, reasoncode, created_by } = req.body;
+
+  if (id) {
+    // Step 1: Check if the same reasoncode exists and is not soft-deleted for other IDs
+    const checkDuplicateSql = `SELECT * FROM reason_code WHERE reasoncode = ? AND id != ? AND deleted = 0`;
+    con.query(checkDuplicateSql, [reasoncode, id], (err, data) => {
+      if (err) {
+        return res.status(500).json(err);
+      }
+
+      if (data.length > 0) {
+        // If duplicate data exists for another ID
+        return res.status(409).json({ message: 'Duplicate entry, reasoncode already exists!' });
+      } else {
+        // Step 2: Update the entry with the given ID
+        const updateSql = `UPDATE reason_code SET reasoncode = ?, updated_date = NOW(), updated_by = ? WHERE id = ?`;
+        con.query(updateSql, [reasoncode, created_by, id], (err, result) => {
+          if (err) {
+            return res.status(500).json(err);
+          } else {
+            return res.json({ message: 'reasoncode updated successfully!' });
+          }
+        });
+      }
+    });
+  } else {
+    // Step 3: Same logic as before for insert if ID is not provided
+    // Check if the same reasoncode exists and is not soft-deleted
+    const checkDuplicateSql = `SELECT * FROM reason_code WHERE reasoncode = ? AND deleted = 0`;
+    con.query(checkDuplicateSql, [reasoncode], (err, data) => {
+      if (err) {
+        return res.status(500).json(err);
+      }
+
+      if (data.length > 0) {
+        // If duplicate data exists (not soft-deleted)
+        return res.status(409).json({ message: 'Duplicate entry, reasoncode already exists!' });
+      } else {
+        // Check if the same reasoncode exists but is soft-deleted
+        const checkSoftDeletedSql = `SELECT * FROM reason_code WHERE reasoncode = ? AND deleted = 1`;
+        con.query(checkSoftDeletedSql, [reasoncode], (err, softDeletedData) => {
+          if (err) {
+            return res.status(500).json(err);
+          }
+
+          if (softDeletedData.length > 0) {
+            // If soft-deleted data exists, restore the entry
+            const restoreSoftDeletedSql = `UPDATE reason_code SET deleted = 0, updated_date = NOW(), updated_by = ? WHERE reasoncode = ?`;
+            con.query(restoreSoftDeletedSql, [created_by, reasoncode], (err) => {
+              if (err) {
+                return res.status(500).json(err);
+              }
+              return res.json({ message: 'Soft-deleted data restored successfully!' });
+            });
+          } else {
+            // Insert new entry if no duplicates found
+            const sql = `INSERT INTO reason_code (reasoncode, created_date, created_by) VALUES (?, NOW(), ?)`;
+            con.query(sql, [reasoncode, created_by], (err, data) => {
+              if (err) {
+                return res.json(err);
+              } else {
+                return res.json({ message: 'reasoncode added successfully!' });
+              }
+            });
+          }
+        });
+      }
+    });
+  }
+});
+
+
+// edit for reasoncode
+
+app.get('/requestdatareason/:id', (req, res) => {
+  const { id } = req.params; // URL se user ki id ko extract kar rahe hain
+  const sql = "SELECT * FROM reason_code WHERE id = ? AND deleted = 0"; // User ko uske ID aur soft-delete status ke base par fetch karne ki query
+  con.query(sql, [id], (err, data) => { // SQL query ko execute kar rahe hain, id ko parameter ke roop me pass kar rahe hain
+    if (err) {
+      return res.status(500).json(err); // Agar koi error aata hai to 500 status ke sath error message return karenge
+    } else {
+      return res.json(data[0]); // Agar query successful hoti hai to specific user ka data (index 0) return karenge
+    }
+  });
+});
+
+// update for reasoncode
+app.put('/putreasondata', (req, res) => {
+  const { id, reasoncode, updated_by } = req.body; // id, reasoncode, and updated_by fields ko extract kar rahe hain
+  
+  // Step 1: Check if the updated reasoncode already exists and is not soft-deleted
+  const checkDuplicateSql = `SELECT * FROM reason_code WHERE reasoncode = ? AND deleted = 0 AND id != ?`;
+  con.query(checkDuplicateSql, [reasoncode, id], (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    }
+
+    if (data.length > 0) {
+      // If duplicate data exists
+      return res.status(409).json({ message: 'Duplicate entry, reasoncode already exists!' });
+    } else {
+      // Step 2: Update reasoncode data if no duplicates found
+      const sql = `UPDATE reason_code SET reasoncode = ?, updated_by = ?, updated_date = NOW() WHERE id = ? AND deleted = 0`; // Update query with 'updated_by' field
+      con.query(sql, [reasoncode, updated_by, id], (err, data) => {
+        if (err) {
+          return res.status(500).json(err); // Error handling
+        } else {
+          return res.json({ message: 'reasoncode updated successfully!' }); // Success message
+        }
+      });
+    }
+  });
+});
+
+
+// delete for reasoncode 
+app.post('/deletereasondata', (req, res) => {
+  const { id } = req.body; // Request body se user ki ID ko extract kar rahe hain
+  const sql = `UPDATE reason_code SET deleted = 1 WHERE id = ?`; // User ko soft-delete karne ki SQL query (deleted column ko 1 kar dena)
+  con.query(sql, [id], (err, data) => { // SQL query ko execute kar rahe hain, id ko parameter ke roop me pass kar rahe hain
+    if (err) {
+      console.error(err); // Agar koi error aata hai to usse console me print karenge
+      return res.status(500).json({ message: 'Error updating user' }); // Error message ke sath 500 status return karenge
+    } else {
+      return res.json(data); // Agar query successful hoti hai to updated data return karenge
+    }
+  });
+})
+
+//action code 
+app.get('/getaction', (req, res) => {
+  const sql = "SELECT * FROM action_code WHERE deleted = 0"; // Users table se sabhi users ko fetch karne ki query jinke 'deleted' column me 0 hai
+  con.query(sql, (err, data) => { // SQL query ko execute kar rahe hain
+    if (err) {
+      return res.json(err); // Agar koi error aata hai to error message return karenge
+    } else {
+      return res.json(data); // Agar query successful hoti hai to users ka data JSON format me return karenge
+    }
+  });
+});
+// Insert for actioncode
+app.post('/postdataaction', (req, res) => {
+  const { id, actioncode, created_by } = req.body;
+
+  if (id) {
+    // Step 1: Check if the same actioncode exists and is not soft-deleted for other IDs
+    const checkDuplicateSql = `SELECT * FROM action_code WHERE actioncode = ? AND id != ? AND deleted = 0`;
+    con.query(checkDuplicateSql, [actioncode, id], (err, data) => {
+      if (err) {
+        return res.status(500).json(err);
+      }
+
+      if (data.length > 0) {
+        // If duplicate data exists for another ID
+        return res.status(409).json({ message: 'Duplicate entry, actioncode already exists!' });
+      } else {
+        // Step 2: Update the entry with the given ID
+        const updateSql = `UPDATE action_code SET actioncode = ?, updated_date = NOW(), updated_by = ? WHERE id = ?`;
+        con.query(updateSql, [actioncode, created_by, id], (err, result) => {
+          if (err) {
+            return res.status(500).json(err);
+          } else {
+            return res.json({ message: 'actioncode updated successfully!' });
+          }
+        });
+      }
+    });
+  } else {
+    // Step 3: Same logic as before for insert if ID is not provided
+    // Check if the same actioncode exists and is not soft-deleted
+    const checkDuplicateSql = `SELECT * FROM action_code WHERE actioncode = ? AND deleted = 0`;
+    con.query(checkDuplicateSql, [actioncode], (err, data) => {
+      if (err) {
+        return res.status(500).json(err);
+      }
+
+      if (data.length > 0) {
+        // If duplicate data exists (not soft-deleted)
+        return res.status(409).json({ message: 'Duplicate entry, actioncode already exists!' });
+      } else {
+        // Check if the same actioncode exists but is soft-deleted
+        const checkSoftDeletedSql = `SELECT * FROM action_code WHERE actioncode = ? AND deleted = 1`;
+        con.query(checkSoftDeletedSql, [actioncode], (err, softDeletedData) => {
+          if (err) {
+            return res.status(500).json(err);
+          }
+
+          if (softDeletedData.length > 0) {
+            // If soft-deleted data exists, restore the entry
+            const restoreSoftDeletedSql = `UPDATE action_code SET deleted = 0, updated_date = NOW(), updated_by = ? WHERE actioncode = ?`;
+            con.query(restoreSoftDeletedSql, [created_by, actioncode], (err) => {
+              if (err) {
+                return res.status(500).json(err);
+              }
+              return res.json({ message: 'Soft-deleted data restored successfully!' });
+            });
+          } else {
+            // Insert new entry if no duplicates found
+            const sql = `INSERT INTO action_code (actioncode, created_date, created_by) VALUES (?, NOW(), ?)`;
+            con.query(sql, [actioncode, created_by], (err, data) => {
+              if (err) {
+                return res.json(err);
+              } else {
+                return res.json({ message: 'actioncode added successfully!' });
+              }
+            });
+          }
+        });
+      }
+    });
+  }
+});
+
+
+// edit for actioncode
+
+app.get('/requestdataaction/:id', (req, res) => {
+  const { id } = req.params; // URL se user ki id ko extract kar rahe hain
+  const sql = "SELECT * FROM action_code WHERE id = ? AND deleted = 0"; // User ko uske ID aur soft-delete status ke base par fetch karne ki query
+  con.query(sql, [id], (err, data) => { // SQL query ko execute kar rahe hain, id ko parameter ke roop me pass kar rahe hain
+    if (err) {
+      return res.status(500).json(err); // Agar koi error aata hai to 500 status ke sath error message return karenge
+    } else {
+      return res.json(data[0]); // Agar query successful hoti hai to specific user ka data (index 0) return karenge
+    }
+  });
+});
+
+// update for actioncode
+app.put('/putactiondata', (req, res) => {
+  const { id, actioncode, updated_by } = req.body; // id, actioncode, and updated_by fields ko extract kar rahe hain
+  
+  // Step 1: Check if the updated actioncode already exists and is not soft-deleted
+  const checkDuplicateSql = `SELECT * FROM action_code WHERE actioncode = ? AND deleted = 0 AND id != ?`;
+  con.query(checkDuplicateSql, [actioncode, id], (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    }
+
+    if (data.length > 0) {
+      // If duplicate data exists
+      return res.status(409).json({ message: 'Duplicate entry, actioncode already exists!' });
+    } else {
+      // Step 2: Update actioncode data if no duplicates found
+      const sql = `UPDATE action_code SET actioncode = ?, updated_by = ?, updated_date = NOW() WHERE id = ? AND deleted = 0`; // Update query with 'updated_by' field
+      con.query(sql, [actioncode, updated_by, id], (err, data) => {
+        if (err) {
+          return res.status(500).json(err); // Error handling
+        } else {
+          return res.json({ message: 'actioncode updated successfully!' }); // Success message
+        }
+      });
+    }
+  });
+});
+// delete for actioncode 
+app.post('/deleteactiondata', (req, res) => {
+  const { id } = req.body; // Request body se user ki ID ko extract kar rahe hain
+  const sql = `UPDATE action_code SET deleted = 1 WHERE id = ?`; // User ko soft-delete karne ki SQL query (deleted column ko 1 kar dena)
+  con.query(sql, [id], (err, data) => { // SQL query ko execute kar rahe hain, id ko parameter ke roop me pass kar rahe hain
+    if (err) {
+      console.error(err); // Agar koi error aata hai to usse console me print karenge
+      return res.status(500).json({ message: 'Error updating user' }); // Error message ke sath 500 status return karenge
+    } else {
+      return res.json(data); // Agar query successful hoti hai to updated data return karenge
+    }
+  });
+})
+
+//service agent  code 
+app.get('/getsdata', (req, res) => {
+  const sql = "SELECT * FROM service_agent WHERE deleted = 0"; // Users table se sabhi users ko fetch karne ki query jinke 'deleted' column me 0 hai
+  con.query(sql, (err, data) => { // SQL query ko execute kar rahe hain
+    if (err) {
+      return res.json(err); // Agar koi error aata hai to error message return karenge
+    } else {
+      return res.json(data); // Agar query successful hoti hai to users ka data JSON format me return karenge
+    }
+  });
+});
+// Insert for serviceagent
+app.post('/postsdata', (req, res) => {
+  const { id, serviceagent, created_by } = req.body;
+
+  if (id) {
+    // Step 1: Check if the same serviceagent exists and is not soft-deleted for other IDs
+    const checkDuplicateSql = `SELECT * FROM service_agent WHERE serviceagent = ? AND id != ? AND deleted = 0`;
+    con.query(checkDuplicateSql, [serviceagent, id], (err, data) => {
+      if (err) {
+        return res.status(500).json(err);
+      }
+
+      if (data.length > 0) {
+        // If duplicate data exists for another ID
+        return res.status(409).json({ message: 'Duplicate entry, serviceagent already exists!' });
+      } else {
+        // Step 2: Update the entry with the given ID
+        const updateSql = `UPDATE service_agent SET serviceagent = ?, updated_date = NOW(), updated_by = ? WHERE id = ?`;
+        con.query(updateSql, [serviceagent, created_by, id], (err, result) => {
+          if (err) {
+            return res.status(500).json(err);
+          } else {
+            return res.json({ message: 'serviceagent updated successfully!' });
+          }
+        });
+      }
+    });
+  } else {
+    // Step 3: Same logic as before for insert if ID is not provided
+    // Check if the same serviceagent exists and is not soft-deleted
+    const checkDuplicateSql = `SELECT * FROM service_agent WHERE serviceagent = ? AND deleted = 0`;
+    con.query(checkDuplicateSql, [serviceagent], (err, data) => {
+      if (err) {
+        return res.status(500).json(err);
+      }
+
+      if (data.length > 0) {
+        // If duplicate data exists (not soft-deleted)
+        return res.status(409).json({ message: 'Duplicate entry, serviceagent already exists!' });
+      } else {
+        // Check if the same serviceagent exists but is soft-deleted
+        const checkSoftDeletedSql = `SELECT * FROM service_agent WHERE serviceagent = ? AND deleted = 1`;
+        con.query(checkSoftDeletedSql, [serviceagent], (err, softDeletedData) => {
+          if (err) {
+            return res.status(500).json(err);
+          }
+
+          if (softDeletedData.length > 0) {
+            // If soft-deleted data exists, restore the entry
+            const restoreSoftDeletedSql = `UPDATE service_agent SET deleted = 0, updated_date = NOW(), updated_by = ? WHERE serviceagent = ?`;
+            con.query(restoreSoftDeletedSql, [created_by, serviceagent], (err) => {
+              if (err) {
+                return res.status(500).json(err);
+              }
+              return res.json({ message: 'Soft-deleted data restored successfully!' });
+            });
+          } else {
+            // Insert new entry if no duplicates found
+            const sql = `INSERT INTO service_agent (serviceagent, created_date, created_by) VALUES (?, NOW(), ?)`;
+            con.query(sql, [serviceagent, created_by], (err, data) => {
+              if (err) {
+                return res.json(err);
+              } else {
+                return res.json({ message: 'serviceagent added successfully!' });
+              }
+            });
+          }
+        });
+      }
+    });
+  }
+});
+
+
+// edit for serviceagent
+
+app.get('/requestsdata/:id', (req, res) => {
+  const { id } = req.params; // URL se user ki id ko extract kar rahe hain
+  const sql = "SELECT * FROM service_agent WHERE id = ? AND deleted = 0"; // User ko uske ID aur soft-delete status ke base par fetch karne ki query
+  con.query(sql, [id], (err, data) => { // SQL query ko execute kar rahe hain, id ko parameter ke roop me pass kar rahe hain
+    if (err) {
+      return res.status(500).json(err); // Agar koi error aata hai to 500 status ke sath error message return karenge
+    } else {
+      return res.json(data[0]); // Agar query successful hoti hai to specific user ka data (index 0) return karenge
+    }
+  });
+});
+
+// update for serviceagent
+app.put('/putsdata', (req, res) => {
+  const { id, serviceagent, updated_by } = req.body; // id, serviceagent, and updated_by fields ko extract kar rahe hain
+  
+  // Step 1: Check if the updated serviceagent already exists and is not soft-deleted
+  const checkDuplicateSql = `SELECT * FROM service_agent WHERE serviceagent = ? AND deleted = 0 AND id != ?`;
+  con.query(checkDuplicateSql, [serviceagent, id], (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    }
+
+    if (data.length > 0) {
+      // If duplicate data exists
+      return res.status(409).json({ message: 'Duplicate entry, serviceagent already exists!' });
+    } else {
+      // Step 2: Update serviceagent data if no duplicates found
+      const sql = `UPDATE service_agent SET serviceagent = ?, updated_by = ?, updated_date = NOW() WHERE id = ? AND deleted = 0`; // Update query with 'updated_by' field
+      con.query(sql, [serviceagent, updated_by, id], (err, data) => {
+        if (err) {
+          return res.status(500).json(err); // Error handling
+        } else {
+          return res.json({ message: 'serviceagent updated successfully!' }); // Success message
+        }
+      });
+    }
+  });
+});
+
+
+// delete for serviceagent 
+app.post('/deletesdata', (req, res) => {
+  const { id } = req.body; // Request body se user ki ID ko extract kar rahe hain
+  const sql = `UPDATE service_agent SET deleted = 1 WHERE id = ?`; // User ko soft-delete karne ki SQL query (deleted column ko 1 kar dena)
+  con.query(sql, [id], (err, data) => { // SQL query ko execute kar rahe hain, id ko parameter ke roop me pass kar rahe hain
+    if (err) {
+      console.error(err); // Agar koi error aata hai to usse console me print karenge
+      return res.status(500).json({ message: 'Error updating user' }); // Error message ke sath 500 status return karenge
+    } else {
+      return res.json(data); // Agar query successful hoti hai to updated data return karenge
+    }
+  });
+})
+
+// call status code 
+app.get('/getcalldata', (req, res) => {
+  const sql = "SELECT * FROM call_status WHERE deleted = 0"; // Users table se sabhi users ko fetch karne ki query jinke 'deleted' column me 0 hai
+  con.query(sql, (err, data) => { // SQL query ko execute kar rahe hain
+    if (err) {
+      return res.json(err); // Agar koi error aata hai to error message return karenge
+    } else {
+      return res.json(data); // Agar query successful hoti hai to users ka data JSON format me return karenge
+    }
+  });
+});
+// Insert for Callstatus
+app.post('/postcalldata', (req, res) => {
+  const { Callstatus } = req.body;
+
+  // Step 1: Check if the same Callstatus exists and is not soft-deleted
+  const checkDuplicateSql = `SELECT * FROM call_status WHERE Callstatus = ? AND deleted = 0`;
+  con.query(checkDuplicateSql, [ Callstatus], (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    }
+
+    if (data.length > 0) {
+      // If duplicate data exists (not soft-deleted)
+      return res.status(409).json({ message: 'Duplicate entry, Callstatus already exists!' });
+    } else {
+      // Step 2: Check if the same Callstatus exists but is soft-deleted
+      const checkSoftDeletedSql = `SELECT * FROM call_status WHERE Callstatus = ? AND deleted = 1`;
+      con.query(checkSoftDeletedSql, [ Callstatus], (err, softDeletedData) => {
+        if (err) {
+          return res.status(500).json(err);
+        }
+
+        if (softDeletedData.length > 0) {
+          // If soft-deleted data exists, restore the entry
+          const restoreSoftDeletedSql = `UPDATE call_status SET deleted = 0 WHERE Callstatus = ?`;
+          con.query(restoreSoftDeletedSql, [ Callstatus], (err) => {
+            if (err) {
+              return res.status(500).json(err);
+            }
+            return res.json({ message: 'Soft-deleted data restored successfully!' });
+          });
+        } else {
+          // Step 3: Insert new entry if no duplicates found
+          const sql = `INSERT INTO call_status (Callstatus) VALUES (?)`; // User data ko database me insert karne ki SQL query
+          con.query(sql, [ Callstatus], (err, data) => { // SQL query ko execute kar rahe hain, user ke data ko parameters ke roop me pass kar rahe hain
+            if (err) {
+              return res.json(err); // Agar koi error aata hai to error message return karenge
+            } else {
+              return res.json({ message: 'Channel partner added successfully!' }); // Agar query successful hoti hai to success message return karenge
+            }
+          });
+        }
+      });
+    }
+  });
+});
+
+// edit for Callstatus
+
+app.get('/requestcalldata/:id', (req, res) => {
+  const { id } = req.params; // URL se user ki id ko extract kar rahe hain
+  const sql = "SELECT * FROM call_status WHERE id = ? AND deleted = 0"; // User ko uske ID aur soft-delete status ke base par fetch karne ki query
+  con.query(sql, [id], (err, data) => { // SQL query ko execute kar rahe hain, id ko parameter ke roop me pass kar rahe hain
+    if (err) {
+      return res.status(500).json(err); // Agar koi error aata hai to 500 status ke sath error message return karenge
+    } else {
+      return res.json(data[0]); // Agar query successful hoti hai to specific user ka data (index 0) return karenge
+    }
+  });
+});
+
+// update for Callstatus
+app.put('/putcalldata', (req, res) => {
+  const { Callstatus, id } = req.body;
+
+  // Step 1: Check if the same Callstatus exists for another record (other than the current one) and is not soft-deleted
+  const checkDuplicateSql = `SELECT * FROM call_status WHERE Callstatus = ? AND id != ? AND deleted = 0`;
+  con.query(checkDuplicateSql, [ Callstatus, id], (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    }
+
+    if (data.length > 0) {
+      // If a duplicate exists (other than the current record)
+      return res.status(409).json({ message: 'Duplicate entry, Callstatus already exists!' });
+    } else {
+      // Step 2: Update the record if no duplicates are found
+      const updateSql = `UPDATE call_status SET Callstatus = ? WHERE id = ?`;
+      con.query(updateSql, [ Callstatus, id], (err, data) => {
+        if (err) {
+          return res.status(500).json(err);
+        }
+        return res.json({ message: ' Callstatus updated successfully!' });
+      });
+    }
+  });
+});
+
+// delete for Callstatus 
+app.post('/deletecalldata', (req, res) => {
+  const { id } = req.body; // Request body se user ki ID ko extract kar rahe hain
+  const sql = `UPDATE call_status SET deleted = 1 WHERE id = ?`; // User ko soft-delete karne ki SQL query (deleted column ko 1 kar dena)
   con.query(sql, [id], (err, data) => { // SQL query ko execute kar rahe hain, id ko parameter ke roop me pass kar rahe hain
     if (err) {
       console.error(err); // Agar koi error aata hai to usse console me print karenge

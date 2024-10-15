@@ -9,11 +9,11 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import { Login } from './Components/Authenticate/Login';
-import { Callstatus } from './Components/Pages/Master/Callstatus';
+import  Callstatus  from './Components/Pages/Master/Callstatus';
 import  Category  from './Components/Pages/Master/Category';
 import ProductType from './Components/Pages/Master/ProductType';
 import  Channelpartner  from './Components/Pages/Master/Channelpartner';
-import { Complaintcode } from './Components/Pages/Master/Complaintcode';
+import  Complaintcode  from './Components/Pages/Master/Complaintcode';
 import { Complaintgrid } from './Components/Pages/Complaint/Complaintgrid';
 import { Complaintlist } from './Components/Pages/Complaint/Complaintlist';
 import { Complaintview } from './Components/Pages/Complaint/Complaintview';
@@ -28,7 +28,7 @@ import { Product } from './Components/Pages/Master/Product';
 import { Productspare } from './Components/Pages/Master/Productspare';
 import { Ratecard } from './Components/Pages/Master/Ratecard';
 import { Registercomplaint } from './Components/Pages/Complaint/Registercomplaint';
-import { Serviceagent } from './Components/Pages/Master/Serviceagent';
+import  Serviceagent  from './Components/Pages/Master/Serviceagent';
 import { Serviceproduct } from './Components/Pages/Master/Serviceproduct';
 import  Subcategory  from './Components/Pages/Master/Subcategory';
 import { Siteheader } from './Components/Layout/Siteheader';
@@ -41,6 +41,11 @@ import Geocity from './Components/Pages/Master/Geocity';
 import Area from './Components/Pages/Master/Area';
 import ProMaster from './Components/Pages/Master/ProMaster';
 import  Channelpartnertabs  from './Components/Pages/Master/Channelpartnertabs';
+import Complainttabs from './Components/Pages/Master/Complainttabs';
+import ReasonCode from './Components/Pages/Master/Reasoncode';
+import ActionCode from './Components/Pages/Master/Actioncode';
+import Serviceagenttabs from './Components/Pages/Master/Serviceagenttabs';
+import Callstatuscodetabs from './Components/Pages/Master/Callstatuscodetabs';
 
 
 
@@ -101,8 +106,24 @@ const Router = createBrowserRouter([
         
       },
       {
-        path: "/complaincode",
+        path: "/complaintcode",
         element: <Complaintcode />,
+        
+      },
+      {
+        path: "/complainttabs",
+        element: <Complainttabs />,
+        
+      },
+      {
+        path: "/reasoncode",
+        element: <ReasonCode />,
+
+        
+      },
+      {
+        path: "/actioncode",
+        element: <ActionCode />,
         
       },
       {
@@ -123,6 +144,16 @@ const Router = createBrowserRouter([
       {
         path: "/country",
         element: <Country />,
+        
+      },
+      {
+        path: "/callstatuscodetabs",
+        element: <Callstatuscodetabs />,
+        
+      },
+      {
+        path: "/callstatus",
+        element: <Callstatus />,
         
       },
       {
@@ -187,6 +218,11 @@ const Router = createBrowserRouter([
       {
         path: "/serviceagent",
         element: <Serviceagent />,
+        
+      },
+      {
+        path: "/serviceagenttabs",
+        element: <Serviceagenttabs />,
         
       },
       {

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
 
-const Serviceagent = () => {
+const ReasonCode = () => {
     // Step 1: Add this state to track errors
     const [errors, setErrors] = useState({});
     const [users, setUsers] = useState([]);
@@ -17,13 +17,13 @@ const Serviceagent = () => {
     const updatedBy = 2;  // Static value for updated_by
 
     const [formData, setFormData] = useState({
-        serviceagent: ''
+        reasoncode: ''
     });
 
 
     const fetchUsers = async () => {
         try {
-            const response = await axios.get(`${Base_Url}/getsdata`);
+            const response = await axios.get(`${Base_Url}/getreason`);
             console.log(response.data);
             setUsers(response.data);
             setFilteredUsers(response.data);
@@ -45,7 +45,7 @@ const Serviceagent = () => {
         const value = e.target.value.toLowerCase();
         setSearchTerm(value);
         const filtered = users.filter((user) =>
-            user.serviceagent && user.serviceagent.toLowerCase().includes(value)
+            user.reasoncode && user.reasoncode.toLowerCase().includes(value)
         );
         setFilteredUsers(filtered);
         setCurrentPage(0);
@@ -55,8 +55,8 @@ const Serviceagent = () => {
     // Step 2: Add form validation function
     const validateForm = () => {
         const newErrors = {}; // Initialize an empty error object
-        if (!formData.serviceagent.trim()) { // Check if the serviceagent is empty
-            newErrors.serviceagent = "serviceagent Field is required."; // Set error message if serviceagent is empty
+        if (!formData.reasoncode.trim()) { // Check if the reasoncode is empty
+            newErrors.reasoncode = "Reasoncode Field is required."; // Set error message if reasoncode is empty
         }
         return newErrors; // Return the error object
     };
@@ -79,31 +79,32 @@ const Serviceagent = () => {
             if (confirmSubmission) {
                 if (isEdit) {
                     // For update, include 'updated_by'
-                    await axios.put(`${Base_Url}/putsdata`, { ...formData, updated_by: updatedBy })
+                    await axios.put(`${Base_Url}/putreasondata`, { ...formData, updated_by: updatedBy })
                         .then(response => {
+                           // window.location.reload();
+                           setFormData({
+                            reasoncode : ''
+                        })
+                        fetchUsers();
+                        })
+                        .catch(error => {
+                            if (error.response && error.response.status === 409) {
+                                setDuplicateError('Duplicate entry, Reasoncode already exists!'); // Show duplicate error for update
+                            }
+                        });
+                } else {
+                    // For insert, include 'created_by'
+                    await axios.post(`${Base_Url}/postdatareason`, { ...formData, created_by: createdBy })
+                        .then(response => {
+                            //window.location.reload();
                             setFormData({
-                                serviceagent : ''
+                                reasoncode : ''
                             })
                             fetchUsers();
                         })
                         .catch(error => {
                             if (error.response && error.response.status === 409) {
-                                setDuplicateError('Duplicate entry, serviceagent already exists!'); // Show duplicate error for update
-                            }
-                        });
-                } else {
-                    // For insert, include 'created_by'
-                    await axios.post(`${Base_Url}/postsdata`, { ...formData, created_by: createdBy })
-                    
-                        .then(response => {
-                            setFormData({
-                                serviceagent : ''
-                            })
-                            fetchUsers()
-                        })
-                        .catch(error => {
-                            if (error.response && error.response.status === 409) {
-                                setDuplicateError('Duplicate entry, serviceagent already exists!'); // Show duplicate error for insert
+                                setDuplicateError('Duplicate entry, Reasoncode already exists!'); // Show duplicate error for insert
                             }
                         });
                 }
@@ -116,9 +117,9 @@ const Serviceagent = () => {
 
     const deleted = async (id) => {
         try {
-            const response = await axios.post(`${Base_Url}/deletesdata`, { id });
+            const response = await axios.post(`${Base_Url}/deletereasondata`, { id });
             // alert(response.data[0]);
-          //  window.location.reload();
+            window.location.reload();
         } catch (error) {
             console.error('Error deleting user:', error);
         }
@@ -126,7 +127,7 @@ const Serviceagent = () => {
 
     const edit = async (id) => {
         try {
-            const response = await axios.get(`${Base_Url}/requestsdata/${id}`);
+            const response = await axios.get(`${Base_Url}/requestdatareason/${id}`);
             setFormData(response.data)
             setIsEdit(true);
             console.log(response.data);
@@ -149,19 +150,22 @@ const Serviceagent = () => {
                             <div className="col-6">
                                 <form onSubmit={handleSubmit} style={{ width: "50%" }} className="text-left">
                                     <div className="mb-3">
-                                        <label htmlFor="serviceagentInput" className="input-field" >Add Service Agent</label>
+                                        <label htmlFor="ReasoncodeInput" className="input-field" >Add Reason Code</label>
                                         <input
                                             type="text"
                                             className="form-control"
-                                            name="serviceagent"
-                                            id="serviceagentInput"
-                                            value={formData.serviceagent}
+                                            name="reasoncode"
+                                            id="ReasoncodeInput"
+                                            value={formData.reasoncode}
                                             onChange={handleChange}
-                                            placeholder="Enter Service Agent "
-                                           
+                                            placeholder="Enter Reason Code "
+                                            pattern="[0-9]*"  // This pattern ensures only numbers are allowed
+                                            onInput={(e) => {
+                                                e.target.value = e.target.value.replace(/[^0-9]/g, '');  // Remove any non-numeric characters
+                                            }}
                                         />
 
-                                        {errors.serviceagent && <small className="text-danger">{errors.serviceagent}</small>}
+                                        {errors.reasoncode && <small className="text-danger">{errors.reasoncode}</small>}
                                         {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
                                     </div>
                                     <div className="text-right">
@@ -204,7 +208,7 @@ const Serviceagent = () => {
                                     <thead>
                                         <tr>
                                             <th style={{ padding: '12px 15px', textAlign: 'center' }}>#</th>
-                                            <th style={{ padding: '12px 15px', textAlign: 'center' }}>Service Agent</th>
+                                            <th style={{ padding: '12px 15px', textAlign: 'center' }}>Reason Code</th>
                                             <th style={{ padding: '0px 0px', textAlign: 'center' }}>Edit</th>
                                             <th style={{ padding: '0px 0px', textAlign: 'center' }}>Delete</th>
                                         </tr>
@@ -213,7 +217,7 @@ const Serviceagent = () => {
                                         {currentUsers.map((item, index) => (
                                             <tr key={item.id}>
                                                 <td style={{ padding: '2px', textAlign: 'center' }}>{index + 1 + indexOfFirstUser}</td>
-                                                <td style={{ padding: '10px' }}>{item.serviceagent}</td>
+                                                <td style={{ padding: '10px' }}>{item.reasoncode}</td>
                                                 <td style={{ padding: '0px', textAlign: 'center' }}>
                                                     <button
                                                         className='btn'
@@ -221,7 +225,7 @@ const Serviceagent = () => {
                                                             // alert(item.id)
                                                             edit(item.id)
                                                         }}
-                                                        serviceagent="Edit"
+                                                        reasoncode="Edit"
                                                         style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
                                                     >
                                                         <FaPencilAlt />
@@ -231,7 +235,7 @@ const Serviceagent = () => {
                                                     <button
                                                         className='btn'
                                                         onClick={() => deleted(item.id)}
-                                                        serviceagent="Delete"
+                                                        reasoncode="Delete"
                                                         style={{ backgroundColor: 'transparent', border: 'none', color: 'red', fontSize: '20px' }}
                                                     >
                                                         <FaTrash />
@@ -281,4 +285,4 @@ const Serviceagent = () => {
     );
 };
 
-export default Serviceagent;
+export default ReasonCode;

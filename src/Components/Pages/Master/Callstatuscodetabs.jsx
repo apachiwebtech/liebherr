@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Channelpartner from './Channelpartner';
+import  Callstatus  from './Callstatus';
 
-function Channelpartnertabs() {
-  const [activeTab, setActiveTab] = useState('Channelpartner');
+function Callstatuscodetabs() {
+  const [activeTab, setActiveTab] = useState('Callstatus');
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'Channelpartner':
-        return <Channelpartner />;
+      case 'Callstatus':
+        return <Callstatus />;
   
       default:
-        return <Channelpartner />;
+        return <Callstatus />;
     }
   };
 
@@ -47,7 +47,7 @@ function Channelpartnertabs() {
       <div className="container-fluid p-0">
         {/* Top Header */}
         <div className="text-left headings">
-          <span style={{paddingLeft:"20px"}}>Channel Partner Master </span>
+          <span style={{paddingLeft:"20px"}}>Call Status Code Master </span>
         </div>
 
         {/* Nav Tabs */}
@@ -58,10 +58,10 @@ function Channelpartnertabs() {
               <ul className="nav nav-tabs ">
                 <li className="nav-item">
                   <button
-                    className={`nav-link ${activeTab === 'Channelpartner' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('Channelpartner')}
+                    className={`nav-link ${activeTab === 'Callstatus' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('Callstatus')}
                   >
-                  CHANNEL PARTNER 
+                  CALL STATUS CODE 
                   </button>
                 </li>
         
@@ -84,4 +84,4 @@ function Channelpartnertabs() {
   );
 }
 
-export default Channelpartnertabs;
+export default Callstatuscodetabs;
