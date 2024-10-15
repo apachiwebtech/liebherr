@@ -4,6 +4,9 @@ import  Category from './Category';
 import Subcategory from './Subcategory';
 import Product from './Product';
 import ProductType from './ProductType';
+import ProductLine from './ProductLine';
+import Material from './Material';
+import Manufacturer from './Manufacturer';
 
 function ProMaster() {
   const [activeTab, setActiveTab] = useState('category');
@@ -18,6 +21,12 @@ function ProMaster() {
         return <Product />;
         case 'producttype':
            return <ProductType />;
+           case 'productline':
+             return <ProductLine />;
+             case 'material':
+                return <Material />;
+                case 'manufacturer':
+                   return <Manufacturer />;
       default:
         return <Category />;
     }
@@ -87,13 +96,35 @@ function ProMaster() {
                   </button>
                 </li>
                 <li className="nav-item">
-
-                  
                   <button
                     className={`nav-link ${activeTab === 'producttype' ? 'active' : ''}`}
                     onClick={() => setActiveTab('producttype')}
                   >
                     PRODUCT TYPE
+                  </button>
+                </li>
+                <li className="nav-item">
+                  <button
+                    className={`nav-link ${activeTab === 'productline' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('productline')}
+                  >
+                    PRODUCT LINE
+                  </button>
+                </li>
+                <li className="nav-item">
+                  <button
+                    className={`nav-link ${activeTab === 'material' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('material')}
+                  >
+                    MATERIAL
+                  </button>
+                </li>
+                <li className="nav-item">
+                  <button
+                    className={`nav-link ${activeTab === 'manufacturer' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('manufacturer')}
+                  >
+                    MANUFACTURER
                   </button>
                 </li>
               </ul>

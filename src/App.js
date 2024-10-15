@@ -41,6 +41,10 @@ import Geocity from './Components/Pages/Master/Geocity';
 import Area from './Components/Pages/Master/Area';
 import ProMaster from './Components/Pages/Master/ProMaster';
 import  Channelpartnertabs  from './Components/Pages/Master/Channelpartnertabs';
+import ProductLine from './Components/Pages/Master/ProductLine';
+import Material from './Components/Pages/Master/Material';
+import Manufacturer from './Components/Pages/Master/Manufacturer'
+
 
 
 
@@ -202,6 +206,20 @@ const Router = createBrowserRouter([
       {
         path: "/producttype",
         element: <ProductType />,
+        
+      },
+      {
+        path: "/productline",
+        element: <ProductLine />,
+        
+      }, {
+        path: "/material",
+        element: <Material />,
+        
+      },
+      {
+        path: "/manufacturer",
+        element: <Manufacturer />,
         
       },
     

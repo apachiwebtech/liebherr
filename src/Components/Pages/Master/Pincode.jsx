@@ -151,6 +151,7 @@ const Pincode = () => {
         name={name}
         value={formData[name]}
         onChange={handleChange}
+        
       >
         <option value="">Select {label}</option>
         {options.map((option) => (

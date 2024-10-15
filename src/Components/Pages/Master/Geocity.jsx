@@ -226,7 +226,7 @@ const Geostate = () => {
           <div className="form-group">
             <label htmlFor="geostate_id" className="form-label pb-0 dropdown-label">Geo State</label>
             <select
-               className="form-control dropdown-select"
+               className="form-control "
               name="geostate_id"
               value={formData.geostate_id}
               onChange={handleChange}

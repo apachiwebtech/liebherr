@@ -919,8 +919,9 @@ app.post('/deletepincode', (req, res) => {
 
 
 
-//yadnesh
-// API jo sabhi users ko fetch karegi jinhone soft delete nahi kiya gaya hai
+//yadnesh Category Start
+
+// API jo sabhi users ko fetch karegi ji SWnhone soft delete nahi kiya gaya hai
 app.get('/getcat', (req, res) => {
   const sql = "SELECT * FROM awt_category WHERE deleted = 0"; // Users table se sabhi users ko fetch karne ki query jinke 'deleted' column me 0 hai
   con.query(sql, (err, data) => { // SQL query ko execute kar rahe hain
@@ -933,50 +934,77 @@ app.get('/getcat', (req, res) => {
 });
 // Insert for category
 app.post('/postdatacat', (req, res) => {
-  const { title } = req.body;
+  const { id, title, created_by } = req.body;
 
-  // Step 1: Check if the same title exists and is not soft-deleted
-  const checkDuplicateSql = `SELECT * FROM awt_category WHERE title = ? AND deleted = 0`;
-  con.query(checkDuplicateSql, [title], (err, data) => {
-    if (err) {
-      return res.status(500).json(err);
-    }
+  if (id) {
+    // Step 1: Check if the same title exists and is not soft-deleted for other IDs
+    const checkDuplicateSql = `SELECT * FROM awt_category WHERE title = ? AND id != ? AND deleted = 0`;
+    con.query(checkDuplicateSql, [title, id], (err, data) => {
+      if (err) {
+        return res.status(500).json(err);
+      }
 
-    if (data.length > 0) {
-      // If duplicate data exists (not soft-deleted)
-      return res.status(409).json({ message: 'Duplicate entry, Country already exists!' });
-    } else {
-      // Step 2: Check if the same title exists but is soft-deleted
-      const checkSoftDeletedSql = `SELECT * FROM awt_category WHERE title = ? AND deleted = 1`;
-      con.query(checkSoftDeletedSql, [title], (err, softDeletedData) => {
-        if (err) {
-          return res.status(500).json(err);
-        }
+      if (data.length > 0) {
+        // If duplicate data exists for another ID
+        return res.status(409).json({ message: 'Duplicate entry, Category already exists!' });
+      } else {
+        // Step 2: Update the entry with the given ID
+        const updateSql = `UPDATE awt_category SET title = ?, updated_date = NOW(), updated_by = ? WHERE id = ?`;
+        con.query(updateSql, [title, created_by, id], (err, result) => {
+          if (err) {
+            return res.status(500).json(err);
+          } else {
+            return res.json({ message: 'Category updated successfully!' });
+          }
+        });
+      }
+    });
+  } else {
+    // Step 3: Same logic as before for insert if ID is not provided
+    // Check if the same title exists and is not soft-deleted
+    const checkDuplicateSql = `SELECT * FROM awt_category WHERE title = ? AND deleted = 0`;
+    con.query(checkDuplicateSql, [title], (err, data) => {
+      if (err) {
+        return res.status(500).json(err);
+      }
 
-        if (softDeletedData.length > 0) {
-          // If soft-deleted data exists, restore the entry
-          const restoreSoftDeletedSql = `UPDATE awt_category SET deleted = 0 WHERE title = ?`;
-          con.query(restoreSoftDeletedSql, [title], (err) => {
-            if (err) {
-              return res.status(500).json(err);
-            }
-            return res.json({ message: 'Soft-deleted data restored successfully!' });
-          });
-        } else {
-          // Step 3: Insert new entry if no duplicates found
-          const sql = `INSERT INTO awt_category (title) VALUES (?)`; // User data ko database me insert karne ki SQL query
-          con.query(sql, [title], (err, data) => { // SQL query ko execute kar rahe hain, user ke data ko parameters ke roop me pass kar rahe hain
-            if (err) {
-              return res.json(err); // Agar koi error aata hai to error message return karenge
-            } else {
-              return res.json({ message: 'Category added successfully!' }); // Agar query successful hoti hai to success message return karenge
-            }
-          });
-        }
-      });
-    }
-  });
+      if (data.length > 0) {
+        // If duplicate data exists (not soft-deleted)
+        return res.status(409).json({ message: 'Duplicate entry, Category already exists!' });
+      } else {
+        // Check if the same title exists but is soft-deleted
+        const checkSoftDeletedSql = `SELECT * FROM awt_category WHERE title = ? AND deleted = 1`;
+        con.query(checkSoftDeletedSql, [title], (err, softDeletedData) => {
+          if (err) {
+            return res.status(500).json(err);
+          }
+
+          if (softDeletedData.length > 0) {
+            // If soft-deleted data exists, restore the entry
+            const restoreSoftDeletedSql = `UPDATE awt_category SET deleted = 0, updated_date = NOW(), updated_by = ? WHERE title = ?`;
+            con.query(restoreSoftDeletedSql, [created_by, title], (err) => {
+              if (err) {
+                return res.status(500).json(err);
+              }
+              return res.json({ message: 'Soft-deleted data restored successfully!' });
+            });
+          } else {
+            // Insert new entry if no duplicates found
+            const sql = `INSERT INTO awt_category (title, created_date, created_by) VALUES (?, NOW(), ?)`;
+            con.query(sql, [title, created_by], (err, data) => {
+              if (err) {
+                return res.json(err);
+              } else {
+                return res.json({ message: 'Category added successfully!' });
+              }
+            });
+          }
+        });
+      }
+    });
+  }
 });
+
 
 // edit for category
 
@@ -994,30 +1022,32 @@ app.get('/requestdatacat/:id', (req, res) => {
 
 // update for category
 app.put('/putcatdata', (req, res) => {
-  const { title, id } = req.body;
-
-  // Step 1: Check if the same title exists for another record (other than the current one) and is not soft-deleted
-  const checkDuplicateSql = `SELECT * FROM awt_category WHERE title = ? AND id != ? AND deleted = 0`;
+  const { id, title, updated_by } = req.body; // id, title, and updated_by fields ko extract kar rahe hain
+  
+  // Step 1: Check if the updated title already exists and is not soft-deleted
+  const checkDuplicateSql = `SELECT * FROM awt_category WHERE title = ? AND deleted = 0 AND id != ?`;
   con.query(checkDuplicateSql, [title, id], (err, data) => {
     if (err) {
       return res.status(500).json(err);
     }
 
     if (data.length > 0) {
-      // If a duplicate exists (other than the current record)
-      return res.status(409).json({ message: 'Duplicate entry, title already exists!' });
+      // If duplicate data exists
+      return res.status(409).json({ message: 'Duplicate entry, Category already exists!' });
     } else {
-      // Step 2: Update the record if no duplicates are found
-      const updateSql = `UPDATE awt_category SET title = ? WHERE id = ?`;
-      con.query(updateSql, [title, id], (err, data) => {
+      // Step 2: Update category data if no duplicates found
+      const sql = `UPDATE awt_category SET title = ?, updated_by = ?, updated_date = NOW() WHERE id = ? AND deleted = 0`; // Update query with 'updated_by' field
+      con.query(sql, [title, updated_by, id], (err, data) => {
         if (err) {
-          return res.status(500).json(err);
+          return res.status(500).json(err); // Error handling
+        } else {
+          return res.json({ message: 'Category updated successfully!' }); // Success message
         }
-        return res.json({ message: 'category updated successfully!' });
       });
     }
   });
 });
+
 
 // delete for category 
 app.post('/deletecatdata', (req, res) => {
@@ -1032,7 +1062,9 @@ app.post('/deletecatdata', (req, res) => {
     }
   });
 })
+  //End Category
 
+    //Sub - Category Start
 // fstch data for subcategory 
 app.get('/getsubcategory', (req, res) => {
   const sql = "SELECT r.*, c.title as category_title FROM awt_subcat r JOIN awt_category c ON r.category_id = c.id WHERE r.deleted = 0"; // subcategory ko fetch karne ki query
@@ -1171,6 +1203,11 @@ app.get('/getcdata', (req, res) => {
     }
   });
 });
+    // End Sub - Category
+
+
+
+// Channel Partner Start
 // Insert for Channelpartner
 app.post('/postcdata', (req, res) => {
   const { Channel_partner } = req.body;
@@ -1272,3 +1309,519 @@ app.post('/deletecdata', (req, res) => {
     }
   });
 })
+// Channel Partner End
+
+// ProductType Start
+            // API to fetch all Product Types that are not soft-deleted
+          app.get('/getproducttype', (req, res) => {
+            const sql = "SELECT * FROM product_type WHERE deleted = 0";
+            con.query(sql, (err, data) => {
+              if (err) {
+                return res.json(err);
+              } else {
+                return res.json(data);
+              }
+            });
+          });
+
+            // Insert for Product Type
+            app.post('/postdataproducttype', (req, res) => {
+              const { id, product_type, created_by } = req.body;
+
+              if (id) {
+                const checkDuplicateSql = `SELECT * FROM product_type WHERE product_type = ? AND id != ? AND deleted = 0`;
+                con.query(checkDuplicateSql, [product_type, id], (err, data) => {
+                  if (err) {
+                    return res.status(500).json(err);
+                  }
+
+                  if (data.length > 0) {
+                    return res.status(409).json({ message: 'Duplicate entry, ProductType already exists!' });
+                  } else {
+                    const updateSql = `UPDATE product_type SET product_type = ?, updated_date = NOW(), updated_by = ? WHERE id = ?`;
+                    con.query(updateSql, [product_type, created_by, id], (err, result) => {
+                      if (err) {
+                        return res.status(500).json(err);
+                      } else {
+                        return res.json({ message: 'ProductType updated successfully!' });
+                      }
+                    });
+                  }
+                });
+              } else {
+                const checkDuplicateSql = `SELECT * FROM product_type WHERE product_type = ? AND deleted = 0`;
+                con.query(checkDuplicateSql, [product_type], (err, data) => {
+                  if (err) {
+                    return res.status(500).json(err);
+                  }
+
+                  if (data.length > 0) {
+                    return res.status(409).json({ message: 'Duplicate entry, ProductType already exists!' });
+                  } else {
+                    const checkSoftDeletedSql = `SELECT * FROM product_type WHERE product_type = ? AND deleted = 1`;
+                    con.query(checkSoftDeletedSql, [product_type], (err, softDeletedData) => {
+                      if (err) {
+                        return res.status(500).json(err);
+                      }
+
+                      if (softDeletedData.length > 0) {
+                        const restoreSoftDeletedSql = `UPDATE product_type SET deleted = 0, updated_date = NOW(), updated_by = ? WHERE product_type = ?`;
+                        con.query(restoreSoftDeletedSql, [created_by, product_type], (err) => {
+                          if (err) {
+                            return res.status(500).json(err);
+                          }
+                          return res.json({ message: 'Soft-deleted data restored successfully!' });
+                        });
+                      } else {
+                        const sql = `INSERT INTO product_type (product_type, created_date, created_by) VALUES (?, NOW(), ?)`;
+                        con.query(sql, [product_type, created_by], (err, data) => {
+                          if (err) {
+                            return res.json(err);
+                          } else {
+                            return res.json({ message: 'ProductType added successfully!' });
+                          }
+                        });
+                      }
+                    });
+                  }
+                });
+              }
+            });
+
+            // Edit for Product Type
+            app.get('/requestdataproducttype/:id', (req, res) => {
+              const { id } = req.params;
+              const sql = "SELECT * FROM product_type WHERE id = ? AND deleted = 0";
+              con.query(sql, [id], (err, data) => {
+                if (err) {
+                  return res.status(500).json(err);
+                } else {
+                  return res.json(data[0]);
+                }
+              });
+            });
+
+                  // Update for Product Type
+                  app.put('/putproducttypedata', (req, res) => {
+                    const { id, product_type, updated_by } = req.body;
+                    
+                    const checkDuplicateSql = `SELECT * FROM product_type WHERE product_type = ? AND deleted = 0 AND id != ?`;
+                    con.query(checkDuplicateSql, [product_type, id], (err, data) => {
+                      if (err) {
+                        return res.status(500).json(err);
+                      }
+
+                      if (data.length > 0) {
+                        return res.status(409).json({ message: 'Duplicate entry, ProductType already exists!' });
+                      } else {
+                        const sql = `UPDATE product_type SET product_type = ?, updated_by = ?, updated_date = NOW() WHERE id = ? AND deleted = 0`;
+                        con.query(sql, [product_type, updated_by, id], (err, data) => {
+                          if (err) {
+                            return res.status(500).json(err);
+                          } else {
+                            return res.json({ message: 'ProductType updated successfully!' });
+                          }
+                        });
+                      }
+                    });
+                  });
+
+                  // Delete for Product Type
+                  app.post('/deleteproducttypedata', (req, res) => {
+                    const { id } = req.body;
+                    const sql = `UPDATE product_type SET deleted = 1 WHERE id = ?`;
+                    con.query(sql, [id], (err, data) => {
+                      if (err) {
+                        return res.status(500).json({ message: 'Error updating user' });
+                      } else {
+                        return res.json(data);
+                      }
+                    });
+                  });
+//Product Type End
+
+//Product Line Start
+            // API to fetch all product lines that are not soft deleted
+            app.get('/getproductline', (req, res) => {
+              const sql = "SELECT * FROM product_line WHERE deleted = 0"; 
+              con.query(sql, (err, data) => { 
+                if (err) {
+                  return res.json(err); 
+                } else {
+                  return res.json(data); 
+                }
+              });
+            });
+
+// Insert for product line
+            app.post('/postdataproductline', (req, res) => {
+              const { id, product_line, pline_code, created_by } = req.body;
+
+              if (id) {
+                const checkDuplicateSql = "SELECT * FROM product_line WHERE product_line = ? AND id != ? AND deleted = 0";
+                con.query(checkDuplicateSql, [product_line, id], (err, data) => {
+                  if (err) {
+                    return res.status(500).json(err);
+                  }
+                  if (data.length > 0) {
+                    return res.status(409).json({ message: 'Duplicate entry, Product Line already exists!' });
+                  } else {
+                    const updateSql = "UPDATE product_line SET product_line = ?, pline_code = ?, updated_date = NOW(), updated_by = ? WHERE id = ?";
+                    con.query(updateSql, [product_line, pline_code, created_by, id], (err, result) => {
+                      if (err) {
+                        return res.status(500).json(err);
+                      } else {
+                        return res.json({ message: 'Product Line updated successfully!' });
+                      }
+                    });
+                  }
+                });
+              } else {
+                const checkDuplicateSql = "SELECT * FROM product_line WHERE product_line = ? AND deleted = 0";
+                con.query(checkDuplicateSql, [product_line], (err, data) => {
+                  if (err) {
+                    return res.status(500).json(err);
+                  }
+                  if (data.length > 0) {
+                    return res.status(409).json({ message: 'Duplicate entry, Product Line already exists!' });
+                  } else {
+                    const checkSoftDeletedSql = "SELECT * FROM product_line WHERE product_line = ? AND deleted = 1";
+                    con.query(checkSoftDeletedSql, [product_line], (err, softDeletedData) => {
+                      if (err) {
+                        return res.status(500).json(err);
+                      }
+                      if (softDeletedData.length > 0) {
+                        const restoreSoftDeletedSql = "UPDATE product_line SET deleted = 0, updated_date = NOW(), updated_by = ? WHERE product_line = ?";
+                        con.query(restoreSoftDeletedSql, [created_by, product_line], (err) => {
+                          if (err) {
+                            return res.status(500).json(err);
+                          }
+                          return res.json({ message: 'Soft-deleted data restored successfully!' });
+                        });
+                      } else {
+                        const sql = "INSERT INTO product_line (product_line, pline_code, created_date, created_by) VALUES (?, ?, NOW(), ?)";
+                        con.query(sql, [product_line, pline_code, created_by], (err, data) => {
+                          if (err) {
+                            return res.json(err);
+                          } else {
+                            return res.json({ message: 'Product Line added successfully!' });
+                          }
+                        });
+                      }
+                    });
+                  }
+                });
+              }
+            });
+
+            // Edit for product line
+            app.get('/requestdataproductline/:id', (req, res) => {
+              const { id } = req.params; 
+              const sql = "SELECT * FROM product_line WHERE id = ? AND deleted = 0"; 
+              con.query(sql, [id], (err, data) => { 
+                if (err) {
+                  return res.status(500).json(err); 
+                } else {
+                  return res.json(data[0]); 
+                }
+              });
+            });
+
+            // Update for product line
+            app.put('/putproductlinedata', (req, res) => {
+              const { id, product_line, pline_code, updated_by } = req.body; 
+              const checkDuplicateSql = "SELECT * FROM product_line WHERE product_line = ? AND deleted = 0 AND id != ?";
+              con.query(checkDuplicateSql, [product_line, id], (err, data) => {
+                if (err) {
+                  return res.status(500).json(err);
+                }
+                if (data.length > 0) {
+                  return res.status(409).json({ message: 'Duplicate entry, Product Line already exists!' });
+                } else {
+                  const sql = "UPDATE product_line SET product_line = ?, pline_code = ?, updated_by = ?, updated_date = NOW() WHERE id = ? AND deleted = 0";
+                  con.query(sql, [product_line, pline_code, updated_by, id], (err, data) => {
+                    if (err) {
+                      return res.status(500).json(err); 
+                    } else {
+                      return res.json({ message: 'Product Line updated successfully!' }); 
+                    }
+                  });
+                }
+              });
+            });
+
+          // Delete for product line 
+          app.post('/deleteproductlinedata', (req, res) => {
+            const { id } = req.body; 
+            const sql = "UPDATE product_line SET deleted = 1 WHERE id = ?"; 
+            con.query(sql, [id], (err, data) => { 
+              if (err) {
+                console.error(err); 
+                return res.status(500).json({ message: 'Error updating Product Line' }); 
+              } else {
+                return res.json(data); 
+              }
+            });
+          });
+
+// Product Line End
+
+//Material Start
+// API to fetch all materials that are not soft deleted
+app.get('/getmat', (req, res) => {
+  const sql = "SELECT * FROM material WHERE deleted = 0"; 
+  con.query(sql, (err, data) => { 
+    if (err) {
+      return res.json(err); 
+    } else {
+      return res.json(data); 
+    }
+  });
+});
+
+// Insert for material
+app.post('/postdatamat', (req, res) => {
+  const { id, Material, created_by } = req.body;
+
+  if (id) {
+    const checkDuplicateSql = "SELECT * FROM material WHERE material = ? AND id != ? AND deleted = 0";
+    con.query(checkDuplicateSql, [Material, id], (err, data) => {
+      if (err) {
+        return res.status(500).json(err);
+      }
+
+      if (data.length > 0) {
+        return res.status(409).json({ message: 'Duplicate entry, Material already exists!' });
+      } else {
+        const updateSql = "UPDATE material SET material = ?, updated_date = NOW(), updated_by = ? WHERE id = ?";
+        con.query(updateSql, [Material, created_by, id], (err, result) => {
+          if (err) {
+            return res.status(500).json(err);
+          } else {
+            return res.json({ message: 'Material updated successfully!' });
+          }
+        });
+      }
+    });
+  } else {
+    const checkDuplicateSql = "SELECT * FROM material WHERE material = ? AND deleted = 0";
+    con.query(checkDuplicateSql, [Material], (err, data) => {
+      if (err) {
+        return res.status(500).json(err);
+      }
+
+      if (data.length > 0) {
+        return res.status(409).json({ message: 'Duplicate entry, Material already exists!' });
+      } else {
+        const checkSoftDeletedSql = "SELECT * FROM material WHERE material = ? AND deleted = 1";
+        con.query(checkSoftDeletedSql, [Material], (err, softDeletedData) => {
+          if (err) {
+            return res.status(500).json(err);
+          }
+
+          if (softDeletedData.length > 0) {
+            const restoreSoftDeletedSql = "UPDATE material SET deleted = 0, updated_date = NOW(), updated_by = ? WHERE material = ?";
+            con.query(restoreSoftDeletedSql, [created_by, Material], (err) => {
+              if (err) {
+                return res.status(500).json(err);
+              }
+              return res.json({ message: 'Soft-deleted data restored successfully!' });
+            });
+          } else {
+            const sql = "INSERT INTO material (material, created_date, created_by) VALUES (?, NOW(), ?)";
+            con.query(sql, [Material, created_by], (err, data) => {
+              if (err) {
+                return res.json(err);
+              } else {
+                return res.json({ message: 'Material added successfully!' });
+              }
+            });
+          }
+        });
+      }
+    });
+  }
+});
+
+// Edit for material
+app.get('/requestdatamat/:id', (req, res) => {
+  const { id } = req.params; 
+  const sql = "SELECT * FROM material WHERE id = ? AND deleted = 0"; 
+  con.query(sql, [id], (err, data) => { 
+    if (err) {
+      return res.status(500).json(err); 
+    } else {
+      return res.json(data[0]); 
+    }
+  });
+});
+
+// Update for material
+app.put('/putmatdata', (req, res) => {
+  const { id, Material, updated_by } = req.body; 
+  
+  const checkDuplicateSql = "SELECT * FROM material WHERE material = ? AND deleted = 0 AND id != ?";
+  con.query(checkDuplicateSql, [Material, id], (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    }
+
+    if (data.length > 0) {
+      return res.status(409).json({ message: 'Duplicate entry, Material already exists!' });
+    } else {
+      const sql = "UPDATE material SET material = ?, updated_by = ?, updated_date = NOW() WHERE id = ? AND deleted = 0";
+      con.query(sql, [Material, updated_by, id], (err, data) => {
+        if (err) {
+          return res.status(500).json(err); 
+        } else {
+          return res.json({ message: 'Material updated successfully!' }); 
+        }
+      });
+    }
+  });
+});
+
+// Delete for material 
+app.post('/deletematdata', (req, res) => {
+  const { id } = req.body; 
+  const sql = "UPDATE material SET deleted = 1 WHERE id = ?"; 
+  con.query(sql, [id], (err, data) => { 
+    if (err) {
+      console.error(err); 
+      return res.status(500).json({ message: 'Error updating Material' }); 
+    } else {
+      return res.json(data); 
+    }
+  });
+});
+// Material End
+
+//Manufacturer Start
+// API to fetch all Manufacturer that are not soft deleted
+app.get('/getmanufacturer', (req, res) => {
+  const sql = "SELECT * FROM manufacturer WHERE deleted = 0"; 
+  con.query(sql, (err, data) => { 
+    if (err) {
+      return res.json(err); 
+    } else {
+      return res.json(data); 
+    }
+  });
+});
+
+// Insert for Manufacturer
+app.post('/postmanufacturer', (req, res) => {
+  const { id, Manufacturer, created_by } = req.body;
+
+  if (id) {
+    const checkDuplicateSql = "SELECT * FROM manufacturer WHERE Manufacturer = ? AND id != ? AND deleted = 0";
+    con.query(checkDuplicateSql, [Manufacturer, id], (err, data) => {
+      if (err) {
+        return res.status(500).json(err);
+      }
+
+      if (data.length > 0) {
+        return res.status(409).json({ message: 'Duplicate entry, Manufacturer already exists!' });
+      } else {
+        const updateSql = "UPDATE manufacturer SET Manufacturer = ?, updated_date = NOW(), updated_by = ? WHERE id = ?";
+        con.query(updateSql, [Manufacturer, created_by, id], (err, result) => {
+          if (err) {
+            return res.status(500).json(err);
+          } else {
+            return res.json({ message: 'Manufacturer updated successfully!' });
+          }
+        });
+      }
+    });
+  } else {
+    const checkDuplicateSql = "SELECT * FROM manufacturer WHERE Manufacturer = ? AND deleted = 0";
+    con.query(checkDuplicateSql, [Manufacturer], (err, data) => {
+      if (err) {
+        return res.status(500).json(err);
+      }
+
+      if (data.length > 0) {
+        return res.status(409).json({ message: 'Duplicate entry, Manufacturer already exists!' });
+      } else {
+        const checkSoftDeletedSql = "SELECT * FROM manufacturer WHERE Manufacturer = ? AND deleted = 1";
+        con.query(checkSoftDeletedSql, [Manufacturer], (err, softDeletedData) => {
+          if (err) {
+            return res.status(500).json(err);
+          }
+
+          if (softDeletedData.length > 0) {
+            const restoreSoftDeletedSql = "UPDATE manufacturer SET deleted = 0, updated_date = NOW(), updated_by = ? WHERE Manufacturer = ?";
+            con.query(restoreSoftDeletedSql, [created_by, Manufacturer], (err) => {
+              if (err) {
+                return res.status(500).json(err);
+              }
+              return res.json({ message: 'Soft-deleted Manufacturer restored successfully!' });
+            });
+          } else {
+            const sql = "INSERT INTO manufacturer (Manufacturer, created_date, created_by) VALUES (?, NOW(), ?)";
+            con.query(sql, [Manufacturer, created_by], (err, data) => {
+              if (err) {
+                return res.json(err);
+              } else {
+                return res.json({ message: 'Manufacturer added successfully!' });
+              }
+            });
+          }
+        });
+      }
+    });
+  }
+});
+
+// Edit for Manufacturer
+app.get('/requestmanufacturer/:id', (req, res) => {
+  const { id } = req.params; 
+  const sql = "SELECT * FROM manufacturer WHERE id = ? AND deleted = 0"; 
+  con.query(sql, [id], (err, data) => { 
+    if (err) {
+      return res.status(500).json(err); 
+    } else {
+      return res.json(data[0]); 
+    }
+  });
+});
+
+// Update for Manufacturer
+app.put('/putmanufacturer', (req, res) => {
+  const { id, Manufacturer, updated_by } = req.body; 
+  
+  const checkDuplicateSql = "SELECT * FROM manufacturer WHERE Manufacturer = ? AND deleted = 0 AND id != ?";
+  con.query(checkDuplicateSql, [Manufacturer, id], (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    }
+
+    if (data.length > 0) {
+      return res.status(409).json({ message: 'Duplicate entry, Manufacturer already exists!' });
+    } else {
+      const sql = "UPDATE manufacturer SET Manufacturer = ?, updated_by = ?, updated_date = NOW() WHERE id = ? AND deleted = 0";
+      con.query(sql, [Manufacturer, updated_by, id], (err, data) => {
+        if (err) {
+          return res.status(500).json(err); 
+        } else {
+          return res.json({ message: 'Manufacturer updated successfully!' }); 
+        }
+      });
+    }
+  });
+});
+
+// Delete for Manufacturer 
+app.post('/delmanufacturer', (req, res) => {
+  const { id } = req.body; 
+  const sql = "UPDATE manufacturer SET deleted = 1 WHERE id = ?"; 
+  con.query(sql, [id], (err, data) => { 
+    if (err) {
+      console.error(err); 
+      return res.status(500).json({ message: 'Error updating Manufacturer' }); 
+    } else {
+      return res.json(data); 
+    }
+  });
+});
+// Manufacturer End
