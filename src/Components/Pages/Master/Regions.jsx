@@ -170,7 +170,7 @@ const Location = () => {
             </div>
             {/* Step 2.2: Region Input */}
           <div className="form-group">
-            <label htmlFor="regionInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>Add Region</label>
+            <label htmlFor="regionInput" className="input-field" style={{marginBottom: '15style={{ mapx', fontSize: '18px' }}>Add Region</label>
             <input
               type="text"
               className="form-control"

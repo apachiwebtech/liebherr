@@ -11,6 +11,7 @@ import {
 import { Login } from './Components/Authenticate/Login';
 import { Callstatus } from './Components/Pages/Master/Callstatus';
 import  Category  from './Components/Pages/Master/Category';
+import ProductType from './Components/Pages/Master/ProductType';
 import  Channelpartner  from './Components/Pages/Master/Channelpartner';
 import { Complaintcode } from './Components/Pages/Master/Complaintcode';
 import { Complaintgrid } from './Components/Pages/Complaint/Complaintgrid';
@@ -40,6 +41,7 @@ import Geocity from './Components/Pages/Master/Geocity';
 import Area from './Components/Pages/Master/Area';
 import ProMaster from './Components/Pages/Master/ProMaster';
 import  Channelpartnertabs  from './Components/Pages/Master/Channelpartnertabs';
+
 
 
 const Router = createBrowserRouter([
@@ -195,6 +197,11 @@ const Router = createBrowserRouter([
       {
         path: "/subcategory",
         element: <Subcategory />,
+        
+      },
+      {
+        path: "/producttype",
+        element: <ProductType />,
         
       },
     

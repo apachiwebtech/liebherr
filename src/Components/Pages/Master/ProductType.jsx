@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
 
-const Location = () => {
+const Category = () => {
  // Step 1: Add this state to track errors
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
@@ -13,6 +13,9 @@ const Location = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const [duplicateError, setDuplicateError] = useState(''); // State to track duplicate error
+  const createdBy = 1;  // Static value for created_by
+  const updatedBy = 2;  // Static value for updated_by
+
 
 
   const [formData, setFormData] = useState({ 
@@ -22,7 +25,7 @@ const Location = () => {
   
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getdata`);
+      const response = await axios.get(`${Base_Url}/getcat`);
       console.log(response.data); 
       setUsers(response.data);
       setFilteredUsers(response.data);
@@ -55,7 +58,7 @@ const Location = () => {
     const validateForm = () => {
       const newErrors = {}; // Initialize an empty error object
       if (!formData.title.trim()) { // Check if the title is empty
-        newErrors.title = "Country Field is required."; // Set error message if title is empty
+        newErrors.title = "Category Field is required."; // Set error message if title is empty
       }
       return newErrors; // Return the error object
     };
@@ -78,24 +81,24 @@ const Location = () => {
           if (confirmSubmission) {
             if (isEdit) {
               // For update, include duplicate check
-              await axios.put(`${Base_Url}/putdata`, { ...formData })
+              await axios.put(`${Base_Url}/putcatdata`, { ...formData })
                 .then(response => {
                   window.location.reload();
                 })
                 .catch(error => {
                   if (error.response && error.response.status === 409) {
-                    setDuplicateError('Duplicate entry, Country already exists!'); // Show duplicate error for update
+                    setDuplicateError('Duplicate entry, Category already exists!'); // Show duplicate error for update
                   }
                 });
             } else {
               // For insert, include duplicate check
-              await axios.post(`${Base_Url}/postdata`, { ...formData })
+              await axios.post(`${Base_Url}/postdatacat`, { ...formData })
                 .then(response => {
-                  window.location.reload();
+                  window.location.reload()
                 })
                 .catch(error => {
                   if (error.response && error.response.status === 409) {
-                    setDuplicateError('Duplicate entry, Country already exists!'); // Show duplicate error for insert
+                    setDuplicateError('Duplicate entry, Category already exists!'); // Show duplicate error for insert
                   }
                 });
             }
@@ -108,7 +111,7 @@ const Location = () => {
 
   const deleted = async (id) => {
     try {
-      const response = await axios.post(`${Base_Url}/deletedata`, { id });
+      const response = await axios.post(`${Base_Url}/deletecatdata`, { id });
       // alert(response.data[0]);
       window.location.reload();
     } catch (error) {
@@ -118,7 +121,7 @@ const Location = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestdata/${id}`);
+      const response = await axios.get(`${Base_Url}/requestdatacat/${id}`);
       setFormData(response.data)
       setIsEdit(true);
       console.log(response.data);
@@ -141,24 +144,24 @@ const Location = () => {
             <div className="col-6">   
       <form onSubmit={handleSubmit} style={{width:"50%"}} className="text-left">
           <div className="mb-3">
-            <label htmlFor="countryInput" className= "input-field" >Add Country</label>
+            <label htmlFor="ProductTypeInput" className="input-field" >Add Product Type</label>
             <input
               type="text"
               className="form-control"
               name="title"
-              id="countryInput"
+              id="CategoryInput"
               value={formData.title}
               onChange={handleChange}
-              placeholder="Enter country"
+              placeholder="Enter Product Type"
             />
             {errors.title && <small className="text-danger">{errors.title}</small>}
             {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
           </div>
           <div className="text-right">
-          <button className="btn btn-liebherr" type="submit" >
+          <button className="btn btn-liebherr" type="submit">
             {isEdit ? "Update" : "Submit"}
           </button>
-          </div>
+            </div>
         </form>
       </div>
 
@@ -190,7 +193,7 @@ const Location = () => {
         </div>
 
         {/* Adjust table padding and spacing */}
-        <table className='table table-bordered table dt-responsive nowrap w-100 table-css'>
+        <table className='table table-bordered table dt-responsive nowrap w-100 table-css' style={{ marginTop: '20px', tableLayout: 'fixed' }}>
           <thead>
             <tr>
               <th style={{ padding: '12px 15px', textAlign: 'center' }}>#</th>
@@ -267,8 +270,8 @@ const Location = () => {
     </div>
     </div>
     </div>
-  
+
   );
 };
 
-export default Location;
+export default Category;
