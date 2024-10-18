@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
 
-const Category = () => {
+const ProductType = () => {
  // Step 1: Add this state to track errors
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
@@ -16,16 +16,14 @@ const Category = () => {
   const createdBy = 1;  // Static value for created_by
   const updatedBy = 2;  // Static value for updated_by
 
-
-
   const [formData, setFormData] = useState({ 
-    title: ''
+    product_type: ''
   });
 
   
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getcat`);
+      const response = await axios.get(`${Base_Url}/getproducttype`);
       console.log(response.data); 
       setUsers(response.data);
       setFilteredUsers(response.data);
@@ -47,7 +45,7 @@ const Category = () => {
     const value = e.target.value.toLowerCase();
     setSearchTerm(value);
     const filtered = users.filter((user) =>
-      user.title && user.title.toLowerCase().includes(value)
+      user.product_type && user.product_type.toLowerCase().includes(value)
     );
     setFilteredUsers(filtered);
     setCurrentPage(0);
@@ -57,8 +55,8 @@ const Category = () => {
     // Step 2: Add form validation function
     const validateForm = () => {
       const newErrors = {}; // Initialize an empty error object
-      if (!formData.title.trim()) { // Check if the title is empty
-        newErrors.title = "Category Field is required."; // Set error message if title is empty
+      if (!formData.product_type.trim()) { 
+        newErrors.product_type = "ProductType Field is required.";
       }
       return newErrors; // Return the error object
     };
@@ -80,25 +78,25 @@ const Category = () => {
           const confirmSubmission = window.confirm("Do you want to submit the data?");
           if (confirmSubmission) {
             if (isEdit) {
-              // For update, include duplicate check
-              await axios.put(`${Base_Url}/putcatdata`, { ...formData })
+              // For update, include 'updated_by'
+              await axios.put(`${Base_Url}/putproducttypedata`, { ...formData, updated_by: updatedBy })
                 .then(response => {
                   window.location.reload();
                 })
                 .catch(error => {
                   if (error.response && error.response.status === 409) {
-                    setDuplicateError('Duplicate entry, Category already exists!'); // Show duplicate error for update
+                    setDuplicateError('Duplicate entry, ProductType already exists!'); // Show duplicate error for update
                   }
                 });
             } else {
-              // For insert, include duplicate check
-              await axios.post(`${Base_Url}/postdatacat`, { ...formData })
+              // For insert, include 'created_by'
+              await axios.post(`${Base_Url}/postdataproducttype`, { ...formData, created_by: createdBy })
                 .then(response => {
-                  window.location.reload()
+                  window.location.reload();
                 })
                 .catch(error => {
                   if (error.response && error.response.status === 409) {
-                    setDuplicateError('Duplicate entry, Category already exists!'); // Show duplicate error for insert
+                    setDuplicateError('Duplicate entry, ProductType already exists!'); // Show duplicate error for insert
                   }
                 });
             }
@@ -111,7 +109,7 @@ const Category = () => {
 
   const deleted = async (id) => {
     try {
-      const response = await axios.post(`${Base_Url}/deletecatdata`, { id });
+      const response = await axios.post(`${Base_Url}/deleteproducttypedata`, { id });
       // alert(response.data[0]);
       window.location.reload();
     } catch (error) {
@@ -121,7 +119,7 @@ const Category = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestdatacat/${id}`);
+      const response = await axios.get(`${Base_Url}/requestdataproducttype/${id}`);
       setFormData(response.data)
       setIsEdit(true);
       console.log(response.data);
@@ -144,17 +142,17 @@ const Category = () => {
             <div className="col-6">   
       <form onSubmit={handleSubmit} style={{width:"50%"}} className="text-left">
           <div className="mb-3">
-            <label htmlFor="ProductTypeInput" className="input-field" >Add Product Type</label>
+            <label htmlFor="ProductTypeInput" className="input-field" >Add ProductType</label>
             <input
               type="text"
               className="form-control"
-              name="title"
-              id="CategoryInput"
-              value={formData.title}
+              name="product_type"
+              id="ProductTypeInput"
+              value={formData.product_type}
               onChange={handleChange}
-              placeholder="Enter Product Type"
+              placeholder="Enter ProductType"
             />
-            {errors.title && <small className="text-danger">{errors.title}</small>}
+            {errors.product_type && <small className="text-danger">{errors.product_type}</small>}
             {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
           </div>
           <div className="text-right">
@@ -197,7 +195,7 @@ const Category = () => {
           <thead>
             <tr>
               <th style={{ padding: '12px 15px', textAlign: 'center' }}>#</th>
-              <th style={{ padding: '12px 15px', textAlign: 'center' }}>Title</th>
+              <th style={{ padding: '12px 15px', textAlign: 'center' }}>ProductType</th>
               <th style={{ padding: '0px 0px', textAlign: 'center' }}>Edit</th>
               <th style={{ padding: '0px 0px', textAlign: 'center' }}>Delete</th>
             </tr>
@@ -206,7 +204,7 @@ const Category = () => {
             {currentUsers.map((item, index) => (
               <tr key={item.id}>
                 <td style={{ padding: '2px', textAlign: 'center' }}>{index + 1 + indexOfFirstUser}</td>
-                <td style={{ padding: '10px' }}>{item.title}</td>
+                <td style={{ padding: '10px' }}>{item.product_type}</td>
                 <td style={{ padding: '0px', textAlign: 'center' }}>
                   <button
                     className='btn'
@@ -274,4 +272,4 @@ const Category = () => {
   );
 };
 
-export default Category;
+export default ProductType;

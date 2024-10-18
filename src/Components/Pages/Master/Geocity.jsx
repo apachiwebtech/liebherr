@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
 
-const Geostate = () => {
+const Geocity = () => {
   const [countries, setCountries] = useState([]);
   const [regions, setRegions] = useState([]); // State for regions
   const [geoStates, setGeoStates] = useState([]); // State for geoStates
@@ -89,7 +89,7 @@ const Geostate = () => {
             })
             .catch((error) => {
               if (error.response && error.response.status === 409) {
-                setDuplicateError('Duplicate entry, Region already exists!');
+                setDuplicateError('Duplicate entry, Geo City already exists!');
               }
             });
         } else {
@@ -99,7 +99,7 @@ const Geostate = () => {
             })
             .catch(error => {
               if (error.response && error.response.status === 409) {
-                setDuplicateError('Duplicate entry, Region already exists!');
+                setDuplicateError('Duplicate entry, Geo City already exists!');
               }
             });
         }
@@ -137,7 +137,7 @@ const Geostate = () => {
   const validateForm = () => {
     const newErrors = {};
     if (!formData.title.trim()) {
-      newErrors.title = 'Region Field is required.';
+      newErrors.title = 'Geo City Field is required.';
     }
     if (!formData.country_id) {
       newErrors.country_id = 'Country selection is required.';
@@ -184,7 +184,7 @@ const Geostate = () => {
           <div className="form-group">
             <label htmlFor="country" className="form-label pb-0 dropdown-label">Country</label>
             <select
-               className="form-control dropdown-select"
+               className="form-select"
               name="country_id"
               value={formData.country_id}
               onChange={handleChange}
@@ -205,7 +205,7 @@ const Geostate = () => {
           <div className="form-group">
             <label htmlFor="region" className="form-label pb-0 dropdown-label">Region</label>
             <select
-               className="form-control dropdown-select"
+               className="form-select"
               name="region_id"
               value={formData.region_id}
               onChange={handleChange}
@@ -221,12 +221,12 @@ const Geostate = () => {
               <small className="text-danger">{errors.region_id}</small>
             )}
           </div>
-
+{/* this is changes */}
           {/* Geo State Dropdown */}
           <div className="form-group">
             <label htmlFor="geostate_id" className="form-label pb-0 dropdown-label">Geo State</label>
             <select
-               className="form-control dropdown-select"
+               className="form-control "
               name="geostate_id"
               value={formData.geostate_id}
               onChange={handleChange}
@@ -392,4 +392,4 @@ const Geostate = () => {
   );
 };
 
-export default Geostate;
+export default Geocity;

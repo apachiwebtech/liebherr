@@ -13,7 +13,8 @@ const Category = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const [duplicateError, setDuplicateError] = useState(''); // State to track duplicate error
-
+  const createdBy = 1;  // Static value for created_by
+  const updatedBy = 2;  // Static value for updated_by
 
   const [formData, setFormData] = useState({ 
     title: ''
@@ -77,8 +78,8 @@ const Category = () => {
           const confirmSubmission = window.confirm("Do you want to submit the data?");
           if (confirmSubmission) {
             if (isEdit) {
-              // For update, include duplicate check
-              await axios.put(`${Base_Url}/putcatdata`, { ...formData })
+              // For update, include 'updated_by'
+              await axios.put(`${Base_Url}/putcatdata`, { ...formData, updated_by: updatedBy })
                 .then(response => {
                   window.location.reload();
                 })
@@ -88,10 +89,10 @@ const Category = () => {
                   }
                 });
             } else {
-              // For insert, include duplicate check
-              await axios.post(`${Base_Url}/postdatacat`, { ...formData })
+              // For insert, include 'created_by'
+              await axios.post(`${Base_Url}/postdatacat`, { ...formData, created_by: createdBy })
                 .then(response => {
-                  window.location.reload()
+                  window.location.reload();
                 })
                 .catch(error => {
                   if (error.response && error.response.status === 409) {

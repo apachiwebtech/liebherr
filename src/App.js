@@ -21,15 +21,15 @@ import { Country } from './Components/Pages/Master/Country';
 import { Customerlocation } from './Components/Pages/Master/Customerlocation';
 import { Dashboard } from './Components/Pages/Dashboard';
 import { Endcustomer } from './Components/Pages/Master/Endcustomer';
-import { Lhiuser } from './Components/Pages/Master/Lhiuser';
+import  Lhiuser  from './Components/Pages/Master/Lhiuser';
 import { Linklocation } from './Components/Pages/Master/Linklocation';
 import  Pincode  from './Components/Pages/Master/Pincode';
 import { Product } from './Components/Pages/Master/Product';
 import { Productspare } from './Components/Pages/Master/Productspare';
-import { Ratecard } from './Components/Pages/Master/Ratecard';
+import  Ratecard  from './Components/Pages/Master/Ratecard';
 import { Registercomplaint } from './Components/Pages/Complaint/Registercomplaint';
 import  Serviceagent  from './Components/Pages/Master/Serviceagent';
-import { Serviceproduct } from './Components/Pages/Master/Serviceproduct';
+import  Serviceproduct  from './Components/Pages/Master/Serviceproduct';
 import  Subcategory  from './Components/Pages/Master/Subcategory';
 import { Siteheader } from './Components/Layout/Siteheader';
 import { Sitefooter } from './Components/Layout/Sitefooter';
@@ -46,6 +46,12 @@ import ReasonCode from './Components/Pages/Master/Reasoncode';
 import ActionCode from './Components/Pages/Master/Actioncode';
 import Serviceagenttabs from './Components/Pages/Master/Serviceagenttabs';
 import Callstatuscodetabs from './Components/Pages/Master/Callstatuscodetabs';
+import Lhiusertabs from './Components/Pages/Master/Lhiusertabs';
+import Serviceproducttabs from './Components/Pages/Master/Serviceproducttabs';
+import Ratecardtabs from './Components/Pages/Master/Ratecardtabs';
+import EndcustomerTabs from './Components/Pages/Master/Endcustomertabs';
+import Endcustomertabs from './Components/Pages/Master/Endcustomertabs';
+
 
 
 
@@ -113,7 +119,7 @@ const Router = createBrowserRouter([
       {
         path: "/complainttabs",
         element: <Complainttabs />,
-        
+              
       },
       {
         path: "/reasoncode",
@@ -151,7 +157,7 @@ const Router = createBrowserRouter([
         element: <Callstatuscodetabs />,
         
       },
-      {
+      { 
         path: "/callstatus",
         element: <Callstatus />,
         
@@ -172,6 +178,11 @@ const Router = createBrowserRouter([
         
       },
       {
+        path: "/endcustomer",
+        element: <Endcustomertabs />,
+        
+      },
+      {
         path: "/geocity",
         element: <Geocity />,
         
@@ -184,6 +195,11 @@ const Router = createBrowserRouter([
       {
         path: "/lhiuser",
         element: <Lhiuser />,
+        
+      },
+      {
+        path: "/lhiusertabs",
+        element: <Lhiusertabs/>,
         
       },
       {
@@ -211,6 +227,11 @@ const Router = createBrowserRouter([
         
       }, 
       {
+        path: "/ratecardtabs",
+        element: <Ratecardtabs />,
+        
+      }, 
+      {
         path: "/register-complaint",
         element: <Registercomplaint />,
         
@@ -228,6 +249,11 @@ const Router = createBrowserRouter([
       {
         path: "/serviceproduct",
         element: <Serviceproduct />,
+        
+      },
+      {
+        path: "/serviceproducttabs",
+        element: <Serviceproducttabs />,
         
       },
       {

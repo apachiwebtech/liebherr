@@ -88,13 +88,7 @@ header {
     width:100%;
 }
 
-.activeM {
-    color: #222;
-    background-color: #ffd000ea; 
-    padding:8px;
-    font-size: 14px;
-    font-family: 'Nunito';
-}
+
 
 .complbread{
     background: aliceblue;

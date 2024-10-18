@@ -81,7 +81,7 @@ const Geostate = () => {
   const validateForm = () => {
     const newErrors = {};
     if (!formData.title.trim()) {
-      newErrors.title = "Region Field is required.";
+      newErrors.title = "Geo State Field is required.";
     }
     if (!formData.country_id) {
       newErrors.country_id = "Country selection is required.";
@@ -112,7 +112,7 @@ const Geostate = () => {
             })
             .catch(error => {
               if (error.response && error.response.status === 409) {
-                setDuplicateError('Duplicate entry, Region already exists!');
+                setDuplicateError('Duplicate entry, Geo State already exists!');
               }
             });
         } else {
@@ -122,7 +122,7 @@ const Geostate = () => {
             })
             .catch(error => {
               if (error.response && error.response.status === 409) {
-                setDuplicateError('Duplicate entry, Region already exists!');
+                setDuplicateError('Duplicate entry, Geo State already exists!');
               }
             });
         }

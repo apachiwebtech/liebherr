@@ -29,7 +29,7 @@ export function Siteheader(params) {
                 <li>
                   <Link className="dropdown-item" to="/promaster">Product Master</Link></li>
                 <li>
-                  <Link className="dropdown-item" to="/endcustomer">End Customer Master</Link></li>
+                  <Link className="dropdown-item" to="/endcustomertabs">End Customer Master</Link></li>
                 <li>
                   <Link className="dropdown-item" to="/channelpartnertabs">Channel Partner Master</Link></li>
                 <li>
@@ -39,15 +39,15 @@ export function Siteheader(params) {
                 <li>
                   <Link className="dropdown-item" to="/pincode">Pincode Master</Link></li>
                 <li>
-                  <Link className="dropdown-item" to="/lhiuser">LHI User Master</Link></li>
+                  <Link className="dropdown-item" to="/lhiusertabs">LHI User Master</Link></li>
                 <li>
-                  <Link className="dropdown-item" to="/serviceproduct">Service Product Master</Link></li>
+                  <Link className="dropdown-item" to="/serviceproducttabs">Service Product Master</Link></li>
                 <li>
                   <Link className="dropdown-item" to="/complainttabs">Complain code, Reason code & Action code</Link></li>
                 <li>
-                  <Link className="dropdown-item" to="/ratecard">Rate card Matrix</Link></li>
+                  <Link className="dropdown-item" to="/ratecardtabs">Rate card Matrix</Link></li>
                 <li>
-                  <Link className="dropdown-item" to="/productspare">Product & Spare mapping master</Link></li>
+                  <Link className="dropdown-item" to="/productsparetabs">Product & Spare mapping master</Link></li>
               </ul>
             </li>
             <li className="nav-item dropdown">

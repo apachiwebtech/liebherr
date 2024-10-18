@@ -88,6 +88,9 @@ header {
 .activeM {
     color: #000;
     background-color: #ffd000ea; 
+    padding:8px;
+    font-size: 14px;
+    font-family: 'Nunito';
 }
 
 .complbread{
@@ -302,13 +305,13 @@ h3.mainheade{
   }
 
   .dropdown-select{
-    appearance: menulist-button; /* Default appearance for dropdowns */
-  padding-right: 30px; /* Padding on the right */
-  padding-left: 8px; /* Padding on the left */
-  background-color: #fff; /* Background color */
-  border: 0.5px solid #ccc; /* Border color and thickness */
-  border-radius: 4px; /* Rounded corners */
-  font-family: 'Nunito', sans-serif; /* Font family */
-  font-size: 14px; /* Font size */
-  margin-bottom: 11px; /* Space below the element */
+    appearance: menulist-button !important; /* Default appearance for dropdowns */
+  padding-right: 30px !important; /* Padding on the right */
+  padding-left: 8px !important; /* Padding on the left */
+  background-color: #fff !important; /* Background color */
+  border: 0.5px solid #ccc !important; /* Border color and thickness */
+  border-radius: 4px !important; /* Rounded corners */
+  font-family: 'Nunito', sans-serif !important; /* Font family */
+  font-size: 14px !important; /* Font size */
+  margin-bottom: 11px !important; /* Space below the element */
   }
