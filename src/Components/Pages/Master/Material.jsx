@@ -89,7 +89,11 @@ const Material = () => {
           // For insert, include 'created_by'
           await axios.post(`${Base_Url}/postdatamat`, { ...formData, created_by: createdBy })
             .then(response => {
-              window.location.reload();
+              //window.location.reload();
+              setFormData({
+                Material : ''
+            })
+            fetchUsers();
             })
             .catch(error => {
               if (error.response && error.response.status === 409) {
