@@ -17,7 +17,7 @@ const Material = () => {
   const updatedBy = 2;  // Static value for updated_by
 
   const [formData, setFormData] = useState({
-    Material: '' // Initialize Material as empty string
+    Material: ''
   });
 
   const fetchUsers = async () => {
@@ -78,7 +78,10 @@ const Material = () => {
           // For update, include 'updated_by'
           await axios.put(`${Base_Url}/putmatdata`, { ...formData, updated_by: updatedBy })
             .then(response => {
-              window.location.reload();
+              setFormData({
+                Material: ''
+                      })
+                     fetchUsers();
             })
             .catch(error => {
               if (error.response && error.response.status === 409) {
@@ -89,7 +92,10 @@ const Material = () => {
           // For insert, include 'created_by'
           await axios.post(`${Base_Url}/postdatamat`, { ...formData, created_by: createdBy })
             .then(response => {
-              //window.location.reload();
+              setFormData({
+                Material: ''
+                      })
+                     fetchUsers();
               setFormData({
                 Material : ''
             })
@@ -111,7 +117,10 @@ const Material = () => {
     console.log(id)
     try {
       const response = await axios.post(`${Base_Url}/deletematdata`, { id: id });
-      window.location.reload(); // Reload after delete
+      setFormData({
+        Material: ''
+              })
+             fetchUsers();
     } catch (error) {
       console.error('Error deleting Material:', error);
     }

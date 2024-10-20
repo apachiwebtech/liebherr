@@ -78,7 +78,10 @@ const Manufacturer = () => {
           // For update, include 'updated_by'
           await axios.put(`${Base_Url}/putmanufacturer`, { ...formData, updated_by: updatedBy })
             .then(response => {
-              window.location.reload();
+              setFormData({
+                Manufacturer: ''
+                      })
+                     fetchUsers();
             })
             .catch(error => {
               if (error.response && error.response.status === 409) {
@@ -89,7 +92,10 @@ const Manufacturer = () => {
           // For insert, include 'created_by'
           await axios.post(`${Base_Url}/postmanufacturer`, { ...formData, created_by: createdBy })
             .then(response => {
-              window.location.reload();
+              setFormData({
+                Manufacturer: ''
+                      })
+                     fetchUsers();
             })
             .catch(error => {
               if (error.response && error.response.status === 409) {
@@ -107,7 +113,10 @@ const Manufacturer = () => {
     console.log(id)
     try {
       const response = await axios.post(`${Base_Url}/delmanufacturer`, { id: id });
-      window.location.reload(); // Reload after delete
+      setFormData({
+        Manufacturer: ''
+              })
+             fetchUsers();
     } catch (error) {
       console.error('Error deleting Manufacturer:', error);
     }
@@ -146,6 +155,7 @@ const Manufacturer = () => {
                       value={formData.Manufacturer}
                       onChange={handleChange}
                       placeholder="Enter Manufacturer"
+                      maxLength={3}
                     />
                     {errors.Manufacturer && <small className="text-danger">{errors.Manufacturer}</small>}
                     {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}

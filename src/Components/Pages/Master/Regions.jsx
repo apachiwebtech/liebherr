@@ -97,7 +97,11 @@ const Location = () => {
               // For update, include duplicate check
               await axios.put(`${Base_Url}/putregion`, { ...formData })
                 .then(response => {
-                  window.location.reload();
+                  setFormData({
+                    title: '',
+                country_id: ''
+                              })
+                    fetchUsers();
                 })
                 .catch(error => {
                   if (error.response && error.response.status === 409) {
@@ -108,7 +112,11 @@ const Location = () => {
               // For insert, include duplicate check
               await axios.post(`${Base_Url}/postregion`, { ...formData })
                 .then(response => {
-                  window.location.reload();
+                  setFormData({
+                    title: '',
+                country_id: ''
+                              })
+                    fetchUsers();
                 })
                 .catch(error => {
                   if (error.response && error.response.status === 409) {
@@ -126,8 +134,11 @@ const Location = () => {
   const deleted = async (id) => {
     try {
       const response = await axios.post(`${Base_Url}/deleteregion`, { id });
-      // alert(response.data[0]);
-      window.location.reload();
+      setFormData({
+        title: '',
+    country_id: ''
+                  })
+        fetchUsers();
     } catch (error) {
       console.error('Error deleting user:', error);
     }
@@ -160,7 +171,7 @@ const Location = () => {
            {/* Step 2.1: Country Dropdown */}
            <div className="form-group">
               <label htmlFor="country" className="form-label pb-0 dropdown-label">Country</label>
-              <select className='form-control dropdown-select' name='country_id' value={formData.country_id} onChange={handleChange} >
+              <select className='form-select dropdown-select' name='country_id' value={formData.country_id} onChange={handleChange} >
                 <option value="">Select Country</option>
                 {countries.map((country) => (
                   <option key={country.id} value={country.id}>{country.title}</option>

@@ -3,8 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
 
-const Location = () => {
+const EngineerMaster = () => {
  // Step 1: Add this state to track errors
+  const [Childfranchise, setChildfranchise] = useState([]);
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -12,17 +13,30 @@ const Location = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
-  const [duplicateError, setDuplicateError] = useState(''); // State to track duplicate error
+  const [duplicateError, setDuplicateError] = useState(''); 
 
 
   const [formData, setFormData] = useState({ 
-    title: ''
+    title: '',
+    cfranchise_id: '',
+    password: '',
+    email: '',
+    mobile_no: '',
   });
 
+  const fetchChildfranchise = async () => {
+    try {
+      const response = await axios.get(`${Base_Url}/getchildfranchise`);
+      console.log(response.data); 
+      setChildfranchise(response.data); 
+    } catch (error) {
+      console.error('Error fetching Childfranchise:', error); 
+    }
+  };
   
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getdata`);
+      const response = await axios.get(`${Base_Url}/getengineer`);
       console.log(response.data); 
       setUsers(response.data);
       setFilteredUsers(response.data);
@@ -33,6 +47,7 @@ const Location = () => {
 
   useEffect(() => {
     fetchUsers();
+    fetchChildfranchise();
   }, []);
 
   const handleChange = (e) => {
@@ -53,11 +68,25 @@ const Location = () => {
    
     // Step 2: Add form validation function
     const validateForm = () => {
-      const newErrors = {}; // Initialize an empty error object
-      if (!formData.title.trim()) { // Check if the title is empty
-        newErrors.title = "Country Field is required."; // Set error message if title is empty
+      const newErrors = {}; 
+      if (!formData.title.trim()) { 
+        newErrors.title = "Engineer Name Field is required."; 
       }
-      return newErrors; // Return the error object
+
+       // Check if the cfranchise_id is empty
+      if (!formData.cfranchise_id) {
+        newErrors.cfranchise_id = "Child Franchise selection is required.";
+      }
+      if (!formData.cfranchise_id) {
+        newErrors.email = "Engineer Email Field is required.";
+      }
+      if (!formData.cfranchise_id) {
+        newErrors.mobile_no = "Engineer Mobile No Field is required.";
+      }
+      if (!formData.cfranchise_id) {
+        newErrors.password = "Engineer Password Field is required.";
+      }
+      return newErrors; 
     };
   
 
@@ -78,30 +107,39 @@ const Location = () => {
           if (confirmSubmission) {
             if (isEdit) {
               // For update, include duplicate check
-              await axios.put(`${Base_Url}/putdata`, { ...formData })
+              await axios.put(`${Base_Url}/putengineer`, { ...formData })
                 .then(response => {
+                  console.log(response.data)
                   setFormData({
-                    title: ''
+                    title: '',
+                    cfranchise_id: '',
+                    password: '',
+                    email: '',
+                    mobile_no: ''
                               })
                     fetchUsers();
                 })
                 .catch(error => {
                   if (error.response && error.response.status === 409) {
-                    setDuplicateError('Duplicate entry, Country already exists!'); // Show duplicate error for update
+                    setDuplicateError('Duplicate entry,Email and Mobile No Credential already exists!'); // Show duplicate error for update
                   }
                 });
             } else {
               // For insert, include duplicate check
-              await axios.post(`${Base_Url}/postdata`, { ...formData })
+              await axios.post(`${Base_Url}/postengineer`, { ...formData })
                 .then(response => {
                   setFormData({
-                    title: ''
+                    title: '',
+                    cfranchise_id: '',
+                    password: '',
+                    email: '',
+                    mobile_no: ''
                               })
                     fetchUsers();
                 })
                 .catch(error => {
                   if (error.response && error.response.status === 409) {
-                    setDuplicateError('Duplicate entry, Country already exists!'); // Show duplicate error for insert
+                    setDuplicateError('Duplicate entry,Email and Mobile No Credential already exists!'); // Show duplicate error for insert
                   }
                 });
             }
@@ -114,11 +152,10 @@ const Location = () => {
 
   const deleted = async (id) => {
     try {
-      const response = await axios.post(`${Base_Url}/deletedata`, { id });
-      // alert(response.data[0]);
-      // window.location.reload(); 
+      const response = await axios.post(`${Base_Url}/deleteengineer`, { id });
       setFormData({
-        title: ''
+        title: '',
+    cfranchise_id: ''
                   })
         fetchUsers();
     } catch (error) {
@@ -128,7 +165,7 @@ const Location = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestdata/${id}`);
+      const response = await axios.get(`${Base_Url}/requestengineer/${id}`);
       setFormData(response.data)
       setIsEdit(true);
       console.log(response.data);
@@ -148,24 +185,97 @@ const Location = () => {
       <div className="card mb-3 tab_box">
         <div className="card-body" style={{flex: "1 1 auto",padding: "13px 28px"}}>
           <div className="row mp0">
-            <div className="col-6">   
+            <div className="col-6">  
       <form onSubmit={handleSubmit} style={{width:"50%"}} className="text-left">
-          <div className="mb-3">
-            <label htmlFor="countryInput" className= "input-field" >Add Country</label>
+           {/* Step 2.1: Child Franchise Dropdown */}
+           <div className="form-group">
+              <label htmlFor="Child Franchise" className="form-label pb-0 dropdown-label">Child Franchise</label>
+              <select className='form-select dropdown-select' name='cfranchise_id' value={formData.cfranchise_id} onChange={handleChange} >
+                <option value="">Select Child Franchise</option>
+                {Childfranchise.map((pf) => (
+                  <option key={pf.id} value={pf.id}>{pf.title}</option>
+                ))}
+              </select>
+              {errors.cfranchise_id && <small className="text-danger">{errors.cfranchise_id}</small>} {/* Show error for Child Franchise selection */}
+            </div>
+            {/* Step 2.2: Engineer Master Input */}
+          <div className="form-group">
+            <label htmlFor="EngineerNameInput" className="input-field" style={{marginBottom: '15style={{ mapx', fontSize: '18px' }}>Add Engineer Name</label>
             <input
               type="text"
               className="form-control"
               name="title"
-              id="countryInput"
+              id="EngineerNameInput"
               value={formData.title}
               onChange={handleChange}
-              placeholder="Enter country"
+              placeholder="Enter Engineer Name"
             />
             {errors.title && <small className="text-danger">{errors.title}</small>}
-            {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
+           
           </div>
+                    <div className="form-group">
+                        <label htmlFor="emailInput" className="input-field" style={{marginBottom: '15style={{ mapx', fontSize: '18px' }}>Add Engineer Email</label>
+                        <input
+                        type="email"
+                        className="form-control"
+                        name="email"
+                        id="emailInput"
+                        value={formData.email}
+                        onChange={handleChange}
+                        placeholder="Enter Engineer Email"
+                        />
+                        {errors.email && <small className="text-danger">{errors.email}</small>}
+                       
+                    </div>
+                    <div className="form-group">
+                                <label
+                                  htmlFor="mobile_noInput"
+                                  className="input-field"
+                                  style={{ marginBottom: '15px', fontSize: '18px' }}
+                                >
+                                  Add Engineer Mobile No
+                                </label>
+                                <input
+                                  type="text"
+                                  className="form-control"
+                                  name="mobile_no"
+                                  id="mobile_noInput"
+                                  value={formData.mobile_no}
+                                  onChange={(e) => {
+                                    const value = e.target.value;
+                                    if (!isNaN(value)) {
+                                      if (value.length <= 15) {
+                                        handleChange(e);
+                                      }
+                                    }
+                                  }}
+                                  placeholder="Enter Engineer Mobile No"
+                                  pattern="[0-9]*"
+                                  maxLength="15"
+                                />
+                                {formData.mobile_no.length > 0 && formData.mobile_no.length < 10 && (
+                                  <small className="text-danger">Mobile number must be at least 10 digits</small>
+                                )}
+                                {errors.mobile_no && <small className="text-danger">{errors.mobile_no}</small>}
+                               
+                     </div>
+
+                             <div className="form-group">
+                                <label htmlFor="passwordInput" className="input-field" style={{marginBottom: '15style={{ mapx', fontSize: '18px' }}>Add Engineer Password</label>
+                                <input
+                                type="password"
+                                className="form-control"
+                                name="password"
+                                id="passwordInput"
+                                value={formData.password}
+                                onChange={handleChange}
+                                placeholder="Enter Engineer Password"
+                                />
+                                {errors.password && <small className="text-danger">{errors.password}</small>}
+                                {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
+                            </div>
           <div className="text-right">
-          <button className="btn btn-liebherr" type="submit" >
+          <button className="btn btn-liebherr" type="submit" style={{ marginTop: '15px' }}>
             {isEdit ? "Update" : "Submit"}
           </button>
           </div>
@@ -200,11 +310,12 @@ const Location = () => {
         </div>
 
         {/* Adjust table padding and spacing */}
-        <table className='table table-bordered table dt-responsive nowrap w-100 table-css'>
+        <table className='table table-bordered' style={{ marginTop: '20px', tableLayout: 'fixed' }}>
           <thead>
             <tr>
               <th style={{ padding: '12px 15px', textAlign: 'center' }}>#</th>
-              <th style={{ padding: '12px 15px', textAlign: 'center' }}>Title</th>
+              <th style={{ padding: '12px 15px', textAlign: 'center' }}>Child Franchise</th>
+              <th style={{ padding: '12px 15px', textAlign: 'center' }}>Engineer</th>
               <th style={{ padding: '0px 0px', textAlign: 'center' }}>Edit</th>
               <th style={{ padding: '0px 0px', textAlign: 'center' }}>Delete</th>
             </tr>
@@ -213,6 +324,7 @@ const Location = () => {
             {currentUsers.map((item, index) => (
               <tr key={item.id}>
                 <td style={{ padding: '2px', textAlign: 'center' }}>{index + 1 + indexOfFirstUser}</td>
+                <td style={{ padding: '10px' }}>{item.childfranchise_title}</td>
                 <td style={{ padding: '10px' }}>{item.title}</td>
                 <td style={{ padding: '0px', textAlign: 'center' }}>
                   <button
@@ -277,8 +389,7 @@ const Location = () => {
     </div>
     </div>
     </div>
-  
   );
 };
 
-export default Location;
+export default EngineerMaster;

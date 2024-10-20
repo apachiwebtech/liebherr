@@ -17,7 +17,7 @@ const Geostate = () => {
   const [formData, setFormData] = useState({
     title: '',
     country_id: '',
-    region_id: '' // Added region_id to formData
+    region_id: '' 
   });
 
   const fetchCountries = async () => {
@@ -108,7 +108,12 @@ const Geostate = () => {
         if (isEdit) {
           await axios.put(`${Base_Url}/putgeostate`, { ...formData })
             .then(response => {
-              window.location.reload();
+              setFormData({
+                title: '',
+            country_id: '',
+              region_id: '' 
+                        })
+              fetchUsers();
             })
             .catch(error => {
               if (error.response && error.response.status === 409) {
@@ -118,7 +123,12 @@ const Geostate = () => {
         } else {
           await axios.post(`${Base_Url}/postgeostate`, { ...formData })
             .then(response => {
-              window.location.reload();
+              setFormData({
+                title: '',
+            country_id: '',
+               region_id: '' 
+                        })
+              fetchUsers();
             })
             .catch(error => {
               if (error.response && error.response.status === 409) {
@@ -135,7 +145,12 @@ const Geostate = () => {
   const deleted = async (id) => {
     try {
       await axios.post(`${Base_Url}/deletegeostate`, { id });
-      window.location.reload();
+      setFormData({
+        title: '',
+    country_id: '',
+       region_id: '' 
+                })
+      fetchUsers();
     } catch (error) {
       console.error('Error deleting user:', error);
     }
@@ -167,7 +182,7 @@ const Geostate = () => {
           {/* Country Dropdown */}
           <div className="form-group">
             <label htmlFor="country" className="form-label pb-0 dropdown-label">Country</label>
-            <select className='form-control dropdown-select' name='country_id' value={formData.country_id} onChange={handleChange}>
+            <select className='form-select dropdown-select' name='country_id' value={formData.country_id} onChange={handleChange}>
               <option value="">Select Country</option>
               {countries.map((country) => (
                 <option key={country.id} value={country.id}>{country.title}</option>
@@ -179,7 +194,7 @@ const Geostate = () => {
           {/* Region Dropdown */}
           <div className="form-group">
             <label htmlFor="region" className="form-label pb-0 dropdown-label">Region</label>
-            <select className='form-control dropdown-select' name='region_id' value={formData.region_id} onChange={handleChange}>
+            <select className='form-select dropdown-select' name='region_id' value={formData.region_id} onChange={handleChange}>
               <option value="">Select Region</option>
               {regions.map((region) => (
                 <option key={region.id} value={region.id}>{region.title}</option>

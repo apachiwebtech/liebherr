@@ -67,7 +67,15 @@ const Pincode = () => {
         const url = isEdit ? `${Base_Url}/putpincode` : `${Base_Url}/postpincode`;
         const method = isEdit ? axios.put : axios.post;
         await method(url, formData);
-        window.location.reload();
+        setFormData({ title: '',
+          pincode: '',
+         country_id: '',
+         region_id: '',
+         geostate_id: '',
+         geocity_id: '',
+         area_id: ''
+                       })
+         fetchPincodes();
       }
     } catch (error) {
       if (error.response && error.response.status === 409) {
@@ -121,7 +129,15 @@ const Pincode = () => {
     try {
       if (window.confirm('Are you sure you want to delete this pincode?')) {
         await axios.post(`${Base_Url}/deletepincode`, { id });
-        window.location.reload();
+        setFormData({ title: '',
+          pincode: '',
+         country_id: '',
+         region_id: '',
+         geostate_id: '',
+         geocity_id: '',
+         area_id: ''
+                       })
+          fetchPincodes();
       }
     } catch (error) {
       console.error('Error deleting pincode:', error);
@@ -147,7 +163,7 @@ const Pincode = () => {
       <label htmlFor={name}  className="form-label pb-0 dropdown-label" >{label}</label>
 
       <select
-        className="form-control dropdown-select"
+        className="form-select dropdown-select"
         name={name}
         value={formData[name]}
         onChange={handleChange}

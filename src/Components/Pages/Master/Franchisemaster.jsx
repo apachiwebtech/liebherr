@@ -1,29 +1,25 @@
 import React, { useState } from 'react';
-import ComplaintCode from './Complaintcode';
-import ActionCode from './Actioncode';
-import ReasonCode from './Reasoncode';
-import { Complaintlist } from '../Complaint/Complaintlist';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import MasterFranchise from './MasterFranchise';
+import Childfranchisemaster from './Childfranchisemaster';
+import EngineerMaster from './EngineerMaster';
 
-function Complainttabs() {
-  const [activeTab, setActiveTab] = useState('complaintlist');
+function MasterFranchiseTabs() {
+  const [activeTab, setActiveTab] = useState('MasterFranchise');
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'complaintlist':
-        return <Complaintlist />;
-      case 'complaintCode':
-        return <ComplaintCode />;
-      case 'reasonCode':
-        return <ReasonCode />;
-      case 'actionCode':
-        return <ActionCode />;
-        
-     
+      case 'MasterFranchise':
+        return <MasterFranchise />;
+        case 'Childfranchisemaster':
+            return <Childfranchisemaster />;
+            case 'EngineerMaster':
+              return <EngineerMaster />;
+
 
 
       default:
-        return <Complaintlist />;
+        return <MasterFranchise />;
     }
   };
 
@@ -58,7 +54,7 @@ function Complainttabs() {
       <div className="container-fluid p-0">
         {/* Top Header */}
         <div className="text-left headings">
-          <span style={{paddingLeft:"20px"}}>Complain code, Reason code & Action code</span>
+          <span style={{paddingLeft:"20px"}}>FRANCHISE MASTER</span>
         </div>
 
         {/* Nav Tabs */}
@@ -67,38 +63,31 @@ function Complainttabs() {
             <div className="col-sm-6 p-0" style={{ width: '100%' }}>
             <div className="tabsMenu" style={{fontSize:"14px", marginLeft: "12px",fontWeight:"600",fontFamily:"Nunito"}}>
               <ul className="nav nav-tabs ">
-              <li className="nav-item">
+                <li className="nav-item">
                   <button
-                    className={`nav-link ${activeTab === 'complaintlist' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('complaintlist')}
+                    className={`nav-link ${activeTab === 'MasterFranchise' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('MasterFranchise')}
                   >
-                  COMPLAINT LIST
+                   FRANCHISE MASTER
                   </button>
                 </li>
                 <li className="nav-item">
                   <button
-                    className={`nav-link ${activeTab === 'complaintCode' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('complaintCode')}
+                    className={`nav-link ${activeTab === 'Childfranchisemaster' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('Childfranchisemaster')}
                   >
-                  COMPLAINT CODE
+                   CHILD FRANCHISE MASTER
                   </button>
                 </li>
                 <li className="nav-item">
                   <button
-                    className={`nav-link ${activeTab === 'reasonCode' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('reasonCode')}
+                    className={`nav-link ${activeTab === 'EngineerMaster' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('EngineerMaster')}
                   >
-                    REASON CODE
+                    ENGINEER MASTER
                   </button>
-                </li>
-                <li className="nav-item">
-                  <button
-                    className={`nav-link ${activeTab === 'actionCode' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('actionCode')}
-                  >
-                   ACTION CODE 
-                  </button>
-                </li>
+                </li>    
+                {/* Add other tabs like GEO STATE, GEO CITY, AREA */}
               </ul>
             </div> 
             </div>
@@ -117,4 +106,4 @@ function Complainttabs() {
   );
 }
 
-export default Complainttabs;
+export default MasterFranchiseTabs;

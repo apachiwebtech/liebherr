@@ -19,7 +19,7 @@ const Geocity = () => {
     title: '',
     country_id: '',
     region_id: '',
-    geostate_id: '' // Added geo_state_id to formData
+    geostate_id: '' 
   });
 
   const fetchCountries = async () => {
@@ -85,7 +85,13 @@ const Geocity = () => {
         if (isEdit) {
           await axios.put(`${Base_Url}/putgeocity`, { ...formData })
             .then((response) => {
-              window.location.reload();
+              setFormData({
+                title: '',
+            country_id: '',
+            region_id: '',
+            geostate_id: '' 
+                        })
+              fetchUsers();
             })
             .catch((error) => {
               if (error.response && error.response.status === 409) {
@@ -95,7 +101,13 @@ const Geocity = () => {
         } else {
             await axios.post(`${Base_Url}/postgeocity`, { ...formData })
             .then(response => {
-              window.location.reload();
+              setFormData({
+                title: '',
+            country_id: '',
+            region_id: '',
+            geostate_id: '' 
+                        })
+              fetchUsers();
             })
             .catch(error => {
               if (error.response && error.response.status === 409) {
@@ -154,7 +166,13 @@ const Geocity = () => {
   const deleted = async (id) => {
     try {
       await axios.post(`${Base_Url}/deletegeocity`, { id });
-      window.location.reload();
+      setFormData({
+        title: '',
+    country_id: '',
+    region_id: '',
+    geostate_id: '' 
+                })
+      fetchUsers();
     } catch (error) {
       console.error('Error deleting user:', error);
     }
@@ -184,7 +202,7 @@ const Geocity = () => {
           <div className="form-group">
             <label htmlFor="country" className="form-label pb-0 dropdown-label">Country</label>
             <select
-               className="form-select"
+               className="form-select dropdown-select"
               name="country_id"
               value={formData.country_id}
               onChange={handleChange}
@@ -205,7 +223,7 @@ const Geocity = () => {
           <div className="form-group">
             <label htmlFor="region" className="form-label pb-0 dropdown-label">Region</label>
             <select
-               className="form-select"
+               className="form-select dropdown-select"
               name="region_id"
               value={formData.region_id}
               onChange={handleChange}
@@ -226,7 +244,7 @@ const Geocity = () => {
           <div className="form-group">
             <label htmlFor="geostate_id" className="form-label pb-0 dropdown-label">Geo State</label>
             <select
-               className="form-control "
+               className="form-control dropdown-select"
               name="geostate_id"
               value={formData.geostate_id}
               onChange={handleChange}

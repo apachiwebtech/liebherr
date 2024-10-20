@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
 
-const ProductType = () => {
+const MasterFranchise = () => {
  // Step 1: Add this state to track errors
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
@@ -13,22 +13,21 @@ const ProductType = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const [duplicateError, setDuplicateError] = useState(''); // State to track duplicate error
-  const createdBy = 1;  // Static value for created_by
-  const updatedBy = 2;  // Static value for updated_by
+
 
   const [formData, setFormData] = useState({ 
-    product_type: ''
+    title: ''
   });
 
   
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getproducttype`);
+      const response = await axios.get(`${Base_Url}/getfranchisedata`);
       console.log(response.data); 
       setUsers(response.data);
       setFilteredUsers(response.data);
     } catch (error) {
-      console.error('Error fetching users:', error);
+      console.error('Error fetching Franchise Master:', error);
     }
   };
 
@@ -45,7 +44,7 @@ const ProductType = () => {
     const value = e.target.value.toLowerCase();
     setSearchTerm(value);
     const filtered = users.filter((user) =>
-      user.product_type && user.product_type.toLowerCase().includes(value)
+      user.title && user.title.toLowerCase().includes(value)
     );
     setFilteredUsers(filtered);
     setCurrentPage(0);
@@ -55,8 +54,8 @@ const ProductType = () => {
     // Step 2: Add form validation function
     const validateForm = () => {
       const newErrors = {}; // Initialize an empty error object
-      if (!formData.product_type.trim()) { 
-        newErrors.product_type = "ProductType Field is required.";
+      if (!formData.title.trim()) { // Check if the title is empty
+        newErrors.title = "Franchise Master Field is required."; // Set error message if title is empty
       }
       return newErrors; // Return the error object
     };
@@ -78,31 +77,31 @@ const ProductType = () => {
           const confirmSubmission = window.confirm("Do you want to submit the data?");
           if (confirmSubmission) {
             if (isEdit) {
-              // For update, include 'updated_by'
-              await axios.put(`${Base_Url}/putproducttypedata`, { ...formData, updated_by: updatedBy })
+              // For update, include duplicate check
+              await axios.put(`${Base_Url}/putfranchisedata`, { ...formData })
                 .then(response => {
                   setFormData({
-                    product_type: ''
-                  })
-                 fetchUsers();
+                    title: ''
+                              })
+                    fetchUsers();
                 })
                 .catch(error => {
                   if (error.response && error.response.status === 409) {
-                    setDuplicateError('Duplicate entry, ProductType already exists!'); // Show duplicate error for update
+                    setDuplicateError('Duplicate entry, Franchise Master already exists!'); // Show duplicate error for update
                   }
                 });
             } else {
-              // For insert, include 'created_by'
-              await axios.post(`${Base_Url}/postdataproducttype`, { ...formData, created_by: createdBy })
+              // For insert, include duplicate check
+              await axios.post(`${Base_Url}/postfranchisedata`, { ...formData })
                 .then(response => {
                   setFormData({
-                    product_type: ''
-                  })
-                 fetchUsers();
+                    title: ''
+                              })
+                    fetchUsers();
                 })
                 .catch(error => {
                   if (error.response && error.response.status === 409) {
-                    setDuplicateError('Duplicate entry, ProductType already exists!'); // Show duplicate error for insert
+                    setDuplicateError('Duplicate entry, Franchise Master already exists!'); // Show duplicate error for insert
                   }
                 });
             }
@@ -115,12 +114,13 @@ const ProductType = () => {
 
   const deleted = async (id) => {
     try {
-      const response = await axios.post(`${Base_Url}/deleteproducttypedata`, { id });
+      const response = await axios.post(`${Base_Url}/deletefranchisedata`, { id });
       // alert(response.data[0]);
+      // window.location.reload(); 
       setFormData({
-        product_type: ''
-      })
-     fetchUsers();
+        title: ''
+                  })
+        fetchUsers();
     } catch (error) {
       console.error('Error deleting user:', error);
     }
@@ -128,7 +128,7 @@ const ProductType = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestdataproducttype/${id}`);
+      const response = await axios.get(`${Base_Url}/requestfranchisedata/${id}`);
       setFormData(response.data)
       setIsEdit(true);
       console.log(response.data);
@@ -151,24 +151,24 @@ const ProductType = () => {
             <div className="col-6">   
       <form onSubmit={handleSubmit} style={{width:"50%"}} className="text-left">
           <div className="mb-3">
-            <label htmlFor="ProductTypeInput" className="input-field" >Add ProductType</label>
+            <label htmlFor="MasterFranchiseInput" className= "input-field" >Add Franchise Master</label>
             <input
               type="text"
               className="form-control"
-              name="product_type"
-              id="ProductTypeInput"
-              value={formData.product_type}
+              name="title"
+              id="MasterFranchiseInput"
+              value={formData.title}
               onChange={handleChange}
-              placeholder="Enter ProductType"
+              placeholder="Enter Franchise Master"
             />
-            {errors.product_type && <small className="text-danger">{errors.product_type}</small>}
+            {errors.title && <small className="text-danger">{errors.title}</small>}
             {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
           </div>
           <div className="text-right">
-          <button className="btn btn-liebherr" type="submit">
+          <button className="btn btn-liebherr" type="submit" >
             {isEdit ? "Update" : "Submit"}
           </button>
-            </div>
+          </div>
         </form>
       </div>
 
@@ -200,11 +200,11 @@ const ProductType = () => {
         </div>
 
         {/* Adjust table padding and spacing */}
-        <table className='table table-bordered table dt-responsive nowrap w-100 table-css' style={{ marginTop: '20px', tableLayout: 'fixed' }}>
+        <table className='table table-bordered table dt-responsive nowrap w-100 table-css'>
           <thead>
             <tr>
               <th style={{ padding: '12px 15px', textAlign: 'center' }}>#</th>
-              <th style={{ padding: '12px 15px', textAlign: 'center' }}>ProductType</th>
+              <th style={{ padding: '12px 15px', textAlign: 'center' }}>Title</th>
               <th style={{ padding: '0px 0px', textAlign: 'center' }}>Edit</th>
               <th style={{ padding: '0px 0px', textAlign: 'center' }}>Delete</th>
             </tr>
@@ -213,7 +213,7 @@ const ProductType = () => {
             {currentUsers.map((item, index) => (
               <tr key={item.id}>
                 <td style={{ padding: '2px', textAlign: 'center' }}>{index + 1 + indexOfFirstUser}</td>
-                <td style={{ padding: '10px' }}>{item.product_type}</td>
+                <td style={{ padding: '10px' }}>{item.title}</td>
                 <td style={{ padding: '0px', textAlign: 'center' }}>
                   <button
                     className='btn'
@@ -277,8 +277,8 @@ const ProductType = () => {
     </div>
     </div>
     </div>
-
+  
   );
 };
 
-export default ProductType;
+export default MasterFranchise;

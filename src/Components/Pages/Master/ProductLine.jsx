@@ -77,7 +77,11 @@ const ProductLine = () => {
         if (isEdit) {
           await axios.put(`${Base_Url}/putproductlinedata`, { ...formData, updated_by: updatedBy })
             .then(response => {
-              window.location.reload();
+              setFormData({
+                pline_code: '',
+   	          	product_line: ''
+             })
+            fetchUsers();
             })
             .catch(error => {
               if (error.response && error.response.status === 409) {
@@ -87,7 +91,11 @@ const ProductLine = () => {
         } else {
           await axios.post(`${Base_Url}/postdataproductline`, { ...formData, created_by: createdBy })
             .then(response => {
-              window.location.reload();
+              setFormData({
+                pline_code: '',
+   	          	product_line: ''
+             })
+            fetchUsers();
             })
             .catch(error => {
               if (error.response && error.response.status === 409) {
@@ -104,7 +112,11 @@ const ProductLine = () => {
   const deleted = async (id) => {
     try {
       const response = await axios.post(`${Base_Url}/deleteproductlinedata`, { id });
-      window.location.reload();
+      setFormData({
+        pline_code: '',
+         product_line: ''
+     })
+    fetchUsers();
     } catch (error) {
       console.error('Error deleting user:', error);
     }
@@ -143,6 +155,7 @@ const ProductLine = () => {
                       value={formData.pline_code}
                       onChange={handleChange}
                       placeholder="Enter Product Line Code"
+                      maxLength={6}
                     />
                     {errors.pline_code && <small className="text-danger">{errors.pline_code}</small>}
                   </div>

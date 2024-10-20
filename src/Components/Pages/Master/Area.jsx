@@ -22,8 +22,8 @@ const Area = () => {
     country_id: '',
     region_id: '',
     geostate_id: '',
-    geocity_id: '', // Added geocity_id to formData
-    area_id: '' // Added area_id to formData
+    geocity_id: '', 
+    area_id: '' 
   });
   
 
@@ -96,7 +96,14 @@ const Area = () => {
         if (isEdit) {
           await axios.put(`${Base_Url}/putarea`, { ...formData })
             .then((response) => {
-              window.location.reload();
+              setFormData({ title: '',
+                country_id: '',
+                region_id: '',
+                geostate_id: '',
+                geocity_id: '', 
+                area_id: '' 
+                              })
+                fetchAreas();
             })
             .catch((error) => {
               if (error.response && error.response.status === 409) {
@@ -106,7 +113,14 @@ const Area = () => {
         } else {
           await axios.post(`${Base_Url}/postarea`, { ...formData })
             .then(response => {
-              window.location.reload();
+              setFormData({ title: '',
+                country_id: '',
+                region_id: '',
+                geostate_id: '',
+                geocity_id: '', 
+                area_id: '' 
+                              })
+                fetchAreas();
             })
             .catch(error => {
               if (error.response && error.response.status === 409) {
@@ -172,7 +186,14 @@ const Area = () => {
   const deleted = async (id) => {
     try {
       await axios.post(`${Base_Url}/deletearea`, { id });
-      window.location.reload();
+      setFormData({ title: '',
+        country_id: '',
+        region_id: '',
+        geostate_id: '',
+        geocity_id: '', 
+        area_id: '' 
+                      })
+         fetchAreas();
     } catch (error) {
       console.error('Error deleting area:', error);
     }
@@ -204,7 +225,7 @@ const Area = () => {
           <div className="form-group">
             <label htmlFor="country" className="form-label pb-0 dropdown-label" >Country</label>
             <select
-              className="form-control dropdown-select"
+              className="form-select dropdown-select"
               name="country_id"
               value={formData.country_id}
               onChange={handleChange}
@@ -225,7 +246,7 @@ const Area = () => {
           <div className="form-group">
             <label htmlFor="region" className="form-label pb-0 dropdown-label">Region</label>
             <select
-              className="form-control dropdown-select"
+              className="form-select dropdown-select"
               name="region_id"
               value={formData.region_id}
               onChange={handleChange}
@@ -246,7 +267,7 @@ const Area = () => {
           <div className="form-group">
             <label htmlFor="geostate_id" className="form-label pb-0 dropdown-label">Geo State</label>
             <select
-              className="form-control dropdown-select"
+              className="form-select dropdown-select"
               name="geostate_id"
               value={formData.geostate_id}
               onChange={handleChange}
@@ -267,7 +288,7 @@ const Area = () => {
                 <div className="form-group">
                 <label htmlFor="geocity_id" className="form-label pb-0 dropdown-label">Geo City</label>
                 <select
-                    className="form-control dropdown-select"
+                    className="form-select dropdown-select"
                     name="geocity_id" // Ensure the name matches formData
                     value={formData.geocity_id}
                     onChange={handleChange}

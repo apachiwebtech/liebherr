@@ -40,6 +40,8 @@ import Geostate from './Components/Pages/Master/Geostate';
 import Geocity from './Components/Pages/Master/Geocity';
 import Area from './Components/Pages/Master/Area';
 import ProMaster from './Components/Pages/Master/ProMaster';
+import Franchisemaster from './Components/Pages/Master/Franchisemaster';
+import EngineerMaster from './Components/Pages/Master/EngineerMaster';
 import  Channelpartnertabs  from './Components/Pages/Master/Channelpartnertabs';
 import Complainttabs from './Components/Pages/Master/Complainttabs';
 import ReasonCode from './Components/Pages/Master/Reasoncode';
@@ -138,7 +140,7 @@ const Router = createBrowserRouter([
         
       },
       {
-        path: "/complaint-list",
+        path: "/complaintlist",
         element: <Complaintlist />,
         
       },
@@ -266,7 +268,17 @@ const Router = createBrowserRouter([
         element: <ProductType />,
         
       },
-    
+      {
+        path: "/franchisemaster",
+        element: <Franchisemaster />,
+        
+      },
+      {
+        path: "/engineermaster",
+        element: <EngineerMaster />,
+        
+      },
+   
       
     ],
   },

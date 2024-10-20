@@ -160,7 +160,7 @@ const Subcategory = () => {
               {/* Step 2.1: Category Dropdown */}
               <div className="form-group">
                  <label htmlFor="category" className="form-label pb-0 dropdown-label">Category</label>
-                 <select className='form-control dropdown-select' name='category_id' value={formData.category_id} onChange={handleChange} >
+                 <select className='form-select dropdown-select' name='category_id' value={formData.category_id} onChange={handleChange} >
                    <option value="">Select Category</option>
                    {categories.map((category) => (
                      <option key={category.id} value={category.id}>{category.title}</option>

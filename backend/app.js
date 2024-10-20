@@ -10,10 +10,10 @@ app.use(express.json()); // JSON requests ko parse kar rahe hain taaki req.body 
 
 // Database connection setup kar rahe hain
 const con = createPool({
-  host: 'localhost', // MySQL ke server ka host address (local development ke liye 'localhost')
-  user: 'root', // MySQL user ka username (default XAMPP ya local server ke liye 'root')
-  password: '', // MySQL user ka password (local server me aksar blank hota hai)
-  database: 'liebherr' // Database ka naam jisme hum data ko store kar rahe hain ('crud')
+  host: 'localhost', 
+  user: 'root', 
+  password: '', 
+  database: 'liebherr' 
 });
 
 app.listen(8081, () => {
@@ -135,7 +135,7 @@ app.post('/deletedata', (req, res) => {
   });
 })
 
-// API jo sabhi regions ko fetch karegi jinhone soft delete nahi kiya gaya hai
+// Region start
 app.get('/getregions', (req, res) => {
   const sql = "SELECT r.*, c.title as country_title FROM awt_region r JOIN awt_country c ON r.country_id = c.id WHERE r.deleted = 0"; // Regions ko fetch karne ki query
   con.query(sql, (err, data) => {
@@ -247,7 +247,7 @@ app.post('/deleteregion', (req, res) => {
     }
   });
 });
-
+// Region End
 
 
 
@@ -2935,4 +2935,373 @@ app.post('/deletematdata', (req, res) => {
                     });
   //Product Type End
   
+  // Start Franchise Master - Parent
+  app.get('/getfranchisedata', (req, res) => {
+    const sql = "SELECT * FROM awt_franchisemaster WHERE deleted = 0";
+    con.query(sql, (err, data) => {
+      if (err) {
+        return res.json(err);
+      } else {
+        return res.json(data);
+      }
+    });
+  });
   
+  app.get('/requestfranchisedata/:id', (req, res) => {
+    const { id } = req.params;
+    const sql = "SELECT * FROM awt_franchisemaster WHERE id = ? AND deleted = 0";
+    con.query(sql, [id], (err, data) => {
+      if (err) {
+        return res.status(500).json(err);
+      } else {
+        return res.json(data[0]);
+      }
+    });
+  });
+  
+  app.post('/postfranchisedata', (req, res) => {
+    const { title } = req.body;
+  
+    const checkDuplicateSql = `SELECT * FROM awt_franchisemaster WHERE title = ? AND deleted = 0`;
+    con.query(checkDuplicateSql, [title], (err, data) => {
+      if (err) {
+        return res.status(500).json(err);
+      }
+  
+      if (data.length > 0) {
+        return res.status(409).json({ message: 'Duplicate entry, Franchise Master already exists!' });
+      } else {
+        const checkSoftDeletedSql = `SELECT * FROM awt_franchisemaster WHERE title = ? AND deleted = 1`;
+        con.query(checkSoftDeletedSql, [title], (err, softDeletedData) => {
+          if (err) {
+            return res.status(500).json(err);
+          }
+  
+          if (softDeletedData.length > 0) {
+            const restoreSoftDeletedSql = `UPDATE awt_franchisemaster SET deleted = 0 WHERE title = ?`;
+            con.query(restoreSoftDeletedSql, [title], (err) => {
+              if (err) {
+                return res.status(500).json(err);
+              }
+              return res.json({ message: 'Soft-deleted Franchise Master restored successfully!' });
+            });
+          } else {
+            const sql = `INSERT INTO awt_franchisemaster (title) VALUES (?)`;
+            con.query(sql, [title], (err, data) => {
+              if (err) {
+                return res.json(err);
+              } else {
+                return res.json({ message: 'Franchise Master added successfully!' });
+              }
+            });
+          }
+        });
+      }
+    });
+  });
+  
+  app.put('/putfranchisedata', (req, res) => {
+    const { title, id } = req.body;
+  
+    const checkDuplicateSql = `SELECT * FROM awt_franchisemaster WHERE title = ? AND id != ? AND deleted = 0`;
+    con.query(checkDuplicateSql, [title, id], (err, data) => {
+      if (err) {
+        return res.status(500).json(err);
+      }
+  
+      if (data.length > 0) {
+        return res.status(409).json({ message: 'Duplicate entry, Franchise Master already exists!' });
+      } else {
+        const updateSql = `UPDATE awt_franchisemaster SET title = ? WHERE id = ?`;
+        con.query(updateSql, [title, id], (err, data) => {
+          if (err) {
+            return res.status(500).json(err);
+          }
+          return res.json({ message: 'Franchise Master updated successfully!' });
+        });
+      }
+    });
+  });
+  
+  app.post('/deletefranchisedata', (req, res) => {
+    const { id } = req.body;
+    const sql = `UPDATE awt_franchisemaster SET deleted = 1 WHERE id = ?`;
+    con.query(sql, [id], (err, data) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ message: 'Error updating Franchise Master' });
+      } else {
+        return res.json(data);
+      }
+    });
+  });
+
+  // End Franchise Master - Parents 
+  
+//Start Child Franchise Master
+
+app.get('/getparentfranchise', (req, res) => {
+  const sql = 'SELECT * FROM awt_franchisemaster WHERE deleted = 0'; 
+  con.query(sql, (err, data) => { 
+    if (err) {
+      return res.status(500).json(err); 
+    } else {
+      return res.json(data); 
+    }
+  });
+});
+
+app.get('/getchildfranchise', (req, res) => {
+  const sql = "SELECT r.*, c.title as parentfranchise_title FROM awt_childfranchisemaster r INNER JOIN awt_franchisemaster c ON r.pfranchise_id = c.id WHERE r.deleted = 0"; 
+  con.query(sql, (err, data) => {
+    if (err) {
+      return res.json(err);
+    } else {
+      return res.json(data);
+    }
+  });
+});
+
+app.get('/requestchildfranchise/:id', (req, res) => {
+  const { id } = req.params;
+  const sql = "SELECT * FROM awt_childfranchisemaster WHERE id = ? AND deleted = 0"; 
+  con.query(sql, [id], (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    } else {
+      return res.json(data[0]);
+    }
+  });
+});
+
+
+app.post('/postchildfranchise', (req, res) => {
+  const { title, pfranchise_id } = req.body;
+
+  
+  const checkDuplicateSql = `SELECT * FROM awt_childfranchisemaster WHERE title = ? AND deleted = 0`;
+  con.query(checkDuplicateSql, [title], (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    }
+
+    if (data.length > 0) {
+      
+      return res.status(409).json({ message: 'Duplicate entry, Child Franchise Master already exists!' });
+    } else {
+      
+      const checkSoftDeletedSql = `SELECT * FROM awt_childfranchisemaster WHERE title = ? AND deleted = 1`;
+      con.query(checkSoftDeletedSql, [title], (err, softDeletedData) => {
+        if (err) {
+          return res.status(500).json(err);
+        }
+
+        if (softDeletedData.length > 0) {
+          
+          const restoreSoftDeletedSql = `UPDATE awt_childfranchisemaster SET deleted = 0 WHERE title = ?`;
+          con.query(restoreSoftDeletedSql, [title], (err) => {
+            if (err) {
+              return res.status(500).json(err);
+            }
+            return res.json({ message: 'Soft-deleted Child Franchise Master restored successfully!' });
+          });
+        } else {
+          
+          const sql = `INSERT INTO awt_childfranchisemaster (title, pfranchise_id) VALUES (?, ?)`;
+          con.query(sql, [title, pfranchise_id], (err, data) => {
+            if (err) {
+              return res.json(err);
+            } else {
+              return res.json({ message: 'Child Franchise Master added successfully!' });
+            }
+          });
+        }
+      });
+    }
+  });
+});
+
+
+app.put('/putchildfranchise', (req, res) => {
+  const { title, id, pfranchise_id } = req.body;
+
+  
+  const checkDuplicateSql = `SELECT * FROM awt_childfranchisemaster WHERE title = ? AND id != ? AND deleted = 0`;
+  con.query(checkDuplicateSql, [title, id], (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    }
+
+    if (data.length > 0) {
+      // If a duplicate exists (other than the current record)
+      return res.status(409).json({ message: 'Duplicate entry, Child Franchise already exists!' });
+    } else {
+      // Step 2: Update the record if no duplicates are found
+      const updateSql = `UPDATE awt_childfranchisemaster SET title = ?, pfranchise_id = ? WHERE id = ?`;
+      con.query(updateSql, [title, pfranchise_id, id], (err, data) => {
+        if (err) {
+          return res.status(500).json(err);
+        }
+        return res.json({ message: 'Child  Franchise updated successfully!' });
+
+      });
+    }
+  });
+});
+
+
+app.post('/deletechildfranchise', (req, res) => {
+  const { id } = req.body; 
+  const sql = `UPDATE awt_childfranchisemaster SET deleted = 1 WHERE id = ?`; 
+  con.query(sql, [id], (err, data) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ message: 'Error updating Child Franchise' });
+    } else {
+      return res.json(data);
+    }
+  });
+});
+// End Child Franchise Master
+
+//Start Engineer Master
+
+app.get('/getchildfranchise', (req, res) => {
+  const sql = 'SELECT * FROM awt_childfranchisemaster WHERE deleted = 0'; 
+  con.query(sql, (err, data) => { 
+    if (err) {
+      return res.status(500).json(err); 
+    } else {
+      return res.json(data); 
+    }
+  });
+});
+
+app.get('/getengineer', (req, res) => {
+  const sql = "SELECT r.*, c.title as childfranchise_title FROM awt_engineermaster r INNER JOIN awt_childfranchisemaster c ON r.cfranchise_id = c.id WHERE r.deleted = 0"; 
+  con.query(sql, (err, data) => {
+    if (err) {
+      return res.json(err);
+    } else {
+      return res.json(data);
+    }
+  });
+});
+
+app.get('/requestengineer/:id', (req, res) => {
+  const { id } = req.params;
+  const sql = "SELECT * FROM awt_engineermaster WHERE id = ? AND deleted = 0"; 
+  con.query(sql, [id], (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    } else {
+      return res.json(data[0]);
+    }
+  });
+});
+
+
+app.post('/postengineer', (req, res) => {
+  const { title, cfranchise_id, password, email, mobile_no} = req.body;
+
+  
+  const checkDuplicateSql = `SELECT * FROM awt_engineermaster WHERE mobile_no = ?  AND email = ? AND deleted = 0`;
+  con.query(checkDuplicateSql, [mobile_no,email], (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    }
+
+    if (data.length > 0) {
+      
+      return res.status(409).json({ message: 'Duplicate entry,Email and mobile_no Credential already exists!' });
+    } else {
+      
+      const checkSoftDeletedSql = `SELECT * FROM awt_engineermaster WHERE mobile_no = ?  AND email = ? AND deleted = 1`;
+
+      con.query(checkSoftDeletedSql, [mobile_no,email], (err, softDeletedData) => {
+        if (err) {
+          return res.status(500).json(err);
+        }
+
+        if (softDeletedData.length > 0) {
+          
+          const restoreSoftDeletedSql = `UPDATE awt_engineermaster SET deleted = 0 WHERE mobile_no = ?  AND email = ?`;
+          con.query(restoreSoftDeletedSql, [mobile_no,email], (err) => {
+            if (err) {
+              return res.status(500).json(err);
+            }
+            return res.json({ message: 'Soft-deleted Engineer Master restored successfully!' });
+          });
+        } else {
+
+
+          
+          const sql = `INSERT INTO awt_engineermaster (title, cfranchise_id, mobile_no, email, password) VALUES (?, ?, ?, ?, ?)`;
+          con.query(sql, [title, cfranchise_id,mobile_no ,email, password], (err, data) => {
+            if (err) {
+              return res.json(err);
+            } else {
+              return res.json({ message: 'Engineer added successfully!' });
+            }
+          });
+        }
+      });
+    }
+  });
+});
+
+
+app.put('/putengineer', (req, res) => {
+  const { title, id, cfranchise_id , password, email, mobile_no} = req.body;
+
+  
+  const checkDuplicateSql = `SELECT * FROM awt_engineermaster WHERE mobile_no = ?  AND email = ? AND id != ? AND deleted = 0`;
+  con.query(checkDuplicateSql, [mobile_no,email,id], (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    }
+
+    if (data.length > 0) {
+      // If a duplicate exists (other than the current record)
+      return res.status(409).json({ message: 'Duplicate entry,Email and mobile_no Credential already exists!' });
+    } else {
+      // Step 2: Update the record if no duplicates are found
+      const updateSql = `UPDATE awt_engineermaster SET title = ?, cfranchise_id = ?,mobile_no = ?,email = ?, password= ? WHERE id = ?`;
+      con.query(updateSql, [title, cfranchise_id,mobile_no, email, password, id], (err, data) => {
+        if (err) {
+          return res.status(500).json(err);
+        }
+        return res.json({ message: 'Engineer updated successfully!' });
+
+      });
+    }
+  });
+});
+
+
+app.post('/deleteengineer', (req, res) => {
+  const { id } = req.body; 
+  const sql = `UPDATE awt_engineermaster SET deleted = 1 WHERE id = ?`; 
+  con.query(sql, [id], (err, data) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ message: 'Error updating Engineer' });
+    } else {
+      return res.json(data);
+    }
+  });
+});
+// End Engineer Master
+
+//Start Complaint List
+
+app.get('/getcomplainlist', (req, res) => {
+  const sql = "SELECT * FROM `complaint_ticket` WHERE deleted = 0 ORDER BY `ticket_no` ASC"; 
+  con.query(sql, (err, data) => {
+    if (err) {
+      return res.json(err);
+    } else {
+      return res.json(data);
+    }
+  });
+});

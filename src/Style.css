@@ -305,11 +305,9 @@ h3.mainheade{
   }
 
   .dropdown-select{
-    appearance: menulist-button !important; /* Default appearance for dropdowns */
   padding-right: 30px !important; /* Padding on the right */
   padding-left: 8px !important; /* Padding on the left */
   background-color: #fff !important; /* Background color */
-  border: 0.5px solid #ccc !important; /* Border color and thickness */
   border-radius: 4px !important; /* Rounded corners */
   font-family: 'Nunito', sans-serif !important; /* Font family */
   font-size: 14px !important; /* Font size */
