@@ -282,7 +282,7 @@ h3.mainheade{
   }
 
   .btn-liebherr {
-    margin-top: 15px !important; /* Space above the element */
+    /* margin-top: 15px !important; Space above the element */
     background-color: rgba(255, 208, 0, 0.917) !important; /* Background color with opacity */
   }
 

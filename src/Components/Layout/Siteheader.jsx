@@ -1,6 +1,6 @@
 import React from "react";
-
 import { Link } from "react-router-dom";
+import Logo from '../../images/Liebherr-logo-768x432.png'
 
 
 export function Siteheader(params) {
@@ -10,7 +10,7 @@ export function Siteheader(params) {
       <div className="container-fuild">
         <div className="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
           <a href="/" className="d-flex align-items-center  mb-2 mb-lg-0 mr-5 text-dark text-decoration-none img" >
-            <img src="images\Liebherr-logo-768x432.png"  />
+            <img src={Logo}  />
           </a>
 
           <ul className="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0 ml-5">

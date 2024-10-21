@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 
 export function Registercomplaint(params) {
 
+    
+    const [hideticket , setHideticket] = useState(false)
 
     return (
         <>
@@ -14,6 +16,7 @@ export function Registercomplaint(params) {
                     </div>
                 </div>
             </div>
+
 
             <div class="row mt-25">
                 <div class="col-3">
@@ -33,7 +36,7 @@ export function Registercomplaint(params) {
                         </div>
                     </div>
 
-                    <div id="searchResult" class="card">
+                    {hideticket ?  <div id="searchResult" class="card">
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-md-12">
@@ -93,14 +96,17 @@ export function Registercomplaint(params) {
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="card">
+                    </div> :    <div class="card">
                         <div class="card-body">
                             <p>No Result Found</p>
                             <button id="generateTicket" data-id="" data-modal="" data-mobile="" class="btn btn-sm btn-primary">New Ticket</button>
                         </div>
-                    </div>
+                    </div>}
+
+                   
+
+                  
+
                 </div>
 
                 <div class="col-6">

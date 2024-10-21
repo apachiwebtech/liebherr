@@ -3,10 +3,17 @@ const { createPool } = require('mysql'); // MySQL ke liye connection pool banane
 const express = require('express'); // Express framework ko import kar rahe hain jo HTTP requests aur responses ko handle karega
 const app = express(); // Express application ka instance bana rahe hain
 const cors = require('cors'); // Cross-Origin Resource Sharing (CORS) ko manage karne ke liye cors module ko import kar rahe hain
+const complaint = require('./Routes/complaint')
 
 // Middleware setup kar rahe hain
 app.use(cors({ origin: '*' })); // CORS ko sabhi domains ke liye enable kar rahe hain taaki koi bhi external website API ko access kar sake
 app.use(express.json()); // JSON requests ko parse kar rahe hain taaki req.body se data access kar sake
+
+// this is for use routing
+
+app.use('/' , complaint)
+
+
 
 // Database connection setup kar rahe hain
 const con = createPool({
@@ -25,9 +32,9 @@ app.get('/getdata', (req, res) => {
   const sql = "SELECT * FROM awt_country WHERE deleted = 0"; // Users table se sabhi users ko fetch karne ki query jinke 'deleted' column me 0 hai
   con.query(sql, (err, data) => { // SQL query ko execute kar rahe hain
     if (err) {
-      return res.json(err); // Agar koi error aata hai to error message return karenge
+      return res.json(err);
     } else {
-      return res.json(data); // Agar query successful hoti hai to users ka data JSON format me return karenge
+      return res.json(data); 
     }
   });
 });
