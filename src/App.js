@@ -278,6 +278,16 @@ const Router = createBrowserRouter([
         element: <EngineerMaster />,
         
       },
+      {
+        path: "/registercomaplaint",
+        element: <Registercomplaint />,
+        
+      },
+      {
+        path: "/complaintview/:complaintid",
+        element: <Complaintview />,
+        
+      },
    
       
     ],

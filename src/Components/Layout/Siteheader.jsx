@@ -16,7 +16,7 @@ export function Siteheader(params) {
           <ul className="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0 ml-5">
 
             <li>
-              <Link className="nav-link   px-2 link-secondary activeM" to="/" >Dashboard </Link></li>
+              <Link className="nav-link   px-2 link-secondary active" to="/" >Dashboard </Link></li>
 
             <li className="nav-item dropdown">
               <Link className="nav-link dropdown-toggle activeM " to="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -81,7 +81,7 @@ export function Siteheader(params) {
 
 
           <div className="dropdown text-end">
-            <a className="btn btn-primary newcomplaint" href="Registercomplaint.jsx">New Complaint</a>
+            <Link className="btn btn-primary newcomplaint" to="/registercomaplaint">New Complaint</Link>
 
             <a href="#" className="link-dark text-decoration-none dropdown-toggle" id="dropdownUser1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               <img src="https://github.com/mdo.png" alt="mdo" width="32" height="32" className="rounded-circle" />

@@ -151,25 +151,7 @@ header {
     font-weight: 700;
 }
 
-#searchResult {
-    display:none;
-}
 
-#formInfo {
-    display:none;
-}
-
-#productInfo {
-    display:none;
-}
-
-#engineerInfo {
-    display:none;
-}
-
-#attachmentInfo {
-    display:none;
-}
 
 h3.mainheade{
     font-size: 16px;
@@ -179,9 +161,7 @@ h3.mainheade{
     font-weight: 700;
 }
 
-#compaintno {
-    display:none;
-}
+
 
 .ticketBox {
     max-height: 400px;
