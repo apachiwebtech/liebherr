@@ -1,10 +1,8 @@
 import React from "react";
-import {useState} from 'react';
 
 export function Complaintview(params) {
+//this i have i=has ==d shcui
 
-
-    
     return (
         <>
             <div className="row mp0">
