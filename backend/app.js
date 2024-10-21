@@ -4,6 +4,8 @@ const express = require('express'); // Express framework ko import kar rahe hain
 const app = express(); // Express application ka instance bana rahe hain
 const cors = require('cors'); // Cross-Origin Resource Sharing (CORS) ko manage karne ke liye cors module ko import kar rahe hain
 const complaint = require('./Routes/complaint')
+const common = require('./Routes/common')
+const multer = require("multer");
 
 // Middleware setup kar rahe hain
 app.use(cors({ origin: '*' })); // CORS ko sabhi domains ke liye enable kar rahe hain taaki koi bhi external website API ko access kar sake
@@ -12,6 +14,20 @@ app.use(express.json()); // JSON requests ko parse kar rahe hain taaki req.body 
 // this is for use routing
 
 app.use('/' , complaint)
+app.use('/' , common)
+
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/"); // Folder where images will be saved
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  },
+});
+
+const upload = multer({ storage: storage });
 
 
 
@@ -3326,3 +3342,18 @@ app.get('/getcomplaintview/:complaintid', (req, res) => {
   });
 });
 
+app.post("/upload", upload.single("image"), (req, res) => {
+ 
+
+  let image = req.file.filename;
+
+  const sql = "insert into table(`image`) values(?)"
+
+  con.query(sql , [image], (err,data) =>{
+    if(err){
+      return res.json(err)
+    }else{
+      return res.json(data)
+    }
+  })
+});

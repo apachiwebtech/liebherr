@@ -1,19 +1,30 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../db');
+const con = require('../db');
+
+router.post('/getticket', (req, res) => {
+    let { searchparam } = req.body;
+    
+
+    const sql = `
+        SELECT * FROM complaint_ticket 
+        WHERE deleted = 0 
+        AND (customer_email LIKE ? OR customer_name LIKE ? OR customer_mobile LIKE ?)
+    `;
+
+    const searchValue = `%${searchparam}%`;
 
 
-router.get('/ticket', (req,res) =>{
 
-    const sql = "SELECT * FROM `complaint_ticket`"
+    con.query(sql, [searchValue, searchValue, searchValue], (err, data) => {
+        if (err) {
+            return res.json(err);
+        } else {
+            // console.log(data)
+            return res.json(data);
 
-    db.query(sql ,  (err,data) =>{
-        if(err){
-            return res.json(err)
-        }else{
-            return res.json(data)
         }
-    })
-})
+    });
+});
 
-module.exports = router
+module.exports = router;
