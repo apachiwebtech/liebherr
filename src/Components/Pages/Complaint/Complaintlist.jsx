@@ -1,10 +1,12 @@
 import axios from 'axios';
+import { Navigate, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
 
 export function Complaintlist(params) {
   const [Complaintdata, setComplaintdata] = useState([]);
+  const navigate = useNavigate();
   const [isEdit, setIsEdit] = useState(false);
   const [formData, setFormData] = useState({ 
     title: '',
@@ -146,10 +148,7 @@ export function Complaintlist(params) {
                                 <td >
                                 <button
                                     className='btn'
-                                    onClick={() => {
-                                    // alert(item.id)
-                                    edit(item.id)
-                                    }}
+                                    onClick={() => {navigate(`/complaintview/${item.id}`); }}
                                     title="Edit"
                                     style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
                                 >
@@ -159,12 +158,13 @@ export function Complaintlist(params) {
                                 <td style={{ padding: '0px', textAlign: 'center' }}>
                                 <button
                                     className='btn'
-                                    onClick={() => deleted(item.id)}
-                                    title="Delete"
-                                    style={{ backgroundColor: 'transparent', border: 'none', color: 'red', fontSize: '20px' }}
+                                    onClick={() => {Navigate(`${Base_Url}/complaintview/${item.id}`);
+                                                    }}
+                                                    title="Edit"
+                                                    style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
                                 >
-                                    <FaTrash />
-                                </button>
+                                    <FaPencilAlt />
+                                 </button>
                                 </td>
                         </tr>
                             )

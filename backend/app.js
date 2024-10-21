@@ -3312,3 +3312,17 @@ app.get('/getcomplainlist', (req, res) => {
     }
   });
 });
+
+// Start Complaint View
+app.get('/getcomplaintview/:complaintid', (req, res) => {
+  const { complaintid } = req.params;
+  const sql = "SELECT * FROM complaint_ticket WHERE id = ? AND deleted = 0";
+  con.query(sql, [complaintid], (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    } else {
+      return res.json(data[0]);
+    }
+  });
+});
+

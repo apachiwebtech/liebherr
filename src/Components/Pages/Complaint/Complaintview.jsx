@@ -1,7 +1,28 @@
-import React from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { Base_Url } from '../../Utils/Base_Url';
 
 export function Complaintview(params) {
-//this i have i=has ==d shcui
+
+    const { complaintid } = useParams();
+    const [complaintview,setComplaintview] = useState([]);
+
+    const fetchComplaintview = async (complaintid) => {
+        try {
+          const response = await axios.get(`${Base_Url}/getcomplaintview/${complaintid}`);
+          console.log(response.data)
+          setComplaintview(response.data);
+        } catch (error) {
+          console.error('Error editing area:', error);
+        }
+      };
+
+        useEffect(()=>{
+            if(complaintid){
+                fetchComplaintview(complaintid);
+            }
+        },[complaintid]);
 
     return (
         <>
@@ -12,7 +33,7 @@ export function Complaintview(params) {
                             <label className="breadMain">Complaint : LB240624015</label>
                         </div>
                         <div className="col-md-9 text-right pt-2">
-                            {/* Buttons can be added here if needed */}
+                            {/* Buttons can be added here if needed */}x``
                         </div>
                     </div>
                 </div>
@@ -24,16 +45,16 @@ export function Complaintview(params) {
                         <div className="card-body">
                             <div className="row">
                                 <div className="col-md-12">
-                                    <h4 className="pname">John Doe</h4>
+                                    <h4 className="pname">{complaintview.customer_name}</h4>
                                 </div>
                             </div>
 
-                            <p>1234 Elm Street, Springfield, Illinois, Pincode: 62704</p>
-                            <p>M : +1234567890</p>
+                            <p>{complaintview.address}, Pincode: {complaintview.pincode}</p>
+                            <p>M : {complaintview.customer_mobile}</p>
 
-                            <p>Ticket Type: Technical</p>
-                            <p>Call Type: Support</p>
-                            <p>Warranty Status: Active</p>
+                            <p>Ticket Type: {complaintview.ticket_type}</p>
+                            <p>Call Type: {complaintview.call_type}</p>
+                            <p>Warranty Status: {complaintview.warranty_status}</p>
 
                             <ul className="nav nav-tabs" id="myTab" role="tablist">
                                 <li className="nav-item">
