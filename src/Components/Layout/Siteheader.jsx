@@ -53,15 +53,10 @@ export function Siteheader(params) {
               </ul>
             </li>
             <li className="nav-item dropdown">
-              <a className="nav-link dropdown-toggle activeM" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" >
+              <Link to={`/complaintlist`} className="nav-link  activeM" href="#" id="navbarDropdown" role="button"  aria-expanded="false" >
                 Complaints
-              </a>
-              <ul className="dropdown-menu activeM" aria-labelledby="navbarDropdown">
-                <li>
-                  <Link className="dropdown-item" to="/Complaintlist.jsx">Layout 1</Link></li>
-                <li>
-                  <Link className="dropdown-item" to="/Complaintgrid.jsx">Layout 2</Link></li>
-              </ul>
+              </Link>
+           
             </li>
             <li className="nav-item dropdown">
               <a className="nav-link dropdown-toggle activeM" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">

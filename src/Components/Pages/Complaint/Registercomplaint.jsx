@@ -1,7 +1,8 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-
+import toast, { Toaster } from 'react-hot-toast';
 import { Base_Url } from '../../Utils/Base_Url'
+import { useNavigate } from "react-router-dom";
 
 export function Registercomplaint(params) {
 
@@ -10,7 +11,9 @@ export function Registercomplaint(params) {
     const [serachval, setSearch] = useState('')
     const [searchdata, setSearchData] = useState([])
     const [form, setForm] = useState(false)
-    const [state , setState] = useState([])
+    const [state, setState] = useState([])
+    const [product, setProduct] = useState([])
+    const [ticket, setTicket] = useState([])
 
 
     //setting the values
@@ -32,23 +35,44 @@ export function Registercomplaint(params) {
         cust_type: "",
         warrenty_status: "",
         invoice_date: "",
-        call_charge: ""
+        call_charge: "",
+        model: "",
+        serial: ""
     })
 
 
     //This is for State Dropdown
 
     async function getState(params) {
-      axios.get(`${Base_Url}/getstate`)
-      .then((res) =>{
-        setState(res.data)
-      })
+        axios.get(`${Base_Url}/getstate`)
+            .then((res) => {
+                if (res.data) {
+
+                    setState(res.data)
+
+                }
+            })
+    }
+
+    //This is for product 
+
+    async function getProduct(params) {
+
+        axios.get(`${Base_Url}/getproduct`)
+            .then((res) => {
+                if (res.data) {
+
+                    setProduct(res.data)
+                }
+            })
+
     }
 
 
-    useEffect(() =>{
+    useEffect(() => {
         getState()
-    },[])
+        getProduct()
+    }, [])
 
 
 
@@ -60,12 +84,12 @@ export function Registercomplaint(params) {
         axios.post(`${Base_Url}/getticket`, { searchparam: serachval })
             .then((res) => {
                 console.log(res.data)
-                if (res.data) {
+                if (res.data && res.data.length > 0) {
 
                     console.log(res.data)
                     setSearchData(res.data[0])
                     setHideticket(true)
-
+                    setTicket(res.data)
 
                     setValue({
                         complaint_date: res.data[0].ticket_date,
@@ -91,14 +115,18 @@ export function Registercomplaint(params) {
 
     }
 
+    const notify = () => toast.success('Data Submitted..');
 
-    const handlesubmit = (e) =>{
+    const navigate = useNavigate()
+
+
+    const handlesubmit = (e) => {
         e.preventDefault()
 
-        const data ={
-            complaint_date: value.complaint_date ,
+        const data = {
+            complaint_date: value.complaint_date,
             customer_name: value.customer_name,
-            contact_person:value.contact_person,
+            contact_person: value.contact_person,
             email: value.email,
             mobile: value.mobile,
             alt_mobile: value.alt_mobile,
@@ -112,10 +140,27 @@ export function Registercomplaint(params) {
             cust_type: value.cust_type,
             warrenty_status: value.warrenty_status,
             invoice_date: value.invoice_date,
-            call_charge: value.call_charge
+            call_charge: value.call_charge,
+            cust_id: searchdata.customer_id,
+            model: value.model || searchdata.ModelNumber,
+            serial: value.serial
+
         }
 
-        axios.post(`${Base_Url}/`)
+        axios.post(`${Base_Url}/add_complaint`, data)
+            .then((res) => {
+                console.log(res.data)
+
+                if (res.data) {
+
+                    notify()
+
+                    setTimeout(() => {
+                        navigate('/complaintlist')
+                    }, 500);
+                }
+
+            })
     }
 
 
@@ -128,7 +173,7 @@ export function Registercomplaint(params) {
 
 
     return (
-        <>
+        < div className="p-3">
             <div className="row ">
                 <div className="complbread">
                     <div className="row">
@@ -138,6 +183,9 @@ export function Registercomplaint(params) {
                     </div>
                 </div>
             </div>
+
+            <Toaster position="bottom-center"
+                reverseOrder={false} />
 
 
             <div className="row mt-25">
@@ -209,17 +257,22 @@ export function Registercomplaint(params) {
                                 <div className="tab-pane active" id="home" role="tabpanel" aria-labelledby="home-tab">
                                     <table className="table table-striped">
                                         <tbody>
-                                            <tr>
-                                                <td>
-                                                    <div>Ticket No: 12345</div>
-                                                    <div>12-10-2024</div>
-                                                </td>
-                                                <td>Model Number</td>
-                                                <td>
-                                                    <div>Status</div>
-                                                    <span>View Info</span>
-                                                </td>
-                                            </tr>
+                                            {ticket.map((item) => {
+                                                return (
+                                                    <tr>
+                                                        <td>
+                                                            <div>Ticket No: {item.ticket_no}</div>
+                                                            <div>{item.ticket_date}</div>
+                                                        </td>
+                                                        <td>{item.ModelNumber}</td>
+                                                        <td>
+                                                            <div>{item.warranty_status}</div>
+                                                            <span>View Info</span>
+                                                        </td>
+                                                    </tr>
+                                                )
+                                            })}
+
                                         </tbody>
 
                                     </table>
@@ -230,8 +283,8 @@ export function Registercomplaint(params) {
 
                     </div> : <div className="card">
                         <div className="card-body">
-                            <p>No Result Found</p>
-                            <button id="generateTicket" data-id="" data-modal="" data-mobile="" className="btn btn-sm btn-primary">New Ticket</button>
+                            {searchdata.length == 0 && <p>No Result Found</p>}
+                            <button onClick={() => setForm(true)} className="btn btn-sm btn-primary">New Ticket</button>
                         </div>
                     </div>}
 
@@ -245,13 +298,44 @@ export function Registercomplaint(params) {
                         <div className="card" id="formInfo">
                             <div className="card-body">
                                 <div className="row">
-                                    <div className="col-md-3">
+                                    <div className="col-md-4">
                                         <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Model</p>
                                         <p>{searchdata.ModelNumber}</p>
+
+                                        {searchdata.length == 0 && <div className="">
+                                            <select className="form-control" onChange={onHandleChange} value={value.model} name="model">
+                                                <option value="">Select</option>
+                                                {product.map((item) => {
+                                                    return (
+                                                        <option value={item.item_description}>{item.item_description}</option>
+
+                                                    )
+                                                })}
+                                            </select>
+                                        </div>}
+
                                     </div>
                                     <div className="col-md-2">
                                         <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Serial No</p>
-                                        <p>330327594</p>
+                                        <p></p>
+                                        {searchdata.length == 0 && <div className="mb-3">
+                                            {/* <select className="form-control" onChange={onHandleChange} value={value.ticket_type} name="ticket_type">
+                                                <option value="">Select</option>
+                                                {product.map((item) => {
+                                                    return (
+                                                        <option value={item.id}>{item.item_code}</option>
+
+                                                    )
+                                                })}
+                                            </select> */}
+                                            <div className="">
+                                                <div className="mb-3">
+                                                  
+                                                    <input type="email"  onChange={onHandleChange} className="form-control" placeholder="Enter.." />
+                                                </div>
+                                            </div>
+                                        </div>}
+
                                     </div>
                                     <div className="col-md-2">
                                         <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Purchase Date</p>
@@ -265,7 +349,7 @@ export function Registercomplaint(params) {
 
                                 <div className="row">
                                     <div className="col-md-12">
-                                        <h3 className="mainheade">Complaint <span id="compaintno">: {searchdata.ticket_no}</span></h3>
+                                        <h3 className="mainheade">Complaint <span id="compaintno">: </span></h3>
                                     </div>
                                 </div>
 
@@ -291,13 +375,13 @@ export function Registercomplaint(params) {
                                     <div className="col-md-4">
                                         <div className="mb-3">
                                             <label htmlFor="exampleFormControlInput1" className="form-label">Email Id</label>
-                                            <input type="email" value={value.email} name="email"  onChange={onHandleChange}className="form-control" placeholder="Enter Email Id" />
+                                            <input type="email" value={value.email} name="email" onChange={onHandleChange} className="form-control" placeholder="Enter Email Id" />
                                         </div>
                                     </div>
                                     <div className="col-md-4">
                                         <div className="mb-3">
                                             <label htmlFor="exampleFormControlInput1" className="form-label">Mobile No. <input type="checkbox" />Whatsapp</label>
-                                            <input type="text" value={value.mobile} name="mobile"  onChange={onHandleChange} className="form-control" placeholder="Enter Mobile" />
+                                            <input type="text" value={value.mobile} name="mobile" onChange={onHandleChange} className="form-control" placeholder="Enter Mobile" />
                                         </div>
                                     </div>
                                     <div className="col-md-4">
@@ -318,8 +402,8 @@ export function Registercomplaint(params) {
                                             <label className="form-label">State</label>
                                             <select className="form-control" value={value.state} name="state" onChange={onHandleChange}>
                                                 <option value="">Select State</option>
-                                                {state.map((item) =>{
-                                                    return(
+                                                {state.map((item) => {
+                                                    return (
 
                                                         <option value={item.id}>{item.title}</option>
                                                     )
@@ -363,9 +447,9 @@ export function Registercomplaint(params) {
                                             <label className="form-label">Ticket Type</label>
                                             <select className="form-control" onChange={onHandleChange} value={value.ticket_type} name="ticket_type">
                                                 <option value="">Select</option>
-                                                <option value="">BREAKDOWN</option>
-                                                <option value="">INSTALLATION</option>
-                                                <option value="Technician1">OTHERS</option>
+                                                <option value="BREAKDOWN">BREAKDOWN</option>
+                                                <option value="INSTALLATION">INSTALLATION</option>
+                                                <option value="Technician">OTHERS</option>
                                             </select>
                                         </div>
                                     </div>
@@ -374,8 +458,8 @@ export function Registercomplaint(params) {
                                             <label className="form-label">Customer Type</label>
                                             <select className="form-control" onChange={onHandleChange} value={value.cust_type} name="cust_type">
                                                 <option value="">Select </option>
-                                                <option value="">END CUSTOMER</option>
-                                                <option value="">DISPLAY / EVENTS</option>
+                                                <option value="END CUSTOMER">END CUSTOMER</option>
+                                                <option value="DISPLAY/EVENT">DISPLAY / EVENTS</option>
                                             </select>
                                         </div>
                                     </div>
@@ -402,8 +486,9 @@ export function Registercomplaint(params) {
                                         <div className="mb-3">
                                             <label className="form-label">Call Chargeable</label>
                                             <select className="form-control" onChange={onHandleChange} value={value.call_charge} name="call_charge">
-                                                <option value="">Yes</option>
-                                                <option value="Complaint1">No</option>
+                                                <option value="">Select</option>
+                                                <option value="Yes">Yes</option>
+                                                <option value="No">No</option>
                                             </select>
                                         </div>
                                     </div>
@@ -421,7 +506,8 @@ export function Registercomplaint(params) {
                         <>
                             <div className="card mb-3" id="productInfo">
                                 <div className="card-body">
-                                    <h4 className="pname">Master Sales Partner</h4>
+                                    <h4 className="pname">Master Service 
+                                    Partner</h4>
                                     <div className="mb-3">
                                         <select className="form-control">
                                             <option value="TEJKARAN MANMAL" >TEJKARAN MANMAL</option>
@@ -429,7 +515,7 @@ export function Registercomplaint(params) {
                                         </select>
                                     </div>
 
-                                    <h4 className="pname">Service Partner</h4>
+                                    <h4 className="pname">Child Service Partner</h4>
                                     <div className="mb-3">
                                         <select className="form-control">
                                             <option value="TEJKARAN MANMAL" >SHREE SAI SERVICES</option>
@@ -463,6 +549,14 @@ export function Registercomplaint(params) {
                             <div className="card mb-3" id="engineerInfo">
                                 <div className="card-body">
                                     <h4 className="pname">Additional Remarks</h4>
+                                    <div className="mb-3">
+                                        <textarea className="form-control"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="card mb-3" id="engineerInfo">
+                                <div className="card-body">
+                                    <h4 className="pname">Specifivation</h4>
                                     <div className="mb-3">
                                         <textarea className="form-control"></textarea>
                                     </div>
@@ -515,6 +609,6 @@ export function Registercomplaint(params) {
 
 
 
-        </>
+        </div>
     )
 }

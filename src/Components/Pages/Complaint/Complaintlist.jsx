@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Navigate, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
-import { FaPencilAlt, FaTrash } from 'react-icons/fa';
+import { FaPencilAlt, FaTrash,FaEye } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
 
 export function Complaintlist(params) {
@@ -74,12 +74,14 @@ export function Complaintlist(params) {
         };
     }, []);
 
+    const navigate = useNavigate()
+
     return (
         <div className="row mp0" >
             <div className="col-md-12 col-12">
                 <div className="card mb-3 tab_box">
                     <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
-                        <table id="myTable" className="display">
+                        <table  className="table">
                             <thead>
                                 <tr>
                                     <th >#</th>
@@ -91,6 +93,7 @@ export function Complaintlist(params) {
                                     <th >Assigned Users</th>
                                     <th >Status</th>
                                     <th >Edit</th>
+                                    <th >View</th>
                                     <th >Delete</th>
                                 </tr>
                             </thead>
@@ -155,6 +158,18 @@ export function Complaintlist(params) {
                                                     style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
                                                 >
                                                     <FaPencilAlt />
+                                                </button>
+                                            </td>
+                                            <td >
+                                                <button
+                                                    className='btn'
+                                                    onClick={() => {
+                                                        navigate(`/complaintview/${item.id}`)
+                                                    }}
+                                                    title="Edit"
+                                                    style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                                                >
+                                                    <FaEye />
                                                 </button>
                                             </td>
                                             <td style={{ padding: '0px', textAlign: 'center' }}>

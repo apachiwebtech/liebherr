@@ -25,7 +25,7 @@ export function Complaintview(params) {
         },[complaintid]);
 
     return (
-        <>
+        < div className="p-3">
             <div className="row mp0">
                 <div className="complbread">
                     <div className="row">
@@ -224,6 +224,6 @@ export function Complaintview(params) {
             </div>
 
 
-        </>
+        </div>
     )
 }

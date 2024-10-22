@@ -15,6 +15,19 @@ router.get('/getstate', (req, res) => {
   })
 });
 
+router.get('/getproduct', (req, res) => {
+ 
+  const sql = "select * from product_master " 
+
+  con.query(sql , (err,data) =>{
+    if(err){
+        return res.json(err)
+    }else{
+        return res.json(data)
+    }
+  })
+});
+
 
 
 
