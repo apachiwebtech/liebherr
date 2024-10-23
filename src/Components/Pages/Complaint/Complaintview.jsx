@@ -117,18 +117,18 @@ export function Complaintview(params) {
   }, [complaintid, complaintview.ticket_no, complaintview.customer_mobile]);
 
   const handleAttachmentClick = (attachment) => {
-    console.log("Attachment clicked:", attachment); 
+    console.log("Attachment clicked:", attachment);
     setCurrentAttachment(attachment);
     setIsModalOpen(true);
   };
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, '0'); 
-    const month = String(date.getMonth() + 1).padStart(2, '0'); 
-    const year = date.getFullYear(); 
-  
-    return `${day}-${month}-${year}`; 
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+
+    return `${day}-${month}-${year}`;
   };
 
   return (
@@ -377,8 +377,8 @@ export function Complaintview(params) {
                   <div key={remark.id} className="card mb-3 remark-card">
                     <div className="card-body">
                       <div className="d-flex justify-content-between align-items-start">
-                        <h5 className="mb-0">Remark</h5>
-                        <h6 className="ms-2">By: {remark.created_by}</h6>
+                        <h3 className="mainheade">Remark</h3>
+                        <h3 className="mainheade">By: {remark.created_by}</h3>
                       </div>
 
                       <p>
@@ -387,7 +387,7 @@ export function Complaintview(params) {
                       {attachments.filter((att) => att.remark_id === remark.id)
                         .length > 0 && (
                         <div className="attachments">
-                          <h5>Attachments</h5>
+                          <h3 className="mainheade" >Attachments</h3>
                           {attachments
                             .filter((att) => att.remark_id === remark.id)
                             .map((attachment) => (
@@ -420,7 +420,7 @@ export function Complaintview(params) {
               ) : (
                 <p>No remarks available.</p>
               )}
-            </div>  
+            </div>
 
             {isModalOpen && (
               <div className="modal">
@@ -456,6 +456,41 @@ export function Complaintview(params) {
                       />
                       Your browser does not support the audio tag.
                     </audio>
+                  ) : currentAttachment.toLowerCase().endsWith(".pdf") ? (
+                    <iframe
+                      src={`${Base_Url}/uploads/${currentAttachment}`}
+                      style={{ width: "100%", height: "500px" }} // Adjust height as needed
+                      title="PDF Document"
+                    >
+                      Your browser does not support PDFs.{" "}
+                      <a href={`${Base_Url}/uploads/${currentAttachment}`}>
+                        Download the PDF
+                      </a>
+                    </iframe>
+                  ) : currentAttachment.toLowerCase().endsWith(".doc") ||
+                    currentAttachment.toLowerCase().endsWith(".docx") ? (
+                    <iframe
+                      src={`https://docs.google.com/gview?url=${Base_Url}/uploads/${currentAttachment}&embedded=true`}
+                      style={{ width: "100%", height: "500px" }} // Adjust height as needed
+                      title="Word Document"
+                    >
+                      Your browser does not support Word documents.{" "}
+                      <a href={`${Base_Url}/uploads/${currentAttachment}`}>
+                        Download the Word document
+                      </a>
+                    </iframe>
+                  ) : currentAttachment.toLowerCase().endsWith(".xls") ||
+                    currentAttachment.toLowerCase().endsWith(".xlsx") ? (
+                    <iframe
+                      src={`https://docs.google.com/gview?url=${Base_Url}/uploads/${currentAttachment}&embedded=true`}
+                      style={{ width: "100%", height: "500px" }} // Adjust height as needed
+                      title="Excel Document"
+                    >
+                      Your browser does not support Excel documents.{" "}
+                      <a href={`${Base_Url}/uploads/${currentAttachment}`}>
+                        Download the Excel document
+                      </a>
+                    </iframe>
                   ) : (
                     <p>Unsupported file type.</p>
                   )}
