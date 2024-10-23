@@ -29,7 +29,7 @@ export function Siteheader(params) {
                 <li>
                   <Link className="dropdown-item" to="/promaster">Product Master</Link></li>
                 <li>
-                  <Link className="dropdown-item" to="/endcustomertabs">End Customer Master</Link></li>
+                  <Link className="dropdown-item" to="/endcustomer">End Customer Master</Link></li>
                 <li>
                   <Link className="dropdown-item" to="/channelpartnertabs">Channel Partner Master</Link></li>
                 <li>

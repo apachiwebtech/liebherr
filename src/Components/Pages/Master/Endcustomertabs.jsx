@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Customer } from './Customer';
+import Customer from './Customer';
 import { Customerlist } from './Customerlist';
-import { Uniqueproduct } from './Uniqueproduct';
-import { Customerlocation } from './Customerlocation';
+import Uniqueproduct from './Uniqueproduct';
+import Customerlocation from './Customerlocation';
 
 function Endcustomertabs() {
   const [activeTab, setActiveTab] = useState('Customer');
@@ -67,6 +67,14 @@ function Endcustomertabs() {
             <div className="tabsMenu" style={{fontSize:"14px", marginLeft: "12px",fontWeight:"600",fontFamily:"Nunito"}}>
               <ul className="nav nav-tabs ">
                 <li className="nav-item">
+                    <button
+                      className={`nav-link ${activeTab === 'Customerlist' ? 'active' : ''}`}
+                      onClick={() => setActiveTab('Customerlist')}
+                    >
+                    CUSTOMER LIST
+                    </button>
+                  </li>
+                <li className="nav-item">
                   <button
                     className={`nav-link ${activeTab === 'Customer' ? 'active' : ''}`}
                     onClick={() => setActiveTab('Customer')}
@@ -79,7 +87,7 @@ function Endcustomertabs() {
                     className={`nav-link ${activeTab === 'Customerlocation' ? 'active' : ''}`}
                     onClick={() => setActiveTab('Customerlocation')}
                   >
-                    CUSTOMER LOCATION
+                    CUSTOMER LOCATION MASTER
                   </button>
                 </li>
                 <li className="nav-item">
@@ -90,16 +98,6 @@ function Endcustomertabs() {
                     UNIQUE PRODUCT MASTER LINKED TO LOCATION
                   </button>
                 </li>
-                <li className="nav-item">
-                  <button
-                    className={`nav-link ${activeTab === 'Customerlist' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('Customerlist')}
-                  >
-                   CUSTOMER LIST
-                  </button>
-                </li>
-               
-               
               </ul>
             </div> 
             </div>

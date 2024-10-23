@@ -18,9 +18,8 @@ import { Complaintgrid } from './Components/Pages/Complaint/Complaintgrid';
 import { Complaintlist } from './Components/Pages/Complaint/Complaintlist';
 import { Complaintview } from './Components/Pages/Complaint/Complaintview';
 import { Country } from './Components/Pages/Master/Country';
-import { Customerlocation } from './Components/Pages/Master/Customerlocation';
+import Customerlocation from './Components/Pages/Master/Customerlocation';
 import { Dashboard } from './Components/Pages/Dashboard';
-import { Endcustomer } from './Components/Pages/Master/Endcustomer';
 import Lhiuser from './Components/Pages/Master/Lhiuser';
 import { Linklocation } from './Components/Pages/Master/Linklocation';
 import Pincode from './Components/Pages/Master/Pincode';
@@ -172,11 +171,6 @@ const Router = createBrowserRouter([
       {
         path: "/",
         element: <Dashboard />,
-
-      },
-      {
-        path: "/endcustomer",
-        element: <Endcustomer />,
 
       },
       {
