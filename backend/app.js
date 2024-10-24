@@ -28,7 +28,6 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// Database connection setup kar rahe hain
 const con = createPool({
   host: "localhost",
   user: "root",
@@ -40,6 +39,7 @@ app.listen(8081, () => {
   console.log("Server is running on http://localhost:8081");
 });
 
+//Country Master Start
 app.get("/getdata", (req, res) => {
   const sql = "SELECT * FROM awt_country WHERE deleted = 0";
   con.query(sql, (err, data) => {
@@ -153,6 +153,7 @@ app.post("/deletedata", (req, res) => {
     }
   });
 });
+//Country Master Start
 
 // Region start
 app.get("/getregions", (req, res) => {
@@ -3679,21 +3680,6 @@ app.get("/getcomplaintview/:complaintid", (req, res) => {
   });
 });
 
-// app.post("/upload", upload.single("image"), (req, res) => {
-
-//   let image = req.file.filename;
-
-//   const sql = "insert into table(`image`) values(?)"
-
-//   con.query(sql , [image], (err,data) =>{
-//     if(err){
-//       return res.json(err)
-//     }else{
-//       return res.json(data)
-//     }
-//   })
-// });
-
 app.post("/addcomplaintremark", (req, res) => {
   const { ticket_no, note, created_by } = req.body;
 
@@ -3778,3 +3764,5 @@ app.get("/getComplaintDuplicate/:customer_mobile", (req, res) => {
     }
   });
 });
+
+
