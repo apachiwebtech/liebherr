@@ -3838,3 +3838,145 @@ app.post("/deleteproductunique", (req, res) => {
   });
 });
 //Unique Product Master Linked to Location End
+
+//Customer Location Start
+  app.get("/getareadrop/:geocity_id", (req, res) => {
+    const { geocity_id } = req.params;
+    const sql = "SELECT * FROM awt_area WHERE geocity_id = ? AND deleted = 0";
+    con.query(sql, [geocity_id], (err, data) => {
+      if (err) {
+        return res.status(500).json(err);
+      }
+      return res.json(data);
+    });
+  });
+
+  app.get("/getpincodedrop/:area_id", (req, res) => {
+    const { area_id } = req.params;
+    const sql = "SELECT * FROM awt_pincode WHERE area_id = ? AND deleted = 0";
+    con.query(sql, [area_id], (err, data) => {
+      if (err) {
+        return res.status(500).json(err);
+      }
+      return res.json(data);
+    });
+  });
+
+  // API to fetch all Customer Location 
+app.get("/getcustomerlocation", (req, res) => {
+  const sql = `
+    SELECT ccl.*, c.title as country_title, r.title as region_title, gs.title as geostate_title, gc.title as geocity_title, a.title as area_title, p.pincode as pincode_title FROM awt_customerlocation ccl JOIN awt_country c ON ccl.country_id = c.id JOIN awt_region r ON ccl.region_id = r.id JOIN awt_geostate gs ON ccl.geostate_id = gs.id JOIN awt_geocity gc ON ccl.geocity_id = gc.id JOIN awt_area a ON ccl.area_id = a.id JOIN awt_pincode p ON ccl.pincode_id = p.id WHERE ccl.deleted = 0;
+  `;
+
+  con.query(sql, (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    } else {
+      return res.json(data);
+    }
+  });
+});
+
+// API to fetch a specific Customer Location by ID
+app.get("/requestcustomerlocation/:id", (req, res) => {
+  const id = req.params.id;
+  const sql = `
+   SELECT ccl.*, c.title as country_title, r.title as region_title, gs.title as geostate_title, gc.title as geocity_title, a.title as area_title, p.pincode as pincode_title FROM awt_customerlocation ccl JOIN awt_country c ON ccl.country_id = c.id JOIN awt_region r ON ccl.region_id = r.id JOIN awt_geostate gs ON ccl.geostate_id = gs.id JOIN awt_geocity gc ON ccl.geocity_id = gc.id JOIN awt_area a ON ccl.area_id = a.id JOIN awt_pincode p ON ccl.pincode_id = p.id WHERE ccl.deleted = 0 AND ccl.id = ?;
+  `;
+
+  con.query(sql, [id], (err, data) => {
+    if (err) {
+      console.error("Error fetching Customer Location:", err);
+      return res
+        .status(500)
+        .json({ message: "Internal Server Error", error: err });
+    }
+
+    if (data.length === 0) {
+      return res.status(404).json({ message: "Customer Location not found" });
+    }
+
+    return res.status(200).json(data[0]);
+  });
+});
+
+// Insert new Customer Location with duplicate check 
+app.post("/postcustomerlocation", (req, res) => {
+  const { country_id, region_id, geostate_id, geocity_id, area_id, pincode_id,address,ccperson,ccnumber,address_type } = req.body;
+
+  // Check for duplicates
+  const checkDuplicateSql = `SELECT * FROM awt_customerlocation WHERE ccnumber = ? AND deleted = 0`;
+  con.query(checkDuplicateSql, [ccnumber],
+    (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    }
+
+    if (data.length > 0) {
+      return res.status(409).json({
+        message: "Duplicate entry, Customer with same number already exists !",
+      });
+    } else {
+      const sql = `INSERT INTO awt_customerlocation (country_id, region_id, geostate_id, geocity_id, area_id, pincode_id,address,ccperson,ccnumber,address_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+      con.query(
+        sql,
+        [country_id, region_id, geostate_id, geocity_id, area_id, pincode_id,address,ccperson,ccnumber,address_type],
+        (err, data) => {
+          if (err) {
+            return res.json(err);
+          } else {
+            return res.json({ message: "Customer Location added successfully!" });
+          }
+        }
+      );
+    }
+  });
+});
+
+// Update existing Customer Location with duplicate check 
+app.put("/putcustomerlocation", (req, res) => {
+  const {
+    country_id, region_id, geostate_id, geocity_id, area_id, pincode_id,address,ccperson,ccnumber,address_type,id
+  } = req.body;
+
+  // Check for duplicates 
+  const checkDuplicateSql = `SELECT * FROM awt_customerlocation WHERE ccnumber = ? AND id != ? AND deleted = 0`;
+  con.query(checkDuplicateSql, [ccnumber, id], (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    }
+
+    if (data.length > 0) {
+      return res.status(409).json({
+        message: "Duplicate entry, Customer with same number already exists !",
+      });
+    } else {
+      const updateSql = `UPDATE awt_customerlocation SET country_id = ?, region_id = ?, geostate_id = ?, geocity_id = ?, area_id = ?,pincode_id = ?,address = ?,ccperson = ?,ccnumber = ?,address_type = ? WHERE id = ?`;
+      con.query(
+        updateSql,
+        [country_id, region_id, geostate_id, geocity_id, area_id, pincode_id,address,ccperson,ccnumber,address_type,id],
+        (err, data) => {
+          if (err) {
+            return res.status(500).json(err);
+          }
+          return res.json({ message: "Customer Location updated successfully!" });
+        }
+      );
+    }
+  });
+});
+
+// API to soft delete a Customer Location
+app.post("/deletepincode", (req, res) => {
+  const { id } = req.body;
+  const sql = `UPDATE awt_customerlocation SET deleted = 1 WHERE id = ?`;
+  con.query(sql, [id], (err, data) => {
+    if (err) {
+      return res.status(500).json({ message: "Error deleting Customer Location" });
+    } else {
+      return res.json(data);
+    }
+  });
+});
+
+//Customer Location End

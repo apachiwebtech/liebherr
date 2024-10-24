@@ -112,7 +112,7 @@ const Uniqueproduct = () => {
                     .catch((error) => {
                       if (error.response && error.response.status === 409) {
                         setDuplicateError(
-                          "Duplicate entry,date and Mobile No Credential already exists!"
+                          "Product with same serial number already exists!"
                         ); // Show duplicate error for update
                       }
                     });
@@ -132,7 +132,7 @@ const Uniqueproduct = () => {
                     .catch((error) => {
                       if (error.response && error.response.status === 409) {
                         setDuplicateError(
-                          "Duplicate entry,date and Mobile No Credential already exists!"
+                          "Product with same serial number already exists!"
                         ); // Show duplicate error for insert
                       }
                     });
@@ -235,6 +235,9 @@ const Uniqueproduct = () => {
                        {errors.serialnumber && (
                         <small className="text-danger">{errors.serialnumber}</small>
                       )}
+                      {duplicateError && (
+                      <small className="text-danger">{duplicateError}</small>
+                    )}
                     </div>
                     <div className="col-md-6 mb-3">
                       <label htmlFor="locationc" className="form-label">
