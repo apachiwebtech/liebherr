@@ -4,8 +4,8 @@ import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
 
 const Location = () => {
-  // Step 1: Add this state to track errors
   const [countries, setCountries] = useState([]);
+  const [currentUsers, setCurrentUsers] = useState([]);
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -13,7 +13,8 @@ const Location = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
-  const [duplicateError, setDuplicateError] = useState(""); // State to track duplicate error
+  const [duplicateError, setDuplicateError] = useState("");
+  const [paginatedUsers, setPaginatedUsers] = useState([]);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -61,22 +62,17 @@ const Location = () => {
     setCurrentPage(0);
   };
 
-  // Step 2: Add form validation function
   const validateForm = () => {
-    const newErrors = {}; // Initialize an empty error object
+    const newErrors = {};
     if (!formData.title.trim()) {
-      // Check if the title is empty
-      newErrors.title = "Region Field is required."; // Set error message if title is empty
+      newErrors.title = "Region Field is required.";
     }
-
-    // Check if the country_id is empty
     if (!formData.country_id) {
-      newErrors.country_id = "Country selection is required."; // Set error message if no country is selected
+      newErrors.country_id = "Country selection is required.";
     }
-    return newErrors; // Return the error object
+    return newErrors;
   };
 
-  //handlesubmit form
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -86,7 +82,7 @@ const Location = () => {
       return;
     }
 
-    setDuplicateError(""); // Clear duplicate error before submitting
+    setDuplicateError("");
 
     try {
       const confirmSubmission = window.confirm(
@@ -94,35 +90,27 @@ const Location = () => {
       );
       if (confirmSubmission) {
         if (isEdit) {
-          // For update, include duplicate check
           await axios
             .put(`${Base_Url}/putregion`, { ...formData })
             .then((response) => {
-              setFormData({
-                title: "",
-                country_id: "",
-              });
+              setFormData({ title: "", country_id: "" });
               fetchUsers();
             })
             .catch((error) => {
               if (error.response && error.response.status === 409) {
-                setDuplicateError("Duplicate entry, Region already exists!"); // Show duplicate error for update
+                setDuplicateError("Duplicate entry, Region already exists!");
               }
             });
         } else {
-          // For insert, include duplicate check
           await axios
             .post(`${Base_Url}/postregion`, { ...formData })
             .then((response) => {
-              setFormData({
-                title: "",
-                country_id: "",
-              });
+              setFormData({ title: "", country_id: "" });
               fetchUsers();
             })
             .catch((error) => {
               if (error.response && error.response.status === 409) {
-                setDuplicateError("Duplicate entry, Region already exists!"); // Show duplicate error for insert
+                setDuplicateError("Duplicate entry, Region already exists!");
               }
             });
         }
@@ -134,11 +122,8 @@ const Location = () => {
 
   const deleted = async (id) => {
     try {
-      const response = await axios.post(`${Base_Url}/deleteregion`, { id });
-      setFormData({
-        title: "",
-        country_id: "",
-      });
+      await axios.post(`${Base_Url}/deleteregion`, { id });
+      setFormData({ title: "", country_id: "" });
       fetchUsers();
     } catch (error) {
       console.error("Error deleting user:", error);
@@ -150,7 +135,6 @@ const Location = () => {
       const response = await axios.get(`${Base_Url}/requestregion/${id}`);
       setFormData(response.data);
       setIsEdit(true);
-      console.log(response.data);
     } catch (error) {
       console.error("Error editing user:", error);
     }
@@ -158,7 +142,7 @@ const Location = () => {
 
   const indexOfLastUser = (currentPage + 1) * itemsPerPage;
   const indexOfFirstUser = indexOfLastUser - itemsPerPage;
-  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+  const displayedUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
   return (
     <div className="row mp0">
@@ -175,7 +159,6 @@ const Location = () => {
                   style={{ width: "50%" }}
                   className="text-left"
                 >
-                  {/* Step 2.1: Country Dropdown */}
                   <div className="form-group">
                     <label
                       htmlFor="country"
@@ -198,18 +181,13 @@ const Location = () => {
                     </select>
                     {errors.country_id && (
                       <small className="text-danger">{errors.country_id}</small>
-                    )}{" "}
-                    {/* Show error for country selection */}
+                    )}
                   </div>
-                  {/* Step 2.2: Region Input */}
                   <div className="form-group">
                     <label
                       htmlFor="regionInput"
                       className="input-field"
-                      style={{
-                        marginBottom: "15style={{ mapx",
-                        fontSize: "18px",
-                      }}
+                      style={{ marginBottom: "15px", fontSize: "18px" }}
                     >
                       Add Region
                     </label>
@@ -227,8 +205,7 @@ const Location = () => {
                     )}
                     {duplicateError && (
                       <small className="text-danger">{duplicateError}</small>
-                    )}{" "}
-                    {/* Show duplicate error */}
+                    )}
                   </div>
                   <div className="text-right">
                     <button
@@ -274,7 +251,6 @@ const Location = () => {
                   />
                 </div>
 
-                {/* Adjust table padding and spacing */}
                 <table
                   className="table table-bordered"
                   style={{ marginTop: "20px", tableLayout: "fixed" }}
@@ -299,7 +275,7 @@ const Location = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {currentUsers.map((item, index) => (
+                    {displayedUsers.map((item, index) => (
                       <tr key={item.id}>
                         <td style={{ padding: "2px", textAlign: "center" }}>
                           {index + 1 + indexOfFirstUser}
@@ -311,10 +287,7 @@ const Location = () => {
                         <td style={{ padding: "0px", textAlign: "center" }}>
                           <button
                             className="btn"
-                            onClick={() => {
-                              // alert(item.id)
-                              edit(item.id);
-                            }}
+                            onClick={() => edit(item.id)}
                             title="Edit"
                             style={{
                               backgroundColor: "transparent",
@@ -346,47 +319,51 @@ const Location = () => {
                   </tbody>
                 </table>
 
-                <div
-                  className="d-flex justify-content-between"
-                  style={{ marginTop: "10px" }}
-                >
-                  <div>
+                <div style={{ marginTop: "20px" }}>
+                  <span>
                     Showing {indexOfFirstUser + 1} to{" "}
                     {Math.min(indexOfLastUser, filteredUsers.length)} of{" "}
                     {filteredUsers.length} entries
-                  </div>
+                  </span>
+                </div>
 
-                  <div className="pagination" style={{ marginLeft: "auto" }}>
-                    <button
-                      onClick={() => setCurrentPage(currentPage - 1)}
-                      disabled={currentPage === 0}
-                    >
-                      {"<"}
-                    </button>
-                    {Array.from(
-                      {
-                        length: Math.ceil(filteredUsers.length / itemsPerPage),
-                      },
-                      (_, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setCurrentPage(index)}
-                          className={currentPage === index ? "active" : ""}
-                        >
-                          {index + 1}
-                        </button>
+                <div className="pagination">
+                  <button
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.max(prev - 1, 0))
+                    }
+                    disabled={currentPage === 0}
+                  >
+                    Previous
+                  </button>
+                  {Array.from(
+                    { length: Math.ceil(filteredUsers.length / itemsPerPage) },
+                    (_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentPage(index)}
+                        className={currentPage === index ? "active" : ""}
+                      >
+                        {index + 1}
+                      </button>
+                    )
+                  )}
+                  <button
+                    onClick={() =>
+                      setCurrentPage((prev) =>
+                        Math.min(
+                          prev + 1,
+                          Math.ceil(filteredUsers.length / itemsPerPage) - 1
+                        )
                       )
-                    )}
-                    <button
-                      onClick={() => setCurrentPage(currentPage + 1)}
-                      disabled={
-                        currentPage ===
-                        Math.ceil(filteredUsers.length / itemsPerPage) - 1
-                      }
-                    >
-                      {">"}
-                    </button>
-                  </div>
+                    }
+                    disabled={
+                      currentPage >=
+                      Math.ceil(filteredUsers.length / itemsPerPage) - 1
+                    }
+                  >
+                    Next
+                  </button>
                 </div>
               </div>
             </div>

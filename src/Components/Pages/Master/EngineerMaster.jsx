@@ -77,13 +77,13 @@ const EngineerMaster = () => {
       if (!formData.cfranchise_id) {
         newErrors.cfranchise_id = "Child Franchise selection is required.";
       }
-      if (!formData.cfranchise_id) {
+      if (!formData.email) {
         newErrors.email = "Engineer Email Field is required.";
       }
-      if (!formData.cfranchise_id) {
+      if (!formData.mobile_no) {
         newErrors.mobile_no = "Engineer Mobile No Field is required.";
       }
-      if (!formData.cfranchise_id) {
+      if (!formData.password) {
         newErrors.password = "Engineer Password Field is required.";
       }
       return newErrors; 

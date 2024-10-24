@@ -3708,3 +3708,133 @@ app.get("/getComplaintDuplicate/:customer_mobile", (req, res) => {
     }
   });
 });
+
+//Unique Product Master Linked to Location Start
+app.get("/getproductunique", (req, res) => {
+  const sql =
+    "SELECT * FROM awt_uniqueproductmaster WHERE deleted = 0";
+  con.query(sql, (err, data) => {
+    if (err) {
+      return res.json(err);
+    } else {
+      return res.json(data);
+    }
+  });
+});
+
+app.get("/requestproductunique/:id", (req, res) => {
+  const { id } = req.params;
+  const sql = "SELECT * FROM awt_uniqueproductmaster WHERE id = ? AND deleted = 0";
+  con.query(sql, [id], (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    } else {
+      return res.json(data[0]);
+    }
+  });
+});
+
+app.post("/postproductunique", (req, res) => {
+  const { product, location, date, serialnumber } = req.body;
+
+  const checkDuplicateSql = `SELECT * FROM awt_uniqueproductmaster WHERE serialnumber = ? AND deleted = 0`;
+  con.query(checkDuplicateSql, [serialnumber], (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    }
+
+    if (data.length > 0) {
+      return res
+        .status(409)
+        .json({
+          message:
+            "Product with same serial number already exists!",
+        });
+    } else {
+      const checkSoftDeletedSql = `SELECT * FROM awt_uniqueproductmaster WHERE serialnumber = ? AND deleted = 1`;
+
+      con.query(
+        checkSoftDeletedSql,
+        [serialnumber],
+        (err, softDeletedData) => {
+          if (err) {
+            return res.status(500).json(err);
+          }
+
+          if (softDeletedData.length > 0) {
+            const restoreSoftDeletedSql = `UPDATE awt_uniqueproductmaster SET deleted = 0 WHERE serialnumber = ?`;
+            con.query(restoreSoftDeletedSql, [serialnumber], (err) => {
+              if (err) {
+                return res.status(500).json(err);
+              }
+              return res.json({
+                message: "Soft-deleted Product with same serial number restored successfully!",
+              });
+            });
+          } else {
+            const sql = `INSERT INTO awt_uniqueproductmaster (product, location, date, serialnumber) VALUES (?, ?, ?, ?)`;
+            con.query(
+              sql,
+              [product, location, date, serialnumber],
+              (err, data) => {
+                if (err) {
+                  return res.json(err);
+                } else {
+                  return res.json({ message: "Product added successfully!" });
+                }
+              }
+            );
+          }
+        }
+      );
+    }
+  });
+});
+
+app.put("/putproductunique", (req, res) => {
+  const { product, id, location, date, serialnumber } = req.body;
+
+  const checkDuplicateSql = `SELECT * FROM awt_uniqueproductmaster WHERE serialnumber = ? AND id != ? AND deleted = 0`;
+  con.query(checkDuplicateSql, [serialnumber, id], (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    }
+
+    if (data.length > 0) {
+      // If a duplicate exists (other than the current record)
+      return res
+        .status(409)
+        .json({
+          message:
+            "Product with same serial number  already exists!",
+        });
+    } else {
+      // Step 2: Update the record if no duplicates are found
+      const updateSql = `UPDATE awt_uniqueproductmaster SET product = ?,location = ?,date = ?, serialnumber= ? WHERE id = ?`;
+      con.query(
+        updateSql,
+        [product, location, date, serialnumber, id],
+        (err, data) => {
+          if (err) {
+            return res.status(500).json(err);
+          }
+          return res.json({ message: "Product updated successfully!" });
+        }
+      );
+    }
+  });
+});
+
+app.post("/deleteproductunique", (req, res) => {
+  const { id } = req.body;
+  const sql = `UPDATE awt_uniqueproductmaster SET deleted = 1 WHERE id = ?`;
+  con.query(sql, [id], (err, data) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ message: "Error Deleting Engineer" });
+    } else {
+      return res.json(data);
+    }
+  });
+});
+//Unique Product Master Linked to Location End

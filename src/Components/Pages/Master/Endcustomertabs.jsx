@@ -90,6 +90,14 @@ function Endcustomertabs() {
                     CUSTOMER LOCATION MASTER
                   </button>
                 </li>
+                <li className="nav-item">
+                  <button
+                    className={`nav-link ${activeTab === 'Uniqueproduct' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('Uniqueproduct')}
+                  >
+                    UNIQUE PRODUCT MASTER LINKED TO LOCATION
+                  </button>
+                </li>
                 
               </ul>
             </div> 

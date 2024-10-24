@@ -4,214 +4,214 @@ import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
 
 const Customerlocation = () => {
-//   const [countries, setCountries] = useState([]);
-//   const [regions, setRegions] = useState([]);
-//   const [geoStates, setGeoStates] = useState([]);
-//   const [geoCities, setGeoCities] = useState([]);
-//   const [areas, setAreas] = useState([]);
-//   const [errors, setErrors] = useState({});
-//   const [filteredUsers, setFilteredUsers] = useState([]);
-//   const [filteredAreas, setFilteredAreas] = useState([]);
-//   const [isEdit, setIsEdit] = useState(false);
-//   const [currentPage, setCurrentPage] = useState(0);
-//   const [itemsPerPage, setItemsPerPage] = useState(10);
-//   const [searchTerm, setSearchTerm] = useState('');
-//   const [duplicateError, setDuplicateError] = useState('');
-//   const [formData, setFormData] = useState({
-//     title: '',
-//     country_id: '',
-//     region_id: '',
-//     geostate_id: '',
-//     geocity_id: '', 
-//     area_id: '' 
-//   });
+  const [countries, setCountries] = useState([]);
+  const [regions, setRegions] = useState([]);
+  const [geoStates, setGeoStates] = useState([]);
+  const [geoCities, setGeoCities] = useState([]);
+  const [areas, setAreas] = useState([]);
+  const [errors, setErrors] = useState({});
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [filteredAreas, setFilteredAreas] = useState([]);
+  const [isEdit, setIsEdit] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [duplicateError, setDuplicateError] = useState('');
+  const [formData, setFormData] = useState({
+    title: '',
+    country_id: '',
+    region_id: '',
+    geostate_id: '',
+    geocity_id: '', 
+    area_id: '' 
+  });
   
 
-//   const fetchCountries = async () => {
-//     try {
-//       const response = await axios.get(`${Base_Url}/getcountries`);
-//       setCountries(response.data);
-//     } catch (error) {
-//       console.error('Error fetching countries:', error);
-//     }
-//   };
+  const fetchCountries = async () => {
+    try {
+      const response = await axios.get(`${Base_Url}/getcountries`);
+      setCountries(response.data);
+    } catch (error) {
+      console.error('Error fetching countries:', error);
+    }
+  };
 
-//   const fetchRegions = async (countryId) => {
-//     try {
-//       const response = await axios.get(`${Base_Url}/getregions/${countryId}`);
-//       setRegions(response.data);
-//     } catch (error) {
-//       console.error('Error fetching regions:', error);
-//     }
-//   };
+  const fetchRegions = async (countryId) => {
+    try {
+      const response = await axios.get(`${Base_Url}/getregions/${countryId}`);
+      setRegions(response.data);
+    } catch (error) {
+      console.error('Error fetching regions:', error);
+    }
+  };
 
-//   const fetchGeoStates = async (regionId) => {
-//     try {
-//       const response = await axios.get(`${Base_Url}/getgeostates/${regionId}`);
-//       setGeoStates(response.data);
-//     } catch (error) {
-//       console.error('Error fetching geo states:', error);
-//     }
-//   };
+  const fetchGeoStates = async (regionId) => {
+    try {
+      const response = await axios.get(`${Base_Url}/getgeostates/${regionId}`);
+      setGeoStates(response.data);
+    } catch (error) {
+      console.error('Error fetching geo states:', error);
+    }
+  };
 
 
-//     const fetchGeoCities = async (geostate_id) => {
-//         try {
-//         const response = await axios.get(`${Base_Url}/getgeocities_a/${geostate_id}`);
-//         console.log('Geo Cities:', response.data); // Add this line to debug
-//         setGeoCities(response.data);
-//         } catch (error) {
-//         console.error('Error fetching geo cities:', error);
-//         }
-//     };
+    const fetchGeoCities = async (geostate_id) => {
+        try {
+        const response = await axios.get(`${Base_Url}/getgeocities_a/${geostate_id}`);
+        console.log('Geo Cities:', response.data); // Add this line to debug
+        setGeoCities(response.data);
+        } catch (error) {
+        console.error('Error fetching geo cities:', error);
+        }
+    };
 
-//   const fetchAreas = async () => {
-//     try {
-//       const response = await axios.get(`${Base_Url}/getareas`);
-//       setAreas(response.data);
-//       setFilteredAreas(response.data);
-//     } catch (error) {
-//       console.error('Error fetching areas:', error);
-//     }
-//   };
+  const fetchAreas = async () => {
+    try {
+      const response = await axios.get(`${Base_Url}/getareas`);
+      setAreas(response.data);
+      setFilteredAreas(response.data);
+    } catch (error) {
+      console.error('Error fetching areas:', error);
+    }
+  };
 
-//   useEffect(() => {
-//     fetchCountries();
-//     fetchAreas();
-//   }, []);
+  useEffect(() => {
+    fetchCountries();
+    fetchAreas();
+  }, []);
 
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     const validationErrors = validateForm();
-//     if (Object.keys(validationErrors).length > 0) {
-//       setErrors(validationErrors);
-//       return;
-//     }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
 
-//     setDuplicateError('');
+    setDuplicateError('');
 
-//     try {
-//       const confirmSubmission = window.confirm('Do you want to submit the data?');
-//       if (confirmSubmission) {
-//         if (isEdit) {
-//           await axios.put(`${Base_Url}/putarea`, { ...formData })
-//             .then((response) => {
-//               setFormData({ title: '',
-//                 country_id: '',
-//                 region_id: '',
-//                 geostate_id: '',
-//                 geocity_id: '', 
-//                 area_id: '' 
-//                               })
-//                 fetchAreas();
-//             })
-//             .catch((error) => {
-//               if (error.response && error.response.status === 409) {
-//                 setDuplicateError('Duplicate entry, Area already exists!');
-//               }
-//             });
-//         } else {
-//           await axios.post(`${Base_Url}/postarea`, { ...formData })
-//             .then(response => {
-//               setFormData({ title: '',
-//                 country_id: '',
-//                 region_id: '',
-//                 geostate_id: '',
-//                 geocity_id: '', 
-//                 area_id: '' 
-//                               })
-//                 fetchAreas();
-//             })
-//             .catch(error => {
-//               if (error.response && error.response.status === 409) {
-//                 setDuplicateError('Duplicate entry, Area already exists!');
-//               }
-//             });
-//         }
-//       }
-//     } catch (error) {
-//       console.error('Error during form submission:', error);
-//     }
-//   };
+    try {
+      const confirmSubmission = window.confirm('Do you want to submit the data?');
+      if (confirmSubmission) {
+        if (isEdit) {
+          await axios.put(`${Base_Url}/putarea`, { ...formData })
+            .then((response) => {
+              setFormData({ title: '',
+                country_id: '',
+                region_id: '',
+                geostate_id: '',
+                geocity_id: '', 
+                area_id: '' 
+                              })
+                fetchAreas();
+            })
+            .catch((error) => {
+              if (error.response && error.response.status === 409) {
+                setDuplicateError('Duplicate entry, Area already exists!');
+              }
+            });
+        } else {
+          await axios.post(`${Base_Url}/postarea`, { ...formData })
+            .then(response => {
+              setFormData({ title: '',
+                country_id: '',
+                region_id: '',
+                geostate_id: '',
+                geocity_id: '', 
+                area_id: '' 
+                              })
+                fetchAreas();
+            })
+            .catch(error => {
+              if (error.response && error.response.status === 409) {
+                setDuplicateError('Duplicate entry, Area already exists!');
+              }
+            });
+        }
+      }
+    } catch (error) {
+      console.error('Error during form submission:', error);
+    }
+  };
 
-//     const handleChange = (e) => {
-//         const { name, value } = e.target;
-//         setFormData({ ...formData, [name]: value });
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
     
-//         if (name === 'country_id') {
-//         fetchRegions(value);
-//         }
-//         if (name === 'region_id') {
-//         fetchGeoStates(value);
-//         }
-//         if (name === 'geostate_id') {
-//         fetchGeoCities(value); // Fetch Geo Cities when Geo State is selected
-//         }
-//     };
+        if (name === 'country_id') {
+        fetchRegions(value);
+        }
+        if (name === 'region_id') {
+        fetchGeoStates(value);
+        }
+        if (name === 'geostate_id') {
+        fetchGeoCities(value); // Fetch Geo Cities when Geo State is selected
+        }
+    };
   
 
-//   const handleSearch = (e) => {
-//     const searchValue = e.target.value.toLowerCase();
-//     setSearchTerm(searchValue);
-//     setFilteredAreas(
-//       areas.filter((area) =>
-//         area.title.toLowerCase().includes(searchValue) ||
-//         area.country_title.toLowerCase().includes(searchValue) ||
-//         area.region_title.toLowerCase().includes(searchValue) ||
-//         area.geostate_title.toLowerCase().includes(searchValue)
-//       )
-//     );
-//   };
+  const handleSearch = (e) => {
+    const searchValue = e.target.value.toLowerCase();
+    setSearchTerm(searchValue);
+    setFilteredAreas(
+      areas.filter((area) =>
+        area.title.toLowerCase().includes(searchValue) ||
+        area.country_title.toLowerCase().includes(searchValue) ||
+        area.region_title.toLowerCase().includes(searchValue) ||
+        area.geostate_title.toLowerCase().includes(searchValue)
+      )
+    );
+  };
 
-//   const validateForm = () => {
-//     const newErrors = {};
-//     if (!formData.title.trim()) {
-//       newErrors.title = 'Area Field is required.';
-//     }
-//     if (!formData.country_id) {
-//       newErrors.country_id = 'Country selection is required.';
-//     }
-//     if (!formData.region_id) {
-//       newErrors.region_id = 'Region selection is required.';
-//     }
-//     if (!formData.geostate_id) {
-//       newErrors.geostate_id = 'Geo State selection is required.';
-//     }
-//     if (!formData.geocity_id) { // Validate Geo City
-//         newErrors.geocity_id = 'Geo City selection is required.';
-//     }
-//     return newErrors;
-//   };
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.title.trim()) {
+      newErrors.title = 'Area Field is required.';
+    }
+    if (!formData.country_id) {
+      newErrors.country_id = 'Country selection is required.';
+    }
+    if (!formData.region_id) {
+      newErrors.region_id = 'Region selection is required.';
+    }
+    if (!formData.geostate_id) {
+      newErrors.geostate_id = 'Geo State selection is required.';
+    }
+    if (!formData.geocity_id) { // Validate Geo City
+        newErrors.geocity_id = 'Geo City selection is required.';
+    }
+    return newErrors;
+  };
 
-//   const deleted = async (id) => {
-//     try {
-//       await axios.post(`${Base_Url}/deletearea`, { id });
-//       setFormData({ title: '',
-//         country_id: '',
-//         region_id: '',
-//         geostate_id: '',
-//         geocity_id: '', 
-//         area_id: '' 
-//                       })
-//          fetchAreas();
-//     } catch (error) {
-//       console.error('Error deleting area:', error);
-//     }
-//   };
+  const deleted = async (id) => {
+    try {
+      await axios.post(`${Base_Url}/deletearea`, { id });
+      setFormData({ title: '',
+        country_id: '',
+        region_id: '',
+        geostate_id: '',
+        geocity_id: '', 
+        area_id: '' 
+                      })
+         fetchAreas();
+    } catch (error) {
+      console.error('Error deleting area:', error);
+    }
+  };
 
-//   const edit = async (id) => {
-//     try {
-//       const response = await axios.get(`${Base_Url}/requestarea/${id}`);
-//       console.log(response.data)
-//       setFormData(response.data);
-//       fetchRegions(response.data.country_id);
-//       fetchGeoStates(response.data.region_id);
-//       fetchGeoCities(response.data.geostate_id);
-//       setIsEdit(true);
-//     } catch (error) {
-//       console.error('Error editing area:', error);
-//     }
-//   };
+  const edit = async (id) => {
+    try {
+      const response = await axios.get(`${Base_Url}/requestarea/${id}`);
+      console.log(response.data)
+      setFormData(response.data);
+      fetchRegions(response.data.country_id);
+      fetchGeoStates(response.data.region_id);
+      fetchGeoCities(response.data.geostate_id);
+      setIsEdit(true);
+    } catch (error) {
+      console.error('Error editing area:', error);
+    }
+  };
 
   return (
     <div className="row mp0">
@@ -228,13 +228,19 @@ const Customerlocation = () => {
                                         </div>
                                         <div className="col-md-4 mb-3">
                                             <label htmlFor="country" className="form-label">Country</label>
-                                            <select id="country" name="country" className="form-select" aria-label=".form-select-lg example">
-                                                <option value="">Select Country</option>
-                                                <option value="Åland Islands">Åland Islands</option>
-                                                <option value="Albania">Albania</option>
-                                                <option value="Zambia">Zambia</option>
-                                                <option value="Zimbabwe">Zimbabwe</option>
+                                            <select id="country" name="country_id" className="form-select" aria-label=".form-select-lg example" value={formData.country_id}
+                                                 onChange={handleChange}>
+                                                 <option value="">Select Country</option>
+                                                {countries.map((country) => (
+                                                    <option key={country.id} value={country.id}>
+                                                    {country.title}
+                                                    </option>
+                                                ))}
                                             </select>
+                                               
+                                             
+                                        
+
                                         </div>
                                         <div className="col-md-4 mb-3">
                                             <label htmlFor="region" className="form-label">Region</label>
