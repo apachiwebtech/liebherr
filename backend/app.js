@@ -3980,3 +3980,40 @@ app.post("/deletepincode", (req, res) => {
 });
 
 //Customer Location End
+
+//Customer Master Start
+app.get("/getcustomer", (req, res) => {
+  const sql = `SELECT * From awt_customer WHERE deleted = 0`;
+  con.query(sql,(err, data) => {
+  if (err) {
+    return res.status(500).json(err);
+  }
+  })
+});
+
+app.post("deletecustomer",(req,res) => {
+  const {id} = req.body;
+  const sql = `UPDATE awt_customer SET deleted = 1 WHERE id = ?`;
+  con.query(sql, [id], (err, data)=> {
+    if (err){
+      return res.status(500).json(err);
+    }
+    return res.json(data);
+  })
+});
+
+app.get("requestcustomer",(req,res) => {
+  const { id } = req.body;
+  const sql = `SELECT * FROM awt_customer WHERE deleted = 0 and id = ? `;
+  con.query =(sql, [id], (err, data) => {
+    if (err){
+        return res.status(500).json(err);
+    }
+    if (data.length === 0){
+      return res.status(404).json({message: "Customer not found"});
+    }
+
+    return res.json(data[0])
+  } )
+});
+
