@@ -1,32 +1,32 @@
-import React, { useState } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import  Category from './Category';
-import Subcategory from './Subcategory';
-import Product from './Product';
-import ProductType from './ProductType';
-import ProductLine from './ProductLine';
-import Material from './Material';
-import Manufacturer from './Manufacturer';
+import React, { useState } from "react";
+import "bootstrap/dist/css/bootstrap.min.css";
+import Category from "./Category";
+import Subcategory from "./Subcategory";
+import Product from "./Product";
+import ProductType from "./ProductType";
+import ProductLine from "./ProductLine";
+import Material from "./Material";
+import Manufacturer from "./Manufacturer";
 
 function ProMaster() {
-  const [activeTab, setActiveTab] = useState('category');
+  const [activeTab, setActiveTab] = useState("category");
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'category':
+      case "category":
         return <Category />;
-      case 'subcategory':
+      case "subcategory":
         return <Subcategory />;
-      case 'product':
+      case "product":
         return <Product />;
-        case 'producttype':
-           return <ProductType />;
-           case 'productline':
-             return <ProductLine />;
-             case 'material':
-                return <Material />;
-                case 'manufacturer':
-                   return <Manufacturer />;
+      case "producttype":
+        return <ProductType />;
+      case "productline":
+        return <ProductLine />;
+      case "material":
+        return <Material />;
+      case "manufacturer":
+        return <Manufacturer />;
       default:
         return <Category />;
     }
@@ -62,86 +62,109 @@ function ProMaster() {
       <div className="container-fluid p-0">
         {/* Top Header */}
         <div className="text-left headings">
-          <span style={{paddingLeft:"20px"}}>PRODUCT MASTER</span>
+          <span style={{ paddingLeft: "20px" }}>PRODUCT MASTER</span>
         </div>
 
         {/* Nav Tabs */}
         <div class="row">
           <div className="container-fluid">
-            <div className="col-sm-6 p-0" style={{ width: '100%' }}>
-            <div className="tabsMenu" style={{fontSize:"14px", marginLeft: "12px",fontWeight:"600",fontFamily:"Nunito"}}>
-              <ul className="nav nav-tabs ">
-                <li className="nav-item">
-                  <button
-                    className={`nav-link ${activeTab === 'category' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('category')}
-                  >
-                    CATEGORY
-                  </button>
-                </li>
-                <li className="nav-item">
-                  <button
-                    className={`nav-link ${activeTab === 'subcategory' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('subcategory')}
-                  >
-                    SUBCATEGORY
-                  </button>
-                </li>
-                <li className="nav-item">
-                  <button
-                    className={`nav-link ${activeTab === 'product' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('product')}
-                  >
-                    PRODUCT
-                  </button>
-                </li>
-                <li className="nav-item">
-                  <button
-                    className={`nav-link ${activeTab === 'producttype' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('producttype')}
-                  >
-                    PRODUCT TYPE
-                  </button>
-                </li>
-                <li className="nav-item">
-                  <button
-                    className={`nav-link ${activeTab === 'productline' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('productline')}
-                  >
-                    PRODUCT LINE
-                  </button>
-                </li>
-                <li className="nav-item">
-                  <button
-                    className={`nav-link ${activeTab === 'material' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('material')}
-                  >
-                    MATERIAL
-                  </button>
-                </li>
-                <li className="nav-item">
-                  <button
-                    className={`nav-link ${activeTab === 'manufacturer' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('manufacturer')}
-                  >
-                    MANUFACTURER
-                  </button>
-                </li>
-              </ul>
-            </div>
+            <div className="col-sm-6 p-0" style={{ width: "100%" }}>
+              <div
+                className="tabsMenu"
+                style={{
+                  fontSize: "14px",
+                  marginLeft: "12px",
+                  fontWeight: "600",
+                  fontFamily: "Nunito",
+                }}
+              >
+                <ul className="nav nav-tabs ">
+                  <li className="nav-item">
+                    <button
+                      className={`nav-link ${
+                        activeTab === "category" ? "active" : ""
+                      }`}
+                      onClick={() => setActiveTab("category")}
+                    >
+                      CATEGORY
+                    </button>
+                  </li>
+                  <li className="nav-item">
+                    <button
+                      className={`nav-link ${
+                        activeTab === "subcategory" ? "active" : ""
+                      }`}
+                      onClick={() => setActiveTab("subcategory")}
+                    >
+                      SUBCATEGORY
+                    </button>
+                  </li>
+                  <li className="nav-item">
+                    <button
+                      className={`nav-link ${
+                        activeTab === "product" ? "active" : ""
+                      }`}
+                      onClick={() => setActiveTab("product")}
+                    >
+                      PRODUCT
+                    </button>
+                  </li>
+                  <li className="nav-item">
+                    <button
+                      className={`nav-link ${
+                        activeTab === "producttype" ? "active" : ""
+                      }`}
+                      onClick={() => setActiveTab("producttype")}
+                    >
+                      PRODUCT TYPE
+                    </button>
+                  </li>
+                  <li className="nav-item">
+                    <button
+                      className={`nav-link ${
+                        activeTab === "productline" ? "active" : ""
+                      }`}
+                      onClick={() => setActiveTab("productline")}
+                    >
+                      PRODUCT LINE
+                    </button>
+                  </li>
+                  <li className="nav-item">
+                    <button
+                      className={`nav-link ${
+                        activeTab === "material" ? "active" : ""
+                      }`}
+                      onClick={() => setActiveTab("material")}
+                    >
+                      MATERIAL
+                    </button>
+                  </li>
+                  <li className="nav-item">
+                    <button
+                      className={`nav-link ${
+                        activeTab === "manufacturer" ? "active" : ""
+                      }`}
+                      onClick={() => setActiveTab("manufacturer")}
+                    >
+                      MANUFACTURER
+                    </button>
+                  </li>
+                </ul>
+              </div>
 
-{/* this is  */}
-            {/* Tab Content */}
-            <div className="col-12 col-custom" style={{paddingLeft:"12px",paddingRight:"12px"}}>
-            <div className="tab-content">
+              {/* this is  */}
+              {/* Tab Content */}
+              <div
+                className="col-12 col-custom"
+                style={{ paddingLeft: "12px", paddingRight: "12px" }}
+              >
                 <div className="tab-content">
-                  {renderTabContent()}
+                  <div className="tab-content">{renderTabContent()}</div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
       </div>
     </>
   );

@@ -59,48 +59,42 @@ export function Complaintview(params) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-         setErrorMessage("");
+    setErrorMessage("");
 
-         
-  if (!note && files.length === 0) {
-    setErrorMessage("Please fill the field and upload a file."); 
-    return;
-  } else if (!note) {
-    setErrorMessage("Please fill the field."); 
-    return; 
-  } else if (files.length === 0) {
-    setErrorMessage("Please upload a file."); 
-    return; 
-  }
+    if (!note && files.length === 0) {
+      setErrorMessage("Please fill the field and upload a file.");
+      return;
+    } else if (!note) {
+      setErrorMessage("Please fill the field.");
+      return;
+    } else if (files.length === 0) {
+      setErrorMessage("Please upload a file.");
+      return;
+    }
 
     try {
-     
       const complaintRemarkData = {
         ticket_no: complaintview.ticket_no,
         note,
         created_by,
       };
 
-    
       const remarkResponse = await axios.post(
         `${Base_Url}/addcomplaintremark`,
         complaintRemarkData
       );
-      const remarkId = remarkResponse.data.insertId; 
+      const remarkId = remarkResponse.data.insertId;
 
-     
       if (files.length > 0) {
         const formData = new FormData();
         formData.append("ticket_no", complaintview.ticket_no);
         formData.append("remark_id", remarkId);
         formData.append("created_by", created_by);
 
-       
         Array.from(files).forEach((file) => {
           formData.append("attachment", file);
         });
 
-   
         await axios.post(`${Base_Url}/uploadcomplaintattachments`, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
@@ -115,7 +109,7 @@ export function Complaintview(params) {
         `Error submitting data: ${
           error.response ? error.response.data.error : error.message
         }`
-      ); 
+      );
     }
   };
 
@@ -255,17 +249,6 @@ export function Complaintview(params) {
                 >
                   <table className="table table-striped">
                     <tbody>
-                      {/* <tr>
-                        <td>
-                          <div>LB240624002</div>
-                          <div>02-06-2024</div>
-                        </td>
-                        <td>Liebherr 472L</td>
-                        <td>
-                          <div>Closed</div>
-                          <span>View Info</span>
-                        </td>
-                      </tr> */}
                       {duplicate.map((item, index) => (
                         <tr key={index}>
                           <td>
@@ -325,57 +308,56 @@ export function Complaintview(params) {
                     className="card shadow-0 border"
                     style={{ backgroundColor: "#f0f2f5" }}
                   >
-                 <form>
-  <div className="card-body p-4">
-    <div className="form-outline mb-2">
-      <input
-        type="text"
-        id="addANote"
-        name="note"
-        className="form-control"
-        placeholder="Type comment..."
-        value={note}
-        onChange={(e) => setNote(e.target.value)}
-      />
-    </div>
+                    <form>
+                      <div className="card-body p-4">
+                        <div className="form-outline mb-2">
+                          <input
+                            type="text"
+                            id="addANote"
+                            name="note"
+                            className="form-control"
+                            placeholder="Type comment..."
+                            value={note}
+                            onChange={(e) => setNote(e.target.value)}
+                          />
+                        </div>
 
-    {/* File upload field for images, videos, and audio */}
-    <div className="form-outline mb-4">
-      <label
-        htmlFor="uploadFiles"
-        className="form-label mp-0"
-      >
-        Upload Files (Images, Videos, Audios)
-      </label>
-      <input
-        type="file"
-        id="uploadFiles"
-        name="attachment"
-        className="form-control"
-        multiple
-        accept="image/*,video/*,audio/*"
-        onChange={handleFileChange}
-      />
-    </div>
+                        {/* File upload field for images, videos, and audio */}
+                        <div className="form-outline mb-4">
+                          <label
+                            htmlFor="uploadFiles"
+                            className="form-label mp-0"
+                          >
+                            Upload Files (Images, Videos, Audios)
+                          </label>
+                          <input
+                            type="file"
+                            id="uploadFiles"
+                            name="attachment"
+                            className="form-control"
+                            multiple
+                            accept="image/*,video/*,audio/*"
+                            onChange={handleFileChange}
+                          />
+                        </div>
 
-    {/* Consolidated error message */}
-    {errorMessage && (
-      <div className="text-danger mt-2">{errorMessage}</div>
-    )}
+                        {/* Consolidated error message */}
+                        {errorMessage && (
+                          <div className="text-danger mt-2">{errorMessage}</div>
+                        )}
 
-    {/* Right-aligned submit button */}
-    <div className="d-flex justify-content-end">
-      <button
-        type="submit" 
-        className="btn btn-primary"
-        onClick={handleSubmit}
-      >
-        Submit
-      </button>
-    </div>
-  </div>
-</form>
-
+                        {/* Right-aligned submit button */}
+                        <div className="d-flex justify-content-end">
+                          <button
+                            type="submit"
+                            className="btn btn-primary"
+                            onClick={handleSubmit}
+                          >
+                            Submit
+                          </button>
+                        </div>
+                      </div>
+                    </form>
                   </div>
                 </div>
               </div>
@@ -413,7 +395,7 @@ export function Complaintview(params) {
                       {attachments.filter((att) => att.remark_id === remark.id)
                         .length > 0 && (
                         <div className="attachments">
-                          <h3 className="mainheade" >Attachments</h3>
+                          <h3 className="mainheade">Attachments</h3>
                           {attachments
                             .filter((att) => att.remark_id === remark.id)
                             .map((attachment) => (

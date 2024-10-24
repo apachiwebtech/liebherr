@@ -1,19 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
-import 'bootstrap/dist/css/bootstrap.min.css';
-import  Ratecard  from './Ratecard';
-
+import "bootstrap/dist/css/bootstrap.min.css";
+import Ratecard from "./Ratecard";
 
 function Ratecardtabs() {
-  const [activeTab, setActiveTab] = useState('Ratecard');
+  const [activeTab, setActiveTab] = useState("Ratecard");
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'Ratecard':
+      case "Ratecard":
         return <Ratecard />;
-  
+
       default:
-        return <Ratecard/>;
+        return <Ratecard />;
     }
   };
 
@@ -48,36 +47,44 @@ function Ratecardtabs() {
       <div className="container-fluid p-0">
         {/* Top Header */}
         <div className="text-left headings">
-          <span style={{paddingLeft:"20px"}}>RATE CARD MATRIX MASTER </span>
+          <span style={{ paddingLeft: "20px" }}>RATE CARD MATRIX MASTER </span>
         </div>
 
         {/* Nav Tabs */}
         <div class="row">
           <div className="container-fluid">
-            <div className="col-sm-6 p-0" style={{ width: '100%' }}>
-            <div className="tabsMenu" style={{fontSize:"14px", marginLeft: "12px",fontWeight:"600",fontFamily:"Nunito"}}>
-              <ul className="nav nav-tabs ">
-                <li className="nav-item">
-                  <button
-                    className={`nav-link ${activeTab === 'Ratecard' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('Ratecard')}
-                  >
-                  RATE CARD MATRIX
-                  </button>
-                </li>
-        
-          
-              </ul>
-            </div> 
+            <div className="col-sm-6 p-0" style={{ width: "100%" }}>
+              <div
+                className="tabsMenu"
+                style={{
+                  fontSize: "14px",
+                  marginLeft: "12px",
+                  fontWeight: "600",
+                  fontFamily: "Nunito",
+                }}
+              >
+                <ul className="nav nav-tabs ">
+                  <li className="nav-item">
+                    <button
+                      className={`nav-link ${
+                        activeTab === "Ratecard" ? "active" : ""
+                      }`}
+                      onClick={() => setActiveTab("Ratecard")}
+                    >
+                      RATE CARD MATRIX
+                    </button>
+                  </li>
+                </ul>
+              </div>
             </div>
 
-
-            {/* Tab Content */}       
-              <div className="col-12 col-custom" style={{paddingLeft:"12px",paddingRight:"12px"}}>
-                <div className="tab-content">
-                  {renderTabContent()}
-                </div>
-              </div>
+            {/* Tab Content */}
+            <div
+              className="col-12 col-custom"
+              style={{ paddingLeft: "12px", paddingRight: "12px" }}
+            >
+              <div className="tab-content">{renderTabContent()}</div>
+            </div>
           </div>
         </div>
       </div>

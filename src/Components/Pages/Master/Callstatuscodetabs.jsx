@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
-import 'bootstrap/dist/css/bootstrap.min.css';
-import  Callstatus  from './Callstatus';
+import "bootstrap/dist/css/bootstrap.min.css";
+import Callstatus from "./Callstatus";
 
 function Callstatuscodetabs() {
-  const [activeTab, setActiveTab] = useState('Callstatus');
+  const [activeTab, setActiveTab] = useState("Callstatus");
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'Callstatus':
+      case "Callstatus":
         return <Callstatus />;
-  
+
       default:
         return <Callstatus />;
     }
@@ -47,36 +47,44 @@ function Callstatuscodetabs() {
       <div className="container-fluid p-0">
         {/* Top Header */}
         <div className="text-left headings">
-          <span style={{paddingLeft:"20px"}}>Call Status Code Master </span>
+          <span style={{ paddingLeft: "20px" }}>Call Status Code Master </span>
         </div>
 
         {/* Nav Tabs */}
         <div class="row">
           <div className="container-fluid">
-            <div className="col-sm-6 p-0" style={{ width: '100%' }}>
-            <div className="tabsMenu" style={{fontSize:"14px", marginLeft: "12px",fontWeight:"600",fontFamily:"Nunito"}}>
-              <ul className="nav nav-tabs ">
-                <li className="nav-item">
-                  <button
-                    className={`nav-link ${activeTab === 'Callstatus' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('Callstatus')}
-                  >
-                  CALL STATUS CODE 
-                  </button>
-                </li>
-        
-          
-              </ul>
-            </div> 
+            <div className="col-sm-6 p-0" style={{ width: "100%" }}>
+              <div
+                className="tabsMenu"
+                style={{
+                  fontSize: "14px",
+                  marginLeft: "12px",
+                  fontWeight: "600",
+                  fontFamily: "Nunito",
+                }}
+              >
+                <ul className="nav nav-tabs ">
+                  <li className="nav-item">
+                    <button
+                      className={`nav-link ${
+                        activeTab === "Callstatus" ? "active" : ""
+                      }`}
+                      onClick={() => setActiveTab("Callstatus")}
+                    >
+                      CALL STATUS CODE
+                    </button>
+                  </li>
+                </ul>
+              </div>
             </div>
 
-
-            {/* Tab Content */}       
-              <div className="col-12 col-custom" style={{paddingLeft:"12px",paddingRight:"12px"}}>
-                <div className="tab-content">
-                  {renderTabContent()}
-                </div>
-              </div>
+            {/* Tab Content */}
+            <div
+              className="col-12 col-custom"
+              style={{ paddingLeft: "12px", paddingRight: "12px" }}
+            >
+              <div className="tab-content">{renderTabContent()}</div>
+            </div>
           </div>
         </div>
       </div>

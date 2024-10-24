@@ -98,44 +98,7 @@ export function Complaintlist(params) {
                                 </tr>
                             </thead>
                             <tbody>
-                                {/* {Complaintdata.map((item, index) => (
                             
-                            <tr key={item.id}>
-                                    <td >{index + 1}</td>
-                                    <td >{item.ticket_no}</td>
-                                    <td >{formatDate(item.ticket_date)}</td>
-                                    <td >{item.customer_name}</td>
-                                    <td >{item.ModelNumber}</td>
-                                    <td >{'0'}</td>
-                                    <td >{item.assigned_to}</td>
-                                    <td >{item.call_status}</td>
-                                    <td >
-                                    <button
-                                        className='btn'
-                                        onClick={() => {
-                                        // alert(item.id)
-                                        edit(item.id)
-                                        }}
-                                        title="Edit"
-                                        style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                                    >
-                                        <FaPencilAlt />
-                                    </button>
-                                    </td>
-                                    <td style={{ padding: '0px', textAlign: 'center' }}>
-                                    <button
-                                        className='btn'
-                                        onClick={() => deleted(item.id)}
-                                        title="Delete"
-                                        style={{ backgroundColor: 'transparent', border: 'none', color: 'red', fontSize: '20px' }}
-                                    >
-                                        <FaTrash />
-                                    </button>
-                                    </td>
-                            </tr>
-                         ))} */}
-
-
                                 {Complaintdata.map((item, index) => {
                                     return (
                                         <tr key={item.id}>

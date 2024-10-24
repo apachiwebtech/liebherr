@@ -1,19 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
-import 'bootstrap/dist/css/bootstrap.min.css';
-import  Serviceproduct  from './Serviceproduct';
-
+import "bootstrap/dist/css/bootstrap.min.css";
+import Serviceproduct from "./Serviceproduct";
 
 function Serviceproducttabs() {
-  const [activeTab, setActiveTab] = useState('Serviceproduct');
+  const [activeTab, setActiveTab] = useState("Serviceproduct");
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'Serviceproduct':
+      case "Serviceproduct":
         return <Serviceproduct />;
-  
+
       default:
-        return <Serviceproduct/>;
+        return <Serviceproduct />;
     }
   };
 
@@ -48,36 +47,44 @@ function Serviceproducttabs() {
       <div className="container-fluid p-0">
         {/* Top Header */}
         <div className="text-left headings">
-          <span style={{paddingLeft:"20px"}}>SERVICE PRODUCT Master </span>
+          <span style={{ paddingLeft: "20px" }}>SERVICE PRODUCT Master </span>
         </div>
 
         {/* Nav Tabs */}
         <div class="row">
           <div className="container-fluid">
-            <div className="col-sm-6 p-0" style={{ width: '100%' }}>
-            <div className="tabsMenu" style={{fontSize:"14px", marginLeft: "12px",fontWeight:"600",fontFamily:"Nunito"}}>
-              <ul className="nav nav-tabs ">
-                <li className="nav-item">
-                  <button
-                    className={`nav-link ${activeTab === 'Serviceproduct' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('Serviceproduct')}
-                  >
-                  SERVICE PRODUCT
-                  </button>
-                </li>
-        
-        
-              </ul>
-            </div> 
+            <div className="col-sm-6 p-0" style={{ width: "100%" }}>
+              <div
+                className="tabsMenu"
+                style={{
+                  fontSize: "14px",
+                  marginLeft: "12px",
+                  fontWeight: "600",
+                  fontFamily: "Nunito",
+                }}
+              >
+                <ul className="nav nav-tabs ">
+                  <li className="nav-item">
+                    <button
+                      className={`nav-link ${
+                        activeTab === "Serviceproduct" ? "active" : ""
+                      }`}
+                      onClick={() => setActiveTab("Serviceproduct")}
+                    >
+                      SERVICE PRODUCT
+                    </button>
+                  </li>
+                </ul>
+              </div>
             </div>
 
-
-            {/* Tab Content */}       
-              <div className="col-12 col-custom" style={{paddingLeft:"12px",paddingRight:"12px"}}>
-                <div className="tab-content">
-                  {renderTabContent()}
-                </div>
-              </div>
+            {/* Tab Content */}
+            <div
+              className="col-12 col-custom"
+              style={{ paddingLeft: "12px", paddingRight: "12px" }}
+            >
+              <div className="tab-content">{renderTabContent()}</div>
+            </div>
           </div>
         </div>
       </div>

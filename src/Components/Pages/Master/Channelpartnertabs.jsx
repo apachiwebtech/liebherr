@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
-import 'bootstrap/dist/css/bootstrap.min.css';
-import Channelpartner from './Channelpartner';
+import "bootstrap/dist/css/bootstrap.min.css";
+import Channelpartner from "./Channelpartner";
 
 function Channelpartnertabs() {
-  const [activeTab, setActiveTab] = useState('Channelpartner');
+  const [activeTab, setActiveTab] = useState("Channelpartner");
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'Channelpartner':
+      case "Channelpartner":
         return <Channelpartner />;
-  
+
       default:
         return <Channelpartner />;
     }
@@ -47,36 +47,44 @@ function Channelpartnertabs() {
       <div className="container-fluid p-0">
         {/* Top Header */}
         <div className="text-left headings">
-          <span style={{paddingLeft:"20px"}}>Channel Partner Master </span>
+          <span style={{ paddingLeft: "20px" }}>Channel Partner Master </span>
         </div>
 
         {/* Nav Tabs */}
         <div class="row">
           <div className="container-fluid">
-            <div className="col-sm-6 p-0" style={{ width: '100%' }}>
-            <div className="tabsMenu" style={{fontSize:"14px", marginLeft: "12px",fontWeight:"600",fontFamily:"Nunito"}}>
-              <ul className="nav nav-tabs ">
-                <li className="nav-item">
-                  <button
-                    className={`nav-link ${activeTab === 'Channelpartner' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('Channelpartner')}
-                  >
-                  CHANNEL PARTNER 
-                  </button>
-                </li>
-        
-          
-              </ul>
-            </div> 
+            <div className="col-sm-6 p-0" style={{ width: "100%" }}>
+              <div
+                className="tabsMenu"
+                style={{
+                  fontSize: "14px",
+                  marginLeft: "12px",
+                  fontWeight: "600",
+                  fontFamily: "Nunito",
+                }}
+              >
+                <ul className="nav nav-tabs ">
+                  <li className="nav-item">
+                    <button
+                      className={`nav-link ${
+                        activeTab === "Channelpartner" ? "active" : ""
+                      }`}
+                      onClick={() => setActiveTab("Channelpartner")}
+                    >
+                      CHANNEL PARTNER
+                    </button>
+                  </li>
+                </ul>
+              </div>
             </div>
 
-
-            {/* Tab Content */}       
-              <div className="col-12 col-custom" style={{paddingLeft:"12px",paddingRight:"12px"}}>
-                <div className="tab-content">
-                  {renderTabContent()}
-                </div>
-              </div>
+            {/* Tab Content */}
+            <div
+              className="col-12 col-custom"
+              style={{ paddingLeft: "12px", paddingRight: "12px" }}
+            >
+              <div className="tab-content">{renderTabContent()}</div>
+            </div>
           </div>
         </div>
       </div>
