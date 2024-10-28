@@ -1,10 +1,3 @@
-
-
-
-
-
-
-// Insert new Customer Location with duplicate check 
 app.post("/postcustomerlocation", (req, res) => {
   const { country_id, region_id, geostate_id, geocity_id, area_id, pincode_id,address,ccperson,ccnumber,address_type } = req.body;
 
@@ -36,3 +29,14 @@ app.post("/postcustomerlocation", (req, res) => {
     }
   });
 });
+
+
+                    customer_fname: '',
+                    customer_lname: '',
+                    customer_type: '',
+                    customer_classification: '',
+                    mobileno: '',
+                    alt_mobileno: '',
+                    dateofbirth: '',
+                    anniversary_date: '',
+                    email: '',

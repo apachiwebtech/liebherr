@@ -5,14 +5,20 @@ import { FaPencilAlt, FaTrash,FaEye } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
 
 export function Products(params) {
-    const [Complaintdata, setComplaintdata] = useState([]);
+    const [Productdata, setProductdata] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
     const [formData, setFormData] = useState({
-        title: '',
-        cfranchise_id: '',
-        password: '',
-        email: '',
-        mobile_no: '',
+        serial_no: '',
+        item_code: '',
+        item_description: '',
+        // itemCode: '',
+        productType: '',
+        productLineCode: '',
+        productLine: '',
+        productClassCode: '',
+        productClass: '',
+        material: '',
+        manufacturer: '',
     });
 
     const formatDate = (dateString) => {
@@ -21,25 +27,34 @@ export function Products(params) {
         return date.toLocaleDateString('en-GB', options).replace(/\//g, '-'); // Convert to 'DD-MM-YYYY' format
     };
 
-    const fetchComplaintlist = async () => {
+    const fetchProductlist = async () => {
         try {
-            const response = await axios.get(`${Base_Url}/getcomplainlist`);
-            setComplaintdata(response.data);
+            const response = await axios.get(`${Base_Url}/getproductlist`);
+            setProductdata(response.data);
         } catch (error) {
-            console.error('Error fetching Complaintdata:', error);
-            setComplaintdata([]);
+            console.error('Error fetching Productdata:', error);
+            setProductdata([]);
         }
     };
 
 
     const deleted = async (id) => {
         try {
-            const response = await axios.post(`${Base_Url}/deleteengineer`, { id });
+            const response = await axios.post(`${Base_Url}/deleteproductlist`, { id });
             setFormData({
-                title: '',
-                cfranchise_id: ''
+                serial_no: '',
+                item_code: '',
+                item_description: '',
+                // itemCode: '',
+                productType: '',
+                productLineCode: '',
+                productLine: '',
+                productClassCode: '',
+                productClass: '',
+                material: '',
+                manufacturer: '',
             })
-            fetchComplaintlist();
+            fetchProductlist();
         } catch (error) {
             console.error('Error deleting user:', error);
         }
@@ -47,7 +62,7 @@ export function Products(params) {
 
     const edit = async (id) => {
         try {
-            const response = await axios.get(`${Base_Url}/requestengineer/${id}`);
+            const response = await axios.get(`${Base_Url}/requestproductlist/${id}`);
             setFormData(response.data)
             setIsEdit(true);
             console.log(response.data);
@@ -56,7 +71,7 @@ export function Products(params) {
         }
     };
     useEffect(() => {
-        fetchComplaintlist();
+        fetchProductlist();
     }, []);
 
     const [isOpen, setIsOpen] = useState({}); // State to track which rows are expanded
@@ -85,13 +100,13 @@ export function Products(params) {
                             <thead>
                                 <tr>
                                     <th >#</th>
-                                    <th >Complaint No.</th>
-                                    <th >Complaint Date</th>
-                                    <th >Customer Name</th>
-                                    <th >Product</th>
-                                    <th >Age</th>
-                                    <th >Assigned Users</th>
-                                    <th >Status</th>
+                                    <th >Serial No.</th>
+                                    <th >Item Code</th>
+                                    <th >Item Description</th>
+                                    <th >Product Type</th>
+                                    <th >Product Line</th>
+                                    <th >Material</th>
+                                    <th >Manufacturer</th>
                                     <th >Edit</th>
                                     <th >View</th>
                                     <th >Delete</th>
@@ -99,17 +114,17 @@ export function Products(params) {
                             </thead>
                             <tbody>
                             
-                                {Complaintdata.map((item, index) => {
+                                {Productdata.map((item, index) => {
                                     return (
                                         <tr key={item.id}>
                                             <td >{index + 1}</td>
-                                            <td >{item.ticket_no}</td>
-                                            <td >{formatDate(item.ticket_date)}</td>
-                                            <td >{item.customer_name}</td>
-                                            <td >{item.ModelNumber}</td>
-                                            <td >{'0'}</td>
-                                            <td >{item.assigned_to}</td>
-                                            <td >{item.call_status}</td>
+                                            <td >{item.serial_no}</td>
+                                            <td >{formatDate(item.item_code)}</td>
+                                            <td >{item.item_description}</td>
+                                            <td >{item.productType}</td>
+                                            <td >{item.productLine}</td>
+                                            <td >{item.material}</td>
+                                            <td >{item.manufacturer}</td>
                                             <td >
                                                 <button
                                                     className='btn'
@@ -129,7 +144,7 @@ export function Products(params) {
                                                     onClick={() => {
                                                         navigate(`/complaintview/${item.id}`)
                                                     }}
-                                                    title="Edit"
+                                                    title="View"
                                                     style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
                                                 >
                                                     <FaEye />

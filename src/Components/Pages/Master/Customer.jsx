@@ -4,161 +4,192 @@ import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
 
 const Customer = () => {
-//  // Step 1: Add this state to track errors
-//   const [countries, setCountries] = useState([]);
-//   const [errors, setErrors] = useState({});
-//   const [users, setUsers] = useState([]);
-//   const [filteredUsers, setFilteredUsers] = useState([]);
-//   const [isEdit, setIsEdit] = useState(false);
-//   const [currentPage, setCurrentPage] = useState(0);
-//   const [itemsPerPage, setItemsPerPage] = useState(10);
-//   const [searchTerm, setSearchTerm] = useState('');
-//   const [duplicateError, setDuplicateError] = useState(''); // State to track duplicate error
+
+  const [customerData, setCustomerData] = useState([]);
+  const [errors, setErrors] = useState({});
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [isEdit, setIsEdit] = useState(false);
+  const [duplicateError, setDuplicateError] = useState(''); 
 
 
-//   const [formData, setFormData] = useState({ 
-//     title: '',
-//     country_id: ''
-//   });
+  const [formData, setFormData] = useState({ 
+    customer_fname: '',
+    customer_lname: '',
+    customer_type: '',
+    customer_classification: '',
+    mobileno: '',
+    alt_mobileno: '',
+    dateofbirth: '',
+    anniversary_date: '',
+    email: '',
+  });
 
-//   const fetchCountries = async () => {
-//     try {
-//       const response = await axios.get(`${Base_Url}/getcountries`);
-//       console.log(response.data); 
-//       setCountries(response.data); // Countries data ko set kar rahe hain
-//     } catch (error) {
-//       console.error('Error fetching countries:', error); // Agar error aata hai to console me print karenge
-//     }
-//   };
+  const fetchCustomerData = async () => {
+    try {
+      const response = await axios.get(`${Base_Url}/getcustomer`);
+      console.log(response.data); 
+      setCustomerData(response.data); 
+    } catch (error) {
+      console.error('Error fetching CustomerData:', error);
+    }
+  };
   
-//   const fetchUsers = async () => {
-//     try {
-//       const response = await axios.get(`${Base_Url}/getregions`);
-//       console.log(response.data); 
-//       setUsers(response.data);
-//       setFilteredUsers(response.data);
-//     } catch (error) {
-//       console.error('Error fetching users:', error);
-//     }
-//   };
 
-//   useEffect(() => {
-//     fetchUsers();
-//     fetchCountries();
-//   }, []);
 
-//   const handleChange = (e) => {
-//     const { name, value } = e.target;
-//     setFormData({ ...formData, [name]: value });
-//   };
+  useEffect(() => {
+    fetchCustomerData();
+  }, []);
 
-//   const handleSearch = (e) => {
-//     const value = e.target.value.toLowerCase();
-//     setSearchTerm(value);
-//     const filtered = users.filter((user) =>
-//       user.title && user.title.toLowerCase().includes(value)
-//     );
-//     setFilteredUsers(filtered);
-//     setCurrentPage(0);
-//   };
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
 
    
-//     // Step 2: Add form validation function
-//     const validateForm = () => {
-//       const newErrors = {}; // Initialize an empty error object
-//       if (!formData.title.trim()) { // Check if the title is empty
-//         newErrors.title = "Region Field is required."; // Set error message if title is empty
-//       }
+    // Step 2: Add form validation function
+    const validateForm = () => {
+      const newErrors = {}; 
+      if (!formData.customer_fname.trim()) {
+        newErrors.customer_fname = "Customer First Name Field is required.";
+      }
 
-//        // Check if the country_id is empty
-//       if (!formData.country_id) {
-//         newErrors.country_id = "Country selection is required."; // Set error message if no country is selected
-//       }
-//       return newErrors; // Return the error object
-//     };
+      
+      if (!formData.customer_lname) {
+        newErrors.customer_lname = "Customer Last Name Field is required."; 
+      }
+
+      if (!formData.customer_type) {
+        newErrors.customer_type = "Customer Type Dropdown is required."; 
+      }
+
+      if (!formData.customer_classification) {
+        newErrors.customer_classification = "Customer Classification Dropdown is required."; 
+      }
+
+      if (!formData.mobileno) {
+        newErrors.mobileno = "Mobile Number Field is required."; 
+      }
+
+      if (!formData.alt_mobileno) {
+        newErrors.alt_mobileno = "Alternate Mobile Number Field is required."; 
+      }
+
+      if (!formData.dateofbirth) {
+        newErrors.dateofbirth = "Date Of Birth Field is required."; 
+      }
+
+      if (!formData.anniversary_date) {
+        newErrors.anniversary_date = "Anniversary Date Field is required."; 
+      }
+
+      if (!formData.email) {
+        newErrors.email = "Email Field is required."; 
+      }
+
+      
+      return newErrors;
+    };
   
 
-//       //handlesubmit form
-//       const handleSubmit = async (e) => {
-//         e.preventDefault();
+      //handlesubmit form
+      const handleSubmit = async (e) => {
+        e.preventDefault();
       
-//         const validationErrors = validateForm();
-//         if (Object.keys(validationErrors).length > 0) {
-//           setErrors(validationErrors);
-//           return;
-//         }
+        const validationErrors = validateForm();
+        if (Object.keys(validationErrors).length > 0) {
+          setErrors(validationErrors);
+          return;
+        }
       
-//         setDuplicateError(''); // Clear duplicate error before submitting
+        setDuplicateError(''); // Clear duplicate error before submitting
       
-//         try {
-//           const confirmSubmission = window.confirm("Do you want to submit the data?");
-//           if (confirmSubmission) {
-//             if (isEdit) {
-//               // For update, include duplicate check
-//               await axios.put(`${Base_Url}/putregion`, { ...formData })
-//                 .then(response => {
-//                   setFormData({
-//                     title: '',
-//                 country_id: ''
-//                               })
-//                     fetchUsers();
-//                 })
-//                 .catch(error => {
-//                   if (error.response && error.response.status === 409) {
-//                     setDuplicateError('Duplicate entry, Region already exists!'); // Show duplicate error for update
-//                   }
-//                 });
-//             } else {
-//               // For insert, include duplicate check
-//               await axios.post(`${Base_Url}/postregion`, { ...formData })
-//                 .then(response => {
-//                   setFormData({
-//                     title: '',
-//                 country_id: ''
-//                               })
-//                     fetchUsers();
-//                 })
-//                 .catch(error => {
-//                   if (error.response && error.response.status === 409) {
-//                     setDuplicateError('Duplicate entry, Region already exists!'); // Show duplicate error for insert
-//                   }
-//                 });
-//             }
-//           }
-//         } catch (error) {
-//           console.error('Error during form submission:', error);
-//         }
-//       };
+        try {
+          const confirmSubmission = window.confirm("Do you want to submit the data?");
+          if (confirmSubmission) {
+            if (isEdit) {
+              // For update, include duplicate check
+              await axios.put(`${Base_Url}/putcustomer`, { ...formData })
+                .then(response => {
+                  setFormData({
+                    customer_fname: '',
+                    customer_lname: '',
+                    customer_type: '',
+                    customer_classification: '',
+                    mobileno: '',
+                    alt_mobileno: '',
+                    dateofbirth: '',
+                    anniversary_date: '',
+                    email: '',
+                              })
+                    fetchCustomerData();
+                })
+                .catch(error => {
+                  if (error.response && error.response.status === 409) {
+                    setDuplicateError('Duplicate entry, Region already exists!'); // Show duplicate error for update
+                  }
+                });
+            } else {
+              // For insert, include duplicate check
+              await axios.post(`${Base_Url}/postcustomer`, { ...formData })
+                .then(response => {
+                  setFormData({
+                    customer_fname: '',
+                    customer_lname: '',
+                    customer_type: '',
+                    customer_classification: '',
+                    mobileno: '',
+                    alt_mobileno: '',
+                    dateofbirth: '',
+                    anniversary_date: '',
+                    email: '',
+                              })
+                    fetchCustomerData();
+                })
+                .catch(error => {
+                  if (error.response && error.response.status === 409) {
+                    setDuplicateError('Duplicate entry, Region already exists!'); // Show duplicate error for insert
+                  }
+                });
+            }
+          }
+        } catch (error) {
+          console.error('Error during form submission:', error);
+        }
+      };
       
 
-//   const deleted = async (id) => {
-//     try {
-//       const response = await axios.post(`${Base_Url}/deleteregion`, { id });
-//       setFormData({
-//         title: '',
-//     country_id: ''
-//                   })
-//         fetchUsers();
-//     } catch (error) {
-//       console.error('Error deleting user:', error);
-//     }
-//   };
+  const deleted = async (id) => {
+    try {
+      const response = await axios.post(`${Base_Url}/deletecustomer`, { id });
+      setFormData({
+        customer_fname: '',
+        customer_lname: '',
+        customer_type: '',
+        customer_classification: '',
+        mobileno: '',
+        alt_mobileno: '',
+        dateofbirth: '',
+        anniversary_date: '',
+        email: '',
+                  })
+        fetchCustomerData();
+    } catch (error) {
+      console.error('Error deleting user:', error);
+    }
+  };
 
-//   const edit = async (id) => {
-//     try {
-//       const response = await axios.get(`${Base_Url}/requestregion/${id}`);
-//       setFormData(response.data)
-//       setIsEdit(true);
-//       console.log(response.data);
-//     } catch (error) {
-//       console.error('Error editing user:', error);
-//     }
-//   };
+  const edit = async (id) => {
+    try {
+      const response = await axios.get(`${Base_Url}/requestcustomer/${id}`);
+      setFormData(response.data)
+      setIsEdit(true);
+      console.log(response.data);
+    } catch (error) {
+      console.error('Error editing user:', error);
+    }
+  };
 
-
-//   const indexOfLastUser = (currentPage + 1) * itemsPerPage;
-//   const indexOfFirstUser = indexOfLastUser - itemsPerPage;
-//   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
   return (
     <div className="row mp0">
@@ -167,7 +198,7 @@ const Customer = () => {
         <div className="card-body">
           <div className="row mp0">
             <div className="col-12">
-              <form>
+              <form  onSubmit={handleSubmit}>
                 <div className="row">
                   <div className="col-md-3 mb-3">
                     <label htmlFor="Customerfname" className="form-label">Customer First Name</label>
@@ -176,7 +207,13 @@ const Customer = () => {
                       className="form-control"
                       id="Customerfname"
                       aria-describedby="Customerfname"
+                      name="customer_fname"
+                      value={formData.customer_fname}
+                      onChange={handleChange}
                     />
+                      {errors.customer_fname && (
+                        <small className="text-danger">{errors.customer_fname}</small>
+                      )}
                   </div>
                   <div className="col-md-3 mb-3">
                     <label htmlFor="Customerlname" className="form-label">Customer Last Name</label>
@@ -185,22 +222,34 @@ const Customer = () => {
                       className="form-control"
                       id="Customerlname"
                       aria-describedby="Customerlname"
+                      name="customer_lname"
+                      onChange={handleChange}
+                      value={formData.customer_lname}
                     />
+                      {errors.customer_lname && (
+                        <small className="text-danger">{errors.customer_lname}</small>
+                      )}
                   </div>
                   <div className="col-md-3 mb-3">
                     <label htmlFor="custype" className="form-label">Customer Type</label>
-                    <select id="custype" name="custype" className="form-select" aria-label=".form-select-lg example">
+                    <select id="custype"  className="form-select" aria-label=".form-select-lg example" name="customer_type" value={formData.customer_type}  onChange={handleChange} >
                       <option value="selected">Select Customer Type</option>
                       <option value="Customer">Customer</option>
                     </select>
+                    {errors.customer_type && (
+                      <small className="text-danger">{errors.customer_type}</small>
+                    )}
                   </div>
                   <div className="col-md-3 mb-3">
                     <label htmlFor="cclassification" className="form-label">Customer Classification</label>
-                    <select id="cclassification" name="cclassification" className="form-select" aria-label=".form-select-lg example">
+                    <select id="cclassification" name="customer_classification" className="form-select" aria-label=".form-select-lg example" value={formData.customer_classification}  onChange={handleChange} >
                       <option value="selected">Select Customer Classification</option>
                       <option value="Import">Import</option>
                       <option value="India">India</option>
                     </select>
+                    {errors.customer_classification && (
+                      <small className="text-danger">{errors.customer_classification}</small>
+                    )}
                   </div>
                   <div className="col-md-3 mb-3">
                     <label htmlFor="mobilenumber" className="form-label">Mobile No.</label>
@@ -209,7 +258,13 @@ const Customer = () => {
                       className="form-control"
                       id="mobilenumber"
                       aria-describedby="mobilenumber"
+                      name="mobileno"
+                      value={formData.mobileno}
+                      onChange={handleChange}
                     />
+                    {errors.mobileno && (
+                      <small className="text-danger">{errors.mobileno}</small>
+                    )}
                   </div>
                   <div className="col-md-3 mb-3">
                     <label htmlFor="Altnumber" className="form-label">Alternate Mobile No.</label>
@@ -218,7 +273,13 @@ const Customer = () => {
                       className="form-control"
                       id="Altnumber"
                       aria-describedby="Altnumber"
+                      name="alt_mobileno"
+                      value={formData.alt_mobileno}
+                      onChange={handleChange}
                     />
+                     {errors.alt_mobileno && (
+                      <small className="text-danger">{errors.alt_mobileno}</small>
+                    )}
                   </div>
                   <div className="col-md-3 mb-3">
                     <label htmlFor="dbirth" className="form-label">Date of Birth</label>
@@ -227,7 +288,13 @@ const Customer = () => {
                       className="form-control"
                       id="dbirth"
                       aria-describedby="dbirth"
+                      name="dateofbirth"
+                      value={formData.dateofbirth}
+                      onChange={handleChange}
                     />
+                     {errors.dateofbirth && (
+                      <small className="text-danger">{errors.dateofbirth}</small>
+                    )}
                   </div>
                   <div className="col-md-3 mb-3">
                     <label htmlFor="Anidate" className="form-label">Anniversary Date</label>
@@ -236,7 +303,13 @@ const Customer = () => {
                       className="form-control"
                       id="Anidate"
                       aria-describedby="Anidate"
+                      name="anniversary_date"
+                      value={formData.anniversary_date}
+                      onChange={handleChange}
                     />
+                    {errors.anniversary_date && (
+                      <small className="text-danger">{errors.anniversary_date}</small>
+                    )}
                   </div>
                   <div className="col-md-3 mb-3">
                     <label htmlFor="emailid" className="form-label">Email ID</label>
@@ -245,10 +318,16 @@ const Customer = () => {
                       className="form-control"
                       id="emailid"
                       aria-describedby="emailid"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
                     />
+                    {errors.email && (
+                      <small className="text-danger">{errors.email}</small>
+                    )}
                   </div>
                   <div className="col-md-12 text-right">
-                    <button type="submit" className="btn btn-liebherr">Submit</button>
+                    <button type="submit" className="btn btn-liebherr">{isEdit ? "Update" : "Submit"}</button>
                   </div>
                 </div>
               </form>

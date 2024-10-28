@@ -16,7 +16,7 @@ export function Complaintview(params) {
   const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
   const [currentAttachment, setCurrentAttachment] = useState(""); // Current attachment for modal
 
-  const created_by = 4;
+  const created_by = 1;
 
   const fetchComplaintDetails = async () => {
     try {

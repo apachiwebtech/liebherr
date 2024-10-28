@@ -2,12 +2,11 @@ import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Category from "./Category";
 import Subcategory from "./Subcategory";
-import Product from "./Product";
 import ProductType from "./ProductType";
 import ProductLine from "./ProductLine";
 import Material from "./Material";
 import Manufacturer from "./Manufacturer";
-
+import { Products } from "./Products";
 function ProMaster() {
   const [activeTab, setActiveTab] = useState("category");
 
@@ -17,18 +16,18 @@ function ProMaster() {
         return <Category />;
       case "subcategory":
         return <Subcategory />;
-      case "product":
-        return <Product />;
-      case "producttype":
-        return <ProductType />;
-      case "productline":
-        return <ProductLine />;
-      case "material":
-        return <Material />;
-      case "manufacturer":
-        return <Manufacturer />;
-      default:
-        return <Category />;
+        case "products":
+          return <Products />;
+          case "producttype":
+            return <ProductType />;
+              case "productline":
+                return <ProductLine />;
+                  case "material":
+                    return <Material />;
+                      case "manufacturer":
+                        return <Manufacturer />;
+                          default:
+                            return <Category />;
     }
   };
 
@@ -102,9 +101,9 @@ function ProMaster() {
                   <li className="nav-item">
                     <button
                       className={`nav-link ${
-                        activeTab === "product" ? "active" : ""
+                        activeTab === "products" ? "active" : ""
                       }`}
-                      onClick={() => setActiveTab("product")}
+                      onClick={() => setActiveTab("products")}
                     >
                       PRODUCT
                     </button>

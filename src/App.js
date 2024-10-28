@@ -39,6 +39,7 @@ import Geostate from './Components/Pages/Master/Geostate';
 import Geocity from './Components/Pages/Master/Geocity';
 import Area from './Components/Pages/Master/Area';
 import ProMaster from './Components/Pages/Master/ProMaster';
+import { Products } from './Components/Pages/Master/Products';
 import Franchisemaster from './Components/Pages/Master/Franchisemaster';
 import EngineerMaster from './Components/Pages/Master/EngineerMaster';
 import Channelpartnertabs from './Components/Pages/Master/Channelpartnertabs';
@@ -207,12 +208,11 @@ const Router = createBrowserRouter([
         path: "/pincode",
         element: <Pincode />,
 
+      },{
+          path: "/products",
+          element: <Products />
       },
       {
-        path: "/product",
-        element: <Product />,
-
-      }, {
         path: "/productspare",
         element: <Productspare />,
 
