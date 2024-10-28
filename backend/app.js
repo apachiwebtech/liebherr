@@ -4048,6 +4048,66 @@ app.post("/postcustomer", (req, res) => {
   });
 });
 
+
+// Route to upload attachment 2
+app.post("/uploadAttachment2", upload.array("attachment2"), (req, res) => {
+  const { ticket_no, created_by } = req.body;
+
+  // Validate request
+  if (!req.files || req.files.length === 0) {
+    return res.status(400).json({ error: "No files uploaded" });
+  }
+
+  // Get all filenames and join them
+  const attachments = req.files.map((file) => file.filename);
+  const attachmentString = attachments.join(", ");
+
+  // SQL query to insert the attachment
+  const sql = "INSERT INTO awt_attachment2 (ticket_no, attachment, created_by, created_date) VALUES (?, ?, ?, NOW())";
+
+  // Execute the query
+  con.query(
+    sql,
+    [ticket_no, attachmentString, created_by],
+    (err, result) => {
+      if (err) {
+        console.error("Error inserting attachment 2:", err);
+        return res
+          .status(500)
+          .json({ error: "Database error", details: err.message });
+      }
+
+      res.json({
+        message: "Files uploaded successfully",
+        count: attachments.length,
+        insertId: result.insertId
+      });
+    }
+  );
+});
+
+// Route to get attachment 2 details
+app.get("/getAttachment2Details/:ticket_no", (req, res) => {
+  const ticket_no = req.params.ticket_no;
+  
+  // SQL query to get attachment 2 records
+  const sql = "SELECT * FROM awt_attachment2 WHERE ticket_no = ? ORDER BY created_date DESC";
+  
+  con.query(sql, [ticket_no], (err, attachments2) => {
+    if (err) {
+      console.error("Error fetching attachment 2:", err);
+      return res
+        .status(500)
+        .json({ error: "Error fetching attachments", details: err.message });
+    }
+
+    res.json({ attachments2 });
+  });
+});
+
+
+//Complaint view End
+
 //Start Product List
 
 app.get("/getproductlist", (req, res) => {

@@ -119,7 +119,7 @@ export function Products(params) {
                                         <tr key={item.id}>
                                             <td >{index + 1}</td>
                                             <td >{item.serial_no}</td>
-                                            <td >{formatDate(item.item_code)}</td>
+                                            <td >{item.item_code}</td>
                                             <td >{item.item_description}</td>
                                             <td >{item.productType}</td>
                                             <td >{item.productLine}</td>

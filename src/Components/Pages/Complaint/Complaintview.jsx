@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Base_Url } from "../../Utils/Base_Url";
 
@@ -13,10 +13,18 @@ export function Complaintview(params) {
   const [attachments, setAttachments] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
 
+  const [files2, setFiles2] = useState([]); // New state for Attachment 2 files
+  const fileInputRef = useRef(); // Ref for Attachment 1 input
+  const fileInputRef2 = useRef(); // Create a ref for the file input
+
+  const [attachments2, setAttachments2] = useState([]); // New state for Attachment 2 list
+  const [isModal2Open, setIsModal2Open] = useState(false); // New modal state
+  const [currentAttachment2, setCurrentAttachment2] = useState(""); // Current attachment 2 for modal
+
   const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
   const [currentAttachment, setCurrentAttachment] = useState(""); // Current attachment for modal
 
-  const created_by = 1;
+  const created_by = 4;
 
   const fetchComplaintDetails = async () => {
     try {
@@ -51,6 +59,69 @@ export function Complaintview(params) {
     } catch (error) {
       console.error("Error fetching complaint details:", error);
     }
+  };
+
+  // New function to fetch Attachment 2 list
+  const fetchAttachment2Details = async () => {
+    try {
+      const response = await axios.get(
+        `${Base_Url}/getAttachment2Details/${complaintview.ticket_no}`
+      );
+      setAttachments2(response.data.attachments2);
+    } catch (error) {
+      console.error("Error fetching attachment 2 details:", error);
+    }
+  };
+
+  // New handler for Attachment 2
+  const handleFile2Change = (e) => {
+    setFiles2(e.target.files);
+  };
+
+  // New submit handler for Attachment 2
+  const handleAttachment2Submit = async (e) => {
+    e.preventDefault();
+
+    try {
+      if (files2.length > 0) {
+        const formData = new FormData();
+        formData.append("ticket_no", complaintview.ticket_no);
+        formData.append("created_by", created_by);
+
+        Array.from(files2).forEach((file) => {
+          formData.append("attachment2", file);
+        });
+
+        await axios.post(`${Base_Url}/uploadAttachment2`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+
+        alert("Attachment 2 files submitted successfully!");
+
+        // Reset the file input and state
+        setFiles2([]); // Clear the state
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ""; // Reset the file input element
+        }
+
+        fetchAttachment2Details(); // Fetch updated attachment details
+      }
+    } catch (error) {
+      console.error("Error submitting attachment 2:", error);
+      alert(
+        `Error submitting files: ${
+          error.response ? error.response.data.error : error.message
+        }`
+      );
+    }
+  };
+
+  // New handler for Attachment 2 preview
+  const handleAttachment2Click = (attachment) => {
+    setCurrentAttachment2(attachment);
+    setIsModal2Open(true);
   };
 
   const handleFileChange = (e) => {
@@ -101,7 +172,18 @@ export function Complaintview(params) {
           },
         });
       }
+
+      // Reset all form fields and states
+      setNote(""); // Clear the note input
+      setFiles([]); // Clear the files state
+
+      // Reset file input using the ref
+      if (fileInputRef2.current) {
+        fileInputRef2.current.value = ""; // Reset the file input for remarks
+      }
+
       alert("Complaint remark and files submitted successfully!");
+
       fetchComplaintDetails();
     } catch (error) {
       console.error("Error submitting complaint remark or files:", error);
@@ -123,6 +205,9 @@ export function Complaintview(params) {
     }
     if (complaintview.ticket_no) {
       fetchComplaintDetails();
+    }
+    if (complaintview.ticket_no) {
+      fetchAttachment2Details(); // Add this line to fetch Attachment 2
     }
   }, [complaintid, complaintview.ticket_no, complaintview.customer_mobile]);
 
@@ -224,7 +309,7 @@ export function Complaintview(params) {
                     Previous Ticket
                   </a>
                 </li>
-                <li className="nav-item">
+                {/* <li className="nav-item">
                   <a
                     className="nav-link"
                     id="profile-tab"
@@ -237,52 +322,52 @@ export function Complaintview(params) {
                   >
                     Products
                   </a>
-                </li>
+                </li> */}
               </ul>
 
-              <div className="tab-content">
-                <div
-                  className="tab-pane active"
-                  id="home"
-                  role="tabpanel"
-                  aria-labelledby="home-tab"
-                >
-                  <table className="table table-striped">
-                    <tbody>
-                      {duplicate.map((item, index) => (
-                        <tr key={index}>
-                          <td>
-                            <div>{item.ticket_no}</div>
-                            <div>{formatDate(item.ticket_date)}</div>
-                          </td>
-                          <td>Liebherr 472L</td>
-                          <td>
-                            <div>{item.call_status}</div>
-                            <span>View Info</span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                          <div className="tab-content">
+                            <div
+                              className="tab-pane active"
+                              id="home"
+                              role="tabpanel"
+                              aria-labelledby="home-tab"
+                            >
+                              <table className="table table-striped">
+                                <tbody>
+                                  {duplicate.map((item, index) => (
+                                    <tr key={index}>
+                                      <td>
+                                        <div>{item.ticket_no}</div>
+                                        <div>{formatDate(item.ticket_date)}</div>
+                                      </td>
+                                      <td>Liebherr 472L</td>
+                                      <td>
+                                        <div>{item.call_status}</div>
+                                        <span>View Info</span>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                        </div>
 
-                <div
-                  className="tab-pane"
-                  id="profile"
-                  role="tabpanel"
-                  aria-labelledby="profile-tab"
-                >
-                  <table className="table table-striped">
-                    <tr>
-                      <td>
-                        <div>SRL01025252252</div>
-                        <div>02-06-2024</div>
-                      </td>
-                      <td>
-                        <div>Liebherr 472L</div>
-                      </td>
-                    </tr>
-                  </table>
+                    <div
+                      className="tab-pane"
+                      id="profile"
+                      role="tabpanel"
+                      aria-labelledby="profile-tab"
+                    >
+                    {/* <table className="table table-striped">
+                      <tr>
+                        <td>
+                          <div>SRL01025252252</div>
+                          <div>02-06-2024</div>
+                        </td>
+                        <td>
+                          <div>Liebherr 472L</div>
+                        </td>
+                      </tr>
+                    </table> */}
                 </div>
               </div>
             </div>
@@ -298,6 +383,12 @@ export function Complaintview(params) {
                   <h3 className="mainheade">
                     Complaint{" "}
                     <span id="compaintno1">: {complaintview.ticket_no}</span>
+                    &nbsp;&nbsp;
+                    Product{" "}
+                    <span id="compaintno1">: {complaintview.ModelNumber}</span>
+                    {/* &nbsp;&nbsp;
+                    Serial No{" "}
+                    <span id="compaintno1">: {complaintview.ModelNumber}</span> */}
                   </h3>
                 </div>
               </div>
@@ -338,6 +429,7 @@ export function Complaintview(params) {
                             multiple
                             accept="image/*,video/*,audio/*"
                             onChange={handleFileChange}
+                            ref={fileInputRef2} // Attach the ref to the input
                           />
                         </div>
 
@@ -556,15 +648,138 @@ export function Complaintview(params) {
 
           <div className="card" id="attachmentInfocs">
             <div className="card-body">
-              <h4 className="pname">Attachment</h4>
+              <h4 className="pname">Attachment 2</h4>
               <div className="mb-3">
-                <input type="file" className="form-control" />
+                <input
+                  type="file"
+                  className="form-control"
+                  multiple
+                  accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx"
+                  onChange={handleFile2Change}
+                  ref={fileInputRef} // Attach the ref to the input
+                />
+              </div>
+              <div className="d-flex justify-content-end mb-3">
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handleAttachment2Submit}
+                >
+                  Upload
+                </button>
               </div>
               <div id="allattachme">
-                {/* Attachment section commented out */}
+                {attachments2.length > 0 ? (
+                  <div className="card">
+                    <div className="card-body">
+                      <h5 className="card-title">Uploaded Attachments</h5>
+                      {attachments2.map((attachment, index) => (
+                        <div
+                          key={index}
+                          className="attachment"
+                          style={{
+                            display: "inline-block",
+                            marginRight: "10px",
+                            marginBottom: "10px",
+                          }}
+                        >
+                          <span
+                            style={{
+                              color: "blue",
+                              cursor: "pointer",
+                            }}
+                            onClick={() =>
+                              handleAttachment2Click(attachment.attachment)
+                            }
+                          >
+                            {attachment.attachment}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <p>No attachments available</p>
+                )}
               </div>
             </div>
           </div>
+
+          {/* New Modal for Attachment 2 Preview */}
+          {isModal2Open && (
+            <div className="modal">
+              <div className="modal-content">
+                <span className="close" onClick={() => setIsModal2Open(false)}>
+                  &times;
+                </span>
+                {currentAttachment2.toLowerCase().endsWith(".jpg") ||
+                currentAttachment2.toLowerCase().endsWith(".jpeg") ||
+                currentAttachment2.toLowerCase().endsWith(".png") ? (
+                  <img
+                    src={`${Base_Url}/uploads/${currentAttachment2}`}
+                    alt="attachment"
+                    style={{ width: "100%" }}
+                  />
+                ) : currentAttachment2.toLowerCase().endsWith(".mp4") ||
+                  currentAttachment2.toLowerCase().endsWith(".mov") ||
+                  currentAttachment2.toLowerCase().endsWith(".avi") ? (
+                  <video controls style={{ width: "100%" }}>
+                    <source
+                      src={`${Base_Url}/uploads/${currentAttachment2}`}
+                      type="video/mp4"
+                    />
+                    Your browser does not support the video tag.
+                  </video>
+                ) : currentAttachment2.toLowerCase().endsWith(".mp3") ||
+                  currentAttachment2.toLowerCase().endsWith(".wav") ? (
+                  <audio controls>
+                    <source
+                      src={`${Base_Url}/uploads/${currentAttachment2}`}
+                      type="audio/mpeg"
+                    />
+                    Your browser does not support the audio tag.
+                  </audio>
+                ) : currentAttachment2.toLowerCase().endsWith(".pdf") ? (
+                  <iframe
+                    src={`${Base_Url}/uploads/${currentAttachment2}`}
+                    style={{ width: "100%", height: "500px" }}
+                    title="PDF Document"
+                  >
+                    Your browser does not support PDFs.{" "}
+                    <a href={`${Base_Url}/uploads/${currentAttachment2}`}>
+                      Download the PDF
+                    </a>
+                  </iframe>
+                ) : currentAttachment2.toLowerCase().endsWith(".doc") ||
+                  currentAttachment2.toLowerCase().endsWith(".docx") ? (
+                  <iframe
+                    src={`https://docs.google.com/gview?url=${Base_Url}/uploads/${currentAttachment2}&embedded=true`}
+                    style={{ width: "100%", height: "500px" }}
+                    title="Word Document"
+                  >
+                    Your browser does not support Word documents.{" "}
+                    <a href={`${Base_Url}/uploads/${currentAttachment2}`}>
+                      Download the Word document
+                    </a>
+                  </iframe>
+                ) : currentAttachment2.toLowerCase().endsWith(".xls") ||
+                  currentAttachment2.toLowerCase().endsWith(".xlsx") ? (
+                  <iframe
+                    src={`https://docs.google.com/gview?url=${Base_Url}/uploads/${currentAttachment2}&embedded=true`}
+                    style={{ width: "100%", height: "500px" }}
+                    title="Excel Document"
+                  >
+                    Your browser does not support Excel documents.{" "}
+                    <a href={`${Base_Url}/uploads/${currentAttachment2}`}>
+                      Download the Excel document
+                    </a>
+                  </iframe>
+                ) : (
+                  <p>Unsupported file type.</p>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
