@@ -165,7 +165,7 @@ const Serviceagent = () => {
                 >
                   <div className="mb-3">
                     <label htmlFor="serviceagentInput" className="input-field">
-                      Add Service Agent
+                      Service Agent
                     </label>
                     <input
                       type="text"

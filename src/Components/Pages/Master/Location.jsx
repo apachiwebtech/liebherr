@@ -156,7 +156,7 @@ const Location = () => {
                 >
                   <div className="mb-3">
                     <label htmlFor="countryInput" className="input-field">
-                      Add Country
+                      Country
                     </label>
                     <input
                       type="text"

@@ -171,7 +171,7 @@ const Material = () => {
                 >
                   <div className="mb-3">
                     <label htmlFor="CategoryInput" className="input-field">
-                      Add Material
+                       Material
                     </label>
                     <input
                       type="text"

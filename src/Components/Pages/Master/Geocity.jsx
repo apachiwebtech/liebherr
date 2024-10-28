@@ -70,6 +70,7 @@ const Geocity = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validateForm();
+    
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
@@ -268,7 +269,7 @@ const Geocity = () => {
                       Geo State
                     </label>
                     <select
-                      className="form-control dropdown-select"
+                      className="form-select dropdown-select"
                       name="geostate_id"
                       value={formData.geostate_id}
                       onChange={handleChange}
@@ -290,7 +291,7 @@ const Geocity = () => {
                   {/* Region Input */}
                   <div className="form-group">
                     <label htmlFor="geoStateInput" className="input-field">
-                      Add Geo City
+                       Geo City
                     </label>
                     <input
                       type="text"

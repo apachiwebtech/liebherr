@@ -172,7 +172,7 @@ const ProductLine = () => {
                 >
                   <div className="mb-3">
                     <label htmlFor="PlineCodeInput" className="input-field">
-                      Add Product Line Code
+                       Product Line Code
                     </label>
                     <input
                       type="text"
@@ -191,7 +191,7 @@ const ProductLine = () => {
 
                   <div className="mb-3">
                     <label htmlFor="ProductLineInput" className="input-field">
-                      Add Product Line
+                       Product Line
                     </label>
                     <input
                       type="text"

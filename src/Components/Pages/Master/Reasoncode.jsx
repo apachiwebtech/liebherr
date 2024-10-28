@@ -150,7 +150,7 @@ const ReasonCode = () => {
                             <div className="col-6">
                                 <form onSubmit={handleSubmit} style={{ width: "50%" }} className="text-left">
                                     <div className="mb-3">
-                                        <label htmlFor="ReasoncodeInput" className="input-field" >Add Reason Code</label>
+                                        <label htmlFor="ReasoncodeInput" className="input-field" >Reason Code</label>
                                         <input
                                             type="text"
                                             className="form-control"

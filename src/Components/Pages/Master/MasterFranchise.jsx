@@ -168,7 +168,7 @@ const MasterFranchise = () => {
                       htmlFor="MasterFranchiseInput"
                       className="input-field"
                     >
-                      Add Franchise Master
+                       Franchise Master
                     </label>
                     <input
                       type="text"

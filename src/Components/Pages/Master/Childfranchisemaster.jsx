@@ -220,7 +220,7 @@ const Childfranchisemaster = () => {
                         fontSize: "18px",
                       }}
                     >
-                      Add Child Franchise Master
+                      Child Franchise Master
                     </label>
                     <input
                       type="text"

@@ -6,12 +6,11 @@ import { Complaintlist } from '../Complaint/Complaintlist';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function Complainttabs() {
-  const [activeTab, setActiveTab] = useState('complaintlist');
+  const [activeTab, setActiveTab] = useState('complaintCode');
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'complaintlist':
-        return <Complaintlist />;
+ 
       case 'complaintCode':
         return <ComplaintCode />;
       case 'reasonCode':
@@ -67,14 +66,7 @@ function Complainttabs() {
             <div className="col-sm-6 p-0" style={{ width: '100%' }}>
             <div className="tabsMenu" style={{fontSize:"14px", marginLeft: "12px",fontWeight:"600",fontFamily:"Nunito"}}>
               <ul className="nav nav-tabs ">
-              <li className="nav-item">
-                  <button
-                    className={`nav-link ${activeTab === 'complaintlist' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('complaintlist')}
-                  >
-                  COMPLAINT LIST
-                  </button>
-                </li>
+              
                 <li className="nav-item">
                   <button
                     className={`nav-link ${activeTab === 'complaintCode' ? 'active' : ''}`}

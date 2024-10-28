@@ -203,7 +203,7 @@ const Subcategory = () => {
                       className="input-field"
                       style={{ marginBottom: "15px", fontSize: "18px" }}
                     >
-                      Add Sub category
+                       Sub category
                     </label>
                     <input
                       type="text"
@@ -212,7 +212,7 @@ const Subcategory = () => {
                       id="subcatInput"
                       value={formData.title}
                       onChange={handleChange}
-                      placeholder="Enter subcat"
+                      placeholder="Enter Subcategory"
                     />
                     {errors.title && (
                       <small className="text-danger">{errors.title}</small>

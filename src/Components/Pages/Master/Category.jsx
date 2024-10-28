@@ -155,7 +155,7 @@ const Category = () => {
                 >
                   <div className="mb-3">
                     <label htmlFor="CategoryInput" className="input-field">
-                      Add Category
+                       Category
                     </label>
                     <input
                       type="text"

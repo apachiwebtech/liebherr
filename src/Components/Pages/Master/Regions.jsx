@@ -189,7 +189,7 @@ const Location = () => {
                       className="input-field"
                       style={{ marginBottom: "15px", fontSize: "18px" }}
                     >
-                      Add Region
+                       Region
                     </label>
                     <input
                       type="text"

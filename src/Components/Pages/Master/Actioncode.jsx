@@ -150,7 +150,7 @@ const ActionCode = () => {
                             <div className="col-6">
                                 <form onSubmit={handleSubmit} style={{ width: "50%" }} className="text-left">
                                     <div className="mb-3">
-                                        <label htmlFor="ActioncodeInput" className="input-field" >Add Action Code</label>
+                                        <label htmlFor="ActioncodeInput" className="input-field" > Action Code</label>
                                         <input
                                             type="text"
                                             className="form-control"

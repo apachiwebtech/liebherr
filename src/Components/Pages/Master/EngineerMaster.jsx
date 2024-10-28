@@ -200,7 +200,7 @@ const EngineerMaster = () => {
             </div>
             {/* Step 2.2: Engineer Master Input */}
           <div className="form-group">
-            <label htmlFor="EngineerNameInput" className="input-field" style={{marginBottom: '15style={{ mapx', fontSize: '18px' }}>Add Engineer Name</label>
+            <label htmlFor="EngineerNameInput" className="input-field" style={{marginBottom: '15style={{ mapx', fontSize: '18px' }}> Engineer Name</label>
             <input
               type="text"
               className="form-control"
@@ -214,7 +214,7 @@ const EngineerMaster = () => {
            
           </div>
                     <div className="form-group">
-                        <label htmlFor="emailInput" className="input-field" style={{marginBottom: '15style={{ mapx', fontSize: '18px' }}>Add Engineer Email</label>
+                        <label htmlFor="emailInput" className="input-field" style={{marginBottom: '15style={{ mapx', fontSize: '18px' }}>Engineer Email</label>
                         <input
                         type="email"
                         className="form-control"
@@ -233,7 +233,7 @@ const EngineerMaster = () => {
                                   className="input-field"
                                   style={{ marginBottom: '15px', fontSize: '18px' }}
                                 >
-                                  Add Engineer Mobile No
+                                  Engineer Mobile No
                                 </label>
                                 <input
                                   type="text"
@@ -261,7 +261,7 @@ const EngineerMaster = () => {
                      </div>
 
                              <div className="form-group">
-                                <label htmlFor="passwordInput" className="input-field" style={{marginBottom: '15style={{ mapx', fontSize: '18px' }}>Add Engineer Password</label>
+                                <label htmlFor="passwordInput" className="input-field" style={{marginBottom: '15style={{ mapx', fontSize: '18px' }}>Engineer Password</label>
                                 <input
                                 type="password"
                                 className="form-control"

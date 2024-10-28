@@ -169,7 +169,7 @@ const ComplaintCode = () => {
                 >
                   <div className="mb-3">
                     <label htmlFor="ComplaintcodeInput" className="input-field">
-                      Add Complaint Code
+                       Complaint Code
                     </label>
                     <input
                       type="text"

@@ -173,7 +173,7 @@ const ProductType = () => {
                 >
                   <div className="mb-3">
                     <label htmlFor="ProductTypeInput" className="input-field">
-                      Add ProductType
+                       ProductType
                     </label>
                     <input
                       type="text"

@@ -205,7 +205,7 @@ const Geostate = () => {
 
           {/* Region Input */}
           <div className="form-group">
-            <label htmlFor="geoStateInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>Add Geo State</label>
+            <label htmlFor="geoStateInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>Geo State</label>
             <input
               type="text"
               className="form-control"

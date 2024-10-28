@@ -250,7 +250,7 @@ const Pincode = () => {
 
                   <div className="mb-3">
                     <label htmlFor="pincodeInput" className="input-field">
-                      Add Pincode
+                      Pincode
                     </label>
                     <input
                       type="text"

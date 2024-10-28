@@ -164,7 +164,7 @@ const Ratecard = () => {
                 >
                   <div className="mb-3">
                     <label htmlFor="RatecardInput" className="input-field">
-                      Add Rate Card Matrix
+                      Rate Card Matrix
                     </label>
                     <input
                       type="text"

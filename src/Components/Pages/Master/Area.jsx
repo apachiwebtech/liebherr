@@ -345,7 +345,7 @@ const Area = () => {
                   {/* Title Input */}
                   <div className="form-group">
                     <label htmlFor="areaInput" className="input-field">
-                      Add Area
+                       Area
                     </label>
                     <input
                       type="text"
