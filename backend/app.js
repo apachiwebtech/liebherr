@@ -51,6 +51,27 @@ app.get("/getdata", (req, res) => {
   });
 });
 
+app.post("/login", (req, res) => {
+  const { Lhiuser, password } = req.body;
+
+  const sql = "SELECT id, Lhiuser FROM lhi_user WHERE Lhiuser = ? AND password = ?";
+  con.query(sql, [Lhiuser, password], (err, results) => {
+    if (err) {
+      return res.status(500).json({ message: "Database error", error: err });
+    }
+
+    if (results.length > 0) {
+      
+      res.json({ id: results[0].id, Lhiuser: results[0].Lhiuser });
+    } else {
+     
+      res.status(401).json({ message: "Invalid username or password" });
+    }
+  });
+});
+
+
+
 app.get("/requestdata/:id", (req, res) => {
   const { id } = req.params;
   const sql = "SELECT * FROM awt_country WHERE id = ? AND deleted = 0";
@@ -3621,7 +3642,7 @@ app.post("/addcomplaintremark", (req, res) => {
 
   console.log(ticket_no, "##");
   const sql =
-    "INSERT INTO awt_complaintremark (ticket_no, remark, created_by) VALUES (?, ?, ?)";
+  "INSERT INTO awt_complaintremark (ticket_no, remark, created_by, created_date) VALUES (?, ?, ?, NOW())";
   con.query(sql, [ticket_no, note, created_by], (err, result) => {
     if (err) {
       console.error("Error inserting remark:", err);
@@ -3648,7 +3669,7 @@ app.post(
     // const attachmentString = JSON.stringify(attachments); // For JSON format
 
     const sql =
-      "INSERT INTO awt_complaintattachment (remark_id, ticket_no, attachment, created_by) VALUES (?, ?, ?, ?)";
+      "INSERT INTO awt_complaintattachment (remark_id, ticket_no, attachment, created_by,created_date) VALUES (?, ?, ?, ?, NOW())";
 
     con.query(
       sql,
@@ -3672,7 +3693,7 @@ app.post(
 app.get("/getComplaintDetails/:ticket_no", (req, res) => {
   const ticket_no = req.params.ticket_no;
 
-  const remarkQuery = "SELECT * FROM awt_complaintremark WHERE ticket_no = ?";
+  const remarkQuery = "SELECT  ac.* ,lu.Lhiuser  FROM `awt_complaintremark` as ac left join lhi_user as lu on lu.id = ac.created_by WHERE ac.ticket_no = ?";
   const attachmentQuery =
     "SELECT * FROM awt_complaintattachment WHERE ticket_no = ?";
 
@@ -3708,6 +3729,68 @@ app.get("/getComplaintDuplicate/:customer_mobile", (req, res) => {
     }
   });
 });
+
+// End Complaint View
+
+// Complaint View attachment 2 Start
+
+app.post("/uploadAttachment2", upload.array("attachment2"), (req, res) => {
+  const { ticket_no, created_by } = req.body;
+
+  // Validate request
+  if (!req.files || req.files.length === 0) {
+    return res.status(400).json({ error: "No files uploaded" });
+  }
+
+  // Get all filenames and join them
+  const attachments = req.files.map((file) => file.filename);
+  const attachmentString = attachments.join(", ");
+
+  // SQL query to insert the attachment
+  const sql = "INSERT INTO awt_attachment2 (ticket_no, attachment, created_by, created_date) VALUES (?, ?, ?, NOW())";
+
+  // Execute the query
+  con.query(
+    sql,
+    [ticket_no, attachmentString, created_by],
+    (err, result) => {
+      if (err) {
+        console.error("Error inserting attachment 2:", err);
+        return res
+          .status(500)
+          .json({ error: "Database error", details: err.message });
+      }
+
+      res.json({
+        message: "Files uploaded successfully",
+        count: attachments.length,
+        insertId: result.insertId
+      });
+    }
+  );
+});
+
+// Route to get attachment 2 details
+app.get("/getAttachment2Details/:ticket_no", (req, res) => {
+  const ticket_no = req.params.ticket_no;
+  
+  // SQL query to get attachment 2 records
+  const sql = "SELECT * FROM awt_attachment2 WHERE ticket_no = ? ORDER BY created_date DESC";
+  
+  con.query(sql, [ticket_no], (err, attachments2) => {
+    if (err) {
+      console.error("Error fetching attachment 2:", err);
+      return res
+        .status(500)
+        .json({ error: "Error fetching attachments", details: err.message });
+    }
+
+    res.json({ attachments2 });
+  });
+});
+
+
+//Complaint view  Attachment 2 End
 
 //Unique Product Master Linked to Location Start
 app.get("/getproductunique", (req, res) => {
@@ -4049,64 +4132,7 @@ app.post("/postcustomer", (req, res) => {
 });
 
 
-// Route to upload attachment 2
-app.post("/uploadAttachment2", upload.array("attachment2"), (req, res) => {
-  const { ticket_no, created_by } = req.body;
 
-  // Validate request
-  if (!req.files || req.files.length === 0) {
-    return res.status(400).json({ error: "No files uploaded" });
-  }
-
-  // Get all filenames and join them
-  const attachments = req.files.map((file) => file.filename);
-  const attachmentString = attachments.join(", ");
-
-  // SQL query to insert the attachment
-  const sql = "INSERT INTO awt_attachment2 (ticket_no, attachment, created_by, created_date) VALUES (?, ?, ?, NOW())";
-
-  // Execute the query
-  con.query(
-    sql,
-    [ticket_no, attachmentString, created_by],
-    (err, result) => {
-      if (err) {
-        console.error("Error inserting attachment 2:", err);
-        return res
-          .status(500)
-          .json({ error: "Database error", details: err.message });
-      }
-
-      res.json({
-        message: "Files uploaded successfully",
-        count: attachments.length,
-        insertId: result.insertId
-      });
-    }
-  );
-});
-
-// Route to get attachment 2 details
-app.get("/getAttachment2Details/:ticket_no", (req, res) => {
-  const ticket_no = req.params.ticket_no;
-  
-  // SQL query to get attachment 2 records
-  const sql = "SELECT * FROM awt_attachment2 WHERE ticket_no = ? ORDER BY created_date DESC";
-  
-  con.query(sql, [ticket_no], (err, attachments2) => {
-    if (err) {
-      console.error("Error fetching attachment 2:", err);
-      return res
-        .status(500)
-        .json({ error: "Error fetching attachments", details: err.message });
-    }
-
-    res.json({ attachments2 });
-  });
-});
-
-
-//Complaint view End
 
 //Start Product List
 

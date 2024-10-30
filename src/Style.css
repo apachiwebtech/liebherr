@@ -305,3 +305,7 @@ h3.mainheade{
   font-size: 14px !important; /* Font size */
   margin-bottom: 11px !important; /* Space below the element */
   }
+
+  .important-margin {
+    margin-bottom: -8px !important;
+  }

@@ -6,6 +6,7 @@ import { Base_Url } from "../../Utils/Base_Url";
 export function Complaintview(params) {
   const { complaintid } = useParams();
   const [complaintview, setComplaintview] = useState([]);
+  const [product, setProduct] = useState([]);
   const [note, setNote] = useState(""); // Input field value
   const [files, setFiles] = useState([]); // Store selected files
   const [remarks, setRemarks] = useState([]);
@@ -18,13 +19,31 @@ export function Complaintview(params) {
   const fileInputRef2 = useRef(); // Create a ref for the file input
 
   const [attachments2, setAttachments2] = useState([]); // New state for Attachment 2 list
+  const [jsondata , setjsondata] = useState([]);
   const [isModal2Open, setIsModal2Open] = useState(false); // New modal state
   const [currentAttachment2, setCurrentAttachment2] = useState(""); // Current attachment 2 for modal
 
   const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
   const [currentAttachment, setCurrentAttachment] = useState(""); // Current attachment for modal
 
-  const created_by = 4;
+const created_by = localStorage.getItem("userId"); // Get user ID from localStorage
+const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
+
+
+
+  async function getProduct(params) {
+
+    axios.get(`${Base_Url}/getproduct`)
+        .then((res) => {
+            if (res.data) {
+
+                setProduct(res.data)
+            }
+        })
+
+}
+
+console.log("this is get product",product);
 
   const fetchComplaintDetails = async () => {
     try {
@@ -37,7 +56,7 @@ export function Complaintview(params) {
       console.error("Error fetching complaint details:", error);
     }
   };
-
+ console.log(remarks , "$$$$")
   const fetchComplaintview = async (complaintid) => {
     try {
       const response = await axios.get(
@@ -68,6 +87,7 @@ export function Complaintview(params) {
         `${Base_Url}/getAttachment2Details/${complaintview.ticket_no}`
       );
       setAttachments2(response.data.attachments2);
+      
     } catch (error) {
       console.error("Error fetching attachment 2 details:", error);
     }
@@ -82,6 +102,7 @@ export function Complaintview(params) {
   const handleAttachment2Submit = async (e) => {
     e.preventDefault();
 
+    
     try {
       if (files2.length > 0) {
         const formData = new FormData();
@@ -195,6 +216,7 @@ export function Complaintview(params) {
     }
   };
 
+
   useEffect(() => {
     if (complaintid) {
       fetchComplaintview(complaintid);
@@ -209,6 +231,7 @@ export function Complaintview(params) {
     if (complaintview.ticket_no) {
       fetchAttachment2Details(); // Add this line to fetch Attachment 2
     }
+    getProduct();
   }, [complaintid, complaintview.ticket_no, complaintview.customer_mobile]);
 
   const handleAttachmentClick = (attachment) => {
@@ -225,6 +248,7 @@ export function Complaintview(params) {
 
     return `${day}-${month}-${year}`;
   };
+
 
   return (
     <div className="p-3">
@@ -265,7 +289,7 @@ export function Complaintview(params) {
           <div className="row">
             <div className="col-md-3">
               <label className="breadMain">
-                Complaint : {complaintview.ticket_no}
+<span style={{ fontSize: "14px"}}>Complaint : {complaintview.ticket_no}</span>
               </label>
             </div>
             <div className="col-md-9 text-right pt-2">
@@ -281,18 +305,18 @@ export function Complaintview(params) {
             <div className="card-body">
               <div className="row">
                 <div className="col-md-12">
-                  <h4 className="pname">{complaintview.customer_name}</h4>
+                  <h4 className="pname" style={{ fontSize: "14px"}}>{complaintview.customer_name}</h4>
                 </div>
               </div>
 
-              <p>
+              <p style={{ fontSize: "14px"}}>
                 {complaintview.address}, Pincode: {complaintview.pincode}
               </p>
-              <p>M : {complaintview.customer_mobile}</p>
+              <p style={{ fontSize: "14px"}}>M : {complaintview.customer_mobile}</p>
 
-              <p>Ticket Type: {complaintview.ticket_type}</p>
-              <p>Call Type: {complaintview.call_type}</p>
-              <p>Warranty Status: {complaintview.warranty_status}</p>
+              <p style={{ fontSize: "14px"}}>Ticket Type: {complaintview.ticket_type}</p>
+              <p style={{ fontSize: "14px"}}>Call Type: {complaintview.call_type}</p>
+              <p style={{ fontSize: "14px"}}>Warranty Status: {complaintview.warranty_status}</p>
 
               <ul className="nav nav-tabs" id="myTab" role="tablist">
                 <li className="nav-item">
@@ -305,6 +329,7 @@ export function Complaintview(params) {
                     role="tab"
                     aria-controls="home"
                     aria-selected="true"
+                    style={{ fontSize: "14px"}}
                   >
                     Previous Ticket
                   </a>
@@ -333,22 +358,23 @@ export function Complaintview(params) {
                               aria-labelledby="home-tab"
                             >
                               <table className="table table-striped">
-                                <tbody>
+                              <tbody>
                                   {duplicate.map((item, index) => (
-                                    <tr key={index}>
-                                      <td>
-                                        <div>{item.ticket_no}</div>
-                                        <div>{formatDate(item.ticket_date)}</div>
-                                      </td>
-                                      <td>Liebherr 472L</td>
-                                      <td>
-                                        <div>{item.call_status}</div>
-                                        <span>View Info</span>
-                                      </td>
-                                    </tr>
+                                      <tr key={index}>
+                                          <td>
+                                              <div style={{ fontSize: "14px"}}>{item.ticket_no}</div>
+                                              <span style={{ fontSize: "14px"}}>{formatDate(item.ticket_date)}</span> 
+                                          </td>
+                                          <td style={{ fontSize: "14px"}}>{item.ModelNumber}</td>
+                                          <td>
+                                              <div style={{ fontSize: "14px"}}>{item.call_status}</div>
+                                              <span style={{ fontSize: "14px"}}>View Info</span>
+                                          </td>
+                                      </tr>
                                   ))}
-                                </tbody>
-                              </table>
+                              </tbody>
+                          </table>
+
                         </div>
 
                     <div
@@ -379,16 +405,52 @@ export function Complaintview(params) {
           <div className="card" id="csformInfo">
             <div className="card-body">
               <div className="row">
+
+                                    {/* <div className="col-md-4">
+                                        <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Model</p>
+                                        <p style={{ fontSize: "14px"}}>{complaintview.ModelNumber}</p>
+                                    </div> */}
+
+
+                                      <div className="col-md-4">
+                                      <label
+                                        htmlFor="country"
+                                        className="form-label pb-0 dropdown-label"
+                                      >
+                                        Model
+                                      </label>
+                                      <select
+                                        className="form-select dropdown-select"
+                                        name="country_id"
+                                        value={complaintview.ModelNumber}
+                                        // onChange={handleChange}
+                                      >
+                                        <option value="">Select Model</option>
+                                        {product.map((products) => (
+                                          <option key={products.id} value={products.item_description}>
+                                            {products.item_description}
+                                          </option>
+                                        ))}
+                                      </select>
+                                      </div>
+
+                                      <div className="col-md-2">
+                                          <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Serial No</p>
+                                          <p style={{ fontSize: "14px"}}></p>
+                                      </div>
+                                          <div className="col-md-2">
+                                              <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Purchase Date</p>
+                                              <p style={{ fontSize: "14px"}}>{formatDate(complaintview.invoice_date)}</p>
+                                          </div>
+                                    <div className="col-md-2">
+                                        <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Warranty Status</p>
+                                        <p style={{ fontSize: "14px"}}>{complaintview.warranty_status}</p>
+                                    </div>
+
                 <div className="col-md-12">
-                  <h3 className="mainheade">
+                  <h3 className="mainheade" style={{ fontSize: "14px"}}>
                     Complaint{" "}
-                    <span id="compaintno1">: {complaintview.ticket_no}</span>
-                    &nbsp;&nbsp;
-                    Product{" "}
-                    <span id="compaintno1">: {complaintview.ModelNumber}</span>
-                    {/* &nbsp;&nbsp;
-                    Serial No{" "}
-                    <span id="compaintno1">: {complaintview.ModelNumber}</span> */}
+                    <span style={{ fontSize: "14px"}} id="compaintno1">: {complaintview.ticket_no}</span>
                   </h3>
                 </div>
               </div>
@@ -418,6 +480,7 @@ export function Complaintview(params) {
                           <label
                             htmlFor="uploadFiles"
                             className="form-label mp-0"
+                            style={{ fontSize: "14px"}}
                           >
                             Upload Files (Images, Videos, Audios)
                           </label>
@@ -443,6 +506,7 @@ export function Complaintview(params) {
                           <button
                             type="submit"
                             className="btn btn-primary"
+                            style={{ fontSize: "14px"}}
                             onClick={handleSubmit}
                           >
                             Submit
@@ -460,9 +524,9 @@ export function Complaintview(params) {
           <div className="mt-3" id="remarksSection">
             <div className="row">
               <div className="col-md-12">
-                <h3 className="mainheade">
+                <h3 className="mainheade" style={{ fontSize: "14px"}}>
                   Remark Record Of{" "}
-                  <span id="compaintno1">
+                  <span id="compaintno1" style={{ fontSize: "14px"}}>
                     : {complaintview.ticket_no} Ticket Number
                   </span>
                 </h3>
@@ -471,56 +535,86 @@ export function Complaintview(params) {
 
             {/* Listing remarks */}
             {/* Listing remarks */}
-            <div className="remarks-attachments">
-              {remarks.length > 0 ? (
-                remarks.map((remark) => (
-                  <div key={remark.id} className="card mb-3 remark-card">
-                    <div className="card-body">
-                      <div className="d-flex justify-content-between align-items-start">
-                        <h3 className="mainheade">Remark</h3>
-                        <h3 className="mainheade">By: {remark.created_by}</h3>
-                      </div>
-
-                      <p>
-                        {remark.remark} <p></p>
-                      </p>
-                      {attachments.filter((att) => att.remark_id === remark.id)
-                        .length > 0 && (
-                        <div className="attachments">
-                          <h3 className="mainheade">Attachments</h3>
-                          {attachments
-                            .filter((att) => att.remark_id === remark.id)
-                            .map((attachment) => (
-                              <div
-                                key={attachment.id}
-                                className="attachment"
-                                style={{
-                                  display: "inline-block",
-                                  marginRight: "10px",
-                                }} // inline block and margin added
-                              >
-                                <span
-                                  style={{
-                                    color: "blue",
-                                    cursor: "pointer",
-                                  }}
-                                  onClick={() =>
-                                    handleAttachmentClick(attachment.attachment)
-                                  }
-                                >
-                                  {attachment.attachment}
-                                </span>
-                              </div>
-                            ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p>No remarks available.</p>
-              )}
+  <div className="remarks-attachments">
+      {remarks.length > 0 ? (
+      remarks.map((remark) => (
+      <div key={remark.id} className="card mb-3 remark-card">
+        <div className="card-body">
+          
+        <div className="d-flex justify-content-between">
+          {/* Remarks Section - 80% */}
+            <div style={{ flex: "0 0 80%", paddingRight: '10px' }}>
+              <p style={{ fontSize: "14px", margin: 0 }}>{remark.remark}</p>
+             
             </div>
+
+             {/* By and Date Section - 20% */}
+              <div style={{ flex: "0 0 20%", textAlign: "right" }}>
+                
+                  <h3 className="mainheade important-margin" style={{ fontSize: "12px", margin: 0 }}>
+                    By: {remark.Lhiuser}
+                  </h3>
+                
+                <h3 className="mainheade" style={{ fontSize: "12px", margin: 0 }}>
+                   Date: {formatDate(remark.created_date)}
+                </h3>
+            </div>
+        </div>
+
+
+            
+
+          {attachments.filter((att) => att.remark_id == remark.id).length > 0 && (
+            <div className="attachments mt-2">
+              <h3 className="mainheade" style={{ fontSize: "14px" }}>Attachments</h3>
+              {attachments
+  .filter((att) => att.remark_id === remark.id)
+  .map((attachment, index) => {
+    // Split the attachment string into an array by commas
+    const fileNames = attachment.attachment.split(','); // Assuming attachment.attachment is a comma-separated string
+
+    return fileNames.map((fileName, fileIndex) => {
+      // Trim whitespace from file name
+      const trimmedFileName = fileName.trim();
+
+      // Determine the file extension
+      const fileExtension = trimmedFileName.split('.').pop();
+
+      // Create a new file name like file1.mp3, file2.mp4, etc.
+      const newFileName = `file${index * fileNames.length + fileIndex + 1}.${fileExtension}`;
+
+      return (
+        <div
+          key={`${attachment.id}-${fileIndex}`} // Unique key for each file
+          className="attachment"
+          style={{
+            display: "block", // Display attachments in new lines
+            marginTop: "5px",
+          }}
+        >
+          <span
+            style={{
+              color: "blue",
+              cursor: "pointer",
+            }}
+            onClick={() => handleAttachmentClick(trimmedFileName)} // Handle click for each file
+          >
+            {newFileName} {/* Display the new file name */}
+          </span>
+        </div>
+      );
+    });
+  })}
+
+            </div>
+          )}
+        </div>
+      </div>
+    ))
+  ) : (
+    <p style={{ fontSize: "14px" }}>No remarks available.</p>
+  )}
+</div>
 
             {isModalOpen && (
               <div className="modal">
@@ -604,10 +698,10 @@ export function Complaintview(params) {
         <div className="col-3">
           <div className="card mb-3" id="productInfocs">
             <div className="card-body">
-              <h4 className="pname">Call Status</h4>
+              <h4 className="pname" style={{ fontSize: "14px"}}>Call Status</h4>
               <div className="mb-3">
-                <select className="form-control">
-                  <option value="">Select Status</option>
+                <select className="form-control" style={{ fontSize: "14px"}}>
+                  <option value="" >Select Status</option>
                   <option value="Quotation">Quotation</option>
                   <option value="Closed">Closed</option>
                   <option value="Cancelled">Cancelled</option>
@@ -622,8 +716,8 @@ export function Complaintview(params) {
 
           <div className="card mb-3" id="productInfocs">
             <div className="card-body">
-              <h4 className="pname">Product</h4>
-              <div className="mb-3">
+              <h4 className="pname" style={{ fontSize: "14px"}}>Product</h4>
+              <div className="mb-3" style={{ fontSize: "14px"}}>
                 <input
                   type="text"
                   className="form-control"
@@ -635,8 +729,8 @@ export function Complaintview(params) {
 
           <div className="card mb-3" id="engineerInfocs">
             <div className="card-body">
-              <h4 className="pname">Engineer</h4>
-              <div className="mb-3">
+              <h4 className="pname" style={{ fontSize: "14px"}}>Engineer</h4>
+              <div className="mb-3" style={{ fontSize: "14px"}}>
                 <input
                   type="text"
                   className="form-control"
@@ -648,7 +742,7 @@ export function Complaintview(params) {
 
           <div className="card" id="attachmentInfocs">
             <div className="card-body">
-              <h4 className="pname">Attachment 2</h4>
+              <h4 className="pname" style={{ fontSize: "14px"}}>Attachment 2</h4>
               <div className="mb-3">
                 <input
                   type="file"
@@ -664,42 +758,66 @@ export function Complaintview(params) {
                   type="button"
                   className="btn btn-primary"
                   onClick={handleAttachment2Submit}
+                  style={{ fontSize: "14px"}}
                 >
                   Upload
                 </button>
               </div>
+              
               <div id="allattachme">
                 {attachments2.length > 0 ? (
-                  <div className="card">
-                    <div className="card-body">
-                      <h5 className="card-title">Uploaded Attachments</h5>
-                      {attachments2.map((attachment, index) => (
-                        <div
-                          key={index}
-                          className="attachment"
-                          style={{
-                            display: "inline-block",
-                            marginRight: "10px",
-                            marginBottom: "10px",
-                          }}
-                        >
-                          <span
-                            style={{
-                              color: "blue",
-                              cursor: "pointer",
-                            }}
-                            onClick={() =>
-                              handleAttachment2Click(attachment.attachment)
-                            }
-                          >
-                            {attachment.attachment}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
+                <div className="card mb-3">
+                  <div className="card-body">
+                    <h5 className="card-title" style={{ fontSize: "16px", fontWeight: "bold" }}>Uploaded Attachments</h5>
+                    
+                    {attachments2.map((attachment, index) => {
+  // Ensure attachment data is an array
+  const attachmentArray = Array.isArray(attachment.attachment)
+    ? attachment.attachment
+    : attachment.attachment.split(','); // Assuming comma-separated string
+
+  return (
+    <div 
+      key={index} 
+      className="d-flex justify-content-between align-items-start mb-3" 
+      style={{ borderBottom: "1px solid #e0e0e0", paddingBottom: "10px" }}
+    >
+      <div style={{ flex: "1" }}>
+        <h6 style={{ fontSize: "12px", margin: "0 0 5px 0" }}>By: {attachment.created_by}</h6>
+        <h6 style={{ fontSize: "12px", margin: "0 0 5px 0" }}>Date: {formatDate(attachment.created_date)}</h6>
+        
+        {/* Display each attachment item with format "File1.extension [filename.extension]" */}
+        {attachmentArray.map((item, idx) => {
+          const fileExtension = item.split('.').pop(); // Extract file extension
+          const fileName = item.trim();
+
+          return (
+            <span
+              key={idx}
+              style={{
+                color: "#007bff",
+                cursor: "pointer",
+                fontWeight: "500",
+                display: "block",
+                marginBottom: "3px",
+              }}
+              onClick={() => handleAttachment2Click(fileName)}
+            >
+              {`File${idx + 1}.${fileExtension}`}
+            </span>
+          );
+        })}
+      </div>
+    </div>
+  );
+})}
+
+
                   </div>
+                </div>
+                
                 ) : (
-                  <p>No attachments available</p>
+                  <p style={{ fontSize: "14px"}}>No attachments available</p>
                 )}
               </div>
             </div>
@@ -775,7 +893,7 @@ export function Complaintview(params) {
                     </a>
                   </iframe>
                 ) : (
-                  <p>Unsupported file type.</p>
+                  <p style={{ fontSize: "14px"}}>Unsupported file type.</p>
                 )}
               </div>
             </div>
