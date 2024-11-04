@@ -7,6 +7,7 @@ export function Complaintview(params) {
   const { complaintid } = useParams();
   const [complaintview, setComplaintview] = useState([]);
   const [product, setProduct] = useState([]);
+  const [engineer, setEngineer] = useState([]); // Initialize as empty array
   const [note, setNote] = useState(""); // Input field value
   const [files, setFiles] = useState([]); // Store selected files
   const [remarks, setRemarks] = useState([]);
@@ -41,6 +42,22 @@ const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorag
             }
         })
 
+}
+
+async function getEngineer(params) {
+  try {
+    const res = await axios.get(`${Base_Url}/getcvengineer`);
+    
+    if (res.data && Array.isArray(res.data)) {
+      setEngineer(res.data);
+    } else {
+      console.error("Expected array from API but got:", typeof res.data);
+      setEngineer([]); // Set empty array as fallback
+    }
+  } catch (error) {
+    console.error("Error fetching engineers:", error);
+    setEngineer([]); // Set empty array on error
+  }
 }
 
 console.log("this is get product",product);
@@ -232,6 +249,7 @@ console.log("this is get product",product);
       fetchAttachment2Details(); // Add this line to fetch Attachment 2
     }
     getProduct();
+    getEngineer();
   }, [complaintid, complaintview.ticket_no, complaintview.customer_mobile]);
 
   const handleAttachmentClick = (attachment) => {
@@ -413,25 +431,20 @@ console.log("this is get product",product);
 
 
                                       <div className="col-md-4">
-                                      <label
-                                        htmlFor="country"
-                                        className="form-label pb-0 dropdown-label"
-                                      >
-                                        Model
-                                      </label>
-                                      <select
-                                        className="form-select dropdown-select"
-                                        name="country_id"
-                                        value={complaintview.ModelNumber}
-                                        // onChange={handleChange}
-                                      >
-                                        <option value="">Select Model</option>
-                                        {product.map((products) => (
-                                          <option key={products.id} value={products.item_description}>
-                                            {products.item_description}
-                                          </option>
-                                        ))}
-                                      </select>
+                                      <h4 className="pname" style={{ fontSize: "11px"}}>Model</h4>
+                                          <select
+                                            className="form-select dropdown-select"
+                                            name="country_id"
+                                            value={complaintview.ModelNumber}
+                                            // onChange={handleChange}
+                                          >
+                                            <option value="">Select Model</option>
+                                            {product.map((products) => (
+                                              <option key={products.id} value={products.item_description}>
+                                                {products.item_description}
+                                              </option>
+                                            ))}
+                                          </select>
                                       </div>
 
                                       <div className="col-md-2">
@@ -714,7 +727,7 @@ console.log("this is get product",product);
             </div>
           </div>
 
-          <div className="card mb-3" id="productInfocs">
+          {/* <div className="card mb-3" id="productInfocs">
             <div className="card-body">
               <h4 className="pname" style={{ fontSize: "14px"}}>Product</h4>
               <div className="mb-3" style={{ fontSize: "14px"}}>
@@ -725,9 +738,9 @@ console.log("this is get product",product);
                 />
               </div>
             </div>
-          </div>
+          </div> */}
 
-          <div className="card mb-3" id="engineerInfocs">
+          {/* <div className="card mb-3" id="engineerInfocs">
             <div className="card-body">
               <h4 className="pname" style={{ fontSize: "14px"}}>Engineer</h4>
               <div className="mb-3" style={{ fontSize: "14px"}}>
@@ -738,7 +751,31 @@ console.log("this is get product",product);
                 />
               </div>
             </div>
-          </div>
+          </div> */}
+
+            <div className="card mb-3" id="engineerInfocs">
+              <div className="card-body">
+                <h4 className="pname" style={{ fontSize: "14px"}}>Engineer</h4>
+                <select
+                  className="form-select dropdown-select"
+                  name="Engineer"
+                  // value={complaintview.ModelNumber}
+                  // onChange={handleChange}
+                >
+                  <option value="">Select Engineer</option>
+                  {Array.isArray(engineer) && engineer.length > 0 ? (
+                    engineer.map((engineers) => (
+                      <option key={engineers.id} value={engineers.title}>
+                        {engineers.title}
+                      </option>
+                    ))
+                  ) : (
+                    <option value="" disabled>No engineers available</option>
+                  )}
+                </select>
+              </div>
+            </div>
+            
 
           <div className="card" id="attachmentInfocs">
             <div className="card-body">
@@ -783,7 +820,7 @@ console.log("this is get product",product);
       style={{ borderBottom: "1px solid #e0e0e0", paddingBottom: "10px" }}
     >
       <div style={{ flex: "1" }}>
-        <h6 style={{ fontSize: "12px", margin: "0 0 5px 0" }}>By: {attachment.created_by}</h6>
+        <h6 style={{ fontSize: "12px", margin: "0 0 5px 0" }}>By: {attachment.Lhiuser}</h6>
         <h6 style={{ fontSize: "12px", margin: "0 0 5px 0" }}>Date: {formatDate(attachment.created_date)}</h6>
         
         {/* Display each attachment item with format "File1.extension [filename.extension]" */}

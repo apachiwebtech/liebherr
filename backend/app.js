@@ -3775,7 +3775,7 @@ app.get("/getAttachment2Details/:ticket_no", (req, res) => {
   const ticket_no = req.params.ticket_no;
   
   // SQL query to get attachment 2 records
-  const sql = "SELECT * FROM awt_attachment2 WHERE ticket_no = ? ORDER BY created_date DESC";
+  const sql = "SELECT ac.*,lu.Lhiuser FROM awt_attachment2 as ac LEFT JOIN lhi_user as lu on ac.created_by = lu.id WHERE ac.ticket_no = ? ORDER BY created_date DESC";
   
   con.query(sql, [ticket_no], (err, attachments2) => {
     if (err) {
@@ -3791,6 +3791,21 @@ app.get("/getAttachment2Details/:ticket_no", (req, res) => {
 
 
 //Complaint view  Attachment 2 End
+
+app.get("/getcvengineer", (req, res) => {
+  const sql = "SELECT * FROM awt_engineermaster WHERE deleted = 0";
+  con.query(sql, (err, data) => {
+    if (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ error: "Database error occurred" });
+    }
+    
+    // Return the entire array
+    return res.json(data);
+  });
+});
+
+//Complaint View End
 
 //Unique Product Master Linked to Location Start
 app.get("/getproductunique", (req, res) => {
