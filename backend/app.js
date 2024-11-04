@@ -3805,6 +3805,33 @@ app.get("/getcvengineer", (req, res) => {
   });
 });
 
+
+app.get("/getProducts", (req, res) => {
+  const sql = "SELECT * FROM awt_engineermaster WHERE deleted = 0";
+  con.query(sql, (err, data) => {
+    if (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ error: "Database error occurred" });
+    }
+    
+    // Return the entire array
+    return res.json(data);
+  });
+});
+
+app.get("/getchildfranchises", (req, res) => {
+  const sql = "SELECT * FROM awt_childfranchisemaster WHERE deleted = 0";
+  con.query(sql, (err, data) => {
+    if (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ error: "Database error occurred" });
+    }
+    
+    // Return the entire array
+    return res.json(data);
+  });
+});
+
 //Complaint View End
 
 //Unique Product Master Linked to Location Start
@@ -4162,3 +4189,33 @@ app.get("/getproductlist", (req, res) => {
     }
   });
 });
+
+//Product List End
+
+//Grouping Master Start
+app.get("/getchildfranchisegroupm",(req,res) => {
+  const sql = `SELECT * FROM awt_childfranchisemaster WHERE deleted = 0`;
+   con.query(sql ,(err,data)=>{
+    if(err){
+      return res.json(err);
+    } else {
+      return res.json(data);
+    }
+   })
+});
+
+
+app.get("/getgroupmengineer/:cfranchise_id", (req, res) => {
+  const { cfranchise_id } = req.params;
+  const sql = "SELECT * FROM awt_engineermaster WHERE cfranchise_id = ? and deleted = 0";
+  con.query(sql,[cfranchise_id], (err, data) => {
+    if (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ error: "Database error occurred" });
+    }
+    
+    // Return the entire array
+    return res.json(data);
+  });
+});
+//Group Master End

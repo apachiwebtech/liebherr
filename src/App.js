@@ -47,6 +47,7 @@ import Complainttabs from './Components/Pages/Master/Complainttabs';
 import ReasonCode from './Components/Pages/Master/Reasoncode';
 import ActionCode from './Components/Pages/Master/Actioncode';
 import Serviceagenttabs from './Components/Pages/Master/Serviceagenttabs';
+import Groupmaster from './Components/Pages/Master/Groupmaster';
 import Callstatuscodetabs from './Components/Pages/Master/Callstatuscodetabs';
 import Lhiusertabs from './Components/Pages/Master/Lhiusertabs';
 import Serviceproducttabs from './Components/Pages/Master/Serviceproducttabs';
@@ -280,6 +281,11 @@ const Router = createBrowserRouter([
       {
         path: "/complaintview/:complaintid",
         element: <Complaintview />,
+
+      },
+      {
+        path: "/groupmaster",
+        element: <Groupmaster />,
 
       },
 
