@@ -309,3 +309,53 @@ h3.mainheade{
   .important-margin {
     margin-bottom: -8px !important;
   }
+
+
+  
+/* Target the SVG inside the dropdown indicator using the class name css-tj5bde-Svg */
+.custom-select .css-tj5bde-Svg {
+    fill: black !important;  /* Set the color of the SVG to black */
+    stroke: none !important;  /* Ensure no stroke is applied */
+    width: 18px !important;   /* Adjust the width of the arrow */
+    height: 18px !important;  /* Adjust the height of the arrow */
+    font-weight: normal !important; /* Make sure the arrow is not bold */
+  }
+  
+  /* Remove the indicator separator */
+  .custom-select .react-select__indicator-separator {
+    display: none !important; /* Hide the separator line */
+  }
+  
+  .custom-select {
+    background-color: #ffffff;
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+  }
+  
+  /* Style for selected items */
+  .custom-select .css-1rhbuit-multiValue {
+    background-color: #0D6EFD !important; /* Background color for selected items */
+    font-family: 'Nunito', sans-serif !important;
+    font-size: 12px !important;
+  }
+  
+  /* Label style for selected items */
+  .custom-select .css-1rhbuit-multiValueLabel {
+    color: #000000; /* Text color for selected items */
+    font-family: 'Nunito', sans-serif !important;
+    font-size: 12px !important;
+  }
+  
+  /* Style for remove icon in selected items */
+  .custom-select .css-1rhbuit-multiValueRemove {
+    color: #004080 !important;
+  }
+  
+  .custom-select .css-1rhbuit-multiValueRemove:hover {
+    background-color: #ff6347; /* Hover color for remove icon */
+    color: white;
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+  }
+  
+  

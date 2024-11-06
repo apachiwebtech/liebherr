@@ -9,7 +9,7 @@ import { Base_Url } from "../../Utils/Base_Url";
 const animatedComponents = makeAnimated();
 
 const Groupmasterpg = () => {
-
+  const [isEdit, setIsEdit] = useState(false);
   const [Childfranchise, setChildfranchise] = useState([]);
   // Step 2: Define state to store the options for the dropdown (fetched from API)
   const [options, setOptions] = useState([]);
@@ -22,6 +22,8 @@ const Groupmasterpg = () => {
 
   const [formData, setFormData] = useState({ 
     cfranchise_id: '',
+    engineer: '',
+    product: '',
   });
   // State for product options
 const [productOptions, setProductOptions] = useState([]);
@@ -144,6 +146,7 @@ const clearProductSelection = (e) => {
       const response = await axios.get(`${Base_Url}/requestsdata/${id}`);
       setGroupdata(response.data); // Update groupdata state with fetched data
       console.log("Fetched data for editing:", response.data);
+      setIsEdit(true);
     } catch (error) {
       console.error("Error editing user:", error);
     }
@@ -161,19 +164,26 @@ const clearProductSelection = (e) => {
                   {/* Step 13: Select All and Clear All buttons */}
                         <div style={{ width: '300px', margin: '20px' }}>
                                 <div className="form-group">
-                                      <label htmlFor="Child Franchise" className="form-label pb-0 dropdown-label">Child Franchise</label>
-                                      <select className='form-select dropdown-select' name='cfranchise_id' value={formData.cfranchise_id} onChange={handleChange} >
-                                        <option value="">Select Child Franchise</option>
-                                        {Childfranchise.map((pf) => (
-                                          <option key={pf.id} value={pf.id}>{pf.title}</option>
-                                        ))}
-                                      </select>
-                                      
+                                    <label htmlFor="Child Franchise" className="form-label pb-0 dropdown-label " >
+                                      Child Franchise
+                                    </label>
+                                    <select className="form-select react-select-dropdown" name="cfranchise_id" value={formData.cfranchise_id} onChange={handleChange} style={{ padding: "8px", border: "1px solid #d1d3e2", borderRadius: "4px" }}>
+                                      <option value="">Child Franchise</option>
+                                      {Childfranchise.map((pf) => (
+                                        <option key={pf.id} value={pf.id}>{pf.title}</option>
+                                      ))}
+                                    </select>                                     
                                 </div>
                         </div> 
                   <div style={{ width: '300px', margin: '20px' }}>
+                      <div className="mb-0">
+                        {/* Label */}
+                        <label htmlFor="Child Franchise" className="form-label pb-0 dropdown-label">
+                          Engineer
+                        </label>
+                      </div>
                     <div className="d-flex mb-2">
-                      {/* Select All Button */}
+                        {/* Select All Button */}
                       <button
                         onClick={selectAll}
                         className="btn btn-outline-primary me-2"
@@ -201,26 +211,24 @@ const clearProductSelection = (e) => {
                       value={selectedOptions}         // Selected options
                       onChange={handleSelectChange}   // Handle change
                       placeholder="Select Engineer"
+                      className="custom-select"
+                      name="engineer"
+              
                       styles={{
-                        control: (provided) => ({
+                       
+                        placeholder: (provided) => ({
                           ...provided,
-                          backgroundColor: '#ffffff',
+                          color: 'black', // Set placeholder text color to black
+                          fontFamily: 'Nunito', // Optional: apply font family to placeholder
+                          fontSize: '14px', // Optional: apply font size to placeholder
                         }),
-                        multiValue: (provided) => ({
+                        dropdownIndicator: (provided) => ({
                           ...provided,
-                          backgroundColor: '#a0c4ff',
+                          color: 'black', // Set the dropdown arrow color to black
                         }),
-                        multiValueLabel: (provided) => ({
+                        indicatorSeparator: (provided) => ({
                           ...provided,
-                          color: '#000000',
-                        }),
-                        multiValueRemove: (provided) => ({
-                          ...provided,
-                          color: '#004080',
-                          ':hover': {
-                            backgroundColor: '#ff6347',
-                            color: 'white',
-                          },
+                          display: 'none', // Hide the separator line
                         }),
                       }}
                     />
@@ -230,6 +238,12 @@ const clearProductSelection = (e) => {
 
                        {/* Step 13: Select All and Clear All buttons */}
                   <div style={{ width: '300px', margin: '20px' }}>
+                        <div className="mb-0">
+                              {/* Label */}
+                              <label htmlFor="Child Franchise" className="form-label pb-0 dropdown-label">
+                                Products
+                              </label>
+                            </div>
                     <div className="d-flex mb-2">
                       {/* Select All  Products Button */}
                       <button
@@ -259,26 +273,23 @@ const clearProductSelection = (e) => {
                           value={selectedProducts}               // Currently selected products
                           onChange={handleProductSelectChange}    // Handle change for products
                           placeholder="Select Products"
+                          className="custom-select" 
+                          name="product"
                           styles={{
-                            control: (provided) => ({
+                           
+                            placeholder: (provided) => ({
                               ...provided,
-                              backgroundColor: '#ffffff',
+                              color: 'black', // Set placeholder text color to black
+                              fontFamily: 'Nunito', // Optional: apply font family to placeholder
+                              fontSize: '14px', // Optional: apply font size to placeholder
                             }),
-                            multiValue: (provided) => ({
+                            dropdownIndicator: (provided) => ({
                               ...provided,
-                              backgroundColor: '#a0c4ff', // Background color for selected items
+                              color: 'black', // Set the dropdown arrow color to black
                             }),
-                            multiValueLabel: (provided) => ({
+                            indicatorSeparator: (provided) => ({
                               ...provided,
-                              color: '#000000', // Text color for selected items
-                            }),
-                            multiValueRemove: (provided) => ({
-                              ...provided,
-                              color: '#004080',
-                              ':hover': {
-                                backgroundColor: '#ff6347', // Hover color for remove icon
-                                color: 'white',
-                              },
+                              display: 'none', // Hide the separator line
                             }),
                           }}
                         />
@@ -291,7 +302,7 @@ const clearProductSelection = (e) => {
                   {/* Submit or Update Button */}
                   <div className="text-right">
                     <button className="btn btn-liebherr" type="submit">
-                      {/* {isEdit ? "Update" : "Submit"} */}
+                      {isEdit ? "Update" : "Submit"}
                     </button>
                   </div>
                 </form>

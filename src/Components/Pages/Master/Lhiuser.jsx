@@ -162,7 +162,7 @@ const Lhiuser = () => {
                 >
                   <div className="mb-3">
                     <label htmlFor="LhiuserInput" className="input-field">
-                      Add Lhi User
+                      Lhi User
                     </label>
                     <input
                       type="text"
