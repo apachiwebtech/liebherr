@@ -27,6 +27,7 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
+//connection
 
 const con = createPool({
   host: "localhost",
@@ -35,6 +36,8 @@ const con = createPool({
   database: "liebherr",
 });
 
+//connection close
+
 app.listen(8081, () => {
   console.log("Server is running on http://localhost:8081");
 });
@@ -42,14 +45,15 @@ app.listen(8081, () => {
 //Country Master Start
 app.get("/getdata", (req, res) => {
   const sql = "SELECT * FROM awt_country WHERE deleted = 0";
-  con.query(sql, (err, data) => {
+  con.request().query(sql, (err, result) => {
     if (err) {
       return res.json(err);
     } else {
-      return res.json(data);
+      return res.json(result.recordset); // Access `recordset` for SQL Server results
     }
   });
 });
+
 
 app.post("/login", (req, res) => {
   const { Lhiuser, password } = req.body;
