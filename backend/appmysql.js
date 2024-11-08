@@ -3228,7 +3228,9 @@ app.post("/deleteproducttypedata", (req, res) => {
     }
   });
 });
-//Product Type End
+//Product Type End\
+
+
 
 // Start Franchise Master - Parent
 app.get("/getfranchisedata", (req, res) => {
@@ -3654,8 +3656,7 @@ app.post("/addcomplaintremark", (req, res) => {
   });
 });
 
-app.post(
-  "/uploadcomplaintattachments",
+app.post("/uploadcomplaintattachments",
   upload.array("attachment"),
   (req, res) => {
     const { ticket_no, remark_id, created_by } = req.body;
@@ -4143,35 +4144,35 @@ app.get("requestcustomer",(req,res) => {
   } )
 });
 
-app.post("/postcustomer", (req, res) => {
-  const { customer_fname, customer_lname, customer_type, customer_classification, mobileno, alt_mobileno, dateofbirth, anniversary_date, email } = req.body;
+  app.post("/postcustomer", (req, res) => {
+    const { customer_fname, customer_lname, customer_type, customer_classification, mobileno, alt_mobileno, dateofbirth, anniversary_date, email } = req.body;
 
-  // Check for duplicates
-  const checkDuplicateSql = `SELECT * FROM awt_customer WHERE mobileno = ? AND dateofbirth = ? AND deleted = 0`;
+    // Check for duplicates
+    const checkDuplicateSql = `SELECT * FROM awt_customer WHERE mobileno = ? AND dateofbirth = ? AND deleted = 0`;
 
-  con.query(checkDuplicateSql, [mobileno, dateofbirth], (err, data) => {
-    if (err) {
-      return res.status(500).json(err);
-    }
-    if (data.length > 0) {
-      return res.status(409).json({
-        message: "Duplicate entry, Customer with same number and DOB already exists!",
-      });
-    } else {
-      // Insert the customer if no duplicate is found
-      const sql = `INSERT INTO awt_customer (customer_fname, customer_lname, customer_type, customer_classification, mobileno, alt_mobileno, dateofbirth, anniversary_date, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-
-      con.query(sql, [customer_fname, customer_lname, customer_type, customer_classification, mobileno, alt_mobileno, dateofbirth, anniversary_date, email], (err, data) => {
-        if (err) {
-          return res.status(500).json(err);
-        }
-        return res.status(201).json({
-          message: "Customer master added successfully",
+    con.query(checkDuplicateSql, [mobileno, dateofbirth], (err, data) => {
+      if (err) {
+        return res.status(500).json(err);
+      }
+      if (data.length > 0) {
+        return res.status(409).json({
+          message: "Duplicate entry, Customer with same number and DOB already exists!",
         });
-      });
-    }
+      } else {
+        // Insert the customer if no duplicate is found
+        const sql = `INSERT INTO awt_customer (customer_fname, customer_lname, customer_type, customer_classification, mobileno, alt_mobileno, dateofbirth, anniversary_date, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+        con.query(sql, [customer_fname, customer_lname, customer_type, customer_classification, mobileno, alt_mobileno, dateofbirth, anniversary_date, email], (err, data) => {
+          if (err) {
+            return res.status(500).json(err);
+          }
+          return res.status(201).json({
+            message: "Customer master added successfully",
+          });
+        });
+      }
+    });
   });
-});
 
 
 
