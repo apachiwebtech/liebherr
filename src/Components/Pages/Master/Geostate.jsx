@@ -161,6 +161,8 @@ const Geostate = () => {
       const response = await axios.get(`${Base_Url}/requestgeostate/${id}`);
       setFormData(response.data);
       fetchRegions(response.data.country_id);
+      console.log("ddtttttt",response.data);
+      console.log("ddddd",response.data.country_id);
       setIsEdit(true);
     } catch (error) {
       console.error('Error editing user:', error);

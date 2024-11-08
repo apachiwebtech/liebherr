@@ -176,7 +176,7 @@ const Channelpartner = () => {
                       className="form-control"
                       name="Channelpartner"
                       id="ChannelpartnerInput"
-                      value={formData.Channelpartner}
+                      value={formData.Channel_partner}
                       onChange={handleChange}
                       placeholder="Enter Channel Partner "
                     />
@@ -258,7 +258,7 @@ const Channelpartner = () => {
                           {index + 1 + indexOfFirstUser}
                         </td>
                         <td style={{ padding: "10px" }}>
-                          {item.Channelpartner}
+                          {item.Channel_partner}
                         </td>
                         <td style={{ padding: "0px", textAlign: "center" }}>
                           <button

@@ -48,13 +48,13 @@ const Pincode = () => {
     );
   const fetchRegions = (countryId) =>
     fetchData(
-      `${Base_Url}/getregions/${countryId}`,
+      `${Base_Url}/getregionspincode/${countryId}`,
       setRegions,
       "Error fetching regions:"
     );
   const fetchGeoStates = (regionId) =>
     fetchData(
-      `${Base_Url}/getgeostates/${regionId}`,
+      `${Base_Url}/getgeostatespincode/${regionId}`,
       setGeoStates,
       "Error fetching geo states:"
     );

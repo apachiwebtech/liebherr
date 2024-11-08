@@ -33,7 +33,7 @@ const Location = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getregions`);
+      const response = await axios.get(`${Base_Url}/getregionsr`);
       console.log(response.data);
       setUsers(response.data);
       setFilteredUsers(response.data);

@@ -33,7 +33,7 @@ const Geocity = () => {
 
   const fetchRegions = async (countryId) => {
     try {
-      const response = await axios.get(`${Base_Url}/getregions/${countryId}`);
+      const response = await axios.get(`${Base_Url}/getregionscity/${countryId}`);
       setRegions(response.data);
       console.log(response.data);
     } catch (error) {
@@ -43,7 +43,7 @@ const Geocity = () => {
 
   const fetchGeoStates = async (regionId) => {
     try {
-      const response = await axios.get(`${Base_Url}/getgeostates/${regionId}`);
+      const response = await axios.get(`${Base_Url}/getgeostatescity/${regionId}`);
       setGeoStates(response.data); // Fetch geo states based on region_id
     } catch (error) {
       console.error("Error fetching geo states:", error);
