@@ -63,6 +63,7 @@ import Customer from './Components/Pages/Master/Customer';
 import Uniqueproduct from './Components/Pages/Master/Uniqueproduct';
 import Childfranchisemaster from './Components/Pages/Master/Childfranchisemaster';
 import MasterFranchise from './Components/Pages/Master/MasterFranchise';
+import Engineer from './Components/Pages/Master/Engineer';
 
 
 
@@ -338,6 +339,10 @@ const Router = createBrowserRouter([
       {
         path: "/addproduct/:productid",
         element: <AddProduct />,
+      },
+      {
+        path: "/engineer",
+        element: <Engineer />,
       },
 
 

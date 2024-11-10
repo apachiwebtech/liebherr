@@ -2860,10 +2860,10 @@ app.post("/getticket", async (req, res) => {
 
 // Add Complaint Start
 app.post("/add_complaint", async (req, res) => {
-  let { 
-    complaint_date, customer_name, contact_person, email, mobile, address, 
-    state, city, area, pincode, mode_of_contact, ticket_type, cust_type, 
-    warrenty_status, invoice_date, call_charge, cust_id, model 
+  let {
+    complaint_date, customer_name, contact_person, email, mobile, address,
+    state, city, area, pincode, mode_of_contact, ticket_type, cust_type,
+    warrenty_status, invoice_date, call_charge, cust_id, model
   } = req.body;
 
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
@@ -4649,9 +4649,9 @@ app.post("/postlhidata", async (req, res) => {
     status,
 
 
-   } = req.body;
+  } = req.body;
 
-  
+
 
   try {
     const pool = await poolPromise;
@@ -5062,52 +5062,52 @@ app.get("/getcomplaintview/:complaintid", async (req, res) => {
   }
 });
 
-    app.post("/addcomplaintremark", async (req, res) => {
-      const { ticket_no, note, created_by } = req.body;
+app.post("/addcomplaintremark", async (req, res) => {
+  const { ticket_no, note, created_by } = req.body;
 
-      try {
-        const pool = await poolPromise;
+  try {
+    const pool = await poolPromise;
 
-        // SQL query to insert a new complaint remark
-        const sql = `INSERT INTO awt_complaintremark (ticket_no, remark, created_by, created_date) 
+    // SQL query to insert a new complaint remark
+    const sql = `INSERT INTO awt_complaintremark (ticket_no, remark, created_by, created_date) 
                     VALUES (${ticket_no}, '${note}', ${created_by}, GETDATE())`;
-        const result = await pool.request().query(sql);
+    const result = await pool.request().query(sql);
 
-        res.json({ insertId: result.rowsAffected[0] }); // Send the inserted ID back to the client
-      } catch (err) {
-        console.error("Error inserting remark:", err);
-        return res.status(500).json({ error: "Database error", details: err.message }); // Send back more details for debugging
-      }
-    });
+    res.json({ insertId: result.rowsAffected[0] }); // Send the inserted ID back to the client
+  } catch (err) {
+    console.error("Error inserting remark:", err);
+    return res.status(500).json({ error: "Database error", details: err.message }); // Send back more details for debugging
+  }
+});
 
-    app.post("/uploadcomplaintattachments", upload.array("attachment"), async (req, res) => {
-      const { ticket_no, remark_id, created_by } = req.body;
+app.post("/uploadcomplaintattachments", upload.array("attachment"), async (req, res) => {
+  const { ticket_no, remark_id, created_by } = req.body;
 
-      if (!req.files || req.files.length === 0) {
-        return res.status(400).json({ error: "No files uploaded" });
-      }
+  if (!req.files || req.files.length === 0) {
+    return res.status(400).json({ error: "No files uploaded" });
+  }
 
-      // Combine filenames into a single string
-      const attachments = req.files.map((file) => file.filename); // Get all filenames
-      const attachmentString = attachments.join(", "); // For a comma-separated string
+  // Combine filenames into a single string
+  const attachments = req.files.map((file) => file.filename); // Get all filenames
+  const attachmentString = attachments.join(", "); // For a comma-separated string
 
-      try {
-        const pool = await poolPromise;
+  try {
+    const pool = await poolPromise;
 
-        // SQL query to insert attachments
-        const sql = `INSERT INTO awt_complaintattachment (remark_id, ticket_no, attachment, created_by, created_date) 
+    // SQL query to insert attachments
+    const sql = `INSERT INTO awt_complaintattachment (remark_id, ticket_no, attachment, created_by, created_date) 
                     VALUES (${remark_id}, ${ticket_no}, '${attachmentString}', ${created_by}, GETDATE())`;
-        const result = await pool.request().query(sql);
+    const result = await pool.request().query(sql);
 
-        res.json({
-          message: "Files uploaded successfully",
-          count: 1, // Only one entry created
-        });
-      } catch (err) {
-        console.error("Error inserting attachments:", err);
-        return res.status(500).json({ error: "Database error", details: err.message });
-      }
+    res.json({
+      message: "Files uploaded successfully",
+      count: 1, // Only one entry created
     });
+  } catch (err) {
+    console.error("Error inserting attachments:", err);
+    return res.status(500).json({ error: "Database error", details: err.message });
+  }
+});
 
 app.get("/getComplaintDetails/:ticket_no", async (req, res) => {
   const ticket_no = req.params.ticket_no;
@@ -5225,7 +5225,7 @@ app.get("/fetchmanufacturer", async (req, res) => {
 
 app.post("/getupdateparam", async (req, res) => {
 
-  const {productid} = req.body;
+  const { productid } = req.body;
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
@@ -5250,7 +5250,7 @@ app.post("/addProduct", async (req, res) => {
 
 
 
-      const request = pool.request()
+    const request = pool.request()
       .input('item_code', item_code)
       .input('item_description', item_description)
       .input('product_model', product_model)
@@ -5275,9 +5275,9 @@ app.post("/addProduct", async (req, res) => {
       .input('service_partner_basic', service_partner_basic);
 
 
-      console.log(sql)
+    console.log(sql)
 
-      const result = await request.query(sql);
+    const result = await request.query(sql);
 
     res.json({ insertId: result.rowsAffected[0] }); // Send the inserted ID back to the client
   } catch (err) {
@@ -5287,16 +5287,16 @@ app.post("/addProduct", async (req, res) => {
 });
 
 app.post("/updateProduct", async (req, res) => {
-  const { 
-    item_code, item_description, product_model, product_type, product_class_code, product_class, 
-    product_line_code, product_line, material, manufacturer, item_type, serialized, size, 
-    crmproducttype, colour, handle_type, serial_identification, installation_type, 
-    customer_classification, price_group, mrp, service_partner_basic, uid 
+  const {
+    item_code, item_description, product_model, product_type, product_class_code, product_class,
+    product_line_code, product_line, material, manufacturer, item_type, serialized, size,
+    crmproducttype, colour, handle_type, serial_identification, installation_type,
+    customer_classification, price_group, mrp, service_partner_basic, uid
   } = req.body;
 
   try {
     const pool = await poolPromise;
-    
+
     // SQL query to update an existing product
     const sql = `
       UPDATE product_master
@@ -5362,40 +5362,41 @@ app.post("/updateProduct", async (req, res) => {
 //Complaint view Insert TicketFormData start
 
 app.post("/ticketFormData", async (req, res) => {
-  const { ticket_no,serial_no, ModelNumber, engineer_id, call_status, updated_by } = req.body;
+  const { ticket_no, serial_no, ModelNumber, engineer_id, call_status, updated_by } = req.body;
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
-  console.log(ticket_no,serial_no, ModelNumber, engineer_id, call_status, updated_by,"Values")
+  console.log(ticket_no, serial_no, ModelNumber, engineer_id, call_status, updated_by, "Values")
 
   try {
     const pool = await poolPromise;
 
-<<<<<<< Updated upstream
     const updateSql = `
       UPDATE complaint_ticket 
       SET ModelNumber = '${ModelNumber}', engineer_id = '${engineer_id}', 
           call_status = '${call_status}', serial_no = '${serial_no}' , updated_by = '${updated_by}', updated_date = '${formattedDate}'
       WHERE ticket_no = '${ticket_no}'`;
-    
-      console.log(updateSql,"UpdateSql");
+
+    console.log(updateSql, "UpdateSql");
     await pool.request().query(updateSql);
 
     return res.status(200).json({ message: "Ticket Formdata updated successfully!" });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "An error occurred while updating the ticket" });
-=======
+  }
+});
+
 app.post("/updatestatus", async (req, res) => {
   const { dataId } = req.body;
   try {
     const pool = await poolPromise;
     const sql = `SELECT * FROM lhi_user WHERE id = @dataId`;
-    
+
     // Execute the query to get the user
     const request = await pool.request()
       .input('dataId', dataId)
       .query(sql);
-    
+
     // Check if records exist
     if (request.recordset.length > 0) {
       const status = request.recordset[0].status;
@@ -5428,6 +5429,5 @@ app.post("/updatestatus", async (req, res) => {
   } catch (err) {
     console.error("Error updating status:", err);
     return res.status(500).json({ message: 'Error updating status' });
->>>>>>> Stashed changes
   }
 });
