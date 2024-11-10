@@ -413,14 +413,14 @@ const Area = () => {
                   <table className="table table-bordered table-hover dt-responsive nowrap w-100">
                     <thead>
                       <tr className="text-center">
-                        <th scope="col" className='text-center'>#</th>
-                        <th scope="col" className='text-center'>Country</th>
-                        <th scope="col" className='text-center'>Region</th>
-                        <th scope="col" className='text-center'>Geo State</th>
-                        <th scope="col" className='text-center'>Geo City</th>
-                        <th scope="col" className='text-center'>Area</th>
-                        <th scope="col" className='text-center'>Edit</th>
-                        <th scope="col" className='text-center'>Delete</th>
+                        <th scope="col" width="10%" className='text-center'>#</th>
+                        <th scope="col" width="14%" className='text-center'>Country</th>
+                        <th scope="col" width="14%" className='text-center'>Region</th>
+                        <th scope="col" width="14%" className='text-center'>Geo State</th>
+                        <th scope="col" width="14%" className='text-center'>Geo City</th>
+                        <th scope="col" width="14%" className='text-center'>Area</th>
+                        <th scope="col" width="15%" className='text-center'>Edit</th>
+                        <th scope="col" width="15%" className='text-center'>Delete</th>
                       </tr>
                     </thead>
                     <tbody>

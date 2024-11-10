@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
-
+import Franchisemaster from '../Master/Franchisemaster';
 const MasterFranchise = () => {
   // Step 1: Add this state to track errors
   const [errors, setErrors] = useState({});
@@ -149,6 +149,9 @@ const MasterFranchise = () => {
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
   return (
+
+    <div className="tab-content">
+      <Franchisemaster />
     <div className="row mp0">
       <div className="col-12">
         <div className="card mb-3 tab_box">
@@ -168,7 +171,7 @@ const MasterFranchise = () => {
                       htmlFor="MasterFranchiseInput"
                       className="input-field"
                     >
-                       Franchise Master
+                      Franchise Master
                     </label>
                     <input
                       type="text"
@@ -228,59 +231,36 @@ const MasterFranchise = () => {
                 </div>
 
                 {/* Adjust table padding and spacing */}
-                <table className="table table-bordered table dt-responsive nowrap w-100 table-css">
-                  <thead>
+                <table className="table table-bordered table-hover table-hover">
+                  <thead className="thead-dark">
                     <tr>
-                      <th style={{ padding: "12px 15px", textAlign: "center" }}>
-                        #
-                      </th>
-                      <th style={{ padding: "12px 15px", textAlign: "center" }}>
-                        Title
-                      </th>
-                      <th style={{ padding: "0px 0px", textAlign: "center" }}>
-                        Edit
-                      </th>
-                      <th style={{ padding: "0px 0px", textAlign: "center" }}>
-                        Delete
-                      </th>
+                      <th width="10%" style={{ textAlign: "center" }}>#</th>
+                      <th width="70%" style={{ textAlign: "left" }}>Title</th>
+                      <th width="15%" style={{ textAlign: "center" }}>Edit</th>
+                      <th width="15%" style={{ textAlign: "center" }}>Delete</th>
                     </tr>
                   </thead>
                   <tbody>
                     {currentUsers.map((item, index) => (
                       <tr key={item.id}>
-                        <td style={{ padding: "2px", textAlign: "center" }}>
-                          {index + 1 + indexOfFirstUser}
-                        </td>
-                        <td style={{ padding: "10px" }}>{item.title}</td>
-                        <td style={{ padding: "0px", textAlign: "center" }}>
+                        <td style={{ textAlign: "center" }}>{index + 1 + indexOfFirstUser}</td>
+                        <td>{item.title}</td>
+                        <td style={{ textAlign: "center" }}>
                           <button
-                            className="btn"
+                            className="btn btn-link"
                             onClick={() => {
-                              // alert(item.id)
                               edit(item.id);
                             }}
                             title="Edit"
-                            style={{
-                              backgroundColor: "transparent",
-                              border: "none",
-                              color: "blue",
-                              fontSize: "20px",
-                            }}
                           >
                             <FaPencilAlt />
                           </button>
                         </td>
-                        <td style={{ padding: "0px", textAlign: "center" }}>
+                        <td style={{ textAlign: "center" }}>
                           <button
-                            className="btn"
+                            className="btn btn-link text-danger"
                             onClick={() => deleted(item.id)}
                             title="Delete"
-                            style={{
-                              backgroundColor: "transparent",
-                              border: "none",
-                              color: "red",
-                              fontSize: "20px",
-                            }}
                           >
                             <FaTrash />
                           </button>
@@ -337,7 +317,7 @@ const MasterFranchise = () => {
           </div>
         </div>
       </div>
-    </div>
+    </div></div>
   );
 };
 

@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
+import Endcustomertabs from "./Endcustomertabs";
 
 const Uniqueproduct = () => {
   const [errors, setErrors] = useState({});
@@ -176,6 +177,8 @@ const Uniqueproduct = () => {
   };
 
   return (
+    <div className="tab-content">
+      <Endcustomertabs></Endcustomertabs>
     <div className="row mp0">
       <div className="col-12">
         <div className="card mb-3 tab_box">
@@ -306,38 +309,22 @@ const Uniqueproduct = () => {
                         <td>{item.product}</td>
                         <td>{item.serialnumber}</td>
                         <td>{item.location}</td>
-                        <td style={{ textAlign: "center" }}>
+                        <td className="text-center">
                           <button
-                            className="edithelper" // You can keep or modify this class as needed
+                            className="btn btn-link text-primary"
                             onClick={() => edit(item.id)}
                             title="Edit"
-                            style={{
-                              backgroundColor: "transparent",
-                              border: "none",
-                              color: "#0000FF",
-                              fontSize: "20px",
-                              transform: "rotate(1deg)", // Add rotation if needed
-                              cursor: "pointer", // Change cursor to pointer on hover
-                            }}
                           >
-                            <i className="fa-solid fa-pen"></i>
+                            <FaPencilAlt />
                           </button>
                         </td>
-                        <td style={{ textAlign: "center" }}>
+                        <td className="text-center">
                           <button
-                            className="deletehelper" // Optional: You can keep this for any specific styling
-                            onClick={() => deleted(item.id)} // Call the delete function
+                            className="btn btn-link text-danger"
+                            onClick={() => deleted(item.id)}
                             title="Delete"
-                            style={{
-                              backgroundColor: "transparent",
-                              border: "none",
-                              color: "#df2025", // Red color for delete icon
-                              fontSize: "20px",
-                              cursor: "pointer", // Change cursor to pointer on hover
-                            }}
                           >
-                            <i className="fa-solid fa-trash"></i>{" "}
-                            {/* Use Font Awesome trash icon */}
+                            <FaTrash />
                           </button>
                         </td>
                       </tr>
@@ -349,7 +336,7 @@ const Uniqueproduct = () => {
           </div>
         </div>
       </div>
-    </div>
+    </div></div>
   );
 };
 

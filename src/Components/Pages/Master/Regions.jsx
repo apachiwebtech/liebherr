@@ -257,11 +257,11 @@ const Location = () => {
                 <table className="table table-bordered table-hover dt-responsive nowrap w-100">
                   <thead className="thead-light">
                     <tr>
-                      <th className="text-center">#</th>
-                      <th className="text-center">Country</th>
-                      <th className="text-center">Region</th>
-                      <th className="text-center">Edit</th>
-                      <th className="text-center">Delete</th>
+                      <th width="10%" className="text-center">#</th>
+                      <th width="35%" className="text-center">Country</th>
+                      <th width="35%" className="text-center">Region</th>
+                      <th width="15%" className="text-center">Edit</th>
+                      <th width="15%" className="text-center">Delete</th>
                     </tr>
                   </thead>
                   <tbody>

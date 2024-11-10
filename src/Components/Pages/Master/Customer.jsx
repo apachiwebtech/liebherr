@@ -2,6 +2,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
+import Endcustomertabs from './Endcustomertabs';
 
 const Customer = () => {
 
@@ -192,6 +193,8 @@ const Customer = () => {
 
 
   return (
+    <div className="tab-content">
+      <Endcustomertabs></Endcustomertabs>
     <div className="row mp0">
     <div className="col-12">
       <div className="card mb-3 tab_box">
@@ -336,7 +339,7 @@ const Customer = () => {
         </div>
       </div>
     </div>
-  </div>
+  </div></div>
   
   );
 };

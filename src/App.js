@@ -58,6 +58,11 @@ import ProductLine from './Components/Pages/Master/ProductLine';
 import Material from './Components/Pages/Master/Material';
 import Manufacturer from './Components/Pages/Master/Manufacturer';
 import { AddProduct } from './Components/Pages/Master/AddProduct';
+import { Customerlist } from './Components/Pages/Master/Customerlist';
+import Customer from './Components/Pages/Master/Customer';
+import Uniqueproduct from './Components/Pages/Master/Uniqueproduct';
+import Childfranchisemaster from './Components/Pages/Master/Childfranchisemaster';
+import MasterFranchise from './Components/Pages/Master/MasterFranchise';
 
 
 
@@ -175,6 +180,21 @@ const Router = createBrowserRouter([
 
       },
       {
+        path: "/Customerlist",
+        element: <Customerlist />,
+
+      },
+      {
+        path: "/Customer",
+        element: <Customer />,
+
+      },
+      {
+        path: "/Uniqueproduct",
+        element: <Uniqueproduct />,
+
+      },
+      {
         path: "/",
         element: <Dashboard />,
 
@@ -275,6 +295,16 @@ const Router = createBrowserRouter([
       {
         path: "/engineermaster",
         element: <EngineerMaster />,
+
+      },
+      {
+        path: "/MasterFranchise",
+        element: <MasterFranchise />,
+
+      },
+      {
+        path: "/Childfranchisemaster",
+        element: <Childfranchisemaster />,
 
       },
       {

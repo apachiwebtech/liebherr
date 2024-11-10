@@ -261,12 +261,12 @@ const Geostate = () => {
                 <table className='table table-bordered  table-hover dt-responsive nowrap w-100'>
                   <thead className='thead-light'>
                     <tr>
-                      <th scope='col' className='text-center'>#</th>
-                      <th scope='col' className='text-center'>Country</th>
-                      <th scope='col' className='text-center'>Region</th>
-                      <th scope='col' className='text-center'>Geo State</th>
-                      <th scope='col' className='text-center'>Edit</th>
-                      <th scope='col' className='text-center'>Delete</th>
+                      <th scope='col' width="10%" className='text-center'>#</th>
+                      <th scope='col' width="23%" className='text-center'>Country</th>
+                      <th scope='col' width="24%" className='text-center'>Region</th>
+                      <th scope='col' width="23%" className='text-center'>Geo State</th>
+                      <th scope='col' width="15%" className='text-center'>Edit</th>
+                      <th scope='col' width="15%" className='text-center'>Delete</th>
                     </tr>
                   </thead>
                   <tbody>

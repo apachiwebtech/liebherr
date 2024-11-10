@@ -259,11 +259,11 @@ const ProductLine = () => {
                   <table className="table table-bordered table-hover table-responsive mt-3">
                     <thead className="thead-light">
                       <tr>
-                        <th className="text-center">#</th>
-                        <th className="text-center">Pline Code</th>
-                        <th className="text-center">Product Line</th>
-                        <th className="text-center">Edit</th>
-                        <th className="text-center">Delete</th>
+                        <th width="10%" className="text-center">#</th>
+                        <th width="20%" className="text-center">Pline Code</th>
+                        <th width="50%" className="text-center">Product Line</th>
+                        <th width="15%" className="text-center">Edit</th>
+                        <th width="15%" className="text-center">Delete</th>
                       </tr>
                     </thead>
                     <tbody>

@@ -231,64 +231,34 @@ const Channelpartner = () => {
                 </div>
 
                 {/* Adjust table padding and spacing */}
-                <table
-                  className="table table-bordered table dt-responsive nowrap w-100 table-css"
-                  style={{ marginTop: "20px", tableLayout: "fixed" }}
-                >
-                  <thead>
+                <table className="table table-bordered table-hover table-responsive mt-4">
+                  <thead className="thead-light">
                     <tr>
-                      <th style={{ padding: "12px 15px", textAlign: "center" }}>
-                        #
-                      </th>
-                      <th style={{ padding: "12px 15px", textAlign: "center" }}>
-                        Channel Partner
-                      </th>
-                      <th style={{ padding: "0px 0px", textAlign: "center" }}>
-                        Edit
-                      </th>
-                      <th style={{ padding: "0px 0px", textAlign: "center" }}>
-                        Delete
-                      </th>
+                      <th width="10%" className="text-center">#</th>
+                      <th width="70%" className="text-center">Channel Partner</th>
+                      <th width="15%" className="text-center">Edit</th>
+                      <th width="15%" className="text-center">Delete</th>
                     </tr>
                   </thead>
                   <tbody>
                     {currentUsers.map((item, index) => (
                       <tr key={item.id}>
-                        <td style={{ padding: "2px", textAlign: "center" }}>
-                          {index + 1 + indexOfFirstUser}
-                        </td>
-                        <td style={{ padding: "10px" }}>
-                          {item.Channel_partner}
-                        </td>
-                        <td style={{ padding: "0px", textAlign: "center" }}>
+                        <td className="text-center">{index + 1 + indexOfFirstUser}</td>
+                        <td>{item.Channel_partner}</td>
+                        <td className="text-center">
                           <button
-                            className="btn"
-                            onClick={() => {
-                              // alert(item.id)
-                              edit(item.id);
-                            }}
-                            Channelpartner="Edit"
-                            style={{
-                              backgroundColor: "transparent",
-                              border: "none",
-                              color: "blue",
-                              fontSize: "20px",
-                            }}
+                            className="btn btn-link text-primary"
+                            onClick={() => edit(item.id)}
+                            aria-label="Edit"
                           >
                             <FaPencilAlt />
                           </button>
                         </td>
-                        <td style={{ padding: "0px", textAlign: "center" }}>
+                        <td className="text-center">
                           <button
-                            className="btn"
+                            className="btn btn-link text-danger"
                             onClick={() => deleted(item.id)}
-                            Channelpartner="Delete"
-                            style={{
-                              backgroundColor: "transparent",
-                              border: "none",
-                              color: "red",
-                              fontSize: "20px",
-                            }}
+                            aria-label="Delete"
                           >
                             <FaTrash />
                           </button>

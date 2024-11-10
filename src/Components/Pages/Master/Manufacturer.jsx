@@ -202,10 +202,10 @@ const Manufacturer = () => {
                   <table className='table table-bordered table-hover table-hover mt-4'>
                     <thead className='thead-dark'>
                       <tr>
-                        <th scope="col" className='text-center'>#</th>
-                        <th scope="col" className='text-center'>Title</th>
-                        <th scope="col" className='text-center'>Edit</th>
-                        <th scope="col" className='text-center'>Delete</th>
+                        <th scope="col" width="10%" className='text-center'>#</th>
+                        <th scope="col" width="70%"  className='text-center'>Title</th>
+                        <th scope="col" width="15%" className='text-center'>Edit</th>
+                        <th scope="col" width="15%" className='text-center'>Delete</th>
                       </tr>
                     </thead>
                     <tbody>

@@ -218,13 +218,13 @@ const Category = () => {
                   </div>
 
                   {/* Adjust table padding and spacing */}
-                  <table className="table table-bordered table-hover table-responsive table-striped mt-3">
+                  <table className="table table-bordered table-hover table-responsive mt-3">
                     <thead className="thead-light">
                       <tr>
-                        <th className="text-center">#</th>
-                        <th className="text-center">Title</th>
-                        <th className="text-center">Edit</th>
-                        <th className="text-center">Delete</th>
+                        <th width="10%" className="text-center">#</th>
+                        <th width="70%" className="text-center">Title</th>
+                        <th width="10%" className="text-center">Edit</th>
+                        <th width="10%" className="text-center">Delete</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -234,7 +234,7 @@ const Category = () => {
                           <td>{item.title}</td>
                           <td className="text-center">
                             <button
-                              className="btn  text-primary"
+                              className="btn btn-link text-primary"
                               onClick={() => {
                                 edit(item.id);
                               }}
@@ -245,7 +245,7 @@ const Category = () => {
                           </td>
                           <td className="text-center">
                             <button
-                              className="btn  text-danger"
+                             className="btn btn-link text-danger"
                               onClick={() => deleted(item.id)}
                               title="Delete"
                             >

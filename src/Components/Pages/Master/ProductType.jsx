@@ -241,10 +241,10 @@ const ProductType = () => {
                   <table className="table table-bordered table-hover table-responsive mt-4">
                     <thead className="thead-light">
                       <tr>
-                        <th className="text-center">#</th>
-                        <th className="text-center">Product Type</th>
-                        <th className="text-center">Edit</th>
-                        <th className="text-center">Delete</th>
+                        <th width="10%" className="text-center">#</th>
+                        <th width="70%" className="text-center">Product Type</th>
+                        <th width="15%" className="text-center">Edit</th>
+                        <th width="15%" className="text-center">Delete</th>
                       </tr>
                     </thead>
                     <tbody>

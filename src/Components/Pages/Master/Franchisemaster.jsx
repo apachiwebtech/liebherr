@@ -1,27 +1,19 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import MasterFranchise from './MasterFranchise';
 import Childfranchisemaster from './Childfranchisemaster';
 import EngineerMaster from './EngineerMaster';
+import { Link } from 'react-router-dom';
 
 function MasterFranchiseTabs() {
-  const [activeTab, setActiveTab] = useState('MasterFranchise');
-
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case 'MasterFranchise':
-        return <MasterFranchise />;
-        case 'Childfranchisemaster':
-            return <Childfranchisemaster />;
-            case 'EngineerMaster':
-              return <EngineerMaster />;
+  const [activeTab, setActiveTab] = useState('/MasterFranchise');
 
 
+  useEffect(() => {
 
-      default:
-        return <MasterFranchise />;
-    }
-  };
+    setActiveTab(window.location.pathname);
+
+  }, [window.location.pathname]);
 
   return (
     <>
@@ -63,30 +55,30 @@ function MasterFranchiseTabs() {
             <div className="col-sm-6 p-0" style={{ width: '100%' }}>
             <div className="tabsMenu" style={{fontSize:"14px", marginLeft: "12px",fontWeight:"600",fontFamily:"Nunito"}}>
               <ul className="nav nav-tabs ">
-                <li className="nav-item">
+              <Link to={`/MasterFranchise`}><li className="nav-item">
                   <button
-                    className={`nav-link ${activeTab === 'MasterFranchise' ? 'active' : ''}`}
+                    className={`nav-link ${activeTab === '/MasterFranchise' ? 'active' : ''}`}
                     onClick={() => setActiveTab('MasterFranchise')}
                   >
                    FRANCHISE MASTER
                   </button>
-                </li>
-                <li className="nav-item">
+                </li></Link>
+                <Link to={`/Childfranchisemaster`}><li className="nav-item">
                   <button
-                    className={`nav-link ${activeTab === 'Childfranchisemaster' ? 'active' : ''}`}
+                    className={`nav-link ${activeTab === '/Childfranchisemaster' ? 'active' : ''}`}
                     onClick={() => setActiveTab('Childfranchisemaster')}
                   >
                    CHILD FRANCHISE MASTER
                   </button>
-                </li>
-                <li className="nav-item">
+                </li></Link>
+                <Link to={`/EngineerMaster`}><li className="nav-item">
                   <button
-                    className={`nav-link ${activeTab === 'EngineerMaster' ? 'active' : ''}`}
+                    className={`nav-link ${activeTab === '/EngineerMaster' ? 'active' : ''}`}
                     onClick={() => setActiveTab('EngineerMaster')}
                   >
                     ENGINEER MASTER
                   </button>
-                </li>    
+                </li>  </Link>  
                 {/* Add other tabs like GEO STATE, GEO CITY, AREA */}
               </ul>
             </div> 
@@ -96,7 +88,7 @@ function MasterFranchiseTabs() {
             {/* Tab Content */}       
               <div className="col-12 col-custom" style={{paddingLeft:"12px",paddingRight:"12px"}}>
                 <div className="tab-content">
-                  {renderTabContent()}
+                  {/* {renderTabContent()} */}
                 </div>
               </div>
           </div>

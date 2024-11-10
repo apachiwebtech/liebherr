@@ -222,16 +222,16 @@ const Location = () => {
                 <table className="table table-bordered table-hover dt-responsive nowrap w-100">
                   <thead className="thead-light">
                     <tr>
-                      <th scope="col" className="text-center">
+                      <th scope="col" width="10%" className="text-center">
                         #
                       </th>
-                      <th scope="col" className="text-center">
+                      <th scope="col" width="70%" className="text-center">
                         Title
                       </th>
-                      <th scope="col" className="text-center">
+                      <th scope="col" width="15%" className="text-center">
                         Edit
                       </th>
-                      <th scope="col" className="text-center">
+                      <th scope="col" width="15%" className="text-center">
                         Delete
                       </th>
                     </tr>
