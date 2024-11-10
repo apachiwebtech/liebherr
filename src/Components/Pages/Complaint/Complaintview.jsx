@@ -1,11 +1,25 @@
 import axios from "axios";
+import Select from "react-select";
+import makeAnimated from 'react-select/animated';
 import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Base_Url } from "../../Utils/Base_Url";
 
 export function Complaintview(params) {
   const { complaintid } = useParams();
-  const [complaintview, setComplaintview] = useState([]);
+  const [complaintview, setComplaintview] = useState({
+    ticket_no: '',
+    customer_name: '',
+    address: '',
+    pincode: '',
+    customer_mobile: '',
+    ticket_type: '',
+    call_type: '',
+    warranty_status: '',
+    ModelNumber: '',
+    invoice_date: ''
+  });
+  
   const [product, setProduct] = useState([]);
   const [engineer, setEngineer] = useState([]); // Initialize as empty array
   const [note, setNote] = useState(""); // Input field value
@@ -154,6 +168,13 @@ console.log("this is get product",product);
         }`
       );
     }
+  };
+
+  const handleModelChange = (selectedOption) => {
+    setComplaintview(prev => ({
+      ...prev,
+      ModelNumber: selectedOption ? selectedOption.value : ''
+    }));
   };
 
   // New handler for Attachment 2 preview
@@ -431,12 +452,13 @@ console.log("this is get product",product);
 
 
                                       <div className="col-md-4">
-                                      <h4 className="pname" style={{ fontSize: "11px"}}>Model</h4>
-                                          <select
+                                        <h4 className="pname" style={{ fontSize: "11px"}}>Model</h4>
+                                       
+                                        <select
                                             className="form-select dropdown-select"
                                             name="country_id"
                                             value={complaintview.ModelNumber}
-                                            // onChange={handleChange}
+                                            onChange={(e) => handleModelChange(e.target.value)}
                                           >
                                             <option value="">Select Model</option>
                                             {product.map((products) => (
@@ -446,6 +468,7 @@ console.log("this is get product",product);
                                             ))}
                                           </select>
                                       </div>
+                                      
 
                                       <div className="col-md-2">
                                           <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Serial No</p>
