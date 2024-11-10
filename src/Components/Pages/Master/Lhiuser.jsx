@@ -41,17 +41,26 @@ const Lhiuser = () => {
   }, []);
 
   const handleChange = (e) => {
-    var { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-    if(name == 'Password'){
-      
-       value = CryptoJS.MD5(value).toString();
-      
-      setFormData({ ...formData, 'passwordmd5': value });
-      
-      
+    let { name, value } = e.target;
+
+    // If the field is Password, hash the value
+    if (name === 'Password') {
+      // Hash the password before setting the state
+      const hashedPassword = CryptoJS.MD5(value).toString();
+      setFormData({
+        ...formData,
+        [name]: value,  // Update the password field itself
+        passwordmd5: hashedPassword,  // Update the hashed password
+      });
+    } else {
+      // Update other fields normally
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
     }
   };
+
 
   const handleSearch = (e) => {
     const value = e.target.value.toLowerCase();
@@ -67,19 +76,19 @@ const Lhiuser = () => {
   const validateForm = () => {
     const newErrors = {};  // Initialize the errors object
 
-    if (!formData.Lhiuser||!formData.Lhiuser.trim()) {
+    if (!formData.Lhiuser || !formData.Lhiuser.trim()) {
       newErrors.Lhiuser = "Lhiuser Field is required.";
     }
-    if (!formData.UserCode||!formData.UserCode.trim()) {
+    if (!formData.UserCode || !formData.UserCode.trim()) {
       newErrors.UserCode = "UserCode Field is required.";
     }
-    if (!formData.Password||!formData.Password.trim()) {
+    if (!formData.Password || !formData.passwordmd5.trim()) {
       newErrors.Password = "Password Field is required.";
     }
-    if (!formData.mobile_no||!formData.mobile_no.trim()) {
+    if (!formData.mobile_no || !formData.mobile_no.trim()) {
       newErrors.mobile_no = "Mobile Number Field is required.";
     }
-    if (!formData.email||!formData.email.trim()) {
+    if (!formData.email || !formData.email.trim()) {
       newErrors.email = "Email Field is required.";
     }
 
@@ -102,7 +111,7 @@ const Lhiuser = () => {
 
     if (validateForm()) {
 
-   
+
       setDuplicateError(""); // Clear duplicate error before submitting
 
       try {
@@ -140,7 +149,7 @@ const Lhiuser = () => {
                   Lhiuser: "",
                 });
                 fetchUsers();
-                
+
               })
               .catch((error) => {
                 if (error.response && error.response.status === 409) {
@@ -155,15 +164,7 @@ const Lhiuser = () => {
     }
   };
 
-  const deleted = async (id) => {
-    try {
-      const response = await axios.post(`${Base_Url}/deletelhidata`, { id });
 
-      window.location.reload();
-    } catch (error) {
-      console.error("Error deleting user:", error);
-    }
-  };
 
   const edit = async (id) => {
     try {
@@ -174,6 +175,18 @@ const Lhiuser = () => {
     } catch (error) {
       console.error("Error editing user:", error);
     }
+  };
+
+  const handleChangestatus = (e) => {
+    try {
+      const dataId = e.target.getAttribute('data-id');
+
+      const response = axios.post(`${Base_Url}/updatestatus`, { dataId: dataId });
+
+    } catch (error) {
+      console.error("Error editing user:", error);
+    }
+
   };
 
   const indexOfLastUser = (currentPage + 1) * itemsPerPage;
@@ -447,7 +460,15 @@ const Lhiuser = () => {
 
                         <td style={{ padding: "10px" }}>
                           <label class="switch">
-                            <input type="checkbox" data-id="'.$listdata->id.'" class="status" />
+                            <input
+                              type="checkbox"
+                              onChange={handleChangestatus}
+                              data-id={item.id}
+                              checked={item.status === 1}  // Check if status is 1 (checked)
+                              className="status"
+                            />
+
+
                             <span class="slider round"></span>
                           </label>
 
@@ -487,7 +508,7 @@ const Lhiuser = () => {
                         <td style={{ padding: "0px", textAlign: "center" }}>
                           <button
                             className="btn"
-                            onClick={() => deleted(item.id)}
+                            onClick={() => (item.id)}
                             Lhiuser="Delete"
                             style={{
                               backgroundColor: "transparent",

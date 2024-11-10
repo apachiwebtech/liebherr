@@ -4710,13 +4710,20 @@ app.get("/requestlhidata/:id", async (req, res) => {
 });
 // update for Lhiuser
 app.put("/putlhidata", async (req, res) => {
-  const { Lhiuser, id, updated_by } = req.body;
+  const {
+    Lhiuser, id, updated_by, mobile_no, Usercode, password, status, email, remarks
+  } = req.body;
 
   try {
     const pool = await poolPromise;
 
     // Step 1: Check if the same Lhiuser exists for another record (other than the current one) and is not soft-deleted
-    const checkDuplicateSql = `SELECT * FROM lhi_user WHERE Lhiuser = '${Lhiuser}' AND id != '${id}' AND deleted = 0`;
+    const checkDuplicateSql = `
+      SELECT * FROM lhi_user 
+      WHERE Lhiuser = '${Lhiuser}' 
+      AND id != '${id}' 
+      AND deleted = 0
+    `;
     const duplicateResult = await pool.request().query(checkDuplicateSql);
 
     if (duplicateResult.recordset.length > 0) {
@@ -4724,7 +4731,20 @@ app.put("/putlhidata", async (req, res) => {
       return res.status(409).json({ message: "Duplicate entry, Lhiuser already exists!" });
     } else {
       // Step 2: Update the record if no duplicates are found
-      const updateSql = `UPDATE lhi_user SET Lhiuser = '${Lhiuser}', updated_by = '${updated_by}', updated_date = GETDATE() WHERE id = '${id}'`;
+      const updateSql = `
+        UPDATE lhi_user
+        SET 
+          Lhiuser = '${Lhiuser}', 
+          updated_by = '${updated_by}', 
+          updated_date = GETDATE(),
+          mobile_no = '${mobile_no}',
+          Usercode = '${Usercode}',
+          password = '${password}', 
+          status = ${status}, 
+          email = '${email}', 
+          remarks = '${remarks}'
+        WHERE id = '${id}'
+      `;
       await pool.request().query(updateSql);
 
       return res.json({ message: "Lhiuser updated successfully!" });
@@ -4734,6 +4754,7 @@ app.put("/putlhidata", async (req, res) => {
     return res.status(500).json({ message: "An error occurred while updating Lhiuser data" });
   }
 });
+
 
 // delete for Lhiuser
 app.post("/deletelhidata", async (req, res) => {
@@ -5349,6 +5370,7 @@ app.post("/ticketFormData", async (req, res) => {
   try {
     const pool = await poolPromise;
 
+<<<<<<< Updated upstream
     const updateSql = `
       UPDATE complaint_ticket 
       SET ModelNumber = '${ModelNumber}', engineer_id = '${engineer_id}', 
@@ -5362,5 +5384,50 @@ app.post("/ticketFormData", async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "An error occurred while updating the ticket" });
+=======
+app.post("/updatestatus", async (req, res) => {
+  const { dataId } = req.body;
+  try {
+    const pool = await poolPromise;
+    const sql = `SELECT * FROM lhi_user WHERE id = @dataId`;
+    
+    // Execute the query to get the user
+    const request = await pool.request()
+      .input('dataId', dataId)
+      .query(sql);
+    
+    // Check if records exist
+    if (request.recordset.length > 0) {
+      const status = request.recordset[0].status;
+      console.log(request.recordset[0].status);
+      let query;
+      if (status == 1) {
+        // If status is 1, deactivate and set activation date
+        query = `UPDATE lhi_user 
+                 SET status = 0, deactivation_date = GETDATE() 
+                 WHERE id = @dataId`;
+      } else {
+        // If status is not 1, deactivate and set deactivation date
+        query = `UPDATE lhi_user 
+                 SET status = 1, activation_date = GETDATE() 
+                 WHERE id = @dataId`;
+      }
+
+      // Execute the update query
+      const update = await pool.request()
+        .input('dataId', dataId)
+        .query(query);
+
+      // Send the response back with rows affected
+      return res.json({ status: update.rowsAffected[0] });
+    } else {
+      // If no user found with the provided dataId
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+  } catch (err) {
+    console.error("Error updating status:", err);
+    return res.status(500).json({ message: 'Error updating status' });
+>>>>>>> Stashed changes
   }
 });
