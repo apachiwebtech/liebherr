@@ -145,7 +145,7 @@ export function Products(params) {
                                                         <FaPencilAlt />
                                                     </button></Link>
                                                 </td>
-                                                {/* <td >
+                                                <td >
                                                     <button
                                                         className='btn'
                                                         onClick={() => {
@@ -156,7 +156,7 @@ export function Products(params) {
                                                     >
                                                         <FaEye />
                                                     </button>
-                                                </td> */}
+                                                </td>
                                                 <td style={{ padding: '0px', textAlign: 'center' }}>
                                                     <button
                                                         className='btn'

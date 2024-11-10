@@ -7,6 +7,7 @@ import {
   createBrowserRouter,
   Outlet,
   RouterProvider,
+  useNavigate,
 } from "react-router-dom";
 import { Login } from './Components/Authenticate/Login';
 import Callstatus from './Components/Pages/Master/Callstatus';
@@ -351,7 +352,20 @@ const Router = createBrowserRouter([
 ]);
 
 
+function checkLocalStorageAndRedirect(navigate) {
+  const user_id = localStorage.getItem('userId')
+  if (user_id == null) {
+    navigate('/login'); // Redirect to dashboard if id exists in localStorage
+  }
+}
+
 function App() {
+
+  const navigate = useNavigate()
+
+  React.useEffect(() =>{
+    checkLocalStorageAndRedirect(navigate);
+  },[navigate])
   return (
     <>
       <Siteheader />

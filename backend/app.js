@@ -51,7 +51,7 @@ const poolPromise = new sql.ConnectionPool(dbConfig).connect()
 
 app.listen(8081, () => {
 
-  console.log('erver is running on http://localhost:8081');
+  console.log('Server is running on http://localhost:8081');
 
 });
 
@@ -71,19 +71,18 @@ app.get("/getdata", async (req, res) => {
 });
 
 
-app.post("/login", async (req, res) => {
+app.post("/loginuser", async (req, res) => {
   const { Lhiuser, password } = req.body;
+
+  console.log(Lhiuser)
 
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
 
-    const sql = `
-      SELECT id, Lhiuser 
-      FROM lhi_user 
-      WHERE Lhiuser = '${Lhiuser}' 
-        AND password = '${password}'
-    `;
+    const sql = `SELECT id, Lhiuser FROM lhi_user WHERE Lhiuser = '${Lhiuser}' AND password = '${password}'`;
+
+    console.log(sql)
 
     const result = await pool.request().query(sql);
 
@@ -97,6 +96,10 @@ app.post("/login", async (req, res) => {
     res.status(500).json({ message: "Database error", error: err });
   }
 });
+
+app.post("/log", async (req,res) =>{
+  console.log("fffrdf")
+})
 
 
 app.get("/requestdata/:id", async (req, res) => {
@@ -2816,7 +2819,7 @@ app.get("/getstate", async (req, res) => {
 });
 
 
-app.get("/getproduct", async (req, res) => {
+app.get("/product_master", async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
@@ -2859,7 +2862,7 @@ app.post("/getticket", async (req, res) => {
 
 
 // Add Complaint Start
-app.post("/add_complaint", async (req, res) => {
+app.post("/add_complaintt", async (req, res) => {
   let {
     complaint_date, customer_name, contact_person, email, mobile, address,
     state, city, area, pincode, mode_of_contact, ticket_type, cust_type,
@@ -2878,7 +2881,7 @@ app.post("/add_complaint", async (req, res) => {
 
     // Generate ticket number based on date and count
     const formatDate = `${(new Date().getMonth() + 1).toString().padStart(2, '0')}${new Date().getDate().toString().padStart(2, '0')}`;
-    const countFormat = count.toString().padStart(5, "0");
+    const countFormat = count.toString().padStart(4, "0");
     const ticket_no = 'IG' + formatDate + "-" + countFormat;
 
     // Insert new complaint with parameterized queries
@@ -2918,7 +2921,11 @@ app.post("/add_complaint", async (req, res) => {
       .input('contact_person', contact_person)
       .input('formattedDate', formattedDate);
 
+
+
     const insertResult = await request.query(insertSQL);
+
+    console.log(insertSQL,"%%")
     return res.json({ insertId: insertResult.rowsAffected[0] });
   } catch (err) {
     console.error("Error inserting complaint:", err);
@@ -5029,7 +5036,7 @@ app.get("/getcomplainlist", async (req, res) => {
     const pool = await poolPromise;
 
     // SQL query to fetch complaint_ticket records that are not deleted and ordered by ticket_no
-    const sql = "SELECT * FROM complaint_ticket WHERE deleted = 0 ORDER BY ticket_no ASC";
+    const sql = "SELECT * FROM complaint_ticket WHERE deleted = 0 ORDER BY id Desc";
     const result = await pool.request().query(sql);
 
     return res.json(result.recordset); // Return the result from the query

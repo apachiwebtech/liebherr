@@ -2,6 +2,7 @@ import axios from "axios";
 import { Base_Url } from "../Utils/Base_Url";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import md5 from "js-md5";
 
 export function Login() {
     const [Lhiuser, setLhiuser] = useState("");
@@ -13,10 +14,12 @@ export function Login() {
         e.preventDefault();
 
         try {
+
+            const hashpass = md5(password)
            
-            const response = await axios.post(`${Base_Url}/login`, {
+            const response = await axios.post(`${Base_Url}/loginuser`, {
                 Lhiuser: Lhiuser,
-                password: password,
+                password: hashpass,
             });
 
           

@@ -58,7 +58,7 @@ const [TicketUpdateSuccess, setTicketUpdateSuccess] = useState({
 
   async function getProduct(params) {
 
-    axios.get(`${Base_Url}/getproduct`)
+    axios.get(`${Base_Url}/product_master`)
         .then((res) => {
             if (res.data) {
 

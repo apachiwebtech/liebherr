@@ -147,7 +147,7 @@ export function Registercomplaint(params) {
 
         }
 
-        axios.post(`${Base_Url}/add_complaint`, data)
+        axios.post(`${Base_Url}/add_complaintt`, data)
             .then((res) => {
                 console.log(res.data)
 
