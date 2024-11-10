@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
+import ProMaster from "./ProMaster";
 
 const Subcategory = () => {
   // Step 1: Add this state to track errors
@@ -154,6 +155,8 @@ const Subcategory = () => {
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
   return (
+    <div className="tab-content">
+    <ProMaster/>
     <div className="row mp0">
       <div className="col-12">
         <div className="card mb-3 tab_box">
@@ -384,6 +387,7 @@ const Subcategory = () => {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 };

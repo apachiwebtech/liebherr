@@ -27,7 +27,7 @@ export function Siteheader(params) {
                 <li >
                   <Link className="dropdown-item" to="/locationtabs">Location</Link></li>
                 <li>
-                  <Link className="dropdown-item" to="/promaster">Product Master</Link></li>
+                  <Link className="dropdown-item" to="/category">Product Master</Link></li>
                 <li>
                   <Link className="dropdown-item" to="/endcustomer">End Customer Master</Link></li>
                 <li>

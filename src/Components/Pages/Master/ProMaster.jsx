@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Category from "./Category";
 import Subcategory from "./Subcategory";
@@ -7,29 +7,17 @@ import ProductLine from "./ProductLine";
 import Material from "./Material";
 import Manufacturer from "./Manufacturer";
 import { Products } from "./Products";
+import { Link } from "react-router-dom";
 function ProMaster() {
-  const [activeTab, setActiveTab] = useState("category");
+  const [activeTab, setActiveTab] = useState('/category');
 
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case "category":
-        return <Category />;
-      case "subcategory":
-        return <Subcategory />;
-        case "products":
-          return <Products />;
-          case "producttype":
-            return <ProductType />;
-              case "productline":
-                return <ProductLine />;
-                  case "material":
-                    return <Material />;
-                      case "manufacturer":
-                        return <Manufacturer />;
-                          default:
-                            return <Category />;
-    }
-  };
+  useEffect(() => {
+
+    setActiveTab(window.location.pathname);
+
+  }, [window.location.pathname]);
+
+
 
   return (
     <>
@@ -79,88 +67,79 @@ function ProMaster() {
               >
                 <ul className="nav nav-tabs ">
                   <li className="nav-item">
-                    <button
+                    <Link to={`/category`}><button
                       className={`nav-link ${
-                        activeTab === "category" ? "active" : ""
+                        activeTab === "/category" ? "active" : ""
                       }`}
                       onClick={() => setActiveTab("category")}
                     >
                       CATEGORY
-                    </button>
+                    </button></Link>
                   </li>
                   <li className="nav-item">
-                    <button
+                  <Link to={`/subcategory`}><button
                       className={`nav-link ${
-                        activeTab === "subcategory" ? "active" : ""
+                        activeTab === "/subcategory" ? "active" : ""
                       }`}
                       onClick={() => setActiveTab("subcategory")}
                     >
                       SUBCATEGORY
-                    </button>
+                    </button></Link>
                   </li>
                   <li className="nav-item">
-                    <button
+                    <Link to={`/products`}><button
                       className={`nav-link ${
-                        activeTab === "products" ? "active" : ""
+                        activeTab === "/products" ? "active" : ""
                       }`}
                       onClick={() => setActiveTab("products")}
                     >
                       PRODUCT
-                    </button>
+                    </button></Link>
                   </li>
                   <li className="nav-item">
-                    <button
+                  <Link to={`/producttype`}><button
                       className={`nav-link ${
-                        activeTab === "producttype" ? "active" : ""
+                        activeTab === "/producttype" ? "active" : ""
                       }`}
                       onClick={() => setActiveTab("producttype")}
                     >
                       PRODUCT TYPE
-                    </button>
+                    </button></Link>
                   </li>
                   <li className="nav-item">
-                    <button
+                  <Link to={`/productline`}> <button
                       className={`nav-link ${
-                        activeTab === "productline" ? "active" : ""
+                        activeTab === "/productline" ? "active" : ""
                       }`}
                       onClick={() => setActiveTab("productline")}
                     >
                       PRODUCT LINE
-                    </button>
+                    </button></Link>
                   </li>
                   <li className="nav-item">
-                    <button
+                    <Link  to={`/material`}><button
                       className={`nav-link ${
-                        activeTab === "material" ? "active" : ""
+                        activeTab === "/material" ? "active" : ""
                       }`}
                       onClick={() => setActiveTab("material")}
                     >
                       MATERIAL
-                    </button>
+                    </button></Link>
                   </li>
                   <li className="nav-item">
-                    <button
+                  <Link  to={`/manufacturer`}><button
                       className={`nav-link ${
-                        activeTab === "manufacturer" ? "active" : ""
+                        activeTab === "/manufacturer" ? "active" : ""
                       }`}
                       onClick={() => setActiveTab("manufacturer")}
                     >
                       MANUFACTURER
-                    </button>
+                    </button></Link>
                   </li>
                 </ul>
               </div>
 
-              {/* this is  */}
-              {/* Tab Content */}
-              <div
-                className="col-12 col-custom"
-                style={{ paddingLeft: "12px", paddingRight: "12px" }}
-              >
-                <div className="tab-content">
-                  <div className="tab-content">{renderTabContent()}</div>
-                </div>
-              </div>
+
             </div>
           </div>
         </div>

@@ -54,6 +54,9 @@ import Serviceproducttabs from './Components/Pages/Master/Serviceproducttabs';
 import Ratecardtabs from './Components/Pages/Master/Ratecardtabs';
 import EndcustomerTabs from './Components/Pages/Master/Endcustomertabs';
 import Endcustomertabs from './Components/Pages/Master/Endcustomertabs';
+import ProductLine from './Components/Pages/Master/ProductLine';
+import Material from './Components/Pages/Master/Material';
+import Manufacturer from './Components/Pages/Master/Manufacturer';
 
 
 
@@ -287,6 +290,19 @@ const Router = createBrowserRouter([
         path: "/groupmaster",
         element: <Groupmaster />,
 
+      },
+      {
+        path: "/productline",
+        element: <ProductLine />,
+
+      },
+      {
+        path: "/material",
+        element: <Material />,
+      },
+      {
+        path: "/manufacturer",
+        element: <Manufacturer />,
       },
 
 
