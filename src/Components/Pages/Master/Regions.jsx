@@ -308,7 +308,7 @@ const Location = () => {
                     }
                     disabled={currentPage === 0}
                   >
-                    Previous
+                    &lt; 
                   </button>
                   {Array.from(
                     { length: Math.ceil(filteredUsers.length / itemsPerPage) },
@@ -336,7 +336,7 @@ const Location = () => {
                       Math.ceil(filteredUsers.length / itemsPerPage) - 1
                     }
                   >
-                    Next
+                       &gt;
                   </button>
                 </div>
               </div>

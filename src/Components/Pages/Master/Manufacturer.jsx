@@ -247,7 +247,7 @@ const Manufacturer = () => {
                         disabled={currentPage === 0}
                         className="btn btn-sm btn-primary mr-2"
                       >
-                        &lt; Prev
+                        &lt; 
                       </button>
                       {Array.from({ length: Math.ceil(filteredUsers.length / itemsPerPage) }, (_, i) => (
                         <button
@@ -263,7 +263,7 @@ const Manufacturer = () => {
                         disabled={currentPage === Math.ceil(filteredUsers.length / itemsPerPage) - 1}
                         className="btn btn-sm btn-primary ml-2"
                       >
-                        Next &gt;
+                         &gt;
                       </button>
                     </div>
                   </div>
