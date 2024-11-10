@@ -2,6 +2,10 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
+import DataTable from 'datatables.net-react';
+import DT from 'datatables.net-dt';
+ 
+DataTable.use(DT);
 
 const ComplaintCode = () => {
   // Step 1: Add this state to track errors
@@ -86,7 +90,7 @@ const ComplaintCode = () => {
               updated_by: updatedBy,
             })
             .then((response) => {
-          
+
               setFormData({
                 complaintcode: "",
               });
@@ -107,7 +111,7 @@ const ComplaintCode = () => {
               created_by: createdBy,
             })
             .then((response) => {
-          
+
               setFormData({
                 complaintcode: "",
               });
@@ -130,7 +134,7 @@ const ComplaintCode = () => {
   const deleted = async (id) => {
     try {
       const response = await axios.post(`${Base_Url}/deletecomdata`, { id });
- 
+
       window.location.reload();
     } catch (error) {
       console.error("Error deleting user:", error);
@@ -169,7 +173,7 @@ const ComplaintCode = () => {
                 >
                   <div className="mb-3">
                     <label htmlFor="ComplaintcodeInput" className="input-field">
-                       Complaint Code
+                      Complaint Code
                     </label>
                     <input
                       type="text"
@@ -235,64 +239,34 @@ const ComplaintCode = () => {
                 </div>
 
                 {/* Adjust table padding and spacing */}
-                <table
-                  className="table table-bordered table dt-responsive nowrap w-100 table-css"
-                  style={{ marginTop: "20px", tableLayout: "fixed" }}
-                >
-                  <thead>
+                <table className="table table-bordered table-responsive table-hover mt-3">
+                  <thead className="thead-light">
                     <tr>
-                      <th style={{ padding: "12px 15px", textAlign: "center" }}>
-                        #
-                      </th>
-                      <th style={{ padding: "12px 15px", textAlign: "center" }}>
-                        Complaint Code
-                      </th>
-                      <th style={{ padding: "0px 0px", textAlign: "center" }}>
-                        Edit
-                      </th>
-                      <th style={{ padding: "0px 0px", textAlign: "center" }}>
-                        Delete
-                      </th>
+                      <th className="text-center">#</th>
+                      <th className="text-center">Complaint Code</th>
+                      <th className="text-center">Edit</th>
+                      <th className="text-center">Delete</th>
                     </tr>
                   </thead>
                   <tbody>
                     {currentUsers.map((item, index) => (
                       <tr key={item.id}>
-                        <td style={{ padding: "2px", textAlign: "center" }}>
-                          {index + 1 + indexOfFirstUser}
-                        </td>
-                        <td style={{ padding: "10px" }}>
-                          {item.complaintcode}
-                        </td>
-                        <td style={{ padding: "0px", textAlign: "center" }}>
+                        <td className="text-center">{index + 1 + indexOfFirstUser}</td>
+                        <td>{item.complaintcode}</td>
+                        <td className="text-center">
                           <button
-                            className="btn"
-                            onClick={() => {
-                              // alert(item.id)
-                              edit(item.id);
-                            }}
-                            complaintcode="Edit"
-                            style={{
-                              backgroundColor: "transparent",
-                              border: "none",
-                              color: "blue",
-                              fontSize: "20px",
-                            }}
+                            className="btn btn-link text-primary"
+                            onClick={() => edit(item.id)}
+                            style={{ fontSize: "20px" }}
                           >
                             <FaPencilAlt />
                           </button>
                         </td>
-                        <td style={{ padding: "0px", textAlign: "center" }}>
+                        <td className="text-center">
                           <button
-                            className="btn"
+                            className="btn btn-link text-danger"
                             onClick={() => deleted(item.id)}
-                            complaintcode="Delete"
-                            style={{
-                              backgroundColor: "transparent",
-                              border: "none",
-                              color: "red",
-                              fontSize: "20px",
-                            }}
+                            style={{ fontSize: "20px" }}
                           >
                             <FaTrash />
                           </button>

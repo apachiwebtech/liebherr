@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Navigate, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
-import { FaPencilAlt, FaTrash,FaEye } from 'react-icons/fa';
+import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
 
 export function Products(params) {
@@ -81,66 +81,57 @@ export function Products(params) {
             <div className="col-md-12 col-12">
                 <div className="card mb-3 tab_box">
                     <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
-                        <table  className="table">
-                            <thead>
+                        <table className="table table-hover table-bordered">
+                            <thead className="thead-dark">
                                 <tr>
-                                    <th >#</th>
-                                    <th >Complaint No.</th>
-                                    <th >Complaint Date</th>
-                                    <th >Customer Name</th>
-                                    <th >Product</th>
-                                    <th >Age</th>
-                                    <th >Assigned Users</th>
-                                    <th >Status</th>
-                                    <th >Edit</th>
-                                    <th >View</th>
-                                    <th >Delete</th>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Complaint No.</th>
+                                    <th scope="col">Complaint Date</th>
+                                    <th scope="col">Customer Name</th>
+                                    <th scope="col">Product</th>
+                                    <th scope="col">Age</th>
+                                    <th scope="col">Assigned Users</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Edit</th>
+                                    <th scope="col">View</th>
+                                    <th scope="col">Delete</th>
                                 </tr>
                             </thead>
                             <tbody>
-                            
                                 {Complaintdata.map((item, index) => {
                                     return (
                                         <tr key={item.id}>
-                                            <td >{index + 1}</td>
-                                            <td >{item.ticket_no}</td>
-                                            <td >{formatDate(item.ticket_date)}</td>
-                                            <td >{item.customer_name}</td>
-                                            <td >{item.ModelNumber}</td>
-                                            <td >{'0'}</td>
-                                            <td >{item.assigned_to}</td>
-                                            <td >{item.call_status}</td>
-                                            <td >
+                                            <td>{index + 1}</td>
+                                            <td>{item.ticket_no}</td>
+                                            <td>{formatDate(item.ticket_date)}</td>
+                                            <td>{item.customer_name}</td>
+                                            <td>{item.ModelNumber}</td>
+                                            <td>{'0'}</td>
+                                            <td>{item.assigned_to}</td>
+                                            <td>{item.call_status}</td>
+                                            <td className="text-center">
                                                 <button
-                                                    className='btn'
-                                                    onClick={() => {
-                                                        // alert(item.id)
-                                                        edit(item.id)
-                                                    }}
+                                                    className='btn btn-link'
+                                                    onClick={() => edit(item.id)}
                                                     title="Edit"
-                                                    style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
                                                 >
                                                     <FaPencilAlt />
                                                 </button>
                                             </td>
-                                            <td >
+                                            <td className="text-center">
                                                 <button
-                                                    className='btn'
-                                                    onClick={() => {
-                                                        navigate(`/complaintview/${item.id}`)
-                                                    }}
-                                                    title="Edit"
-                                                    style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                                                    className='btn btn-link'
+                                                    onClick={() => navigate(`/complaintview/${item.id}`)}
+                                                    title="View"
                                                 >
                                                     <FaEye />
                                                 </button>
                                             </td>
-                                            <td style={{ padding: '0px', textAlign: 'center' }}>
+                                            <td className="text-center">
                                                 <button
-                                                    className='btn'
+                                                    className='btn btn-link text-danger'
                                                     onClick={() => deleted(item.id)}
                                                     title="Delete"
-                                                    style={{ backgroundColor: 'transparent', border: 'none', color: 'red', fontSize: '20px' }}
                                                 >
                                                     <FaTrash />
                                                 </button>
@@ -148,7 +139,6 @@ export function Products(params) {
                                         </tr>
                                     )
                                 })}
-
                             </tbody>
                         </table>
                     </div>

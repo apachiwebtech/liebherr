@@ -199,36 +199,34 @@ const Manufacturer = () => {
                   </div>
 
                   {/* Adjust table padding and spacing */}
-                  <table className='table table-bordered table dt-responsive nowrap w-100 table-css' style={{ marginTop: '20px', tableLayout: 'fixed' }}>
-                    <thead>
+                  <table className='table table-bordered table-hover table-hover mt-4'>
+                    <thead className='thead-dark'>
                       <tr>
-                        <th style={{ padding: '12px 15px', textAlign: 'center' }}>#</th>
-                        <th style={{ padding: '12px 15px', textAlign: 'center' }}>Title</th>
-                        <th style={{ padding: '0px 0px', textAlign: 'center' }}>Edit</th>
-                        <th style={{ padding: '0px 0px', textAlign: 'center' }}>Delete</th>
+                        <th scope="col" className='text-center'>#</th>
+                        <th scope="col" className='text-center'>Title</th>
+                        <th scope="col" className='text-center'>Edit</th>
+                        <th scope="col" className='text-center'>Delete</th>
                       </tr>
                     </thead>
                     <tbody>
                       {currentUsers.map((item, index) => (
                         <tr key={item.id}>
-                          <td style={{ padding: '2px', textAlign: 'center' }}>{index + 1 + indexOfFirstUser}</td>
-                          <td style={{ padding: '10px' }}>{item.Manufacturer}</td>
-                          <td style={{ padding: '0px', textAlign: 'center' }}>
+                          <td className='text-center'>{index + 1 + indexOfFirstUser}</td>
+                          <td>{item.Manufacturer}</td>
+                          <td className='text-center'>
                             <button
-                              className='btn'
+                              className='btn btn-link text-primary'
                               onClick={() => edit(item.id)}
                               title="Edit"
-                              style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
                             >
                               <FaPencilAlt />
                             </button>
                           </td>
-                          <td style={{ padding: '0px', textAlign: 'center' }}>
+                          <td className='text-center'>
                             <button
-                              className='btn'
+                              className='btn btn-link text-danger'
                               onClick={() => deleted(item.id)}
                               title="Delete"
-                              style={{ backgroundColor: 'transparent', border: 'none', color: 'red', fontSize: '20px' }}
                             >
                               <FaTrash />
                             </button>

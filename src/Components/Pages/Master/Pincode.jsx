@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
+import LocationTabs from "./LocationTabs";
 
 const Pincode = () => {
   const [countries, setCountries] = useState([]);
@@ -161,10 +162,9 @@ const Pincode = () => {
     ];
     requiredFields.forEach((field) => {
       if (!formData[field]) {
-        newErrors[field] = `${
-          field.replace("_id", "").charAt(0).toUpperCase() +
+        newErrors[field] = `${field.replace("_id", "").charAt(0).toUpperCase() +
           field.replace("_id", "").slice(1)
-        } is required.`;
+          } is required.`;
       }
     });
     return newErrors;
@@ -228,246 +228,167 @@ const Pincode = () => {
   );
 
   return (
-    <div className="row mp0">
-      <div className="col-12">
-        <div className="card mb-3 tab_box">
-          <div
-            className="card-body"
-            style={{ flex: "1 1 auto", padding: "13px 28px" }}
-          >
-            <div className="row mp0">
-              <div className="col-6">
-                <form
-                  onSubmit={handleSubmit}
-                  style={{ width: "50%" }}
-                  className="text-left"
-                >
-                  {renderDropdown("country_id", countries, "Country")}
-                  {renderDropdown("region_id", regions, "Region")}
-                  {renderDropdown("geostate_id", geoStates, "Geo State")}
-                  {renderDropdown("geocity_id", geoCities, "Geo City")}
-                  {renderDropdown("area_id", areas, "Area")}
+    <div className="tab-content">
+      <LocationTabs />
+      <div className="row mp0">
+        <div className="col-12">
+          <div className="card mb-3 tab_box">
+            <div
+              className="card-body"
+              style={{ flex: "1 1 auto", padding: "13px 28px" }}
+            >
+              <div className="row mp0">
+                <div className="col-6">
+                  <form
+                    onSubmit={handleSubmit}
+                    style={{ width: "50%" }}
+                    className="text-left"
+                  >
+                    {renderDropdown("country_id", countries, "Country")}
+                    {renderDropdown("region_id", regions, "Region")}
+                    {renderDropdown("geostate_id", geoStates, "Geo State")}
+                    {renderDropdown("geocity_id", geoCities, "Geo City")}
+                    {renderDropdown("area_id", areas, "Area")}
 
-                  <div className="mb-3">
-                    <label htmlFor="pincodeInput" className="input-field">
-                      Pincode
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="pincode"
-                      id="pincodeInput"
-                      value={formData.pincode}
-                      onChange={handleChange}
-                      placeholder="Enter Pincode"
-                      maxLength={6}
-                    />
-                    {errors.pincode && (
-                      <small className="text-danger">{errors.pincode}</small>
-                    )}
-                    {duplicateError && (
-                      <small className="text-danger">{duplicateError}</small>
-                    )}
-                  </div>
-                  <div className="text-right">
-                    <button className="btn btn-liebherr" type="submit">
-                      {isEdit ? "Update" : "Submit"}
-                    </button>
-                  </div>
-                </form>
-              </div>
-
-              <div className="col-6">
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                  <span>
-                    Show
-                    <select
-                      value={itemsPerPage}
-                      onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                      className="form-control d-inline-block"
-                      style={{
-                        width: "51px",
-                        display: "inline-block",
-                        margin: "0 5px",
-                      }}
-                    >
-                      {[10, 15, 20].map((value) => (
-                        <option key={value} value={value}>
-                          {value}
-                        </option>
-                      ))}
-                    </select>
-                    entries
-                  </span>
-
-                  <input
-                    type="text"
-                    placeholder="Search..."
-                    value={searchTerm}
-                    onChange={handleSearch}
-                    className="form-control d-inline-block"
-                    style={{ width: "300px" }}
-                  />
+                    <div className="mb-3">
+                      <label htmlFor="pincodeInput" className="input-field">
+                        Pincode
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="pincode"
+                        id="pincodeInput"
+                        value={formData.pincode}
+                        onChange={handleChange}
+                        placeholder="Enter Pincode"
+                        maxLength={6}
+                      />
+                      {errors.pincode && (
+                        <small className="text-danger">{errors.pincode}</small>
+                      )}
+                      {duplicateError && (
+                        <small className="text-danger">{duplicateError}</small>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      <button className="btn btn-liebherr" type="submit">
+                        {isEdit ? "Update" : "Submit"}
+                      </button>
+                    </div>
+                  </form>
                 </div>
 
-                <table
-                  id="basic-datatable"
-                  className="table table-bordered table dt-responsive nowrap w-100 table-css"
-                >
-                  <thead>
-                    <tr>
-                      <th scope="col" width="10%">
-                        #
-                      </th>
-                      <th scope="col">Country</th>
-                      <th scope="col">Region</th>
-                      <th scope="col">Geo State</th>
-                      <th scope="col">Geo City</th>
-                      <th scope="col">Area</th>
-                      <th scope="col">Pincode</th>
-                      <th
-                        scope="col"
-                        width="15%"
-                        style={{ textAlign: "center" }}
+                <div className="col-6">
+                  <div className="d-flex justify-content-between align-items-center mb-3">
+                    <span>
+                      Show
+                      <select
+                        value={itemsPerPage}
+                        onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                        className="form-control d-inline-block"
+                        style={{
+                          width: "51px",
+                          display: "inline-block",
+                          margin: "0 5px",
+                        }}
                       >
-                        Edit
-                      </th>
-                      <th
-                        scope="col"
-                        width="15%"
-                        style={{ textAlign: "center" }}
-                      >
-                        Delete
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredPincodes
-                      .slice(
-                        currentPage * itemsPerPage,
-                        (currentPage + 1) * itemsPerPage
-                      )
-                      .map((pincode, index) => (
-                        <tr key={pincode.id}>
-                          <td
-                            style={{
-                              padding: "10px",
-                              textAlign: "center",
-                              width: "30px",
-                            }}
-                          >
-                            {currentPage * itemsPerPage + index + 1}
-                          </td>
-                          <td
-                            style={{
-                              padding: "10px",
-                              textAlign: "center",
-                              minWidth: "70px",
-                            }}
-                          >
-                            {pincode.country_title}
-                          </td>
-                          <td
-                            style={{
-                              padding: "10px",
-                              textAlign: "center",
-                              minWidth: "70px",
-                            }}
-                          >
-                            {pincode.region_title}
-                          </td>
-                          <td
-                            style={{
-                              padding: "10px",
-                              textAlign: "center",
-                              minWidth: "70px",
-                            }}
-                          >
-                            {pincode.geostate_title}
-                          </td>
-                          <td
-                            style={{
-                              padding: "10px",
-                              textAlign: "center",
-                              minWidth: "70px",
-                            }}
-                          >
-                            {pincode.geocity_title}
-                          </td>
-                          <td
-                            style={{
-                              padding: "10px",
-                              textAlign: "center",
-                              minWidth: "70px",
-                            }}
-                          >
-                            {pincode.area_title}
-                          </td>
-                          <td
-                            style={{
-                              padding: "10px",
-                              textAlign: "center",
-                              minWidth: "70px",
-                            }}
-                          >
-                            {pincode.pincode}
-                          </td>
-                          <td
-                            style={{
-                              padding: "10px",
-                              textAlign: "center",
-                              width: "30px",
-                            }}
-                          >
-                            <button
-                              className="btn btn-sm"
-                              onClick={() => edit(pincode.id)}
-                              style={{
-                                fontSize: "14px",
-                                color: "blue",
-                                background: "transparent",
-                              }}
-                            >
-                              <FaPencilAlt />
-                            </button>
-                          </td>
-                          <td
-                            style={{
-                              padding: "10px",
-                              textAlign: "center",
-                              width: "30px",
-                            }}
-                          >
-                            <button
-                              className="btn btn-sm"
-                              onClick={() => deleted(pincode.id)}
-                              style={{
-                                fontSize: "14px",
-                                color: "red",
-                                background: "transparent",
-                              }}
-                            >
-                              <FaTrash />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
-                <div>
-                  Showing {currentPage * itemsPerPage + 1} to{" "}
-                  {Math.min(
-                    (currentPage + 1) * itemsPerPage,
-                    filteredPincodes.length
-                  )}{" "}
-                  of {filteredPincodes.length} entries
+                        {[10, 15, 20].map((value) => (
+                          <option key={value} value={value}>
+                            {value}
+                          </option>
+                        ))}
+                      </select>
+                      entries
+                    </span>
+
+                    <input
+                      type="text"
+                      placeholder="Search..."
+                      value={searchTerm}
+                      onChange={handleSearch}
+                      className="form-control d-inline-block"
+                      style={{ width: "300px" }}
+                    />
+                  </div>
+
+                  <table
+                    id="basic-datatable"
+                    className="table table-bordered table-hover dt-responsive nowrap w-100"
+                  >
+                    <thead className="thead-light">
+                      <tr>
+                        <th scope="col" className='text-center' width="10%">
+                          #
+                        </th>
+                        <th scope="col" className='text-center'>Country</th>
+                        <th scope="col" className='text-center'>Region</th>
+                        <th scope="col" className='text-center'>Geo State</th>
+                        <th scope="col" className='text-center'>Geo City</th>
+                        <th scope="col" className='text-center'>Area</th>
+                        <th scope="col" className='text-center'>Pincode</th>
+                        <th scope="col" className='text-center'>
+                          Edit
+                        </th>
+                        <th scope="col" className='text-center'>
+                          Delete
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredPincodes
+                        .slice(
+                          currentPage * itemsPerPage,
+                          (currentPage + 1) * itemsPerPage
+                        )
+                        .map((pincode, index) => (
+                          <tr key={pincode.id}>
+                            <td className="text-center">
+                              {currentPage * itemsPerPage + index + 1}
+                            </td>
+                            <td className="text-center">
+                              {pincode.country_title}
+                            </td>
+                            <td className="text-center">
+                              {pincode.region_title}
+                            </td>
+                            <td className="text-center">
+                              {pincode.geostate_title}
+                            </td>
+                            <td className="text-center">
+                              {pincode.geocity_title}
+                            </td>
+                            <td className="text-center">
+                              {pincode.area_title}
+                            </td>
+                            <td className="text-center">
+                              {pincode.pincode}
+                            </td>
+                            <td className='text-center'>
+                              <FaPencilAlt style={{ cursor: 'pointer', color: 'blue' }}  onClick={() => edit(pincode.id)} />
+                            </td>
+                            <td className='text-center'>
+                              <FaTrash style={{ cursor: 'pointer', color: 'red' }} onClick={() => deleted(pincode.id)}/>
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+
+                  <div>
+                    Showing {currentPage * itemsPerPage + 1} to{" "}
+                    {Math.min(
+                      (currentPage + 1) * itemsPerPage,
+                      filteredPincodes.length
+                    )}{" "}
+                    of {filteredPincodes.length} entries
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </div></div>
   );
 };
 

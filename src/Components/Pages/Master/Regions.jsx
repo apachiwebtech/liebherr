@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
+import LocationTabs from "./LocationTabs";
 
 const Location = () => {
   const [countries, setCountries] = useState([]);
@@ -145,6 +146,8 @@ const Location = () => {
   const displayedUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
   return (
+    <div className="tab-content">
+      <LocationTabs/>
     <div className="row mp0">
       <div className="col-12">
         <div className="card mb-3 tab_box">
@@ -251,65 +254,36 @@ const Location = () => {
                   />
                 </div>
 
-                <table
-                  className="table table-bordered"
-                  style={{ marginTop: "20px", tableLayout: "fixed" }}
-                >
-                  <thead>
+                <table className="table table-bordered table-hover dt-responsive nowrap w-100">
+                  <thead className="thead-light">
                     <tr>
-                      <th style={{ padding: "12px 15px", textAlign: "center" }}>
-                        #
-                      </th>
-                      <th style={{ padding: "12px 15px", textAlign: "center" }}>
-                        Country
-                      </th>
-                      <th style={{ padding: "12px 15px", textAlign: "center" }}>
-                        Region
-                      </th>
-                      <th style={{ padding: "0px 0px", textAlign: "center" }}>
-                        Edit
-                      </th>
-                      <th style={{ padding: "0px 0px", textAlign: "center" }}>
-                        Delete
-                      </th>
+                      <th className="text-center">#</th>
+                      <th className="text-center">Country</th>
+                      <th className="text-center">Region</th>
+                      <th className="text-center">Edit</th>
+                      <th className="text-center">Delete</th>
                     </tr>
                   </thead>
                   <tbody>
                     {displayedUsers.map((item, index) => (
                       <tr key={item.id}>
-                        <td style={{ padding: "2px", textAlign: "center" }}>
-                          {index + 1 + indexOfFirstUser}
-                        </td>
-                        <td style={{ padding: "10px" }}>
-                          {item.country_title}
-                        </td>
-                        <td style={{ padding: "10px" }}>{item.title}</td>
-                        <td style={{ padding: "0px", textAlign: "center" }}>
+                        <td className="text-center">{index + 1 + indexOfFirstUser}</td>
+                        <td>{item.country_title}</td>
+                        <td>{item.title}</td>
+                        <td className="text-center">
                           <button
-                            className="btn"
+                            className="btn btn-link text-primary"
                             onClick={() => edit(item.id)}
                             title="Edit"
-                            style={{
-                              backgroundColor: "transparent",
-                              border: "none",
-                              color: "blue",
-                              fontSize: "20px",
-                            }}
                           >
                             <FaPencilAlt />
                           </button>
                         </td>
-                        <td style={{ padding: "0px", textAlign: "center" }}>
+                        <td className="text-center">
                           <button
-                            className="btn"
+                            className="btn btn-link text-danger"
                             onClick={() => deleted(item.id)}
                             title="Delete"
-                            style={{
-                              backgroundColor: "transparent",
-                              border: "none",
-                              color: "red",
-                              fontSize: "20px",
-                            }}
                           >
                             <FaTrash />
                           </button>
@@ -370,6 +344,7 @@ const Location = () => {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 };

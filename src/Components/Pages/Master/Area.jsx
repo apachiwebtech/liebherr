@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
+import LocationTabs from "./LocationTabs";
 
 const Area = () => {
   const [countries, setCountries] = useState([]);
@@ -222,394 +223,242 @@ const Area = () => {
   };
 
   return (
-    <div className="row mp0">
-      <div className="col-12">
-        <div className="card mb-3 tab_box">
-          <div
-            className="card-body"
-            style={{ flex: "1 1 auto", padding: "13px 28px" }}
-          >
-            <div className="row mp0">
-              <div className="col-6">
-                <form
-                  onSubmit={handleSubmit}
-                  style={{ width: "50%" }}
-                  className="text-left"
-                >
-                  {/* Country Dropdown */}
-                  <div className="form-group">
-                    <label
-                      htmlFor="country"
-                      className="form-label pb-0 dropdown-label"
-                    >
-                      Country
-                    </label>
-                    <select
-                      className="form-select dropdown-select"
-                      name="country_id"
-                      value={formData.country_id}
-                      onChange={handleChange}
-                    >
-                      <option value="">Select Country</option>
-                      {countries.map((country) => (
-                        <option key={country.id} value={country.id}>
-                          {country.title}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.country_id && (
-                      <small className="text-danger">{errors.country_id}</small>
-                    )}
-                  </div>
-
-                  {/* Region Dropdown */}
-                  <div className="form-group">
-                    <label
-                      htmlFor="region"
-                      className="form-label pb-0 dropdown-label"
-                    >
-                      Region
-                    </label>
-                    <select
-                      className="form-select dropdown-select"
-                      name="region_id"
-                      value={formData.region_id}
-                      onChange={handleChange}
-                    >
-                      <option value="">Select Region</option>
-                      {regions.map((region) => (
-                        <option key={region.id} value={region.id}>
-                          {region.title}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.region_id && (
-                      <small className="text-danger">{errors.region_id}</small>
-                    )}
-                  </div>
-
-                  {/* Geo State Dropdown */}
-                  <div className="form-group">
-                    <label
-                      htmlFor="geostate_id"
-                      className="form-label pb-0 dropdown-label"
-                    >
-                      Geo State
-                    </label>
-                    <select
-                      className="form-select dropdown-select"
-                      name="geostate_id"
-                      value={formData.geostate_id}
-                      onChange={handleChange}
-                    >
-                      <option value="">Select Geo State</option>
-                      {geoStates.map((geoState) => (
-                        <option key={geoState.id} value={geoState.id}>
-                          {geoState.title}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.geostate_id && (
-                      <small className="text-danger">
-                        {errors.geostate_id}
-                      </small>
-                    )}
-                  </div>
-
-                  {/* Geo City Dropdown */}
-                  <div className="form-group">
-                    <label
-                      htmlFor="geocity_id"
-                      className="form-label pb-0 dropdown-label"
-                    >
-                      Geo City
-                    </label>
-                    <select
-                      className="form-select dropdown-select"
-                      name="geocity_id" // Ensure the name matches formData
-                      value={formData.geocity_id}
-                      onChange={handleChange}
-                    >
-                      <option value="">Select Geo City</option>
-                      {geoCities.map((geoCity) => (
-                        <option key={geoCity.id} value={geoCity.id}>
-                          {geoCity.title}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.geocity_id && (
-                      <small className="text-danger">{errors.geocity_id}</small>
-                    )}
-                  </div>
-
-                  {/* Title Input */}
-                  <div className="form-group">
-                    <label htmlFor="areaInput" className="input-field">
-                       Area
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="title"
-                      id="areaInput"
-                      value={formData.title}
-                      onChange={handleChange}
-                      placeholder="Enter Area"
-                    />
-                    {errors.title && (
-                      <small className="text-danger">{errors.title}</small>
-                    )}
-                    {duplicateError && (
-                      <small className="text-danger">{duplicateError}</small>
-                    )}
-                  </div>
-                  <div className="text-right">
-                    <button
-                      className="btn btn-liebherr"
-                      type="submit"
-                      style={{ marginTop: "15px" }}
-                    >
-                      {isEdit ? "Update" : "Submit"}
-                    </button>
-                  </div>
-                </form>
-              </div>
-
-              <div className="col-md-6">
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                  <span>
-                    Show
-                    <select
-                      value={itemsPerPage}
-                      onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                      className="form-control d-inline-block"
-                      style={{
-                        width: "51px",
-                        display: "inline-block",
-                        marginLeft: "5px",
-                        marginRight: "5px",
-                      }}
-                    >
-                      <option value={10}>10</option>
-                      <option value={15}>15</option>
-                      <option value={20}>20</option>
-                    </select>
-                    entries
-                  </span>
-
-                  <input
-                    type="text"
-                    placeholder="Search..."
-                    value={searchTerm}
-                    onChange={handleSearch}
-                    className="form-control d-inline-block"
-                    style={{ width: "300px" }}
-                  />
-                </div>
-
-                <table
-                  className="table table-bordered"
-                  style={{
-                    marginTop: "20px",
-                    tableLayout: "auto",
-                    width: "100%",
-                  }}
-                >
-                  <thead>
-                    <tr>
-                      <th
-                        style={{
-                          padding: "12px 15px",
-                          textAlign: "center",
-                          width: "30px",
-                        }}
-                      >
-                        #
-                      </th>
-                      <th
-                        style={{
-                          padding: "12px 15px",
-                          textAlign: "center",
-                          minWidth: "70px",
-                        }}
+    <div className="tab-content">
+      <LocationTabs />
+      <div className="row mp0">
+        <div className="col-12">
+          <div className="card mb-3 tab_box">
+            <div
+              className="card-body"
+              style={{ flex: "1 1 auto", padding: "13px 28px" }}
+            >
+              <div className="row mp0">
+                <div className="col-6">
+                  <form
+                    onSubmit={handleSubmit}
+                    style={{ width: "50%" }}
+                    className="text-left"
+                  >
+                    {/* Country Dropdown */}
+                    <div className="form-group">
+                      <label
+                        htmlFor="country"
+                        className="form-label pb-0 dropdown-label"
                       >
                         Country
-                      </th>
-                      <th
-                        style={{
-                          padding: "12px 15px",
-                          textAlign: "center",
-                          minWidth: "70px",
-                        }}
+                      </label>
+                      <select
+                        className="form-select dropdown-select"
+                        name="country_id"
+                        value={formData.country_id}
+                        onChange={handleChange}
+                      >
+                        <option value="">Select Country</option>
+                        {countries.map((country) => (
+                          <option key={country.id} value={country.id}>
+                            {country.title}
+                          </option>
+                        ))}
+                      </select>
+                      {errors.country_id && (
+                        <small className="text-danger">{errors.country_id}</small>
+                      )}
+                    </div>
+
+                    {/* Region Dropdown */}
+                    <div className="form-group">
+                      <label
+                        htmlFor="region"
+                        className="form-label pb-0 dropdown-label"
                       >
                         Region
-                      </th>
-                      <th
-                        style={{
-                          padding: "12px 15px",
-                          textAlign: "center",
-                          minWidth: "70px",
-                        }}
+                      </label>
+                      <select
+                        className="form-select dropdown-select"
+                        name="region_id"
+                        value={formData.region_id}
+                        onChange={handleChange}
+                      >
+                        <option value="">Select Region</option>
+                        {regions.map((region) => (
+                          <option key={region.id} value={region.id}>
+                            {region.title}
+                          </option>
+                        ))}
+                      </select>
+                      {errors.region_id && (
+                        <small className="text-danger">{errors.region_id}</small>
+                      )}
+                    </div>
+
+                    {/* Geo State Dropdown */}
+                    <div className="form-group">
+                      <label
+                        htmlFor="geostate_id"
+                        className="form-label pb-0 dropdown-label"
                       >
                         Geo State
-                      </th>
-                      <th
-                        style={{
-                          padding: "12px 15px",
-                          textAlign: "center",
-                          minWidth: "70px",
-                        }}
+                      </label>
+                      <select
+                        className="form-select dropdown-select"
+                        name="geostate_id"
+                        value={formData.geostate_id}
+                        onChange={handleChange}
+                      >
+                        <option value="">Select Geo State</option>
+                        {geoStates.map((geoState) => (
+                          <option key={geoState.id} value={geoState.id}>
+                            {geoState.title}
+                          </option>
+                        ))}
+                      </select>
+                      {errors.geostate_id && (
+                        <small className="text-danger">
+                          {errors.geostate_id}
+                        </small>
+                      )}
+                    </div>
+
+                    {/* Geo City Dropdown */}
+                    <div className="form-group">
+                      <label
+                        htmlFor="geocity_id"
+                        className="form-label pb-0 dropdown-label"
                       >
                         Geo City
-                      </th>
-                      <th
-                        style={{
-                          padding: "12px 15px",
-                          textAlign: "center",
-                          minWidth: "70px",
-                        }}
+                      </label>
+                      <select
+                        className="form-select dropdown-select"
+                        name="geocity_id" // Ensure the name matches formData
+                        value={formData.geocity_id}
+                        onChange={handleChange}
                       >
-                        Area
-                      </th>
-                      <th
-                        style={{
-                          padding: "12px 15px",
-                          textAlign: "center",
-                          width: "30px",
-                        }}
-                      >
-                        Edit
-                      </th>
-                      <th
-                        style={{
-                          padding: "12px 15px",
-                          textAlign: "center",
-                          width: "30px",
-                        }}
-                      >
-                        Delete
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredAreas
-                      .slice(
-                        currentPage * itemsPerPage,
-                        (currentPage + 1) * itemsPerPage
-                      )
-                      .map((area, index) => (
-                        <tr key={area.id}>
-                          <td
-                            style={{
-                              padding: "10px",
-                              textAlign: "center",
-                              width: "30px",
-                            }}
-                          >
-                            {currentPage * itemsPerPage + index + 1}
-                          </td>
-                          <td
-                            style={{
-                              padding: "10px",
-                              textAlign: "center",
-                              minWidth: "70px",
-                            }}
-                          >
-                            {area.country_title}
-                          </td>
-                          <td
-                            style={{
-                              padding: "10px",
-                              textAlign: "center",
-                              minWidth: "70px",
-                            }}
-                          >
-                            {area.region_title}
-                          </td>
-                          <td
-                            style={{
-                              padding: "10px",
-                              textAlign: "center",
-                              minWidth: "70px",
-                            }}
-                          >
-                            {area.geostate_title}
-                          </td>
-                          <td
-                            style={{
-                              padding: "10px",
-                              textAlign: "center",
-                              minWidth: "70px",
-                            }}
-                          >
-                            {area.geocity_title}
-                          </td>
-                          <td
-                            style={{
-                              padding: "10px",
-                              textAlign: "center",
-                              minWidth: "70px",
-                            }}
-                          >
-                            {area.title}
-                          </td>
-                          <td
-                            style={{
-                              padding: "10px",
-                              textAlign: "center",
-                              width: "30px",
-                            }}
-                          >
-                            <button
-                              className="btn btn-sm"
-                              onClick={() => edit(area.id)}
-                              style={{
-                                fontSize: "14px",
-                                color: "blue",
-                                background: "transparent",
-                              }}
-                            >
-                              <FaPencilAlt />
-                            </button>
-                          </td>
-                          <td
-                            style={{
-                              padding: "10px",
-                              textAlign: "center",
-                              width: "30px",
-                            }}
-                          >
-                            <button
-                              className="btn btn-sm"
-                              onClick={() => deleted(area.id)}
-                              style={{
-                                fontSize: "14px",
-                                color: "red",
-                                background: "transparent",
-                              }}
-                            >
-                              <FaTrash />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
+                        <option value="">Select Geo City</option>
+                        {geoCities.map((geoCity) => (
+                          <option key={geoCity.id} value={geoCity.id}>
+                            {geoCity.title}
+                          </option>
+                        ))}
+                      </select>
+                      {errors.geocity_id && (
+                        <small className="text-danger">{errors.geocity_id}</small>
+                      )}
+                    </div>
 
-                <div>
-                  Showing {currentPage * itemsPerPage + 1} to{" "}
-                  {Math.min(
-                    (currentPage + 1) * itemsPerPage,
-                    filteredAreas.length
-                  )}{" "}
-                  of {filteredAreas.length} entries
+                    {/* Title Input */}
+                    <div className="form-group">
+                      <label htmlFor="areaInput" className="input-field">
+                        Area
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="title"
+                        id="areaInput"
+                        value={formData.title}
+                        onChange={handleChange}
+                        placeholder="Enter Area"
+                      />
+                      {errors.title && (
+                        <small className="text-danger">{errors.title}</small>
+                      )}
+                      {duplicateError && (
+                        <small className="text-danger">{duplicateError}</small>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      <button
+                        className="btn btn-liebherr"
+                        type="submit"
+                        style={{ marginTop: "15px" }}
+                      >
+                        {isEdit ? "Update" : "Submit"}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+
+                <div className="col-md-6">
+                  <div className="d-flex justify-content-between align-items-center mb-3">
+                    <span>
+                      Show
+                      <select
+                        value={itemsPerPage}
+                        onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                        className="form-control d-inline-block"
+                        style={{
+                          width: "51px",
+                          display: "inline-block",
+                          marginLeft: "5px",
+                          marginRight: "5px",
+                        }}
+                      >
+                        <option value={10}>10</option>
+                        <option value={15}>15</option>
+                        <option value={20}>20</option>
+                      </select>
+                      entries
+                    </span>
+
+                    <input
+                      type="text"
+                      placeholder="Search..."
+                      value={searchTerm}
+                      onChange={handleSearch}
+                      className="form-control d-inline-block"
+                      style={{ width: "300px" }}
+                    />
+                  </div>
+
+                  <table className="table table-bordered table-hover dt-responsive nowrap w-100">
+                    <thead>
+                      <tr className="text-center">
+                        <th scope="col" className='text-center'>#</th>
+                        <th scope="col" className='text-center'>Country</th>
+                        <th scope="col" className='text-center'>Region</th>
+                        <th scope="col" className='text-center'>Geo State</th>
+                        <th scope="col" className='text-center'>Geo City</th>
+                        <th scope="col" className='text-center'>Area</th>
+                        <th scope="col" className='text-center'>Edit</th>
+                        <th scope="col" className='text-center'>Delete</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredAreas
+                        .slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage)
+                        .map((area, index) => (
+                          <tr key={area.id} className="text-center">
+                            <td className='text-center'>{currentPage * itemsPerPage + index + 1}</td>
+                            <td className='text-center'>{area.country_title}</td>
+                            <td className='text-center'>{area.region_title}</td>
+                            <td className='text-center'>{area.geostate_title}</td>
+                            <td className='text-center'>{area.geocity_title}</td>
+                            <td className='text-center'>{area.title}</td>
+                            <td className='text-center'>
+                              <FaPencilAlt style={{ cursor: 'pointer', color: 'blue' }} onClick={() => edit(area.id)} />
+                            </td>
+                            <td className='text-center'>
+                              <FaTrash style={{ cursor: 'pointer', color: 'red' }} onClick={() => deleted(area.id)} />
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+
+                  <div>
+                    Showing {currentPage * itemsPerPage + 1} to{" "}
+                    {Math.min(
+                      (currentPage + 1) * itemsPerPage,
+                      filteredAreas.length
+                    )}{" "}
+                    of {filteredAreas.length} entries
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </div></div>
   );
 };
 

@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
+import LocationTabs from "./LocationTabs";
 
 const Location = () => {
   // Step 1: Add this state to track errors
@@ -140,6 +141,8 @@ const Location = () => {
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
   return (
+    <div className="tab-content">
+      <LocationTabs/>
     <div className="row mp0">
       <div className="col-12">
         <div className="card mb-3 tab_box">
@@ -216,19 +219,19 @@ const Location = () => {
                 </div>
 
                 {/* Adjust table padding and spacing */}
-                <table className="table table-bordered table dt-responsive nowrap w-100 table-css">
-                  <thead>
+                <table className="table table-bordered table-hover dt-responsive nowrap w-100">
+                  <thead className="thead-light">
                     <tr>
-                      <th style={{ padding: "12px 15px", textAlign: "center" }}>
+                      <th scope="col" className="text-center">
                         #
                       </th>
-                      <th style={{ padding: "12px 15px", textAlign: "center" }}>
+                      <th scope="col" className="text-center">
                         Title
                       </th>
-                      <th style={{ padding: "0px 0px", textAlign: "center" }}>
+                      <th scope="col" className="text-center">
                         Edit
                       </th>
-                      <th style={{ padding: "0px 0px", textAlign: "center" }}>
+                      <th scope="col" className="text-center">
                         Delete
                       </th>
                     </tr>
@@ -236,39 +239,26 @@ const Location = () => {
                   <tbody>
                     {currentUsers.map((item, index) => (
                       <tr key={item.id}>
-                        <td style={{ padding: "2px", textAlign: "center" }}>
+                        <td className="text-center align-middle">
                           {index + 1 + indexOfFirstUser}
                         </td>
-                        <td style={{ padding: "10px" }}>{item.title}</td>
-                        <td style={{ padding: "0px", textAlign: "center" }}>
+                        <td className="align-middle">{item.title}</td>
+                        <td className="text-center align-middle">
                           <button
-                            className="btn"
+                            className="btn btn-link text-primary"
                             onClick={() => {
-                              // alert(item.id)
                               edit(item.id);
                             }}
                             title="Edit"
-                            style={{
-                              backgroundColor: "transparent",
-                              border: "none",
-                              color: "blue",
-                              fontSize: "20px",
-                            }}
                           >
                             <FaPencilAlt />
                           </button>
                         </td>
-                        <td style={{ padding: "0px", textAlign: "center" }}>
+                        <td className="text-center align-middle">
                           <button
-                            className="btn"
+                            className="btn btn-link text-danger"
                             onClick={() => deleted(item.id)}
                             title="Delete"
-                            style={{
-                              backgroundColor: "transparent",
-                              border: "none",
-                              color: "red",
-                              fontSize: "20px",
-                            }}
                           >
                             <FaTrash />
                           </button>
@@ -325,6 +315,7 @@ const Location = () => {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 };

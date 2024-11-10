@@ -141,7 +141,7 @@ const Category = () => {
 
   return (
     <div className="tab-content">
-      <ProMaster/>
+      <ProMaster />
       <div className="row mp0">
         <div className="col-12">
           <div className="card mb-3 tab_box">
@@ -218,62 +218,36 @@ const Category = () => {
                   </div>
 
                   {/* Adjust table padding and spacing */}
-                  <table
-                    className="table table-bordered table dt-responsive nowrap w-100 table-css"
-                    style={{ marginTop: "20px", tableLayout: "fixed" }}
-                  >
-                    <thead>
+                  <table className="table table-bordered table-hover table-responsive table-striped mt-3">
+                    <thead className="thead-light">
                       <tr>
-                        <th style={{ padding: "12px 15px", textAlign: "center" }}>
-                          #
-                        </th>
-                        <th style={{ padding: "12px 15px", textAlign: "center" }}>
-                          Title
-                        </th>
-                        <th style={{ padding: "0px 0px", textAlign: "center" }}>
-                          Edit
-                        </th>
-                        <th style={{ padding: "0px 0px", textAlign: "center" }}>
-                          Delete
-                        </th>
+                        <th className="text-center">#</th>
+                        <th className="text-center">Title</th>
+                        <th className="text-center">Edit</th>
+                        <th className="text-center">Delete</th>
                       </tr>
                     </thead>
                     <tbody>
                       {currentUsers.map((item, index) => (
                         <tr key={item.id}>
-                          <td style={{ padding: "2px", textAlign: "center" }}>
-                            {index + 1 + indexOfFirstUser}
-                          </td>
-                          <td style={{ padding: "10px" }}>{item.title}</td>
-                          <td style={{ padding: "0px", textAlign: "center" }}>
+                          <td className="text-center">{index + 1 + indexOfFirstUser}</td>
+                          <td>{item.title}</td>
+                          <td className="text-center">
                             <button
-                              className="btn"
+                              className="btn  text-primary"
                               onClick={() => {
-                                // alert(item.id)
                                 edit(item.id);
                               }}
                               title="Edit"
-                              style={{
-                                backgroundColor: "transparent",
-                                border: "none",
-                                color: "blue",
-                                fontSize: "20px",
-                              }}
                             >
                               <FaPencilAlt />
                             </button>
                           </td>
-                          <td style={{ padding: "0px", textAlign: "center" }}>
+                          <td className="text-center">
                             <button
-                              className="btn"
+                              className="btn  text-danger"
                               onClick={() => deleted(item.id)}
                               title="Delete"
-                              style={{
-                                backgroundColor: "transparent",
-                                border: "none",
-                                color: "red",
-                                fontSize: "20px",
-                              }}
                             >
                               <FaTrash />
                             </button>

@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
+import LocationTabs from "./LocationTabs";
 
 const Geocity = () => {
   const [countries, setCountries] = useState([]);
@@ -194,6 +195,8 @@ const Geocity = () => {
   };
 
   return (
+    <div className="tab-content">
+      <LocationTabs/>
     <div className="row mp0">
       <div className="col-12">
         <div className="card mb-3 tab_box">
@@ -353,83 +356,36 @@ const Geocity = () => {
                   />
                 </div>
 
-                <table
-                  className="table table-bordered"
-                  style={{ marginTop: "20px", tableLayout: "fixed" }}
-                >
-                  <thead>
-                    <tr>
-                      <th style={{ padding: "12px 15px", textAlign: "center" }}>
-                        #
-                      </th>
-                      <th style={{ padding: "12px 15px", textAlign: "center" }}>
-                        Country
-                      </th>
-                      <th style={{ padding: "12px 15px", textAlign: "center" }}>
-                        Region
-                      </th>
-                      <th style={{ padding: "12px 15px", textAlign: "center" }}>
-                        Geo State
-                      </th>
-                      <th style={{ padding: "12px 15px", textAlign: "center" }}>
-                        Geo City
-                      </th>
-                      <th style={{ padding: "12px 15px", textAlign: "center" }}>
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredUsers
-                      .slice(
-                        currentPage * itemsPerPage,
-                        (currentPage + 1) * itemsPerPage
-                      )
-                      .map((user, index) => (
-                        <tr key={index}>
-                          <td style={{ padding: "10px", textAlign: "center" }}>
-                            {currentPage * itemsPerPage + index + 1}
-                          </td>
-                          <td style={{ padding: "10px", textAlign: "center" }}>
-                            {user.country_title}
-                          </td>
-                          <td style={{ padding: "10px", textAlign: "center" }}>
-                            {user.region_title}
-                          </td>
-                          <td style={{ padding: "10px", textAlign: "center" }}>
-                            {user.geostate_title}
-                          </td>
-                          <td style={{ padding: "10px", textAlign: "center" }}>
-                            {user.title}
-                          </td>
-                          <td style={{ padding: "10px", textAlign: "center" }}>
-                            <button
-                              className="btn btn-sm"
-                              onClick={() => edit(user.id)}
-                              style={{
-                                fontSize: "14px",
-                                color: "blue",
-                                background: "transparent",
-                              }}
-                            >
-                              <FaPencilAlt />
-                            </button>
-                            <button
-                              className="btn btn-sm"
-                              onClick={() => deleted(user.id)}
-                              style={{
-                                fontSize: "14px",
-                                color: "red",
-                                background: "transparent",
-                              }}
-                            >
-                              <FaTrash />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
+                <table className="table table-bordered table-hover" style={{ marginTop: "20px" }}>
+                    <thead className="thead-light">
+                      <tr>
+                        <th scope="col" className="text-center">#</th>
+                        <th scope="col" className="text-center">Country</th>
+                        <th scope="col" className="text-center">Region</th>
+                        <th scope="col" className="text-center">Geo State</th>
+                        <th scope="col" className="text-center">Geo City</th>
+                        <th scope="col" className="text-center">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredUsers
+                        .slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage)
+                        .map((user, index) => (
+                          <tr key={index}>
+                            <td className="text-center">{currentPage * itemsPerPage + index + 1}</td>
+                            <td className="text-center">{user.country_title}</td>
+                            <td className="text-center">{user.region_title}</td>
+                            <td className="text-center">{user.geostate_title}</td>
+                            <td className="text-center">{user.title}</td>
+                            <td className='text-center'>
+                              <FaPencilAlt style={{ cursor: 'pointer', color: 'blue', marginRight: '10px' }} onClick={() => edit(user.id)} />
+                              <FaTrash style={{ cursor: 'pointer', color: 'red' }} onClick={() => deleted(user.id)} />
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                
                 <div className="d-flex justify-content-between">
                   <span className="text-muted">
                     Showing{" "}
@@ -468,7 +424,7 @@ const Geocity = () => {
           </div>
         </div>
       </div>
-    </div>
+    </div></div>
   );
 };
 

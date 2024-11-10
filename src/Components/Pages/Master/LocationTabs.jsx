@@ -1,35 +1,18 @@
-import React, { useState } from 'react';
-import Location from './Location';
-import Regions from './Regions';
-import Geostate from './Geostate';
-import Geocity from './Geocity';
-import Area from './Area';
-import Pincode from './Pincode';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 function LocationTabs() {
-  const [activeTab, setActiveTab] = useState('country');
-
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case 'country':
-        return <Location />;
-      case 'regions':
-        return <Regions />;
-      case 'geostate':
-        return <Geostate />;
-      case 'geocity':
-        return <Geocity />;
-      case 'area':
-        return <Area />;
-        case 'pincode':
-         return <Pincode />;
+  const [activeTab, setActiveTab] = useState('/location');
 
 
-      default:
-        return <Location />;
-    }
-  };
+  useEffect(() => {
+
+    setActiveTab(window.location.pathname);
+
+  }, [window.location.pathname]);
+
+
 
   return (
     <>
@@ -72,52 +55,52 @@ function LocationTabs() {
             <div className="tabsMenu" style={{fontSize:"14px", marginLeft: "12px",fontWeight:"600",fontFamily:"Nunito"}}>
               <ul className="nav nav-tabs ">
                 <li className="nav-item">
-                  <button
-                    className={`nav-link ${activeTab === 'country' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('country')}
+                <Link to={`/location`}><button
+                    className={`nav-link ${activeTab === '/location' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('location')}
                   >
                     COUNTRY
-                  </button>
+                  </button></Link>
                 </li>
                 <li className="nav-item">
-                  <button
-                    className={`nav-link ${activeTab === 'regions' ? 'active' : ''}`}
+                <Link to={`/regions`}> <button
+                    className={`nav-link ${activeTab === '/regions' ? 'active' : ''}`}
                     onClick={() => setActiveTab('regions')}
                   >
                     REGION
-                  </button>
+                  </button></Link>
                 </li>
                 <li className="nav-item">
-                  <button
-                    className={`nav-link ${activeTab === 'geostate' ? 'active' : ''}`}
+                <Link to={`/geostate`}> <button
+                    className={`nav-link ${activeTab === '/geostate' ? 'active' : ''}`}
                     onClick={() => setActiveTab('geostate')}
                   >
                     GEO STATE
-                  </button>
+                  </button></Link>
                 </li>
                 <li className="nav-item">
-                  <button
-                    className={`nav-link ${activeTab === 'geocity' ? 'active' : ''}`}
+                <Link to={`/area`}><button
+                    className={`nav-link ${activeTab === '/area' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('area')}
+                  >
+                    DISTRICT 
+                  </button></Link>
+                </li>
+                <li className="nav-item">
+                <Link to={`/geocity`}><button
+                    className={`nav-link ${activeTab === '/geocity' ? 'active' : ''}`}
                     onClick={() => setActiveTab('geocity')}
                   >
                     GEO CITY
-                  </button>
+                  </button></Link>
                 </li>
                 <li className="nav-item">
-                  <button
-                    className={`nav-link ${activeTab === 'area' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('area')}
-                  >
-                    AREA
-                  </button>
-                </li>
-                <li className="nav-item">
-                  <button
-                    className={`nav-link ${activeTab === 'pincode' ? 'active' : ''}`}
+                <Link to={`/pincode`}><button
+                    className={`nav-link ${activeTab === '/pincode' ? 'active' : ''}`}
                     onClick={() => setActiveTab('pincode')}
                   >
                     PINCODE
-                  </button>
+                  </button></Link>
                 </li>
                 {/* Add other tabs like GEO STATE, GEO CITY, AREA */}
               </ul>
@@ -128,7 +111,7 @@ function LocationTabs() {
             {/* Tab Content */}       
               <div className="col-12 col-custom" style={{paddingLeft:"12px",paddingRight:"12px"}}>
                 <div className="tab-content">
-                  {renderTabContent()}
+                  {/* {renderTabContent()} */}
                 </div>
               </div>
           </div>
