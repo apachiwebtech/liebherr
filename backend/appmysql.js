@@ -3656,7 +3656,7 @@ app.post("/addcomplaintremark", (req, res) => {
   });
 });
 
-app.post("/uploadcomplaintattachments",
+    app.post("/uploadcomplaintattachments",
   upload.array("attachment"),
   (req, res) => {
     const { ticket_no, remark_id, created_by } = req.body;

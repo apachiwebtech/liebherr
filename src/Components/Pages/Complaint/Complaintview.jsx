@@ -17,9 +17,15 @@ export function Complaintview(params) {
     call_type: '',
     warranty_status: '',
     ModelNumber: '',
-    invoice_date: ''
+    invoice_date: '',
+    serial_no: '',
+    call_status: '',
+    engineer_id: ''
   });
-  
+
+
+    
+  const [sserial_no, setsserial_no] = useState([]);
   const [product, setProduct] = useState([]);
   const [engineer, setEngineer] = useState([]); // Initialize as empty array
   const [note, setNote] = useState(""); // Input field value
@@ -44,7 +50,11 @@ export function Complaintview(params) {
 const created_by = localStorage.getItem("userId"); // Get user ID from localStorage
 const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
 
-
+const [TicketUpdateSuccess, setTicketUpdateSuccess] = useState({
+  message: '',
+  visible: false,
+  type: 'success' // can be 'success' or 'error'
+});
 
   async function getProduct(params) {
 
@@ -74,7 +84,7 @@ async function getEngineer(params) {
   }
 }
 
-console.log("this is get product",product);
+// console.log("this is get product",product);
 
   const fetchComplaintDetails = async () => {
     try {
@@ -87,7 +97,7 @@ console.log("this is get product",product);
       console.error("Error fetching complaint details:", error);
     }
   };
- console.log(remarks , "$$$$")
+//  console.log(remarks , "$$$$")
   const fetchComplaintview = async (complaintid) => {
     try {
       const response = await axios.get(
@@ -95,6 +105,10 @@ console.log("this is get product",product);
       );
       console.log(response.data);
       setComplaintview(response.data);
+      if(response.data.serial_no != ""){
+      setsserial_no(response.data.serial_no);
+    
+    }
     } catch (error) {
       console.error("Error fetching complaint view:", error);
     }
@@ -170,12 +184,71 @@ console.log("this is get product",product);
     }
   };
 
-  const handleModelChange = (selectedOption) => {
-    setComplaintview(prev => ({
-      ...prev,
-      ModelNumber: selectedOption ? selectedOption.value : ''
-    }));
+  const handleModelChange = (e) => { 
+    const { name, value } = e.target;
+
+    setComplaintview(prev => ({ ...prev, [name]: value }));
   };
+  
+//handlesubmitticketdata strat for serial no,model number, engineer_id and call_status and form data
+const handleSubmitTicketFormData = (e) => {
+  e.preventDefault();
+  
+  const data = {
+    serial_no: complaintview.serial_no,
+    ModelNumber: complaintview.ModelNumber,
+    engineer_id: complaintview.engineer_id,
+    call_status: complaintview.call_status,
+    updated_by: 1,
+    ticket_no: complaintview.ticket_no
+  };
+
+  axios.post(`${Base_Url}/ticketFormData`, data)
+    .then(response => {
+      console.log("Server response:", response.data);
+      setComplaintview({
+        ...complaintview,
+        serial_no: '',
+        ModelNumber: '',
+        engineer_id: '',
+        call_status: '',
+      });
+      fetchComplaintview(complaintid);
+    
+      setTicketUpdateSuccess({
+        message: 'Ticket updated successfully!',
+        visible: true,
+        type: 'success'
+      });
+
+      // Hide the message after 3 seconds
+      setTimeout(() => {
+        setTicketUpdateSuccess({
+          message: '',
+          visible: false,
+          type: 'success'
+        });
+      }, 3000);
+    })
+    .catch(error => {
+      console.error("Error updating ticket:", error);
+      setTicketUpdateSuccess({
+        message: 'Error updating ticket. Please try again.',
+        visible: true,
+        type: 'error'
+      });
+
+      setTimeout(() => {
+        setTicketUpdateSuccess({
+          message: '',
+          visible: false,
+          type: 'error'
+        });
+      }, 3000);
+    });
+};
+
+//handkesubmitticketdata end
 
   // New handler for Attachment 2 preview
   const handleAttachment2Click = (attachment) => {
@@ -288,6 +361,19 @@ console.log("this is get product",product);
     return `${day}-${month}-${year}`;
   };
 
+  const successMessageStyle = {
+    padding: '10px 15px',
+    marginTop: '10px',
+    borderRadius: '4px',
+    fontSize: '14px',
+    fontWeight: '500',
+    textAlign: 'center',
+    opacity: TicketUpdateSuccess.visible ? '1' : '0',
+    transition: 'opacity 0.3s ease-in-out',
+    backgroundColor: TicketUpdateSuccess.type === 'success' ? '#d4edda' : '#f8d7da',
+    color: TicketUpdateSuccess.type === 'success' ? '#155724' : '#721c24',
+    border: TicketUpdateSuccess.type === 'success' ? '1px solid #c3e6cb' : '1px solid #f5c6cb'
+  };
 
   return (
     <div className="p-3">
@@ -456,9 +542,9 @@ console.log("this is get product",product);
                                        
                                         <select
                                             className="form-select dropdown-select"
-                                            name="country_id"
+                                            name="ModelNumber"
                                             value={complaintview.ModelNumber}
-                                            onChange={(e) => handleModelChange(e.target.value)}
+                                            onChange={handleModelChange}
                                           >
                                             <option value="">Select Model</option>
                                             {product.map((products) => (
@@ -471,9 +557,24 @@ console.log("this is get product",product);
                                       
 
                                       <div className="col-md-2">
-                                          <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Serial No</p>
-                                          <p style={{ fontSize: "14px"}}></p>
+                                        <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>
+                                          Serial No
+                                        </p>
+                                        {sserial_no ? (
+                                          <p style={{ fontSize: "14px" }}>{complaintview.serial_no}</p>
+                                        ) : (
+                                          <input
+                                            type="text"
+                                            name="serial_no"
+                                            value={complaintview.serial_no || ''}
+                                            placeholder="Enter Serial No"
+                                            style={{ fontSize: "14px", width: "100%" }}
+                                            onChange={handleModelChange}
+                                          />
+                                        )}
                                       </div>
+
+                                  
                                           <div className="col-md-2">
                                               <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Purchase Date</p>
                                               <p style={{ fontSize: "14px"}}>{formatDate(complaintview.invoice_date)}</p>
@@ -497,7 +598,7 @@ console.log("this is get product",product);
                     className="card shadow-0 border"
                     style={{ backgroundColor: "#f0f2f5" }}
                   >
-                    <form>
+                    <form onSubmit={handleSubmit}>
                       <div className="card-body p-4">
                         <div className="form-outline mb-2">
                           <input
@@ -545,7 +646,7 @@ console.log("this is get product",product);
                             style={{ fontSize: "14px"}}
                             onClick={handleSubmit}
                           >
-                            Submit
+                            Upload Remark
                           </button>
                         </div>
                       </div>
@@ -736,7 +837,7 @@ console.log("this is get product",product);
             <div className="card-body">
               <h4 className="pname" style={{ fontSize: "14px"}}>Call Status</h4>
               <div className="mb-3">
-                <select className="form-control" style={{ fontSize: "14px"}}>
+                <select name="call_status" className="form-control" style={{ fontSize: "14px"}} onChange={handleModelChange}>
                   <option value="" >Select Status</option>
                   <option value="Quotation">Quotation</option>
                   <option value="Closed">Closed</option>
@@ -780,22 +881,38 @@ console.log("this is get product",product);
               <div className="card-body">
                 <h4 className="pname" style={{ fontSize: "14px"}}>Engineer</h4>
                 <select
-                  className="form-select dropdown-select"
-                  name="Engineer"
-                  // value={complaintview.ModelNumber}
-                  // onChange={handleChange}
-                >
-                  <option value="">Select Engineer</option>
-                  {Array.isArray(engineer) && engineer.length > 0 ? (
-                    engineer.map((engineers) => (
-                      <option key={engineers.id} value={engineers.title}>
-                        {engineers.title}
-                      </option>
-                    ))
-                  ) : (
-                    <option value="" disabled>No engineers available</option>
-                  )}
-                </select>
+                    className="form-select dropdown-select"
+                    name="engineer_id"
+                    value={complaintview.engineer_id} // Add this to control the value
+                    onChange={handleModelChange}
+                  >
+                    <option value="">Select Engineer</option>
+                    {Array.isArray(engineer) && engineer.length > 0 ? (
+                      engineer.map((engineers) => (
+                        <option key={engineers.id} value={engineers.id}>
+                          {engineers.title}
+                        </option>
+                      ))
+                    ) : (
+                      <option value="" disabled>No engineers available</option>
+                    )}
+                  </select>
+
+                <div className="d-flex justify-content-end">
+                          <button
+                            type="submit"
+                            className="btn btn-primary"
+                            style={{ fontSize: "14px"}}
+                            onClick={handleSubmitTicketFormData}
+                          >
+                            Submit
+                          </button>
+                        </div>
+                        {TicketUpdateSuccess.visible && (
+            <div style={successMessageStyle}>
+              {TicketUpdateSuccess.message}
+            </div>
+                        )}
               </div>
             </div>
             

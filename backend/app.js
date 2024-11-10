@@ -2600,8 +2600,6 @@ app.get("/getComplaintDetails/:ticket_no", async (req, res) => {
     // Direct SQL query without parameter binding for remarks
     const remarkQuery = `SELECT ac.*, lu.Lhiuser FROM awt_complaintremark as ac LEFT JOIN lhi_user as lu ON lu.id = ac.created_by WHERE ac.ticket_no = ${"'" + ticket_no + "'"}`;
 
-    console.log(remarkQuery, "Firstquer")
-
     // Execute remark query
     const remarksResult = await pool.request().query(remarkQuery);
     const remarks = remarksResult.recordset;
@@ -2612,8 +2610,6 @@ app.get("/getComplaintDetails/:ticket_no", async (req, res) => {
       WHERE ticket_no = ${"'" + ticket_no + "'"}
     `;
 
-
-    console.log(attachmentQuery)
 
     // Execute attachment query
     const attachmentsResult = await pool.request().query(attachmentQuery);
@@ -2864,45 +2860,72 @@ app.post("/getticket", async (req, res) => {
 
 // Add Complaint Start
 app.post("/add_complaint", async (req, res) => {
-  let { complaint_date, customer_name, contact_person, email, mobile, address, state, city, area, pincode, mode_of_contact, ticket_type, cust_type, warrenty_status, invoice_date, call_charge, cust_id, model } = req.body;
+  let { 
+    complaint_date, customer_name, contact_person, email, mobile, address, 
+    state, city, area, pincode, mode_of_contact, ticket_type, cust_type, 
+    warrenty_status, invoice_date, call_charge, cust_id, model 
+  } = req.body;
+
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
   try {
-    // Use the poolPromise to get the connection pool
+    // Get the connection pool
     const pool = await poolPromise;
 
     // First query to count existing complaints
     const checkResult = await pool.request().query("SELECT * FROM complaint_ticket WHERE deleted = 0");
     const count = checkResult.recordset.length + 1;
 
-    // Format date and count for ticket number
-    const formatDate = `${(date.getMonth() + 1).toString().padStart(2, '0')}${date.getDate().toString().padStart(2, '0')}`;
+    // Generate ticket number based on date and count
+    const formatDate = `${(new Date().getMonth() + 1).toString().padStart(2, '0')}${new Date().getDate().toString().padStart(2, '0')}`;
     const countFormat = count.toString().padStart(5, "0");
     const ticket_no = 'IG' + formatDate + "-" + countFormat;
 
-    // Insert new complaint
+    // Insert new complaint with parameterized queries
     const insertSQL = `
       INSERT INTO complaint_ticket (
         ticket_no, ticket_date, customer_name, customer_mobile, customer_email, address, 
-        state_id, city, area, pincode, customer_id, ModelNumber, ticket_type, call_type, 
+        state, city, area, pincode, customer_id, ModelNumber, ticket_type, call_type, 
         call_status, warranty_status, invoice_date, call_charges, mode_of_contact, 
         contact_person, assigned_to, created_date, created_by, engineer_id
       ) 
       VALUES (
-        '${ticket_no}', '${complaint_date}', '${customer_name}', '${mobile}', '${email}', 
-        '${address}', '${state}', '${city}', '${area}', '${pincode}', '${cust_id}', 
-        '${model}', '${ticket_type}', '${cust_type}', 'Pending', '${warrenty_status}', 
-        '${invoice_date}', '${call_charge}', '${mode_of_contact}', '${contact_person}', 
-        '1', '${formattedDate}', '1', '1'
+        @ticket_no, @complaint_date, @customer_name, @mobile, @email, @address, 
+        @state, @city, @area, @pincode, @cust_id, @model, @ticket_type, @cust_type, 
+        'Pending', @warrenty_status, @invoice_date, @call_charge, @mode_of_contact, 
+        @contact_person, 1, @formattedDate, 1, 1
       )`;
 
-    const insertResult = await pool.request().query(insertSQL);
-    return res.json(insertResult);
+    const request = pool.request()
+      .input('ticket_no', ticket_no)
+      .input('complaint_date', complaint_date)
+      .input('customer_name', customer_name)
+      .input('mobile', mobile)
+      .input('email', email)
+      .input('address', address)
+      .input('state', state)
+      .input('city', city)
+      .input('area', area)
+      .input('pincode', pincode)
+      .input('cust_id', cust_id)
+      .input('model', model)
+      .input('ticket_type', ticket_type)
+      .input('cust_type', cust_type)
+      .input('warrenty_status', warrenty_status)
+      .input('invoice_date', invoice_date)
+      .input('call_charge', call_charge)
+      .input('mode_of_contact', mode_of_contact)
+      .input('contact_person', contact_person)
+      .input('formattedDate', formattedDate);
+
+    const insertResult = await request.query(insertSQL);
+    return res.json({ insertId: insertResult.rowsAffected[0] });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'An error occurred while adding the complaint' });
+    console.error("Error inserting complaint:", err);
+    return res.status(500).json({ error: 'An error occurred while adding the complaint', details: err.message });
   }
 });
+
 
 
 // S End for Complaint Registration
@@ -5018,54 +5041,52 @@ app.get("/getcomplaintview/:complaintid", async (req, res) => {
   }
 });
 
-app.post("/addcomplaintremark", async (req, res) => {
-  const { ticket_no, note, created_by } = req.body;
+    app.post("/addcomplaintremark", async (req, res) => {
+      const { ticket_no, note, created_by } = req.body;
 
-  try {
-    const pool = await poolPromise;
+      try {
+        const pool = await poolPromise;
 
-    console.log(ticket_no, "##");
+        // SQL query to insert a new complaint remark
+        const sql = `INSERT INTO awt_complaintremark (ticket_no, remark, created_by, created_date) 
+                    VALUES (${ticket_no}, '${note}', ${created_by}, GETDATE())`;
+        const result = await pool.request().query(sql);
 
-    // SQL query to insert a new complaint remark
-    const sql = `INSERT INTO awt_complaintremark (ticket_no, remark, created_by, created_date) 
-                 VALUES (${ticket_no}, '${note}', ${created_by}, GETDATE())`;
-    const result = await pool.request().query(sql);
-
-    res.json({ insertId: result.rowsAffected[0] }); // Send the inserted ID back to the client
-  } catch (err) {
-    console.error("Error inserting remark:", err);
-    return res.status(500).json({ error: "Database error", details: err.message }); // Send back more details for debugging
-  }
-});
-
-app.post("/uploadcomplaintattachments", upload.array("attachment"), async (req, res) => {
-  const { ticket_no, remark_id, created_by } = req.body;
-
-  if (!req.files || req.files.length === 0) {
-    return res.status(400).json({ error: "No files uploaded" });
-  }
-
-  // Combine filenames into a single string
-  const attachments = req.files.map((file) => file.filename); // Get all filenames
-  const attachmentString = attachments.join(", "); // For a comma-separated string
-
-  try {
-    const pool = await poolPromise;
-
-    // SQL query to insert attachments
-    const sql = `INSERT INTO awt_complaintattachment (remark_id, ticket_no, attachment, created_by, created_date) 
-                 VALUES (${remark_id}, ${ticket_no}, '${attachmentString}', ${created_by}, GETDATE())`;
-    const result = await pool.request().query(sql);
-
-    res.json({
-      message: "Files uploaded successfully",
-      count: 1, // Only one entry created
+        res.json({ insertId: result.rowsAffected[0] }); // Send the inserted ID back to the client
+      } catch (err) {
+        console.error("Error inserting remark:", err);
+        return res.status(500).json({ error: "Database error", details: err.message }); // Send back more details for debugging
+      }
     });
-  } catch (err) {
-    console.error("Error inserting attachments:", err);
-    return res.status(500).json({ error: "Database error", details: err.message });
-  }
-});
+
+    app.post("/uploadcomplaintattachments", upload.array("attachment"), async (req, res) => {
+      const { ticket_no, remark_id, created_by } = req.body;
+
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({ error: "No files uploaded" });
+      }
+
+      // Combine filenames into a single string
+      const attachments = req.files.map((file) => file.filename); // Get all filenames
+      const attachmentString = attachments.join(", "); // For a comma-separated string
+
+      try {
+        const pool = await poolPromise;
+
+        // SQL query to insert attachments
+        const sql = `INSERT INTO awt_complaintattachment (remark_id, ticket_no, attachment, created_by, created_date) 
+                    VALUES (${remark_id}, ${ticket_no}, '${attachmentString}', ${created_by}, GETDATE())`;
+        const result = await pool.request().query(sql);
+
+        res.json({
+          message: "Files uploaded successfully",
+          count: 1, // Only one entry created
+        });
+      } catch (err) {
+        console.error("Error inserting attachments:", err);
+        return res.status(500).json({ error: "Database error", details: err.message });
+      }
+    });
 
 app.get("/getComplaintDetails/:ticket_no", async (req, res) => {
   const ticket_no = req.params.ticket_no;
@@ -5111,7 +5132,6 @@ app.get("/getComplaintDuplicate/:customer_mobile", async (req, res) => {
     return res.status(500).json({ error: "Error fetching complaint duplicate", details: err.message });
   }
 });
-<<<<<<< Updated upstream
 // End Complaint View
 // y end
 
@@ -5318,11 +5338,29 @@ app.post("/updateProduct", async (req, res) => {
     return res.status(500).json({ error: "Database error", details: err.message });
   }
 });
+//Complaint view Insert TicketFormData start
 
+app.post("/ticketFormData", async (req, res) => {
+  const { ticket_no,serial_no, ModelNumber, engineer_id, call_status, updated_by } = req.body;
+  const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
+  console.log(ticket_no,serial_no, ModelNumber, engineer_id, call_status, updated_by,"Values")
 
+  try {
+    const pool = await poolPromise;
 
+    const updateSql = `
+      UPDATE complaint_ticket 
+      SET ModelNumber = '${ModelNumber}', engineer_id = '${engineer_id}', 
+          call_status = '${call_status}', serial_no = '${serial_no}' , updated_by = '${updated_by}', updated_date = '${formattedDate}'
+      WHERE ticket_no = '${ticket_no}'`;
+    
+      console.log(updateSql,"UpdateSql");
+    await pool.request().query(updateSql);
 
-=======
-// End Complaint Vie
->>>>>>> Stashed changes
+    return res.status(200).json({ message: "Ticket Formdata updated successfully!" });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "An error occurred while updating the ticket" });
+  }
+});
