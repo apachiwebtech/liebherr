@@ -101,7 +101,7 @@ export function Products(params) {
 
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
                             <div className='p-1 text-right'>
-                                <Link to={`/addproduct`}><button className='btn btn-primary'>Add Product</button></Link>
+                                <Link to={`/addproduct/:productid`}><button className='btn btn-primary'>Add Product</button></Link>
                             </div>
                             <table className="table">
                                 <thead>
@@ -133,7 +133,7 @@ export function Products(params) {
                                                 <td >{item.material}</td>
                                                 <td >{item.manufacturer}</td>
                                                 <td >
-                                                    <button
+                                                   <Link to={`/addproduct/${item.id}`}> <button
                                                         className='btn'
                                                         onClick={() => {
                                                             // alert(item.id)
@@ -143,9 +143,9 @@ export function Products(params) {
                                                         style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
                                                     >
                                                         <FaPencilAlt />
-                                                    </button>
+                                                    </button></Link>
                                                 </td>
-                                                <td >
+                                                {/* <td >
                                                     <button
                                                         className='btn'
                                                         onClick={() => {
@@ -156,7 +156,7 @@ export function Products(params) {
                                                     >
                                                         <FaEye />
                                                     </button>
-                                                </td>
+                                                </td> */}
                                                 <td style={{ padding: '0px', textAlign: 'center' }}>
                                                     <button
                                                         className='btn'

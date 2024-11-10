@@ -28,7 +28,7 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
- 
+
 const dbConfig = {
   user: "sa",
   password: "8$E5r6p8%8KH#F6V",
@@ -42,12 +42,12 @@ const dbConfig = {
 
 const poolPromise = new sql.ConnectionPool(dbConfig).connect()
 
-                   .then(pool => { console.log("Connected to MSSQL via connection pool"); return pool; })
+  .then(pool => { console.log("Connected to MSSQL via connection pool"); return pool; })
 
-                   .catch(err => console.error("Database Connection Pool Error:", err));
+  .catch(err => console.error("Database Connection Pool Error:", err));
 
 
- 
+
 
 app.listen(8081, () => {
 
@@ -55,7 +55,7 @@ app.listen(8081, () => {
 
 });
 
- 
+
 
 //Country Master Start
 app.get("/getdata", async (req, res) => {
@@ -101,7 +101,7 @@ app.post("/login", async (req, res) => {
 
 app.get("/requestdata/:id", async (req, res) => {
   const { id } = req.params;
-  
+
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
@@ -388,7 +388,7 @@ app.post("/deleteregion", async (req, res) => {
 // API to fetch  Region based on the selected country
 app.get("/getregion/:country_id", async (req, res) => {
   const { country_id } = req.params;
-  
+
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
@@ -450,7 +450,7 @@ app.get("/getgeostates", async (req, res) => {
 // API to fetch a specific GEO state by ID
 app.get("/requestgeostate/:id", async (req, res) => {
   const { id } = req.params;
-  
+
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
@@ -512,7 +512,7 @@ app.post("/postgeostate", async (req, res) => {
         UPDATE awt_geostate SET deleted = 0 
         WHERE title = '${title}'
       `;
-      
+
       await pool.request().query(restoreSoftDeletedSql);
       return res.json({ message: "Soft-deleted State restored successfully!" });
     } else {
@@ -1461,7 +1461,7 @@ app.put("/putcatdata", async (req, res) => {
       FROM awt_category 
       WHERE title = '${title}' AND id != ${id} AND deleted = 0
     `;
-    
+
     // Execute the duplicate check query
     const duplicateCheckResult = await pool.request().query(checkDuplicateSql);
 
@@ -1549,7 +1549,7 @@ app.get("/requestsubcat/:id", async (req, res) => {
     // Access the connection pool using poolPromise
     const pool = await poolPromise;
 
-    
+
     const sql = `
       SELECT * 
       FROM awt_subcat 
@@ -1663,13 +1663,13 @@ app.post("/deletesubcat", async (req, res) => {
     // Access the connection pool using poolPromise
     const pool = await poolPromise;
 
-   
+
     const sql = `
       UPDATE awt_subcat 
       SET deleted = 1 
       WHERE id = ${id}
     `;
-    
+
     // Execute the query
     const result = await pool.request().query(sql);
 
@@ -1691,7 +1691,7 @@ app.get("/getcategory", async (req, res) => {
       FROM awt_category 
       WHERE deleted = 0
     `;
-    
+
     // Execute the query
     const result = await pool.request().query(sql);
 
@@ -1714,7 +1714,7 @@ app.get("/getcdata", async (req, res) => {
       FROM awt_channelpartner 
       WHERE deleted = 0
     `;
-    
+
     // Execute the query
     const result = await pool.request().query(sql);
 
@@ -1796,7 +1796,7 @@ app.get("/requestcdata/:id", async (req, res) => {
       FROM awt_channelpartner 
       WHERE id = ${id} AND deleted = 0
     `;
-    
+
     // Execute the query and get the results
     const result = await pool.request().query(sql);
 
@@ -1883,7 +1883,7 @@ app.get("/getcom", async (req, res) => {
       FROM complaint_code 
       WHERE deleted = 0
     `;
-    
+
     // Execute the query
     const result = await pool.request().query(sql);
 
@@ -2114,7 +2114,7 @@ app.post("/postdatareason", async (req, res) => {
         AND id != ${id} 
         AND deleted = 0
       `;
-      
+
       // Execute the query
       const checkDuplicateResult = await pool.request().query(checkDuplicateSql);
 
@@ -2130,10 +2130,10 @@ app.post("/postdatareason", async (req, res) => {
               updated_by = '${created_by}' 
           WHERE id = ${id}
         `;
-        
+
         // Execute the query
         await pool.request().query(updateSql);
-        
+
         return res.json({ message: "reasoncode updated successfully!" });
       }
     } else {
@@ -2145,7 +2145,7 @@ app.post("/postdatareason", async (req, res) => {
         WHERE reasoncode = '${reasoncode}' 
         AND deleted = 0
       `;
-      
+
       // Execute the query
       const checkDuplicateResult = await pool.request().query(checkDuplicateSql);
 
@@ -2159,7 +2159,7 @@ app.post("/postdatareason", async (req, res) => {
           WHERE reasoncode = '${reasoncode}' 
           AND deleted = 1
         `;
-        
+
         // Execute the query
         const softDeletedResult = await pool.request().query(checkSoftDeletedSql);
 
@@ -2172,7 +2172,7 @@ app.post("/postdatareason", async (req, res) => {
                 updated_by = '${created_by}' 
             WHERE reasoncode = '${reasoncode}'
           `;
-          
+
           // Execute the query
           await pool.request().query(restoreSoftDeletedSql);
 
@@ -2183,10 +2183,10 @@ app.post("/postdatareason", async (req, res) => {
             INSERT INTO reason_code (reasoncode, created_date, created_by) 
             VALUES ('${reasoncode}', GETDATE(), '${created_by}')
           `;
-          
+
           // Execute the query
           await pool.request().query(insertSql);
-          
+
           return res.json({ message: "reasoncode added successfully!" });
         }
       }
@@ -2598,9 +2598,9 @@ app.get("/getComplaintDetails/:ticket_no", async (req, res) => {
     const pool = await poolPromise;
 
     // Direct SQL query without parameter binding for remarks
-    const remarkQuery = `SELECT ac.*, lu.Lhiuser FROM awt_complaintremark as ac LEFT JOIN lhi_user as lu ON lu.id = ac.created_by WHERE ac.ticket_no = ${"'"+ticket_no+"'"}`;
+    const remarkQuery = `SELECT ac.*, lu.Lhiuser FROM awt_complaintremark as ac LEFT JOIN lhi_user as lu ON lu.id = ac.created_by WHERE ac.ticket_no = ${"'" + ticket_no + "'"}`;
 
-    console.log(remarkQuery , "Firstquer")
+    console.log(remarkQuery, "Firstquer")
 
     // Execute remark query
     const remarksResult = await pool.request().query(remarkQuery);
@@ -2609,7 +2609,7 @@ app.get("/getComplaintDetails/:ticket_no", async (req, res) => {
     // Direct SQL query without parameter binding for attachments
     const attachmentQuery = `
       SELECT * FROM awt_complaintattachment
-      WHERE ticket_no = ${"'"+ticket_no+"'"}
+      WHERE ticket_no = ${"'" + ticket_no + "'"}
     `;
 
 
@@ -2661,7 +2661,7 @@ app.get("/getComplaintDuplicate/:customer_mobile", async (req, res) => {
 
 // End Complaint View
 
-app.post("/uploadAttachment2", upload.array("attachment2"), async (req, res) => { 
+app.post("/uploadAttachment2", upload.array("attachment2"), async (req, res) => {
   const { ticket_no, created_by } = req.body;
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
@@ -2870,7 +2870,7 @@ app.post("/add_complaint", async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
-    
+
     // First query to count existing complaints
     const checkResult = await pool.request().query("SELECT * FROM complaint_ticket WHERE deleted = 0");
     const count = checkResult.recordset.length + 1;
@@ -2930,13 +2930,13 @@ app.get("/getgroupmengineer/:cfranchise_id", async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
-    
+
     // Create the query using string interpolation (be careful to sanitize the input to avoid SQL injection)
     const sql = `SELECT * FROM awt_engineermaster WHERE cfranchise_id = ${pool.request().literal(cfranchise_id)} AND deleted = 0`;
 
     // Perform the query
     const result = await pool.request().query(sql);
-    
+
     // Return the result as JSON
     return res.json(result.recordset);
   } catch (err) {
@@ -3129,14 +3129,14 @@ app.get("/getpincodedrop/:area_id", async (req, res) => {
   }
 });
 
-  // API to fetch all Customer Location 
-  app.get("/getcustomerlocation", async (req, res) => {
-    try {
-      // Use the poolPromise to get the connection pool
-      const pool = await poolPromise;
-  
-      // Construct the SQL query (no parameter binding)
-      const sql = `
+// API to fetch all Customer Location 
+app.get("/getcustomerlocation", async (req, res) => {
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    // Construct the SQL query (no parameter binding)
+    const sql = `
         SELECT 
           ccl.*, 
           c.title AS country_title, 
@@ -3154,17 +3154,17 @@ app.get("/getpincodedrop/:area_id", async (req, res) => {
         JOIN awt_pincode p ON ccl.pincode_id = p.id 
         WHERE ccl.deleted = 0;
       `;
-  
-      // Execute the query
-      const result = await pool.request().query(sql);
-  
-      // Return the result
-      return res.json(result.recordset);
-    } catch (err) {
-      console.error("Database error:", err);
-      return res.status(500).json({ error: "Database error occurred" });
-    }
-  });  
+
+    // Execute the query
+    const result = await pool.request().query(sql);
+
+    // Return the result
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred" });
+  }
+});
 
 // API to fetch a specific Customer Location by ID
 app.get("/requestcustomerlocation/:id", async (req, res) => {
@@ -3228,9 +3228,9 @@ app.post("/postcustomerlocation", async (req, res) => {
     } else {
       const insertSql = `INSERT INTO awt_customerlocation (country_id, region_id, geostate_id, geocity_id, area_id, pincode_id, address, ccperson, ccnumber, address_type) 
                          VALUES ('${country_id}', '${region_id}', '${geostate_id}', '${geocity_id}', '${area_id}', '${pincode_id}', '${address}', '${ccperson}', '${ccnumber}', '${address_type}')`;
-      
+
       await pool.request().query(insertSql);
-      
+
       return res.json({ message: "Customer Location added successfully!" });
     }
   } catch (err) {
@@ -3555,25 +3555,25 @@ app.put("/putengineer", async (req, res) => {
   }
 });
 
- app.post("/deleteengineer", async (req, res) => {
+app.post("/deleteengineer", async (req, res) => {
   const { id } = req.body;
 
   try {
     // Use the poolPromise to get the connection pool
-     const pool = await poolPromise;
+    const pool = await poolPromise;
 
-     // Directly inject `id` into the SQL query (no parameter binding)
-     const sql = `UPDATE awt_engineermaster SET deleted = 1 WHERE id = '${id}'`;
+    // Directly inject `id` into the SQL query (no parameter binding)
+    const sql = `UPDATE awt_engineermaster SET deleted = 1 WHERE id = '${id}'`;
 
-     // Execute the SQL query
-     await pool.request().query(sql);
+    // Execute the SQL query
+    await pool.request().query(sql);
 
-     return res.json({ message: "Engineer deleted successfully!" });
-   } catch (err) {
-     console.error(err);
-     return res.status(500).json({ message: "Error updating Engineer" });
-   }
- });
+    return res.json({ message: "Engineer deleted successfully!" });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Error updating Engineer" });
+  }
+});
 
 
 
@@ -3655,7 +3655,7 @@ app.put("/putfranchisedata", async (req, res) => {
 
     // Update the record
     await pool.request().query(`UPDATE awt_franchisemaster SET title = '${title}' WHERE id = '${id}'`);
-    
+
     return res.json({ message: "Franchise Master updated successfully!" });
 
   } catch (err) {
@@ -3909,7 +3909,7 @@ app.get("/requestdataproducttype/:id", async (req, res) => {
     } else {
       return res.status(404).json({ message: "ProductType not found" });
     }
-    
+
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "An error occurred while fetching product type data" });
@@ -4247,7 +4247,7 @@ app.get("/getmanufacturer", async (req, res) => {
 // Insert for Mnufacturer 
 app.post("/postmanufacturer", async (req, res) => {
   const { id, Manufacturer, created_by } = req.body;
-  
+
   try {
     const pool = await poolPromise;
 
@@ -5100,3 +5100,212 @@ app.get("/getComplaintDuplicate/:customer_mobile", async (req, res) => {
 });
 // End Complaint View
 // y end
+
+app.get("/product_type", async (req, res) => {
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+    const result = await pool.request().query("SELECT id , product_type FROM product_type WHERE deleted = 0");
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching product types' });
+  }
+});
+app.get("/fetchproductline", async (req, res) => {
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+    const result = await pool.request().query("SELECT id , pline_code, product_line FROM product_line WHERE deleted = 0");
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching product types' });
+  }
+});
+app.get("/fetchmaterial", async (req, res) => {
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+    const result = await pool.request().query("SELECT id ,  Material FROM material WHERE deleted = 0");
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching product types' });
+  }
+});
+app.get("/fetchitemtype", async (req, res) => {
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+    const result = await pool.request().query("SELECT id , title FROM item_type ");
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching product types' });
+  }
+});
+app.get("/fetchproductclass", async (req, res) => {
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+    const result = await pool.request().query("SELECT id , class_code , product_class FROM product_class ");
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching product types' });
+  }
+});
+app.get("/fetchmanufacturer", async (req, res) => {
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+    const result = await pool.request().query("SELECT id , Manufacturer FROM manufacturer ");
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching product types' });
+  }
+});
+
+app.post("/getupdateparam", async (req, res) => {
+
+  const {productid} = req.body;
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+    const result = await pool.request().query(`SELECT * FROM product_master where id = ${productid}`);
+
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching product types' });
+  }
+});
+
+app.post("/addProduct", async (req, res) => {
+  const { item_code, item_description, product_model, product_type, product_class_code, product_class, product_line_code, product_line, material, manufacturer, item_type, serialized, size, crmproducttype, colour, handle_type, serial_identification, installation_type, customer_classification, price_group, mrp, service_partner_basic } = req.body;
+
+
+  try {
+    const pool = await poolPromise;
+    // SQL query to insert a new complaint remark
+    const sql = `INSERT INTO product_master (serial_no,item_code, item_description, itemCode,product_model,productType,productLineCode,productLine,productClassCode,productClass,material,manufacturer,itemType,serialized,sizeProduct,crm_productType,color,installationType,handleType,customerClassification,price_group,mrp,service_partner_basic)VALUES (@serial_identification,@item_code,@item_description,@item_code,@product_model,@product_type,@product_line_code,@product_line,@product_class_code,@product_class,@material,@manufacturer,@item_type,@serialized,@size,@crmproducttype,@colour,@installation_type,@handle_type,@customer_classification,@price_group,@mrp,@service_partner_basic);`;
+
+
+
+      const request = pool.request()
+      .input('item_code', item_code)
+      .input('item_description', item_description)
+      .input('product_model', product_model)
+      .input('product_type', product_type)
+      .input('product_class_code', product_class_code)
+      .input('product_class', product_class)
+      .input('product_line_code', product_line_code)
+      .input('product_line', product_line)
+      .input('material', material)
+      .input('manufacturer', manufacturer)
+      .input('item_type', item_type)
+      .input('serialized', serialized)
+      .input('size', size)
+      .input('crmproducttype', crmproducttype)
+      .input('colour', colour)
+      .input('handle_type', handle_type)
+      .input('serial_identification', serial_identification)
+      .input('installation_type', installation_type)
+      .input('customer_classification', customer_classification)
+      .input('price_group', price_group)
+      .input('mrp', mrp)
+      .input('service_partner_basic', service_partner_basic);
+
+
+      console.log(sql)
+
+      const result = await request.query(sql);
+
+    res.json({ insertId: result.rowsAffected[0] }); // Send the inserted ID back to the client
+  } catch (err) {
+    console.error("Error inserting remark:", err);
+    return res.status(500).json({ error: "Database error", details: err.message }); // Send back more details for debugging
+  }
+});
+
+app.post("/updateProduct", async (req, res) => {
+  const { 
+    item_code, item_description, product_model, product_type, product_class_code, product_class, 
+    product_line_code, product_line, material, manufacturer, item_type, serialized, size, 
+    crmproducttype, colour, handle_type, serial_identification, installation_type, 
+    customer_classification, price_group, mrp, service_partner_basic, uid 
+  } = req.body;
+
+  try {
+    const pool = await poolPromise;
+    
+    // SQL query to update an existing product
+    const sql = `
+      UPDATE product_master
+      SET
+        serial_no = @serial_identification,
+        item_code = @item_code,
+        item_description = @item_description,
+        product_model = @product_model,
+        productType = @product_type,
+        productLineCode = @product_line_code,
+        productLine = @product_line,
+        productClassCode = @product_class_code,
+        productClass = @product_class,
+        material = @material,
+        manufacturer = @manufacturer,
+        itemType = @item_type,
+        serialized = @serialized,
+        sizeProduct = @size,
+        crm_productType = @crmproducttype,
+        color = @colour,
+        installationType = @installation_type,
+        handleType = @handle_type,
+        customerClassification = @customer_classification,
+        price_group = @price_group,
+        mrp = @mrp,
+        service_partner_basic = @service_partner_basic
+      WHERE id = @uid;
+    `;
+
+    const request = pool.request()
+      .input('item_code', item_code)
+      .input('item_description', item_description)
+      .input('product_model', product_model)
+      .input('product_type', product_type)
+      .input('product_class_code', product_class_code)
+      .input('product_class', product_class)
+      .input('product_line_code', product_line_code)
+      .input('product_line', product_line)
+      .input('material', material)
+      .input('manufacturer', manufacturer)
+      .input('item_type', item_type)
+      .input('serialized', serialized)
+      .input('size', size)
+      .input('crmproducttype', crmproducttype)
+      .input('colour', colour)
+      .input('handle_type', handle_type)
+      .input('serial_identification', serial_identification)
+      .input('installation_type', installation_type)
+      .input('customer_classification', customer_classification)
+      .input('price_group', price_group)
+      .input('mrp', mrp)
+      .input('service_partner_basic', service_partner_basic)
+      .input('uid', uid); // Adding uid for the WHERE clause
+
+    const result = await request.query(sql);
+
+    res.json({ affectedRows: result.rowsAffected[0] }); // Send the affected rows count back to the client
+  } catch (err) {
+    console.error("Error updating product:", err);
+    return res.status(500).json({ error: "Database error", details: err.message });
+  }
+});
+
+
+
+
+
