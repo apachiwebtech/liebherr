@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
@@ -94,25 +94,29 @@ export function Products(params) {
 
     return (
         <div className="tab-content">
-            <ProMaster/>
+            <ProMaster />
             <div className="row mp0" >
                 <div className="col-md-12 col-12">
                     <div className="card mb-3 tab_box">
+
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
+                            <div className='p-1 text-right'>
+                                <Link to={`/addproduct`}><button className='btn btn-primary'>Add Product</button></Link>
+                            </div>
                             <table className="table">
                                 <thead>
                                     <tr>
-                                        <th >#</th>
-                                        <th >Serial No.</th>
-                                        <th >Item Code</th>
-                                        <th >Item Description</th>
-                                        <th >Product Type</th>
-                                        <th >Product Line</th>
-                                        <th >Material</th>
-                                        <th >Manufacturer</th>
-                                        <th >Edit</th>
-                                        <th >View</th>
-                                        <th >Delete</th>
+                                        <th width="3%">#</th>
+                                        <th width="7%">Serial No.</th>
+                                        <th width="8%">Item Code</th>
+                                        <th width="20%">Item Description</th>
+                                        <th width="20%">Product Type</th>
+                                        <th width="10%">Product Line</th>
+                                        <th width="15%">Material</th>
+                                        <th width="5%">Manufacturer</th>
+                                        <th width="5%">Edit</th>
+                                        <th width="5%">View</th>
+                                        <th width="5%">Delete</th>
                                     </tr>
                                 </thead>
                                 <tbody>

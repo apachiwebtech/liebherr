@@ -57,6 +57,7 @@ import Endcustomertabs from './Components/Pages/Master/Endcustomertabs';
 import ProductLine from './Components/Pages/Master/ProductLine';
 import Material from './Components/Pages/Master/Material';
 import Manufacturer from './Components/Pages/Master/Manufacturer';
+import { AddProduct } from './Components/Pages/Master/AddProduct';
 
 
 
@@ -303,6 +304,10 @@ const Router = createBrowserRouter([
       {
         path: "/manufacturer",
         element: <Manufacturer />,
+      },
+      {
+        path: "/addproduct",
+        element: <AddProduct />,
       },
 
 
