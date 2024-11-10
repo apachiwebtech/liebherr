@@ -1,7 +1,9 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { FaPencilAlt, FaTrash } from "react-icons/fa";
+import { FaPencilAlt, FaTrash, FaEye } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
+import { Navigate } from "react-router-dom";
+
 
 const Lhiuser = () => {
   // Step 1: Add this state to track errors
@@ -154,42 +156,183 @@ const Lhiuser = () => {
             style={{ flex: "1 1 auto", padding: "13px 28px" }}
           >
             <div className="row mp0">
-              <div className="col-6">
-                <form
-                  onSubmit={handleSubmit}
-                  style={{ width: "50%" }}
-                  className="text-left"
-                >
-                  <div className="mb-3">
-                    <label htmlFor="LhiuserInput" className="input-field">
-                      Lhi User
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="Lhiuser"
-                      id="LhiuserInput"
-                      value={formData.Lhiuser}
-                      onChange={handleChange}
-                      placeholder="Enter Lhi User "
-                    />
-                    {errors.Lhiuser && (
-                      <small className="text-danger">{errors.Lhiuser}</small>
-                    )}
-                    {duplicateError && (
-                      <small className="text-danger">{duplicateError}</small>
-                    )}{" "}
-                    {/* Show duplicate error */}
-                  </div>
-                  <div className="text-right">
-                    <button className="btn btn-liebherr" type="submit">
-                      {isEdit ? "Update" : "Submit"}
-                    </button>
-                  </div>
-                </form>
-              </div>
+              <form
+                onSubmit={handleSubmit}
 
-              <div className="col-md-6">
+                className="text-left col-md-5"
+              >
+                <div className="row ">
+
+                  <div className="col-4">
+
+
+                    <div className="mb-3">
+                      <label htmlFor="LhiuserInput" className="input-field">
+                        FullName
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="Lhiuser"
+                        id="LhiuserInput"
+                        value={formData.Lhiuser}
+                        onChange={handleChange}
+                        placeholder="Enter FullName "
+                      />
+                      {errors.Lhiuser && (
+                        <small className="text-danger">{errors.Lhiuser}</small>
+                      )}
+                      {duplicateError && (
+                        <small className="text-danger">{duplicateError}</small>
+                      )}{" "}
+                      {/* Show duplicate error */}
+                    </div>
+
+                  </div>
+                  <div className="col-4">
+                    <div className="mb-3">
+                      <label htmlFor="UserCodeInput" className="input-field">
+                        User Code
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="UserCode"
+                        id="UserCodeInput"
+                        value={formData.UserCode}
+                        onChange={handleChange}
+                        placeholder="Enter User Code"
+                      />
+                      {errors.UserCode && (
+                        <small className="text-danger">{errors.UserCode}</small>
+                      )}
+                      {duplicateError && (
+                        <small className="text-danger">{duplicateError}</small>
+                      )}{" "}
+                      {/* Show duplicate error */}
+                    </div>
+                  </div>
+
+                  <div className="col-4">
+                    <div className="mb-3">
+                      <label htmlFor="PassInput" className="input-field">
+                        Password
+                      </label>
+                      <input
+                        type="password"
+                        className="form-control"
+                        name="Password"
+                        id="PassInput"
+                        value={formData.Password}
+                        onChange={handleChange}
+                        placeholder="Enter Password "
+                      />
+                      {errors.Password && (
+                        <small className="text-danger">{errors.Password}</small>
+                      )}
+                      {duplicateError && (
+                        <small className="text-danger">{duplicateError}</small>
+                      )}{" "}
+                      {/* Show duplicate error */}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="row ">
+                  <div className="col-4">
+                    <div className="mb-3">
+                      <label htmlFor="MobileInput" className="input-field">
+                        Mobile Number
+                      </label>
+                      <input
+                        type="tel"
+                        className="form-control"
+                        name="MobileNumber"
+                        id="MobileInput"
+                        value={formData.mobile_no}
+                        onChange={handleChange}
+                        placeholder="Enter Mobile Number"
+                        pattern="[0-9]{10}"
+                        maxLength="10"
+                      />
+
+
+                      {errors.mobile_no && <small className="text-danger">{errors.mobile_no}</small>}
+                      {/* Show duplicate error */}
+                    </div>
+                  </div>
+                  <div className="col-4">
+                    <div className="mb-3">
+                      <label htmlFor="EmailInput" className="input-field">
+                        Email Address
+                      </label>
+                      <input
+                        type="email"
+                        className="form-control"
+                        name="Email"
+                        id="EmailInput"
+                        value={formData.Email}
+                        onChange={handleChange}
+                        placeholder="Enter Email Address"
+                      />
+                      {errors.Email && (
+                        <small className="text-danger">{errors.Email}</small>
+                      )}
+                      {duplicateError && (
+                        <small className="text-danger">{duplicateError}</small>
+                      )}{" "}
+                      {/* Show duplicate error */}
+                    </div>
+                  </div>
+                  <div className="col-4">
+                    <div className="mb-3">
+                      <label htmlFor="StatusInput" className="input-field">
+                        Status
+                      </label>
+                      <select
+                        className="form-select"
+                        id="StatusInput"
+                        name="status"
+                        value={formData.status}
+                        onChange={handleChange}
+                      >
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div className="row ">
+                  <div className="col-12">
+                    <div className="mb-3">
+                      <label htmlFor="RemarksInput" className="input-field">
+                        Remarks
+                      </label>
+                      <textarea
+                        className="form-control"
+                        id="RemarksInput"
+                        name="remarks"
+                        rows="2"
+                        value={formData.remarks}
+                        onChange={handleChange}
+                        placeholder="Enter remarks here"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <button className="btn btn-liebherr" type="submit">
+                    {isEdit ? "Update" : "Submit"}
+                  </button>
+                </div>
+              </form>
+
+
+
+
+
+
+              <div className="col-md-7">
                 <div className="d-flex justify-content-between align-items-center mb-3">
                   <span>
                     Show
@@ -232,13 +375,28 @@ const Lhiuser = () => {
                         #
                       </th>
                       <th style={{ padding: "12px 15px", textAlign: "center" }}>
-                        Lhi User
+                        UserCode
                       </th>
-                      <th style={{ padding: "0px 0px", textAlign: "center" }}>
+                   
+                      <th style={{ padding: "12px 15px", textAlign: "center" }}>
+                        Full Name
+                      </th>
+                  
+                      <th style={{ padding: "12px 0px", textAlign: "center" }}>
+                        Status
+                      </th>
+                      <th style={{ padding: "12px 0px", textAlign: "center" }}>
+                        Activation date
+                      </th>
+                  
+                      <th style={{ padding: "12px 0px", textAlign: "center" }}>
+                        View
+                      </th>
+                      <th style={{ padding: "12px 0px", textAlign: "center" }}>
                         Edit
                       </th>
-                      <th style={{ padding: "0px 0px", textAlign: "center" }}>
-                        Delete
+                      <th style={{ padding: "12px 0px", textAlign: "center" }}>
+                        Deactivate
                       </th>
                     </tr>
                   </thead>
@@ -248,7 +406,30 @@ const Lhiuser = () => {
                         <td style={{ padding: "2px", textAlign: "center" }}>
                           {index + 1 + indexOfFirstUser}
                         </td>
+
+                        <td style={{ padding: "10px" }}>{item.Usercode}</td>
+                    
                         <td style={{ padding: "10px" }}>{item.Lhiuser}</td>
+                     
+                        <td style={{ padding: "10px" }}>{item.status}
+                          <button className="btn">
+                            
+                          </button>
+                        </td>
+                        <td style={{ padding: "10px" }}>{item.Lhiuser}</td>
+                       
+                        <td style={{ padding: "0px", textAlign: "center" }}>  
+                          <button
+                            className='btn'
+                            onClick={() => {
+                              Navigate(`/complaintview/${item.id}`)
+                            }}
+                            title="Edit"
+                            style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                          >
+                            <FaEye />
+                          </button>
+                        </td>
                         <td style={{ padding: "0px", textAlign: "center" }}>
                           <button
                             className="btn"

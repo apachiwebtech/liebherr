@@ -262,7 +262,7 @@ const Customerlocation = () => {
 
   const deleted = async (id) => {
     try {
-      await axios.post(`${Base_Url}/deletecustomerlocation`, { id });
+      await axios.post(`${Base_Url}/deletepincode`, { id });
       setFormData({
         country_id: "",
         region_id: "",

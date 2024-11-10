@@ -153,10 +153,7 @@ const EngineerMaster = () => {
   const deleted = async (id) => {
     try {
       const response = await axios.post(`${Base_Url}/deleteengineer`, { id });
-      setFormData({
-        title: '',
-    cfranchise_id: ''
-                  })
+
         fetchUsers();
     } catch (error) {
       console.error('Error deleting user:', error);

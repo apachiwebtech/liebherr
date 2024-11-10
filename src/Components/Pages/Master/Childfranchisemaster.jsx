@@ -32,7 +32,7 @@ const Childfranchisemaster = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getchildfranchise`);
+      const response = await axios.get(`${Base_Url}/getchildFranchiseDetails`);
       console.log(response.data);
       setUsers(response.data);
       setFilteredUsers(response.data);
@@ -314,7 +314,7 @@ const Childfranchisemaster = () => {
                           {index + 1 + indexOfFirstUser}
                         </td>
                         <td style={{ padding: "10px" }}>
-                          {item.parentfranchise_title}
+                          {item.totle}
                         </td>
                         <td style={{ padding: "10px" }}>{item.title}</td>
                         <td style={{ padding: "0px", textAlign: "center" }}>
