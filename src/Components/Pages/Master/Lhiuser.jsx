@@ -1,3 +1,4 @@
+import CryptoJS from 'crypto-js';
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash, FaEye } from "react-icons/fa";
@@ -20,6 +21,8 @@ const Lhiuser = () => {
 
   const [formData, setFormData] = useState({
     Lhiuser: "",
+    usercode: "",
+    passwordmd5: "",
   });
 
   const fetchUsers = async () => {
@@ -38,8 +41,16 @@ const Lhiuser = () => {
   }, []);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    var { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+    if(name == 'Password'){
+      
+       value = CryptoJS.MD5(value).toString();
+      
+      setFormData({ ...formData, 'passwordmd5': value });
+      
+      
+    }
   };
 
   const handleSearch = (e) => {
@@ -54,71 +65,93 @@ const Lhiuser = () => {
 
   // Step 2: Add form validation function
   const validateForm = () => {
-    const newErrors = {}; // Initialize an empty error object
-    if (!formData.Lhiuser.trim()) {
-      // Check if the Lhiuser is empty
-      newErrors.Lhiuser = "Lhiuser Field is required."; // Set error message if Lhiuser is empty
+    const newErrors = {};  // Initialize the errors object
+
+    if (!formData.Lhiuser||!formData.Lhiuser.trim()) {
+      newErrors.Lhiuser = "Lhiuser Field is required.";
     }
-    return newErrors; // Return the error object
+    if (!formData.UserCode||!formData.UserCode.trim()) {
+      newErrors.UserCode = "UserCode Field is required.";
+    }
+    if (!formData.Password||!formData.Password.trim()) {
+      newErrors.Password = "Password Field is required.";
+    }
+    if (!formData.mobile_no||!formData.mobile_no.trim()) {
+      newErrors.mobile_no = "Mobile Number Field is required.";
+    }
+    if (!formData.email||!formData.email.trim()) {
+      newErrors.email = "Email Field is required.";
+    }
+
+
+
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length === 0) {
+      return true;  // If no errors, form is valid
+    } else {
+      return false;  // If there are errors, form is invalid
+    }
   };
+
 
   //handlesubmit form
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const validationErrors = validateForm();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      return;
-    }
+    if (validateForm()) {
 
-    setDuplicateError(""); // Clear duplicate error before submitting
+   
+      setDuplicateError(""); // Clear duplicate error before submitting
 
-    try {
-      const confirmSubmission = window.confirm(
-        "Do you want to submit the data?"
-      );
-      if (confirmSubmission) {
-        if (isEdit) {
-          // For update, include 'updated_by'
-          await axios
-            .put(`${Base_Url}/putlhidata`, {
-              ...formData,
-              updated_by: updatedBy,
-            })
-            .then((response) => {
-              setFormData({
-                Lhiuser: "",
+      try {
+        const confirmSubmission = window.confirm(
+          "Do you want to submit the data?"
+        );
+        if (confirmSubmission) {
+          if (isEdit) {
+            // For update, include 'updated_by'
+            await axios
+              .put(`${Base_Url}/putlhidata`, {
+                ...formData,
+                updated_by: updatedBy,
+              })
+              .then((response) => {
+                setFormData({
+                  Lhiuser: "",
+                });
+                fetchUsers();
+              })
+              .catch((error) => {
+                if (error.response && error.response.status === 409) {
+                  setDuplicateError("Duplicate entry, Lhiuser already exists!"); // Show duplicate error for update
+                }
               });
-              fetchUsers();
-            })
-            .catch((error) => {
-              if (error.response && error.response.status === 409) {
-                setDuplicateError("Duplicate entry, Lhiuser already exists!"); // Show duplicate error for update
-              }
-            });
-        } else {
-          // For insert, include 'created_by'
-          await axios
-            .post(`${Base_Url}/postlhidata`, {
-              ...formData,
-              created_by: createdBy,
-            })
-            .then((response) => {
-              setFormData({
-                Lhiuser: "",
+          } else {
+            // For insert, include 'created_by'
+            await axios
+              .post(`${Base_Url}/postlhidata`, {
+                ...formData,
+                created_by: createdBy,
+              })
+              .then((response) => {
+                setFormData({
+                  Lhiuser: "",
+                });
+                fetchUsers();
+                
+              })
+              .catch((error) => {
+                if (error.response && error.response.status === 409) {
+                  setDuplicateError("Duplicate entry, Lhiuser already exists!"); // Show duplicate error for insert
+                }
               });
-              fetchUsers();
-            })
-            .catch((error) => {
-              if (error.response && error.response.status === 409) {
-                setDuplicateError("Duplicate entry, Lhiuser already exists!"); // Show duplicate error for insert
-              }
-            });
+          }
         }
+      } catch (error) {
+        console.error("Error during form submission:", error);
       }
-    } catch (error) {
-      console.error("Error during form submission:", error);
     }
   };
 
@@ -195,7 +228,7 @@ const Lhiuser = () => {
                         User Code
                       </label>
                       <input
-                        type="text"
+                        type="number"
                         className="form-control"
                         name="UserCode"
                         id="UserCodeInput"
@@ -247,7 +280,7 @@ const Lhiuser = () => {
                       <input
                         type="tel"
                         className="form-control"
-                        name="MobileNumber"
+                        name="mobile_no"
                         id="MobileInput"
                         value={formData.mobile_no}
                         onChange={handleChange}
@@ -269,14 +302,14 @@ const Lhiuser = () => {
                       <input
                         type="email"
                         className="form-control"
-                        name="Email"
+                        name="email"
                         id="EmailInput"
                         value={formData.Email}
                         onChange={handleChange}
                         placeholder="Enter Email Address"
                       />
-                      {errors.Email && (
-                        <small className="text-danger">{errors.Email}</small>
+                      {errors.email && (
+                        <small className="text-danger">{errors.email}</small>
                       )}
                       {duplicateError && (
                         <small className="text-danger">{duplicateError}</small>
@@ -296,8 +329,9 @@ const Lhiuser = () => {
                         value={formData.status}
                         onChange={handleChange}
                       >
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
+                        <option value=''>Select Status</option>
+                        <option value="1">Active</option>
+                        <option value="0">Inactive</option>
                       </select>
                     </div>
                   </div>
@@ -377,18 +411,18 @@ const Lhiuser = () => {
                       <th style={{ padding: "12px 15px", textAlign: "center" }}>
                         UserCode
                       </th>
-                   
+
                       <th style={{ padding: "12px 15px", textAlign: "center" }}>
                         Full Name
                       </th>
-                  
+
                       <th style={{ padding: "12px 0px", textAlign: "center" }}>
                         Status
                       </th>
                       <th style={{ padding: "12px 0px", textAlign: "center" }}>
                         Activation date
                       </th>
-                  
+
                       <th style={{ padding: "12px 0px", textAlign: "center" }}>
                         View
                       </th>
@@ -408,17 +442,19 @@ const Lhiuser = () => {
                         </td>
 
                         <td style={{ padding: "10px" }}>{item.Usercode}</td>
-                    
+
                         <td style={{ padding: "10px" }}>{item.Lhiuser}</td>
-                     
-                        <td style={{ padding: "10px" }}>{item.status}
-                          <button className="btn">
-                            
-                          </button>
+
+                        <td style={{ padding: "10px" }}>
+                          <label class="switch">
+                            <input type="checkbox" data-id="'.$listdata->id.'" class="status" />
+                            <span class="slider round"></span>
+                          </label>
+
                         </td>
                         <td style={{ padding: "10px" }}>{item.Lhiuser}</td>
-                       
-                        <td style={{ padding: "0px", textAlign: "center" }}>  
+
+                        <td style={{ padding: "0px", textAlign: "center" }}>
                           <button
                             className='btn'
                             onClick={() => {

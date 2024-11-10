@@ -4617,13 +4617,24 @@ app.get("/getlhidata", async (req, res) => {
 });
 // Insert for Lhiuser
 app.post("/postlhidata", async (req, res) => {
-  const { Lhiuser } = req.body;
+  const { Lhiuser,
+    mobile_no,
+    Password,
+    UserCode,
+    email,
+    remarks,
+    status,
+
+
+   } = req.body;
+
+  
 
   try {
     const pool = await poolPromise;
 
     // Step 1: Check if the same Lhiuser exists and is not soft-deleted
-    let sql = `SELECT * FROM lhi_user WHERE Lhiuser = '${Lhiuser}' AND deleted = 0`;
+    let sql = `SELECT * FROM lhi_user WHERE  Lhiuser = '${Lhiuser}' AND deleted = 0`;
     const result = await pool.request().query(sql);
 
     if (result.recordset.length > 0) {
@@ -4642,7 +4653,7 @@ app.post("/postlhidata", async (req, res) => {
         return res.json({ message: "Soft-deleted data restored successfully!" });
       } else {
         // Step 3: Insert new entry if no duplicates found
-        sql = `INSERT INTO lhi_user (Lhiuser) VALUES ('${Lhiuser}')`;
+        sql = `INSERT INTO lhi_user (Lhiuser,password,remarks,Usercode,mobile_no,email,status) VALUES ('${Lhiuser}','${Password}','${remarks}','${UserCode}','${mobile_no}','${email}','${status}')`
         await pool.request().query(sql);
 
         return res.json({ message: "Lhiuser added successfully!" });
@@ -4718,6 +4729,8 @@ app.post("/deletelhidata", async (req, res) => {
     return res.status(500).json({ message: "Error updating Lhiuser data" });
   }
 });
+
+// status api for lhi user
 //lhi user code end
 
 // call status code start
@@ -5098,6 +5111,7 @@ app.get("/getComplaintDuplicate/:customer_mobile", async (req, res) => {
     return res.status(500).json({ error: "Error fetching complaint duplicate", details: err.message });
   }
 });
+<<<<<<< Updated upstream
 // End Complaint View
 // y end
 
@@ -5309,3 +5323,6 @@ app.post("/updateProduct", async (req, res) => {
 
 
 
+=======
+// End Complaint Vie
+>>>>>>> Stashed changes
