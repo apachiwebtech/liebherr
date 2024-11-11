@@ -164,7 +164,15 @@ const Lhiuser = () => {
     }
   };
 
+  const deleted = async (id) => {
+    try {
+      const response = await axios.post(`${Base_Url}/deletelhidata`, { id });
 
+      window.location.reload();
+    } catch (error) {
+      console.error("Error deleting user:", error);
+    }
+  };
 
   const edit = async (id) => {
     try {
@@ -436,15 +444,11 @@ const Lhiuser = () => {
                         Activation date
                       </th>
 
-                      <th style={{ padding: "12px 0px", textAlign: "center" }}>
-                        View
-                      </th>
+                      
                       <th style={{ padding: "12px 0px", textAlign: "center" }}>
                         Edit
                       </th>
-                      <th style={{ padding: "12px 0px", textAlign: "center" }}>
-                        Deactivate
-                      </th>
+                      
                     </tr>
                   </thead>
                   <tbody>
@@ -475,18 +479,7 @@ const Lhiuser = () => {
                         </td>
                         <td style={{ padding: "10px" }}>{item.Lhiuser}</td>
 
-                        <td style={{ padding: "0px", textAlign: "center" }}>
-                          <button
-                            className='btn'
-                            onClick={() => {
-                              Navigate(`/complaintview/${item.id}`)
-                            }}
-                            title="Edit"
-                            style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                          >
-                            <FaEye />
-                          </button>
-                        </td>
+                        
                         <td style={{ padding: "0px", textAlign: "center" }}>
                           <button
                             className="btn"
@@ -505,21 +498,7 @@ const Lhiuser = () => {
                             <FaPencilAlt />
                           </button>
                         </td>
-                        <td style={{ padding: "0px", textAlign: "center" }}>
-                          <button
-                            className="btn"
-                            onClick={() => (item.id)}
-                            Lhiuser="Delete"
-                            style={{
-                              backgroundColor: "transparent",
-                              border: "none",
-                              color: "red",
-                              fontSize: "20px",
-                            }}
-                          >
-                            <FaTrash />
-                          </button>
-                        </td>
+                    
                       </tr>
                     ))}
                   </tbody>
