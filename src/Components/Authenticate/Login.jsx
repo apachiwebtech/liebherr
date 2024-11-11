@@ -3,6 +3,8 @@ import { Base_Url } from "../Utils/Base_Url";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import md5 from "js-md5";
+import logo from  '../../images/Liebherr-logo-768x432.png'
+import back from '../../images/login.jpeg'
 
 export function Login() {
     const [Lhiuser, setLhiuser] = useState("");
@@ -44,7 +46,7 @@ export function Login() {
                 <div className="col-md-4">
                     <div className="pt-5 p-5 pb-0 mt-5">
                         <h1 className="h4 text-gray-900 mb-4">
-                            <img src="images/blum.png.png" style={{ width: '130px', height: '50px' }} alt="Logo" />
+                            <img src={logo} style={{ width: '130px', height: '50px' }} alt="Logo" />
                         </h1>
                     </div>
 
@@ -85,7 +87,7 @@ export function Login() {
                 </div>
                 <div className="col-md-8" style={{
                     height: "100vh",
-                    backgroundImage: "url(images/login.jpeg)",
+                    backgroundImage: `url(${back})`,
                     backgroundRepeat: 'no-repeat',
                     backgroundSize: 'cover'
                 }}>
