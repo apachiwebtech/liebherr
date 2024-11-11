@@ -68,15 +68,15 @@ header {
 
 .btn-liebherr {
     color: #222;
-    background-color: #ffd000ea;
-    border-color: #ffd000ea;
+    background-color: #2779C4;
+    border-color: #2779C4;
     text-transform: uppercase;
 }
 
 .btn-liebherr:hover {
     color: #222;
-    background-color: #ffd000ea;
-    border-color: #ffd000ea;
+    background-color: #2779C4;
+    border-color: #2779C4;
     text-transform: uppercase;
 }
 .newcomplaint {
@@ -96,12 +96,12 @@ header {
   }
 
 .breadMain {
-    background: #ffd000ea;
+    background: #2779C4;
     padding: 15px;
 }
 
 .breadcrumbc{
-    background: #ffd000ea;
+    background: #2779C4;
     margin-bottom: 15px;
     padding: 5px 15px;
     font-size: 18px;
@@ -115,7 +115,7 @@ header {
 } 
 
 .breadcrumb li.active {
-    background-color: #ffd000ea; 
+    background-color: #2779C4; 
     color:#222;
     padding:5px;
  }
@@ -183,7 +183,7 @@ h3.mainheade{
 }
 
 .bg-warntick {
-    background-color: #ffd000ea;
+    background-color: #2779C4;
     color: #222;
     padding: 5px;
     border-radius: 3px;
