@@ -1,11 +1,12 @@
-import axios from 'axios';
-import { Navigate, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
-import { FaPencilAlt, FaTrash,FaEye } from 'react-icons/fa';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
 
 export function Complaintlist(params) {
     const [Complaintdata, setComplaintdata] = useState([]);
+    const [filteredData, setFilteredData] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
     const [formData, setFormData] = useState({
         title: '',
@@ -14,25 +15,68 @@ export function Complaintlist(params) {
         email: '',
         mobile_no: '',
     });
+    const [searchFilters, setSearchFilters] = useState({
+        fromDate: '',
+        toDate: '',
+        customerName: ''
+    });
 
     const formatDate = (dateString) => {
-        const date = new Date(dateString); // Parse the date string
+        const date = new Date(dateString);
         const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
-        return date.toLocaleDateString('en-GB', options).replace(/\//g, '-'); // Convert to 'DD-MM-YYYY' format
+        return date.toLocaleDateString('en-GB', options).replace(/\//g, '-');
     };
 
     const fetchComplaintlist = async () => {
         try {
             const response = await axios.get(`${Base_Url}/getcomplainlist`);
             setComplaintdata(response.data);
+            setFilteredData(response.data); // Set filtered data initially
         } catch (error) {
             console.error('Error fetching Complaintdata:', error);
             setComplaintdata([]);
+            setFilteredData([]);
         }
     };
 
+    const fetchFilteredData = async () => {
+        try {
+            // Create query parameters
+            const params = new URLSearchParams();
+            if (searchFilters.fromDate) params.append('fromDate', searchFilters.fromDate);
+            if (searchFilters.toDate) params.append('toDate', searchFilters.toDate);
+            if (searchFilters.customerName) params.append('customerName', searchFilters.customerName);
 
-    const deleted = async (id) => {
+            const response = await axios.get(`${Base_Url}/getcomplainlist?${params}`);
+            setFilteredData(response.data);
+        } catch (error) {
+            console.error('Error fetching filtered data:', error);
+            setFilteredData([]);
+        }
+    };
+
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+        setSearchFilters(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const applyFilters = () => {
+        fetchFilteredData(); // Call API with filters
+    };
+
+    const resetFilters = () => {
+        setSearchFilters({
+            fromDate: '',
+            toDate: '',
+            customerName: ''
+        });
+        fetchComplaintlist(); // Reset to original data
+    };
+
+	 const deleted = async (id) => { 
         try {
             const response = await axios.post(`${Base_Url}/deleteengineer`, { id });
             setFormData({
@@ -55,105 +99,142 @@ export function Complaintlist(params) {
             console.error('Error editing user:', error);
         }
     };
+
     useEffect(() => {
         fetchComplaintlist();
     }, []);
 
-    const [isOpen, setIsOpen] = useState({}); // State to track which rows are expanded
-    const toggleRow = (rowId) => {
-        setIsOpen((prev) => ({ ...prev, [rowId]: !prev[rowId] }));
-    };
-
-    useEffect(() => {
-        const $ = window.$; // Access jQuery
-        $(document).ready(function () {
-            $('#myTable').DataTable();
-        });
-        return () => {
-            $('#myTable').DataTable().destroy();
-        };
-    }, []);
-
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
     return (
-        <div className="row mp0" >
+        <div className="row mp0">
             <div className="col-md-12 col-12">
                 <div className="card mb-3 tab_box">
                     <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
-                        <table  className="table">
+                        {/* Search Filters */}
+                        <div className="row mb-3">
+                            <div className="col-md-3">
+                                <div className="form-group">
+                                    <label>From Date</label>
+                                    <input
+                                        type="date"
+                                        className="form-control"
+                                        name="fromDate"
+                                        value={searchFilters.fromDate}
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
+                            <div className="col-md-3">
+                                <div className="form-group">
+                                    <label>To Date</label>
+                                    <input
+                                        type="date"
+                                        className="form-control"
+                                        name="toDate"
+                                        value={searchFilters.toDate}
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
+                            <div className="col-md-3">
+                                <div className="form-group">
+                                    <label>Customer Name</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="customerName"
+                                        value={searchFilters.customerName}
+                                        placeholder="Search by customer name"
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
+                            <div className="col-md-3">
+                                <div className="form-group" style={{ marginTop: '24px' }}>
+                                    <button
+                                        className="btn btn-primary mr-2"
+                                        onClick={applyFilters}
+                                    >
+                                        Search
+                                    </button>
+                                    <button
+                                        className="btn btn-secondary"
+                                        onClick={resetFilters}
+                                    >
+                                        Reset
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Table */}
+                        <table className="table">
                             <thead>
                                 <tr>
-                                    <th >#</th>
-                                    <th >Complaint No.</th>
-                                    <th >Complaint Date</th>
-                                    <th >Customer Name</th>
-                                    <th >Product</th>
-                                    <th >Age</th>
-                                    <th >Assigned Users</th>
-                                    <th >Status</th>
-                                    <th >Edit</th>
-                                    <th >View</th>
-                                    <th >Delete</th>
+                                    <th>#</th>
+                                    <th>Complaint No.</th>
+                                    <th>Complaint Date</th>
+                                    <th>Customer Name</th>
+                                    <th>Product</th>
+                                    <th>Age</th>
+                                    <th>Assigned Users</th>
+                                    <th>Status</th>
+                                    <th>Edit</th>
+                                    <th>View</th>
+                                    <th>Delete</th>
                                 </tr>
                             </thead>
                             <tbody>
-                            
-                                {Complaintdata.map((item, index) => {
-                                    return (
-                                        <tr key={item.id}>
-                                            <td >{index + 1}</td>
-                                            <td >{item.ticket_no}</td>
-                                            <td >{formatDate(item.ticket_date)}</td>
-                                            <td >{item.customer_name}</td>
-                                            <td >{item.ModelNumber}</td>
-                                            <td >{'0'}</td>
-                                            <td >{item.assigned_to}</td>
-                                            <td >{item.call_status}</td>
-                                            <td >
-                                                <button
-                                                    className='btn'
-                                                    onClick={() => {
-                                                        // alert(item.id)
-                                                        edit(item.id)
-                                                    }}
-                                                    title="Edit"
-                                                    style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                                                >
-                                                    <FaPencilAlt />
-                                                </button>
-                                            </td>
-                                            <td >
-                                                <button
-                                                    className='btn'
-                                                    onClick={() => {
-                                                        navigate(`/complaintview/${item.id}`)
-                                                    }}
-                                                    title="Edit"
-                                                    style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                                                >
-                                                    <FaEye />
-                                                </button>
-                                            </td>
-                                            <td style={{ padding: '0px', textAlign: 'center' }}>
-                                                <button
-                                                    className='btn'
-                                                    onClick={() => deleted(item.id)}
-                                                    title="Delete"
-                                                    style={{ backgroundColor: 'transparent', border: 'none', color: 'red', fontSize: '20px' }}
-                                                >
-                                                    <FaTrash />
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    )
-                                })}
-
+                                {filteredData.map((item, index) => (
+                                    <tr key={item.id}>
+                                        <td>{index + 1}</td>
+                                        <td>{item.ticket_no}</td>
+                                        <td>{formatDate(item.ticket_date)}</td>
+                                        <td>{item.customer_name}</td>
+                                        <td>{item.ModelNumber}</td>
+                                        <td>{'0'}</td>
+                                        <td>{item.assigned_to}</td>
+                                        <td>{item.call_status}</td>
+                                        <td>
+                                            <button
+                                                className='btn'
+                                                onClick={() => edit(item.id)}
+                                                title="Edit"
+                                                style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                                            >
+                                                <FaPencilAlt />
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <button
+                                                className='btn'
+                                                onClick={() => navigate(`/complaintview/${item.id}`)}
+                                                title="View"
+                                                style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                                            >
+                                                <FaEye />
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <button
+                                                className='btn'
+                                                onClick={() => deleted(item.id)}
+                                                title="Delete"
+                                                style={{ backgroundColor: 'transparent', border: 'none', color: 'red', fontSize: '20px' }}
+                                            >
+                                                <FaTrash />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
         </div>
-    )
+    );
 }
+
+export default Complaintlist;

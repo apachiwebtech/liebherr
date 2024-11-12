@@ -5038,22 +5038,6 @@ app.post("/deletesdata", async (req, res) => {
 });
 //serviceagent end
 
-//Start Complaint List
-app.get("/getcomplainlist", async (req, res) => {
-  try {
-    const pool = await poolPromise;
-
-    // SQL query to fetch complaint_ticket records that are not deleted and ordered by ticket_no
-    const sql = "SELECT * FROM complaint_ticket WHERE deleted = 0 ORDER BY id Desc";
-    const result = await pool.request().query(sql);
-
-    return res.json(result.recordset); // Return the result from the query
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "An error occurred while fetching the complaint list" });
-  }
-});
-// end Complaint list
 // Start Complaint View
 
 app.get("/getcomplaintview/:complaintid", async (req, res) => {
@@ -5695,3 +5679,39 @@ app.post('/updatecomplaint', async (req, res) => {
     res.status(500).json({ message: 'An error occurred during the update' });
   }
 });
+
+//Start Complaint List
+// Complaint List API with filters
+app.get("/getcomplainlist", async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    
+
+    const { fromDate, toDate, customerName } = req.query;
+
+    let sql = "SELECT * FROM complaint_ticket WHERE deleted = 0";
+    
+    // Add date range filter if both dates are provided
+    if (fromDate && toDate) {
+      sql += ` AND CAST(ticket_date AS DATE) >= CAST('${fromDate}' AS DATE) 
+               AND CAST(ticket_date AS DATE) <= CAST('${toDate}' AS DATE)`;
+    }
+    
+ 
+    if (customerName) {
+      sql += ` AND customer_name LIKE '%${customerName}%'`;
+    }
+    
+    // Add ordering
+    sql += " ORDER BY id DESC";
+
+ console.log(sql,"backend SQL Query")
+    const result = await pool.request().query(sql);
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "An error occurred while fetching the complaint list" });
+  }
+});
+// end Complaint list
