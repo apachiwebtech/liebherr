@@ -286,9 +286,11 @@ const handleSubmitTicketFormData = (e) => {
         `${Base_Url}/addcomplaintremark`,
         complaintRemarkData
       );
-      const remarkId = remarkResponse.data.insertId;
 
-      if (files.length > 0) {
+      
+      const remarkId = remarkResponse.data.remark_id;
+
+      if (files.length > 0 && remarkId > 0)  {
         const formData = new FormData();
         formData.append("ticket_no", complaintview.ticket_no);
         formData.append("remark_id", remarkId);

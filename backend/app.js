@@ -7,6 +7,7 @@ const common = require("./Routes/common");
 const multer = require("multer");
 const bodyParser = require("body-parser");
 const path = require("path");
+const fs = require("fs");
 
 app.use(cors({ origin: "*" }));
 app.use(express.json());
@@ -17,10 +18,16 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/", complaint);
 app.use("/", common);
 
+// Ensure 'uploads' folder exists
+const uploadDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "./uploads"); // Folder where images will be saved
+    cb(null, uploadDir); // Absolute path to 'uploads' folder
   },
   filename: (req, file, cb) => {
     cb(null, `${Date.now()}-${file.originalname}`);
@@ -28,7 +35,7 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
-
+//
 const dbConfig = {
   user: "sa",
   password: "8$E5r6p8%8KH#F6V",
@@ -2577,6 +2584,7 @@ app.post("/uploadcomplaintattachments", upload.array("attachment"), async (req, 
       INSERT INTO awt_complaintattachment (remark_id, ticket_no, attachment, created_by, created_date)
       VALUES (${remark_id}, '${ticket_no}', '${attachmentString}', ${created_by}, '${formattedDate}')
     `;
+    console.log("SQL Query:", sql);
 
     await pool.request().query(sql);
 
