@@ -65,6 +65,11 @@ import Uniqueproduct from './Components/Pages/Master/Uniqueproduct';
 import Childfranchisemaster from './Components/Pages/Master/Childfranchisemaster';
 import MasterFranchise from './Components/Pages/Master/MasterFranchise';
 import Engineer from './Components/Pages/Master/Engineer';
+import { Engineerlist } from './Components/Pages/Master/Engineerlist';
+
+
+
+
 
 
 
@@ -345,6 +350,11 @@ const Router = createBrowserRouter([
         path: "/engineer",
         element: <Engineer />,
       },
+      {
+        path: "/engineerlist",
+        element: <Engineerlist />
+      }
+    
 
 
     ],

@@ -79,7 +79,14 @@ function MasterFranchiseTabs() {
                     ENGINEER MASTER
                   </button>
                 </li>  </Link>  
-                {/* Add other tabs like GEO STATE, GEO CITY, AREA */}
+                <Link to={`/Engineerlist`}><li className="nav-item">
+                  <button
+                    className={`nav-link ${activeTab === '/Engineerlist' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('Engineerlist')}
+                  >
+                    ENGINEER LIST
+                  </button>
+                </li>  </Link> 
               </ul>
             </div> 
             </div>
