@@ -18,7 +18,11 @@ export function Complaintlist(params) {
     const [searchFilters, setSearchFilters] = useState({
         fromDate: '',
         toDate: '',
-        customerName: ''
+        customerName: '',
+        customerEmail: '',
+        serialNo: '',
+        productCode: '',
+        customerMobile: '',
     });
 
     const formatDate = (dateString) => {
@@ -46,6 +50,10 @@ export function Complaintlist(params) {
             if (searchFilters.fromDate) params.append('fromDate', searchFilters.fromDate);
             if (searchFilters.toDate) params.append('toDate', searchFilters.toDate);
             if (searchFilters.customerName) params.append('customerName', searchFilters.customerName);
+            if (searchFilters.customerEmail) params.append('customerEmail', searchFilters.customerEmail);
+            if (searchFilters.serialNo) params.append('serialNo', searchFilters.serialNo);
+            if (searchFilters.productCode) params.append('productCode', searchFilters.productCode);
+            if (searchFilters.customerMobile) params.append('customerMobile', searchFilters.customerMobile);
 
             const response = await axios.get(`${Base_Url}/getcomplainlist?${params}`);
             setFilteredData(response.data);
@@ -146,6 +154,64 @@ export function Complaintlist(params) {
                                         name="customerName"
                                         value={searchFilters.customerName}
                                         placeholder="Search by customer name"
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
+                            <div className="col-md-3">
+                                <div className="form-group">
+                                    <label>Customer Mobile</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="customerMobile"
+                                        value={searchFilters.customerMobile}
+                                        placeholder="Search by customer mobile"
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
+                            
+                        </div>
+
+                        {/* second row of filter */}
+
+                        <div className="row mb-3">
+                            <div className="col-md-3">
+                            <div className="form-group">
+                                    <label>Customer Email</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="customerEmail"
+                                        value={searchFilters.customerEmail}
+                                        placeholder="Search by customer email"
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
+                            <div className="col-md-3">
+                            <div className="form-group">
+                                    <label>Serial No</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="serialNo"
+                                        value={searchFilters.serialNo}
+                                        placeholder="Search by serial no"
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
+                            <div className="col-md-3">
+                                <div className="form-group">
+                                    <label>Product Code</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="productCode"
+                                        value={searchFilters.productCode}
+                                        placeholder="Search by product code"
                                         onChange={handleFilterChange}
                                     />
                                 </div>

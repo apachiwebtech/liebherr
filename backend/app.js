@@ -5687,7 +5687,7 @@ app.get("/getcomplainlist", async (req, res) => {
     const pool = await poolPromise;
     
 
-    const { fromDate, toDate, customerName } = req.query;
+    const { fromDate, toDate, customerName, customerEmail, serialNo, productCode, customerMobile } = req.query;
 
     let sql = "SELECT * FROM complaint_ticket WHERE deleted = 0";
     
@@ -5700,6 +5700,18 @@ app.get("/getcomplainlist", async (req, res) => {
  
     if (customerName) {
       sql += ` AND customer_name LIKE '%${customerName}%'`;
+    }
+    
+    if (customerEmail) {
+      sql += ` AND customer_email LIKE '%${customerEmail}%'`;
+    }
+
+    if (serialNo) {
+      sql += ` AND serial_no LIKE '%${serialNo}%'`;
+    }
+
+    if (productCode) {
+      sql += ` AND ModelNumber LIKE '%${productCode}%'`;
     }
     
     // Add ordering
