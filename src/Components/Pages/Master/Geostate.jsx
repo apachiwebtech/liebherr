@@ -34,7 +34,7 @@ const Geostate = () => {
 
   const fetchRegions = async (countryId) => {
     try {
-      const response = await axios.get(`${Base_Url}/getregion/${countryId}`); // API to fetch regions based on country_id
+      const response = await axios.get(`${Base_Url}/getregionscity/${countryId}`); // API to fetch regions based on country_id
       setRegions(response.data);
       console.log(response.data);
     } catch (error) {

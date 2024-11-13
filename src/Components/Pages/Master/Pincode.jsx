@@ -59,9 +59,9 @@ const Pincode = () => {
       setGeoStates,
       "Error fetching geo states:"
     );
-  const fetchGeoCities = (geostate_id) =>
+  const fetchGeoCities = (area_id) =>
     fetchData(
-      `${Base_Url}/getgeocities_a/${geostate_id}`,
+      `${Base_Url}/getgeocities_p/${area_id}`,
       setGeoCities,
       "Error fetching geo cities:"
     );
@@ -132,11 +132,11 @@ const Pincode = () => {
       setFormData((prev) => ({ ...prev, [name]: value }));
       if (name === "country_id") fetchRegions(value);
       if (name === "region_id") fetchGeoStates(value);
-      if (name === "geostate_id") fetchGeoCities(value);
-      if (name === "geocity_id") fetchAreas(value);
+      if (name === "geostate_id") fetchAreas(value);
+      if (name === "area_id") fetchGeoCities(value);
     }
   };
-
+  
   const handleSearch = (e) => {
     const searchValue = e.target.value.toLowerCase();
     setSearchTerm(searchValue);
@@ -196,8 +196,8 @@ const Pincode = () => {
       setFormData(response.data);
       fetchRegions(response.data.country_id);
       fetchGeoStates(response.data.region_id);
-      fetchGeoCities(response.data.geostate_id);
-      fetchAreas(response.data.geocity_id);
+      fetchGeoCities(response.data.area_id);
+      fetchAreas(response.data.geostate_id);
       setIsEdit(true);
     } catch (error) {
       console.error("Error editing pincode:", error);
@@ -247,8 +247,8 @@ const Pincode = () => {
                     {renderDropdown("country_id", countries, "Country")}
                     {renderDropdown("region_id", regions, "Region")}
                     {renderDropdown("geostate_id", geoStates, "Geo State")}
+                    {renderDropdown("area_id", areas, "District")}
                     {renderDropdown("geocity_id", geoCities, "Geo City")}
-                    {renderDropdown("area_id", areas, "Area")}
 
                     <div className="mb-3">
                       <label htmlFor="pincodeInput" className="input-field">
@@ -324,8 +324,8 @@ const Pincode = () => {
                         <th scope="col" width="12%" className='text-center'>Country</th>
                         <th scope="col" width="12%" className='text-center'>Region</th>
                         <th scope="col" width="11%" className='text-center'>Geo State</th>
+                        <th scope="col" width="12%" className='text-center'>District</th>
                         <th scope="col" width="11%" className='text-center'>Geo City</th>
-                        <th scope="col" width="12%" className='text-center'>Area</th>
                         <th scope="col" width="12%" className='text-center'>Pincode</th>
                         <th scope="col" width="15%" className='text-center'>
                           Edit
@@ -356,10 +356,10 @@ const Pincode = () => {
                               {pincode.geostate_title}
                             </td>
                             <td className="text-center">
-                              {pincode.geocity_title}
+                              {pincode.area_title}
                             </td>
                             <td className="text-center">
-                              {pincode.area_title}
+                              {pincode.geocity_title}
                             </td>
                             <td className="text-center">
                               {pincode.pincode}

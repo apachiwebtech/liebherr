@@ -22,7 +22,7 @@ function Callstatuscodetabs() {
         {`
            
            .headings {
-              background: #ffd000ea;
+              background: #2779c4;
               margin-bottom: 15px;
               padding: 10px 0px;
               font-size: 18px;

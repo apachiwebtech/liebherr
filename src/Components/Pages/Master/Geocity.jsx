@@ -8,6 +8,7 @@ const Geocity = () => {
   const [countries, setCountries] = useState([]);
   const [regions, setRegions] = useState([]); // State for regions
   const [geoStates, setGeoStates] = useState([]); // State for geoStates
+  const [districts, setdistricts] = useState([]);
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -21,6 +22,7 @@ const Geocity = () => {
     country_id: "",
     region_id: "",
     geostate_id: "",
+    district: "",
   });
 
   const fetchCountries = async () => {
@@ -51,6 +53,15 @@ const Geocity = () => {
     }
   };
 
+  const fetchdistricts= async (geostateID) => {
+    try {
+      const response = await axios.get(`${Base_Url}/getdistrictcity/${geostateID}`);
+      setdistricts(response.data);
+    } catch (error) {
+      console.error("Error fetching disctricts:", error);
+    }
+  };
+
   const fetchUsers = async () => {
     try {
       const response = await axios.get(`${Base_Url}/getgeocities`);
@@ -63,8 +74,6 @@ const Geocity = () => {
 
   useEffect(() => {
     fetchCountries();
-    fetchRegions();
-    fetchGeoStates();
     fetchUsers();
   }, []);
 
@@ -93,6 +102,7 @@ const Geocity = () => {
                 country_id: "",
                 region_id: "",
                 geostate_id: "",
+                district: "",
               });
               fetchUsers();
             })
@@ -110,6 +120,7 @@ const Geocity = () => {
                 country_id: "",
                 region_id: "",
                 geostate_id: "",
+                district: "",
               });
               fetchUsers();
             })
@@ -134,6 +145,9 @@ const Geocity = () => {
     }
     if (name === "region_id") {
       fetchGeoStates(value);
+    }
+    if (name === "geostate_id") {
+      fetchdistricts(value);
     }
   };
 
@@ -164,8 +178,13 @@ const Geocity = () => {
     if (!formData.geostate_id) {
       newErrors.geostate_id = "Geo State selection is required.";
     }
+    if (!formData.district) {
+      newErrors.district = "District selection is required.";
+    }
     return newErrors;
-  };
+    
+ 
+};
 
   const deleted = async (id) => {
     try {
@@ -175,6 +194,7 @@ const Geocity = () => {
         country_id: "",
         region_id: "",
         geostate_id: "",
+        district: "",
       });
       fetchUsers();
     } catch (error) {
@@ -186,8 +206,9 @@ const Geocity = () => {
     try {
       const response = await axios.get(`${Base_Url}/requestgeocity/${id}`);
       setFormData(response.data);
-      fetchRegions(response.data.country_id);
-      fetchGeoStates(response.data.region_id);
+      await fetchRegions(response.data.country_id);
+      await fetchGeoStates(response.data.region_id);
+      await fetchdistricts(response.data.geostate_id);
       setIsEdit(true);
     } catch (error) {
       console.error("Error editing user:", error);
@@ -291,6 +312,33 @@ const Geocity = () => {
                     )}
                   </div>
 
+                  <div className="form-group">
+                    <label
+                      htmlFor="district"
+                      className="form-label pb-0 dropdown-label"
+                    >
+                      District
+                    </label>
+                    <select
+                      className="form-select dropdown-select"
+                      name="district"
+                      value={formData.district}
+                      onChange={handleChange}
+                    >
+                      <option value="">Select District</option>
+                      {districts.map((district) => (
+                        <option key={district.id} value={district.id}>
+                          {district.title}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.district && (
+                      <small className="text-danger">
+                        {errors.district}
+                      </small>
+                    )}
+                  </div>
+
                   {/* Region Input */}
                   <div className="form-group">
                     <label htmlFor="geoStateInput" className="input-field">
@@ -363,6 +411,7 @@ const Geocity = () => {
                         <th scope="col" width="18%" className="text-center">Country</th>
                         <th scope="col" width="19%" className="text-center">Region</th>
                         <th scope="col" width="19%" className="text-center">Geo State</th>
+                        <th scope="col" width="19%" className="text-center">District</th>
                         <th scope="col" width="19%" className="text-center">Geo City</th>
                         <th scope="col" width="15%" className="text-center">Actions</th>
                       </tr>
@@ -376,6 +425,7 @@ const Geocity = () => {
                             <td className="text-center">{user.country_title}</td>
                             <td className="text-center">{user.region_title}</td>
                             <td className="text-center">{user.geostate_title}</td>
+                            <td className="text-center">{user.district_title}</td>
                             <td className="text-center">{user.title}</td>
                             <td className='text-center'>
                               <FaPencilAlt style={{ cursor: 'pointer', color: 'blue', marginRight: '10px' }} onClick={() => edit(user.id)} />

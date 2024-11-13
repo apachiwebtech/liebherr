@@ -20,7 +20,7 @@ function LocationTabs() {
         {`
            
            .headings {
-              background: #ffd000ea;
+              background: #2779c4;
               margin-bottom: 15px;
               padding: 10px 0px;
               font-size: 18px;
@@ -79,7 +79,7 @@ function LocationTabs() {
                   </button></Link>
                 </li>
                 <li className="nav-item">
-                <Link to={`/area`}><button
+                  <Link to={`/area`}><button
                     className={`nav-link ${activeTab === '/area' ? 'active' : ''}`}
                     onClick={() => setActiveTab('area')}
                   >
@@ -87,7 +87,7 @@ function LocationTabs() {
                   </button></Link>
                 </li>
                 <li className="nav-item">
-                <Link to={`/geocity`}><button
+                  <Link to={`/geocity`}><button
                     className={`nav-link ${activeTab === '/geocity' ? 'active' : ''}`}
                     onClick={() => setActiveTab('geocity')}
                   >

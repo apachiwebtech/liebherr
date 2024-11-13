@@ -296,8 +296,7 @@ app.post("/postregion", async (req, res) => {
     // Step 1: Check if the same title exists and is not soft-deleted
     const checkDuplicateSql = `
       SELECT * FROM awt_region 
-      WHERE title = '${title}' 
-        AND deleted = 0
+      WHERE title = '${title}' AND country_id = ${country_id} AND deleted = 0
     `;
     const duplicateResult = await pool.request().query(checkDuplicateSql);
 
@@ -349,8 +348,7 @@ app.put("/putregion", async (req, res) => {
     // Step 1: Check if the same title exists for another record (other than the current one) and is not soft-deleted
     const checkDuplicateSql = `
       SELECT * FROM awt_region 
-      WHERE title = '${title}' 
-        AND id != ${id} 
+      WHERE title = '${title}' AND country_id = ${country_id} AND id != ${id} 
         AND deleted = 0
     `;
     const duplicateResult = await pool.request().query(checkDuplicateSql);
@@ -395,36 +393,6 @@ app.post("/deleteregion", async (req, res) => {
 // Region End
 
 // GEO States Start
-// API to fetch  Region based on the selected country
-app.get("/getregion/:country_id", async (req, res) => {
-  const { country_id } = req.params;
-
-  try {
-    // Use the poolPromise to get the connection pool
-    const pool = await poolPromise;
-
-    // SQL query to fetch regions for the given country_id, excluding soft-deleted records
-    const sqlQuery = `
-      SELECT * FROM awt_region
-      WHERE country_id = ${country_id} 
-        AND deleted = 0
-    `;
-
-    // Execute the query
-    const result = await pool.request().query(sqlQuery);
-
-    if (result.recordset.length > 0) {
-      // Return the fetched regions
-      res.json(result.recordset);
-    } else {
-      res.status(404).json({ message: "No regions found for this country" });
-    }
-  } catch (err) {
-    console.error(err); // Log error to the console for debugging
-    res.status(500).json({ message: "Database error", error: err });
-  }
-});
-
 
 // API to fetch all Geo states that are not soft deleted
 app.get("/getgeostates", async (req, res) => {
@@ -498,7 +466,7 @@ app.post("/postgeostate", async (req, res) => {
     // Check if the same title exists and is not soft-deleted
     const checkDuplicateSql = `
       SELECT * FROM awt_geostate 
-      WHERE title = '${title}' AND deleted = 0
+      WHERE title = '${title}' AND country_id = ${country_id} AND region_id = ${region_id} AND deleted = 0
     `;
 
     // Execute the query to check for duplicates
@@ -553,7 +521,7 @@ app.put("/putgeostate", async (req, res) => {
     // Check if the same title exists for another record, excluding the current ID
     const checkDuplicateSql = `
       SELECT * FROM awt_geostate 
-      WHERE title = '${title}' AND id != ${id} AND deleted = 0
+      WHERE title = '${title}' AND country_id = ${country_id} AND region_id = ${region_id} AND id != ${id} AND deleted = 0
     `;
 
     const duplicateResult = await pool.request().query(checkDuplicateSql);
@@ -664,6 +632,33 @@ app.get("/getgeostatescity/:region_id", async (req, res) => {
 });
 
 
+app.get("/getdistrictcity/:geostateID", async (req, res) => {
+  const { geostateID } = req.params;
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    
+    const sql = `
+      SELECT * FROM awt_district 
+      WHERE geostate_id = ${geostateID} 
+      AND deleted = 0
+    `;
+
+    // Execute the query
+    const result = await pool.request().query(sql);
+
+    // Return the fetched geostates
+    return res.json(result.recordset);
+
+  } catch (err) {
+    console.error(err); // Log error for debugging
+    return res.status(500).json({ message: "Database error", error: err });
+  }
+});
+
+
 // API to fetch all cities (joining countries, regions, and geostates)
 app.get("/getgeocities", async (req, res) => {
   try {
@@ -672,11 +667,12 @@ app.get("/getgeocities", async (req, res) => {
 
     // SQL query to fetch geocities with related country, region, and geostate titles
     const sql = `
-      SELECT gc.*, c.title AS country_title, r.title AS region_title, gs.title AS geostate_title
+      SELECT gc.*, c.title AS country_title, r.title AS region_title, gs.title AS geostate_title, d.title AS district_title
       FROM awt_geocity gc
       JOIN awt_country c ON gc.country_id = c.id
       JOIN awt_region r ON gc.region_id = r.id
       JOIN awt_geostate gs ON gc.geostate_id = gs.id
+      JOIN awt_district d ON gc.district = d.id
       WHERE gc.deleted = 0
     `;
 
@@ -687,10 +683,11 @@ app.get("/getgeocities", async (req, res) => {
     return res.json(result.recordset);
 
   } catch (err) {
-    console.error(err); // Log error for debugging
-    return res.status(500).json({ message: "Database error", error: err });
+    console.error("Database error:", err); // Log error for debugging
+    return res.status(500).json({ message: "Database error", error: err.message });
   }
 });
+
 
 
 // API to fetch a specific GEO city by ID
@@ -722,14 +719,14 @@ app.get("/requestgeocity/:id", async (req, res) => {
 
 // Insert new geocity with duplicate check
 app.post("/postgeocity", async (req, res) => {
-  const { title, country_id, region_id, geostate_id } = req.body;
+  const { title, country_id, region_id, geostate_id,district } = req.body;
 
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
 
     // SQL query to check for duplicate entries
-    const checkDuplicateSql = `SELECT * FROM awt_geocity WHERE title = '${title}' AND geostate_id ='${geostate_id}' AND deleted = 0`;
+    const checkDuplicateSql = `SELECT * FROM awt_geocity WHERE title = '${title}' AND country_id = ${country_id} AND region_id = ${region_id} AND geostate_id =${geostate_id} AND district =${district} AND deleted = 0`;
     const duplicateResult = await pool.request().query(checkDuplicateSql);
 
     if (duplicateResult.recordset.length > 0) {
@@ -746,7 +743,7 @@ app.post("/postgeocity", async (req, res) => {
         return res.json({ message: "Soft-deleted City restored successfully!" });
       } else {
         // SQL query to insert a new city if no duplicates are found
-        const insertSql = `INSERT INTO awt_geocity (title, country_id, region_id, geostate_id) VALUES ('${title}', ${country_id}, ${region_id}, ${geostate_id})`;
+        const insertSql = `INSERT INTO awt_geocity (title, country_id, region_id, geostate_id, district) VALUES ('${title}', ${country_id}, ${region_id}, ${geostate_id}, ${district})`;
         await pool.request().query(insertSql);
         return res.json({ message: "City added successfully!" });
       }
@@ -767,7 +764,7 @@ app.put("/putgeocity", async (req, res) => {
     const pool = await poolPromise;
 
     // SQL query to check for duplicates (excluding the current record's id)
-    const checkDuplicateSql = `SELECT * FROM awt_geocity WHERE title = '${title}' AND geostate_id ='${geostate_id}' AND id != ${id} AND deleted = 0`;
+    const checkDuplicateSql = `SELECT * FROM awt_geocity WHERE title = '${title}' AND country_id = ${country_id} AND region_id = ${region_id} AND geostate_id =${geostate_id} AND id != ${id} AND deleted = 0`;
     const duplicateResult = await pool.request().query(checkDuplicateSql);
 
     if (duplicateResult.recordset.length > 0) {
@@ -900,13 +897,12 @@ app.get("/getareas", async (req, res) => {
     const pool = await poolPromise;
 
     const sql = `
-      SELECT a.*, c.title as country_title, r.title as region_title, gs.title as geostate_title, gc.title as geocity_title
-      FROM awt_area a
-      JOIN awt_country c ON a.country_id = c.id
-      JOIN awt_region r ON a.region_id = r.id
-      JOIN awt_geostate gs ON a.geostate_id = gs.id
-      JOIN awt_geocity gc ON a.geocity_id = gc.id
-      WHERE a.deleted = 0
+          SELECT a.*, c.title as country_title, r.title as region_title, gs.title as geostate_title
+            FROM awt_district a
+            JOIN awt_country c ON a.country_id = c.id
+            JOIN awt_region r ON a.region_id = r.id
+            JOIN awt_geostate gs ON a.geostate_id = gs.id
+            WHERE a.deleted = 0
     `;
 
     const result = await pool.request().query(sql);
@@ -935,13 +931,12 @@ app.get("/requestarea/:id", async (req, res) => {
       SELECT a.*,   
              c.title AS country_title, 
              r.title AS region_title, 
-             gs.title AS geostate_title, 
-             gc.title AS geocity_title
-      FROM awt_area a
+             gs.title AS geostate_title
+      FROM awt_district  a
       JOIN awt_country c ON a.country_id = c.id
       JOIN awt_region r ON a.region_id = r.id
       JOIN awt_geostate gs ON a.geostate_id = gs.id
-      JOIN awt_geocity gc ON a.geocity_id = gc.id
+
       WHERE a.id = @areaId AND a.deleted = 0
     `;
 
@@ -970,7 +965,7 @@ app.get("/requestarea/:id", async (req, res) => {
 
 // Insert new area with duplicate check
 app.post("/postarea", async (req, res) => {
-  const { title, country_id, region_id, geostate_id, geocity_id } = req.body;
+  const { title, country_id, region_id, geostate_id } = req.body;
 
   try {
     // Use the poolPromise to get the connection pool
@@ -978,7 +973,7 @@ app.post("/postarea", async (req, res) => {
 
     // Check if the area already exists
     const checkDuplicateSql = `
-      SELECT * FROM awt_area WHERE title = '${title}' AND geocity_id = '${geocity_id}' AND deleted = 0
+      SELECT * FROM awt_district WHERE title = '${title}' AND country_id = '${country_id}' AND region_id = '${region_id}' AND geostate_id = '${geostate_id}' AND deleted = 0
     `;
     const checkResult = await pool.request().query(checkDuplicateSql);
 
@@ -988,12 +983,12 @@ app.post("/postarea", async (req, res) => {
 
     // Insert the new area
     const insertSql = `
-      INSERT INTO awt_area (title, country_id, region_id, geostate_id, geocity_id)
-      VALUES ('${title}', ${country_id}, ${region_id}, ${geostate_id}, ${geocity_id})
+      INSERT INTO awt_district (title, country_id, region_id, geostate_id)
+      VALUES ('${title}', ${country_id}, ${region_id}, ${geostate_id})
     `;
     const insertResult = await pool.request().query(insertSql);
 
-    return res.json({ message: "Area added successfully!" });
+    return res.json({ message: "District added successfully!" });
   } catch (err) {
     console.error(err);
     return res.status(500).json(err);
@@ -1002,7 +997,7 @@ app.post("/postarea", async (req, res) => {
 
 // Update existing area with duplicate check
 app.put("/putarea", async (req, res) => {
-  const { title, id, country_id, region_id, geostate_id, geocity_id } = req.body;
+  const { title, id, country_id, region_id, geostate_id } = req.body;
 
   try {
     // Use the poolPromise to get the connection pool
@@ -1010,21 +1005,23 @@ app.put("/putarea", async (req, res) => {
 
     // Check if the area already exists
     const checkDuplicateSql = `
-      SELECT * FROM awt_area WHERE title = '${title}' AND geocity_id = '${geocity_id}' AND id != ${id} AND deleted = 0
+      SELECT * FROM awt_district WHERE title = '${title}' AND country_id = '${country_id}' AND region_id = '${region_id}' AND geostate_id = '${geostate_id}' AND id != ${id} AND deleted = 0
     `;
-    const checkResult = await pool.request().query(checkDuplicateSql);
 
+    const checkResult = await pool.request().query(checkDuplicateSql);
+    
     if (checkResult.recordset.length > 0) {
       return res.status(409).json({ message: "Duplicate entry, Area already exists!" });
     }
-
+    
     // Update the area
     const updateSql = `
-      UPDATE awt_area 
-      SET title = '${title}', country_id = ${country_id}, region_id = ${region_id}, 
-          geostate_id = ${geostate_id}, geocity_id = ${geocity_id}
-      WHERE id = ${id}
+    UPDATE awt_district 
+    SET title = '${title}', country_id = ${country_id}, region_id = ${region_id}, 
+    geostate_id = ${geostate_id}
+    WHERE id = ${id}
     `;
+    console.log(updateSql,"Update query")
     const updateResult = await pool.request().query(updateSql);
 
     return res.json({ message: "Area updated successfully!" });
@@ -1044,7 +1041,7 @@ app.post("/deletearea", async (req, res) => {
 
     // Update the area to be deleted
     const sql = `
-      UPDATE awt_area SET deleted = 1 WHERE id = ${id}
+      UPDATE awt_district SET deleted = 1 WHERE id = ${id}
     `;
     const result = await pool.request().query(sql);
 
@@ -1099,15 +1096,15 @@ app.get("/getgeostatespincode/:region_id", async (req, res) => {
 
 
 // API to fetch geocities based on selected geostate (for the geocity dropdown)
-app.get("/getgeocities_a/:geostate_id", async (req, res) => {
-  const { geostate_id } = req.params;
+app.get("/getgeocities_p/:area_id", async (req, res) => {
+  const { area_id } = req.params;
 
   try {
     // Access the connection pool using poolPromise
     const pool = await poolPromise;
 
     // Direct SQL query without parameter binding
-    const sql = `SELECT * FROM awt_geocity WHERE geostate_id = ${geostate_id} AND deleted = 0`;
+    const sql = `SELECT * FROM awt_geocity WHERE district = ${area_id} AND deleted = 0` ;
     const result = await pool.request().query(sql);
 
     return res.json(result.recordset); // Return only the recordset data
@@ -1119,15 +1116,15 @@ app.get("/getgeocities_a/:geostate_id", async (req, res) => {
 
 
 // API to fetch areas based on selected geocity (for the area dropdown)
-app.get("/getareas/:geocity_id", async (req, res) => {
-  const { geocity_id } = req.params;
+app.get("/getareas/:geostate_id", async (req, res) => {
+  const { geostate_id } = req.params;
 
   try {
     // Access the connection pool using poolPromise
     const pool = await poolPromise;
 
     // Direct SQL query without parameter binding
-    const sql = `SELECT * FROM awt_area WHERE geocity_id = ${geocity_id} AND deleted = 0`;
+    const sql = `SELECT * FROM awt_district WHERE geostate_id = ${geostate_id} AND deleted = 0`;
     const result = await pool.request().query(sql);
 
     return res.json(result.recordset); // Return only the recordset data
@@ -1156,7 +1153,7 @@ app.get("/getpincodes", async (req, res) => {
       JOIN awt_region r ON p.region_id = r.id
       JOIN awt_geostate gs ON p.geostate_id = gs.id
       JOIN awt_geocity gc ON p.geocity_id = gc.id
-      JOIN awt_area a ON p.area_id = a.id
+      JOIN awt_district a ON p.area_id = a.id
       WHERE p.deleted = 0
     `;
 
@@ -1182,18 +1179,18 @@ app.get("/requestpincode/:id", async (req, res) => {
     // Direct SQL query without parameter binding
     const sql = `
       SELECT p.*, 
-             c.title AS country_title, 
-             r.title AS region_title, 
-             gs.title AS geostate_title, 
-             gc.title AS geocity_title,
-             a.title AS area_title
-      FROM awt_pincode p
-      INNER JOIN awt_country c ON p.country_id = c.id
-      INNER JOIN awt_region r ON p.region_id = r.id
-      INNER JOIN awt_geostate gs ON p.geostate_id = gs.id
-      INNER JOIN awt_geocity gc ON p.geocity_id = gc.id
-      INNER JOIN awt_area a ON p.area_id = a.id
-      WHERE p.id = ${id} AND p.deleted = 0
+                  c.title AS country_title, 
+                  r.title AS region_title, 
+                  gs.title AS geostate_title, 
+                  gc.title AS geocity_title,
+                  a.title AS area_title
+            FROM awt_pincode p
+            INNER JOIN awt_country c ON p.country_id = c.id
+            INNER JOIN awt_region r ON p.region_id = r.id
+            INNER JOIN awt_geostate gs ON p.geostate_id = gs.id
+            INNER JOIN awt_geocity gc ON p.geocity_id = gc.id
+            INNER JOIN awt_district a ON p.area_id = a.id
+            WHERE p.id = 202 AND p.deleted = 0
     `;
 
     // Execute the query and get the result

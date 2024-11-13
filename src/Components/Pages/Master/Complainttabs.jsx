@@ -32,7 +32,7 @@ function Complainttabs() {
         {`
            
            .headings {
-              background: #ffd000ea;
+              background: #2779c4;
               margin-bottom: 15px;
               padding: 10px 0px;
               font-size: 18px;
@@ -57,7 +57,7 @@ function Complainttabs() {
       <div className="container-fluid p-0">
         {/* Top Header */}
         <div className="text-left headings">
-          <span style={{paddingLeft:"20px"}}>Complain code, Reason code & Action code</span>
+          <span style={{paddingLeft:"20px"}}>Code</span>
         </div>
 
         {/* Nav Tabs */}

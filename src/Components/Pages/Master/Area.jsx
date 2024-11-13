@@ -8,7 +8,7 @@ const Area = () => {
   const [countries, setCountries] = useState([]);
   const [regions, setRegions] = useState([]);
   const [geoStates, setGeoStates] = useState([]);
-  const [geoCities, setGeoCities] = useState([]);
+  // const [geoCities, setGeoCities] = useState([]);
   const [areas, setAreas] = useState([]);
   const [errors, setErrors] = useState({});
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -23,8 +23,7 @@ const Area = () => {
     country_id: "",
     region_id: "",
     geostate_id: "",
-    geocity_id: "",
-    area_id: "",
+    // geocity_id: "",
   });
 
   const fetchCountries = async () => {
@@ -38,7 +37,7 @@ const Area = () => {
 
   const fetchRegions = async (countryId) => {
     try {
-      const response = await axios.get(`${Base_Url}/getregions/${countryId}`);
+      const response = await axios.get(`${Base_Url}/getregionscity/${countryId}`);
       setRegions(response.data);
     } catch (error) {
       console.error("Error fetching regions:", error);
@@ -47,24 +46,24 @@ const Area = () => {
 
   const fetchGeoStates = async (regionId) => {
     try {
-      const response = await axios.get(`${Base_Url}/getgeostates/${regionId}`);
+      const response = await axios.get(`${Base_Url}/getgeostatescity/${regionId}`);
       setGeoStates(response.data);
     } catch (error) {
       console.error("Error fetching geo states:", error);
     }
   };
 
-  const fetchGeoCities = async (geostate_id) => {
-    try {
-      const response = await axios.get(
-        `${Base_Url}/getgeocities_a/${geostate_id}`
-      );
-      console.log("Geo Cities:", response.data);
-      setGeoCities(response.data);
-    } catch (error) {
-      console.error("Error fetching geo cities:", error);
-    }
-  };
+  // const fetchGeoCities = async (geostate_id) => {
+  //   try {
+  //     const response = await axios.get(
+  //       `${Base_Url}/getgeocities_a/${geostate_id}`
+  //     );
+  //     console.log("Geo Cities:", response.data);
+  //     setGeoCities(response.data);
+  //   } catch (error) {
+  //     console.error("Error fetching geo cities:", error);
+  //   }
+  // };
 
   const fetchAreas = async () => {
     try {
@@ -83,12 +82,14 @@ const Area = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
 
+    
     setDuplicateError("");
 
     try {
@@ -105,8 +106,8 @@ const Area = () => {
                 country_id: "",
                 region_id: "",
                 geostate_id: "",
-                geocity_id: "",
-                area_id: "",
+                // geocity_id: "",
+             
               });
               fetchAreas();
             })
@@ -124,8 +125,8 @@ const Area = () => {
                 country_id: "",
                 region_id: "",
                 geostate_id: "",
-                geocity_id: "",
-                area_id: "",
+                // geocity_id: "",
+   
               });
               fetchAreas();
             })
@@ -151,9 +152,9 @@ const Area = () => {
     if (name === "region_id") {
       fetchGeoStates(value);
     }
-    if (name === "geostate_id") {
-      fetchGeoCities(value); // Fetch Geo Cities when Geo State is selected
-    }
+    // if (name === "geostate_id") {
+    //   fetchGeoCities(value); // Fetch Geo Cities when Geo State is selected
+    // }
   };
 
   const handleSearch = (e) => {
@@ -184,10 +185,7 @@ const Area = () => {
     if (!formData.geostate_id) {
       newErrors.geostate_id = "Geo State selection is required.";
     }
-    if (!formData.geocity_id) {
-      // Validate Geo City
-      newErrors.geocity_id = "Geo City selection is required.";
-    }
+
     return newErrors;
   };
 
@@ -200,7 +198,6 @@ const Area = () => {
         region_id: "",
         geostate_id: "",
         geocity_id: "",
-        area_id: "",
       });
       fetchAreas();
     } catch (error) {
@@ -215,7 +212,7 @@ const Area = () => {
       setFormData(response.data);
       fetchRegions(response.data.country_id);
       fetchGeoStates(response.data.region_id);
-      fetchGeoCities(response.data.geostate_id);
+      // fetchGeoCities(response.data.geostate_id);
       setIsEdit(true);
     } catch (error) {
       console.error("Error editing area:", error);
@@ -320,7 +317,7 @@ const Area = () => {
                     </div>
 
                     {/* Geo City Dropdown */}
-                    <div className="form-group">
+                    {/* <div className="form-group">
                       <label
                         htmlFor="geocity_id"
                         className="form-label pb-0 dropdown-label"
@@ -343,12 +340,12 @@ const Area = () => {
                       {errors.geocity_id && (
                         <small className="text-danger">{errors.geocity_id}</small>
                       )}
-                    </div>
+                    </div> */}
 
                     {/* Title Input */}
                     <div className="form-group">
                       <label htmlFor="areaInput" className="input-field">
-                        Area
+                        District
                       </label>
                       <input
                         type="text"
@@ -357,7 +354,7 @@ const Area = () => {
                         id="areaInput"
                         value={formData.title}
                         onChange={handleChange}
-                        placeholder="Enter Area"
+                        placeholder="Enter District"
                       />
                       {errors.title && (
                         <small className="text-danger">{errors.title}</small>
@@ -417,8 +414,7 @@ const Area = () => {
                         <th scope="col" width="14%" className='text-center'>Country</th>
                         <th scope="col" width="14%" className='text-center'>Region</th>
                         <th scope="col" width="14%" className='text-center'>Geo State</th>
-                        <th scope="col" width="14%" className='text-center'>Geo City</th>
-                        <th scope="col" width="14%" className='text-center'>Area</th>
+                        <th scope="col" width="14%" className='text-center'>District</th>
                         <th scope="col" width="15%" className='text-center'>Edit</th>
                         <th scope="col" width="15%" className='text-center'>Delete</th>
                       </tr>
@@ -432,7 +428,6 @@ const Area = () => {
                             <td className='text-center'>{area.country_title}</td>
                             <td className='text-center'>{area.region_title}</td>
                             <td className='text-center'>{area.geostate_title}</td>
-                            <td className='text-center'>{area.geocity_title}</td>
                             <td className='text-center'>{area.title}</td>
                             <td className='text-center'>
                               <FaPencilAlt style={{ cursor: 'pointer', color: 'blue' }} onClick={() => edit(area.id)} />
