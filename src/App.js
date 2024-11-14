@@ -66,6 +66,10 @@ import Childfranchisemaster from './Components/Pages/Master/Childfranchisemaster
 import MasterFranchise from './Components/Pages/Master/MasterFranchise';
 import Engineer from './Components/Pages/Master/Engineer';
 import { Engineerlist } from './Components/Pages/Master/Engineerlist';
+import Complaintreporttabs from './Components/Pages/Reports/Complaintreporttabs';
+import { Complaintreport } from './Components/Pages/Reports/Complaintreport';
+import Claimreporttabs from './Components/Pages/Reports/Claimreporttabs';
+import { Claimreport } from './Components/Pages/Reports/Claimreport';
 
 
 
@@ -353,7 +357,23 @@ const Router = createBrowserRouter([
       {
         path: "/engineerlist",
         element: <Engineerlist />
-      }
+      },
+      {
+        path: "/complaintreporttabs",
+        element: <Complaintreporttabs />
+      },
+      {
+        path: "/complaintreport",
+        element: <Complaintreport/>
+      },
+      {
+        path: "/claimreporttabs",
+        element: <Claimreporttabs />
+      },
+      {
+        path: "/claimreport",
+        element: <Claimreport/>
+      },
     
 
 

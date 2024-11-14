@@ -57,38 +57,39 @@ function Endcustomertabs() {
             <div className="col-sm-6 p-0" style={{ width: '100%' }}>
             <div className="tabsMenu" style={{fontSize:"14px", marginLeft: "12px",fontWeight:"600",fontFamily:"Nunito"}}>
               <ul className="nav nav-tabs ">
-              <Link to={`/Customerlist`}><li className="nav-item">
-                    <button
-                      className={`nav-link ${activeTab === '/Customerlist' ? 'active' : ''}`}
-                      onClick={() => setActiveTab('Customerlist')}
-                    >
-                    CUSTOMER LIST
-                    </button>
-                  </li></Link>
+             
                   <Link to={`/Customer`}><li className="nav-item">
                   <button
-                    className={`nav-link ${activeTab === '/Customer' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('Customer')}
+                    className={`nav-link ${activeTab === '/Customer' ? 'active' : 'onClick={() => setActiveTab("Customer")}'}`}
+                    
                   >
                     CUSTOMER
                   </button>
                 </li></Link>
-                <Link to={`/Customerlocation`}><li className="nav-item">
+                <Link to={`/Customerlist`}><li className="nav-item">
+                    <button
+                      className={`nav-link ${activeTab === '/Customerlist' ? 'active' : 'onClick={() => setActiveTab("Customerlist")}'}`}
+                      
+                    >
+                    CUSTOMER LIST
+                    </button>
+                  </li></Link>
+                {/* <Link to={`/Customerlocation`}><li className="nav-item">
                   <button
-                    className={`nav-link ${activeTab === '/Customerlocation' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('Customerlocation')}
+                    className={`nav-link ${activeTab === '/Customerlocation' ? 'active' : 'onClick={() => setActiveTab("Customerlocation")}'}`}
+                    
                   >
                     CUSTOMER LOCATION MASTER
                   </button>
                 </li></Link>
                 <Link to={`/Uniqueproduct`}><li className="nav-item">
                   <button
-                    className={`nav-link ${activeTab === '/Uniqueproduct' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('Uniqueproduct')}
+                    className={`nav-link ${activeTab === '/Uniqueproduct' ? 'active' : 'onClick={() => setActiveTab("Uniqueproduct")}'}`}
+                    
                   >
                     UNIQUE PRODUCT MASTER LINKED TO LOCATION
                   </button>
-                </li></Link>
+                </li></Link> */}
                 
               </ul>
             </div> 

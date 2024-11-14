@@ -56,48 +56,48 @@ function LocationTabs() {
               <ul className="nav nav-tabs ">
                 <li className="nav-item">
                 <Link to={`/location`}><button
-                    className={`nav-link ${activeTab === '/location' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('location')}
+                    className={`nav-link ${activeTab === '/location' ? 'active' : ' onClick={() => setActiveTab("location")}'}`}
+                   
                   >
                     COUNTRY
                   </button></Link>
                 </li>
                 <li className="nav-item">
                 <Link to={`/regions`}> <button
-                    className={`nav-link ${activeTab === '/regions' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('regions')}
+                    className={`nav-link ${activeTab === '/regions' ? 'active' : ' onClick={() => setActiveTab("regions")}'}`}
+                  
                   >
                     REGION
                   </button></Link>
                 </li>
                 <li className="nav-item">
                 <Link to={`/geostate`}> <button
-                    className={`nav-link ${activeTab === '/geostate' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('geostate')}
+                    className={`nav-link ${activeTab === '/geostate' ? 'active' : ' onClick={() => setActiveTab("geostate")}'}`}
+                   
                   >
                     GEO STATE
                   </button></Link>
                 </li>
                 <li className="nav-item">
                   <Link to={`/area`}><button
-                    className={`nav-link ${activeTab === '/area' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('area')}
+                    className={`nav-link ${activeTab === '/area' ? 'active' : 'onClick={() => setActiveTab("area")}'}`}
+                    
                   >
                     DISTRICT 
                   </button></Link>
                 </li>
                 <li className="nav-item">
                   <Link to={`/geocity`}><button
-                    className={`nav-link ${activeTab === '/geocity' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('geocity')}
+                    className={`nav-link ${activeTab === '/geocity' ? 'active' : ' onClick={() => setActiveTab("geocity")}'}`}
+                   
                   >
                     GEO CITY
                   </button></Link>
                 </li>
                 <li className="nav-item">
                 <Link to={`/pincode`}><button
-                    className={`nav-link ${activeTab === '/pincode' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('pincode')}
+                    className={`nav-link ${activeTab === '/pincode' ? 'active' : ' onClick={() => setActiveTab("pincode")}'}`}
+                   
                   >
                     PINCODE
                   </button></Link>

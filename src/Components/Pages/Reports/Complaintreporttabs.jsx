@@ -1,18 +1,18 @@
 import React, { useState } from "react";
 
 import "bootstrap/dist/css/bootstrap.min.css";
-import Ratecard from "./Ratecard";
+import {Complaintreport} from "./Complaintreport";
 
-function Ratecardtabs() {
-  const [activeTab, setActiveTab] = useState("Ratecard");
+function Complaintreporttabs() {
+  const [activeTab, setActiveTab] = useState("Complaintreport");
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case "Ratecard":
-        return <Ratecard />;
+      case "Complaintreport":
+        return <Complaintreport />;
 
       default:
-        return <Ratecard />;
+        return <Complaintreport />;
     }
   };
 
@@ -47,7 +47,7 @@ function Ratecardtabs() {
       <div className="container-fluid p-0">
         {/* Top Header */}
         <div className="text-left headings">
-          <span style={{ paddingLeft: "20px" }}>RATE CARD MATRIX MASTER </span>
+          <span style={{ paddingLeft: "20px" }}>COMPLAINT REPORT  </span>
         </div>
 
         {/* Nav Tabs */}
@@ -67,11 +67,11 @@ function Ratecardtabs() {
                   <li className="nav-item">
                     <button
                       className={`nav-link ${
-                        activeTab === "Ratecard" ? "active" : "onClick={() => setActiveTab('Ratecard')}"
+                        activeTab === "Complaintreport" ? "active" : " onClick={() => setActiveTab('Complaintreport')}"
                       }`}
-                      
+                     
                     >
-                      RATE CARD MATRIX
+                      COMPLAINT REPORT
                     </button>
                   </li>
                 </ul>
@@ -92,4 +92,4 @@ function Ratecardtabs() {
   );
 }
 
-export default Ratecardtabs;
+export default Complaintreporttabs;

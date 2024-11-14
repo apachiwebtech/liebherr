@@ -67,9 +67,9 @@ function Serviceagenttabs() {
                   <li className="nav-item">
                     <button
                       className={`nav-link ${
-                        activeTab === "Serviceagent" ? "active" : ""
+                        activeTab === "Serviceagent" ? "active" : "onClick={() => setActiveTab('Serviceagent')}"
                       }`}
-                      onClick={() => setActiveTab("Serviceagent")}
+                      
                     >
                       SERVICE AGENT
                     </button>

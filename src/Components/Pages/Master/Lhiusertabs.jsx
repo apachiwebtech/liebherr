@@ -67,9 +67,9 @@ function Lhiusertabs() {
                   <li className="nav-item">
                     <button
                       className={`nav-link ${
-                        activeTab === "Lhiuser" ? "active" : ""
+                        activeTab === "Lhiuser" ? "active" : "onClick={() => setActiveTab('Lhiuser')}"
                       }`}
-                      onClick={() => setActiveTab("Lhiuser")}
+                      
                     >
                       LHI USER
                     </button>

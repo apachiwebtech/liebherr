@@ -57,32 +57,32 @@ function MasterFranchiseTabs() {
               <ul className="nav nav-tabs ">
               <Link to={`/MasterFranchise`}><li className="nav-item">
                   <button
-                    className={`nav-link ${activeTab === '/MasterFranchise' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('MasterFranchise')}
+                    className={`nav-link ${activeTab === '/MasterFranchise' ? 'active' : ' onClick={() => setActiveTab("MasterFranchise")}'}`}
+                   
                   >
                    FRANCHISE MASTER
                   </button>
                 </li></Link>
                 <Link to={`/Childfranchisemaster`}><li className="nav-item">
                   <button
-                    className={`nav-link ${activeTab === '/Childfranchisemaster' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('Childfranchisemaster')}
+                    className={`nav-link ${activeTab === '/Childfranchisemaster' ? 'active' : 'onClick={() => setActiveTab("Childfranchisemaster")}'}`}
+                    
                   >
                    CHILD FRANCHISE MASTER
                   </button>
                 </li></Link>
                 <Link to={`/EngineerMaster`}><li className="nav-item">
                   <button
-                    className={`nav-link ${activeTab === '/EngineerMaster' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('EngineerMaster')}
+                    className={`nav-link ${activeTab === '/EngineerMaster' ? 'active' : 'onClick={() => setActiveTab("EngineerMaster")}'}`}
+                    
                   >
                     ENGINEER MASTER
                   </button>
                 </li>  </Link>  
                 <Link to={`/Engineerlist`}><li className="nav-item">
                   <button
-                    className={`nav-link ${activeTab === '/Engineerlist' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('Engineerlist')}
+                    className={`nav-link ${activeTab === '/Engineerlist' ? 'active' : 'onClick={() => setActiveTab("Engineerlist")}'}`}
+                    
                   >
                     ENGINEER LIST
                   </button>

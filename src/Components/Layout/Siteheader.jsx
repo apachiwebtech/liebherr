@@ -16,14 +16,14 @@ export function Siteheader(params) {
           <ul className="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0 ml-5">
 
             <li>
-              <Link className="nav-link   px-2 link-secondary activeM" to="/" >Dashboard </Link></li>
+              <Link className="nav-link   px-2 link-secondary site" to="/" >Dashboard </Link></li>
 
             <li className="nav-item dropdown">
-              <Link className="nav-link dropdown-toggle activeM " to="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <Link className="nav-link dropdown-toggle site " to="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 Master</Link>
                
 
-              <ul className="dropdown-menu activeM" aria-labelledby="navbarDropdown">
+              <ul className="dropdown-menu site" aria-labelledby="navbarDropdown">
                 <li >
                   <Link className="dropdown-item" to="/location">Location</Link></li>
                 <li>
@@ -53,16 +53,15 @@ export function Siteheader(params) {
               </ul>
             </li>
             <li className="nav-item dropdown">
-              <Link to={`/complaintlist`} className="nav-link  activeM" href="#" id="navbarDropdown" role="button"  aria-expanded="false" >
+              <Link to={`/complaintlist`} className="nav-link  site" href="#" id="navbarDropdown" role="button"  aria-expanded="false" >
                 Complaints
               </Link>
            
             </li>
             <li className="nav-item dropdown">
-              <a className="nav-link dropdown-toggle activeM" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Reports
-              </a>
-              <ul className="dropdown-menu activeM" aria-labelledby="navbarDropdown">
+              <Link className="nav-link dropdown-toggle site " to="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Reports</Link>
+              <ul className="dropdown-menu site" aria-labelledby="navbarDropdown">
                 <li>
                   <Link className="dropdown-item" to="#">Complaint Report</Link></li>
                 <li>

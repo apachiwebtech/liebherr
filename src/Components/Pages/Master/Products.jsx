@@ -12,6 +12,7 @@ export function Products(params) {
         serial_no: '',
         item_code: '',
         item_description: '',
+        product_model: '',
         // itemCode: '',
         productType: '',
         productLineCode: '',
@@ -46,6 +47,7 @@ export function Products(params) {
                 serial_no: '',
                 item_code: '',
                 item_description: '',
+                product_model: '',
                 // itemCode: '',
                 productType: '',
                 productLineCode: '',
@@ -109,13 +111,13 @@ export function Products(params) {
                                         <th width="3%">#</th>
                                         <th width="7%">Serial No.</th>
                                         <th width="8%">Item Code</th>
-                                        <th width="20%">Item Description</th>
+                                        <th width="20%">Product Name</th>
                                         <th width="20%">Product Type</th>
                                         <th width="10%">Product Line</th>
                                         <th width="15%">Material</th>
                                         <th width="5%">Manufacturer</th>
                                         <th width="5%">Edit</th>
-                                        <th width="5%">View</th>
+                                        {/* <th width="5%">View</th> */}
                                         <th width="5%">Delete</th>
                                     </tr>
                                 </thead>
@@ -127,7 +129,7 @@ export function Products(params) {
                                                 <td >{index + 1}</td>
                                                 <td >{item.serial_no}</td>
                                                 <td >{item.item_code}</td>
-                                                <td >{item.item_description}</td>
+                                                <td >{item.product_model}<br></br>{item.item_description}</td>
                                                 <td >{item.productType}</td>
                                                 <td >{item.productLine}</td>
                                                 <td >{item.material}</td>
@@ -145,7 +147,7 @@ export function Products(params) {
                                                         <FaPencilAlt />
                                                     </button></Link>
                                                 </td>
-                                                <td >
+                                                {/* <td >
                                                     <button
                                                         className='btn'
                                                         onClick={() => {
@@ -156,7 +158,7 @@ export function Products(params) {
                                                     >
                                                         <FaEye />
                                                     </button>
-                                                </td>
+                                                </td> */}
                                                 <td style={{ padding: '0px', textAlign: 'center' }}>
                                                     <button
                                                         className='btn'

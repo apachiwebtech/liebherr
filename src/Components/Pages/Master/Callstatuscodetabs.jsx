@@ -67,9 +67,9 @@ function Callstatuscodetabs() {
                   <li className="nav-item">
                     <button
                       className={`nav-link ${
-                        activeTab === "Callstatus" ? "active" : ""
+                        activeTab === "Callstatus" ? "active" : "onClick={() => setActiveTab('Callstatus')}"
                       }`}
-                      onClick={() => setActiveTab("Callstatus")}
+                      
                     >
                       CALL STATUS CODE
                     </button>

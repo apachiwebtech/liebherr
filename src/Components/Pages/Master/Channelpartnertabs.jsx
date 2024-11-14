@@ -67,9 +67,9 @@ function Channelpartnertabs() {
                   <li className="nav-item">
                     <button
                       className={`nav-link ${
-                        activeTab === "Channelpartner" ? "active" : ""
+                        activeTab === "Channelpartner" ? "active" : " onClick={() => setActiveTab('Channelpartner')}"
                       }`}
-                      onClick={() => setActiveTab("Channelpartner")}
+                     
                     >
                       CHANNEL PARTNER
                     </button>

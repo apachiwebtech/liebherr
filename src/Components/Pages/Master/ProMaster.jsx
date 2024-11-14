@@ -69,9 +69,9 @@ function ProMaster() {
                   <li className="nav-item">
                     <Link to={`/category`}><button
                       className={`nav-link ${
-                        activeTab === "/category" ? "active" : ""
+                        activeTab === "/category" ? "active" : "onClick={() => setActiveTab('category')}"
                       }`}
-                      onClick={() => setActiveTab("category")}
+                      
                     >
                       CATEGORY
                     </button></Link>
@@ -79,29 +79,20 @@ function ProMaster() {
                   <li className="nav-item">
                   <Link to={`/subcategory`}><button
                       className={`nav-link ${
-                        activeTab === "/subcategory" ? "active" : ""
+                        activeTab === "/subcategory" ? "active" : "onClick={() => setActiveTab('subcategory')}"
                       }`}
-                      onClick={() => setActiveTab("subcategory")}
+                      
                     >
                       SUBCATEGORY
                     </button></Link>
                   </li>
-                  <li className="nav-item">
-                    <Link to={`/products`}><button
-                      className={`nav-link ${
-                        activeTab === "/products" ? "active" : ""
-                      }`}
-                      onClick={() => setActiveTab("products")}
-                    >
-                      PRODUCT
-                    </button></Link>
-                  </li>
+                 
                   <li className="nav-item">
                   <Link to={`/producttype`}><button
                       className={`nav-link ${
-                        activeTab === "/producttype" ? "active" : ""
+                        activeTab === "/producttype" ? "active" : "onClick={() => setActiveTab('producttype')}"
                       }`}
-                      onClick={() => setActiveTab("producttype")}
+                      
                     >
                       PRODUCT TYPE
                     </button></Link>
@@ -109,9 +100,9 @@ function ProMaster() {
                   <li className="nav-item">
                   <Link to={`/productline`}> <button
                       className={`nav-link ${
-                        activeTab === "/productline" ? "active" : ""
+                        activeTab === "/productline" ? "active" : "onClick={() => setActiveTab('productline')}"
                       }`}
-                      onClick={() => setActiveTab("productline")}
+                      
                     >
                       PRODUCT LINE
                     </button></Link>
@@ -119,9 +110,9 @@ function ProMaster() {
                   <li className="nav-item">
                     <Link  to={`/material`}><button
                       className={`nav-link ${
-                        activeTab === "/material" ? "active" : ""
+                        activeTab === "/material" ? "active" : "onClick={() => setActiveTab('material')}"
                       }`}
-                      onClick={() => setActiveTab("material")}
+                      
                     >
                       MATERIAL
                     </button></Link>
@@ -129,11 +120,21 @@ function ProMaster() {
                   <li className="nav-item">
                   <Link  to={`/manufacturer`}><button
                       className={`nav-link ${
-                        activeTab === "/manufacturer" ? "active" : ""
+                        activeTab === "/manufacturer" ? "active" : "onClick={() => setActiveTab('manufacturer')}"
                       }`}
-                      onClick={() => setActiveTab("manufacturer")}
+                      
                     >
                       MANUFACTURER
+                    </button></Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link to={`/products`}><button
+                      className={`nav-link ${
+                        activeTab === "/products" ? "active" : " onClick={() => setActiveTab('products')}"
+                      }`}
+                     
+                    >
+                      PRODUCT
                     </button></Link>
                   </li>
                 </ul>
