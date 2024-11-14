@@ -146,6 +146,7 @@ const Location = () => {
   const displayedUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
   return (
+    
     <div className="tab-content">
       <LocationTabs/>
     <div className="row mp0">

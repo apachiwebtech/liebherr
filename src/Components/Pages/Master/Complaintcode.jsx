@@ -208,7 +208,7 @@ const ComplaintCode = () => {
 
               <div className="col-md-6">
                 {/* Adjust table padding and spacing */}
-                <DataTable data={filteredUsers} className="table table-bordered table-responsive table-hover mt-3">
+                <table data={filteredUsers} className="table table-bordered table-responsive table-hover mt-3">
                     <thead className="thead-light">
                       <tr>
                         <th className="text-center">#</th>
@@ -243,7 +243,7 @@ const ComplaintCode = () => {
                         </tr>
                       ))}
                     </tbody>
-                  </DataTable>
+                  </table>
                 {/* <DataTable
                   data={currentUsers}
                   columns={[

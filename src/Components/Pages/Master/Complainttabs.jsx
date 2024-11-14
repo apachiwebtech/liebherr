@@ -69,24 +69,24 @@ function Complainttabs() {
               
                 <li className="nav-item">
                   <button
-                    className={`nav-link ${activeTab === 'complaintCode' ? 'active' : 'onClick={() => setActiveTab("complaintCode")}'}`}
-                    
+                    className={`nav-link ${activeTab === 'complaintCode' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('complaintCode')}
                   >
                   COMPLAINT CODE
                   </button>
                 </li>
                 <li className="nav-item">
                   <button
-                    className={`nav-link ${activeTab === 'reasonCode' ? 'active' : 'onClick={() => setActiveTab("reasonCode")}'}`}
-                    
+                    className={`nav-link ${activeTab === 'reasonCode' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('reasonCode')}
                   >
                     REASON CODE
                   </button>
                 </li>
                 <li className="nav-item">
                   <button
-                    className={`nav-link ${activeTab === 'actionCode' ? 'active' : 'onClick={() => setActiveTab("actionCode")}'}`}
-                    
+                    className={`nav-link ${activeTab === 'actionCode' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('actionCode')}
                   >
                    ACTION CODE 
                   </button>

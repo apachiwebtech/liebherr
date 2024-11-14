@@ -371,7 +371,7 @@ const Router = createBrowserRouter([
         element: <Claimreporttabs />
       },
       {
-        path: "/claimreport",
+        path: "claimreport",
         element: <Claimreport/>
       },
     
