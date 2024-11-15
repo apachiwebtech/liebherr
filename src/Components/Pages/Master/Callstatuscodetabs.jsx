@@ -47,7 +47,7 @@ function Callstatuscodetabs() {
       <div className="container-fluid p-0">
         {/* Top Header */}
         <div className="text-left headings">
-          <span style={{ paddingLeft: "20px" }}>Call Status Code Master </span>
+          <span style={{ paddingLeft: "20px",color:'#FFFFFF' }}>Call Status Code Master </span>
         </div>
 
         {/* Nav Tabs */}

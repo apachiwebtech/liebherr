@@ -57,7 +57,7 @@ function Complainttabs() {
       <div className="container-fluid p-0">
         {/* Top Header */}
         <div className="text-left headings">
-          <span style={{paddingLeft:"20px"}}>Code</span>
+          <span style={{paddingLeft:"20px",color:'#FFFFFF'}}>Code</span>
         </div>
 
         {/* Nav Tabs */}

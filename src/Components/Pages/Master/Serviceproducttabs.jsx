@@ -47,7 +47,7 @@ function Serviceproducttabs() {
       <div className="container-fluid p-0">
         {/* Top Header */}
         <div className="text-left headings">
-          <span style={{ paddingLeft: "20px" }}>SERVICE PRODUCT Master </span>
+          <span style={{ paddingLeft: "20px",color:'#FFFFFF' }}>SERVICE PRODUCT Master </span>
         </div>
 
         {/* Nav Tabs */}

@@ -63,9 +63,9 @@ export function Siteheader(params) {
                 Reports</Link>
               <ul className="dropdown-menu site" aria-labelledby="navbarDropdown">
                 <li>
-                  <Link className="dropdown-item" to="#">Complaint Report</Link></li>
+                  <Link className="dropdown-item" to="/complaintreport">Complaint Report</Link></li>
                 <li>
-                  <Link className="dropdown-item" to="#">Claim Report</Link></li>
+                  <Link className="dropdown-item" to="/claimreport">Claim Report</Link></li>
               </ul>
             </li>
           </ul>

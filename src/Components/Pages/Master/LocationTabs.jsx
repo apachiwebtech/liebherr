@@ -45,7 +45,7 @@ function LocationTabs() {
       <div className="container-fluid p-0">
         {/* Top Header */}
         <div className="text-left headings">
-          <span style={{paddingLeft:"20px"}}>LOCATION</span>
+          <span style={{paddingLeft:"20px",color:'#FFFFFF'}}>LOCATION</span>
         </div>
 
         {/* Nav Tabs */}

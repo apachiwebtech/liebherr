@@ -1,18 +1,25 @@
 import React from "react";
-import Claimreporttabs from "./Claimreporttabs";
-
+import {  useNavigate } from "react-router-dom";
 
 export function Claimreport(params) {
     
+    const Navigate = useNavigate()
+    const handleSubmit= ()=> {
+        Navigate('/claimreport')
+    }
 
     return(
+        <div className="row mp0">
+        <div className="col-3 ">
+            <div className="card mt-3 mb-3">
+                <div className="card-body">
+                    Coming Soon
+                </div>
+            </div>
 
-        <>
-        
-        <div className="tab-content">
-        <Claimreporttabs></Claimreporttabs>
-        <h1>Coming Soon</h1>
+            
         </div>
-        </>
+        
+    </div>
     )
 }

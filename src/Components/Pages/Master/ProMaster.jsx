@@ -49,7 +49,7 @@ function ProMaster() {
       <div className="container-fluid p-0">
         {/* Top Header */}
         <div className="text-left headings">
-          <span style={{ paddingLeft: "20px" }}>PRODUCT MASTER</span>
+          <span style={{ paddingLeft: "20px",color:'#FFFFFF' }}>PRODUCT MASTER</span>
         </div>
 
         {/* Nav Tabs */}

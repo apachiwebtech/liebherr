@@ -48,7 +48,7 @@ function Endcustomertabs() {
       <div className="container-fluid p-0">
         {/* Top Header */}
         <div className="text-left headings">
-          <span style={{paddingLeft:"20px"}}>ENDCUSTOMER</span>
+          <span style={{paddingLeft:"20px",color:'#FFFFFF'}}>ENDCUSTOMER</span>
         </div>
 
         {/* Nav Tabs */}

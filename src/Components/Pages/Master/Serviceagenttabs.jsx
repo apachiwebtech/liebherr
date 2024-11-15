@@ -47,7 +47,7 @@ function Serviceagenttabs() {
       <div className="container-fluid p-0">
         {/* Top Header */}
         <div className="text-left headings">
-          <span style={{ paddingLeft: "20px" }}>Service Agent Master </span>
+          <span style={{ paddingLeft: "20px",color:'#FFFFFF' }}>Service Agent Master </span>
         </div>
 
         {/* Nav Tabs */}
