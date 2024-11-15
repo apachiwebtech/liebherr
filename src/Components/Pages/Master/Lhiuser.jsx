@@ -21,7 +21,7 @@ const Lhiuser = () => {
 
   const [formData, setFormData] = useState({
     Lhiuser: "",
-    UserCode: "",
+    Usercode: "",
     passwordmd5: "",
   });
 
@@ -79,8 +79,8 @@ const Lhiuser = () => {
     if (!formData.Lhiuser || !formData.Lhiuser.trim()) {
       newErrors.Lhiuser = "Lhiuser Field is required.";
     }
-    if (!formData.UserCode || !formData.UserCode.trim()) {
-      newErrors.UserCode = "UserCode Field is required.";
+    if (!formData.Usercode || !formData.Usercode.trim()) {
+      newErrors.Usercode = "Usercode Field is required.";
     }
     if (!formData.Password || !formData.passwordmd5.trim()) {
       newErrors.Password = "Password Field is required.";
@@ -245,20 +245,20 @@ const Lhiuser = () => {
                   </div>
                   <div className="col-4">
                     <div className="mb-3">
-                      <label htmlFor="UserCodeInput" className="input-field">
+                      <label htmlFor="UsercodeInput" className="input-field">
                         User Code
                       </label>
                       <input
-                        type="number"
+                        type="text"
                         className="form-control"
-                        name="UserCode"
-                        id="UserCodeInput"
-                        value={formData.UserCode}
+                        name="Usercode"
+                        id="UsercodeInput"
+                        value={formData.Usercode}
                         onChange={handleChange}
                         placeholder="Enter User Code"
                       />
-                      {errors.UserCode && (
-                        <small className="text-danger">{errors.UserCode}</small>
+                      {errors.Usercode && (
+                        <small className="text-danger">{errors.Usercode}</small>
                       )}
                       {duplicateError && (
                         <small className="text-danger">{duplicateError}</small>
@@ -430,7 +430,7 @@ const Lhiuser = () => {
                         #
                       </th>
                       <th style={{ padding: "12px 15px", textAlign: "center" }}>
-                        UserCode
+                        Usercode
                       </th>
 
                       <th style={{ padding: "12px 15px", textAlign: "center" }}>
