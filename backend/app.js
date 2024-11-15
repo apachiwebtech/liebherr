@@ -4,10 +4,12 @@ const app = express();
 const cors = require('cors');
 const complaint = require("./Routes/complaint");
 const common = require("./Routes/common");
+const Category = require("./Routes/ProductMaster/Category");
 const multer = require("multer");
 const bodyParser = require("body-parser");
 const path = require("path");
 const fs = require("fs");
+
 
 app.use(cors({ origin: "*" }));
 app.use(express.json());
@@ -17,6 +19,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use("/", complaint);
 app.use("/", common);
+app.use("/", Category);
 
 // Ensure 'uploads' folder exists
 const uploadDir = path.join(__dirname, "uploads");
@@ -64,18 +67,7 @@ app.listen(8081, () => {
 
 
 
-//Country Master Start
-app.get("/getdata", async (req, res) => {
-  try {
-    // Use the poolPromise to get the connection pool
-    const pool = await poolPromise;
-    const result = await pool.request().query("SELECT * FROM awt_country WHERE deleted = 0");
-    return res.json(result.recordset);
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'An error occurred while fetching data' });
-  }
-});
+
 
 
 app.post("/loginuser", async (req, res) => {

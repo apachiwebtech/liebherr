@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const con = require('../db');
 
-router.get('/getstate', (req, res) => {
+router.get('/getstate-new', (req, res) => {
  
   const sql = "select id , region_id,title from awt_geostate where deleted = 0" 
 

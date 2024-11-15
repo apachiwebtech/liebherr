@@ -1,11 +1,21 @@
-const mysql = require('mysql');
+const sql = require("mssql");
 
 
-const con = mysql.createPool({
-    host: 'localhost', 
-    user: 'root', 
-    password: '', 
-    database: 'liebherr' 
-  });
+const dbConfig = {
+  user: "sa",
+  password: "8$E5r6p8%8KH#F6V",
+  server: "103.101.58.207",
+  database: "licare",
+  options: {
+    encrypt: true, // for Azure
+    trustServerCertificate: true,
+  },
+};
 
-module.exports = con
+const poolPromise = new sql.ConnectionPool(dbConfig).connect()
+
+  .then(pool => { console.log("Connected to MSSQL via connection pool"); return pool; })
+
+  .catch(err => console.error("Database Connection Pool Error:", err));
+
+module.exports = poolPromise
