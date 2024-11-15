@@ -21,7 +21,7 @@ const Lhiuser = () => {
 
   const [formData, setFormData] = useState({
     Lhiuser: "",
-    usercode: "",
+    UserCode: "",
     passwordmd5: "",
   });
 
@@ -325,7 +325,7 @@ const Lhiuser = () => {
                         className="form-control"
                         name="email"
                         id="EmailInput"
-                        value={formData.Email}
+                        value={formData.email}
                         onChange={handleChange}
                         placeholder="Enter Email Address"
                       />
