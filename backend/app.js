@@ -2815,6 +2815,7 @@ app.get("/getchildfranchises", async (req, res) => {
 
 // S added for Complaint Registration
 
+
 app.get("/getstate", async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
@@ -2843,7 +2844,7 @@ app.get("/product_master", async (req, res) => {
 
 
 // Ticket Search Start
-app.post("/getticket", async (req, res) => {
+app.post("/getticketendcustomer", async (req, res) => {
   let { searchparam } = req.body;
 
   if (searchparam === "") {
@@ -2854,20 +2855,44 @@ app.post("/getticket", async (req, res) => {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
     const sql = `
-      SELECT * FROM complaint_ticket
-      WHERE deleted = 0
-      AND (customer_email LIKE '%${searchparam}%'
-      OR customer_name LIKE '%${searchparam}%'
-      OR customer_mobile LIKE '%${searchparam}%')
+SELECT c.*, 
+       l.address, 
+       CONCAT(c.customer_fname, ' ', c.customer_lname) AS customer_name
+FROM awt_customer AS c 
+LEFT JOIN awt_customerlocation AS l ON c.id = l.customer_id 
+WHERE c.deleted = 0 
+  AND (c.email LIKE '%${searchparam}%' 
+       OR c.mobileno LIKE '%${searchparam}%')
+
+
     `;
 
     const result = await pool.request().query(sql);
-    return res.json(result.recordset);
+
+    // Product of End Customer using customer_id | in Table awt_customer id is primary key and customer_id is foreign key in awt_customerlocation
+    const sql1 = `
+    SELECT * FROM awt_uniqueproductmaster
+    WHERE deleted = 0 AND customer_id = @customerId
+  `;
+// console.log(result.recordset[0])
+  const result1 = await pool.request()
+    .input('customerId', result.recordset[0].id)
+    .query(sql1);
+
+    if(result1.recordset === 0){
+        return res.json({ information : result.recordset ,product : []}); 
+    }
+    else {
+
+      return res.json({ information : result.recordset ,product : result1.recordset});
+    }
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: 'An error occurred while fetching data' });
+    return res.json({ information : [], product : []});
   }
 });
+
+// Comaplint Module -> Start
 
 // Add Complaint Start
 app.post("/add_complaintt", async (req, res) => {
@@ -2911,11 +2936,11 @@ app.post("/add_complaintt", async (req, res) => {
     // Insert into awt_customerlocation using insertedCustomerId as customer_id
     const customerLocationSQL = `
       INSERT INTO awt_customerlocation (
-        customer_id, geostate_id, geocity_id, area_id, pincode_id,
+        customer_id, geostate_id, geocity_id, area_id, pincode_id, 
         created_date, created_by, ccperson, ccnumber, address
       )
       VALUES (
-        @customer_id, @state, @city, @area, @pincode,
+        @customer_id, @state, @city, @area, @pincode, 
         @formattedDate, @created_by, @customer_name, @mobile, @address
       )`;
 
@@ -2965,15 +2990,15 @@ app.post("/add_complaintt", async (req, res) => {
     // Insert into complaint_ticket
     const complaintSQL = `
       INSERT INTO complaint_ticket (
-        ticket_no, ticket_date, customer_name, customer_mobile, customer_email, address,
-        state, city, area, pincode, customer_id, ModelNumber, ticket_type, call_type,
-        call_status, warranty_status, invoice_date, call_charges, mode_of_contact,
+        ticket_no, ticket_date, customer_name, customer_mobile, customer_email, address, 
+        state, city, area, pincode, customer_id, ModelNumber, ticket_type, call_type, 
+        call_status, warranty_status, invoice_date, call_charges, mode_of_contact, 
         contact_person, assigned_to, created_date, created_by, engineer_id, purchase_date, serial_no
-      )
+      ) 
       VALUES (
-        @ticket_no, @complaint_date, @customer_name, @mobile, @email, @address,
-        @state, @city, @area, @pincode, @customer_id, @model, @ticket_type, @cust_type,
-        'Pending', @warrenty_status, @invoice_date, @call_charge, @mode_of_contact,
+        @ticket_no, @complaint_date, @customer_name, @mobile, @email, @address, 
+        @state, @city, @area, @pincode, @customer_id, @model, @ticket_type, @cust_type, 
+        'Pending', @warrenty_status, @invoice_date, @call_charge, @mode_of_contact, 
         @contact_person, 1, @formattedDate, @created_by, 1, @purchase_date, @serial
       )`;
 
@@ -3013,8 +3038,37 @@ app.post("/add_complaintt", async (req, res) => {
 });
 
 
+//Master Service Partner
+app.get("/getmasterpartner", async (req, res) => {
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+    const result = await pool.request().query("SELECT * FROM awt_franchisemaster WHERE deleted = 0");
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
 
-// S End for Complaint Registration
+
+
+//Child Service Partner
+app.get("/getchildpartner", async (req, res) => {
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+    const result = await pool.request().query("SELECT * FROM awt_childfranchisemaster WHERE deleted = 0");
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
+
+
+
+// S End for Complaint Module
 
 
 // y start
@@ -5883,7 +5937,7 @@ app.get("/getComplaintDuplicateRegisterPage/:DuplicateCustomerNumber", async (re
 
   } catch (err) {
     console.error("Database error:", err);
-    return res.status(500).json({ error: "Database error occurred", details: err.message });
+    return res.json([]);
   }
 });
 
