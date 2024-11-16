@@ -23,6 +23,19 @@ const EngineerMaster = () => {
     password: '',
     email: '',
     mobile_no: '',
+    employee_code: '',
+    personal_email: '',
+    personal_mobile: '',
+    dob: '',
+    blood_group:'',
+    academic_qualification: '',
+    joining_date: '',
+    passport_picture: '',
+    resume: '',
+    photo_proof: '',
+    address_proof: '',
+    permanent_address: '',
+    current_address: ''
   });
 
   const fetchChildfranchise = async () => {
@@ -116,7 +129,20 @@ const EngineerMaster = () => {
                 cfranchise_id: '',
                 password: '',
                 email: '',
-                mobile_no: ''
+                mobile_no: '',
+                employee_code: '',
+                personal_email: '',
+                personal_mobile: '',
+                dob: '',
+                blood_group:'',
+                academic_qualification: '',
+                joining_date: '',
+                passport_picture: '',
+                resume: '',
+                photo_proof: '',
+                address_proof: '',
+                permanent_address: '',
+                current_address: ''
               })
               fetchUsers();
             })
@@ -134,7 +160,20 @@ const EngineerMaster = () => {
                 cfranchise_id: '',
                 password: '',
                 email: '',
-                mobile_no: ''
+                mobile_no: '',
+                employee_code: '',
+                personal_email: '',
+                personal_mobile: '',
+                dob: '',
+                blood_group:'',
+                academic_qualification: '',
+                joining_date: '',
+                passport_picture: '',
+                resume: '',
+                photo_proof: '',
+                address_proof: '',
+                permanent_address: '',
+                current_address: ''
               })
               fetchUsers();
             })
@@ -234,13 +273,13 @@ const EngineerMaster = () => {
                         <input
                           type="text"  // Changed to "text" for Employee Code
                           className="form-control"
-                          name="employeeCode"
+                          name="employee_code"
                           id="employeeCodeInput"
-                          value={formData.employeeCode}  // Updated value to match "employeeCode"
+                          value={formData.employee_code}  // Updated value to match "employeeCode"
                           onChange={handleChange}
                           placeholder="Enter Employee Code"
                         />
-                        {errors.employeeCode && <small className="text-danger">{errors.employeeCode}</small>}
+                        {errors.employee_code && <small className="text-danger">{errors.employee_code}</small>}
                         {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
                       </div>
                       
@@ -263,13 +302,13 @@ const EngineerMaster = () => {
                         <input
                           type="email"  // Changed to "email" for Personal Email ID
                           className="form-control"
-                          name="pemail"
+                          name="personal_email"
                           id="pemailInput"
-                          value={formData.pemail}  // Updated value to match "email"
+                          value={formData.personal_email}  // Updated value to match "email"
                           onChange={handleChange}
                           placeholder="Enter Personal Email ID"
                         />
-                        {errors.email && <small className="text-danger">{errors.pemail}</small>}
+                        {errors.personal_email && <small className="text-danger">{errors.personal_email}</small>}
                         {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
                       </div>
 
@@ -310,9 +349,9 @@ const EngineerMaster = () => {
                         <input
                           type="tel"  // Changed to "tel" for Personal Mobile Number
                           className="form-control"
-                          name="mobile"
+                          name="personal_mobile"
                           id="mobileInput"
-                          value={formData.mobile}  // Updated value to match "mobile"
+                          value={formData.personal_mobile}  // Updated value to match "mobile"
                           onChange={(e) => {
                             const value = e.target.value;
                             if (!isNaN(value)) {
@@ -325,10 +364,10 @@ const EngineerMaster = () => {
                           pattern="[0-9]{10}"  // Optional: Pattern to enforce 10-digit mobile number (adjust as needed)
                           maxLength="15"
                         />
-                        {formData.mobile_no.length > 0 && formData.mobile_no.length < 10 && (
+                        {formData.personal_mobile.length > 0 && formData.personal_mobile.length < 10 && (
                           <small className="text-danger">Mobile number must be at least 10 digits</small>
                         )}
-                        {errors.mobile && <small className="text-danger">{errors.mobile}</small>}
+                        {errors.personal_mobile && <small className="text-danger">{errors.personal_mobile}</small>}
 
                       </div>
 
@@ -351,22 +390,22 @@ const EngineerMaster = () => {
                         <input
                           type="text"  // Changed to "text" for Blood Group
                           className="form-control"
-                          name="bloodGroup"
+                          name="blood_group"
                           id="bloodGroupInput"
-                          value={formData.bloodGroup}  // Updated value to match "bloodGroup"
+                          value={formData.blood_group}  // Updated value to match "bloodGroup"
                           onChange={handleChange}
                           placeholder="Enter Blood Group"
                         />
-                        {errors.bloodGroup && <small className="text-danger">{errors.bloodGroup}</small>}
+                        {errors.blood_group && <small className="text-danger">{errors.blood_group}</small>}
                         {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
                       </div>
                       <div className="col-md-3">
                         <label htmlFor="academicQualificationInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>Academic Qualification</label>
                         <select
                           className="form-select"
-                          name="academicQualification"
+                          name="academic_qualification"
                           id="academicQualificationInput"
-                          value={formData.academicQualification}  // Updated value to match "academicQualification"
+                          value={formData.academic_qualification}  // Updated value to match "academicQualification"
                           onChange={handleChange}
                         >
                           <option value="">Select Academic Qualification</option>  // Placeholder option
@@ -381,7 +420,7 @@ const EngineerMaster = () => {
 
                           {/* Add more options as necessary */}
                         </select>
-                        {errors.academicQualification && <small className="text-danger">{errors.academicQualification}</small>}
+                        {errors.academic_qualification && <small className="text-danger">{errors.academic_qualification}</small>}
                         {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
                       </div>
                       <div className="col-md-3">
@@ -389,13 +428,13 @@ const EngineerMaster = () => {
                         <input
                           type="date"  // Changed to "date" for Joining Date
                           className="form-control"
-                          name="joiningDate"
+                          name="joining_date"
                           id="joiningDateInput"
-                          value={formData.joiningDate}  // Updated value to match "joiningDate"
+                          value={formData.joining_date}  // Updated value to match "joiningDate"
                           onChange={handleChange}
                           placeholder="Enter Joining Date"
                         />
-                        {errors.joiningDate && <small className="text-danger">{errors.joiningDate}</small>}
+                        {errors.joining_date && <small className="text-danger">{errors.joining_date}</small>}
                         {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
                       </div>
 
@@ -404,12 +443,12 @@ const EngineerMaster = () => {
                         <input
                           type="file"  // Changed to "file" for uploading Passport Picture
                           className="form-control"
-                          name="passportPicture"
+                          name="passport_picture"
                           id="passportPictureInput"
                           onChange={handleChange}
                           accept="image/*"  // Accept any image format (can restrict to jpg, png, etc.)
                         />
-                        {errors.passportPicture && <small className="text-danger">{errors.passportPicture}</small>}
+                        {errors.passport_picture && <small className="text-danger">{errors.passport_picture}</small>}
                         {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
                       </div>
 
@@ -432,12 +471,12 @@ const EngineerMaster = () => {
                         <input
                           type="file"  // Changed to "file" for uploading Photo ID Proof
                           className="form-control"
-                          name="photoIdProof"
+                          name="photo_proof"
                           id="photoIdProofInput"
                           onChange={handleChange}
                           accept="image/*,application/pdf"  // Accept image files or PDF formats for ID proof (customize as needed)
                         />
-                        {errors.photoIdProof && <small className="text-danger">{errors.photoIdProof}</small>}
+                        {errors.photo_proof && <small className="text-danger">{errors.photo_proof}</small>}
                         {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
                       </div>
 
@@ -446,12 +485,12 @@ const EngineerMaster = () => {
                         <input
                           type="file"  // Changed to "file" for uploading Govt. Address Proof
                           className="form-control"
-                          name="govAddressProof"
+                          name="address_proof"
                           id="govAddressProofInput"
                           onChange={handleChange}
                           accept="image/*,application/pdf"  // Accepts image files and PDFs (e.g., utility bills, bank statements)
                         />
-                        {errors.govAddressProof && <small className="text-danger">{errors.govAddressProof}</small>}
+                        {errors.address_proof && <small className="text-danger">{errors.address_proof}</small>}
                         {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
                       </div>
 
@@ -459,14 +498,14 @@ const EngineerMaster = () => {
                         <label htmlFor="permanentAddressInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>Permanent Address</label>
                         <textarea
                           className="form-control"
-                          name="permanentAddress"
+                          name="permanent_address"
                           id="permanentAddressInput"
-                          value={formData.permanentAddress}  // Updated value to match "permanentAddress"
+                          value={formData.permanent_address}  // Updated value to match "permanentAddress"
                           onChange={handleChange}
                           placeholder="Enter Permanent Address"
                           rows="4"  // Adjust the number of rows (height) as needed
                         />
-                        {errors.permanentAddress && <small className="text-danger">{errors.permanentAddress}</small>}
+                        {errors.permanent_address && <small className="text-danger">{errors.permanent_address}</small>}
                         {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
                       </div>
 
@@ -474,14 +513,14 @@ const EngineerMaster = () => {
                         <label htmlFor="currentAddressInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>Current Address</label>
                         <textarea
                           className="form-control"
-                          name="currentAddress"
+                          name="current_address"
                           id="currentAddressInput"
-                          value={formData.currentAddress}  // Updated value to match "permanentAddress"
+                          value={formData.current_address}  // Updated value to match "permanentAddress"
                           onChange={handleChange}
                           placeholder="Enter Current Address"
                           rows="4"  // Adjust the number of rows (height) as needed
                         />
-                        {errors.currentAddress && <small className="text-danger">{errors.currentAddress}</small>}
+                        {errors.current_address && <small className="text-danger">{errors.current_address}</small>}
                         {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
                       </div>
                     </div>

@@ -3514,7 +3514,7 @@ app.get("/requestengineer/:id", async (req, res) => {
   }
 });
 app.post("/postengineer", async (req, res) => {
-  const { title, cfranchise_id, password, email, mobile_no } = req.body;
+  const { title, cfranchise_id, password, email, mobile_no ,personal_email,employee_code,personal_mobile,dob,blood_group,academic_qualification,joining_date,passport_picture,resume,photo_proof,address_proof,permanent_address,current_address} = req.body;
 
   try {
     // Use the poolPromise to get the connection pool
@@ -3541,8 +3541,8 @@ app.post("/postengineer", async (req, res) => {
         });
       } else {
         // Insert new engineer if no duplicate or soft-deleted found
-        const insertSql = `INSERT INTO awt_engineermaster (title, cfranchise_id, mobile_no, email, password) 
-                           VALUES ('${title}', '${cfranchise_id}', '${mobile_no}', '${email}', '${password}')`;
+        const insertSql = `INSERT INTO awt_engineermaster (title, cfranchise_id, mobile_no, email, password,employee_code,personal_email,personal_mobile,dob,blood_group,academic_qualification,joining_date,passport_picture,resume,photo_proof,address_proof,permanent_address,current_address) 
+                           VALUES ('${title}', '${cfranchise_id}', '${mobile_no}', '${email}', '${password}', '${employee_code}', '${personal_email}', '${personal_mobile}', '${dob}', '${blood_group}', '${academic_qualification}', '${joining_date}', '${passport_picture}', '${resume}', '${photo_proof}', '${address_proof}', '${permanent_address}', '${current_address}')`;
         await pool.request().query(insertSql);
         return res.json({ message: "Engineer added successfully!" });
       }
@@ -3553,7 +3553,7 @@ app.post("/postengineer", async (req, res) => {
   }
 });
 app.put("/putengineer", async (req, res) => {
-  const { title, id, cfranchise_id, password, email, mobile_no } = req.body;
+  const { title, id, cfranchise_id, password, email, mobile_no,personal_email,employee_code,personal_mobile,dob,blood_group,academic_qualification,joining_date,passport_picture,resume,photo_proof,address_proof,permanent_address,current_address } = req.body;
 
   try {
     // Use the poolPromise to get the connection pool
@@ -3599,6 +3599,49 @@ app.post("/deleteengineer", async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "Error updating Engineer" });
+  }
+});
+
+app.post("/addEngineer", async (req, res) => {
+  const { title, mobile_no, email, password, employee_code, personal_email, personal_mobile, dob, blood_group, academic_qualification, joining_date, passport_picture, resume, photo_proof, address_proof, permanent_address, current_address } = req.body;
+
+
+  try {
+    const pool = await poolPromise;
+    // SQL query to insert a new complaint remark
+    const sql = `INSERT INTO awt_engineermaster (title, mobile_no,email,password,employee_code,personal_email,personal_mobile,dob,blood_group,academic_qualification,joining_date,passport_picture,resume,photo_proof,address_proof,permanent_address,current_address)VALUES (@title,@mobile_no,@email,@password,@employee_code,@personal_email,@personal_mobile,@dob,@blood_group,@academic_qualification,@joining_date,@passport_picture,@resume,@photo_proof,@address_proof,@permanent_address,@current_address);`;
+
+
+
+    const request = pool.request()
+      .input('title', title)
+      .input('mobile_no', mobile_no)
+      .input('email', email)
+      .input('password', password)
+      .input('employee_code', employee_code)
+      .input('personal_email', personal_email)
+      .input('personal_mobile', personal_mobile)
+      .input('dob', dob)
+      .input('blood_group', blood_group)
+      .input('academic_qualification', academic_qualification)
+      .input('joining_date', joining_date)
+      .input('passport_picture', passport_picture)
+      .input('resume', resume)
+      .input('photo_proof', photo_proof)
+      .input('address_proof', address_proof)
+      .input('permanent_address', permanent_address)
+      .input('current_address', current_address)
+     
+
+
+    console.log(sql)
+
+    const result = await request.query(sql);
+
+    res.json({ insertId: result.rowsAffected[0] }); // Send the inserted ID back to the client
+  } catch (err) {
+    console.error("Error inserting remark:", err);
+    return res.status(500).json({ error: "Database error", details: err.message }); // Send back more details for debugging
   }
 });
 
@@ -5274,6 +5317,7 @@ app.post("/addProduct", async (req, res) => {
   }
 });
 
+
 app.post("/updateProduct", async (req, res) => {
   const {
     item_code, item_description, product_model, product_type, product_class_code, product_class,
@@ -5419,6 +5463,8 @@ app.post("/updatestatus", async (req, res) => {
     return res.status(500).json({ message: 'Error updating status' });
   }
 });
+
+
 
 
 
