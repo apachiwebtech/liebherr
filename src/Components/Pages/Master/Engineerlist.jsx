@@ -6,7 +6,7 @@ import { Base_Url } from '../../Utils/Base_Url';
 import Franchisemaster from './Franchisemaster';
 
 export function Engineerlist(params) {
-    const [Productdata, setEngineerdata] = useState([]);
+    const [Engineerdata, setEngineerdata] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
     const [formData, setFormData] = useState({
         title: '',
@@ -37,6 +37,17 @@ export function Engineerlist(params) {
             setEngineerdata([]);
         }
     };
+    const handleChangestatus = (e) => {
+        try {
+          const dataId = e.target.getAttribute('data-id');
+    
+          const response = axios.post(`${Base_Url}/updatestatus`, { dataId: dataId });
+    
+        } catch (error) {
+          console.error("Error editing user:", error);
+        }
+    
+      };
 
 
     const deleted = async (id) => {
@@ -47,7 +58,7 @@ export function Engineerlist(params) {
                 email: '',
                 mobile_no: '',
                 employee_code: '',
-    
+
                 cfranchise_id: '',
                 productLineCode: '',
                 productLine: '',
@@ -102,7 +113,7 @@ export function Engineerlist(params) {
 
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
                             <div className='p-1 text-right'>
-                                <Link to={`/addproduct/:productid`}><button className='btn btn-primary'>Add Engineer</button></Link>
+                                <Link to={`/addengineer/:engineerid`}><button className='btn btn-primary'>Add Engineer</button></Link>
                             </div>
                             <table className="table">
                                 <thead>
@@ -111,25 +122,25 @@ export function Engineerlist(params) {
                                         <th width="7%">Name</th>
                                         <th width="8%">Email</th>
                                         <th width="20%">Mobile Number</th>
-                                        <th width="20%">Employee Code</th>
+                                        <th width="10%">Employee Code</th>
                                         <th width="5%">Edit</th>
                                         {/* <th width="5%">View</th> */}
-                                        <th width="5%">Delete</th>
+                                        <th width="5%">Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
 
-                                    {Productdata.map((item, index) => {
+                                    {Engineerdata.map((item, index) => {
                                         return (
                                             <tr key={item.id}>
                                                 <td >{index + 1}</td>
-                                                <td >{item.title }</td>
+                                                <td >{item.title}</td>
                                                 <td >{item.email}</td>
                                                 <td >{item.mobile_no}</td>
                                                 <td >{item.employee_code}</td>
-                                                
+
                                                 <td >
-                                                   <Link to={`/addproduct/${item.id}`}> <button
+                                                    <Link to={`/addengineer/:requestengineer${item.id}`}> <button
                                                         className='btn'
                                                         onClick={() => {
                                                             // alert(item.id)
@@ -153,15 +164,20 @@ export function Engineerlist(params) {
                                                         <FaEye />
                                                     </button>
                                                 </td> */}
-                                                <td style={{ padding: '0px', textAlign: 'center' }}>
-                                                    <button
-                                                        className='btn'
-                                                        onClick={() => deleted(item.id)}
-                                                        title="Delete"
-                                                        style={{ backgroundColor: 'transparent', border: 'none', color: 'red', fontSize: '20px' }}
-                                                    >
-                                                        <FaTrash />
-                                                    </button>
+                                                <td style={{ padding: "10px" }}>
+                                                    <label class="switch">
+                                                        <input
+                                                            type="checkbox"
+                                                            onChange={handleChangestatus}
+                                                            data-id={item.id}
+                                                            checked={item.status === 1}  // Check if status is 1 (checked)
+                                                            className="status"
+                                                        />
+
+
+                                                        <span class="slider round"></span>
+                                                    </label>
+
                                                 </td>
                                             </tr>
                                         )

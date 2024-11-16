@@ -96,9 +96,21 @@ app.post("/loginuser", async (req, res) => {
   }
 });
 
-app.post("/log", async (req,res) =>{
+app.post("/log", async (req, res) => {
   console.log("fffrdf")
 })
+
+app.get("/getdata", async (req, res) => {
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+    const result = await pool.request().query("SELECT * FROM awt_country WHERE deleted = 0");
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
 
 
 app.get("/requestdata/:id", async (req, res) => {
@@ -631,7 +643,7 @@ app.get("/getdistrictcity/:geostateID", async (req, res) => {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
 
-    
+
     const sql = `
       SELECT * FROM awt_district 
       WHERE geostate_id = ${geostateID} 
@@ -711,7 +723,7 @@ app.get("/requestgeocity/:id", async (req, res) => {
 
 // Insert new geocity with duplicate check
 app.post("/postgeocity", async (req, res) => {
-  const { title, country_id, region_id, geostate_id,district } = req.body;
+  const { title, country_id, region_id, geostate_id, district } = req.body;
 
   try {
     // Use the poolPromise to get the connection pool
@@ -1001,11 +1013,11 @@ app.put("/putarea", async (req, res) => {
     `;
 
     const checkResult = await pool.request().query(checkDuplicateSql);
-    
+
     if (checkResult.recordset.length > 0) {
       return res.status(409).json({ message: "Duplicate entry, Area already exists!" });
     }
-    
+
     // Update the area
     const updateSql = `
     UPDATE awt_district 
@@ -1013,7 +1025,7 @@ app.put("/putarea", async (req, res) => {
     geostate_id = ${geostate_id}
     WHERE id = ${id}
     `;
-    console.log(updateSql,"Update query")
+    console.log(updateSql, "Update query")
     const updateResult = await pool.request().query(updateSql);
 
     return res.json({ message: "Area updated successfully!" });
@@ -1096,7 +1108,7 @@ app.get("/getgeocities_p/:area_id", async (req, res) => {
     const pool = await poolPromise;
 
     // Direct SQL query without parameter binding
-    const sql = `SELECT * FROM awt_geocity WHERE district = ${area_id} AND deleted = 0` ;
+    const sql = `SELECT * FROM awt_geocity WHERE district = ${area_id} AND deleted = 0`;
     const result = await pool.request().query(sql);
 
     return res.json(result.recordset); // Return only the recordset data
@@ -2922,7 +2934,7 @@ app.post("/add_complaintt", async (req, res) => {
 
     const insertResult = await request.query(insertSQL);
 
-    console.log(insertSQL,"%%")
+    console.log(insertSQL, "%%")
     return res.json({ insertId: insertResult.rowsAffected[0] });
   } catch (err) {
     console.error("Error inserting complaint:", err);
@@ -3514,7 +3526,7 @@ app.get("/requestengineer/:id", async (req, res) => {
   }
 });
 app.post("/postengineer", async (req, res) => {
-  const { title, cfranchise_id, password, email, mobile_no ,personal_email,employee_code,personal_mobile,dob,blood_group,academic_qualification,joining_date,passport_picture,resume,photo_proof,address_proof,permanent_address,current_address} = req.body;
+  const { title, cfranchise_id, password, email, mobile_no, personal_email, employee_code, personal_mobile, dob, blood_group, academic_qualification, joining_date, passport_picture, resume, photo_proof, address_proof, permanent_address, current_address } = req.body;
 
   try {
     // Use the poolPromise to get the connection pool
@@ -3553,7 +3565,7 @@ app.post("/postengineer", async (req, res) => {
   }
 });
 app.put("/putengineer", async (req, res) => {
-  const { title, id, cfranchise_id, password, email, mobile_no,personal_email,employee_code,personal_mobile,dob,blood_group,academic_qualification,joining_date,passport_picture,resume,photo_proof,address_proof,permanent_address,current_address } = req.body;
+  const { title, id, cfranchise_id, password, email, mobile_no, personal_email, employee_code, personal_mobile, dob, blood_group, academic_qualification, joining_date, passport_picture, resume, photo_proof, address_proof, permanent_address, current_address } = req.body;
 
   try {
     // Use the poolPromise to get the connection pool
@@ -3570,7 +3582,10 @@ app.put("/putengineer", async (req, res) => {
     } else {
       // Update the engineer record if no duplicates are found
       const updateSql = `UPDATE awt_engineermaster 
-                         SET title = '${title}', cfranchise_id = '${cfranchise_id}', mobile_no = '${mobile_no}', email = '${email}', password = '${password}' 
+                         SET title = '${title}', cfranchise_id = '${cfranchise_id}', mobile_no = '${mobile_no}', email = '${email}', password = '${password}',
+                         personal_email = '${personal_email}', employee_code = '${employee_code}', personal_mobile = '${personal_mobile}', dob = '${dob}',
+                         blood_group = '${blood_group}', academic_qualification = '${academic_qualification}', joining_date = '${joining_date}', passport_picture = '${passport_picture},
+                         resume = '${resume}', photo_proof = '${photo_proof}', address_proof = '${address_proof}', permanent_address = '${permanent_address}', current_address = '${current_address}' 
                          WHERE id = '${id}'`;
 
       await pool.request().query(updateSql);
@@ -3631,7 +3646,7 @@ app.post("/addEngineer", async (req, res) => {
       .input('address_proof', address_proof)
       .input('permanent_address', permanent_address)
       .input('current_address', current_address)
-     
+
 
 
     console.log(sql)
@@ -5538,11 +5553,11 @@ app.get('/getcomplaint', async (req, res) => {
     const result = await pool.request()
       .query(`SELECT * FROM complaint_ticket WHERE engineer_id = '${en_id}' ORDER BY id DESC`);
 
-      if (result.recordset.length > 0) {
-        res.status(200).json({ data: result.recordset });
-      } else {
-        res.status(200).json({ message: 'No records found' });
-      }
+    if (result.recordset.length > 0) {
+      res.status(200).json({ data: result.recordset });
+    } else {
+      res.status(200).json({ message: 'No records found' });
+    }
 
   } catch (error) {
     console.error('Database Query Error:', error);
@@ -5557,11 +5572,11 @@ app.get('/SymptomCode', async (req, res) => {
     const result = await pool.request()
       .query(`select * from symptom_code where deleted = 0`);
 
-      if (result.recordset.length > 0) {
-        res.status(200).json({ data: result.recordset });
-      } else {
-        res.status(200).json({ message: 'No records found' });
-      }
+    if (result.recordset.length > 0) {
+      res.status(200).json({ data: result.recordset });
+    } else {
+      res.status(200).json({ message: 'No records found' });
+    }
 
   } catch (error) {
     console.error('Database Query Error:', error);
@@ -5575,11 +5590,11 @@ app.get('/CauseCode', async (req, res) => {
     const result = await pool.request()
       .query(`select * from cause_code where deleted = 0`);
 
-      if (result.recordset.length > 0) {
-        res.status(200).json({ data: result.recordset });
-      } else {
-        res.status(200).json({ message: 'No records found' });
-      }
+    if (result.recordset.length > 0) {
+      res.status(200).json({ data: result.recordset });
+    } else {
+      res.status(200).json({ message: 'No records found' });
+    }
 
   } catch (error) {
     console.error('Database Query Error:', error);
@@ -5593,11 +5608,11 @@ app.get('/ActionCode', async (req, res) => {
     const result = await pool.request()
       .query(`select * from action_code where deleted = 0`);
 
-      if (result.recordset.length > 0) {
-        res.status(200).json({ data: result.recordset });
-      } else {
-        res.status(200).json({ message: 'No records found' });
-      }
+    if (result.recordset.length > 0) {
+      res.status(200).json({ data: result.recordset });
+    } else {
+      res.status(200).json({ message: 'No records found' });
+    }
 
   } catch (error) {
     console.error('Database Query Error:', error);
@@ -5611,11 +5626,11 @@ app.get('/CallType', async (req, res) => {
     const result = await pool.request()
       .query(`select * from calltype where deleted = 0`);
 
-      if (result.recordset.length > 0) {
-        res.status(200).json({ data: result.recordset });
-      } else {
-        res.status(200).json({ message: 'No records found' });
-      }
+    if (result.recordset.length > 0) {
+      res.status(200).json({ data: result.recordset });
+    } else {
+      res.status(200).json({ message: 'No records found' });
+    }
 
   } catch (error) {
     console.error('Database Query Error:', error);
@@ -5629,11 +5644,11 @@ app.get('/CallStatus', async (req, res) => {
     const result = await pool.request()
       .query(`select * from call_status where deleted = 0`);
 
-      if (result.recordset.length > 0) {
-        res.status(200).json({ data: result.recordset });
-      } else {
-        res.status(200).json({ message: 'No records found' });
-      }
+    if (result.recordset.length > 0) {
+      res.status(200).json({ data: result.recordset });
+    } else {
+      res.status(200).json({ message: 'No records found' });
+    }
 
   } catch (error) {
     console.error('Database Query Error:', error);
@@ -5651,11 +5666,11 @@ app.get('/getcomplaintdetailsdata', async (req, res) => {
     const result = await pool.request()
       .query(`SELECT * FROM complaint_ticket WHERE id = '${id}'`);
 
-      if (result.recordset.length > 0) {
-        res.status(200).json({ data: result.recordset });
-      } else {
-        res.status(200).json({ message: 'No records found' });
-      }
+    if (result.recordset.length > 0) {
+      res.status(200).json({ data: result.recordset });
+    } else {
+      res.status(200).json({ message: 'No records found' });
+    }
 
   } catch (error) {
     console.error('Database Query Error:', error);
@@ -5673,11 +5688,11 @@ app.get('/getremark', async (req, res) => {
     const result = await pool.request()
       .query(`SELECT * FROM awt_complaintremark WHERE ticket_no = '${id}'`);
 
-      if (result.recordset.length > 0) {
-        res.status(200).json({ data: result.recordset });
-      } else {
-        res.status(200).json({ Message: 'No records found' });
-      }
+    if (result.recordset.length > 0) {
+      res.status(200).json({ data: result.recordset });
+    } else {
+      res.status(200).json({ Message: 'No records found' });
+    }
 
   } catch (error) {
     console.error('Database Query Error:', error);
@@ -5687,7 +5702,7 @@ app.get('/getremark', async (req, res) => {
 
 // .input('call_remark', sql.VarChar, call_remark)
 app.post('/updatecomplaint', async (req, res) => {
-  const { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode, com_id ,warranty_status} = req.body;
+  const { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode, com_id, warranty_status } = req.body;
 
   try {
     const pool = await poolPromise;
@@ -5720,23 +5735,23 @@ app.post('/updatecomplaint', async (req, res) => {
 app.get("/getcomplainlist", async (req, res) => {
   try {
     const pool = await poolPromise;
-    
+
 
     const { fromDate, toDate, customerName, customerEmail, serialNo, productCode, customerMobile } = req.query;
 
     let sql = "SELECT * FROM complaint_ticket WHERE deleted = 0";
-    
+
     // Add date range filter if both dates are provided
     if (fromDate && toDate) {
       sql += ` AND CAST(ticket_date AS DATE) >= CAST('${fromDate}' AS DATE) 
                AND CAST(ticket_date AS DATE) <= CAST('${toDate}' AS DATE)`;
     }
-    
- 
+
+
     if (customerName) {
       sql += ` AND customer_name LIKE '%${customerName}%'`;
     }
-    
+
     if (customerEmail) {
       sql += ` AND customer_email LIKE '%${customerEmail}%'`;
     }
@@ -5748,11 +5763,11 @@ app.get("/getcomplainlist", async (req, res) => {
     if (productCode) {
       sql += ` AND ModelNumber LIKE '%${productCode}%'`;
     }
-    
+
     // Add ordering
     sql += " ORDER BY id DESC";
 
- console.log(sql,"backend SQL Query")
+    console.log(sql, "backend SQL Query")
     const result = await pool.request().query(sql);
 
     return res.json(result.recordset);

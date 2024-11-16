@@ -351,6 +351,10 @@ const Router = createBrowserRouter([
         element: <AddProduct />,
       },
       {
+        path: "/addengineer/:engineerid",
+        element: <EngineerMaster />,
+      },
+      {
         path: "/engineer",
         element: <Engineer />,
       },
