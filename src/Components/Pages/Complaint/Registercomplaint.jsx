@@ -10,11 +10,28 @@ export function Registercomplaint(params) {
     const [hideticket, setHideticket] = useState(false)
     const [serachval, setSearch] = useState('')
     const [searchdata, setSearchData] = useState([])
+    const [ProductCustomer, setProductCustomer] = useState([])
+    const [DuplicateCustomerNumber, setDuplicateCustomerNumber] = useState([])
+    const [hasSearched, setHasSearched] = useState(false)
     const [form, setForm] = useState(false)
     const [state, setState] = useState([])
     const [product, setProduct] = useState([])
+    const [MasterPartner, setMasterPartner] = useState([])
+    const [ChildPartner, setChildPartner] = useState([])
+    const [duplicate, setDuplicate] = useState([]);
     const [ticket, setTicket] = useState([])
 
+    const created_by = localStorage.getItem("userId"); // Get user ID from localStorage
+    const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
+
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const year = date.getFullYear();
+
+        return `${day}-${month}-${year}`;
+      };
 
     //setting the values
 
@@ -37,9 +54,14 @@ export function Registercomplaint(params) {
         invoice_date: "",
         call_charge: "",
         model: "",
-        serial: ""
-    })
+        serial: "",
+        purchase_date: "",
+        master_service_partner: "",
+        child_service_partner: "",
+        customer_id: "",
+        created_by: created_by,
 
+    })
 
     //This is for State Dropdown
 
@@ -54,7 +76,7 @@ export function Registercomplaint(params) {
             })
     }
 
-    //This is for product 
+    //This is for product
 
     async function getProduct(params) {
 
@@ -68,48 +90,98 @@ export function Registercomplaint(params) {
 
     }
 
+    //Master Service Partner
+    async function getMasterPartner(params) {
+
+        axios.get(`${Base_Url}/getmasterpartner`)
+            .then((res) => {
+                if (res.data) {
+
+                    setMasterPartner(res.data)
+                }
+            })
+
+    }
+
+    //Child Service Partner
+    async function getChildPartner(params) {
+
+        axios.get(`${Base_Url}/getchildpartner`)
+            .then((res) => {
+                if (res.data) {
+
+                    setChildPartner(res.data)
+                }
+            })
+
+    }
 
     useEffect(() => {
+        console.log("DuplicateCustomerNumber",DuplicateCustomerNumber);
+        if (DuplicateCustomerNumber) {
+            fetchComplaintDuplicate(DuplicateCustomerNumber);
+          }
         getState()
         getProduct()
-    }, [])
+        getMasterPartner()
+        getChildPartner()
+    }, [DuplicateCustomerNumber])
 
 
 
-
-    //This function is for search 
+    //This function is for search
 
     const searchResult = () => {
+        setHasSearched(true); // Set that a search has been performed
 
-        axios.post(`${Base_Url}/getticket`, { searchparam: serachval })
+        axios.post(`${Base_Url}/getticketendcustomer`, { searchparam: serachval })
             .then((res) => {
-                console.log(res.data)
-                if (res.data && res.data.length > 0) {
+                console.log(res.data.information)
+                if (res.data.information && res.data.information.length > 0) {
 
-                    console.log(res.data)
-                    setSearchData(res.data[0])
+                    // console.log(res.data,"Search Data")
+                    // console.log(res.data[0],"Hide Ticket")
+                    setDuplicateCustomerNumber(res.data.information[0].mobileno);
+                    setSearchData(res.data.information[0])
+                    setProductCustomer(res.data.product)
+
                     setHideticket(true)
-                    setTicket(res.data)
-
+                    // setTicket(res.data)
                     setValue({
-                        complaint_date: res.data[0].ticket_date,
-                        customer_name: res.data[0].customer_name,
-                        contact_person: res.data[0].customer_mobile,
-                        email: res.data[0].customer_email,
-                        mobile: res.data[0].customer_mobile,
-                        alt_mobile: "",
-                        address: res.data[0].address,
-                        state: res.data[0].state,
-                        city: res.data[0].city,
-                        area: res.data[0].area,
-                        pincode: res.data[0].pincode,
-                        mode_of_contact: res.data[0].mode_of_contact,
-                        ticket_type: res.data[0].ticket_type,
-                        cust_type: res.data[0].call_type,
-                        warrenty_status: res.data[0].warranty_status,
-                        invoice_date: res.data[0].invoice_date,
-                        call_charge: res.data[0].call_charges
+                        // complaint_date: res.data[0].ticket_date,
+                        // contact_person: res.data[0].customer_mobile,
+                        customer_name: res.data.information[0].customer_name,
+                        email: res.data.information[0].email,
+                        mobile: res.data.information[0].mobileno,
+                        address: res.data.information[0].address,
+                        customer_id: res.data.information[0].id,
+
+
+
+                        // alt_mobile: "",
+                        // state: res.data[0].state,
+                        // city: res.data[0].city,
+                        // area: res.data[0].area,
+                        // pincode: res.data[0].pincode,
+                        // mode_of_contact: res.data[0].mode_of_contact,
+                        // ticket_type: res.data[0].ticket_type,
+                        // cust_type: res.data[0].call_type,
+                        // warrenty_status: res.data[0].warranty_status,
+                        // invoice_date: res.data[0].invoice_date,
+                        // call_charge: res.data[0].call_charges,
+                        // purchase_date: res.data[0].purchase_date || "",
+                        // serial: res.data[0].serial || "",
+                        // master_service_partner: res.data[0].master_service_partner || "",
+                        // child_service_partner: res.data[0].child_service_partner || ""
+
                     })
+
+
+                } else {
+                     // If no results found, clear previous data
+                    setSearchData([])
+                    setHideticket(false)
+                    setTicket([])
                 }
             })
 
@@ -141,9 +213,15 @@ export function Registercomplaint(params) {
             warrenty_status: value.warrenty_status,
             invoice_date: value.invoice_date,
             call_charge: value.call_charge,
-            cust_id: searchdata.customer_id,
-            model: value.model || searchdata.ModelNumber,
-            serial: value.serial
+            cust_id: searchdata.customer_id || "",
+            model: value.model,
+            serial: value.serial,
+
+             // Add new fields to the data object
+            purchase_date: value.purchase_date,
+            master_service_partner: value.master_service_partner,
+            child_service_partner: value.child_service_partner
+
 
         }
 
@@ -167,8 +245,22 @@ export function Registercomplaint(params) {
 
     const onHandleChange = (e) => {
         setValue((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+
+        // if (name === "master_service_partner"){
+
+        // }
     };
 
+    const fetchComplaintDuplicate = async () => {
+        try {
+          const response = await axios.get(
+            `${Base_Url}/getComplaintDuplicateRegisterPage/${DuplicateCustomerNumber}`
+          );
+          setDuplicate(response.data);
+        } catch (error) {
+          console.error("Error fetching complaint details:", error);
+        }
+      };
 
 
 
@@ -183,7 +275,6 @@ export function Registercomplaint(params) {
                     </div>
                 </div>
             </div>
-
             <Toaster position="bottom-center"
                 reverseOrder={false} />
 
@@ -219,13 +310,14 @@ export function Registercomplaint(params) {
 
                             <div className="row mb-3">
                                 <div className="col-md-5">
-                                    <p className="mp0">M: {searchdata.customer_mobile}</p>
+                                    <p className="mp0">M: {searchdata.mobileno}</p>
                                 </div>
                             </div>
 
                             <ul className="nav nav-tabs" id="myTab2" role="tablist">
                                 <li className="nav-item">
                                     <a className="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Products</a>
+
                                 </li>
                             </ul>
 
@@ -233,19 +325,22 @@ export function Registercomplaint(params) {
                                 <div className="tab-pane active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
                                     <table className="table table-striped">
                                         <tbody>
-                                            <tr>
-                                                <td><div>{searchdata.ModelNumber}</div></td>
-                                                <td>
-                                                    <div className="text-right pb-2">
-                                                        <button onClick={() => setForm(true)} className="btn btn-sm btn-primary generateTicket">New Ticket</button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </tbody>
 
+                                            {ProductCustomer.map((item, index) => (
+                                                <tr key={index}>
+                                                    <td><div>{item.product}</div></td>
+                                                    <td>
+                                                        <div className="text-right pb-2">
+                                                            <button onClick={() => setForm(true)} className="btn btn-sm btn-primary generateTicket">New Ticket</button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
                                     </table>
                                 </div>
                             </div>
+
 
                             <ul className="nav nav-tabs" id="myTab" role="tablist">
                                 <li className="nav-item">
@@ -256,24 +351,21 @@ export function Registercomplaint(params) {
                             <div className="tab-content">
                                 <div className="tab-pane active" id="home" role="tabpanel" aria-labelledby="home-tab">
                                     <table className="table table-striped">
-                                        <tbody>
-                                            {ticket.map((item) => {
-                                                return (
-                                                    <tr>
-                                                        <td>
-                                                            <div>Ticket No: {item.ticket_no}</div>
-                                                            <div>{item.ticket_date}</div>
-                                                        </td>
-                                                        <td>{item.ModelNumber}</td>
-                                                        <td>
-                                                            <div>{item.warranty_status}</div>
-                                                            <span>View Info</span>
-                                                        </td>
-                                                    </tr>
-                                                )
-                                            })}
-
-                                        </tbody>
+                                    <tbody>
+                                            {duplicate.map((item, index) => (
+                                                <tr key={index}>
+                                                    <td>
+                                                        <div style={{ fontSize: "14px"}}>{item.ticket_no}</div>
+                                                        <span style={{ fontSize: "14px"}}>{formatDate(item.ticket_date)}</span>
+                                                    </td>
+                                                    <td style={{ fontSize: "14px"}}>{item.ModelNumber}</td>
+                                                    <td>
+                                                        <div style={{ fontSize: "14px"}}>{item.call_status}</div>
+                                                        <span style={{ fontSize: "14px"}}>View Info</span>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                    </tbody>
 
                                     </table>
                                 </div>
@@ -283,8 +375,9 @@ export function Registercomplaint(params) {
 
                     </div> : <div className="card">
                         <div className="card-body">
-                            {searchdata.length == 0 && <p>No Result Found</p>}
-                            <button onClick={() => setForm(true)} className="btn btn-sm btn-primary">New Ticket</button>
+                             {/* Only show "No Result Found" if a search was performed and no results were found */}
+                                {hasSearched && searchdata.length === 0 && <p>No Result Found</p>}
+                                <button onClick={() => setForm(true)} className="btn btn-sm btn-primary">New Ticket</button>
                         </div>
                     </div>}
 
@@ -317,34 +410,41 @@ export function Registercomplaint(params) {
                                     </div>
                                     <div className="col-md-2">
                                         <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Serial No</p>
-                                        <p></p>
-                                        {searchdata.length == 0 && <div className="mb-3">
-                                            {/* <select className="form-control" onChange={onHandleChange} value={value.ticket_type} name="ticket_type">
-                                                <option value="">Select</option>
-                                                {product.map((item) => {
-                                                    return (
-                                                        <option value={item.id}>{item.item_code}</option>
+                                        <div className="mb-3">
+                                            <input
+                                                type="text"
+                                                name="serial"
+                                                value={value.serial}
+                                                onChange={onHandleChange}
+                                                className="form-control"
+                                                placeholder="Enter.."
+                                            />
+                                        </div>
 
-                                                    )
-                                                })}
-                                            </select> */}
-                                            <div className="">
-                                                <div className="mb-3">
-                                                  
-                                                    <input type="email"  onChange={onHandleChange} className="form-control" placeholder="Enter.." />
-                                                </div>
+                                    </div>                                       {/* Add Purchase Date field */}
+                                        <div className="col-md-3">
+                                            <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Purchase Date</p>
+                                            <div className="mb-3">
+                                                <input
+                                                    type="date"
+                                                    name="purchase_date"
+                                                    onChange={onHandleChange}
+                                                    value={value.purchase_date}
+                                                    className="form-control"
+                                                />
                                             </div>
-                                        </div>}
-
-                                    </div>
-                                    <div className="col-md-2">
-                                        <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Purchase Date</p>
-                                        <p>{searchdata.invoice_date}</p>
-                                    </div>
-                                    <div className="col-md-2">
-                                        <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Warranty Status</p>
-                                        <p>{searchdata.warranty_status}</p>
-                                    </div>
+                                        </div>
+                                     {/* Add Warranty Status field */}
+                                        <div className="col-md-3">
+                                            <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Warranty Status</p>
+                                            <div className="mb-3">
+                                            <select className="form-control" onChange={onHandleChange} value={value.warrenty_status} name="warrenty_status">
+                                                <option value="">Select Option</option>
+                                                <option value="WARRANTY">IN WARRANTY</option>
+                                                <option value="OUT OF WARRANTY">OUT OF WARRANTY</option>
+                                            </select>
+                                            </div>
+                                        </div>
                                 </div>
 
                                 <div className="row">
@@ -463,7 +563,7 @@ export function Registercomplaint(params) {
                                             </select>
                                         </div>
                                     </div>
-                                    <div className="col-md-4">
+                                    {/* <div className="col-md-4">
                                         <div className="mb-3">
                                             <label className="form-label">Warrenty Status</label>
                                             <select className="form-control" onChange={onHandleChange} value={value.warrenty_status} name="warrenty_status">
@@ -472,7 +572,7 @@ export function Registercomplaint(params) {
                                                 <option value="OUT OF WARRANTY">No</option>
                                             </select>
                                         </div>
-                                    </div>
+                                    </div> */}
                                     <div className="col-md-4">
                                         <div className="mb-3">
                                             <label className="form-label">Invoice Date</label>
@@ -505,24 +605,43 @@ export function Registercomplaint(params) {
 
                         <>
                             <div className="card mb-3" id="productInfo">
-                                <div className="card-body">
-                                    <h4 className="pname">Master Service 
-                                    Partner</h4>
-                                    <div className="mb-3">
-                                        <select className="form-control">
-                                            <option value="TEJKARAN MANMAL" >TEJKARAN MANMAL</option>
-                                            <option value="Hafele India Private Limited">Hafele India Private Limited</option>
-                                        </select>
+                            <div className="card-body">
+
+                                <h4 className="pname">Master Service Partner</h4>
+                                <div className="mb-3">
+                                    <select
+                                        className="form-control"
+                                        name="master_service_partner"
+                                        value={value.master_service_partner}
+                                        onChange={onHandleChange}
+                                    >
+                                        <option value="">Select</option>
+                                        {MasterPartner.map((partner, index) => (
+                                        <option key={index} value={partner.title}>
+                                            {partner.title}
+                                        </option>
+                                        ))}
+                                    </select>
                                     </div>
 
-                                    <h4 className="pname">Child Service Partner</h4>
-                                    <div className="mb-3">
-                                        <select className="form-control">
-                                            <option value="TEJKARAN MANMAL" >SHREE SAI SERVICES</option>
-                                            <option value="Hafele India Private Limited">ELECTRONICS WORLD SERVICE</option>
-                                        </select>
-                                    </div>
+
+                                <h4 className="pname">Child Service Partner</h4>
+                                <div className="mb-3">
+                                    <select
+                                        className="form-control"
+                                        name="child_service_partner"
+                                        value={value.child_service_partner}
+                                        onChange={onHandleChange}
+                                    >
+                                        <option value="">Select</option>
+                                        {ChildPartner.map((child, index) => (
+                                        <option key={index} value={child.title}>
+                                            {child.title}
+                                        </option>
+                                        ))}
+                                    </select>
                                 </div>
+                            </div>
                             </div>
 
                             <div className="card mb-3" id="engineerInfo">

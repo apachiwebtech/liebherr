@@ -196,9 +196,9 @@ app.put("/putdata", async (req, res) => {
 
     // Step 1: Check if the same title exists for another record (other than the current one) and is not soft-deleted
     const checkDuplicateSql = `
-      SELECT * FROM awt_country 
-      WHERE title = '${title}' 
-        AND id != ${id} 
+      SELECT * FROM awt_country
+      WHERE title = '${title}'
+        AND id != ${id}
         AND deleted = 0
     `;
     const result = await pool.request().query(checkDuplicateSql);
@@ -209,8 +209,8 @@ app.put("/putdata", async (req, res) => {
     } else {
       // Step 2: Update the record if no duplicates are found
       const updateSql = `
-        UPDATE awt_country 
-        SET title = '${title}' 
+        UPDATE awt_country
+        SET title = '${title}'
         WHERE id = ${id}
       `;
       await pool.request().query(updateSql);
@@ -232,8 +232,8 @@ app.post("/deletedata", async (req, res) => {
     const pool = await poolPromise;
 
     const sql = `
-      UPDATE awt_country 
-      SET deleted = 1 
+      UPDATE awt_country
+      SET deleted = 1
       WHERE id = ${id}
     `;
     const result = await pool.request().query(sql);
@@ -253,9 +253,9 @@ app.get("/getregionsr", async (req, res) => {
     const pool = await poolPromise;
 
     const sql = `
-      SELECT r.*, c.title as country_title 
-      FROM awt_region r 
-      JOIN awt_country c ON r.country_id = c.id 
+      SELECT r.*, c.title as country_title
+      FROM awt_region r
+      JOIN awt_country c ON r.country_id = c.id
       WHERE r.deleted = 0
     `;
     const result = await pool.request().query(sql);
@@ -276,8 +276,8 @@ app.get("/requestregion/:id", async (req, res) => {
     const pool = await poolPromise;
 
     const sqlQuery = `
-      SELECT * FROM awt_region 
-      WHERE id = ${id} 
+      SELECT * FROM awt_region
+      WHERE id = ${id}
         AND deleted = 0
     `;
     const result = await pool.request().query(sqlQuery);
@@ -299,7 +299,7 @@ app.post("/postregion", async (req, res) => {
 
     // Step 1: Check if the same title exists and is not soft-deleted
     const checkDuplicateSql = `
-      SELECT * FROM awt_region 
+      SELECT * FROM awt_region
       WHERE title = '${title}' AND country_id = ${country_id} AND deleted = 0
     `;
     const duplicateResult = await pool.request().query(checkDuplicateSql);
@@ -310,8 +310,8 @@ app.post("/postregion", async (req, res) => {
     } else {
       // Step 2: Check if the same title exists but is soft-deleted
       const checkSoftDeletedSql = `
-        SELECT * FROM awt_region 
-        WHERE title = '${title}' 
+        SELECT * FROM awt_region
+        WHERE title = '${title}'
           AND deleted = 1
       `;
       const softDeletedResult = await pool.request().query(checkSoftDeletedSql);
@@ -319,8 +319,8 @@ app.post("/postregion", async (req, res) => {
       if (softDeletedResult.recordset.length > 0) {
         // Soft-deleted entry exists, restore it
         const restoreSoftDeletedSql = `
-          UPDATE awt_region 
-          SET deleted = 0 
+          UPDATE awt_region
+          SET deleted = 0
           WHERE title = '${title}'
         `;
         await pool.request().query(restoreSoftDeletedSql);
@@ -328,7 +328,7 @@ app.post("/postregion", async (req, res) => {
       } else {
         // Step 3: Insert new entry if no duplicates found
         const insertSql = `
-          INSERT INTO awt_region (title, country_id) 
+          INSERT INTO awt_region (title, country_id)
           VALUES ('${title}', ${country_id})
         `;
         await pool.request().query(insertSql);
@@ -351,8 +351,8 @@ app.put("/putregion", async (req, res) => {
 
     // Step 1: Check if the same title exists for another record (other than the current one) and is not soft-deleted
     const checkDuplicateSql = `
-      SELECT * FROM awt_region 
-      WHERE title = '${title}' AND country_id = ${country_id} AND id != ${id} 
+      SELECT * FROM awt_region
+      WHERE title = '${title}' AND country_id = ${country_id} AND id != ${id}
         AND deleted = 0
     `;
     const duplicateResult = await pool.request().query(checkDuplicateSql);
@@ -363,8 +363,8 @@ app.put("/putregion", async (req, res) => {
     } else {
       // Step 2: Update the record if no duplicates are found
       const updateSql = `
-        UPDATE awt_region 
-        SET title = '${title}', country_id = ${country_id} 
+        UPDATE awt_region
+        SET title = '${title}', country_id = ${country_id}
         WHERE id = ${id}
       `;
       await pool.request().query(updateSql);
@@ -406,10 +406,10 @@ app.get("/getgeostates", async (req, res) => {
 
     // SQL query to fetch geostates, including country and region titles
     const sqlQuery = `
-      SELECT gs.*, c.title as country_title, r.title as region_title 
-      FROM awt_geostate gs 
-      JOIN awt_country c ON gs.country_id = c.id 
-      JOIN awt_region r ON gs.region_id = r.id 
+      SELECT gs.*, c.title as country_title, r.title as region_title
+      FROM awt_geostate gs
+      JOIN awt_country c ON gs.country_id = c.id
+      JOIN awt_region r ON gs.region_id = r.id
       WHERE gs.deleted = 0
     `;
 
@@ -439,7 +439,7 @@ app.get("/requestgeostate/:id", async (req, res) => {
 
     // SQL query to fetch the geostate by ID, excluding soft-deleted records
     const sqlQuery = `
-      SELECT * FROM awt_geostate 
+      SELECT * FROM awt_geostate
       WHERE id = ${id} AND deleted = 0
     `;
 
@@ -469,7 +469,7 @@ app.post("/postgeostate", async (req, res) => {
 
     // Check if the same title exists and is not soft-deleted
     const checkDuplicateSql = `
-      SELECT * FROM awt_geostate 
+      SELECT * FROM awt_geostate
       WHERE title = '${title}' AND country_id = ${country_id} AND region_id = ${region_id} AND deleted = 0
     `;
 
@@ -482,7 +482,7 @@ app.post("/postgeostate", async (req, res) => {
 
     // Check if the same title exists but is soft-deleted
     const checkSoftDeletedSql = `
-      SELECT * FROM awt_geostate 
+      SELECT * FROM awt_geostate
       WHERE title = '${title}' AND deleted = 1
     `;
 
@@ -491,7 +491,7 @@ app.post("/postgeostate", async (req, res) => {
     if (softDeletedResult.recordset.length > 0) {
       // Restore soft-deleted entry
       const restoreSoftDeletedSql = `
-        UPDATE awt_geostate SET deleted = 0 
+        UPDATE awt_geostate SET deleted = 0
         WHERE title = '${title}'
       `;
 
@@ -500,7 +500,7 @@ app.post("/postgeostate", async (req, res) => {
     } else {
       // Insert new entry if no duplicates found
       const insertSql = `
-        INSERT INTO awt_geostate (title, country_id, region_id) 
+        INSERT INTO awt_geostate (title, country_id, region_id)
         VALUES ('${title}', ${country_id}, ${region_id})
       `;
 
@@ -524,7 +524,7 @@ app.put("/putgeostate", async (req, res) => {
 
     // Check if the same title exists for another record, excluding the current ID
     const checkDuplicateSql = `
-      SELECT * FROM awt_geostate 
+      SELECT * FROM awt_geostate
       WHERE title = '${title}' AND country_id = ${country_id} AND region_id = ${region_id} AND id != ${id} AND deleted = 0
     `;
 
@@ -536,8 +536,8 @@ app.put("/putgeostate", async (req, res) => {
 
     // Update the record if no duplicates are found
     const updateSql = `
-      UPDATE awt_geostate 
-      SET title = '${title}', country_id = ${country_id}, region_id = ${region_id} 
+      UPDATE awt_geostate
+      SET title = '${title}', country_id = ${country_id}, region_id = ${region_id}
       WHERE id = ${id}
     `;
 
@@ -551,7 +551,7 @@ app.put("/putgeostate", async (req, res) => {
 });
 
 
-// API to soft delete a state 
+// API to soft delete a state
 app.post("/deletegeostate", async (req, res) => {
   const { id } = req.body;
 
@@ -561,8 +561,8 @@ app.post("/deletegeostate", async (req, res) => {
 
     // SQL query to mark the record as deleted (soft delete)
     const sql = `
-      UPDATE awt_geostate 
-      SET deleted = 1 
+      UPDATE awt_geostate
+      SET deleted = 1
       WHERE id = ${id}
     `;
 
@@ -590,8 +590,8 @@ app.get("/getregionscity/:country_id", async (req, res) => {
 
     // SQL query to fetch regions for the given country_id, excluding soft-deleted records
     const sql = `
-      SELECT * FROM awt_region 
-      WHERE country_id = ${country_id} 
+      SELECT * FROM awt_region
+      WHERE country_id = ${country_id}
       AND deleted = 0
     `;
 
@@ -618,8 +618,8 @@ app.get("/getgeostatescity/:region_id", async (req, res) => {
 
     // SQL query to fetch geostates for the given region_id, excluding soft-deleted records
     const sql = `
-      SELECT * FROM awt_geostate 
-      WHERE region_id = ${region_id} 
+      SELECT * FROM awt_geostate
+      WHERE region_id = ${region_id}
       AND deleted = 0
     `;
 
@@ -645,8 +645,8 @@ app.get("/getdistrictcity/:geostateID", async (req, res) => {
 
 
     const sql = `
-      SELECT * FROM awt_district 
-      WHERE geostate_id = ${geostateID} 
+      SELECT * FROM awt_district
+      WHERE geostate_id = ${geostateID}
       AND deleted = 0
     `;
 
@@ -836,8 +836,8 @@ app.get("/getregions/:country_id", async (req, res) => {
     const pool = await poolPromise;
 
     const sql = `
-      SELECT * FROM awt_region 
-      WHERE country_id = ${country_id} 
+      SELECT * FROM awt_region
+      WHERE country_id = ${country_id}
         AND deleted = 0
     `;
     const result = await pool.request().query(sql);
@@ -858,8 +858,8 @@ app.get("/getgeostates/:region_id", async (req, res) => {
     const pool = await poolPromise;
 
     const sql = `
-      SELECT * FROM awt_geostate 
-      WHERE region_id = ${region_id} 
+      SELECT * FROM awt_geostate
+      WHERE region_id = ${region_id}
         AND deleted = 0
     `;
     const result = await pool.request().query(sql);
@@ -880,8 +880,8 @@ app.get("/getgeocities_a/:geostate_id", async (req, res) => {
     const pool = await poolPromise;
 
     const sql = `
-      SELECT * FROM awt_geocity 
-      WHERE geostate_id = ${geostate_id} 
+      SELECT * FROM awt_geocity
+      WHERE geostate_id = ${geostate_id}
         AND deleted = 0
     `;
     const result = await pool.request().query(sql);
@@ -932,9 +932,9 @@ app.get("/requestarea/:id", async (req, res) => {
     const pool = await poolPromise;
 
     const sqlQuery = `
-      SELECT a.*,   
-             c.title AS country_title, 
-             r.title AS region_title, 
+      SELECT a.*,
+             c.title AS country_title,
+             r.title AS region_title,
              gs.title AS geostate_title
       FROM awt_district  a
       JOIN awt_country c ON a.country_id = c.id
@@ -1020,8 +1020,8 @@ app.put("/putarea", async (req, res) => {
 
     // Update the area
     const updateSql = `
-    UPDATE awt_district 
-    SET title = '${title}', country_id = ${country_id}, region_id = ${region_id}, 
+    UPDATE awt_district
+    SET title = '${title}', country_id = ${country_id}, region_id = ${region_id},
     geostate_id = ${geostate_id}
     WHERE id = ${id}
     `;
@@ -1146,10 +1146,10 @@ app.get("/getpincodes", async (req, res) => {
 
     // Direct SQL query without parameter binding
     const sql = `
-      SELECT p.*, 
-             c.title as country_title, 
-             r.title as region_title, 
-             gs.title as geostate_title, 
+      SELECT p.*,
+             c.title as country_title,
+             r.title as region_title,
+             gs.title as geostate_title,
              gc.title as geocity_title,
              a.title as area_title
       FROM awt_pincode p
@@ -1182,10 +1182,10 @@ app.get("/requestpincode/:id", async (req, res) => {
 
     // Direct SQL query without parameter binding
     const sql = `
-      SELECT p.*, 
-                  c.title AS country_title, 
-                  r.title AS region_title, 
-                  gs.title AS geostate_title, 
+      SELECT p.*,
+                  c.title AS country_title,
+                  r.title AS region_title,
+                  gs.title AS geostate_title,
                   gc.title AS geocity_title,
                   a.title AS area_title
             FROM awt_pincode p
@@ -1223,9 +1223,9 @@ app.post("/postpincode", async (req, res) => {
 
     // Check for duplicates based on pincode and country_id
     const checkDuplicateSql = `
-      SELECT * FROM awt_pincode 
-      WHERE pincode = ${pincode} 
-      AND country_id = ${country_id} 
+      SELECT * FROM awt_pincode
+      WHERE pincode = ${pincode}
+      AND country_id = ${country_id}
       AND deleted = 0
     `;
     const duplicateResult = await pool.request().query(checkDuplicateSql);
@@ -1237,7 +1237,7 @@ app.post("/postpincode", async (req, res) => {
     } else {
       // If no duplicate, insert the new pincode
       const insertSql = `
-        INSERT INTO awt_pincode (pincode, country_id, region_id, geostate_id, geocity_id, area_id) 
+        INSERT INTO awt_pincode (pincode, country_id, region_id, geostate_id, geocity_id, area_id)
         VALUES (${pincode}, ${country_id}, ${region_id}, ${geostate_id}, ${geocity_id}, ${area_id})
       `;
       const insertResult = await pool.request().query(insertSql);
@@ -1268,10 +1268,10 @@ app.put("/putpincode", async (req, res) => {
 
     // Check for duplicates based on pincode and country_id
     const checkDuplicateSql = `
-      SELECT * FROM awt_pincode 
-      WHERE pincode = ${pincode} 
-      AND country_id = ${country_id} 
-      AND id != ${id} 
+      SELECT * FROM awt_pincode
+      WHERE pincode = ${pincode}
+      AND country_id = ${country_id}
+      AND id != ${id}
       AND deleted = 0
     `;
     const duplicateResult = await pool.request().query(checkDuplicateSql);
@@ -1283,13 +1283,13 @@ app.put("/putpincode", async (req, res) => {
     } else {
       // If no duplicate, update the pincode
       const updateSql = `
-        UPDATE awt_pincode 
-        SET pincode = ${pincode}, 
-            country_id = ${country_id}, 
-            region_id = ${region_id}, 
-            geostate_id = ${geostate_id}, 
-            geocity_id = ${geocity_id}, 
-            area_id = ${area_id} 
+        UPDATE awt_pincode
+        SET pincode = ${pincode},
+            country_id = ${country_id},
+            region_id = ${region_id},
+            geostate_id = ${geostate_id},
+            geocity_id = ${geocity_id},
+            area_id = ${area_id}
         WHERE id = ${id}
       `;
       const updateResult = await pool.request().query(updateSql);
@@ -1312,8 +1312,8 @@ app.post("/deletepincode", async (req, res) => {
 
     // Direct SQL query without parameter binding
     const sql = `
-      UPDATE awt_pincode 
-      SET deleted = 1 
+      UPDATE awt_pincode
+      SET deleted = 1
       WHERE id = ${id}
     `;
 
@@ -1358,8 +1358,8 @@ app.get("/getcat", async (req, res) => {
 
     // Direct SQL query
     const sql = `
-      SELECT * 
-      FROM awt_category 
+      SELECT *
+      FROM awt_category
       WHERE deleted = 0
     `;
 
@@ -1384,8 +1384,8 @@ app.post("/postdatacat", async (req, res) => {
 
     // Step 1: Check if the same title exists and is not soft-deleted
     const checkDuplicateSql = `
-      SELECT * 
-      FROM awt_category 
+      SELECT *
+      FROM awt_category
       WHERE title = '${title}' AND deleted = 0
     `;
     const duplicateCheckResult = await pool.request().query(checkDuplicateSql);
@@ -1396,8 +1396,8 @@ app.post("/postdatacat", async (req, res) => {
     } else {
       // Step 2: Check if the same title exists but is soft-deleted
       const checkSoftDeletedSql = `
-        SELECT * 
-        FROM awt_category 
+        SELECT *
+        FROM awt_category
         WHERE title = '${title}' AND deleted = 1
       `;
       const softDeletedCheckResult = await pool.request().query(checkSoftDeletedSql);
@@ -1405,8 +1405,8 @@ app.post("/postdatacat", async (req, res) => {
       if (softDeletedCheckResult.recordset.length > 0) {
         // If soft-deleted data exists, restore the entry
         const restoreSoftDeletedSql = `
-          UPDATE awt_category 
-          SET deleted = 0 
+          UPDATE awt_category
+          SET deleted = 0
           WHERE title = '${title}'
         `;
         await pool.request().query(restoreSoftDeletedSql);
@@ -1414,7 +1414,7 @@ app.post("/postdatacat", async (req, res) => {
       } else {
         // Step 3: Insert new entry if no duplicates found
         const insertSql = `
-          INSERT INTO awt_category (title) 
+          INSERT INTO awt_category (title)
           VALUES ('${title}')
         `;
         await pool.request().query(insertSql);
@@ -1437,8 +1437,8 @@ app.get("/requestdatacat/:id", async (req, res) => {
 
     // Direct SQL query without parameter binding
     const sql = `
-      SELECT * 
-      FROM awt_category 
+      SELECT *
+      FROM awt_category
       WHERE id = ${id} AND deleted = 0
     `;
 
@@ -1468,8 +1468,8 @@ app.put("/putcatdata", async (req, res) => {
 
     // Step 1: Direct SQL query to check for duplicates without parameter binding
     const checkDuplicateSql = `
-      SELECT * 
-      FROM awt_category 
+      SELECT *
+      FROM awt_category
       WHERE title = '${title}' AND id != ${id} AND deleted = 0
     `;
 
@@ -1482,8 +1482,8 @@ app.put("/putcatdata", async (req, res) => {
     } else {
       // Step 2: Update the record if no duplicates are found
       const updateSql = `
-        UPDATE awt_category 
-        SET title = '${title}' 
+        UPDATE awt_category
+        SET title = '${title}'
         WHERE id = ${id}
       `;
 
@@ -1508,8 +1508,8 @@ app.post("/deletecatdata", async (req, res) => {
 
     // Direct SQL query without parameter binding
     const sql = `
-      UPDATE awt_category 
-      SET deleted = 1 
+      UPDATE awt_category
+      SET deleted = 1
       WHERE id = ${id}
     `;
 
@@ -1533,10 +1533,10 @@ app.get("/getsubcategory", async (req, res) => {
 
     // Direct SQL query without parameter binding
     const sql = `
-      SELECT r.*, 
-             c.title as category_title 
-      FROM awt_subcat r 
-      JOIN awt_category c ON r.category_id = c.id 
+      SELECT r.*,
+             c.title as category_title
+      FROM awt_subcat r
+      JOIN awt_category c ON r.category_id = c.id
       WHERE r.deleted = 0
     `;
 
@@ -1562,8 +1562,8 @@ app.get("/requestsubcat/:id", async (req, res) => {
 
 
     const sql = `
-      SELECT * 
-      FROM awt_subcat 
+      SELECT *
+      FROM awt_subcat
       WHERE id = ${id} AND deleted = 0
     `;
 
@@ -1588,8 +1588,8 @@ app.post("/postsubcategory", async (req, res) => {
 
     // Step 1: Check if the same title exists and is not soft-deleted
     const checkDuplicateSql = `
-      SELECT * 
-      FROM awt_subcat 
+      SELECT *
+      FROM awt_subcat
       WHERE title = '${title}' AND deleted = 0
     `;
     const checkDuplicateResult = await pool.request().query(checkDuplicateSql);
@@ -1600,8 +1600,8 @@ app.post("/postsubcategory", async (req, res) => {
     } else {
       // Step 2: Check if the same title exists but is soft-deleted
       const checkSoftDeletedSql = `
-        SELECT * 
-        FROM awt_subcat 
+        SELECT *
+        FROM awt_subcat
         WHERE title = '${title}' AND deleted = 1
       `;
       const checkSoftDeletedResult = await pool.request().query(checkSoftDeletedSql);
@@ -1609,8 +1609,8 @@ app.post("/postsubcategory", async (req, res) => {
       if (checkSoftDeletedResult.recordset.length > 0) {
         // If soft-deleted data exists, restore the entry
         const restoreSoftDeletedSql = `
-          UPDATE awt_subcat 
-          SET deleted = 0 
+          UPDATE awt_subcat
+          SET deleted = 0
           WHERE title = '${title}'
         `;
         await pool.request().query(restoreSoftDeletedSql);
@@ -1618,7 +1618,7 @@ app.post("/postsubcategory", async (req, res) => {
       } else {
         // Step 3: Insert new entry if no duplicates found
         const insertSql = `
-          INSERT INTO awt_subcat (title, category_id) 
+          INSERT INTO awt_subcat (title, category_id)
           VALUES ('${title}', ${category_id})
         `;
         await pool.request().query(insertSql);
@@ -1641,8 +1641,8 @@ app.put("/putsubcategory", async (req, res) => {
 
     // Step 1: Check if the same title exists for another record (other than the current one) and is not soft-deleted
     const checkDuplicateSql = `
-      SELECT * 
-      FROM awt_subcat 
+      SELECT *
+      FROM awt_subcat
       WHERE title = '${title}' AND id != ${id} AND deleted = 0
     `;
     const checkDuplicateResult = await pool.request().query(checkDuplicateSql);
@@ -1653,8 +1653,8 @@ app.put("/putsubcategory", async (req, res) => {
     } else {
       // Step 2: Update the record if no duplicates are found
       const updateSql = `
-        UPDATE awt_subcat 
-        SET title = '${title}', category_id = ${category_id} 
+        UPDATE awt_subcat
+        SET title = '${title}', category_id = ${category_id}
         WHERE id = ${id}
       `;
       await pool.request().query(updateSql);
@@ -1676,8 +1676,8 @@ app.post("/deletesubcat", async (req, res) => {
 
 
     const sql = `
-      UPDATE awt_subcat 
-      SET deleted = 1 
+      UPDATE awt_subcat
+      SET deleted = 1
       WHERE id = ${id}
     `;
 
@@ -1698,8 +1698,8 @@ app.get("/getcategory", async (req, res) => {
     const pool = await poolPromise;
 
     const sql = `
-      SELECT * 
-      FROM awt_category 
+      SELECT *
+      FROM awt_category
       WHERE deleted = 0
     `;
 
@@ -1721,8 +1721,8 @@ app.get("/getcdata", async (req, res) => {
 
     // Direct SQL query without parameter binding
     const sql = `
-      SELECT * 
-      FROM awt_channelpartner 
+      SELECT *
+      FROM awt_channelpartner
       WHERE deleted = 0
     `;
 
@@ -1746,8 +1746,8 @@ app.post("/postcdata", async (req, res) => {
 
     // Step 1: Check if the same channelpartner exists and is not soft-deleted
     const checkDuplicateSql = `
-      SELECT * 
-      FROM awt_channelpartner 
+      SELECT *
+      FROM awt_channelpartner
       WHERE Channel_partner = '${Channelpartner}' AND deleted = 0
     `;
     const duplicateResult = await pool.request().query(checkDuplicateSql);
@@ -1758,8 +1758,8 @@ app.post("/postcdata", async (req, res) => {
     } else {
       // Step 2: Check if the same channelpartner exists but is soft-deleted
       const checkSoftDeletedSql = `
-        SELECT * 
-        FROM awt_channelpartner 
+        SELECT *
+        FROM awt_channelpartner
         WHERE Channel_partner = '${Channelpartner}' AND deleted = 1
       `;
       const softDeletedResult = await pool.request().query(checkSoftDeletedSql);
@@ -1767,8 +1767,8 @@ app.post("/postcdata", async (req, res) => {
       if (softDeletedResult.recordset.length > 0) {
         // If soft-deleted data exists, restore the entry
         const restoreSoftDeletedSql = `
-          UPDATE awt_channelpartner 
-          SET deleted = 0 
+          UPDATE awt_channelpartner
+          SET deleted = 0
           WHERE Channel_partner = '${Channelpartner}'
         `;
         await pool.request().query(restoreSoftDeletedSql);
@@ -1776,7 +1776,7 @@ app.post("/postcdata", async (req, res) => {
       } else {
         // Step 3: Insert new entry if no duplicates found
         const insertSql = `
-          INSERT INTO awt_channelpartner (Channel_partner) 
+          INSERT INTO awt_channelpartner (Channel_partner)
           VALUES ('${Channelpartner}')
         `;
         await pool.request().query(insertSql);
@@ -1803,8 +1803,8 @@ app.get("/requestcdata/:id", async (req, res) => {
 
     // Direct SQL query without parameter binding
     const sql = `
-      SELECT * 
-      FROM awt_channelpartner 
+      SELECT *
+      FROM awt_channelpartner
       WHERE id = ${id} AND deleted = 0
     `;
 
@@ -1830,8 +1830,8 @@ app.put("/putcdata", async (req, res) => {
 
     // Step 1: Check if the same channelpartner exists for another record (other than the current one) and is not soft-deleted
     const checkDuplicateSql = `
-      SELECT * 
-      FROM awt_channelpartner 
+      SELECT *
+      FROM awt_channelpartner
       WHERE Channel_partner = '${Channelpartner}' AND id != ${id} AND deleted = 0
     `;
     const duplicateCheckResult = await pool.request().query(checkDuplicateSql);
@@ -1842,8 +1842,8 @@ app.put("/putcdata", async (req, res) => {
     } else {
       // Step 2: Update the record if no duplicates are found
       const updateSql = `
-        UPDATE awt_channelpartner 
-        SET Channel_partner = '${Channelpartner}' 
+        UPDATE awt_channelpartner
+        SET Channel_partner = '${Channelpartner}'
         WHERE id = ${id}
       `;
       await pool.request().query(updateSql);
@@ -1865,8 +1865,8 @@ app.post("/deletecdata", async (req, res) => {
 
     // Direct SQL query without parameter binding
     const sql = `
-      UPDATE awt_channelpartner 
-      SET deleted = 1 
+      UPDATE awt_channelpartner
+      SET deleted = 1
       WHERE id = ${id}
     `;
 
@@ -1890,8 +1890,8 @@ app.get("/getcom", async (req, res) => {
     const pool = await poolPromise;
 
     const sql = `
-      SELECT * 
-      FROM complaint_code 
+      SELECT *
+      FROM complaint_code
       WHERE deleted = 0
     `;
 
@@ -1916,8 +1916,8 @@ app.post("/postdatacom", async (req, res) => {
     if (id) {
       // Step 1: Check if the same complaintcode exists and is not soft-deleted for other IDs
       const checkDuplicateSql = `
-        SELECT * 
-        FROM complaint_code 
+        SELECT *
+        FROM complaint_code
         WHERE complaintcode = '${complaintcode}' AND id != ${id} AND deleted = 0
       `;
       const duplicateData = await pool.request().query(checkDuplicateSql);
@@ -1928,8 +1928,8 @@ app.post("/postdatacom", async (req, res) => {
       } else {
         // Step 2: Update the entry with the given ID
         const updateSql = `
-          UPDATE complaint_code 
-          SET complaintcode = '${complaintcode}', updated_date = GETDATE(), updated_by = '${created_by}' 
+          UPDATE complaint_code
+          SET complaintcode = '${complaintcode}', updated_date = GETDATE(), updated_by = '${created_by}'
           WHERE id = ${id}
         `;
         await pool.request().query(updateSql);
@@ -1940,8 +1940,8 @@ app.post("/postdatacom", async (req, res) => {
       // Step 3: Same logic as before for insert if ID is not provided
       // Check if the same complaintcode exists and is not soft-deleted
       const checkDuplicateSql = `
-        SELECT * 
-        FROM complaint_code 
+        SELECT *
+        FROM complaint_code
         WHERE complaintcode = '${complaintcode}' AND deleted = 0
       `;
       const duplicateData = await pool.request().query(checkDuplicateSql);
@@ -1952,8 +1952,8 @@ app.post("/postdatacom", async (req, res) => {
       } else {
         // Check if the same complaintcode exists but is soft-deleted
         const checkSoftDeletedSql = `
-          SELECT * 
-          FROM complaint_code 
+          SELECT *
+          FROM complaint_code
           WHERE complaintcode = '${complaintcode}' AND deleted = 1
         `;
         const softDeletedData = await pool.request().query(checkSoftDeletedSql);
@@ -1961,8 +1961,8 @@ app.post("/postdatacom", async (req, res) => {
         if (softDeletedData.recordset.length > 0) {
           // If soft-deleted data exists, restore the entry
           const restoreSoftDeletedSql = `
-            UPDATE complaint_code 
-            SET deleted = 0, updated_date = GETDATE(), updated_by = '${created_by}' 
+            UPDATE complaint_code
+            SET deleted = 0, updated_date = GETDATE(), updated_by = '${created_by}'
             WHERE complaintcode = '${complaintcode}'
           `;
           await pool.request().query(restoreSoftDeletedSql);
@@ -1971,7 +1971,7 @@ app.post("/postdatacom", async (req, res) => {
         } else {
           // Insert new entry if no duplicates found
           const insertSql = `
-            INSERT INTO complaint_code (complaintcode, created_date, created_by) 
+            INSERT INTO complaint_code (complaintcode, created_date, created_by)
             VALUES ('${complaintcode}', GETDATE(), '${created_by}')
           `;
           await pool.request().query(insertSql);
@@ -1997,8 +1997,8 @@ app.get("/requestdatacom/:id", async (req, res) => {
 
     // Direct SQL query without parameter binding
     const sql = `
-      SELECT * 
-      FROM complaint_code 
+      SELECT *
+      FROM complaint_code
       WHERE id = ${id} AND deleted = 0
     `;
 
@@ -2028,10 +2028,10 @@ app.put("/putcomdata", async (req, res) => {
 
     // Step 1: Check if the updated complaintcode already exists and is not soft-deleted
     const checkDuplicateSql = `
-      SELECT * 
-      FROM complaint_code 
-      WHERE complaintcode = '${complaintcode}' 
-        AND deleted = 0 
+      SELECT *
+      FROM complaint_code
+      WHERE complaintcode = '${complaintcode}'
+        AND deleted = 0
         AND id != ${id}
     `;
 
@@ -2044,10 +2044,10 @@ app.put("/putcomdata", async (req, res) => {
     } else {
       // Step 2: Update complaintcode data if no duplicates found
       const updateSql = `
-        UPDATE complaint_code 
-        SET complaintcode = '${complaintcode}', 
-            updated_by = '${updated_by}', 
-            updated_date = GETDATE() 
+        UPDATE complaint_code
+        SET complaintcode = '${complaintcode}',
+            updated_by = '${updated_by}',
+            updated_date = GETDATE()
         WHERE id = ${id} AND deleted = 0
       `;
 
@@ -2072,8 +2072,8 @@ app.post("/deletecomdata", async (req, res) => {
 
     // Direct SQL query without parameter binding
     const sql = `
-      UPDATE complaint_code 
-      SET deleted = 1 
+      UPDATE complaint_code
+      SET deleted = 1
       WHERE id = ${id}
     `;
 
@@ -2120,9 +2120,9 @@ app.post("/postdatareason", async (req, res) => {
     if (id) {
       // Step 1: Check if the same reasoncode exists and is not soft-deleted for other IDs
       const checkDuplicateSql = `
-        SELECT * FROM reason_code 
-        WHERE reasoncode = '${reasoncode}' 
-        AND id != ${id} 
+        SELECT * FROM reason_code
+        WHERE reasoncode = '${reasoncode}'
+        AND id != ${id}
         AND deleted = 0
       `;
 
@@ -2135,10 +2135,10 @@ app.post("/postdatareason", async (req, res) => {
       } else {
         // Step 2: Update the entry with the given ID
         const updateSql = `
-          UPDATE reason_code 
-          SET reasoncode = '${reasoncode}', 
-              updated_date = GETDATE(), 
-              updated_by = '${created_by}' 
+          UPDATE reason_code
+          SET reasoncode = '${reasoncode}',
+              updated_date = GETDATE(),
+              updated_by = '${created_by}'
           WHERE id = ${id}
         `;
 
@@ -2152,8 +2152,8 @@ app.post("/postdatareason", async (req, res) => {
 
       // Check if the same reasoncode exists and is not soft-deleted
       const checkDuplicateSql = `
-        SELECT * FROM reason_code 
-        WHERE reasoncode = '${reasoncode}' 
+        SELECT * FROM reason_code
+        WHERE reasoncode = '${reasoncode}'
         AND deleted = 0
       `;
 
@@ -2166,8 +2166,8 @@ app.post("/postdatareason", async (req, res) => {
       } else {
         // Check if the same reasoncode exists but is soft-deleted
         const checkSoftDeletedSql = `
-          SELECT * FROM reason_code 
-          WHERE reasoncode = '${reasoncode}' 
+          SELECT * FROM reason_code
+          WHERE reasoncode = '${reasoncode}'
           AND deleted = 1
         `;
 
@@ -2177,10 +2177,10 @@ app.post("/postdatareason", async (req, res) => {
         if (softDeletedResult.recordset.length > 0) {
           // If soft-deleted data exists, restore the entry
           const restoreSoftDeletedSql = `
-            UPDATE reason_code 
-            SET deleted = 0, 
-                updated_date = GETDATE(), 
-                updated_by = '${created_by}' 
+            UPDATE reason_code
+            SET deleted = 0,
+                updated_date = GETDATE(),
+                updated_by = '${created_by}'
             WHERE reasoncode = '${reasoncode}'
           `;
 
@@ -2191,7 +2191,7 @@ app.post("/postdatareason", async (req, res) => {
         } else {
           // Insert new entry if no duplicates found
           const insertSql = `
-            INSERT INTO reason_code (reasoncode, created_date, created_by) 
+            INSERT INTO reason_code (reasoncode, created_date, created_by)
             VALUES ('${reasoncode}', GETDATE(), '${created_by}')
           `;
 
@@ -2218,8 +2218,8 @@ app.get("/requestdatareason/:id", async (req, res) => {
 
     // Direct SQL query with the 'id' value inserted directly into the query string
     const sql = `
-      SELECT * FROM reason_code 
-      WHERE id = ${id} 
+      SELECT * FROM reason_code
+      WHERE id = ${id}
       AND deleted = 0
     `;
 
@@ -2248,9 +2248,9 @@ app.put("/putreasondata", async (req, res) => {
 
     // Step 1: Check if the updated reasoncode already exists and is not soft-deleted
     const checkDuplicateSql = `
-      SELECT * FROM reason_code 
-      WHERE reasoncode = '${reasoncode}' 
-      AND deleted = 0 
+      SELECT * FROM reason_code
+      WHERE reasoncode = '${reasoncode}'
+      AND deleted = 0
       AND id != ${id}
     `;
 
@@ -2263,10 +2263,10 @@ app.put("/putreasondata", async (req, res) => {
     } else {
       // Step 2: Update reasoncode data if no duplicates found
       const sql = `
-        UPDATE reason_code 
-        SET reasoncode = '${reasoncode}', 
-            updated_by = '${updated_by}', 
-            updated_date = GETDATE() 
+        UPDATE reason_code
+        SET reasoncode = '${reasoncode}',
+            updated_by = '${updated_by}',
+            updated_date = GETDATE()
         WHERE id = ${id} AND deleted = 0
       `;
 
@@ -2292,8 +2292,8 @@ app.post("/deletereasondata", async (req, res) => {
 
     // Direct SQL query without parameter binding
     const sql = `
-      UPDATE reason_code 
-      SET deleted = 1 
+      UPDATE reason_code
+      SET deleted = 1
       WHERE id = ${id}
     `;
 
@@ -2318,8 +2318,8 @@ app.get("/getaction", async (req, res) => {
 
     // Direct SQL query without parameter binding
     const sql = `
-      SELECT * 
-      FROM action_code 
+      SELECT *
+      FROM action_code
       WHERE deleted = 0
     `;
 
@@ -2352,8 +2352,8 @@ app.post("/postdataaction", async (req, res) => {
     if (id) {
       // Direct SQL query without parameter binding to check for duplicates on update
       const checkDuplicateSql = `
-        SELECT * 
-        FROM action_code 
+        SELECT *
+        FROM action_code
         WHERE actioncode = '${actioncode}' AND id != ${id} AND deleted = 0
       `;
 
@@ -2364,8 +2364,8 @@ app.post("/postdataaction", async (req, res) => {
       } else {
         // Direct SQL query without parameter binding for update
         const updateSql = `
-          UPDATE action_code 
-          SET actioncode = '${actioncode}', updated_date = GETDATE(), updated_by = '${created_by}' 
+          UPDATE action_code
+          SET actioncode = '${actioncode}', updated_date = GETDATE(), updated_by = '${created_by}'
           WHERE id = ${id}
         `;
         await pool.request().query(updateSql);
@@ -2374,8 +2374,8 @@ app.post("/postdataaction", async (req, res) => {
     } else {
       // Direct SQL query without parameter binding to check for duplicates on insert
       const checkDuplicateSql = `
-        SELECT * 
-        FROM action_code 
+        SELECT *
+        FROM action_code
         WHERE actioncode = '${actioncode}' AND deleted = 0
       `;
 
@@ -2386,8 +2386,8 @@ app.post("/postdataaction", async (req, res) => {
       } else {
         // Check if a soft-deleted entry with the same actioncode exists
         const checkSoftDeletedSql = `
-          SELECT * 
-          FROM action_code 
+          SELECT *
+          FROM action_code
           WHERE actioncode = '${actioncode}' AND deleted = 1
         `;
 
@@ -2396,8 +2396,8 @@ app.post("/postdataaction", async (req, res) => {
         if (softDeletedCheckResult.recordset.length > 0) {
           // Restore the soft-deleted entry
           const restoreSoftDeletedSql = `
-            UPDATE action_code 
-            SET deleted = 0, updated_date = GETDATE(), updated_by = '${created_by}' 
+            UPDATE action_code
+            SET deleted = 0, updated_date = GETDATE(), updated_by = '${created_by}'
             WHERE actioncode = '${actioncode}'
           `;
           await pool.request().query(restoreSoftDeletedSql);
@@ -2405,7 +2405,7 @@ app.post("/postdataaction", async (req, res) => {
         } else {
           // Insert a new action code
           const insertSql = `
-            INSERT INTO action_code (actioncode, created_date, created_by) 
+            INSERT INTO action_code (actioncode, created_date, created_by)
             VALUES ('${actioncode}', GETDATE(), '${created_by}')
           `;
           await pool.request().query(insertSql);
@@ -2429,8 +2429,8 @@ app.get("/requestdataaction/:id", async (req, res) => {
 
     // Direct SQL query without parameter binding
     const sql = `
-      SELECT * 
-      FROM action_code 
+      SELECT *
+      FROM action_code
       WHERE id = ${id} AND deleted = 0
     `;
 
@@ -2455,8 +2455,8 @@ app.put("/putactiondata", async (req, res) => {
 
     // Direct SQL query without parameter binding to check for duplicates
     const checkDuplicateSql = `
-      SELECT * 
-      FROM action_code 
+      SELECT *
+      FROM action_code
       WHERE actioncode = '${actioncode}' AND deleted = 0 AND id != ${id}
     `;
     const duplicateCheckResult = await pool.request().query(checkDuplicateSql);
@@ -2466,8 +2466,8 @@ app.put("/putactiondata", async (req, res) => {
     } else {
       // Direct SQL query without parameter binding for the update
       const sql = `
-        UPDATE action_code 
-        SET actioncode = '${actioncode}', updated_by = '${updated_by}', updated_date = GETDATE() 
+        UPDATE action_code
+        SET actioncode = '${actioncode}', updated_by = '${updated_by}', updated_date = GETDATE()
         WHERE id = ${id} AND deleted = 0
       `;
       await pool.request().query(sql);
@@ -2489,8 +2489,8 @@ app.post("/deleteactiondata", async (req, res) => {
 
     // Direct SQL query without parameter binding
     const sql = `
-      UPDATE action_code 
-      SET deleted = 1 
+      UPDATE action_code
+      SET deleted = 1
       WHERE id = ${id}
     `;
 
@@ -2515,8 +2515,8 @@ app.get("/getcomplaintview/:complaintid", async (req, res) => {
 
     // Direct SQL query without parameter binding
     const sql = `
-      SELECT * 
-      FROM complaint_ticket 
+      SELECT *
+      FROM complaint_ticket
       WHERE id = ${complaintid} AND deleted = 0
     `;
 
@@ -2648,10 +2648,10 @@ app.get("/getComplaintDuplicate/:customer_mobile", async (req, res) => {
 
     // Direct SQL query without parameter binding
     const sql = `
-      SELECT * 
-      FROM complaint_ticket 
-      WHERE customer_mobile = '${customer_mobile}' 
-      AND deleted = 0 
+      SELECT *
+      FROM complaint_ticket
+      WHERE customer_mobile = '${customer_mobile}'
+      AND deleted = 0
       ORDER BY id DESC
     `;
 
@@ -2688,7 +2688,7 @@ app.post("/uploadAttachment2", upload.array("attachment2"), async (req, res) => 
 
     // Adjusted SQL query without line breaks and extra characters
     const sql = `
-      INSERT INTO awt_attachment2 (ticket_no, attachment, created_by, created_date) 
+      INSERT INTO awt_attachment2 (ticket_no, attachment, created_by, created_date)
       OUTPUT INSERTED.id
       VALUES ('${ticket_no}', '${attachmentString}', '${created_by}', '${formattedDate}')
     `;
@@ -2724,11 +2724,11 @@ app.get("/getAttachment2Details/:ticket_no", async (req, res) => {
 
     // Direct SQL query without parameter binding
     const sql = `
-      SELECT ac.*, lu.Lhiuser 
-      FROM awt_attachment2 as ac 
-      LEFT JOIN lhi_user as lu 
-      ON ac.created_by = lu.id 
-      WHERE ac.ticket_no = '${ticket_no}' 
+      SELECT ac.*, lu.Lhiuser
+      FROM awt_attachment2 as ac
+      LEFT JOIN lhi_user as lu
+      ON ac.created_by = lu.id
+      WHERE ac.ticket_no = '${ticket_no}'
       ORDER BY created_date DESC
     `;
 
@@ -2854,10 +2854,10 @@ app.post("/getticket", async (req, res) => {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
     const sql = `
-      SELECT * FROM complaint_ticket 
-      WHERE deleted = 0 
-      AND (customer_email LIKE '%${searchparam}%' 
-      OR customer_name LIKE '%${searchparam}%' 
+      SELECT * FROM complaint_ticket
+      WHERE deleted = 0
+      AND (customer_email LIKE '%${searchparam}%'
+      OR customer_name LIKE '%${searchparam}%'
       OR customer_mobile LIKE '%${searchparam}%')
     `;
 
@@ -2869,46 +2869,117 @@ app.post("/getticket", async (req, res) => {
   }
 });
 
-
 // Add Complaint Start
 app.post("/add_complaintt", async (req, res) => {
   let {
     complaint_date, customer_name, contact_person, email, mobile, address,
     state, city, area, pincode, mode_of_contact, ticket_type, cust_type,
-    warrenty_status, invoice_date, call_charge, cust_id, model
+    warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date,created_by
   } = req.body;
 
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
+
   try {
-    // Get the connection pool
     const pool = await poolPromise;
 
-    // First query to count existing complaints
-    const checkResult = await pool.request().query("SELECT * FROM complaint_ticket WHERE deleted = 0");
-    const count = checkResult.recordset.length + 1;
+  // Split customer_name into customer_fname and customer_lname
+  const [customer_fname, ...customer_lnameArr] = customer_name.split(' ');
+  const customer_lname = customer_lnameArr.join(' '); // Join the remaining part as last name
 
-    // Generate ticket number based on date and count
-    const formatDate = `${(new Date().getMonth() + 1).toString().padStart(2, '0')}${new Date().getDate().toString().padStart(2, '0')}`;
-    const countFormat = count.toString().padStart(4, "0");
-    const ticket_no = 'IG' + formatDate + "-" + countFormat;
+  // Insert into awt_customer
+  const customerSQL = `
+    INSERT INTO awt_customer (customer_fname, customer_lname, email, mobileno, alt_mobileno, created_date, created_by)
+    OUTPUT INSERTED.id
+    VALUES (@customer_fname, @customer_lname, @email, @mobile, @alt_mobile, @formattedDate, @created_by)`;
 
-    // Insert new complaint with parameterized queries
-    const insertSQL = `
-      INSERT INTO complaint_ticket (
-        ticket_no, ticket_date, customer_name, customer_mobile, customer_email, address, 
-        state, city, area, pincode, customer_id, ModelNumber, ticket_type, call_type, 
-        call_status, warranty_status, invoice_date, call_charges, mode_of_contact, 
-        contact_person, assigned_to, created_date, created_by, engineer_id
-      ) 
+    console.log("Executing customer SQL:", customerSQL);  // Debugging log
+
+    const customerResult = await pool.request()
+    .input('customer_fname', customer_fname)
+    .input('customer_lname', customer_lname)
+    .input('email', email)
+    .input('mobile', mobile)
+    .input('alt_mobile', alt_mobile)
+    .input('formattedDate', formattedDate)
+    .input('created_by', created_by)
+    .query(customerSQL);
+
+    const insertedCustomerId = customerResult.recordset[0].id;
+    console.log("Inserted Customer ID:", insertedCustomerId);  // Debugging log
+
+    // Insert into awt_customerlocation using insertedCustomerId as customer_id
+    const customerLocationSQL = `
+      INSERT INTO awt_customerlocation (
+        customer_id, geostate_id, geocity_id, area_id, pincode_id,
+        created_date, created_by, ccperson, ccnumber, address
+      )
       VALUES (
-        @ticket_no, @complaint_date, @customer_name, @mobile, @email, @address, 
-        @state, @city, @area, @pincode, @cust_id, @model, @ticket_type, @cust_type, 
-        'Pending', @warrenty_status, @invoice_date, @call_charge, @mode_of_contact, 
-        @contact_person, 1, @formattedDate, 1, 1
+        @customer_id, @state, @city, @area, @pincode,
+        @formattedDate, @created_by, @customer_name, @mobile, @address
       )`;
 
-    const request = pool.request()
+    console.log("Executing customer location SQL:", customerLocationSQL);  // Debugging log
+
+    await pool.request()
+      .input('customer_id', insertedCustomerId)
+      .input('state', state)
+      .input('city', city)
+      .input('area', area)
+      .input('created_by', created_by)
+      .input('pincode', pincode)
+      .input('formattedDate', formattedDate)
+      .input('customer_name', customer_name)
+      .input('mobile', mobile)
+      .input('address', address)
+      .query(customerLocationSQL);
+
+    // Insert into awt_uniqueproductmaster using insertedCustomerId as customer_id
+    const productSQL = `
+      INSERT INTO awt_uniqueproductmaster (
+        customer_id, product, serialnumber, date, location , created_date, created_by
+      )
+      VALUES (
+        @customer_id, @model, @serial, @purchase_date, @pincode, @formattedDate, @created_by
+      )`;
+
+    console.log("Executing product SQL:", productSQL);  // Debugging log
+
+    await pool.request()
+      .input('customer_id', insertedCustomerId)
+      .input('model', model)
+      .input('created_by', created_by)
+      .input('serial', serial)
+      .input('purchase_date', purchase_date)
+      .input('pincode', pincode)
+      .input('formattedDate', formattedDate)
+      .query(productSQL);
+
+    const checkResult = await pool.request().query(`
+      SELECT COUNT(*) AS count FROM complaint_ticket WHERE deleted = 0`);
+
+    const count = checkResult.recordset[0].count + 1;
+    const formatDate = `${(new Date().getMonth() + 1).toString().padStart(2, '0')}${new Date().getDate().toString().padStart(2, '0')}`;
+    const ticket_no = `IG${formatDate}-${count.toString().padStart(4, "0")}`;
+
+    // Insert into complaint_ticket
+    const complaintSQL = `
+      INSERT INTO complaint_ticket (
+        ticket_no, ticket_date, customer_name, customer_mobile, customer_email, address,
+        state, city, area, pincode, customer_id, ModelNumber, ticket_type, call_type,
+        call_status, warranty_status, invoice_date, call_charges, mode_of_contact,
+        contact_person, assigned_to, created_date, created_by, engineer_id, purchase_date, serial_no
+      )
+      VALUES (
+        @ticket_no, @complaint_date, @customer_name, @mobile, @email, @address,
+        @state, @city, @area, @pincode, @customer_id, @model, @ticket_type, @cust_type,
+        'Pending', @warrenty_status, @invoice_date, @call_charge, @mode_of_contact,
+        @contact_person, 1, @formattedDate, @created_by, 1, @purchase_date, @serial
+      )`;
+
+    console.log("Executing complaint SQL:", complaintSQL);  // Debugging log
+
+    await pool.request()
       .input('ticket_no', ticket_no)
       .input('complaint_date', complaint_date)
       .input('customer_name', customer_name)
@@ -2916,10 +2987,11 @@ app.post("/add_complaintt", async (req, res) => {
       .input('email', email)
       .input('address', address)
       .input('state', state)
+      .input('created_by', created_by)
       .input('city', city)
       .input('area', area)
       .input('pincode', pincode)
-      .input('cust_id', cust_id)
+      .input('customer_id', insertedCustomerId)
       .input('model', model)
       .input('ticket_type', ticket_type)
       .input('cust_type', cust_type)
@@ -2928,16 +3000,14 @@ app.post("/add_complaintt", async (req, res) => {
       .input('call_charge', call_charge)
       .input('mode_of_contact', mode_of_contact)
       .input('contact_person', contact_person)
-      .input('formattedDate', formattedDate);
+      .input('formattedDate', formattedDate)
+      .input('purchase_date', purchase_date)
+      .input('serial', serial)
+      .query(complaintSQL);
 
-
-
-    const insertResult = await request.query(insertSQL);
-
-    console.log(insertSQL, "%%")
-    return res.json({ insertId: insertResult.rowsAffected[0] });
+    return res.json({ message: 'Complaint added successfully!', ticket_no, insertedCustomerId });
   } catch (err) {
-    console.error("Error inserting complaint:", err);
+    console.error("Error inserting complaint:", err.stack);
     return res.status(500).json({ error: 'An error occurred while adding the complaint', details: err.message });
   }
 });
@@ -3168,7 +3238,7 @@ app.get("/getpincodedrop/:area_id", async (req, res) => {
   }
 });
 
-// API to fetch all Customer Location 
+// API to fetch all Customer Location
 app.get("/getcustomerlocation", async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
@@ -3176,21 +3246,21 @@ app.get("/getcustomerlocation", async (req, res) => {
 
     // Construct the SQL query (no parameter binding)
     const sql = `
-        SELECT 
-          ccl.*, 
-          c.title AS country_title, 
-          r.title AS region_title, 
-          gs.title AS geostate_title, 
-          gc.title AS geocity_title, 
-          a.title AS area_title, 
-          p.pincode AS pincode_title 
-        FROM awt_customerlocation ccl 
-        JOIN awt_country c ON ccl.country_id = c.id 
-        JOIN awt_region r ON ccl.region_id = r.id 
-        JOIN awt_geostate gs ON ccl.geostate_id = gs.id 
-        JOIN awt_geocity gc ON ccl.geocity_id = gc.id 
-        JOIN awt_area a ON ccl.area_id = a.id 
-        JOIN awt_pincode p ON ccl.pincode_id = p.id 
+        SELECT
+          ccl.*,
+          c.title AS country_title,
+          r.title AS region_title,
+          gs.title AS geostate_title,
+          gc.title AS geocity_title,
+          a.title AS area_title,
+          p.pincode AS pincode_title
+        FROM awt_customerlocation ccl
+        JOIN awt_country c ON ccl.country_id = c.id
+        JOIN awt_region r ON ccl.region_id = r.id
+        JOIN awt_geostate gs ON ccl.geostate_id = gs.id
+        JOIN awt_geocity gc ON ccl.geocity_id = gc.id
+        JOIN awt_area a ON ccl.area_id = a.id
+        JOIN awt_pincode p ON ccl.pincode_id = p.id
         WHERE ccl.deleted = 0;
       `;
 
@@ -3214,21 +3284,21 @@ app.get("/requestcustomerlocation/:id", async (req, res) => {
     const pool = await poolPromise;
 
     // Construct the SQL query (no parameter binding)
-    const sql = `SELECT 
-                  ccl.*, 
-                  c.title as country_title, 
-                  r.title as region_title, 
-                  gs.title as geostate_title, 
-                  gc.title as geocity_title, 
-                  a.title as area_title, 
-                  p.pincode as pincode_title 
-                FROM awt_customerlocation ccl 
-                JOIN awt_country c ON ccl.country_id = c.id 
-                JOIN awt_region r ON ccl.region_id = r.id 
-                JOIN awt_geostate gs ON ccl.geostate_id = gs.id 
-                JOIN awt_geocity gc ON ccl.geocity_id = gc.id 
-                JOIN awt_area a ON ccl.area_id = a.id 
-                JOIN awt_pincode p ON ccl.pincode_id = p.id 
+    const sql = `SELECT
+                  ccl.*,
+                  c.title as country_title,
+                  r.title as region_title,
+                  gs.title as geostate_title,
+                  gc.title as geocity_title,
+                  a.title as area_title,
+                  p.pincode as pincode_title
+                FROM awt_customerlocation ccl
+                JOIN awt_country c ON ccl.country_id = c.id
+                JOIN awt_region r ON ccl.region_id = r.id
+                JOIN awt_geostate gs ON ccl.geostate_id = gs.id
+                JOIN awt_geocity gc ON ccl.geocity_id = gc.id
+                JOIN awt_area a ON ccl.area_id = a.id
+                JOIN awt_pincode p ON ccl.pincode_id = p.id
                 WHERE ccl.deleted = 0 AND ccl.id = ${id}`;
 
     // Execute the query
@@ -3248,7 +3318,7 @@ app.get("/requestcustomerlocation/:id", async (req, res) => {
   }
 });
 
-// Insert new Customer Location with duplicate check 
+// Insert new Customer Location with duplicate check
 app.post("/postcustomerlocation", async (req, res) => {
   const { country_id, region_id, geostate_id, geocity_id, area_id, pincode_id, address, ccperson, ccnumber, address_type } = req.body;
 
@@ -3265,7 +3335,7 @@ app.post("/postcustomerlocation", async (req, res) => {
         message: "Duplicate entry, Customer with same number already exists!",
       });
     } else {
-      const insertSql = `INSERT INTO awt_customerlocation (country_id, region_id, geostate_id, geocity_id, area_id, pincode_id, address, ccperson, ccnumber, address_type) 
+      const insertSql = `INSERT INTO awt_customerlocation (country_id, region_id, geostate_id, geocity_id, area_id, pincode_id, address, ccperson, ccnumber, address_type)
                          VALUES ('${country_id}', '${region_id}', '${geostate_id}', '${geocity_id}', '${area_id}', '${pincode_id}', '${address}', '${ccperson}', '${ccnumber}', '${address_type}')`;
 
       await pool.request().query(insertSql);
@@ -3278,7 +3348,7 @@ app.post("/postcustomerlocation", async (req, res) => {
   }
 });
 
-// Update existing Customer Location with duplicate check 
+// Update existing Customer Location with duplicate check
 app.put("/putcustomerlocation", async (req, res) => {
   const {
     country_id, region_id, geostate_id, geocity_id, area_id, pincode_id, address, ccperson, ccnumber, address_type, id
@@ -3401,7 +3471,7 @@ app.post("/postproductunique", async (req, res) => {
         });
       } else {
         // Insert new product
-        const insertSql = `INSERT INTO awt_uniqueproductmaster (product, location, date, serialnumber) 
+        const insertSql = `INSERT INTO awt_uniqueproductmaster (product, location, date, serialnumber)
                           VALUES ('${product}', '${location}', '${date}', '${serialnumber}')`;
         await pool.request().query(insertSql);
 
@@ -3487,9 +3557,9 @@ app.get("/getengineer", async (req, res) => {
 
     // SQL query to fetch data from the database with an INNER JOIN
     const sql = `
-      SELECT r.*, c.title as childfranchise_title 
-      FROM awt_engineermaster r 
-      INNER JOIN awt_childfranchisemaster c ON r.cfranchise_id = c.id 
+      SELECT r.*, c.title as childfranchise_title
+      FROM awt_engineermaster r
+      INNER JOIN awt_childfranchisemaster c ON r.cfranchise_id = c.id
       WHERE r.deleted = 0
     `;
 
@@ -3553,7 +3623,7 @@ app.post("/postengineer", async (req, res) => {
         });
       } else {
         // Insert new engineer if no duplicate or soft-deleted found
-        const insertSql = `INSERT INTO awt_engineermaster (title, cfranchise_id, mobile_no, email, password,employee_code,personal_email,personal_mobile,dob,blood_group,academic_qualification,joining_date,passport_picture,resume,photo_proof,address_proof,permanent_address,current_address) 
+        const insertSql = `INSERT INTO awt_engineermaster (title, cfranchise_id, mobile_no, email, password,employee_code,personal_email,personal_mobile,dob,blood_group,academic_qualification,joining_date,passport_picture,resume,photo_proof,address_proof,permanent_address,current_address)
                            VALUES ('${title}', '${cfranchise_id}', '${mobile_no}', '${email}', '${password}', '${employee_code}', '${personal_email}', '${personal_mobile}', '${dob}', '${blood_group}', '${academic_qualification}', '${joining_date}', '${passport_picture}', '${resume}', '${photo_proof}', '${address_proof}', '${permanent_address}', '${current_address}')`;
         await pool.request().query(insertSql);
         return res.json({ message: "Engineer added successfully!" });
@@ -3581,11 +3651,11 @@ app.put("/putengineer", async (req, res) => {
       });
     } else {
       // Update the engineer record if no duplicates are found
-      const updateSql = `UPDATE awt_engineermaster 
+      const updateSql = `UPDATE awt_engineermaster
                          SET title = '${title}', cfranchise_id = '${cfranchise_id}', mobile_no = '${mobile_no}', email = '${email}', password = '${password}',
                          personal_email = '${personal_email}', employee_code = '${employee_code}', personal_mobile = '${personal_mobile}', dob = '${dob}',
                          blood_group = '${blood_group}', academic_qualification = '${academic_qualification}', joining_date = '${joining_date}', passport_picture = '${passport_picture},
-                         resume = '${resume}', photo_proof = '${photo_proof}', address_proof = '${address_proof}', permanent_address = '${permanent_address}', current_address = '${current_address}' 
+                         resume = '${resume}', photo_proof = '${photo_proof}', address_proof = '${address_proof}', permanent_address = '${permanent_address}', current_address = '${current_address}'
                          WHERE id = '${id}'`;
 
       await pool.request().query(updateSql);
@@ -4329,7 +4399,7 @@ app.get("/getmanufacturer", async (req, res) => {
     return res.status(500).json({ message: "An error occurred while fetching manufacturer data" });
   }
 });
-// Insert for Mnufacturer 
+// Insert for Mnufacturer
 app.post("/postmanufacturer", async (req, res) => {
   const { id, Manufacturer, created_by } = req.body;
 
@@ -4345,8 +4415,8 @@ app.post("/postmanufacturer", async (req, res) => {
       if (result.recordset.length > 0) {
         return res.status(409).json({ message: "Duplicate entry, Manufacturer already exists!" });
       } else {
-        sql = `UPDATE manufacturer 
-               SET Manufacturer = '${Manufacturer}', updated_date = GETDATE(), updated_by = '${created_by}' 
+        sql = `UPDATE manufacturer
+               SET Manufacturer = '${Manufacturer}', updated_date = GETDATE(), updated_by = '${created_by}'
                WHERE id = ${id}`;
         await pool.request().query(sql);
         return res.json({ message: "Manufacturer updated successfully!" });
@@ -4364,14 +4434,14 @@ app.post("/postmanufacturer", async (req, res) => {
         const softDeletedData = await pool.request().query(sql);
 
         if (softDeletedData.recordset.length > 0) {
-          sql = `UPDATE manufacturer 
-                 SET deleted = 0, updated_date = GETDATE(), updated_by = '${created_by}' 
+          sql = `UPDATE manufacturer
+                 SET deleted = 0, updated_date = GETDATE(), updated_by = '${created_by}'
                  WHERE Manufacturer = '${Manufacturer}'`;
           await pool.request().query(sql);
           return res.json({ message: "Soft-deleted Manufacturer restored successfully!" });
         } else {
           // Insert new manufacturer
-          sql = `INSERT INTO manufacturer (Manufacturer, created_date, created_by) 
+          sql = `INSERT INTO manufacturer (Manufacturer, created_date, created_by)
                  VALUES ('${Manufacturer}', GETDATE(), '${created_by}')`;
           await pool.request().query(sql);
           return res.json({ message: "Manufacturer added successfully!" });
@@ -4422,8 +4492,8 @@ app.put("/putmanufacturer", async (req, res) => {
       return res.status(409).json({ message: "Duplicate entry, Manufacturer already exists!" });
     } else {
       // Update manufacturer details
-      sql = `UPDATE manufacturer 
-             SET Manufacturer = '${Manufacturer}', updated_by = '${updated_by}', updated_date = GETDATE() 
+      sql = `UPDATE manufacturer
+             SET Manufacturer = '${Manufacturer}', updated_by = '${updated_by}', updated_date = GETDATE()
              WHERE id = ${id} AND deleted = 0`;
       await pool.request().query(sql);
 
@@ -4781,9 +4851,9 @@ app.put("/putlhidata", async (req, res) => {
 
     // Step 1: Check if the same Lhiuser exists for another record (other than the current one) and is not soft-deleted
     const checkDuplicateSql = `
-      SELECT * FROM lhi_user 
-      WHERE Lhiuser = '${Lhiuser}' 
-      AND id != '${id}' 
+      SELECT * FROM lhi_user
+      WHERE Lhiuser = '${Lhiuser}'
+      AND id != '${id}'
       AND deleted = 0
     `;
     const duplicateResult = await pool.request().query(checkDuplicateSql);
@@ -4795,15 +4865,15 @@ app.put("/putlhidata", async (req, res) => {
       // Step 2: Update the record if no duplicates are found
       const updateSql = `
         UPDATE lhi_user
-        SET 
-          Lhiuser = '${Lhiuser}', 
-          updated_by = '${updated_by}', 
+        SET
+          Lhiuser = '${Lhiuser}',
+          updated_by = '${updated_by}',
           updated_date = GETDATE(),
           mobile_no = '${mobile_no}',
           Usercode = '${Usercode}',
-          password = '${password}', 
-          status = ${status}, 
-          email = '${email}', 
+          password = '${password}',
+          status = ${status},
+          email = '${email}',
           remarks = '${remarks}'
         WHERE id = '${id}'
       `;
@@ -5115,7 +5185,7 @@ app.post("/addcomplaintremark", async (req, res) => {
     const pool = await poolPromise;
 
     // SQL query to insert a new complaint remark
-    const sql = `INSERT INTO awt_complaintremark (ticket_no, remark, created_by, created_date) 
+    const sql = `INSERT INTO awt_complaintremark (ticket_no, remark, created_by, created_date)
                     VALUES (${ticket_no}, '${note}', ${created_by}, GETDATE())`;
     const result = await pool.request().query(sql);
 
@@ -5141,7 +5211,7 @@ app.post("/uploadcomplaintattachments", upload.array("attachment"), async (req, 
     const pool = await poolPromise;
 
     // SQL query to insert attachments
-    const sql = `INSERT INTO awt_complaintattachment (remark_id, ticket_no, attachment, created_by, created_date) 
+    const sql = `INSERT INTO awt_complaintattachment (remark_id, ticket_no, attachment, created_by, created_date)
                     VALUES (${remark_id}, ${ticket_no}, '${attachmentString}', ${created_by}, GETDATE())`;
     const result = await pool.request().query(sql);
 
@@ -5418,8 +5488,8 @@ app.post("/ticketFormData", async (req, res) => {
     const pool = await poolPromise;
 
     const updateSql = `
-      UPDATE complaint_ticket 
-      SET ModelNumber = '${ModelNumber}', engineer_id = '${engineer_id}', 
+      UPDATE complaint_ticket
+      SET ModelNumber = '${ModelNumber}', engineer_id = '${engineer_id}',
           call_status = '${call_status}', serial_no = '${serial_no}' , updated_by = '${updated_by}', updated_date = '${formattedDate}'
       WHERE ticket_no = '${ticket_no}'`;
 
@@ -5451,13 +5521,13 @@ app.post("/updatestatus", async (req, res) => {
       let query;
       if (status == 1) {
         // If status is 1, deactivate and set activation date
-        query = `UPDATE lhi_user 
-                 SET status = 0, deactivation_date = GETDATE() 
+        query = `UPDATE lhi_user
+                 SET status = 0, deactivation_date = GETDATE()
                  WHERE id = @dataId`;
       } else {
         // If status is not 1, deactivate and set deactivation date
-        query = `UPDATE lhi_user 
-                 SET status = 1, activation_date = GETDATE() 
+        query = `UPDATE lhi_user
+                 SET status = 1, activation_date = GETDATE()
                  WHERE id = @dataId`;
       }
 
@@ -5483,7 +5553,7 @@ app.post("/updatestatus", async (req, res) => {
 
 
 
-// Bahvehsh dubey 
+// Bahvehsh dubey
 
 
 app.post('/login', async (req, res) => {
@@ -5743,7 +5813,7 @@ app.get("/getcomplainlist", async (req, res) => {
 
     // Add date range filter if both dates are provided
     if (fromDate && toDate) {
-      sql += ` AND CAST(ticket_date AS DATE) >= CAST('${fromDate}' AS DATE) 
+      sql += ` AND CAST(ticket_date AS DATE) >= CAST('${fromDate}' AS DATE)
                AND CAST(ticket_date AS DATE) <= CAST('${toDate}' AS DATE)`;
     }
 
@@ -5777,3 +5847,44 @@ app.get("/getcomplainlist", async (req, res) => {
   }
 });
 // end Complaint list
+
+
+//Register Page Complaint Duplicate Start
+
+app.get("/getComplaintDuplicateRegisterPage/:DuplicateCustomerNumber", async (req, res) => {
+  const { DuplicateCustomerNumber } = req.params;
+
+  try {
+
+    if (!DuplicateCustomerNumber) {
+      return res.status(400).json({ error: "DuplicateCustomerNumber parameter is required" });
+    }
+
+    const pool = await poolPromise;
+
+    const sqlQuery = `
+      SELECT *
+      FROM complaint_ticket
+      WHERE customer_mobile = '${DuplicateCustomerNumber}'
+      AND deleted = 0
+      ORDER BY id DESC
+    `;
+
+
+    const result = await pool.request().query(sqlQuery);
+
+
+    if (result.recordset.length === 0) {
+      return res.json([]);
+    }
+
+    // Return the records if found
+    return res.json(result.recordset);
+
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred", details: err.message });
+  }
+});
+
+//Register Page Complaint Duplicate End
