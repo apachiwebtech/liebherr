@@ -2899,7 +2899,7 @@ app.post("/add_complaintt", async (req, res) => {
   let {
     complaint_date, customer_name, contact_person, email, mobile, address,
     state, city, area, pincode, mode_of_contact, ticket_type, cust_type,
-    warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date,created_by
+    warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date,created_by, child_service_partner, master_service_partner, specification, additional_remarks
   } = req.body;
 
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
@@ -2910,7 +2910,7 @@ app.post("/add_complaintt", async (req, res) => {
 
   // Split customer_name into customer_fname and customer_lname
   const [customer_fname, ...customer_lnameArr] = customer_name.split(' ');
-  const customer_lname = customer_lnameArr.join(' '); // Join the remaining part as last name
+  const customer_lname = customer_lnameArr.join(' '); 
 
   // Insert into awt_customer
   const customerSQL = `
@@ -2993,13 +2993,13 @@ app.post("/add_complaintt", async (req, res) => {
         ticket_no, ticket_date, customer_name, customer_mobile, customer_email, address, 
         state, city, area, pincode, customer_id, ModelNumber, ticket_type, call_type, 
         call_status, warranty_status, invoice_date, call_charges, mode_of_contact, 
-        contact_person, assigned_to, created_date, created_by, engineer_id, purchase_date, serial_no
+        contact_person, assigned_to, created_date, created_by, engineer_id, purchase_date, serial_no, child_service_partner, sevice_partner,specification
       ) 
       VALUES (
         @ticket_no, @complaint_date, @customer_name, @mobile, @email, @address, 
         @state, @city, @area, @pincode, @customer_id, @model, @ticket_type, @cust_type, 
         'Pending', @warrenty_status, @invoice_date, @call_charge, @mode_of_contact, 
-        @contact_person, 1, @formattedDate, @created_by, 1, @purchase_date, @serial
+        @contact_person, 1, @formattedDate, @created_by, 1, @purchase_date, @serial, @child_service_partner,@master_service_partner,@specification
       )`;
 
     console.log("Executing complaint SQL:", complaintSQL);  // Debugging log
@@ -3028,7 +3028,27 @@ app.post("/add_complaintt", async (req, res) => {
       .input('formattedDate', formattedDate)
       .input('purchase_date', purchase_date)
       .input('serial', serial)
+      .input('master_service_partner', master_service_partner)
+      .input('child_service_partner', child_service_partner)
+      .input('specification', specification)
       .query(complaintSQL);
+
+      //Remark insert query
+      const reamrks = `
+    INSERT INTO awt_complaintremark (
+        ticket_no, remark, created_date, created_by
+    )
+    VALUES (
+        @ticket_no, @additional_remarks, @formattedDate, @created_by
+    )`;
+
+ 
+await pool.request()
+    .input('ticket_no', ticket_no) // Use existing ticket_no from earlier query
+    .input('formattedDate', formattedDate) // Use current timestamp
+    .input('created_by', created_by) // Use current user ID
+    .input('additional_remarks', additional_remarks) // Use current user ID
+    .query(reamrks);
 
     return res.json({ message: 'Complaint added successfully!', ticket_no, insertedCustomerId });
   } catch (err) {
@@ -3054,17 +3074,28 @@ app.get("/getmasterpartner", async (req, res) => {
 
 
 //Child Service Partner
-app.get("/getchildpartner", async (req, res) => {
+
+app.get("/getchildpartner/:MasterId", async (req, res) => {
   try {
+    const MasterId = req.params.MasterId; // Get MasterId from route parameters
+    console.log("MasterId received:", MasterId); // Log the MasterId for debugging
+
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
-    const result = await pool.request().query("SELECT * FROM awt_childfranchisemaster WHERE deleted = 0");
+
+    // Query to fetch child partners filtered by MasterId
+    const result = await pool
+      .request()
+      .input('MasterId', sql.Int, MasterId) // Use parameterized queries to prevent SQL injection
+      .query("SELECT * FROM awt_childfranchisemaster WHERE deleted = 0 AND pfranchise_id = @MasterId");
+
     return res.json(result.recordset);
   } catch (err) {
-    console.error(err);
+    console.error("Error fetching child partners:", err);
     return res.status(500).json({ error: 'An error occurred while fetching data' });
   }
 });
+
 
 
 

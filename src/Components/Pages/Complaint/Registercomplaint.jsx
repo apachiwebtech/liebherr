@@ -59,6 +59,8 @@ export function Registercomplaint(params) {
         master_service_partner: "",
         child_service_partner: "",
         customer_id: "",
+        additional_remarks: "",
+        specification: "", 
         created_by: created_by,
 
     })
@@ -103,18 +105,17 @@ export function Registercomplaint(params) {
 
     }
 
-    //Child Service Partner
-    async function getChildPartner(params) {
-
-        axios.get(`${Base_Url}/getchildpartner`)
-            .then((res) => {
-                if (res.data) {
-
-                    setChildPartner(res.data)
-                }
-            })
-
+   // Child Service Partner
+async function getChildPartner(MasterId) {
+    try {
+        const res = await axios.get(`${Base_Url}/getchildpartner/${MasterId}`);
+        if (res.data) {
+            setChildPartner(res.data);
+        }
+    } catch (err) {
+        console.error("Error fetching child partners:", err);
     }
+}
 
     useEffect(() => {
         console.log("DuplicateCustomerNumber",DuplicateCustomerNumber);
@@ -124,7 +125,7 @@ export function Registercomplaint(params) {
         getState()
         getProduct()
         getMasterPartner()
-        getChildPartner()
+        // getChildPartner()
     }, [DuplicateCustomerNumber])
 
 
@@ -213,43 +214,49 @@ export function Registercomplaint(params) {
             warrenty_status: value.warrenty_status,
             invoice_date: value.invoice_date,
             call_charge: value.call_charge,
-            cust_id: searchdata.customer_id || "",
+            cust_id: searchdata.id || value.customer_id || "", // Fix customer ID handling
             model: value.model,
             serial: value.serial,
-
-             // Add new fields to the data object
             purchase_date: value.purchase_date,
             master_service_partner: value.master_service_partner,
-            child_service_partner: value.child_service_partner
+            child_service_partner: value.child_service_partner,
+            additional_remarks: value.additional_remarks,
+            specification: value.specification,
+            created_by: value.created_by
+        };
 
-
-        }
+        console.log("Submitting data:", data);
 
         axios.post(`${Base_Url}/add_complaintt`, data)
-            .then((res) => {
-                console.log(res.data)
-
-                if (res.data) {
-
-                    notify()
-
-                    setTimeout(() => {
-                        navigate('/complaintlist')
-                    }, 500);
-                }
-
-            })
+        .then((res) => {
+            if (res.data) {
+                notify();
+                setTimeout(() => {
+                    navigate('/complaintlist');
+                }, 500);
+            }
+        })
+        .catch(error => {
+            console.error("Error submitting form:", error);
+            toast.error('Error submitting data');
+        });
     }
 
-
-
+    // Fix the onHandleChange function
     const onHandleChange = (e) => {
-        setValue((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+        const { name, value: inputValue } = e.target;
+        
+        setValue(prevState => ({
+            ...prevState,
+            [name]: inputValue
+        }));
 
-        // if (name === "master_service_partner"){
-
-        // }
+        if (name === "master_service_partner") {
+            getChildPartner(inputValue);
+        }
     };
+
+   
 
     const fetchComplaintDuplicate = async () => {
         try {
@@ -617,7 +624,7 @@ export function Registercomplaint(params) {
                                     >
                                         <option value="">Select</option>
                                         {MasterPartner.map((partner, index) => (
-                                        <option key={index} value={partner.title}>
+                                        <option key={index} value={partner.id}>
                                             {partner.title}
                                         </option>
                                         ))}
@@ -669,15 +676,27 @@ export function Registercomplaint(params) {
                                 <div className="card-body">
                                     <h4 className="pname">Additional Remarks</h4>
                                     <div className="mb-3">
-                                        <textarea className="form-control"></textarea>
+                                        <textarea 
+                                            className="form-control"
+                                            name="additional_remarks"
+                                            value={value.additional_remarks}
+                                            onChange={onHandleChange}
+                                            placeholder="Enter additional remarks..."
+                                        ></textarea>
                                     </div>
                                 </div>
                             </div>
                             <div className="card mb-3" id="engineerInfo">
                                 <div className="card-body">
-                                    <h4 className="pname">Specifivation</h4>
+                                    <h4 className="pname">Specification</h4>
                                     <div className="mb-3">
-                                        <textarea className="form-control"></textarea>
+                                        <textarea 
+                                            className="form-control"
+                                            name="specification"
+                                            value={value.specification}
+                                            onChange={onHandleChange}
+                                            placeholder="Enter specifications..."
+                                        ></textarea>
                                     </div>
                                 </div>
                             </div>
