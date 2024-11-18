@@ -3350,14 +3350,14 @@ app.get("/getcustomerlocation", async (req, res) => {
           r.title AS region_title,
           gs.title AS geostate_title,
           gc.title AS geocity_title,
-          a.title AS area_title,
+          a.title AS district_title,
           p.pincode AS pincode_title
         FROM awt_customerlocation ccl
         JOIN awt_country c ON ccl.country_id = c.id
         JOIN awt_region r ON ccl.region_id = r.id
         JOIN awt_geostate gs ON ccl.geostate_id = gs.id
         JOIN awt_geocity gc ON ccl.geocity_id = gc.id
-        JOIN awt_area a ON ccl.area_id = a.id
+        JOIN awt_district a ON ccl.district_id = a.id
         JOIN awt_pincode p ON ccl.pincode_id = p.id
         WHERE ccl.deleted = 0;
       `;

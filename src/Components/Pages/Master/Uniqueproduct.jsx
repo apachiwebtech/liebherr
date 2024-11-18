@@ -318,6 +318,7 @@ const Uniqueproduct = () => {
                             <FaPencilAlt />
                           </button>
                         </td>
+                        {/* kjkbvskd */}
                         <td className="text-center">
                           <button
                             className="btn btn-link text-danger"

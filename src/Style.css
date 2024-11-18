@@ -61,6 +61,7 @@ header {
     border-radius: 0.55rem !important;
 }
 
+
 .nav-link {
     color: #222;
     width: auto !important;
@@ -280,6 +281,7 @@ h3.mainheade{
     margin-bottom: 8px !important; /* Space below the element */
     font-size: 14px !important; /* Font size */
     font-family: 'Nunito', sans-serif !important; /* Font family */
+    color: #222;
   }
 
   .btn-liebherr {
@@ -413,5 +415,6 @@ input:checked+.slider:before {
     -ms-transform: translateX(26px);
     transform: translateX(26px);
 }
+
 
   

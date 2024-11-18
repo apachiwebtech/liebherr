@@ -29,7 +29,7 @@ const EngineerMaster = () => {
     personal_email: '',
     personal_mobile: '',
     dob: '',
-    blood_group:'',
+    blood_group: '',
     academic_qualification: '',
     joining_date: '',
     passport_picture: '',
@@ -40,20 +40,28 @@ const EngineerMaster = () => {
     current_address: ''
   });
 
-  const fetchChildfranchise = async () => {
+  const fetchParentfranchise = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getchildfranchise`);
-      console.log(response.data);
+      const response = await axios.get(`${Base_Url}/getparentfranchise`);
+      setParentfranchise(response.data);
+    } catch (error) {
+      console.error("Error fetching Parentfranchise:", error);
+    }
+  };
+
+  const fetchChildfranchise = async (mfranchise_id) => {
+    try {
+      const response = await axios.get(`${Base_Url}/getchildfranchise${mfranchise_id}`);
       setChildfranchise(response.data);
     } catch (error) {
       console.error('Error fetching Childfranchise:', error);
     }
   };
 
+
   const fetchUsers = async () => {
     try {
       const response = await axios.get(`${Base_Url}/getengineer`);
-      console.log(response.data);
       setUsers(response.data);
       setFilteredUsers(response.data);
     } catch (error) {
@@ -63,12 +71,15 @@ const EngineerMaster = () => {
 
   useEffect(() => {
     fetchUsers();
-    fetchChildfranchise();
+    fetchParentfranchise();
   }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+    if (name === "mfranchise_id") {
+      fetchChildfranchise(value);
+    }
   };
 
   const handleSearch = (e) => {
@@ -131,7 +142,7 @@ const EngineerMaster = () => {
               console.log(response.data)
               setFormData({
                 title: '',
-                mfranchise_id: '', 
+                mfranchise_id: '',
                 cfranchise_id: '',
                 password: '',
                 email: '',
@@ -140,7 +151,7 @@ const EngineerMaster = () => {
                 personal_email: '',
                 personal_mobile: '',
                 dob: '',
-                blood_group:'',
+                blood_group: '',
                 academic_qualification: '',
                 joining_date: '',
                 passport_picture: '',
@@ -172,7 +183,7 @@ const EngineerMaster = () => {
                 personal_email: '',
                 personal_mobile: '',
                 dob: '',
-                blood_group:'',
+                blood_group: '',
                 academic_qualification: '',
                 joining_date: '',
                 passport_picture: '',
@@ -234,7 +245,7 @@ const EngineerMaster = () => {
                 <div className="col-12">
                   <form onSubmit={handleSubmit} className="col-12">
                     <div className='row'>
-                    <div className="col-md-3">
+                      <div className="col-md-3">
                         <label htmlFor="Master  Franchise" className="form-label pb-0 dropdown-label">Master Franchise</label>
                         <select className='form-select dropdown-select' name='mfranchise_id' value={formData.mfranchise_id} onChange={handleChange} >
                           <option value="">Select Master Franchise</option>
@@ -298,7 +309,7 @@ const EngineerMaster = () => {
                         {errors.employee_code && <small className="text-danger">{errors.employee_code}</small>}
                         {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
                       </div>
-                      
+
                       <div className="col-md-3">
                         <label htmlFor="emailInput" className="input-field" style={{ marginBottom: '15style={{ mapx', fontSize: '18px' }}>Engineer Email</label>
                         <input
