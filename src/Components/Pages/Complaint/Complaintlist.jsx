@@ -359,14 +359,13 @@ export function Complaintlist(params) {
                                         <button
                                                 className='btn'
                                                 onClick={() => navigate(`/complaintview/${item.id}`)}
-                                                disabled={isActionDisabled(item.call_status)}
-                                                title={isActionDisabled(item.call_status) ? "Cannot view closed or cancelled complaints" : "View"}
+                                                title="View"
                                                 style={{
                                                     backgroundColor: 'transparent',
                                                     border: 'none',
-                                                    color: isActionDisabled(item.call_status) ? 'gray' : 'blue',
+                                                    color: 'blue',
                                                     fontSize: '20px',
-                                                    cursor: isActionDisabled(item.call_status) ? 'not-allowed' : 'pointer'
+                                                    cursor: 'pointer'
                                                 }}
                                             >
                                                 <FaEye />
