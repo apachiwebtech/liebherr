@@ -5912,7 +5912,8 @@ app.get("/getcomplainlist", async (req, res) => {
         productCode, 
         customerMobile, 
         ticketno,
-        status 
+        status ,
+        customerID,
     } = req.query;
 
     console.log('Received status:', status); // Debug log
@@ -5963,6 +5964,9 @@ app.get("/getcomplainlist", async (req, res) => {
 
     if (ticketno) {
         sql += ` AND c.ticket_no LIKE '%${ticketno}%'`;
+    }
+    if (customerID) {
+        sql += ` AND c.customer_id LIKE '%${customerID}%'`;
     }
 
     sql += " ORDER BY c.id DESC";

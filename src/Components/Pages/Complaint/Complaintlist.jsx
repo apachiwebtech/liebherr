@@ -25,6 +25,8 @@ export function Complaintlist(params) {
         customerMobile: '',
         ticketno: '',
         status: '',
+        customerID: '',
+        
     });
 
     const formatDate = (dateString) => {
@@ -95,22 +97,23 @@ export function Complaintlist(params) {
             customerMobile: '',
             ticketno: '',
             status: '',
+            customerID: '',
         });
         fetchComplaintlist(); // Reset to original data
     };
 
-	 const deleted = async (id) => { 
-        try {
-            const response = await axios.post(`${Base_Url}/deleteengineer`, { id });
-            setFormData({
-                title: '',
-                cfranchise_id: ''
-            })
-            fetchComplaintlist();
-        } catch (error) {
-            console.error('Error deleting user:', error);
-        }
-    };
+	//  const deleted = async (id) => { 
+    //     try {
+    //         const response = await axios.post(`${Base_Url}/deleteengineer`, { id });
+    //         setFormData({
+    //             title: '',
+    //             cfranchise_id: ''
+    //         })
+    //         fetchComplaintlist();
+    //     } catch (error) {
+    //         console.error('Error deleting user:', error);
+    //     }
+    // };
 
     const edit = async (id) => {
         try {
@@ -179,6 +182,21 @@ export function Complaintlist(params) {
                                     />
                                 </div>
                             </div>
+
+                            <div className="col-md-3">
+                                <div className="form-group">
+                                    <label>Customer ID</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="customerID"
+                                        value={searchFilters.customerID}
+                                        placeholder="Search by customer Id"
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
+
                             <div className="col-md-3">
                                 <div className="form-group">
                                     <label>Customer Name</label>
@@ -192,39 +210,17 @@ export function Complaintlist(params) {
                                     />
                                 </div>
                             </div>
-                            <div className="col-md-3">
-                                <div className="form-group">
-                                    <label>Customer Mobile</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        name="customerMobile"
-                                        value={searchFilters.customerMobile}
-                                        placeholder="Search by customer mobile"
-                                        onChange={handleFilterChange}
-                                    />
-                                </div>
-                            </div>
+                           
                             
                         </div>
 
                         {/* second row of filter */}
 
+                       
+
                         <div className="row mb-3">
-                            <div className="col-md-3">
-                            <div className="form-group">
-                                    <label>Customer Email</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        name="customerEmail"
-                                        value={searchFilters.customerEmail}
-                                        placeholder="Search by customer email"
-                                        onChange={handleFilterChange}
-                                    />
-                                </div>
-                            </div>
-                            <div className="col-md-3">
+
+                            <div className="col-md-2">
                             <div className="form-group">
                                     <label>Serial No</label>
                                     <input
@@ -237,7 +233,7 @@ export function Complaintlist(params) {
                                     />
                                 </div>
                             </div>
-                            <div className="col-md-3">
+                            <div className="col-md-2">
                                 <div className="form-group">
                                     <label>Product Code</label>
                                     <input
@@ -268,44 +264,72 @@ export function Complaintlist(params) {
                                     </select>
                                 </div>
                             </div>
+
                             <div className="col-md-3">
-                                <div className="form-group" style={{ marginTop: '24px' }}>
-                                    <button
-                                        className="btn btn-primary mr-2"
-                                        onClick={applyFilters}
-                                    >
-                                        Search
-                                    </button>
-                                    <button
-                                        className="btn btn-secondary"
-                                        onClick={resetFilters}
-                                        style={{
-                                            
-                                            marginLeft: '5px',
-                                           
-                                        }}
-                                    >
-                                        Reset
-                                    </button>
-                                    {filteredData.length === 0 && (
-                                    <div
-                                        style={{
-                                            backgroundColor: '#f8d7da',
-                                            color: '#721c24',
-                                            padding: '5px 10px',
-                                            marginLeft: '10px',
-                                            borderRadius: '4px',
-                                            border: '1px solid #f5c6cb',
-                                            fontSize: '14px',
-                                            display: 'inline-block'
-                                        }}
-                                    >
-                                        No Record Found
-                                    </div>
-                                )}
+                                <div className="form-group">
+                                    <label>Customer Mobile</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="customerMobile"
+                                        value={searchFilters.customerMobile}
+                                        placeholder="Search by customer mobile"
+                                        onChange={handleFilterChange}
+                                    />
                                 </div>
                             </div>
-                        </div>
+
+                            <div className="col-md-3">
+                                <div className="form-group">
+                                    <label>Customer Email</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="customerEmail"
+                                        value={searchFilters.customerEmail}
+                                        placeholder="Search by customer email"
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Buttons and message at the far-right corner */}
+    <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
+        <div className="form-group">
+            <button
+                className="btn btn-primary mr-2"
+                onClick={applyFilters}
+            >
+                Search
+            </button>
+            <button
+                className="btn btn-secondary"
+                onClick={resetFilters}
+                style={{
+                    marginLeft: '5px',
+                }}
+            >
+                Reset
+            </button>
+            {filteredData.length === 0 && (
+                <div
+                    style={{
+                        backgroundColor: '#f8d7da',
+                        color: '#721c24',
+                        padding: '5px 10px',
+                        marginLeft: '10px',
+                        borderRadius: '4px',
+                        border: '1px solid #f5c6cb',
+                        fontSize: '14px',
+                        display: 'inline-block'
+                    }}
+                >
+                    No Record Found
+                </div>
+            )}
+        </div>
+    </div>
+</div>
 
                         {/* No Record Found Message */}
                        
@@ -324,7 +348,7 @@ export function Complaintlist(params) {
                                     <th>Status</th>
                                     <th>Edit</th>
                                     <th>View</th>
-                                    <th>Delete</th>
+                                    {/* <th>Delete</th> */}
                                 </tr>
                             </thead>
                             <tbody>
@@ -371,21 +395,21 @@ export function Complaintlist(params) {
                                                 <FaEye />
                                             </button>
                                         </td>
-                                        <td>
-                                        <button
-                                                className='btn'
-                                                onClick={() => deleted(item.id)}
-                                                title="Delete"
-                                                style={{
-                                                    backgroundColor: 'transparent',
-                                                    border: 'none',
-                                                    color: 'red',
-                                                    fontSize: '20px'
-                                                }}
-                                            >
-                                                <FaTrash />
-                                            </button>
-                                        </td>
+                                        {/* <td>
+                                            <button
+                                                    className='btn'
+                                                    onClick={() => deleted(item.id)}
+                                                    title="Delete"
+                                                    style={{
+                                                        backgroundColor: 'transparent',
+                                                        border: 'none',
+                                                        color: 'red',
+                                                        fontSize: '20px'
+                                                    }}
+                                                >
+                                                    <FaTrash />
+                                                </button>
+                                        </td> */}
                                     </tr>
                                 ))}
                             </tbody>
