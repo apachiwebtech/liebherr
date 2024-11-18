@@ -356,35 +356,35 @@ async function getChildPartner(MasterId) {
                                 </li>
                             </ul>
 
-                            <div className="tab-content">
-                                <div className="tab-pane active" id="home" role="tabpanel" aria-labelledby="home-tab">
-                                    <table className="table table-striped">
-                                    <tbody>
-                                            {duplicate.map((item, index) => (
-                                                <tr key={index}>
-                                                    <td>
-                                                        <div style={{ fontSize: "14px"}}>{item.ticket_no}</div>
-                                                        <span style={{ fontSize: "14px"}}>{formatDate(item.ticket_date)}</span>
-                                                    </td>
-                                                    <td style={{ fontSize: "14px"}}>{item.ModelNumber}</td>
-                                                    <td>
-                                                        <div style={{ fontSize: "14px"}}>{item.call_status}</div>
-                                                        <span style={{ fontSize: "14px"}}><button
-                                                className='btn'
-                                                onClick={() => navigate(`/complaintview/${item.id}`)}
-                                                title="View"
-                                                style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                                            >
-                                                <FaEye />
-                                            </button>view Info</span>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                    </tbody>
+                                <div className="tab-content">
+                                    <div className="tab-pane active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                                        <table className="table table-striped">
+                                        <tbody>
+                                                {duplicate.map((item, index) => (
+                                                    <tr key={index}>
+                                                        <td>
+                                                            <div style={{ fontSize: "14px"}}>{item.ticket_no}</div>
+                                                            <span style={{ fontSize: "14px"}}>{formatDate(item.ticket_date)}</span>
+                                                        </td>
+                                                        <td style={{ fontSize: "14px"}}>{item.ModelNumber}</td>
+                                                        <td>
+                                                            <div style={{ fontSize: "14px"}}>{item.call_status}</div>
+                                                            <span style={{ fontSize: "14px"}}><button
+                                                    className='btn'
+                                                    onClick={() => navigate(`/complaintview/${item.id}`)}
+                                                    title="View"
+                                                    style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                                                >
+                                                    <FaEye />
+                                                </button>view Info</span>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                        </tbody>
 
-                                    </table>
+                                        </table>
+                                    </div>
                                 </div>
-                            </div>
 
                         </div>
 

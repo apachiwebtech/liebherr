@@ -2637,29 +2637,42 @@ app.get("/getComplaintDetails/:ticket_no", async (req, res) => {
 });
 
 
-
-// getComplaintDuplicate for MS SQL rswithout parameter binding
+// Complaint view Previous ticket
 app.get("/getComplaintDuplicate/:customer_mobile", async (req, res) => {
   const { customer_mobile } = req.params;
-
+  
   try {
-    // Access the connection pool using poolPromise
     const pool = await poolPromise;
-
-    // Direct SQL query without parameter binding
+    
+    // Modified SQL query to skip the latest entry for duplicates
     const sql = `
+      WITH DuplicateNumbers AS (
+        SELECT customer_mobile
+        FROM complaint_ticket
+        WHERE deleted = 0
+        GROUP BY customer_mobile
+        HAVING COUNT(*) > 1
+      ),
+      RankedComplaints AS (
+        SELECT *,
+          ROW_NUMBER() OVER (PARTITION BY customer_mobile ORDER BY id DESC) as rn
+        FROM complaint_ticket
+        WHERE deleted = 0
+        AND customer_mobile IN (SELECT customer_mobile FROM DuplicateNumbers)
+      )
       SELECT *
-      FROM complaint_ticket
-      WHERE customer_mobile = '${customer_mobile}'
-      AND deleted = 0
+      FROM RankedComplaints
+      WHERE rn > 1
+      AND customer_mobile = @customer_mobile
       ORDER BY id DESC
     `;
 
-    // Execute the query
-    const result = await pool.request().query(sql);
-
-    // Return the data
+    const result = await pool.request()
+      .input('customer_mobile', customer_mobile)
+      .query(sql);
+    
     return res.json(result.recordset);
+
   } catch (err) {
     console.error("Database error:", err);
     return res.status(500).json({ error: "Database error occurred", details: err.message });
@@ -5336,24 +5349,24 @@ app.get("/getComplaintDetails/:ticket_no", async (req, res) => {
   }
 });
 
-app.get("/getComplaintDuplicate/:customer_mobile", async (req, res) => {
-  const customer_mobile = req.params.customer_mobile;
+// app.get("/getComplaintDuplicate/:customer_mobile", async (req, res) => {
+//   const customer_mobile = req.params.customer_mobile;
 
-  try {
-    const pool = await poolPromise;
+//   try {
+//     const pool = await poolPromise;
 
-    // Query to fetch complaint tickets based on customer_mobile
-    const sql = `SELECT * FROM complaint_ticket WHERE customer_mobile = '${customer_mobile}' AND deleted = 0 ORDER BY id DESC`;
-    const result = await pool.request().query(sql);
+//     // Query to fetch complaint tickets based on customer_mobile
+//     const sql = `SELECT * FROM complaint_ticket WHERE customer_mobile = '${customer_mobile}' AND deleted = 0 ORDER BY id DESC`;
+//     const result = await pool.request().query(sql);
 
-    // Send the result back to the client
-    res.json(result.recordset);
+//     // Send the result back to the client
+//     res.json(result.recordset);
 
-  } catch (err) {
-    console.error("Error fetching complaint duplicate:", err);
-    return res.status(500).json({ error: "Error fetching complaint duplicate", details: err.message });
-  }
-});
+//   } catch (err) {
+//     console.error("Error fetching complaint duplicate:", err);
+//     return res.status(500).json({ error: "Error fetching complaint duplicate", details: err.message });
+//   }
+// });
 // End Complaint View
 // y end
 
@@ -5944,35 +5957,44 @@ app.get("/getComplaintDuplicateRegisterPage/:DuplicateCustomerNumber", async (re
   const { DuplicateCustomerNumber } = req.params;
 
   try {
-
     if (!DuplicateCustomerNumber) {
       return res.status(400).json({ error: "DuplicateCustomerNumber parameter is required" });
     }
 
     const pool = await poolPromise;
 
-    const sqlQuery = `
+    // Modified SQL query to skip the latest entry for duplicates
+    const sql = `
+      WITH DuplicateNumbers AS (
+        SELECT customer_mobile
+        FROM complaint_ticket
+        WHERE deleted = 0
+        GROUP BY customer_mobile
+        HAVING COUNT(*) > 1
+      ),
+      RankedComplaints AS (
+        SELECT *,
+          ROW_NUMBER() OVER (PARTITION BY customer_mobile ORDER BY id DESC) as rn
+        FROM complaint_ticket
+        WHERE deleted = 0
+        AND customer_mobile IN (SELECT customer_mobile FROM DuplicateNumbers)
+      )
       SELECT *
-      FROM complaint_ticket
-      WHERE customer_mobile = '${DuplicateCustomerNumber}'
-      AND deleted = 0
+      FROM RankedComplaints
+      WHERE rn > 1
+      AND customer_mobile = @DuplicateCustomerNumber
       ORDER BY id DESC
     `;
 
+    const result = await pool.request()
+      .input('DuplicateCustomerNumber', DuplicateCustomerNumber)
+      .query(sql);
 
-    const result = await pool.request().query(sqlQuery);
-
-
-    if (result.recordset.length === 0) {
-      return res.json([]);
-    }
-
-    // Return the records if found
     return res.json(result.recordset);
 
   } catch (err) {
     console.error("Database error:", err);
-    return res.json([]);
+    return res.status(500).json({ error: "Database error occurred", details: err.message });
   }
 });
 
