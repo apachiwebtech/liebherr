@@ -23,6 +23,7 @@ export function Complaintlist(params) {
         serialNo: '',
         productCode: '',
         customerMobile: '',
+        ticketno: '',
     });
 
     const formatDate = (dateString) => {
@@ -54,6 +55,7 @@ export function Complaintlist(params) {
             if (searchFilters.serialNo) params.append('serialNo', searchFilters.serialNo);
             if (searchFilters.productCode) params.append('productCode', searchFilters.productCode);
             if (searchFilters.customerMobile) params.append('customerMobile', searchFilters.customerMobile);
+            if (searchFilters.ticketno) params.append('ticketno', searchFilters.ticketno);
 
             const response = await axios.get(`${Base_Url}/getcomplainlist?${params}`);
             setFilteredData(response.data);
@@ -121,7 +123,7 @@ export function Complaintlist(params) {
                     <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
                         {/* Search Filters */}
                         <div className="row mb-3">
-                            <div className="col-md-3">
+                            <div className="col-md-2">
                                 <div className="form-group">
                                     <label>From Date</label>
                                     <input
@@ -133,7 +135,7 @@ export function Complaintlist(params) {
                                     />
                                 </div>
                             </div>
-                            <div className="col-md-3">
+                            <div className="col-md-2">
                                 <div className="form-group">
                                     <label>To Date</label>
                                     <input
@@ -141,6 +143,19 @@ export function Complaintlist(params) {
                                         className="form-control"
                                         name="toDate"
                                         value={searchFilters.toDate}
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
+                            <div className="col-md-2">
+                                <div className="form-group">
+                                    <label>Complaint No.</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="ticketno"
+                                        value={searchFilters.ticketno}
+                                        placeholder="Search by complaint no"
                                         onChange={handleFilterChange}
                                     />
                                 </div>
