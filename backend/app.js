@@ -1349,7 +1349,50 @@ app.get("/getproductlist", async (req, res) => {
   }
 });
 // Product list end
+//customer list start
+app.get("/getcustomerlist", async (req, res) => {
+  try {
+    
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
 
+    // Directly use the query (no parameter binding)
+    const sql = "SELECT * FROM awt_customer ORDER BY id ASC";
+
+    // Execute the query
+    const result = await pool.request().query(sql);
+
+    // Return the result as JSON
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred" });
+  }
+});
+
+app.get("/requestcustomerlist/:id",async (req,res) => {
+  try {
+   
+    const pool = await poolPromise;
+    const id = req.params.id;
+    const sql = `SELECT * FROM awt_customer WHERE id = @id`;
+
+    const result = await pool.request()
+    .input('id', id)
+    .query(sql);
+   
+    
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ error: 'Customer not found' });
+    }
+
+    return res.json(result.recordset);
+  }
+  catch (err) {
+    console.error('Error in requestcustomerlist/:id endpoint:', err);
+    return res.status(500).json({ error: 'An error occurred while fetching customer data' });
+  }
+})
 //Category Start
 app.get("/getcat", async (req, res) => {
   try {

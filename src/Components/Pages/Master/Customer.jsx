@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
 import Endcustomertabs from './Endcustomertabs';
+import { useParams } from 'react-router-dom';
 
 const Customer = () => {
 
@@ -12,6 +13,7 @@ const Customer = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [duplicateError, setDuplicateError] = useState(''); 
 
+  const { eid } = useParams();
 
   const [formData, setFormData] = useState({ 
     customer_fname: '',
@@ -25,7 +27,7 @@ const Customer = () => {
     email: '',
   });
 
-  const fetchCustomerData = async () => {
+  const fetchCustomerData = async (id) => {
     try {
       const response = await axios.get(`${Base_Url}/getcustomer`);
       console.log(response.data); 
@@ -38,7 +40,10 @@ const Customer = () => {
 
 
   useEffect(() => {
-    fetchCustomerData();
+    
+      fetchCustomerData();
+
+    
   }, []);
 
   const handleChange = (e) => {

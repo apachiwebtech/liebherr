@@ -191,8 +191,20 @@ const Router = createBrowserRouter([
 
       },
       {
+        path: "/customerlocation/:id",
+        element: <Customerlocation />
+      },
+      {
+        path: "/customer/:id",
+        element: <Customer />
+      },
+      {
+        path: "/uniqueproduct/:id",
+        element: <Uniqueproduct />
+      },
+      {
         path: "/Customerlist",
-        element: <Customerlist />,
+        element: <Customerlist />
 
       },
       {
