@@ -7,6 +7,7 @@ import Franchisemaster from '../Master/Franchisemaster';
 const EngineerMaster = () => {
   // Step 1: Add this state to track errors
   const [Childfranchise, setChildfranchise] = useState([]);
+  const [Parentfranchise, setParentfranchise] = useState([]);
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -20,6 +21,7 @@ const EngineerMaster = () => {
   const [formData, setFormData] = useState({
     title: '',
     cfranchise_id: '',
+    mfranchise_id: '',
     password: '',
     email: '',
     mobile_no: '',
@@ -91,6 +93,9 @@ const EngineerMaster = () => {
     if (!formData.cfranchise_id) {
       newErrors.cfranchise_id = "Child Franchise selection is required.";
     }
+    if (!formData.mfranchise_id) {
+      newErrors.mfranchise_id = "Main Franchise selection is required.";
+    }
     if (!formData.email) {
       newErrors.email = "Engineer Email Field is required.";
     }
@@ -126,6 +131,7 @@ const EngineerMaster = () => {
               console.log(response.data)
               setFormData({
                 title: '',
+                mfranchise_id: '', 
                 cfranchise_id: '',
                 password: '',
                 email: '',
@@ -157,6 +163,7 @@ const EngineerMaster = () => {
             .then(response => {
               setFormData({
                 title: '',
+                mfranchise_id: '',
                 cfranchise_id: '',
                 password: '',
                 email: '',
@@ -226,8 +233,17 @@ const EngineerMaster = () => {
               <div className="row mp0">
                 <div className="col-12">
                   <form onSubmit={handleSubmit} className="col-12">
-                    {/* Step 2.1: Child Franchise Dropdown */}
                     <div className='row'>
+                    <div className="col-md-3">
+                        <label htmlFor="Master  Franchise" className="form-label pb-0 dropdown-label">Master Franchise</label>
+                        <select className='form-select dropdown-select' name='mfranchise_id' value={formData.mfranchise_id} onChange={handleChange} >
+                          <option value="">Select Master Franchise</option>
+                          {Parentfranchise.map((pf) => (
+                            <option key={pf.id} value={pf.id}>{pf.title}</option>
+                          ))}
+                        </select>
+                        {errors.mfranchise_id && <small className="text-danger">{errors.mfranchise_id}</small>} {/* Show error for Child Franchise selection */}
+                      </div>
                       <div className="col-md-3">
                         <label htmlFor="Child Franchise" className="form-label pb-0 dropdown-label">Child Franchise</label>
                         <select className='form-select dropdown-select' name='cfranchise_id' value={formData.cfranchise_id} onChange={handleChange} >

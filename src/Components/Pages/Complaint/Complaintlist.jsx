@@ -274,7 +274,7 @@ export function Complaintlist(params) {
                                         <td>{formatDate(item.ticket_date)}</td>
                                         <td>{item.customer_name}</td>
                                         <td>{item.ModelNumber}</td>
-                                        <td>{'0'}</td>
+                                        <td>{item.ageingdays}</td>
                                         <td>{item.assigned_to}</td>
                                         <td>{item.call_status}</td>
                                         <td>

@@ -1,9 +1,11 @@
 import axios from "axios";
 import Select from "react-select";
 import makeAnimated from 'react-select/animated';
+import { useNavigate } from 'react-router-dom';
 import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Base_Url } from "../../Utils/Base_Url";
+import { FaEye } from "react-icons/fa";
 
 export function Complaintview(params) {
   const { complaintid } = useParams();
@@ -377,6 +379,8 @@ const handleSubmitTicketFormData = (e) => {
     border: TicketUpdateSuccess.type === 'success' ? '1px solid #c3e6cb' : '1px solid #f5c6cb'
   };
 
+  const navigate = useNavigate();
+
   return (
     <div className="p-3">
       <style>
@@ -495,7 +499,14 @@ const handleSubmitTicketFormData = (e) => {
                                           <td style={{ fontSize: "14px"}}>{item.ModelNumber}</td>
                                           <td>
                                               <div style={{ fontSize: "14px"}}>{item.call_status}</div>
-                                              <span style={{ fontSize: "14px"}}>View Info</span>
+                                              <span style={{ fontSize: "14px"}}><button
+                                                className='btn'
+                                                onClick={() => navigate(`/complaintview/${item.id}`)}
+                                                title="View"
+                                                style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                                            >
+                                                <FaEye />
+                                            </button>View Info</span>
                                           </td>
                                       </tr>
                                   ))}

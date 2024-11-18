@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import toast, { Toaster } from 'react-hot-toast';
 import { Base_Url } from '../../Utils/Base_Url'
 import { useNavigate } from "react-router-dom";
+import { FaEye } from "react-icons/fa";
 
 export function Registercomplaint(params) {
 
@@ -368,7 +369,14 @@ async function getChildPartner(MasterId) {
                                                     <td style={{ fontSize: "14px"}}>{item.ModelNumber}</td>
                                                     <td>
                                                         <div style={{ fontSize: "14px"}}>{item.call_status}</div>
-                                                        <span style={{ fontSize: "14px"}}>View Info</span>
+                                                        <span style={{ fontSize: "14px"}}><button
+                                                className='btn'
+                                                onClick={() => navigate(`/complaintview/${item.id}`)}
+                                                title="View"
+                                                style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                                            >
+                                                <FaEye />
+                                            </button>view Info</span>
                                                     </td>
                                                 </tr>
                                             ))}

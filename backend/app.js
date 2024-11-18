@@ -5894,7 +5894,7 @@ app.get("/getcomplainlist", async (req, res) => {
 
     const { fromDate, toDate, customerName, customerEmail, serialNo, productCode, customerMobile, ticketno } = req.query;
 
-    let sql = "SELECT * FROM complaint_ticket WHERE deleted = 0";
+    let sql = "SELECT *, DATEDIFF(day, (ticket_date), GETDATE()) AS ageingdays FROM complaint_ticket WHERE deleted = 0";
 
     // Add date range filter if both dates are provided
     if (fromDate && toDate) {
