@@ -24,6 +24,7 @@ export function Complaintlist(params) {
         productCode: '',
         customerMobile: '',
         ticketno: '',
+        status: '',
     });
 
     const formatDate = (dateString) => {
@@ -35,8 +36,12 @@ export function Complaintlist(params) {
     const fetchComplaintlist = async () => {
         try {
             const response = await axios.get(`${Base_Url}/getcomplainlist`);
+            // Filter out 'Closed' and 'Cancelled' status complaints by default
+            const filteredComplaints = response.data.filter(complaint => 
+                !['Closed', 'Cancelled'].includes(complaint.call_status)
+            );
             setComplaintdata(response.data);
-            setFilteredData(response.data); // Set filtered data initially
+            setFilteredData(filteredComplaints);
         } catch (error) {
             console.error('Error fetching Complaintdata:', error);
             setComplaintdata([]);
@@ -46,17 +51,17 @@ export function Complaintlist(params) {
 
     const fetchFilteredData = async () => {
         try {
-            // Create query parameters
             const params = new URLSearchParams();
-            if (searchFilters.fromDate) params.append('fromDate', searchFilters.fromDate);
-            if (searchFilters.toDate) params.append('toDate', searchFilters.toDate);
-            if (searchFilters.customerName) params.append('customerName', searchFilters.customerName);
-            if (searchFilters.customerEmail) params.append('customerEmail', searchFilters.customerEmail);
-            if (searchFilters.serialNo) params.append('serialNo', searchFilters.serialNo);
-            if (searchFilters.productCode) params.append('productCode', searchFilters.productCode);
-            if (searchFilters.customerMobile) params.append('customerMobile', searchFilters.customerMobile);
-            if (searchFilters.ticketno) params.append('ticketno', searchFilters.ticketno);
-
+            
+            // Add all filters to params
+            Object.entries(searchFilters).forEach(([key, value]) => {
+                if (value) { // Only add if value is not empty
+                    params.append(key, value);
+                }
+            });
+    
+            console.log('Sending params:', params.toString()); // Debug log
+            
             const response = await axios.get(`${Base_Url}/getcomplainlist?${params}`);
             setFilteredData(response.data);
         } catch (error) {
@@ -67,6 +72,7 @@ export function Complaintlist(params) {
 
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
+        console.log('Filter changed:', name, value); // Debug log
         setSearchFilters(prev => ({
             ...prev,
             [name]: value
@@ -74,14 +80,21 @@ export function Complaintlist(params) {
     };
 
     const applyFilters = () => {
-        fetchFilteredData(); // Call API with filters
+        console.log('Applying filters:', searchFilters); // Debug log
+        fetchFilteredData();
     };
 
     const resetFilters = () => {
         setSearchFilters({
             fromDate: '',
             toDate: '',
-            customerName: ''
+            customerName: '',
+            customerEmail: '',
+            serialNo: '',
+            productCode: '',
+            customerMobile: '',
+            ticketno: '',
+            status: '',
         });
         fetchComplaintlist(); // Reset to original data
     };
@@ -115,6 +128,12 @@ export function Complaintlist(params) {
     }, []);
 
     const navigate = useNavigate();
+
+    const isActionDisabled = (status) => {
+        return ['Closed', 'Cancelled'].includes(status);
+    };
+
+
 
     return (
         <div className="row mp0">
@@ -231,6 +250,24 @@ export function Complaintlist(params) {
                                     />
                                 </div>
                             </div>
+                            <div className="col-md-2">
+                                <div className="form-group">
+                                    <label>Status</label>
+                                    <select
+                                        className="form-control"
+                                        name="status"
+                                        value={searchFilters.status}
+                                        onChange={handleFilterChange}
+                                    >
+                                        <option value="">All Active Status</option>
+                                        <option value="Closed">Closed</option>
+                                        <option value="Cancelled">Cancelled</option>
+                                        <option value="Pending">Pending</option>
+                                        <option value="Quotation">Quotation</option>
+                                        <option value="Duplicates">Duplicates</option>
+                                    </select>
+                                </div>
+                            </div>
                             <div className="col-md-3">
                                 <div className="form-group" style={{ marginTop: '24px' }}>
                                     <button
@@ -242,12 +279,36 @@ export function Complaintlist(params) {
                                     <button
                                         className="btn btn-secondary"
                                         onClick={resetFilters}
+                                        style={{
+                                            
+                                            marginLeft: '5px',
+                                           
+                                        }}
                                     >
                                         Reset
                                     </button>
+                                    {filteredData.length === 0 && (
+                                    <div
+                                        style={{
+                                            backgroundColor: '#f8d7da',
+                                            color: '#721c24',
+                                            padding: '5px 10px',
+                                            marginLeft: '10px',
+                                            borderRadius: '4px',
+                                            border: '1px solid #f5c6cb',
+                                            fontSize: '14px',
+                                            display: 'inline-block'
+                                        }}
+                                    >
+                                        No Record Found
+                                    </div>
+                                )}
                                 </div>
                             </div>
                         </div>
+
+                        {/* No Record Found Message */}
+                       
 
                         {/* Table */}
                         <table className="table">
@@ -275,34 +336,53 @@ export function Complaintlist(params) {
                                         <td>{item.customer_name}</td>
                                         <td>{item.ModelNumber}</td>
                                         <td>{item.ageingdays}</td>
-                                        <td>{item.assigned_to}</td>
+                                        <td>{item.assigned_name}</td>
                                         <td>{item.call_status}</td>
                                         <td>
-                                            <button
+                                        <button
                                                 className='btn'
                                                 onClick={() => edit(item.id)}
-                                                title="Edit"
-                                                style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                                                disabled={isActionDisabled(item.call_status)}
+                                                title={isActionDisabled(item.call_status) ? "Cannot edit closed or cancelled complaints" : "Edit"}
+                                                style={{
+                                                    backgroundColor: 'transparent',
+                                                    border: 'none',
+                                                    color: isActionDisabled(item.call_status) ? 'gray' : 'blue',
+                                                    fontSize: '20px',
+                                                    cursor: isActionDisabled(item.call_status) ? 'not-allowed' : 'pointer'
+                                                }}
                                             >
                                                 <FaPencilAlt />
                                             </button>
                                         </td>
                                         <td>
-                                            <button
+                                        <button
                                                 className='btn'
                                                 onClick={() => navigate(`/complaintview/${item.id}`)}
-                                                title="View"
-                                                style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                                                disabled={isActionDisabled(item.call_status)}
+                                                title={isActionDisabled(item.call_status) ? "Cannot view closed or cancelled complaints" : "View"}
+                                                style={{
+                                                    backgroundColor: 'transparent',
+                                                    border: 'none',
+                                                    color: isActionDisabled(item.call_status) ? 'gray' : 'blue',
+                                                    fontSize: '20px',
+                                                    cursor: isActionDisabled(item.call_status) ? 'not-allowed' : 'pointer'
+                                                }}
                                             >
                                                 <FaEye />
                                             </button>
                                         </td>
                                         <td>
-                                            <button
+                                        <button
                                                 className='btn'
                                                 onClick={() => deleted(item.id)}
                                                 title="Delete"
-                                                style={{ backgroundColor: 'transparent', border: 'none', color: 'red', fontSize: '20px' }}
+                                                style={{
+                                                    backgroundColor: 'transparent',
+                                                    border: 'none',
+                                                    color: 'red',
+                                                    fontSize: '20px'
+                                                }}
                                             >
                                                 <FaTrash />
                                             </button>

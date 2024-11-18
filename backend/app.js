@@ -5903,43 +5903,71 @@ app.post('/updatecomplaint', async (req, res) => {
 app.get("/getcomplainlist", async (req, res) => {
   try {
     const pool = await poolPromise;
+    const { 
+        fromDate, 
+        toDate, 
+        customerName, 
+        customerEmail, 
+        serialNo, 
+        productCode, 
+        customerMobile, 
+        ticketno,
+        status 
+    } = req.query;
 
+    console.log('Received status:', status); // Debug log
 
-    const { fromDate, toDate, customerName, customerEmail, serialNo, productCode, customerMobile, ticketno } = req.query;
+    let sql = `
+        SELECT c.*, e.title as assigned_name, 
+        DATEDIFF(day, (c.ticket_date), GETDATE()) AS ageingdays 
+        FROM complaint_ticket AS c
+        JOIN awt_engineermaster AS e ON c.engineer_id = e.id
+        WHERE c.deleted = 0
+    `;
 
-    let sql = "SELECT *, DATEDIFF(day, (ticket_date), GETDATE()) AS ageingdays FROM complaint_ticket WHERE deleted = 0";
-
-    // Add date range filter if both dates are provided
-    if (fromDate && toDate) {
-      sql += ` AND CAST(ticket_date AS DATE) >= CAST('${fromDate}' AS DATE)
-               AND CAST(ticket_date AS DATE) <= CAST('${toDate}' AS DATE)`;
+    // Modified status filtering logic
+    if (status === 'Closed' || status === 'Cancelled') {
+        sql += ` AND c.call_status = '${status}'`;
+    } else if (status === '') {
+        sql += ` AND c.call_status NOT IN ('Closed', 'Cancelled')`;
+    } else if (status) {
+        sql += ` AND c.call_status = '${status}'`;
+    } else {
+        sql += ` AND c.call_status NOT IN ('Closed', 'Cancelled')`;
     }
 
+    if (fromDate && toDate) {
+        sql += ` AND CAST(c.ticket_date AS DATE) >= CAST('${fromDate}' AS DATE)
+                AND CAST(c.ticket_date AS DATE) <= CAST('${toDate}' AS DATE)`;
+    }
 
     if (customerName) {
-      sql += ` AND customer_name LIKE '%${customerName}%'`;
+        sql += ` AND c.customer_name LIKE '%${customerName}%'`;
     }
 
     if (customerEmail) {
-      sql += ` AND customer_email LIKE '%${customerEmail}%'`;
+        sql += ` AND c.customer_email LIKE '%${customerEmail}%'`;
+    }
+
+    if (customerMobile) {
+        sql += ` AND c.customer_mobile LIKE '%${customerMobile}%'`;
     }
 
     if (serialNo) {
-      sql += ` AND serial_no LIKE '%${serialNo}%'`;
+        sql += ` AND c.serial_no LIKE '%${serialNo}%'`;
     }
 
     if (productCode) {
-      sql += ` AND ModelNumber LIKE '%${productCode}%'`;
+        sql += ` AND c.ModelNumber LIKE '%${productCode}%'`;
     }
 
     if (ticketno) {
-      sql += ` AND ticket_no LIKE '%${ticketno}%'`;
+        sql += ` AND c.ticket_no LIKE '%${ticketno}%'`;
     }
 
-    // Add ordering
-    sql += " ORDER BY id DESC";
+    sql += " ORDER BY c.id DESC";
 
-    console.log(sql, "backend SQL Query")
+    console.log('SQL Query:', sql); // Debug log
     const result = await pool.request().query(sql);
 
     return res.json(result.recordset);
@@ -5948,7 +5976,8 @@ app.get("/getcomplainlist", async (req, res) => {
     return res.status(500).json({ message: "An error occurred while fetching the complaint list" });
   }
 });
-// end Complaint list
+
+        // end Complaint list
 
 
 //Register Page Complaint Duplicate Start
