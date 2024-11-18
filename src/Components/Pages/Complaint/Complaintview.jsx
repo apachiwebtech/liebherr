@@ -266,16 +266,23 @@ const handleSubmitTicketFormData = (e) => {
     e.preventDefault();
     setErrorMessage("");
 
-    if (!note && files.length === 0) {
-      setErrorMessage("Please fill the field and upload a file.");
-      return;
-    } else if (!note) {
-      setErrorMessage("Please fill the field.");
-      return;
-    } else if (files.length === 0) {
-      setErrorMessage("Please upload a file.");
-      return;
-    }
+    // if (!note && files.length === 0) {
+    //   setErrorMessage("Please fill the field and upload a file.");
+    //   return;
+    // } else if (!note) {
+    //   setErrorMessage("Please fill the field.");
+    //   return;
+    // } else if (files.length === 0) {
+    //   setErrorMessage("Please upload a file.");
+    //   return;
+    // }
+
+      // Check only for note being empty
+      if (!note) {
+        setErrorMessage("Please fill the field.");
+        return;
+      }
+  
 
     try {
       const complaintRemarkData = {
