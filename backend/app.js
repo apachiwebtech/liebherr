@@ -104,7 +104,7 @@ app.get("/getdata", async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
-    const result = await pool.request().query("SELECT * FROM awt_country WHERE deleted = 0");
+    const result = await pool.request().query("SELECT * FROM awt_country WHERE deleted = 0 ORDER BY id DESC");
     return res.json(result.recordset);
   } catch (err) {
     console.error(err);
@@ -256,7 +256,7 @@ app.get("/getregionsr", async (req, res) => {
       SELECT r.*, c.title as country_title
       FROM awt_region r
       JOIN awt_country c ON r.country_id = c.id
-      WHERE r.deleted = 0
+      WHERE r.deleted = 0 ORDER BY r.id DESC
     `;
     const result = await pool.request().query(sql);
 
@@ -410,7 +410,7 @@ app.get("/getgeostates", async (req, res) => {
       FROM awt_geostate gs
       JOIN awt_country c ON gs.country_id = c.id
       JOIN awt_region r ON gs.region_id = r.id
-      WHERE gs.deleted = 0
+      WHERE gs.deleted = 0 ORDER BY gs.id DESC
     `;
 
     // Execute the query
@@ -677,7 +677,7 @@ app.get("/getgeocities", async (req, res) => {
       JOIN awt_region r ON gc.region_id = r.id
       JOIN awt_geostate gs ON gc.geostate_id = gs.id
       JOIN awt_district d ON gc.district = d.id
-      WHERE gc.deleted = 0
+      WHERE gc.deleted = 0 ORDER BY gc.id DESC
     `;
 
     // Execute the query
@@ -761,14 +761,14 @@ app.post("/postgeocity", async (req, res) => {
 
 // Update existing geocity with duplicate check
 app.put("/putgeocity", async (req, res) => {
-  const { title, id, country_id, region_id, geostate_id } = req.body;
+  const { title, id, country_id, region_id, geostate_id ,district} = req.body;
 
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
 
     // SQL query to check for duplicates (excluding the current record's id)
-    const checkDuplicateSql = `SELECT * FROM awt_geocity WHERE title = '${title}' AND country_id = ${country_id} AND region_id = ${region_id} AND geostate_id =${geostate_id} AND id != ${id} AND deleted = 0`;
+    const checkDuplicateSql = `SELECT * FROM awt_geocity WHERE title = '${title}' AND country_id = ${country_id} AND region_id = ${region_id} AND geostate_id =${geostate_id} AND district =${district} AND id != ${id} AND deleted = 0`;
     const duplicateResult = await pool.request().query(checkDuplicateSql);
 
     if (duplicateResult.recordset.length > 0) {
@@ -906,7 +906,7 @@ app.get("/getareas", async (req, res) => {
             JOIN awt_country c ON a.country_id = c.id
             JOIN awt_region r ON a.region_id = r.id
             JOIN awt_geostate gs ON a.geostate_id = gs.id
-            WHERE a.deleted = 0
+            WHERE a.deleted = 0 ORDER BY a.id DESC
     `;
 
     const result = await pool.request().query(sql);
@@ -1158,7 +1158,7 @@ app.get("/getpincodes", async (req, res) => {
       JOIN awt_geostate gs ON p.geostate_id = gs.id
       JOIN awt_geocity gc ON p.geocity_id = gc.id
       JOIN awt_district a ON p.area_id = a.id
-      WHERE p.deleted = 0
+      WHERE p.deleted = 0 ORDER BY p.id DESC
     `;
 
     // Execute the query and get the results
@@ -1180,25 +1180,28 @@ app.get("/requestpincode/:id", async (req, res) => {
     // Access the connection pool using poolPromise
     const pool = await poolPromise;
 
-    // Direct SQL query without parameter binding
+    // Parameterized SQL query
     const sql = `
       SELECT p.*,
-                  c.title AS country_title,
-                  r.title AS region_title,
-                  gs.title AS geostate_title,
-                  gc.title AS geocity_title,
-                  a.title AS area_title
-            FROM awt_pincode p
-            INNER JOIN awt_country c ON p.country_id = c.id
-            INNER JOIN awt_region r ON p.region_id = r.id
-            INNER JOIN awt_geostate gs ON p.geostate_id = gs.id
-            INNER JOIN awt_geocity gc ON p.geocity_id = gc.id
-            INNER JOIN awt_district a ON p.area_id = a.id
-            WHERE p.id = 202 AND p.deleted = 0
+             c.title AS country_title,
+             r.title AS region_title,
+             gs.title AS geostate_title,
+             gc.title AS geocity_title,
+             a.title AS area_title
+      FROM awt_pincode p
+      INNER JOIN awt_country c ON p.country_id = c.id
+      INNER JOIN awt_region r ON p.region_id = r.id
+      INNER JOIN awt_geostate gs ON p.geostate_id = gs.id
+      INNER JOIN awt_geocity gc ON p.geocity_id = gc.id
+      INNER JOIN awt_district a ON p.area_id = a.id
+      WHERE p.id = @id AND p.deleted = 0
     `;
 
-    // Execute the query and get the result
-    const result = await pool.request().query(sql);
+    // Execute the query with a parameter
+    const result = await pool
+      .request()
+      .input("id", id) // Safely pass the `id` parameter
+      .query(sql);
 
     // If no data found, return a 404 response
     if (result.recordset.length === 0) {
