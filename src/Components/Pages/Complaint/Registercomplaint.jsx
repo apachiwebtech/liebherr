@@ -16,6 +16,9 @@ export function Registercomplaint(params) {
     const [hasSearched, setHasSearched] = useState(false)
     const [form, setForm] = useState(false)
     const [state, setState] = useState([])
+    const [city, setCity] = useState([])
+    const [area, setArea] = useState([])
+    const [pincode, setPincode] = useState([])
     const [product, setProduct] = useState([])
     const [MasterPartner, setMasterPartner] = useState([])
     const [ChildPartner, setChildPartner] = useState([])
@@ -528,22 +531,46 @@ async function getChildPartner(MasterId) {
                                     </div>
                                     <div className="col-md-3">
                                         <div className="mb-3">
-                                            <label className="form-label" >City</label>
-                                            <input type="text" className="form-control" value={value.city} name="city" onChange={onHandleChange} />
+                                            <label className="form-label">City</label>
+                                            <select className="form-control" value={value.city} name="city" onChange={onHandleChange}>
+                                                <option value="">Select City</option>
+                                                {city.map((item) => {
+                                                    return (
+                                                        <option value={item.id} key={item.id}>{item.title}</option>
+                                                    );
+                                                })}
+                                            </select>
                                         </div>
                                     </div>
+
                                     <div className="col-md-3">
                                         <div className="mb-3">
-                                            <label className="form-label" >Area</label>
-                                            <input type="text" className="form-control" onChange={onHandleChange} name="area" value={value.area} />
+                                            <label className="form-label">Area</label>
+                                            <select className="form-control" onChange={onHandleChange} name="area" value={value.area}>
+                                                <option value="">Select Area</option>
+                                                {area.map((item) => {
+                                                    return (
+                                                        <option value={item.id} key={item.id}>{item.title}</option>
+                                                    );
+                                                })}
+                                            </select>
                                         </div>
                                     </div>
+
                                     <div className="col-md-3">
                                         <div className="mb-3">
-                                            <label className="form-label" >Pincode</label>
-                                            <input type="text" className="form-control" value={value.pincode} name="pincode" onChange={onHandleChange} placeholder="Enter Pincode" />
+                                            <label className="form-label">Pincode</label>
+                                            <select className="form-control" value={value.pincode} name="pincode" onChange={onHandleChange}>
+                                                <option value="">Select Pincode</option>
+                                                {pincode.map((item) => {
+                                                    return (
+                                                        <option value={item.id} key={item.id}>{item.title}</option>
+                                                    );
+                                                })}
+                                            </select>
                                         </div>
                                     </div>
+
 
                                     <div className="col-md-4">
                                         <div className="mb-3">
