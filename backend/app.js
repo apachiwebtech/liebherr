@@ -3050,7 +3050,7 @@ app.post("/add_complaintt", async (req, res) => {
   let {
     complaint_date, customer_name, contact_person, email, mobile, address,
     state, city, area, pincode, mode_of_contact, ticket_type, cust_type,
-    warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks,ticket_id
+    warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks, ticket_id
   } = req.body;
 
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
@@ -3225,7 +3225,7 @@ app.post("/add_complaintt", async (req, res) => {
       .input('model', model)
       .input('ticket_type', ticket_type)
       .input('cust_type', cust_type)
-      .input("warranty_status", sql.NVarChar, warrenty_status || "WARRENTY") 
+      .input("warranty_status", sql.NVarChar, warrenty_status || "WARRENTY")
       .input('invoice_date', invoice_date)
       .input('call_charge', call_charge)
       .input('mode_of_contact', mode_of_contact)
@@ -4141,7 +4141,7 @@ app.get("/getfranchisedata", async (req, res) => {
     const result = await pool.request().query("SELECT * FROM awt_franchisemaster WHERE deleted = 0");
     return res.json(result.recordset);
   } catch (err) {
-    console.error(err);    return res.status(500).json({ error: 'An error occurred while fetching franchise data' });
+    console.error(err); return res.status(500).json({ error: 'An error occurred while fetching franchise data' });
   }
 });
 app.get("/requestfranchisedata/:id", async (req, res) => {
@@ -4158,46 +4158,131 @@ app.get("/requestfranchisedata/:id", async (req, res) => {
 });
 
 app.post("/postfranchisedata", async (req, res) => {
-  const { title, contact_person, email, mobile_no, newpassword, address } = req.body;
+  const { title, contact_person, email, mobile_no, password, address, country_id, region_id, state, area, city, pincode_id, website, gst_no, panno, bank_name, bank_acc, bank_ifsc, bank_address, with_liebherr, last_working_date, contract_acti, contract_expir, licarecode,partner_name } = req.body;
   try {
+   
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
-
     // Check for duplicate entries in awt_franchisemaster
+ 
     const checkDuplicateResult = await pool.request().query(`SELECT * FROM awt_franchisemaster WHERE title = '${title}' AND deleted = 0`);
     if (checkDuplicateResult.recordset.length > 0) {
       return res.status(409).json({
         message: "Duplicate entry, Franchise Master already exists!",
       });
     }
-
+   
     // Check for soft deleted entries
     const checkSoftDeletedResult = await pool.request().query(`SELECT * FROM awt_franchisemaster WHERE title = '${title}' AND deleted = 1`);
+
     if (checkSoftDeletedResult.recordset.length > 0) {
       // Restore soft deleted record
+    
       await pool.request().query(`UPDATE awt_franchisemaster SET deleted = 0 WHERE title = '${title}'`);
+      ifa = 'if'
+   
       return res.json({
         message: "Soft-deleted Franchise Master restored successfully!",
       });
     } else {
+      
+  
       // Insert new record
-      await pool.request().query(`INSERT INTO awt_franchisemaster (title,contact_person,email,mobile_no,password,address)
-         VALUES ('${title}', '${contact_person}', '${email}', '${mobile_no}', '${newpassword}', '${address}')`);
-
+      await pool.request().query(`INSERT INTO awt_franchisemaster (title,licarecode,partner_name,contact_person,email,mobile_no,password,address,country_id,region_id,geostate_id,area_id,geocity_id,pincode_id,webste,gstno,panno,bankname,bankacc,bankifsc,bankaddress,withliebher,lastworkinddate,contractacti,contractexpir)
+          VALUES ('${title}','${licarecode}','${partner_name}','${contact_person}','${email}','${mobile_no}','${password}','${address}','${country_id}','${region_id}','${state}','${area}','${city}','${pincode_id}','${website}','${gst_no}','${panno}','${bank_name}','${bank_acc}','${bank_ifsc}','${bank_address}','${with_liebherr}','${last_working_date}','${contract_acti}','${contract_expir}' `);
+         
       return res.json({
         message: "Franchise Master added successfully!",
       });
     }
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: 'An error occurred while processing the request' });
+    return res.status(500).json({ error: 'An error occurred while processing the request', });
   }
 });
+// app.post("/postfranchisedata", async (req, res) => {
+//   const { 
+//     title, contact_person, email, mobile_no, password, address, country_id, region_id,
+//     state, area, city, pincode_id, website, gst_no, panno, bank_name, bank_acc, bank_ifsc,
+//     bank_address, with_liebherr, last_working_date, contract_acti, contract_expir, licarecode
+//   } = req.body;
+
+//   try {
+//     const pool = await poolPromise;
+
+//     // Check for duplicate entries in awt_franchisemaster
+//     const checkDuplicateResult = await pool.request()
+//       .input('title', title)
+//       .query(`SELECT * FROM awt_franchisemaster WHERE title = @title AND deleted = 0`);
+
+//     if (checkDuplicateResult.recordset.length > 0) {
+//       return res.status(409).json({
+//         message: "Duplicate entry, Franchise Master already exists!",
+//       });
+//     }
+
+//     // Check for soft deleted entries
+//     const checkSoftDeletedResult = await pool.request()
+//       .input('title', title)
+//       .query(`SELECT * FROM awt_franchisemaster WHERE title = @title AND deleted = 1`);
+
+//     if (checkSoftDeletedResult.recordset.length > 0) {
+//       // Restore soft deleted record
+//       await pool.request()
+//         .input('title', title)
+//         .query(`UPDATE awt_franchisemaster SET deleted = 0 WHERE title = @title`);
+
+//       return res.json({
+//         message: "Soft-deleted Franchise Master restored successfully!",
+//       });
+//     } else {
+//       // Insert new record
+//       await pool.request()
+//         .input('title', title)
+//         .input('contact_person', contact_person)
+//         .input('email', email)
+//         .input('mobile_no', mobile_no)
+//         .input('password', password)
+//         .input('address', address)
+//         .input('country_id', country_id)
+//         .input('region_id', region_id)
+//         .input('geostate_id', state )
+//         .input('area_id', area)
+//         .input('geocity_id', city)
+//         .input('pincode_id', pincode_id)
+//         .input('webste', website)
+//         .input('gstno', gst_no)
+//         .input('panno', panno)
+//         .input('bankname', bank_name)
+//         .input('bankacc', bank_acc)
+//         .input('bankifsc', bank_ifsc)
+//         .input('bankaddress', bank_address)
+//         .input('withliebher', with_liebherr)
+//         .input('lastworkinddate', last_working_date)
+//         .input('contractacti', contract_acti)
+//         .input('contractexpir', contract_expir)
+//         .input('licarecode', licarecode)
+//         .query(`
+//           INSERT INTO awt_franchisemaster 
+//           (title, contact_person, email, mobile_no, password, address, country_id, region_id, geostate_id, area_id, geocity_id, pincode_id, website, gstno, panno, bankname, bankacc, bankifsc, bankaddress, withliebher, lastworkinddate, contractacti, contractexpir, licarecode)
+//           VALUES 
+//           (@title, @contact_person, @email, @mobile_no, @password, @address, @country_id, @region_id, @state, @area, @city, @pincode_id, @website, @gst_no, @panno, @bank_name, @bank_acc, @bank_ifsc, @bank_address, @with_liebherr, @last_working_date, @contract_acti, @contract_expir, @licarecode)
+//         `);
+
+//       return res.json({
+//         message: "Franchise Master added successfully!",
+//       });
+//     }
+//   } catch (err) {
+//     console.error(err);
+//     return res.status(500).json({ error: 'An error occurred while processing the request', err });
+//   }
+// });
 
 app.put("/putfranchisedata", async (req, res) => {
-  const { title, id, contact_person, email, mobile_no, password, address, country_id,region_id,geostate_id,area_id,geocity_id,pincode_id
-
-    
+  const { title, id, contact_person, email, mobile_no, password, address, country_id, region_id, state, area, city, pincode_id,
+    website, gst_no, panno, bank_name, bank_acc, bank_ifsc, bank_address, with_liebherr, last_working_date, contract_acti, contract_expir, licarecode
+    , partner_name
   } = req.body;
 
 
@@ -4214,7 +4299,12 @@ app.put("/putfranchisedata", async (req, res) => {
       const updateSql = `UPDATE awt_franchisemaster
                          SET title = '${title}', mobile_no = '${mobile_no}', email = '${email}', password = '${password}',
                          address = '${address}', contact_person = '${contact_person}',country_id = '${country_id}',region_id = '${region_id}',
-                         geostate_id = '${geostate_id}', area_id = '${area_id}', geocity_id = '${geocity_id}',pincode_id = '${pincode_id}' 
+                         geostate_id = '${state}', area_id = '${area}', geocity_id = '${city}',pincode_id = '${pincode_id}' ,
+                         webste = '${website}', gstno = '${gst_no}', panno = '${panno}',
+                         bankname = '${bank_name}', bankacc = '${bank_acc}', bankifsc = '${bank_ifsc}
+                         bankaddress = '${bank_address}', withliebher = '${with_liebherr}
+                         lastworkinddate = '${last_working_date}', contractacti = '${contract_acti}', contractexpir = '${contract_expir}', 
+                         licarecode = '${licarecode}', partnername = '${partner_name}' 
                          WHERE id = '${id}'`;
 
       await pool.request().query(updateSql);
@@ -6021,7 +6111,7 @@ app.post("/add_new_ticket", async (req, res) => {
 
     return res
       .status(200)
-      .json({ message: "Ticket Form data added successfully!" , id: insertedId });
+      .json({ message: "Ticket Form data added successfully!", id: insertedId });
   } catch (err) {
     console.error(err);
     return res

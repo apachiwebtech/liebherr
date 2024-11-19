@@ -145,7 +145,6 @@ const Childfranchisemaster = () => {
   };
   useEffect(() => {
     fetchUsers();
-    fetchcountries();
     fetchParentfranchise();
   }, []);
 
@@ -226,31 +225,26 @@ const Childfranchisemaster = () => {
     setDuplicateError(""); // Clear duplicate error before submitting
 
     try {
-      const confirmSubmission = window.confirm("Do you want to submit the data?");
+      const confirmSubmission = window.confirm(
+        "Do you want to submit the data?"
+      );
       if (confirmSubmission) {
         if (isEdit) {
-          await axios.put(`${Base_Url}/putchildfranchise`, formData)
+          // For update, include duplicate check
+          await axios
+            .put(`${Base_Url}/putchildfranchise`, { ...formData })
             .then((response) => {
               setFormData({
                 title: "",
                 pfranchise_id: "",
-                contact_person: "",
-                email: "",
-                mobile_no: "",
-                password: "",
-                country_id: "",
-                region_id: "",
-                state: "",
-                area: "",
-                city: "",
-                pincode_id: "",
-                address: ""
               });
               fetchUsers();
             })
             .catch((error) => {
               if (error.response && error.response.status === 409) {
-                setDuplicateError("Duplicate entry, Child Franchise already exists!");
+                setDuplicateError(
+                  "Duplicate entry, Child Franchise already exists!"
+                ); // Show duplicate error for update
               }
             });
         } else {
@@ -260,23 +254,14 @@ const Childfranchisemaster = () => {
               setFormData({
                 title: "",
                 pfranchise_id: "",
-                contact_person: "",
-                email: "",
-                mobile_no: "",
-                password: "",
-                country_id: "",
-                region_id: "",
-                state: "",
-                area: "",
-                city: "",
-                pincode_id: "",
-                address: ""
               });
               fetchUsers();
             })
             .catch((error) => {
               if (error.response && error.response.status === 409) {
-                setDuplicateError("Duplicate entry, Child Franchise already exists!");
+                setDuplicateError(
+                  "Duplicate entry, Child Franchise already exists!"
+                ); // Show duplicate error for insert
               }
             });
         }

@@ -26,6 +26,31 @@ const MasterFranchise = () => {
   const [formData, setFormData] = useState({
     title: "",
     password: "",
+    contact_person: '',
+    email:"",
+    mobile_no:'',
+    address:'',
+    country_id:'',
+    region_id:'',
+    state:'',
+    area:'',
+    city:'',
+    pincode_id:'',
+    website:'',
+    gst_no:'',
+    panno:'',
+    bank_name:'',
+    bank_acc:'',
+    bank_ifsc:'',
+    with_liebherr:'',
+    last_working_date:'',
+    contract_acti:'',
+    contract_expir:'',
+    bank_address:'',
+    licarecode:'',
+    partner_name:'',
+
+
 
   });
 
@@ -106,6 +131,7 @@ const MasterFranchise = () => {
 
   useEffect(() => {
     fetchUsers();
+    fetchcountries();
 
 
 
@@ -129,6 +155,26 @@ const MasterFranchise = () => {
         ...formData,
         [name]: value,
       });
+    }
+
+    switch (name) {
+      case "country_id":
+        fetchregion(value);
+        break;
+      case "region_id":
+        fetchState(value);
+        break;
+      case "state":
+        fetchdistricts(value);
+        break;
+      case "area":
+        fetchCity(value);
+        break;
+      case "city":
+        fetchpincode(value);
+        break;
+      default:
+        break;
     }
   };
 
@@ -177,6 +223,7 @@ const MasterFranchise = () => {
             .then((response) => {
               setFormData({
                 title: "",
+                
               });
               fetchUsers();
             })
@@ -192,11 +239,34 @@ const MasterFranchise = () => {
           await axios
             .post(`${Base_Url}/postfranchisedata`, { ...formData })
             .then((response) => {
-              const newpassword = md5(formData.password)
+              //const newpassword = md5(formData.password)
 
               setFormData({
                 title: "",
-                password: newpassword,
+                password: '',
+                contact_person: '',
+                email:"",
+                mobile_no:'',
+                address:'',
+                country_id:'',
+                region_id:'',
+                state:'',
+                area:'',
+                city:'',
+                pincode_id:'',
+                website:'',
+                gst_no:'',
+                panno:'',
+                bank_name:'',
+                bank_acc:'',
+                bank_ifsc:'',
+                with_liebherr:'',
+                last_working_date:'',
+                contract_acti:'',
+                contract_expir:'',
+                bank_address:'',
+                licarecode:'',
+                partner_name:'',
 
               });
               fetchUsers();
@@ -262,11 +332,11 @@ const MasterFranchise = () => {
 
                 <form
                   onSubmit={handleSubmit}
-                  style={{ width: "50%" }}
-                  className="text-left"
+
+                  className="col-12"
                 >
                   <div className="row">
-                    <div className="col-6">
+                    <div className="col-3">
                       <label
                         htmlFor="MasterFranchiseInput"
                         className="input-field"
@@ -290,7 +360,29 @@ const MasterFranchise = () => {
                       )}{" "}
                       {/* Show duplicate error */}
                     </div>
-                    <div className="col-6">
+                    <div className="col-3">
+                      <label htmlFor="LicareInput" className="input-field">
+                        Licare Code
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="licarecode"
+                        id="LicareInput"
+                        value={formData.licarecode}
+                        onChange={handleChange}
+                        placeholder="Enter Licare Code"
+                      />
+                      {errors.licarecode && (
+                        <small className="text-danger">{errors.licarecode}</small>
+                      )}
+                      {duplicateError && (
+                        <small className="text-danger">{duplicateError}</small>
+                      )}
+                      {/* Show duplicate error */}
+                    </div>
+
+                    <div className="col-3">
                       <label
                         htmlFor="MasterFranchiseInput"
                         className="input-field"
@@ -314,7 +406,7 @@ const MasterFranchise = () => {
                       )}{" "}
                       {/* Show duplicate error */}
                     </div>
-                    <div className="col-6">
+                    <div className="col-3">
                       <label
                         htmlFor="MasterFranchiseInput"
                         className="input-field"
@@ -338,7 +430,7 @@ const MasterFranchise = () => {
                       )}
                       {/* Show duplicate error */}
                     </div>
-                    <div className="col-6">
+                    <div className="col-3">
                       <label
                         htmlFor="MasterFranchiseInput"
                         className="input-field"
@@ -364,7 +456,29 @@ const MasterFranchise = () => {
                       )}
                       {/* Show duplicate error */}
                     </div>
-                    <div className="col-6">
+                    {/* <div className="col-3">
+                      <label htmlFor="PartnerNameInput" className="input-field">
+                        Partner Name
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="partner_name"
+                        id="PartnerNameInput"
+                        value={formData.partner_name}
+                        onChange={handleChange}
+                        placeholder="Enter Partner Name"
+                      />
+                      {errors.partner_name && (
+                        <small className="text-danger">{errors.partner_name}</small>
+                      )}
+                      {duplicateError && (
+                        <small className="text-danger">{duplicateError}</small>
+                      )}
+                      {/* Show duplicate error 
+                    </div> */}
+
+                    <div className="col-3">
                       <label
                         htmlFor="MasterFranchiseInput"
                         className="input-field"
@@ -388,8 +502,8 @@ const MasterFranchise = () => {
                       )}
                       {/* Show duplicate error */}
                     </div>
-                    <div className="col-md-4">
-                      <label htmlFor="country" className="form-label">
+                    <div className="col-md-3">
+                      <label htmlFor="country" className="input-field">
                         Country
                       </label>
                       <select
@@ -414,7 +528,7 @@ const MasterFranchise = () => {
                       )}
                     </div>
                     <div className="col-md-3 mb-3">
-                      <label htmlFor="region" className="form-label">
+                      <label htmlFor="region" className="input-field">
                         Region
                       </label>
                       <select
@@ -441,7 +555,7 @@ const MasterFranchise = () => {
 
                     {/* Geo State Dropdown */}
                     <div className="col-md-3">
-                      <label htmlFor="geostate" className="form-label">
+                      <label htmlFor="geostate" className="input-field">
                         Geo State
                       </label>
                       <select className="form-select" value={formData.state} name="state" onChange={handleChange}>
@@ -462,12 +576,12 @@ const MasterFranchise = () => {
 
                     {/* Geo District Dropdown **/}
                     <div className="col-md-3">
-                      <label htmlFor="area" className="form-label">
+                      <label htmlFor="area" className="input-field">
                         District
                       </label>
-                      <label className="form-label">Area</label>
+
                       <select className="form-select" onChange={handleChange} name="area" value={formData.area}>
-                        <option value="">Select Area</option>
+                        <option value="">Select District</option>
                         {area.map((item) => {
                           return (
                             <option value={item.id} key={item.id}>{item.title}</option>
@@ -481,7 +595,7 @@ const MasterFranchise = () => {
 
                     {/* Geo City Dropdown */}
                     <div className="col-md-3">
-                      <label htmlFor="geocity" className="form-label">
+                      <label htmlFor="geocity" className="input-field">
                         Geo City
                       </label>
                       <select className="form-select" value={formData.city} name="city" onChange={handleChange}>
@@ -502,7 +616,7 @@ const MasterFranchise = () => {
 
                     {/* Pincode Dropdown */}
                     <div className="col-md-3">
-                      <label htmlFor="area" className="form-label">
+                      <label htmlFor="area" className="input-field">
                         Pincode
                       </label>
                       <select
@@ -524,8 +638,243 @@ const MasterFranchise = () => {
                         <small className="text-danger">{errors.pincode_id}</small>
                       )}
                     </div>
+                    <div className="col-3">
+                      <label htmlFor="WebsiteInput" className="input-field">
+                        Website
+                      </label>
+                      <input
+                        type="url"
+                        className="form-control"
+                        name="website"
+                        id="WebsiteInput"
+                        value={formData.website}
+                        onChange={handleChange}
+                        placeholder="Enter Website URL"
+                      />
+                      {errors.website && (
+                        <small className="text-danger">{errors.website}</small>
+                      )}
+                      {duplicateError && (
+                        <small className="text-danger">{duplicateError}</small>
+                      )}
+                      {/* Show duplicate error */}
+                    </div>
 
-                    <div className="col-12">
+                    <div className="col-3">
+                      <label htmlFor="GSTNoInput" className="input-field">
+                        GST Number
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="gst_no"
+                        id="GSTNoInput"
+                        value={formData.gst_no}
+                        onChange={handleChange}
+                        placeholder="Enter GST Number"
+                      />
+                      {errors.gst_no && (
+                        <small className="text-danger">{errors.gst_no}</small>
+                      )}
+                      {duplicateError && (
+                        <small className="text-danger">{duplicateError}</small>
+                      )}
+                      {/* Show duplicate error */}
+                    </div>
+                    <div className="col-3">
+                      <label htmlFor="PannoInput" className="input-field">
+                        PAN Number
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="panno"
+                        id="PannoInput"
+                        value={formData.panno}
+                        onChange={handleChange}
+                        placeholder="Enter PAN Number"
+                      />
+                      {errors.panno && (
+                        <small className="text-danger">{errors.panno}</small>
+                      )}
+                      {duplicateError && (
+                        <small className="text-danger">{duplicateError}</small>
+                      )}
+                      {/* Show duplicate error */}
+                    </div>
+                    <div className="col-3">
+                      <label htmlFor="BankNameInput" className="input-field">
+                        Bank Name
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="bank_name"
+                        id="BankNameInput"
+                        value={formData.bank_name}
+                        onChange={handleChange}
+                        placeholder="Enter Bank Name"
+                      />
+                      {errors.bank_name && (
+                        <small className="text-danger">{errors.bank_name}</small>
+                      )}
+                      {duplicateError && (
+                        <small className="text-danger">{duplicateError}</small>
+                      )}
+                      {/* Show duplicate error */}
+                    </div>
+                    <div className="col-3">
+                      <label htmlFor="BankAccInput" className="input-field">
+                        Bank Account Number
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="bank_acc"
+                        id="BankAccInput"
+                        value={formData.bank_acc}
+                        onChange={handleChange}
+                        placeholder="Enter Bank Account Number"
+                      />
+                      {errors.bank_acc && (
+                        <small className="text-danger">{errors.bank_acc}</small>
+                      )}
+                      {duplicateError && (
+                        <small className="text-danger">{duplicateError}</small>
+                      )}
+                      {/* Show duplicate error */}
+                    </div>
+                    <div className="col-3">
+                      <label htmlFor="BankIfscInput" className="input-field">
+                        Bank IFSC Code
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="bank_ifsc"
+                        id="BankIfscInput"
+                        value={formData.bank_ifsc}
+                        onChange={handleChange}
+                        placeholder="Enter Bank IFSC Code"
+                      />
+                      {errors.bank_ifsc && (
+                        <small className="text-danger">{errors.bank_ifsc}</small>
+                      )}
+                      {duplicateError && (
+                        <small className="text-danger">{duplicateError}</small>
+                      )}
+                      {/* Show duplicate error */}
+                    </div>
+                    <div className="col-3">
+                      <label htmlFor="WithLiebherrInput" className="input-field">
+                        With Liebherr
+                      </label>
+                      <input
+                        type="date"
+                        className="form-control"
+                        name="with_liebherr"
+                        id="WithLiebherrInput"
+                        value={formData.with_liebherr}
+                        onChange={handleChange}
+                        placeholder="Enter With Liebherr"
+                      />
+                      {errors.with_liebherr && (
+                        <small className="text-danger">{errors.with_liebherr}</small>
+                      )}
+                      {duplicateError && (
+                        <small className="text-danger">{duplicateError}</small>
+                      )}
+                      {/* Show duplicate error */}
+                    </div>
+                    <div className="col-3">
+                      <label htmlFor="LastWorkingDateInput" className="input-field">
+                        Last Working Date
+                      </label>
+                      <input
+                        type="date"
+                        className="form-control"
+                        name="last_working_date"
+                        id="LastWorkingDateInput"
+                        value={formData.last_working_date}
+                        onChange={handleChange}
+                        placeholder="Select Last Working Date"
+                      />
+                      {errors.last_working_date && (
+                        <small className="text-danger">{errors.last_working_date}</small>
+                      )}
+                      {duplicateError && (
+                        <small className="text-danger">{duplicateError}</small>
+                      )}
+                      {/* Show duplicate error */}
+                    </div>
+                    <div className="col-3">
+                      <label htmlFor="ContractActiInput" className="input-field">
+                        Contract Activation Date
+                      </label>
+                      <input
+                        type="date"
+                        className="form-control"
+                        name="contract_acti"
+                        id="ContractActiInput"
+                        value={formData.contract_acti}
+                        onChange={handleChange}
+                        placeholder="Select Contract Activation Date"
+                      />
+                      {errors.contract_acti && (
+                        <small className="text-danger">{errors.contract_acti}</small>
+                      )}
+                      {duplicateError && (
+                        <small className="text-danger">{duplicateError}</small>
+                      )}
+                      {/* Show duplicate error */}
+                    </div>
+                    <div className="col-3">
+                      <label htmlFor="ContractExpirInput" className="input-field">
+                        Contract Expiration Date
+                      </label>
+                      <input
+                        type="date"
+                        className="form-control"
+                        name="contract_expir"
+                        id="ContractExpirInput"
+                        value={formData.contract_expir}
+                        onChange={handleChange}
+                        placeholder="Select Contract Expiration Date"
+                      />
+                      {errors.contract_expir && (
+                        <small className="text-danger">{errors.contract_expir}</small>
+                      )}
+                      {duplicateError && (
+                        <small className="text-danger">{duplicateError}</small>
+                      )}
+                      {/* Show duplicate error */}
+                    </div>
+
+
+                    <div className="col-6">
+                      <label htmlFor="BankAddressInput" className="input-field">
+                        Bank Address
+                      </label>
+                      <textarea
+                        className="form-control"
+                        name="bank_address"
+                        id="BankAddressInput"
+                        value={formData.bank_address}
+                        onChange={handleChange}
+                        placeholder="Enter Bank Address"
+                        rows="3"
+                      />
+                      {errors.bank_address && (
+                        <small className="text-danger">{errors.bank_address}</small>
+                      )}
+                      {duplicateError && (
+                        <small className="text-danger">{duplicateError}</small>
+                      )}
+                      {/* Show duplicate error */}
+                    </div>
+
+
+                    <div className="col-6">
                       <label
                         htmlFor="MasterFranchiseInput"
                         className="input-field"
@@ -565,121 +914,7 @@ const MasterFranchise = () => {
                 </form>
 
 
-                <div className="col-md-6">
-                  <div className="d-flex justify-content-between align-items-center mb-3">
-                    <span>
-                      Show
-                      <select
-                        value={itemsPerPage}
-                        onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                        className="form-control d-inline-block"
-                        style={{
-                          width: "51px",
-                          display: "inline-block",
-                          marginLeft: "5px",
-                          marginRight: "5px",
-                        }}
-                      >
-                        <option value={10}>10</option>
-                        <option value={15}>15</option>
-                        <option value={20}>20</option>
-                      </select>
-                      entries
-                    </span>
 
-                    <input
-                      type="text"
-                      placeholder="Search..."
-                      value={searchTerm}
-                      onChange={handleSearch}
-                      className="form-control d-inline-block"
-                      style={{ width: "300px" }}
-                    />
-                  </div>
-
-                  {/* Adjust table padding and spacing */}
-                  <table className="table table-bordered table-hover table-hover">
-                    <thead className="thead-dark">
-                      <tr>
-                        <th width="10%" style={{ textAlign: "center" }}>#</th>
-                        <th width="70%" style={{ textAlign: "left" }}>Master Franchise</th>
-                        <th width="15%" style={{ textAlign: "center" }}>Edit</th>
-                        <th width="15%" style={{ textAlign: "center" }}>Delete</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {currentUsers.map((item, index) => (
-                        <tr key={item.id}>
-                          <td style={{ textAlign: "center" }}>{index + 1 + indexOfFirstUser}</td>
-                          <td>{item.title}</td>
-                          <td style={{ textAlign: "center" }}>
-                            <button
-                              className="btn btn-link"
-                              onClick={() => {
-                                edit(item.id);
-                              }}
-                              title="Edit"
-                            >
-                              <FaPencilAlt />
-                            </button>
-                          </td>
-                          <td style={{ textAlign: "center" }}>
-                            <button
-                              className="btn btn-link text-danger"
-                              onClick={() => deleted(item.id)}
-                              title="Delete"
-                            >
-                              <FaTrash />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-
-                  <div
-                    className="d-flex justify-content-between"
-                    style={{ marginTop: "10px" }}
-                  >
-                    <div>
-                      Showing {indexOfFirstUser + 1} to{" "}
-                      {Math.min(indexOfLastUser, filteredUsers.length)} of{" "}
-                      {filteredUsers.length} entries
-                    </div>
-
-                    <div className="pagination" style={{ marginLeft: "auto" }}>
-                      <button
-                        onClick={() => setCurrentPage(currentPage - 1)}
-                        disabled={currentPage === 0}
-                      >
-                        {"<"}
-                      </button>
-                      {Array.from(
-                        {
-                          length: Math.ceil(filteredUsers.length / itemsPerPage),
-                        },
-                        (_, index) => (
-                          <button
-                            key={index}
-                            onClick={() => setCurrentPage(index)}
-                            className={currentPage === index ? "active" : ""}
-                          >
-                            {index + 1}
-                          </button>
-                        )
-                      )}
-                      <button
-                        onClick={() => setCurrentPage(currentPage + 1)}
-                        disabled={
-                          currentPage ===
-                          Math.ceil(filteredUsers.length / itemsPerPage) - 1
-                        }
-                      >
-                        {">"}
-                      </button>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
