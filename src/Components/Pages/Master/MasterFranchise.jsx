@@ -530,7 +530,7 @@ const MasterFranchise = () => {
                       {errors.pincode_id && (
                         <small className="text-danger">{errors.pincode_id}</small>
                       )}
-                    </div>x
+                    </div>
 
                     <div className="col-12">
                       <label
