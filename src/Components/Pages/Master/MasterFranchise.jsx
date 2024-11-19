@@ -1,7 +1,9 @@
 import axios from "axios";
+import CryptoJS from 'crypto-js';
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
+import md5 from "js-md5";
 import Franchisemaster from '../Master/Franchisemaster';
 const MasterFranchise = () => {
   // Step 1: Add this state to track errors
@@ -24,6 +26,8 @@ const MasterFranchise = () => {
 
   const [formData, setFormData] = useState({
     title: "",
+    password: "",
+
   });
 
   const fetchUsers = async () => {
@@ -90,18 +94,30 @@ const MasterFranchise = () => {
 
   useEffect(() => {
     fetchUsers();
-    fetchGeoStates();
-    fetchCountries();
-    fetchRegions();
-    fetchAreas();
-    fetchGeoCities();
+ 
   
 
   }, []);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    let { name, value } = e.target;
+
+    // If the field is Password, hash the value
+    if (name === 'password') {
+      // Hash the password before setting the state
+      const hashedPassword = CryptoJS.MD5(value).toString();
+      setFormData({
+        ...formData,
+        [name]: value,  // Update the password field itself
+        passwordmd5: hashedPassword,  // Update the hashed password
+      });
+    } else {
+      // Update other fields normally
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
   };
 
   const handleSearch = (e) => {
@@ -128,6 +144,7 @@ const MasterFranchise = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
@@ -163,8 +180,12 @@ const MasterFranchise = () => {
           await axios
             .post(`${Base_Url}/postfranchisedata`, { ...formData })
             .then((response) => {
+              const newpassword = md5(formData.password)
+
               setFormData({
                 title: "",
+                password: newpassword,
+                
               });
               fetchUsers();
             })
@@ -341,7 +362,7 @@ const MasterFranchise = () => {
                       <input
                         type="password" // Changed type to 'password' for secure text input
                         className="form-control"
-                        name="passsword"
+                        name="password"
                         id="MasterFranchiseInput"
                         value={formData.password}
                         onChange={handleChange}
@@ -355,7 +376,7 @@ const MasterFranchise = () => {
                       )}
                       {/* Show duplicate error */}
                     </div>
-                    <div className="col-md-3 mb-3">
+                    {/* <div className="col-md-3 mb-3">
                       <label htmlFor="country" className="form-label">
                         Country
                       </label>
@@ -406,7 +427,7 @@ const MasterFranchise = () => {
                       )}
                     </div>
 
-                    {/* Geo State Dropdown */}
+                    {/* Geo State Dropdown 
                     <div className="col-md-3 mb-3">
                       <label htmlFor="geostate" className="form-label">
                         Geo State
@@ -433,7 +454,7 @@ const MasterFranchise = () => {
                       )}
                     </div>
 
-                    {/* Geo District Dropdown */}
+                    {/* Geo District Dropdown *
                     <div className="col-md-3 mb-3">
                       <label htmlFor="area" className="form-label">
                         District
@@ -458,7 +479,7 @@ const MasterFranchise = () => {
                       )}
                     </div>
 
-                    {/* Geo City Dropdown */}
+                    {/* Geo City Dropdown *
                     <div className="col-md-3 mb-3">
                       <label htmlFor="geocity" className="form-label">
                         Geo City
@@ -486,7 +507,7 @@ const MasterFranchise = () => {
                     </div>
 
 
-                    {/* Pincode Dropdown */}
+                    {/* Pincode Dropdown *
                     <div className="col-md-3 mb-3">
                       <label htmlFor="area" className="form-label">
                         Pincode
@@ -509,7 +530,7 @@ const MasterFranchise = () => {
                       {errors.pincode_id && (
                         <small className="text-danger">{errors.pincode_id}</small>
                       )}
-                    </div>
+                    </div> */}
 
                     <div className="col-12">
                       <label

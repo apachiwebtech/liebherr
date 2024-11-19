@@ -95,16 +95,17 @@ app.post("/loginuser", async (req, res) => {
     res.status(500).json({ message: "Database error", error: err });
   }
 });
-app.post("/msplogin", async (req, res) => {
-  const { Msp, password } = req.body;
 
-  console.log(Msp)
+app.post("/loginmsp", async (req, res) => {
+  const { title, password } = req.body;
+
+  console.log(title)
 
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
 
-    const sql = `SELECT id, title FROM awt_franchisemaster WHERE title = '${Msp}' AND password = '${password}'`;
+    const sql = `SELECT id, title FROM awt_franchisemaster WHERE title = '${title}' AND password = '${password}'`;
 
     console.log(sql)
 
@@ -113,13 +114,38 @@ app.post("/msplogin", async (req, res) => {
     if (result.recordset.length > 0) {
       res.json({ id: result.recordset[0].id, title: result.recordset[0].title });
     } else {
-      res.status(401).json({ message: "Invalid username or password" });
+      res.status(500).json({ message: "Invalid username or password", res });
     }
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Database error", error: err });
   }
 });
+// app.post("/msplogin", async (req, res) => {
+//   const { title, password } = req.body;
+
+//   console.log(Msp)
+
+//   try {
+//     // Use the poolPromise to get the connection pool
+//     const pool = await poolPromise;
+
+//     const sql = `SELECT id, title FROM awt_franchisemaster WHERE title = '${title}' AND password = '${password}'`;
+
+//     console.log(sql)
+
+//     const result = await pool.request().query(sql);
+
+//     if (result.recordset.length > 0) {
+//       res.json({ id: result.recordset[0].id, title: result.recordset[0].title });
+//     } else {
+//       res.status(401).json({ message: "Invalid username or password" });
+//     }
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: "Database error", error: err });
+//   }
+// });
 
 app.post("/log", async (req, res) => {
   console.log("fffrdf")
@@ -786,7 +812,7 @@ app.post("/postgeocity", async (req, res) => {
 
 // Update existing geocity with duplicate check
 app.put("/putgeocity", async (req, res) => {
-  const { title, id, country_id, region_id, geostate_id ,district} = req.body;
+  const { title, id, country_id, region_id, geostate_id, district } = req.body;
 
   try {
     // Use the poolPromise to get the connection pool
@@ -1380,7 +1406,7 @@ app.get("/getproductlist", async (req, res) => {
 //customer list start
 app.get("/getcustomerlist", async (req, res) => {
   try {
-    
+
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
 
@@ -1398,18 +1424,18 @@ app.get("/getcustomerlist", async (req, res) => {
   }
 });
 
-app.get("/requestcustomerlist/:id",async (req,res) => {
+app.get("/requestcustomerlist/:id", async (req, res) => {
   try {
-   
+
     const pool = await poolPromise;
     const id = req.params.id;
     const sql = `SELECT * FROM awt_customer WHERE id = @id`;
 
     const result = await pool.request()
-    .input('id', id)
-    .query(sql);
-   
-    
+      .input('id', id)
+      .query(sql);
+
+
     if (result.recordset.length === 0) {
       return res.status(404).json({ error: 'Customer not found' });
     }
@@ -2711,10 +2737,10 @@ app.get("/getComplaintDetails/:ticket_no", async (req, res) => {
 // Complaint view Previous ticket
 app.get("/getComplaintDuplicate/:customer_mobile", async (req, res) => {
   const { customer_mobile } = req.params;
-  
+
   try {
     const pool = await poolPromise;
-    
+
     // Modified SQL query to skip the latest entry for duplicates
     const sql = `
       WITH DuplicateNumbers AS (
@@ -2741,7 +2767,7 @@ app.get("/getComplaintDuplicate/:customer_mobile", async (req, res) => {
     const result = await pool.request()
       .input('customer_mobile', customer_mobile)
       .query(sql);
-    
+
     return res.json(result.recordset);
 
   } catch (err) {
@@ -2958,21 +2984,21 @@ WHERE c.deleted = 0
     SELECT * FROM awt_uniqueproductmaster
     WHERE deleted = 0 AND customer_id = @customerId
   `;
-// console.log(result.recordset[0])
-  const result1 = await pool.request()
-    .input('customerId', result.recordset[0].id)
-    .query(sql1);
+    // console.log(result.recordset[0])
+    const result1 = await pool.request()
+      .input('customerId', result.recordset[0].id)
+      .query(sql1);
 
-    if(result1.recordset === 0){
-        return res.json({ information : result.recordset ,product : []}); 
+    if (result1.recordset === 0) {
+      return res.json({ information: result.recordset, product: [] });
     }
     else {
 
-      return res.json({ information : result.recordset ,product : result1.recordset});
+      return res.json({ information: result.recordset, product: result1.recordset });
     }
   } catch (err) {
     console.error(err);
-    return res.json({ information : [], product : []});
+    return res.json({ information: [], product: [] });
   }
 });
 
@@ -2983,7 +3009,7 @@ app.post("/add_complaintt", async (req, res) => {
   let {
     complaint_date, customer_name, contact_person, email, mobile, address,
     state, city, area, pincode, mode_of_contact, ticket_type, cust_type,
-    warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date,created_by, child_service_partner, master_service_partner, specification, additional_remarks
+    warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks
   } = req.body;
 
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
@@ -2992,12 +3018,12 @@ app.post("/add_complaintt", async (req, res) => {
   try {
     const pool = await poolPromise;
 
-  // Split customer_name into customer_fname and customer_lname
-  const [customer_fname, ...customer_lnameArr] = customer_name.split(' ');
-  const customer_lname = customer_lnameArr.join(' '); 
+    // Split customer_name into customer_fname and customer_lname
+    const [customer_fname, ...customer_lnameArr] = customer_name.split(' ');
+    const customer_lname = customer_lnameArr.join(' ');
 
-  // Insert into awt_customer
-  const customerSQL = `
+    // Insert into awt_customer
+    const customerSQL = `
     INSERT INTO awt_customer (customer_fname, customer_lname, email, mobileno, alt_mobileno, created_date, created_by)
     OUTPUT INSERTED.id
     VALUES (@customer_fname, @customer_lname, @email, @mobile, @alt_mobile, @formattedDate, @created_by)`;
@@ -3005,14 +3031,14 @@ app.post("/add_complaintt", async (req, res) => {
     console.log("Executing customer SQL:", customerSQL);  // Debugging log
 
     const customerResult = await pool.request()
-    .input('customer_fname', customer_fname)
-    .input('customer_lname', customer_lname)
-    .input('email', email)
-    .input('mobile', mobile)
-    .input('alt_mobile', alt_mobile)
-    .input('formattedDate', formattedDate)
-    .input('created_by', created_by)
-    .query(customerSQL);
+      .input('customer_fname', customer_fname)
+      .input('customer_lname', customer_lname)
+      .input('email', email)
+      .input('mobile', mobile)
+      .input('alt_mobile', alt_mobile)
+      .input('formattedDate', formattedDate)
+      .input('created_by', created_by)
+      .query(customerSQL);
 
     const insertedCustomerId = customerResult.recordset[0].id;
     console.log("Inserted Customer ID:", insertedCustomerId);  // Debugging log
@@ -3117,8 +3143,8 @@ app.post("/add_complaintt", async (req, res) => {
       .input('specification', specification)
       .query(complaintSQL);
 
-      //Remark insert query
-      const reamrks = `
+    //Remark insert query
+    const reamrks = `
     INSERT INTO awt_complaintremark (
         ticket_no, remark, created_date, created_by
     )
@@ -3126,13 +3152,13 @@ app.post("/add_complaintt", async (req, res) => {
         @ticket_no, @additional_remarks, @formattedDate, @created_by
     )`;
 
- 
-await pool.request()
-    .input('ticket_no', ticket_no) // Use existing ticket_no from earlier query
-    .input('formattedDate', formattedDate) // Use current timestamp
-    .input('created_by', created_by) // Use current user ID
-    .input('additional_remarks', additional_remarks) // Use current user ID
-    .query(reamrks);
+
+    await pool.request()
+      .input('ticket_no', ticket_no) // Use existing ticket_no from earlier query
+      .input('formattedDate', formattedDate) // Use current timestamp
+      .input('created_by', created_by) // Use current user ID
+      .input('additional_remarks', additional_remarks) // Use current user ID
+      .query(reamrks);
 
     return res.json({ message: 'Complaint added successfully!', ticket_no, insertedCustomerId });
   } catch (err) {
@@ -3929,8 +3955,7 @@ app.get("/requestfranchisedata/:id", async (req, res) => {
 });
 
 app.post("/postfranchisedata", async (req, res) => {
-  const { title,contact_person,email,mobile_no,password,address,country_id,region_id,geostate_id,area_id,geocity_id,pincode_id } = req.body;
-
+  const { title, contact_person, email, mobile_no, newpassword, address } = req.body;
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
@@ -3953,9 +3978,9 @@ app.post("/postfranchisedata", async (req, res) => {
       });
     } else {
       // Insert new record
-      await pool.request().query(`INSERT INTO awt_franchisemaster (title,contact_person,email,mobile_no,password,address,country_id,region_id,geostate_id,area_id,geocity_id,pincode_id)
-         VALUES ('${title}', '${contact_person}', '${email}', '${mobile_no}', '${password}', '${address}', '${country_id}', '${region_id}', '${geostate_id}', '${area_id}', '${geocity_id}','${pincode_id}')`);
-         await pool.request().query(insertSql);
+      await pool.request().query(`INSERT INTO awt_franchisemaster (title,contact_person,email,mobile_no,password,address)
+         VALUES ('${title}', '${contact_person}', '${email}', '${mobile_no}', '${newpassword}', '${address}')`);
+
       return res.json({
         message: "Franchise Master added successfully!",
       });
@@ -3967,8 +3992,8 @@ app.post("/postfranchisedata", async (req, res) => {
 });
 
 app.put("/putfranchisedata", async (req, res) => {
-  const { title, id ,contact_person,email, mobile_no, password,address,country_id,region_id,geostate_id,area_id,geocity_id,pincode_id} = req.body;
-  
+  const { title, id, contact_person, email, mobile_no, password, address, country_id, region_id, geostate_id, area_id, geocity_id, pincode_id } = req.body;
+
 
   try {
     // Use the poolPromise to get the connection pool
@@ -3978,7 +4003,7 @@ app.put("/putfranchisedata", async (req, res) => {
     const checkDuplicateResult = await pool.request().query(`SELECT * FROM awt_franchisemaster WHERE title = '${title}' AND id != '${id}' AND deleted = 0`);
     if (checkDuplicateResult.recordset.length > 0) {
       return res.status(409).json({ message: "Duplicate entry, Franchise Master already exists!" });
-    }else {
+    } else {
       // Update the engineer record if no duplicates are found
       const updateSql = `UPDATE awt_franchisemaster
                          SET title = '${title}', mobile_no = '${mobile_no}', email = '${email}', password = '${password}',
@@ -3988,7 +4013,7 @@ app.put("/putfranchisedata", async (req, res) => {
 
       await pool.request().query(updateSql);
 
-    return res.json({ message: "Franchise Master updated successfully!" });
+      return res.json({ message: "Franchise Master updated successfully!" });
     }
 
   } catch (err) {
@@ -5983,17 +6008,17 @@ app.post('/updatecomplaint', async (req, res) => {
 app.get("/getcomplainlist", async (req, res) => {
   try {
     const pool = await poolPromise;
-    const { 
-        fromDate, 
-        toDate, 
-        customerName, 
-        customerEmail, 
-        serialNo, 
-        productCode, 
-        customerMobile, 
-        ticketno,
-        status ,
-        customerID,
+    const {
+      fromDate,
+      toDate,
+      customerName,
+      customerEmail,
+      serialNo,
+      productCode,
+      customerMobile,
+      ticketno,
+      status,
+      customerID,
     } = req.query;
 
     console.log('Received status:', status); // Debug log
@@ -6006,48 +6031,64 @@ app.get("/getcomplainlist", async (req, res) => {
         WHERE c.deleted = 0
     `;
 
-    // Modified status filtering logic
-    if (status === 'Closed' || status === 'Cancelled') {
-        sql += ` AND c.call_status = '${status}'`;
-    } else if (status === '') {
-        sql += ` AND c.call_status NOT IN ('Closed', 'Cancelled')`;
-    } else if (status) {
-        sql += ` AND c.call_status = '${status}'`;
-    } else {
-        sql += ` AND c.call_status NOT IN ('Closed', 'Cancelled')`;
-    }
+    let nots = 'NOT';
+
+
 
     if (fromDate && toDate) {
-        sql += ` AND CAST(c.ticket_date AS DATE) >= CAST('${fromDate}' AS DATE)
+      sql += ` AND CAST(c.ticket_date AS DATE) >= CAST('${fromDate}' AS DATE)
                 AND CAST(c.ticket_date AS DATE) <= CAST('${toDate}' AS DATE)`;
+      nots = ''
     }
 
     if (customerName) {
-        sql += ` AND c.customer_name LIKE '%${customerName}%'`;
+      sql += ` AND c.customer_name LIKE '%${customerName}%'`;
+      nots = ''
     }
 
     if (customerEmail) {
-        sql += ` AND c.customer_email LIKE '%${customerEmail}%'`;
+      sql += ` AND c.customer_email LIKE '%${customerEmail}%'`;
+      nots = ''
     }
 
     if (customerMobile) {
-        sql += ` AND c.customer_mobile LIKE '%${customerMobile}%'`;
+      sql += ` AND c.customer_mobile LIKE '%${customerMobile}%'`;
+      nots = ''
     }
 
     if (serialNo) {
-        sql += ` AND c.serial_no LIKE '%${serialNo}%'`;
+      sql += ` AND c.serial_no LIKE '%${serialNo}%'`;
+      nots = ''
     }
 
     if (productCode) {
-        sql += ` AND c.ModelNumber LIKE '%${productCode}%'`;
+      sql += ` AND c.ModelNumber LIKE '%${productCode}%'`;
+      nots = ''
     }
 
     if (ticketno) {
-        sql += ` AND c.ticket_no LIKE '%${ticketno}%'`;
+      sql += ` AND c.ticket_no LIKE '%${ticketno}%'`;
+      nots = ''
     }
     if (customerID) {
-        sql += ` AND c.customer_id LIKE '%${customerID}%'`;
+      sql += ` AND c.customer_id LIKE '%${customerID}%'`;
+      nots = ''
     }
+
+
+
+
+    // Modified status filtering logic
+    if (status === 'Closed' || status === 'Cancelled') {
+      sql += ` AND c.call_status = '${status}'`;
+    } else if (status === '') {
+      sql += ` AND c.call_status  IN ('Closed', 'Cancelled')`;
+    } else if (status) {
+      sql += ` AND c.call_status = '${status}'`;
+    } else {
+      sql += ` AND c.call_status ${nots} IN ('Closed', 'Cancelled')`;
+    }
+
 
     sql += " ORDER BY c.id DESC";
 
@@ -6061,7 +6102,7 @@ app.get("/getcomplainlist", async (req, res) => {
   }
 });
 
-        // end Complaint list
+// end Complaint list
 
 
 //Register Page Complaint Duplicate Start

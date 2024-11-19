@@ -7,7 +7,7 @@ import logo from  '../../images/Liebherr-logo-768x432.png'
 import back from '../../images/login.jpeg'
 
 export function MSP_Login() {
-    const [Msp, setMspuser] = useState("");
+    const [title, settitle] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
 
@@ -19,8 +19,8 @@ export function MSP_Login() {
 
             const hashpass = md5(password)
            
-            const response = await axios.post(`${Base_Url}/msplogin`, {
-                title: Msp,
+            const response = await axios.post(`${Base_Url}/loginmsp`, {
+                title: title,
                 password: hashpass,
             });
 
@@ -53,19 +53,19 @@ export function MSP_Login() {
                     <div className="pt-0 pl-5 pr-5" style={{ maxWidth: "450px" }}>
                         <form onSubmit={handleSubmit} className="user p-5 pt-0 pb-0" method="POST">
                             <div className="form-group mb-3">
-                                Master Franchise Username 
+                                Master Franchise User
                                 <input
                                     type="tel"
                                     style={{ borderRadius: '5px' }}
-                                    name="Msp"
+                                    name="title"
                                     className="form-control form-control-user"
                                     placeholder="Enter Username..."
-                                    value={Msp}
-                                    onChange={(e) => setMspuser(e.target.value)}
+                                    value={title}
+                                    onChange={(e) => settitle(e.target.value)}
                                 />
                             </div>
                             <div className="form-group mb-3">
-                                Master Franchise Password 
+                                Password
                                 <input
                                     type="password"
                                     style={{ borderRadius: '5px' }}

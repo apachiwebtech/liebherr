@@ -79,16 +79,17 @@ import { MSP_Login } from './Components/Authenticate/MSP_Login';
 
 
 
+
 const Router = createBrowserRouter([
   {
     path: "/login",
     element: <Login />,
 
   },
-  {
+   {
     path: "/msplogin",
     element: <MSP_Login />,
-  },
+   },
   {
     path: "/",
     element: <App />,
