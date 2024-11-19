@@ -364,7 +364,7 @@ export function Complaintlist(params) {
                                         <td>{item.assigned_name}</td>
                                         <td>{item.call_status}</td>
                                         <td>
-                                        <Link to={`/registercomaplaint/${item.customer_mobile}`}><button
+                                        <Link to={`/registercomaplaint/${item.ticket_no}`}><button
                                                 className='btn'
                                     
                                                 disabled={isActionDisabled(item.call_status)}

@@ -22,10 +22,12 @@ export function Registercomplaint(params) {
     const [product, setProduct] = useState([])
     const [MasterPartner, setMasterPartner] = useState([])
     const [ChildPartner, setChildPartner] = useState([])
+    const [ModelNumber, setModelNumber] = useState([])
     const [duplicate, setDuplicate] = useState([]);
     const [ticket, setTicket] = useState([])
-    const [ticketid , setTicketid] = useState('')
-    const {Comp_id} = useParams()
+    const [ticketno, setTicketNo] = useState([])
+    const [ticketid, setTicketid] = useState('')
+    const { Comp_id } = useParams()
     const [location, setLocation] = useState([])
     const created_by = localStorage.getItem("userId"); // Get user ID from localStorage
     const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
@@ -110,6 +112,53 @@ export function Registercomplaint(params) {
             })
 
     }
+    async function getCompticket(params) {
+
+        const data = {
+            comp_no: Comp_id
+        }
+
+        axios.post(`${Base_Url}/getcomplaintticket`, data)
+            .then((res) => {
+                if (res.data) {
+
+                    setModelNumber(res.data[0].ModelNumber)
+                    setLocation(res.data[0])
+                    setTicketNo(res.data[0].ticket_no)
+
+                    setValue({
+                        complaint_date: res.data[0].ticket_date,
+                        contact_person: res.data[0].customer_mobile,
+                        customer_name: res.data[0].customer_name,
+                        email: res.data[0].customer_email,
+                        mobile: res.data[0].customer_mobile,
+                        address: res.data[0].address,
+                        customer_id: res.data[0].id,
+                        alt_mobile: "",
+                        state: res.data[0].state,
+                        city: res.data[0].city,
+                        area: res.data[0].area,
+                        pincode: res.data[0].pincode,
+                        mode_of_contact: res.data[0].mode_of_contact,
+                        ticket_type: res.data[0].ticket_type,
+                        cust_type: res.data[0].call_type,
+                        warrenty_status: res.data[0].warranty_status,
+                        invoice_date: res.data[0].invoice_date,
+                        call_charge: res.data[0].call_charges,
+                        purchase_date: res.data[0].purchase_date || "",
+                        serial: res.data[0].serial_no || "",
+                        master_service_partner: res.data[0].master_service_partner || "",
+                        child_service_partner: res.data[0].child_service_partner || "",
+                        model: res.data[0].ModelNumber,
+
+
+                    })
+                }
+            })
+
+    }
+
+
 
     // Child Service Partner
     async function getChildPartner(MasterId) {
@@ -124,13 +173,18 @@ export function Registercomplaint(params) {
     }
 
     useEffect(() => {
-        console.log("DuplicateCustomerNumber", DuplicateCustomerNumber);
+
         if (DuplicateCustomerNumber) {
             fetchComplaintDuplicate(DuplicateCustomerNumber);
         }
         getState()
         getProduct()
         getMasterPartner()
+        if (Comp_id) {
+
+            getCompticket()
+
+        }
         // getChildPartner()
     }, [DuplicateCustomerNumber])
 
@@ -141,18 +195,18 @@ export function Registercomplaint(params) {
     const searchResult = () => {
         setHasSearched(true); // Set that a search has been performed
 
-        axios.post(`${Base_Url}/getticketendcustomer`, { searchparam: serachval || Comp_id })
+        axios.post(`${Base_Url}/getticketendcustomer`, { searchparam: serachval })
             .then((res) => {
                 console.log(res.data.information)
                 if (res.data.information && res.data.information.length > 0) {
 
                     // console.log(res.data,"Search Data")
                     // console.log(res.data[0],"Hide Ticket")
-                    setDuplicateCustomerNumber(res.data.information[0].mobileno);
+                    setDuplicateCustomerNumber(res.data.information[0].customer_mobile);
                     setSearchData(res.data.information[0])
                     setProductCustomer(res.data.product)
 
-                    console.log(searchdata,"EEE")
+                    console.log(searchdata, "EEE")
 
                     setHideticket(true)
                     // setTicket(res.data)
@@ -196,9 +250,7 @@ export function Registercomplaint(params) {
 
     }
 
-    useEffect(() =>{
-        searchResult()
-    },[Comp_id])
+
 
     const notify = () => toast.success('Data Submitted..');
 
@@ -235,7 +287,7 @@ export function Registercomplaint(params) {
             additional_remarks: value.additional_remarks,
             specification: value.specification,
             created_by: value.created_by,
-            ticket_id : ticketid
+            ticket_id: ticketid
         };
 
         console.log("Submitting data:", data);
@@ -247,6 +299,53 @@ export function Registercomplaint(params) {
                     setTimeout(() => {
                         navigate('/complaintlist');
                     }, 500);
+                }
+            })
+            .catch(error => {
+                console.error("Error submitting form:", error);
+                toast.error('Error submitting data');
+            });
+    }
+
+    const updatecomplaint = () => {
+
+
+        const data = {
+            complaint_date: value.complaint_date,
+            customer_name: value.customer_name,
+            contact_person: value.contact_person,
+            email: value.email,
+            mobile: value.mobile,
+            alt_mobile: value.alt_mobile,
+            address: value.address,
+            state: value.state,
+            city: value.city,
+            area: value.area,
+            pincode: value.pincode,
+            mode_of_contact: value.mode_of_contact,
+            ticket_type: value.ticket_type,
+            cust_type: value.cust_type,
+            warrenty_status: value.warrenty_status,
+            invoice_date: value.invoice_date,
+            call_charge: value.call_charge,
+            cust_id: searchdata.id || value.customer_id || "", // Fix customer ID handling
+            model: value.model,
+            serial: value.serial,
+            purchase_date: value.purchase_date,
+            master_service_partner: value.master_service_partner,
+            child_service_partner: value.child_service_partner,
+            additional_remarks: value.additional_remarks,
+            specification: value.specification,
+            created_by: value.created_by,
+            ticket_no: Comp_id
+        };
+
+
+        axios.post(`${Base_Url}/update_complaint`, data)
+            .then((res) => {
+                if (res.data) {
+                    notify();
+
                 }
             })
             .catch(error => {
@@ -315,15 +414,19 @@ export function Registercomplaint(params) {
             const response = await axios.get(
                 `${Base_Url}/getComplaintDuplicateRegisterPage/${DuplicateCustomerNumber}`
             );
+
+            if (response.data && response.data[0]) {
+
+                setLocation(response.data[0]);
+            }
             setDuplicate(response.data);
-            setLocation(response.data[0]);
         } catch (error) {
             console.error("Error fetching complaint details:", error);
         }
     };
 
-    const addnewticket = (product_id) =>{
-       setForm(true)
+    const addnewticket = (product_id) => {
+        setForm(true)
         const data = {
             customer_name: searchdata.customer_name,
             contact_person: searchdata.contact_person,
@@ -333,12 +436,12 @@ export function Registercomplaint(params) {
             product_id: product_id
         }
 
-        axios.post(`${Base_Url}/add_new_ticket` , data)
-        .then((res) =>{
-            setTicketid(res.data.id)
-        }).catch((err) =>{
-            console.log(err)
-        })
+        axios.post(`${Base_Url}/add_new_ticket`, data)
+            .then((res) => {
+                setTicketid(res.data.id)
+            }).catch((err) => {
+                console.log(err)
+            })
     }
 
 
@@ -363,17 +466,41 @@ export function Registercomplaint(params) {
                 <div className="col-3">
                     <div className="card mb-3">
                         <div className="card-body">
-                            <div >
+                            <div>
                                 <p>Search by Mobile / Email</p>
                                 <div className="row g-3 align-items-center">
                                     <div className="col-8">
-                                        <input required type="text" name="searchtext" id="searchtext" className="form-control" aria-describedby="passwordHelpInline" value={serachval} onChange={(e) => setSearch(e.target.value)} placeholder="Enter Mobile / Email / Customer Name" />
+                                        <input
+                                            required
+                                            type="text"
+                                            name="searchtext"
+                                            id="searchtext"
+                                            className="form-control"
+                                            aria-describedby="passwordHelpInline"
+                                            value={serachval}
+                                            onChange={(e) => setSearch(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === "Enter") {
+                                                    searchResult(); // Trigger search when 'Enter' is pressed
+                                                }
+                                            }}
+                                            placeholder="Enter Mobile / Email / Customer Name"
+                                        />
                                     </div>
                                     <div className="col-4">
-                                        <button id="inputSearch" name="inputSearch" for="inputSearch" type="submit" className="btn btn-liebherr" onClick={searchResult}>Search</button>
+                                        <button
+                                            id="inputSearch"
+                                            name="inputSearch"
+                                            type="submit"
+                                            className="btn btn-liebherr"
+                                            onClick={searchResult}
+                                        >
+                                            Search
+                                        </button>
                                     </div>
                                 </div>
                             </div>
+
                         </div>
                     </div>
 
@@ -390,7 +517,7 @@ export function Registercomplaint(params) {
 
                             <div className="row mb-3">
                                 <div className="col-md-5">
-                                    <p className="mp0">M: {searchdata.mobileno}</p>
+                                    <p className="mp0">M: {searchdata.customer_mobile}</p>
                                 </div>
                             </div>
 
@@ -405,13 +532,13 @@ export function Registercomplaint(params) {
                                 <div className="tab-pane active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
                                     <table className="table table-striped">
                                         <tbody>
-                                        
-                                            {!form &&  ProductCustomer.map((item, index) => (
+
+                                            {!form && ProductCustomer.map((item, index) => (
                                                 <tr key={index}>
-                                                    <td><div>{item.product}</div></td>
+                                                    <td><div>{item.ModelNumber}</div></td>
                                                     <td>
                                                         <div className="text-right pb-2">
-                                                            <button onClick={() => addnewticket(item.id)} className="btn btn-sm btn-primary generateTicket">New Ticket</button>
+                                                            <button onClick={() => addnewticket(item.ModelNumber)} className="btn btn-sm btn-primary generateTicket">New Ticket</button>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -473,16 +600,15 @@ export function Registercomplaint(params) {
 
 
                 </div>
-                {form || Comp_id  && <>
+                {(Comp_id || form) && <>
                     <div className="col-6">
                         <div className="card" id="formInfo">
                             <div className="card-body">
                                 <div className="row">
                                     <div className="col-md-4">
                                         <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Model</p>
-                                        <p>{searchdata.ModelNumber}</p>
 
-                                        {searchdata.length == 0 && <div className="">
+                                        {searchdata.length == 0 && !Comp_id || ModelNumber == null ? <div className="">
                                             <select className="form-control" onChange={onHandleChange} value={value.model} name="model">
                                                 <option value="">Select</option>
                                                 {product.map((item) => {
@@ -492,7 +618,7 @@ export function Registercomplaint(params) {
                                                     )
                                                 })}
                                             </select>
-                                        </div>}
+                                        </div> : <div>{ModelNumber}</div>}
 
                                     </div>
                                     <div className="col-md-2">
@@ -536,7 +662,7 @@ export function Registercomplaint(params) {
 
                                 <div className="row">
                                     <div className="col-md-12">
-                                        <h3 className="mainheade">Complaint <span id="compaintno">: </span></h3>
+                                        <h3 className="mainheade">Complaint <span id="compaintno">:{ticketno} </span></h3>
                                     </div>
                                 </div>
 
@@ -585,7 +711,7 @@ export function Registercomplaint(params) {
                                     </div>
 
 
-                                   {!duplicate ? <>    <div className="col-md-3">
+                                    {!duplicate ? <>    <div className="col-md-3">
                                         <div className="mb-3">
                                             <label className="form-label">State</label>
                                             <select className="form-control" value={value.state} name="state" onChange={onHandleChange}>
@@ -601,74 +727,74 @@ export function Registercomplaint(params) {
                                     </div>
 
 
-                                    <div className="col-md-3">
-                                        <div className="mb-3">
-                                            <label className="form-label">Area</label>
-                                            <select className="form-control" onChange={onHandleChange} name="area" value={value.area}>
-                                                <option value="">Select Area</option>
-                                                {area.map((item) => {
-                                                    return (
-                                                        <option value={item.id} key={item.id}>{item.title}</option>
-                                                    );
-                                                })}
-                                            </select>
+                                        <div className="col-md-3">
+                                            <div className="mb-3">
+                                                <label className="form-label">Area</label>
+                                                <select className="form-control" onChange={onHandleChange} name="area" value={value.area}>
+                                                    <option value="">Select Area</option>
+                                                    {area.map((item) => {
+                                                        return (
+                                                            <option value={item.id} key={item.id}>{item.title}</option>
+                                                        );
+                                                    })}
+                                                </select>
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    {/* city */}
-                                    <div className="col-md-3">
-                                        <div className="mb-3">
-                                            <label className="form-label">City</label>
-                                            <select className="form-control" value={value.city} name="city" onChange={onHandleChange}>
-                                                <option value="">Select City</option>
-                                                {city.map((item) => {
-                                                    return (
-                                                        <option value={item.id} key={item.id}>{item.title}</option>
-                                                    );
-                                                })}
-                                            </select>
+                                        {/* city */}
+                                        <div className="col-md-3">
+                                            <div className="mb-3">
+                                                <label className="form-label">City</label>
+                                                <select className="form-control" value={value.city} name="city" onChange={onHandleChange}>
+                                                    <option value="">Select City</option>
+                                                    {city.map((item) => {
+                                                        return (
+                                                            <option value={item.id} key={item.id}>{item.title}</option>
+                                                        );
+                                                    })}
+                                                </select>
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    <div className="col-md-3">
-                                        <div className="mb-3">
-                                            <label className="form-label">Pincode</label>
-                                            <select className="form-control" value={value.pincode} name="pincode" onChange={onHandleChange}>
-                                                <option value="">Select Pincode</option>
-                                                {pincode.map((item) => {
-                                                    return (
-                                                        <option value={item.id} key={item.id}>{item.pincode}</option>
-                                                    );
-                                                })}
-                                            </select>
+                                        <div className="col-md-3">
+                                            <div className="mb-3">
+                                                <label className="form-label">Pincode</label>
+                                                <select className="form-control" value={value.pincode} name="pincode" onChange={onHandleChange}>
+                                                    <option value="">Select Pincode</option>
+                                                    {pincode.map((item) => {
+                                                        return (
+                                                            <option value={item.id} key={item.id}>{item.pincode}</option>
+                                                        );
+                                                    })}
+                                                </select>
+                                            </div>
+                                        </div></> : <>      <div className="col-md-3">
+                                            <div className="mb-3">
+                                                <label htmlFor="exampleFormControlInput1" className="form-label">State</label>
+                                                <input type="text" className="form-control" value={location.state} name="" onChange={onHandleChange} placeholder="" disabled />
+                                            </div>
                                         </div>
-                                    </div></> : <>      <div className="col-md-3">
-                                        <div className="mb-3">
-                                            <label htmlFor="exampleFormControlInput1" className="form-label">State</label>
-                                            <input type="text" className="form-control" value={location.state} name="" onChange={onHandleChange} placeholder="" disabled/>
+                                        <div className="col-md-3">
+                                            <div className="mb-3">
+                                                <label htmlFor="exampleFormControlInput1" className="form-label">City</label>
+                                                <input type="text" className="form-control" value={location.city} name="" onChange={onHandleChange} placeholder="" disabled />
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="col-md-3">
-                                        <div className="mb-3">
-                                            <label htmlFor="exampleFormControlInput1" className="form-label">City</label>
-                                            <input type="text" className="form-control" value={location.city} name="" onChange={onHandleChange} placeholder="" disabled/>
+                                        <div className="col-md-3">
+                                            <div className="mb-3">
+                                                <label htmlFor="exampleFormControlInput1" className="form-label">Area</label>
+                                                <input type="text" className="form-control" value={location.area} name="" onChange={onHandleChange} placeholder="" disabled />
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="col-md-3">
-                                        <div className="mb-3">
-                                            <label htmlFor="exampleFormControlInput1" className="form-label">Area</label>
-                                            <input type="text" className="form-control" value={location.area} name="" onChange={onHandleChange} placeholder="" disabled/>
-                                        </div>
-                                    </div>
-                                    <div className="col-md-3">
-                                        <div className="mb-3">
-                                            <label htmlFor="exampleFormControlInput1" className="form-label">Pincode</label>
-                                            <input type="text" className="form-control" value={location.pincode} name="" onChange={onHandleChange} placeholder="" disabled/>
-                                        </div>
-                                    </div> </> }
-                                
+                                        <div className="col-md-3">
+                                            <div className="mb-3">
+                                                <label htmlFor="exampleFormControlInput1" className="form-label">Pincode</label>
+                                                <input type="text" className="form-control" value={location.pincode} name="" onChange={onHandleChange} placeholder="" disabled />
+                                            </div>
+                                        </div> </>}
 
-                              
+
+
 
 
                                     <div className="col-md-4">
@@ -688,11 +814,11 @@ export function Registercomplaint(params) {
                                             <label className="form-label">Ticket Type</label>
                                             <select className="form-control" onChange={onHandleChange} value={value.ticket_type} name="ticket_type">
                                                 <option value="">Select</option>
-                                                <option value="B">BREAKDOWN</option>
-                                                <option value="D">Demo</option>
-                                                <option value="I">INSTALLATION</option>
-                                                <option value="M">PM / Ex Warrenty Scedulling</option>
-                                                <option value="V">Pre-Site Visit</option>
+                                                <option value="Breakdown">BREAKDOWN</option>
+                                                <option value="Demo">Demo</option>
+                                                <option value="Installation">INSTALLATION</option>
+                                                <option value="PM / Ex warranty Scheduling">PM / Ex Warrenty Scedulling</option>
+                                                <option value="Pre-Site Visit">Pre-Site Visit</option>
                                             </select>
                                         </div>
                                     </div>
@@ -738,7 +864,8 @@ export function Registercomplaint(params) {
 
 
                                     <div className="col-md-12">
-                                        <button style={{ float: "right" }} className="btn btn-liebherr">Submit</button>
+                                        {Comp_id ? <button style={{ float: "right" }} type="button" onClick={() => updatecomplaint()} className="btn btn-liebherr">Submit</button>
+                                            : <button style={{ float: "right" }} className="btn btn-liebherr">Submit</button>}
                                     </div>
                                 </form>
                             </div>

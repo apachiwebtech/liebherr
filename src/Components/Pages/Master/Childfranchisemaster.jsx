@@ -4,24 +4,25 @@ import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
 import Franchisemaster from '../Master/Franchisemaster';
 const Childfranchisemaster = () => {
-  // Step 1: Add this state to track errors
+
   const [Parentfranchise, setParentfranchise] = useState([]);
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
-  const [filteredUsers, setFilteredUsers] = useState([]);
-  const [isEdit, setIsEdit] = useState(false);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [searchTerm, setSearchTerm] = useState("");
   const [duplicateError, setDuplicateError] = useState("");
+  const [isEdit, setIsEdit] = useState(false);
+  
+  // const [filteredUsers, setFilteredUsers] = useState([]);
+  // const [currentPage, setCurrentPage] = useState(0);
+  // const [itemsPerPage, setItemsPerPage] = useState(10);
+  // const [searchTerm, setSearchTerm] = useState("");
 
-  const [countries, setCountries] = useState([]);
+    const [countries, setCountries] = useState([]);
   const [regions, setRegions] = useState([]);
   const [state, setState] = useState([])
   const [area, setdistricts] = useState([])
   const [city, setCity] = useState([])
   const [pincode, setPincode] = useState([])
-
+  
   const [formData, setFormData] = useState({
     title: "",
     pfranchise_id: "",
@@ -35,10 +36,23 @@ const Childfranchisemaster = () => {
     area: "",
     city: "",
     pincode_id: "",
-    address: ""
+    address: "",
+    licare_code: "",
+    partner_name: "",
+    website: "",
+    gst_number: "",
+    pan_number: "",
+    bank_name: "",
+    bank_account_number: "",
+    bank_ifsc_code: "",
+    bank_address: "",
+    last_working_date: "",
+    contract_activation_date: "",
+    contract_expiration_date: "",
+    with_liebherr: ""
   });
 
-
+  
   const fetchParentfranchise = async () => {
     try {
       const response = await axios.get(`${Base_Url}/getparentfranchise`);
@@ -54,27 +68,27 @@ const Childfranchisemaster = () => {
       const response = await axios.get(`${Base_Url}/getchildFranchiseDetails`);
       console.log(response.data);
       setUsers(response.data);
-      setFilteredUsers(response.data);
+      // setFilteredUsers(response.data);
     } catch (error) {
       console.error("Error fetching users:", error);
     }
   };
 
-  //This is for State Dropdown
+    //This is for State Dropdown
 
-  async function getState(params) {
-    axios.get(`${Base_Url}/getstate`)
-      .then((res) => {
-        if (res.data) {
+    async function getState(params) {
+      axios.get(`${Base_Url}/getstate`)
+          .then((res) => {
+              if (res.data) {
 
-          setState(res.data)
+                  setState(res.data)
 
-        }
-      })
+              }
+          })
   }
 
 
-  const fetchcountries = async () => {
+  const fetchcountries= async () => {
     try {
       const response = await axios.get(`${Base_Url}/getcountries`);
       setCountries(response.data);
@@ -84,7 +98,7 @@ const Childfranchisemaster = () => {
   };
 
   //region
-  const fetchregion = async (country_id) => {
+  const fetchregion= async (country_id) => {
     try {
       const response = await axios.get(`${Base_Url}/getregionscity/${country_id}`);
       setRegions(response.data);
@@ -94,7 +108,7 @@ const Childfranchisemaster = () => {
   };
 
   //geostate
-  const fetchState = async (region_id) => {
+  const fetchState= async (region_id) => {
     try {
       const response = await axios.get(`${Base_Url}/getgeostatescity/${region_id}`);
       setState(response.data);
@@ -103,7 +117,7 @@ const Childfranchisemaster = () => {
     }
   };
 
-  const fetchdistricts = async (geostateID) => {
+  const fetchdistricts= async (geostateID) => {
     try {
       const response = await axios.get(`${Base_Url}/getdistrictcity/${geostateID}`);
       setdistricts(response.data);
@@ -112,7 +126,7 @@ const Childfranchisemaster = () => {
     }
   };
 
-  const fetchCity = async (area_id) => {
+  const fetchCity= async (area_id) => {
     try {
       const response = await axios.get(`${Base_Url}/getgeocities_p/${area_id}`);
       setCity(response.data);
@@ -121,7 +135,7 @@ const Childfranchisemaster = () => {
     }
   };
 
-  const fetchpincode = async (cityid) => {
+  const fetchpincode= async (cityid) => {
     try {
       const response = await axios.get(`${Base_Url}/getpincodebyid/${cityid}`);
       setPincode(response.data);
@@ -143,7 +157,7 @@ const Childfranchisemaster = () => {
     }));
 
     // Handle dependent dropdowns
-    switch (name) {
+    switch(name) {
       case "country_id":
         fetchregion(value);
         break;
@@ -166,21 +180,12 @@ const Childfranchisemaster = () => {
 
 
 
-  const handleSearch = (e) => {
-    const value = e.target.value.toLowerCase();
-    setSearchTerm(value);
-    const filtered = users.filter(
-      (user) => user.title && user.title.toLowerCase().includes(value)
-    );
-    setFilteredUsers(filtered);
-    setCurrentPage(0);
-  };
-
   // Step 2: Add form validation function
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.title.trim()) newErrors.title = "Child Franchise Field is required.";
+
     if (!formData.pfranchise_id) newErrors.pfranchise_id = "Parent Franchise selection is required.";
+  if (!formData.title.trim()) newErrors.title = "Child Franchise Field is required.";
     if (!formData.contact_person.trim()) newErrors.contact_person = "Contact Person is required.";
     if (!formData.email.trim()) newErrors.email = "Email is required.";
     if (!formData.mobile_no.trim()) newErrors.mobile_no = "Mobile Number is required.";
@@ -192,16 +197,28 @@ const Childfranchisemaster = () => {
     if (!formData.city) newErrors.city = "City selection is required.";
     if (!formData.pincode_id) newErrors.pincode_id = "Pincode selection is required.";
     if (!formData.address.trim()) newErrors.address = "Address is required.";
+
+    // Add validations for new fields
+    if (!formData.licare_code.trim()) newErrors.licare_code = "Licare Code is required.";
+    if (!formData.partner_name.trim()) newErrors.partner_name = "Partner Name is required.";
+    if (!formData.gst_number.trim()) newErrors.gst_number = "GST Number is required.";
+    if (!formData.pan_number.trim()) newErrors.pan_number = "PAN Number is required.";
+    if (!formData.bank_name.trim()) newErrors.bank_name = "Bank Name is required.";
+    if (!formData.bank_account_number.trim()) newErrors.bank_account_number = "Bank Account Number is required.";
+    if (!formData.bank_ifsc_code.trim()) newErrors.bank_ifsc_code = "Bank IFSC Code is required.";
+
     return newErrors;
   };
+
 
   //handlesubmit form
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-
+    console.log("Form Data:", formData); // Log payload before submission
+   
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
+      console.log("Validation Errors:", validationErrors); // Log validation errors
       setErrors(validationErrors);
       return;
     }
@@ -237,6 +254,7 @@ const Childfranchisemaster = () => {
               }
             });
         } else {
+          console.log("Attempting to submit data"); // Add logging
           await axios.post(`${Base_Url}/postchildfranchise`, formData)
             .then((response) => {
               setFormData({
@@ -296,9 +314,6 @@ const Childfranchisemaster = () => {
     }
   };
 
-  const indexOfLastUser = (currentPage + 1) * itemsPerPage;
-  const indexOfFirstUser = indexOfLastUser - itemsPerPage;
-  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
   return (
     <div className="tab-content">
@@ -307,11 +322,9 @@ const Childfranchisemaster = () => {
         <div className="col-12">
           <div className="card mb-3 tab_box">
             <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
-              <div className="row mp0">
-                <div className="col-md-6">
-                  <form onSubmit={handleSubmit}>
-                    <div className="row">
-                      <div className="col-md-6">
+              <form onSubmit={handleSubmit}>
+                <div className="row">
+                <div className="col-md-3">
                         <label htmlFor="Parent Franchise" className="form-label pb-0 dropdown-label">
                           Parent Franchise
                         </label>
@@ -336,226 +349,191 @@ const Childfranchisemaster = () => {
                         )}
                       </div>
 
-                      <div className="col-md-6">
-                        <label
-                          htmlFor="ChildFranchiseMasterInput"
-                          className="input-field"
-                          style={{ marginBottom: "15px", fontSize: "18px" }}
-                        >
-                          Child Franchise Master
-                        </label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          name="title"
-                          id="ChildFranchiseMasterInput"
-                          value={formData.title}
-                          onChange={handleChange}
-                          placeholder="Enter Child Franchise Master"
-                          style={{ fontSize: "18px" }}
-                        />
-                        {errors.title && (
-                          <small className="text-danger">{errors.title}</small>
-                        )}
+                      <div className="col-md-3">
+                      <label
+                        htmlFor="ChildFranchiseMasterInput"
+                        className="input-field"
+                        style={{ marginBottom: "15px", fontSize: "18px" }}
+                      >
+                        Child Franchise Master
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="title"
+                        id="ChildFranchiseMasterInput"
+                        value={formData.title}
+                        onChange={handleChange}
+                        placeholder="Enter Child Franchise Master"
+                        style={{ fontSize: "18px" }}
+                      />
+                      {errors.title && (
+                        <small className="text-danger">{errors.title}</small>
+                      )}
                       </div>
 
-                      <div className="col-md-6">
-                        <label
-                          htmlFor="MasterFranchiseInput"
-                          className="input-field"
-                          style={{ fontSize: "18px" }}
-                        >
-                          Child Franchise Master(Contact Person)
-                        </label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          name="contact_person"
-                          id="ChildFranchiseCP"
-                          value={formData.contact_person}
-                          onChange={handleChange}
-                          placeholder="Enter Contact Person"
-                          style={{ fontSize: "18px" }}
-                        />
-                        {errors.contact_person && (
-                          <small className="text-danger">{errors.contact_person}</small>
-                        )}
-                      </div>
+                  <div className="col-md-3">
+                    <label className="input-field">Child Licare Code</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="licare_code"
+                      value={formData.licare_code}
+                      onChange={handleChange}
+                      placeholder="Enter Licare Code"
+                    />
+                    {errors.licare_code && <small className="text-danger">{errors.licare_code}</small>}
+                  </div>
 
-                      <div className="col-md-6">
-                        <label
-                          htmlFor="ChildFranchiseMasterInput"
-                          className="input-field"
-                          style={{ marginBottom: "15px", fontSize: "18px" }}
-                        >
-                          Child Franchise(Email)
-                        </label>
-                        <input
-                          type="email"
-                          className="form-control"
-                          name="email"
-                          value={formData.email}
-                          onChange={handleChange}
-                          placeholder="Enter Child Franchise Master Email"
-                          style={{ fontSize: "18px" }}
-                        />
-                        {errors.email && (
-                          <small className="text-danger">{errors.email}</small>
-                        )}
-                      </div>
+                  <div className="col-md-3">
+                    <label className="input-field"> Child Franchise Master(Contact Person)</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="contact_person"
+                      value={formData.contact_person}
+                      onChange={handleChange}
+                      placeholder="Enter Contact Person"
+                    />
+                    {errors.contact_person && <small className="text-danger">{errors.contact_person}</small>}
+                  </div>
 
-                      <div className="col-md-6">
-                        <label
-                          htmlFor="ChildFranchiseMasterInput"
-                          className="input-field"
-                          style={{ marginBottom: "15px", fontSize: "18px" }}
-                        >
-                          Child Franchise(Mobile Number)
-                        </label>
-                        <input
-                          type="tel"
-                          className="form-control"
-                          name="mobile_no"
-                          value={formData.mobile_no}
-                          onChange={handleChange}
-                          placeholder="Enter Mobile Number"
-                          pattern="[0-9]{10}"
-                          maxLength="15"
-                          style={{ fontSize: "18px" }}
-                        />
-                        {errors.mobile_no && (
-                          <small className="text-danger">{errors.mobile_no}</small>
-                        )}
-                      </div>
+                  <div className="col-md-3">
+                    <label className="input-field">Child Franchise Master (Email)</label>
+                    <input
+                      type="email"
+                      className="form-control"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="Enter Franchise Master Email"
+                    />
+                    {errors.email && <small className="text-danger">{errors.email}</small>}
+                  </div>
 
-                      <div className="col-md-6">
-                        <label
-                          htmlFor="ChildFranchiseMasterInput"
-                          className="input-field"
-                          style={{ marginBottom: "15px", fontSize: "18px" }}
-                        >
-                          Child Franchise(Password)
-                        </label>
-                        <input
-                          type="password"
-                          className="form-control"
-                          name="password"
-                          value={formData.password}
-                          onChange={handleChange}
-                          placeholder="Enter Password"
-                          style={{ fontSize: "18px" }}
-                        />
-                        {errors.password && (
-                          <small className="text-danger">{errors.password}</small>
-                        )}
-                      </div>
+                  <div className="col-md-3">
+                    <label className="input-field">Child Franchise Master (Mobile Number)</label>
+                    <input
+                      type="tel"
+                      className="form-control"
+                      name="mobile_no"
+                      value={formData.mobile_no}
+                      onChange={handleChange}
+                      placeholder="Enter Mobile Number"
+                      pattern="[0-9]{10}"
+                      maxLength="15"
+                    />
+                    {errors.mobile_no && <small className="text-danger">{errors.mobile_no}</small>}
+                  </div>
 
-                      <div className="col-md-4">
-                        <label htmlFor="country" className="form-label">
-                          Country
-                        </label>
-                        <select
-                          id="country"
-                          name="country_id"
-                          className="form-select"
-                          aria-label=".form-select-lg example"
-                          value={formData.country_id}
-                          onChange={handleChange}
-                        >
-                          <option value="">Select Country</option>
-                          {countries.map((country) => (
-                            <option key={country.id} value={country.id}>
-                              {country.title}
-                            </option>
-                          ))}
-                        </select>
-                        {errors.country_id && (
-                          <small className="text-danger">
-                            {errors.country_id}
-                          </small>
-                        )}
-                      </div>
+                  <div className="col-md-3">
+                    <label className="input-field">Child Partner Name</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="partner_name"
+                      value={formData.partner_name}
+                      onChange={handleChange}
+                      placeholder="Enter Partner Name"
+                    />
+                    {errors.partner_name && <small className="text-danger">{errors.partner_name}</small>}
+                  </div>
 
-                      <div className="col-md-4">
-                        <label htmlFor="region" className="form-label" style={{ fontSize: "18px" }}>
-                          Region
-                        </label>
-                        <select
-                          id="region"
-                          name="region_id"
-                          className="form-select"
-                          value={formData.region_id}
-                          onChange={handleChange}
-                          style={{ fontSize: "18px" }}
-                        >
-                          <option value="">Select Region</option>
-                          {regions.map((region) => (
-                            <option key={region.id} value={region.id}>
-                              {region.title}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+                  <div className="col-md-3">
+                    <label className="input-field">Child Franchise Master (Password)</label>
+                    <input
+                      type="password"
+                      className="form-control"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      placeholder="Enter Password"
+                    />
+                    {errors.password && <small className="text-danger">{errors.password}</small>}
+                  </div>
 
-                      <div className="col-md-4">
-                        <label htmlFor="geostate" className="form-label">
-                          Geo State
-                        </label>
-                        <select className="form-control" value={formData.state} name="state" onChange={handleChange}>
-                          <option value="">Select State</option>
-                          {state.map((item) => {
-                            return (
+                  <div className="col-md-3">
+                    <label className="input-field">Country</label>
+                    <select
+                      name="country_id"
+                      className="form-select"
+                      value={formData.country_id}
+                      onChange={handleChange}
+                    >
+                      <option value="">Select Country</option>
+                      {countries.map((country) => (
+                        <option key={country.id} value={country.id}>{country.title}</option>
+                      ))}
+                    </select>
+                    {errors.country_id && <small className="text-danger">{errors.country_id}</small>}
+                  </div>
 
-                              <option value={item.id}>{item.title}</option>
-                            )
-                          })}
-                        </select>
-                        {errors.state && (
-                          <small className="text-danger">
-                            {errors.state}
-                          </small>
-                        )}
-                      </div>
+                  <div className="col-md-3">
+                    <label className="input-field">Region</label>
+                    <select
+                      name="region_id"
+                      className="form-select"
+                      value={formData.region_id}
+                      onChange={handleChange}
+                    >
+                      <option value="">Select Region</option>
+                      {regions.map((region) => (
+                        <option key={region.id} value={region.id}>{region.title}</option>
+                      ))}
+                    </select>
+                    {errors.region_id && <small className="text-danger">{errors.region_id}</small>}
+                  </div>
 
-                      <div className="col-md-4">
-                        <label htmlFor="area" className="form-label">
-                          District
-                        </label>
-                        <label className="form-label">Area</label>
-                        <select className="form-control" onChange={handleChange} name="area" value={formData.area}>
-                          <option value="">Select Area</option>
-                          {area.map((item) => {
-                            return (
-                              <option value={item.id} key={item.id}>{item.title}</option>
-                            );
-                          })}
-                        </select>
-                        {errors.area && (
-                          <small className="text-danger">{errors.area}</small>
-                        )}
-                      </div>
+                  <div className="col-md-3">
+                    <label className="input-field">Geo State</label>
+                    <select
+                      name="state"
+                      className="form-select"
+                      value={formData.state}
+                      onChange={handleChange}
+                    >
+                      <option value="">Select State</option>
+                      {state.map((item) => (
+                        <option key={item.id} value={item.id}>{item.title}</option>
+                      ))}
+                    </select>
+                    {errors.state && <small className="text-danger">{errors.state}</small>}
+                  </div>
 
-                      <div className="col-md-4">
-                        <label htmlFor="geocity" className="form-label">
-                          Geo City
-                        </label>
-                        <select className="form-control" value={formData.city} name="city" onChange={handleChange}>
-                          <option value="">Select City</option>
-                          {city.map((item) => {
-                            return (
-                              <option value={item.id} key={item.id}>{item.title}</option>
-                            );
-                          })}
-                        </select>
-                        {errors.city && (
-                          <small className="text-danger">
-                            {errors.city}
-                          </small>
-                        )}
-                      </div>
+                  <div className="col-md-3">
+                    <label className="input-field">District</label>
+                    <select
+                      name="area"
+                      className="form-select"
+                      value={formData.area}
+                      onChange={handleChange}
+                    >
+                      <option value="">Select District</option>
+                      {area.map((item) => (
+                        <option key={item.id} value={item.id}>{item.title}</option>
+                      ))}
+                    </select>
+                    {errors.area && <small className="text-danger">{errors.area}</small>}
+                  </div>
 
-                      <div className="col-md-4">
-                        <label htmlFor="area" className="form-label">
+                  <div className="col-md-3">
+                    <label className="input-field">Geo City</label>
+                    <select
+                      name="city"
+                      className="form-select"
+                      value={formData.city}
+                      onChange={handleChange}
+                    >
+                      <option value="">Select City</option>
+                      {city.map((item) => (
+                        <option key={item.id} value={item.id}>{item.title}</option>
+                      ))}
+                    </select>
+                    {errors.city && <small className="text-danger">{errors.city}</small>}
+                  </div>
+
+                  <div className="col-md-3">
+                          <label htmlFor="area" className="input-field">
                           Pincode
                         </label>
                         <select
@@ -578,166 +556,168 @@ const Childfranchisemaster = () => {
                         )}
                       </div>
 
-                      <div className="col-12">
-                        <label
-                          htmlFor="MasterFranchiseInput"
-                          className="input-field"
-                        >
-                          Address
-                        </label>
-                        <textarea
-                          className="form-control"
-                          name="address"
-                          id="MasterFranchiseInput"
-                          value={formData.address}
-                          onChange={handleChange}
-                          placeholder="Enter Franchise Master"
-                          rows="3"
-                        />
-                        {errors.address && (
-                          <small className="text-danger">{errors.address}</small>
-                        )}
-                        {duplicateError && (
-                          <small className="text-danger">{duplicateError}</small>
-                        )}{" "}
-                        {/* Show duplicate error */}
-                      </div>
+                  <div className="col-md-3">
+                    <label className="input-field">Website</label>
+                    <input
+                      type="url"
+                      className="form-control"
+                      name="website"
+                      value={formData.website}
+                      onChange={handleChange}
+                      placeholder="Enter Website URL"
+                    />
+                  </div>
 
-                      <div className="text-right">
-                        <button
+                  <div className="col-md-3">
+                    <label className="input-field">GST Number</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="gst_number"
+                      value={formData.gst_number}
+                      onChange={handleChange}
+                      placeholder="Enter GST Number"
+                    />
+                    {errors.gst_number && <small className="text-danger">{errors.gst_number}</small>}
+                  </div>
+
+                  <div className="col-md-3">
+                    <label className="input-field">PAN Number</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="pan_number"
+                      value={formData.pan_number}
+                      onChange={handleChange}
+                      placeholder="Enter PAN Number"
+                    />
+                    {errors.pan_number && <small className="text-danger">{errors.pan_number}</small>}
+                  </div>
+
+                  <div className="col-md-3">
+                    <label className="input-field">Bank Name</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="bank_name"
+                      value={formData.bank_name}
+                      onChange={handleChange}
+                      placeholder="Enter Bank Name"
+                    />
+                    {errors.bank_name && <small className="text-danger">{errors.bank_name}</small>}
+                  </div>
+
+                  <div className="col-md-3">
+                    <label className="input-field">Bank Account Number</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="bank_account_number"
+                      value={formData.bank_account_number}
+                      onChange={handleChange}
+                      placeholder="Enter Bank Account Number"
+                    />
+                    {errors.bank_account_number && <small className="text-danger">{errors.bank_account_number}</small>}
+                  </div>
+
+                  <div className="col-md-3">
+                    <label className="input-field">Bank IFSC Code</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="bank_ifsc_code"
+                      value={formData.bank_ifsc_code}
+                      onChange={handleChange}
+                      placeholder="Enter Bank IFSC Code"
+                    />
+                    {errors.bank_ifsc_code && <small className="text-danger">{errors.bank_ifsc_code}</small>}
+                  </div>
+
+                  <div className="col-md-3">
+                    <label className="input-field">Last Working Date</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      name="last_working_date"
+                      value={formData.last_working_date}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div className="col-md-3">
+                    <label className="input-field">Contract Activation Date</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      name="contract_activation_date"
+                      value={formData.contract_activation_date}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div className="col-md-3">
+                    <label className="input-field">Contract Expiration Date</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      name="contract_expiration_date"
+                      value={formData.contract_expiration_date}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div className="col-md-3">
+                    <label className="input-field">With Liebherr</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      name="with_liebherr"
+                      value={formData.with_liebherr}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div className="col-md-6">
+                    <label className="input-field">Bank Address</label>
+                    <textarea
+                      className="form-control"
+                      name="bank_address"
+                      value={formData.bank_address}
+                      onChange={handleChange}
+                      placeholder="Enter Bank Address"
+                      rows="3"
+                    />
+                  </div>
+
+                  <div className="col-md-6">
+                    <label className="input-field">Address</label>
+                    <textarea
+                      className="form-control"
+                      name="address"
+                      value={formData.address}
+                      onChange={handleChange}
+                      placeholder="Enter Address"
+                      rows="3"
+                    />
+                    {errors.address && <small className="text-danger">{errors.address}</small>}
+                  </div>
+
+                  <div className="col-12 text-right">
+                  <button
                           className="btn btn-liebherr"
                           type="submit"
                           style={{ marginTop: "15px" }}
                         >
                           {isEdit ? "Update" : "Submit"}
                         </button>
-                      </div>
-                    </div>
-                  </form>
-                </div>
-
-
-
-                <div className="col-md-6">
-                  <div className="d-flex justify-content-between align-items-center mb-3">
-                    <span>
-                      Show
-                      <select
-                        value={itemsPerPage}
-                        onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                        className="form-control d-inline-block"
-                        style={{
-                          width: "51px",
-                          display: "inline-block",
-                          marginLeft: "5px",
-                          marginRight: "5px",
-                        }}
-                      >
-                        <option value={10}>10</option>
-                        <option value={15}>15</option>
-                        <option value={20}>20</option>
-                      </select>
-                      entries
-                    </span>
-
-                    <input
-                      type="text"
-                      placeholder="Search..."
-                      value={searchTerm}
-                      onChange={handleSearch}
-                      className="form-control d-inline-block"
-                      style={{ width: "300px" }}
-                    />
-                  </div>
-
-                  {/* Adjust table padding and spacing */}
-                  <table className="table table-bordered table-hover" style={{ marginTop: "20px" }}>
-                    <thead className="thead-light">
-                      <tr>
-                        <th scope="col" width="10%" style={{ textAlign: "center" }}>#</th>
-                        <th scope="col" width="35%" style={{ textAlign: "center" }}>Parent Franchise</th>
-                        <th scope="col" width="35%" style={{ textAlign: "center" }}>Child Franchise</th>
-                        <th scope="col" width="15%" style={{ textAlign: "center" }}>Edit</th>
-                        <th scope="col" width="15%" style={{ textAlign: "center" }}>Delete</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {currentUsers.map((item, index) => (
-                        <tr key={item.id}>
-                          <td style={{ textAlign: "center" }}>{index + 1 + indexOfFirstUser}</td>
-                          <td>{item.totle}</td>
-                          <td>{item.title}</td>
-                          <td style={{ textAlign: "center" }}>
-                            <button
-                              className="btn btn-link text-primary"
-                              onClick={() => edit(item.id)}
-                              title="Edit"
-                            >
-                              <FaPencilAlt />
-                            </button>
-                          </td>
-                          <td style={{ textAlign: "center" }}>
-                            <button
-                              className="btn btn-link text-danger"
-                              onClick={() => deleted(item.id)}
-                              title="Delete"
-                            >
-                              <FaTrash />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-
-                  <div
-                    className="d-flex justify-content-between"
-                    style={{ marginTop: "10px" }}
-                  >
-                    <div>
-                      Showing {indexOfFirstUser + 1} to{" "}
-                      {Math.min(indexOfLastUser, filteredUsers.length)} of{" "}
-                      {filteredUsers.length} entries
-                    </div>
-
-                    <div className="pagination" style={{ marginLeft: "auto" }}>
-                      <button
-                        onClick={() => setCurrentPage(currentPage - 1)}
-                        disabled={currentPage === 0}
-                      >
-                        {"<"}
-                      </button>
-                      {Array.from(
-                        {
-                          length: Math.ceil(filteredUsers.length / itemsPerPage),
-                        },
-                        (_, index) => (
-                          <button
-                            key={index}
-                            onClick={() => setCurrentPage(index)}
-                            className={currentPage === index ? "active" : ""}
-                          >
-                            {index + 1}
-                          </button>
-                        )
-                      )}
-                      <button
-                        onClick={() => setCurrentPage(currentPage + 1)}
-                        disabled={
-                          currentPage ===
-                          Math.ceil(filteredUsers.length / itemsPerPage) - 1
-                        }
-                      >
-                        {">"}
-                      </button>
-                    </div>
                   </div>
                 </div>
-              </div>
+              </form>
             </div>
           </div>
         </div>
-      </div></div>
+      </div>
+    </div>
   );
 };
 

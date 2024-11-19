@@ -3001,29 +3001,33 @@ app.post("/getticketendcustomer", async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
-    const sql = `
-SELECT c.*, 
-       l.address, 
-       CONCAT(c.customer_fname, ' ', c.customer_lname) AS customer_name
-FROM awt_customer AS c 
-LEFT JOIN awt_customerlocation AS l ON c.id = l.customer_id 
-WHERE c.deleted = 0 
-  AND (c.email LIKE '%${searchparam}%' 
-       OR c.mobileno LIKE '%${searchparam}%')
+//     const sql = `
+// SELECT c.*, 
+//        l.address, 
+//        CONCAT(c.customer_fname, ' ', c.customer_lname) AS customer_name
+// FROM awt_customer AS c 
+// LEFT JOIN awt_customerlocation AS l ON c.id = l.customer_id 
+// WHERE c.deleted = 0 
+//   AND (c.email LIKE '%${searchparam}%' 
+//        OR c.mobileno LIKE '%${searchparam}%')
 
 
-    `;
+//     `;
 
-    const result = await pool.request().query(sql);
+  const checkincomplaint = `select * from complaint_ticket where (customer_email LIKE '%${searchparam}%' OR ticket_no LIKE '%${searchparam}%' OR customer_name LIKE '%${searchparam}%' OR serial_no LIKE '%${searchparam}%' OR customer_mobile LIKE '%${searchparam}%' OR customer_id LIKE '%${searchparam}%')`
+
+  console.log(checkincomplaint)
+
+    const result = await pool.request().query(checkincomplaint);
 
     // Product of End Customer using customer_id | in Table awt_customer id is primary key and customer_id is foreign key in awt_customerlocation
     const sql1 = `
     SELECT * FROM awt_uniqueproductmaster
-    WHERE deleted = 0 AND customer_id = @customerId
+    WHERE deleted = 0 AND CustomerID = @customerId
   `;
     // console.log(result.recordset[0])
     const result1 = await pool.request()
-      .input('customerId', result.recordset[0].id)
+      .input('customerId', result.recordset[0].customer_id)
       .query(sql1);
 
     if (result1.recordset === 0) {
@@ -3051,34 +3055,51 @@ app.post("/add_complaintt", async (req, res) => {
 
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
+   let t_type;
+
+   if(ticket_type == 'Breakdown'){
+    t_type = 'B'
+   }
+   else if(ticket_type == 'Demo'){
+    t_type = 'D'
+
+   }else if(ticket_type == 'Installation'){
+    t_type = 'I'
+
+   }else if(ticket_type == 'PM / Ex warranty Scheduling'){
+    t_type = 'M'
+
+   }else if(ticket_type == 'Pre-Site Visit'){
+     t_type = 'V'
+   }
+
 
   try {
     const pool = await poolPromise;
 
     // Split customer_name into customer_fname and customer_lname
-    const [customer_fname, ...customer_lnameArr] = customer_name.split(' ');
-    const customer_lname = customer_lnameArr.join(' ');
+    // const [customer_fname, ...customer_lnameArr] = customer_name.split(' ');
+    // const customer_lname = customer_lnameArr.join(' ');
 
-    // Insert into awt_customer
-    const customerSQL = `
-    INSERT INTO awt_customer (customer_fname, customer_lname, email, mobileno, alt_mobileno, created_date, created_by)
-    OUTPUT INSERTED.id
-    VALUES (@customer_fname, @customer_lname, @email, @mobile, @alt_mobile, @formattedDate, @created_by)`;
+//     // Insert into awt_customer
+//     const customerSQL = `
+//     INSERT INTO awt_customer (customer_fname, customer_lname, email, mobileno, alt_mobileno, created_date, created_by)
+//     OUTPUT INSERTED.id
+//     VALUES (@customer_fname, @customer_lname, @email, @mobile, @alt_mobile, @formattedDate, @created_by)`;
+// // Debugging log
 
-    console.log("Executing customer SQL:", customerSQL);  // Debugging log
+//     const customerResult = await pool.request()
+//       .input('customer_fname', customer_fname)
+//       .input('customer_lname', customer_lname)
+//       .input('email', email)
+//       .input('mobile', mobile)
+//       .input('alt_mobile', alt_mobile)
+//       .input('formattedDate', formattedDate)
+//       .input('created_by', created_by)
+//       .query(customerSQL);
 
-    const customerResult = await pool.request()
-      .input('customer_fname', customer_fname)
-      .input('customer_lname', customer_lname)
-      .input('email', email)
-      .input('mobile', mobile)
-      .input('alt_mobile', alt_mobile)
-      .input('formattedDate', formattedDate)
-      .input('created_by', created_by)
-      .query(customerSQL);
-
-    const insertedCustomerId = customerResult.recordset[0].id;
-    console.log("Inserted Customer ID:", insertedCustomerId);  // Debugging log
+//     const insertedCustomerId = customerResult.recordset[0].id;
+//     console.log("Inserted Customer ID:", insertedCustomerId); 
 
     // Insert into awt_customerlocation using insertedCustomerId as customer_id
     const customerLocationSQL = `
@@ -3094,7 +3115,7 @@ app.post("/add_complaintt", async (req, res) => {
     console.log("Executing customer location SQL:", customerLocationSQL);  // Debugging log
 
     await pool.request()
-      .input('customer_id', insertedCustomerId)
+      .input('customer_id', cust_id)
       .input('state', state)
       .input('city', city)
       .input('area', area)
@@ -3109,16 +3130,16 @@ app.post("/add_complaintt", async (req, res) => {
     // Insert into awt_uniqueproductmaster using insertedCustomerId as customer_id
     const productSQL = `
       INSERT INTO awt_uniqueproductmaster (
-        customer_id, product, serialnumber, date, location , created_date, created_by
+        CustomerID, ModelNumber, serial_no,  pincode , created_date, created_by
       )
       VALUES (
-        @customer_id, @model, @serial, @purchase_date, @pincode, @formattedDate, @created_by
+        @customer_id, @model, @serial,  @pincode, @formattedDate, @created_by
       )`;
 
     console.log("Executing product SQL:", productSQL);  // Debugging log
 
     await pool.request()
-      .input('customer_id', insertedCustomerId)
+      .input('customer_id', cust_id)
       .input('model', model)
       .input('created_by', created_by)
       .input('serial', serial)
@@ -3132,7 +3153,7 @@ app.post("/add_complaintt", async (req, res) => {
 
     const count = checkResult.recordset[0].count + 1;
     const formatDate = `${(new Date().getMonth() + 1).toString().padStart(2, '0')}${new Date().getDate().toString().padStart(2, '0')}`;
-    const ticket_no = `${ticket_type}G${formatDate}-${count.toString().padStart(4, "0")}`;
+    const ticket_no = `${t_type}G${formatDate}-${count.toString().padStart(4, "0")}`;
 
     // Insert into complaint_ticket
     // const complaintSQL = `
@@ -3185,9 +3206,6 @@ app.post("/add_complaintt", async (req, res) => {
     id = @ticket_id
 `;
 
-    console.log(complaintSQL,"$$")
-    console.log(warrenty_status,"$$")
-
     console.log("Executing complaint SQL:", complaintSQL);  // Debugging log
 
     await pool.request()
@@ -3203,7 +3221,7 @@ app.post("/add_complaintt", async (req, res) => {
       .input('city', city)
       .input('area', area)
       .input('pincode', pincode)
-      .input('customer_id', insertedCustomerId)
+      .input('customer_id', cust_id)
       .input('model', model)
       .input('ticket_type', ticket_type)
       .input('cust_type', cust_type)
@@ -3237,7 +3255,116 @@ app.post("/add_complaintt", async (req, res) => {
       .input('additional_remarks', additional_remarks) // Use current user ID
       .query(reamrks);
 
-    return res.json({ message: 'Complaint added successfully!', ticket_no, insertedCustomerId });
+    return res.json({ message: 'Complaint added successfully!', ticket_no, cust_id });
+  } catch (err) {
+    console.error("Error inserting complaint:", err.stack);
+    return res.status(500).json({ error: 'An error occurred while adding the complaint', details: err.message });
+  }
+});
+
+
+app.post("/update_complaint", async (req, res) => {
+  let {
+    complaint_date, customer_name, contact_person, email, mobile, address,
+    state, city, area, pincode, mode_of_contact, ticket_type, cust_type,
+    warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks,ticket_no
+  } = req.body;
+
+  const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+
+  try {
+    const pool = await poolPromise;
+
+
+
+    const complaintSQL = `
+  UPDATE complaint_ticket
+  SET
+    ticket_date = @complaint_date,
+    customer_name = @customer_name,
+    customer_mobile = @mobile,
+    customer_email = @email,
+    address = @address,
+    state = @state,
+    city = @city,
+    area = @area,
+    pincode = @pincode,
+    customer_id = @customer_id,
+    ModelNumber = @model,
+    ticket_type = @ticket_type,
+    call_type = @cust_type,
+    call_status = 'Pending',
+    warranty_status = @warranty_status,
+    invoice_date = @invoice_date,
+    call_charges = @call_charge,
+    mode_of_contact = @mode_of_contact,
+    contact_person = @contact_person,
+    assigned_to = 1,
+    created_date = @formattedDate,
+    created_by = @created_by,
+    engineer_id = 1,
+    purchase_date = @purchase_date,
+    serial_no = @serial,
+    child_service_partner = @child_service_partner,
+    sevice_partner = @master_service_partner,
+    specification = @specification
+  WHERE
+    ticket_no = @ticket_no
+`;
+
+    console.log(complaintSQL,"$$")
+    console.log(warrenty_status,"$$")
+
+    console.log("Executing complaint SQL:", complaintSQL);  // Debugging log
+
+    await pool.request()
+      .input('ticket_no', ticket_no)
+      .input('complaint_date', complaint_date)
+      .input('customer_name', customer_name)
+      .input('mobile', mobile)
+      .input('email', email)
+      .input('address', address)
+      .input('state', state)
+      .input('created_by', created_by)
+      .input('city', city)
+      .input('area', area)
+      .input('pincode', pincode)
+      .input('customer_id', cust_id)
+      .input('model', model)
+      .input('ticket_type', ticket_type)
+      .input('cust_type', cust_type)
+      .input("warranty_status", sql.NVarChar, warrenty_status || "WARRENTY") 
+      .input('invoice_date', invoice_date)
+      .input('call_charge', call_charge)
+      .input('mode_of_contact', mode_of_contact)
+      .input('contact_person', contact_person)
+      .input('formattedDate', formattedDate)
+      .input('purchase_date', purchase_date)
+      .input('serial', serial)
+      .input('master_service_partner', master_service_partner)
+      .input('child_service_partner', child_service_partner)
+      .input('specification', specification)
+      .query(complaintSQL);
+
+    //Remark insert query
+    const reamrks = `
+    INSERT INTO awt_complaintremark (
+        ticket_no, remark, created_date, created_by
+    )
+    VALUES (
+        @ticket_no, @additional_remarks, @formattedDate, @created_by
+    )`;
+
+
+    await pool.request()
+      .input('ticket_no', ticket_no) // Use existing ticket_no from earlier query
+      .input('formattedDate', formattedDate) // Use current timestamp
+      .input('created_by', created_by) // Use current user ID
+      .input('additional_remarks', additional_remarks) // Use current user ID
+      .query(reamrks);
+
+    return res.json({ message: 'Complaint Updated successfully!' });
   } catch (err) {
     console.error("Error inserting complaint:", err.stack);
     return res.status(500).json({ error: 'An error occurred while adding the complaint', details: err.message });
@@ -4176,15 +4303,58 @@ app.get("/requestchildfranchise/:id", async (req, res) => {
     return res.status(500).json({ message: "Error fetching child franchise data" });
   }
 });
+// app.post("/postchildfranchise", async (req, res) => {
+//   const { title, pfranchise_id } = req.body;
+
+//   try {
+//     // Use the poolPromise to get the connection pool
+//     const pool = await poolPromise;
+
+//     // Check if the title already exists and is not deleted
+//     const checkDuplicateSql = `SELECT * FROM awt_childfranchisemaster WHERE title = '${title}' AND deleted = 0`;
+//     const duplicateResult = await pool.request().query(checkDuplicateSql);
+
+//     if (duplicateResult.recordset.length > 0) {
+//       return res.status(409).json({
+//         message: "Duplicate entry, Child Franchise Master already exists!",
+//       });
+//     }
+
+//     // Check if the title exists and is soft-deleted
+//     const checkSoftDeletedSql = `SELECT * FROM awt_childfranchisemaster WHERE title = '${title}' AND deleted = 1`;
+//     const softDeletedResult = await pool.request().query(checkSoftDeletedSql);
+
+//     if (softDeletedResult.recordset.length > 0) {
+//       const restoreSoftDeletedSql = `UPDATE awt_childfranchisemaster SET deleted = 0 WHERE title = '${title}'`;
+//       await pool.request().query(restoreSoftDeletedSql);
+
+//       return res.json({
+//         message: "Soft-deleted Child Franchise Master restored successfully!",
+//       });
+//     }
+
+//     // Insert the new child franchise if no duplicates or soft-deleted records found
+//     const insertSql = `INSERT INTO awt_childfranchisemaster (title, pfranchise_id) VALUES ('${title}', '${pfranchise_id}')`;
+//     await pool.request().query(insertSql);
+
+//     return res.json({
+//       message: "Child Franchise Master added successfully!",
+//     });
+//   } catch (err) {
+//     console.error(err);
+//     return res.status(500).json(err);
+//   }
+// });
+
 app.post("/postchildfranchise", async (req, res) => {
-  const { title, pfranchise_id } = req.body;
+  const { title, pfranchise_id, address, area, city, contact_person, country_id, email, mobile_no,password , pincode_id, region_id, state, } = req.body;
 
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
 
     // Check if the title already exists and is not deleted
-    const checkDuplicateSql = `SELECT * FROM awt_childfranchisemaster WHERE title = '${title}' AND deleted = 0`;
+    const checkDuplicateSql = `SELECT * FROM awt_childfranchisemaster WHERE title = '${title}' AND pfranchise_id = '${pfranchise_id}' AND deleted = 0`;
     const duplicateResult = await pool.request().query(checkDuplicateSql);
 
     if (duplicateResult.recordset.length > 0) {
@@ -4194,7 +4364,7 @@ app.post("/postchildfranchise", async (req, res) => {
     }
 
     // Check if the title exists and is soft-deleted
-    const checkSoftDeletedSql = `SELECT * FROM awt_childfranchisemaster WHERE title = '${title}' AND deleted = 1`;
+    const checkSoftDeletedSql = `SELECT * FROM awt_childfranchisemaster WHERE title = '${title}' AND pfranchise_id = '${pfranchise_id}' AND deleted = 1`;
     const softDeletedResult = await pool.request().query(checkSoftDeletedSql);
 
     if (softDeletedResult.recordset.length > 0) {
@@ -4216,8 +4386,10 @@ app.post("/postchildfranchise", async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.status(500).json(err);
-  }
+  }
 });
+
+
 app.put("/putchildfranchise", (req, res) => {
   const { title, id, pfranchise_id } = req.body;
 
@@ -5789,7 +5961,6 @@ app.post("/ticketFormData", async (req, res) => {
 app.post("/add_new_ticket", async (req, res) => {
   const {
     customer_name,
-    contact_person,
     email,
     mobile,
     cust_id,
@@ -5803,20 +5974,20 @@ app.post("/add_new_ticket", async (req, res) => {
   try {
     const pool = await poolPromise;
 
-    // Fetch product details if required
-    const productQuery = `
-      SELECT item_description 
-      FROM product_master 
-      WHERE id = @product_id
-    `;
-    const productResult = await pool
-      .request()
-      .input("product_id", sql.Int, product_id)
-      .query(productQuery);
+    // // Fetch product details if required
+    // const productQuery = `
+    //   SELECT item_description 
+    //   FROM product_master 
+    //   WHERE id = @product_id
+    // `;
+    // const productResult = await pool
+    //   .request()
+    //   .input("product_id", sql.Int, product_id)
+    //   .query(productQuery);
 
-    console.log(productResult, "###")
+    // console.log(productResult, "###")
 
-    const model = productResult.recordset[0].item_description;
+    // const model = productResult.recordset[0].item_description;
 
     // Insert complaint ticket and return the inserted ID
     const complaintSQL = `
@@ -5838,7 +6009,7 @@ app.post("/add_new_ticket", async (req, res) => {
       .input("email", sql.NVarChar, email)
       .input("address", sql.NVarChar, address)
       .input("customer_id", sql.Int, cust_id)
-      .input("model", sql.NVarChar, model)
+      .input("model", sql.NVarChar, product_id)
       .input("formattedDate", sql.DateTime, formattedDate)
       .input("created_by", sql.Int, created_by)
       .query(complaintSQL);
@@ -6272,27 +6443,29 @@ app.get("/getComplaintDuplicateRegisterPage/:DuplicateCustomerNumber", async (re
     const pool = await poolPromise;
 
     // Modified SQL query to skip the latest entry for duplicates
-    const sql = `
-      WITH DuplicateNumbers AS (
-        SELECT customer_mobile
-        FROM complaint_ticket
-        WHERE deleted = 0
-        GROUP BY customer_mobile
-        HAVING COUNT(*) > 1
-      ),
-      RankedComplaints AS (
-        SELECT *,
-          ROW_NUMBER() OVER (PARTITION BY customer_mobile ORDER BY id DESC) as rn
-        FROM complaint_ticket
-        WHERE deleted = 0
-        AND customer_mobile IN (SELECT customer_mobile FROM DuplicateNumbers)
-      )
-      SELECT *
-      FROM RankedComplaints
-      WHERE rn > 1
-      AND customer_mobile = @DuplicateCustomerNumber
-      ORDER BY id DESC
-    `;
+    // const sql = `
+    //   WITH DuplicateNumbers AS (
+    //     SELECT customer_mobile
+    //     FROM complaint_ticket
+    //     WHERE deleted = 0
+    //     GROUP BY customer_mobile
+    //     HAVING COUNT(*) > 1
+    //   ),
+    //   RankedComplaints AS (
+    //     SELECT *,
+    //       ROW_NUMBER() OVER (PARTITION BY customer_mobile ORDER BY id DESC) as rn
+    //     FROM complaint_ticket
+    //     WHERE deleted = 0
+    //     AND customer_mobile IN (SELECT customer_mobile FROM DuplicateNumbers)
+    //   )
+    //   SELECT *
+    //   FROM RankedComplaints
+    //   WHERE rn > 1
+    //   AND customer_mobile = @DuplicateCustomerNumber
+    //   ORDER BY id DESC
+    // `;
+
+    const sql = 'select * from complaint_ticket where customer_mobile = @DuplicateCustomerNumber order by id desc'
 
     const result = await pool.request()
       .input('DuplicateCustomerNumber', DuplicateCustomerNumber)
@@ -6306,4 +6479,27 @@ app.get("/getComplaintDuplicateRegisterPage/:DuplicateCustomerNumber", async (re
   }
 });
 
+
+app.post("/getcomplaintticket", async (req, res) => {
+  const { comp_no } = req.body;
+
+  try {
+    const pool = await poolPromise;
+
+    // Modified SQL query using parameterized query
+    const sql = "SELECT * FROM complaint_ticket WHERE ticket_no = @comp_no";
+
+    const result = await pool.request()
+      .input('comp_no', comp_no) // Parameterized input
+      .query(sql);
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred", details: err.message });
+  }
+});
+
 //Register Page Complaint Duplicate End
+
+
