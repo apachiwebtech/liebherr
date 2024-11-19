@@ -3929,7 +3929,7 @@ app.get("/requestfranchisedata/:id", async (req, res) => {
 });
 
 app.post("/postfranchisedata", async (req, res) => {
-  const { title } = req.body;
+  const { title,contact_person,email,mobile_no,password,address,country_id,region_id,geostate_id,area_id,geocity_id,pincode_id } = req.body;
 
   try {
     // Use the poolPromise to get the connection pool
@@ -3953,7 +3953,9 @@ app.post("/postfranchisedata", async (req, res) => {
       });
     } else {
       // Insert new record
-      await pool.request().query(`INSERT INTO awt_franchisemaster (title) VALUES ('${title}')`);
+      await pool.request().query(`INSERT INTO awt_franchisemaster (title,contact_person,email,mobile_no,password,address,country_id,region_id,geostate_id,area_id,geocity_id,pincode_id)
+         VALUES ('${title}', '${contact_person}', '${email}', '${mobile_no}', '${password}', '${address}', '${country_id}', '${region_id}', '${geostate_id}', '${area_id}', '${geocity_id}','${pincode_id}')`);
+         await pool.request().query(insertSql);
       return res.json({
         message: "Franchise Master added successfully!",
       });
@@ -3965,7 +3967,8 @@ app.post("/postfranchisedata", async (req, res) => {
 });
 
 app.put("/putfranchisedata", async (req, res) => {
-  const { title, id } = req.body;
+  const { title, id ,contact_person,email, mobile_no, password,address,country_id,region_id,geostate_id,area_id,geocity_id,pincode_id} = req.body;
+  
 
   try {
     // Use the poolPromise to get the connection pool
@@ -3975,12 +3978,18 @@ app.put("/putfranchisedata", async (req, res) => {
     const checkDuplicateResult = await pool.request().query(`SELECT * FROM awt_franchisemaster WHERE title = '${title}' AND id != '${id}' AND deleted = 0`);
     if (checkDuplicateResult.recordset.length > 0) {
       return res.status(409).json({ message: "Duplicate entry, Franchise Master already exists!" });
-    }
+    }else {
+      // Update the engineer record if no duplicates are found
+      const updateSql = `UPDATE awt_franchisemaster
+                         SET title = '${title}', mobile_no = '${mobile_no}', email = '${email}', password = '${password}',
+                         address = '${address}', contact_person = '${contact_person}',country_id = '${country_id}',region_id = '${region_id}',
+                         geostate_id = '${geostate_id}', area_id = '${area_id}', geocity_id = '${geocity_id}',pincode_id = '${pincode_id}' 
+                         WHERE id = '${id}'`;
 
-    // Update the record
-    await pool.request().query(`UPDATE awt_franchisemaster SET title = '${title}' WHERE id = '${id}'`);
+      await pool.request().query(updateSql);
 
     return res.json({ message: "Franchise Master updated successfully!" });
+    }
 
   } catch (err) {
     console.error(err);

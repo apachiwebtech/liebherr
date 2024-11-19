@@ -8,6 +8,14 @@ const MasterFranchise = () => {
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
+  const [countries, setCountries] = useState([]);
+  const [regions, setRegions] = useState([]);
+  const [geoStates, setGeoStates] = useState([]);
+  const [geoCities, setGeoCities] = useState([]);
+  const [geoAreas, setGeoAreas] = useState([]);
+  const [areas, setAreas] = useState([]);
+  const [geoPincodes, setGeoPincodes] = useState([]);
+  const [customerLocation, setCustomerLocation] = useState([]);
   const [isEdit, setIsEdit] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -29,8 +37,66 @@ const MasterFranchise = () => {
     }
   };
 
+  const fetchData = async (url, setStateFunction, errorMessage) => {
+    try {
+      const response = await axios.get(url);
+      setStateFunction(response.data);
+    } catch (error) {
+      console.error(errorMessage, error);
+    }
+  };
+  const fetchCountries = () =>
+    fetchData(
+      `${Base_Url}/getcountries`,
+      setCountries,
+      "Error fetching countries:"
+    );
+  const fetchRegions = (countryId) =>
+    fetchData(
+      `${Base_Url}/getregionspincode/${countryId}`,
+      setRegions,
+      "Error fetching regions:"
+    );
+  const fetchGeoStates = (regionId) =>
+    fetchData(
+      `${Base_Url}/getgeostatespincode/${regionId}`,
+      setGeoStates,
+      "Error fetching geo states:"
+    );
+  const fetchGeoCities = (area_id) =>
+    fetchData(
+      `${Base_Url}/getgeocities_p/${area_id}`,
+      setGeoCities,
+      "Error fetching geo cities:"
+    );
+  const fetchAreas = (geocity_id) =>
+    fetchData(
+      `${Base_Url}/getareas/${geocity_id}`,
+      setAreas,
+      "Error fetching areas:"
+    );
+
+  const fetchPincodedrop = async (geocity_id) => {
+    try {
+      const response = await axios.get(
+        `${Base_Url}/getpincodedrop/${geocity_id}`
+      );
+      console.log("Pincode Dropdown:", response.data);
+      setGeoPincodes(response.data);
+    } catch (error) {
+      console.error("Error fetching Pincode:", error);
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
+    fetchGeoStates();
+    fetchCountries();
+    fetchRegions();
+    fetchAreas();
+    fetchGeoCities();
+  
+
   }, []);
 
   const handleChange = (e) => {
@@ -196,6 +262,30 @@ const MasterFranchise = () => {
                         htmlFor="MasterFranchiseInput"
                         className="input-field"
                       >
+                        Franchise Master(Contact Person)
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="contact_person"
+                        id="MasterFranchiseInput"
+                        value={formData.contact_person}
+                        onChange={handleChange}
+                        placeholder="Enter Contact Person"
+                      />
+                      {errors.contact_person && (
+                        <small className="text-danger">{errors.contact_person}</small>
+                      )}
+                      {duplicateError && (
+                        <small className="text-danger">{duplicateError}</small>
+                      )}{" "}
+                      {/* Show duplicate error */}
+                    </div>
+                    <div className="col-6">
+                      <label
+                        htmlFor="MasterFranchiseInput"
+                        className="input-field"
+                      >
                         Franchise Master (Email)
                       </label>
                       <input
@@ -265,11 +355,195 @@ const MasterFranchise = () => {
                       )}
                       {/* Show duplicate error */}
                     </div>
+                    <div className="col-md-3 mb-3">
+                      <label htmlFor="country" className="form-label">
+                        Country
+                      </label>
+                      <select
+                        id="country"
+                        name="country_id"
+                        className="form-select"
+                        aria-label=".form-select-lg example"
+                        value={formData.country_id}
+                        onChange={handleChange}
+                      >
+                        <option value="">Select Country</option>
+                        {countries.map((country) => (
+                          <option key={country.id} value={country.id}>
+                            {country.title}
+                          </option>
+                        ))}
+                      </select>
+                      {errors.country_id && (
+                        <small className="text-danger">
+                          {errors.country_id}
+                        </small>
+                      )}
+                    </div>
+                    <div className="col-md-3 mb-3">
+                      <label htmlFor="region" className="form-label">
+                        Region
+                      </label>
+                      <select
+                        id="region"
+                        name="region_id"
+                        className="form-select"
+                        aria-label=".form-select-lg example"
+                        value={formData.region_id}
+                        onChange={handleChange}
+                      >
+                        <option value="">Select Region</option>
+                        {regions.map((region) => (
+                          <option key={region.id} value={region.id}>
+                            {region.title}
+                          </option>
+                        ))}
+                      </select>
+                      {errors.region_id && (
+                        <small className="text-danger">
+                          {errors.region_id}
+                        </small>
+                      )}
+                    </div>
+
+                    {/* Geo State Dropdown */}
+                    <div className="col-md-3 mb-3">
+                      <label htmlFor="geostate" className="form-label">
+                        Geo State
+                      </label>
+                      <select
+                        id="geostate"
+                        name="geostate_id"
+                        className="form-select"
+                        aria-label=".form-select-lg example"
+                        value={formData.geostate_id}
+                        onChange={handleChange}
+                      >
+                        <option value="">Select Geo State</option>
+                        {geoStates.map((geoState) => (
+                          <option key={geoState.id} value={geoState.id}>
+                            {geoState.title}
+                          </option>
+                        ))}
+                      </select>
+                      {errors.geostate_id && (
+                        <small className="text-danger">
+                          {errors.geostate_id}
+                        </small>
+                      )}
+                    </div>
+
+                    {/* Geo District Dropdown */}
+                    <div className="col-md-3 mb-3">
+                      <label htmlFor="area" className="form-label">
+                        District
+                      </label>
+                      <select
+                        id="area"
+                        name="area_id"
+                        className="form-select"
+                        aria-label=".form-select-lg example"
+                        value={formData.area_id}
+                        onChange={handleChange}
+                      >
+                        <option value="">Select District</option>
+                        {geoAreas.map((geoArea) => (
+                          <option key={geoArea.id} value={geoArea.id}>
+                            {geoArea.title}
+                          </option>
+                        ))}
+                      </select>
+                      {errors.area_id && (
+                        <small className="text-danger">{errors.area_id}</small>
+                      )}
+                    </div>
+
+                    {/* Geo City Dropdown */}
+                    <div className="col-md-3 mb-3">
+                      <label htmlFor="geocity" className="form-label">
+                        Geo City
+                      </label>
+                      <select
+                        id="geocity"
+                        name="geocity_id"
+                        className="form-select"
+                        aria-label=".form-select-lg example"
+                        value={formData.geocity_id}
+                        onChange={handleChange}
+                      >
+                        <option value="">Select Geo City</option>
+                        {geoCities.map((geoCity) => (
+                          <option key={geoCity.id} value={geoCity.id}>
+                            {geoCity.title}
+                          </option>
+                        ))}
+                      </select>
+                      {errors.geocity_id && (
+                        <small className="text-danger">
+                          {errors.geocity_id}
+                        </small>
+                      )}
+                    </div>
+
+
+                    {/* Pincode Dropdown */}
+                    <div className="col-md-3 mb-3">
+                      <label htmlFor="area" className="form-label">
+                        Pincode
+                      </label>
+                      <select
+                        id="pincode"
+                        name="pincode_id"
+                        className="form-select"
+                        aria-label=".form-select-lg example"
+                        value={formData.pincode_id}
+                        onChange={handleChange}
+                      >
+                        <option value="">Select Pincode</option>
+                        {geoPincodes.map((geoPincode) => (
+                          <option key={geoPincode.id} value={geoPincode.id}>
+                            {geoPincode.pincode}
+                          </option>
+                        ))}
+                      </select>
+                      {errors.pincode_id && (
+                        <small className="text-danger">{errors.pincode_id}</small>
+                      )}
+                    </div>
+
+                    <div className="col-12">
+                      <label
+                        htmlFor="MasterFranchiseInput"
+                        className="input-field"
+                      >
+                       Address
+                      </label>
+                      <textarea
+                        className="form-control"
+                        name="address"
+                        id="MasterFranchiseInput"
+                        value={formData.address}
+                        onChange={handleChange}
+                        placeholder="Enter Franchise Master"
+                        rows="3"
+                      />
+                      {errors.address && (
+                        <small className="text-danger">{errors.address}</small>
+                      )}
+                      {duplicateError && (
+                        <small className="text-danger">{duplicateError}</small>
+                      )}{" "}
+                      {/* Show duplicate error */}
+                    </div>
 
 
 
                     <div className="text-right">
-                      <button className="btn btn-liebherr" type="submit">
+                      <button
+                        className="btn btn-liebherr"
+                        type="submit"
+                        style={{ marginTop: "15px" }}
+                      >
                         {isEdit ? "Update" : "Submit"}
                       </button>
                     </div>
@@ -314,7 +588,7 @@ const MasterFranchise = () => {
                     <thead className="thead-dark">
                       <tr>
                         <th width="10%" style={{ textAlign: "center" }}>#</th>
-                        <th width="70%" style={{ textAlign: "left" }}>Title</th>
+                        <th width="70%" style={{ textAlign: "left" }}>Master Franchise</th>
                         <th width="15%" style={{ textAlign: "center" }}>Edit</th>
                         <th width="15%" style={{ textAlign: "center" }}>Delete</th>
                       </tr>
