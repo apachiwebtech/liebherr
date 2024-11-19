@@ -714,6 +714,24 @@ app.get("/getdistrictcity/:geostateID", async (req, res) => {
   }
 });
 
+app.get("/getpincodebyid/:cityid", async (req, res) => {
+  const { cityid } = req.params;
+
+  try {
+    // Access the connection pool using poolPromise
+    const pool = await poolPromise;
+
+    // Direct SQL query without parameter binding
+    const sql = `SELECT * FROM awt_pincode WHERE geocity_id = ${cityid} AND deleted = 0`;
+    const result = await pool.request().query(sql);
+
+    return res.json(result.recordset); // Return only the recordset data
+  } catch (err) {
+    console.error(err); // Log the error for debugging
+    return res.status(500).json(err); // Return error response
+  }
+});
+
 
 // API to fetch all cities (joining countries, regions, and geostates)
 app.get("/getgeocities", async (req, res) => {
@@ -3996,8 +4014,7 @@ app.get("/getfranchisedata", async (req, res) => {
     const result = await pool.request().query("SELECT * FROM awt_franchisemaster WHERE deleted = 0");
     return res.json(result.recordset);
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'An error occurred while fetching franchise data' });
+    console.error(err);    return res.status(500).json({ error: 'An error occurred while fetching franchise data' });
   }
 });
 app.get("/requestfranchisedata/:id", async (req, res) => {
