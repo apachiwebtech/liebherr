@@ -95,6 +95,31 @@ app.post("/loginuser", async (req, res) => {
     res.status(500).json({ message: "Database error", error: err });
   }
 });
+app.post("/msplogin", async (req, res) => {
+  const { Msp, password } = req.body;
+
+  console.log(Msp)
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    const sql = `SELECT id, title FROM awt_franchisemaster WHERE title = '${Msp}' AND password = '${password}'`;
+
+    console.log(sql)
+
+    const result = await pool.request().query(sql);
+
+    if (result.recordset.length > 0) {
+      res.json({ id: result.recordset[0].id, title: result.recordset[0].title });
+    } else {
+      res.status(401).json({ message: "Invalid username or password" });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Database error", error: err });
+  }
+});
 
 app.post("/log", async (req, res) => {
   console.log("fffrdf")

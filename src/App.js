@@ -70,6 +70,7 @@ import Complaintreporttabs from './Components/Pages/Reports/Complaintreporttabs'
 import { Complaintreport } from './Components/Pages/Reports/Complaintreport';
 import Claimreporttabs from './Components/Pages/Reports/Claimreporttabs';
 import { Claimreport } from './Components/Pages/Reports/Claimreport';
+import { MSP_Login } from './Components/Authenticate/MSP_Login';
 
 
 
@@ -83,6 +84,10 @@ const Router = createBrowserRouter([
     path: "/login",
     element: <Login />,
 
+  },
+  {
+    path: "/msplogin",
+    element: <MSP_Login />,
   },
   {
     path: "/",
