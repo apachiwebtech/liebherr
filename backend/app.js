@@ -6150,7 +6150,11 @@ app.post("/add_new_ticket", async (req, res) => {
     cust_id,
     product_id,
     address,
-    created_by
+    created_by,
+    state,
+    city,
+    area,
+    pincode
   } = req.body;
 
   const formattedDate = new Date().toISOString().slice(0, 19).replace("T", " ");
@@ -6158,33 +6162,18 @@ app.post("/add_new_ticket", async (req, res) => {
   try {
     const pool = await poolPromise;
 
-    // // Fetch product details if required
-    // const productQuery = `
-    //   SELECT item_description 
-    //   FROM product_master 
-    //   WHERE id = @product_id
-    // `;
-    // const productResult = await pool
-    //   .request()
-    //   .input("product_id", sql.Int, product_id)
-    //   .query(productQuery);
-
-    // console.log(productResult, "###")
-
-    // const model = productResult.recordset[0].item_description;
-
     // Insert complaint ticket and return the inserted ID
     const complaintSQL = `
- INSERT INTO complaint_ticket (
-   customer_name, customer_mobile, customer_email, address, 
-   customer_id, ModelNumber, assigned_to, created_date, created_by
- ) 
- OUTPUT INSERTED.id
- VALUES (
-   @customer_name, @mobile, @email, @address, 
-   @customer_id, @model, 1, @formattedDate, @created_by
- )
-`;
+      INSERT INTO complaint_ticket (
+        customer_name, customer_mobile, customer_email, address, 
+        customer_id, ModelNumber, assigned_to,state,city,area,pincode, created_date, created_by
+      ) 
+      OUTPUT INSERTED.id
+      VALUES (
+        @customer_name, @mobile, @email, @address, 
+        @customer_id, @model, 1,@state, @city,@area,@pincode, @formattedDate, @created_by
+      )
+    `;
 
     const result = await pool
       .request()
@@ -6194,20 +6183,35 @@ app.post("/add_new_ticket", async (req, res) => {
       .input("address", sql.NVarChar, address)
       .input("customer_id", sql.Int, cust_id)
       .input("model", sql.NVarChar, product_id)
+      .input("state", sql.NVarChar, state)
+      .input("city", sql.NVarChar, city)
+      .input("area", sql.NVarChar, area)
+      .input("pincode", sql.NVarChar, pincode)
       .input("formattedDate", sql.DateTime, formattedDate)
       .input("created_by", sql.Int, created_by)
       .query(complaintSQL);
 
     const insertedId = result.recordset[0].id;
 
-    console.log(insertedId)
+    // Fetch the newly created complaint ticket
+    const getComplaintRow = `
+      SELECT * 
+      FROM complaint_ticket 
+      WHERE id = @id
+    `;
 
+    const result2 = await pool
+      .request()
+      .input("id", sql.Int, insertedId)
+      .query(getComplaintRow);
 
-    return res
-      .status(200)
-      .json({ message: "Ticket Form data added successfully!", id: insertedId });
+    return res.status(200).json({
+      message: "Ticket Form data added successfully!",
+      id: insertedId,
+      rowdata: result2.recordset,
+    });
   } catch (err) {
-    console.error(err);
+    console.error("Error:", err);
     return res
       .status(500)
       .json({ error: "An error occurred while adding the ticket." });

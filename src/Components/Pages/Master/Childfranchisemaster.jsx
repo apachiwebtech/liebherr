@@ -16,7 +16,7 @@ const Childfranchisemaster = () => {
   // const [itemsPerPage, setItemsPerPage] = useState(10);
   // const [searchTerm, setSearchTerm] = useState("");
 
-    const [countries, setCountries] = useState([]);
+  const [countries, setCountries] = useState([]);
   const [regions, setRegions] = useState([]);
   const [state, setState] = useState([])
   const [area, setdistricts] = useState([])
