@@ -4157,49 +4157,143 @@ app.get("/requestfranchisedata/:id", async (req, res) => {
   }
 });
 
-app.post("/postfranchisedata", async (req, res) => {
-  const { title, contact_person, email, mobile_no, password, address, country_id, region_id, state, area, city, pincode_id, website, gst_no, panno, bank_name, bank_acc, bank_ifsc, bank_address, with_liebherr, last_working_date, contract_acti, contract_expir, licarecode,partner_name } = req.body;
-  try {
+// app.post("/postfranchisedata", async (req, res) => {
+//   const { title, contact_person, email, mobile_no, password, address, country_id, region_id, state, area, city, pincode_id, website, gst_no, panno, bank_name, bank_acc, bank_ifsc, bank_address, with_liebherr, last_working_date, contract_acti, contract_expir, licarecode,partner_name } = req.body;
+//   try {
    
+//     // Use the poolPromise to get the connection pool
+//     const pool = await poolPromise;
+//     // Check for duplicate entries in awt_franchisemaster
+ 
+//     const checkDuplicateResult = await pool.request().query(`SELECT * FROM awt_franchisemaster WHERE title = '${title}' AND deleted = 0`);
+//     if (checkDuplicateResult.recordset.length > 0) {
+//       return res.status(409).json({
+//         message: "Duplicate entry, Franchise Master already exists!",
+//       });
+//     }
+   
+//     // Check for soft deleted entries
+//     const checkSoftDeletedResult = await pool.request().query(`SELECT * FROM awt_franchisemaster WHERE title = '${title}' AND deleted = 1`);
+
+//     if (checkSoftDeletedResult.recordset.length > 0) {
+//       // Restore soft deleted record
+    
+//       await pool.request().query(`UPDATE awt_franchisemaster SET deleted = 0 WHERE title = '${title}'`);
+//       ifa = 'if'
+   
+//       return res.json({
+//         message: "Soft-deleted Franchise Master restored successfully!",
+//       });
+//     } else {
+      
+  
+//       // Insert new record
+//       await pool.request().query(`INSERT INTO awt_franchisemaster (title,licarecode,partner_name,contact_person,email,mobile_no,password,address,country_id,region_id,geostate_id,area_id,geocity_id,pincode_id,webste,gstno,panno,bankname,bankacc,bankifsc,bankaddress,withliebher,lastworkinddate,contractacti,contractexpir)
+//           VALUES ('${title}','${licarecode}','${partner_name}','${contact_person}','${email}','${mobile_no}','${password}','${address}','${country_id}','${region_id}','${state}','${area}','${city}','${pincode_id}','${website}','${gst_no}','${panno}','${bank_name}','${bank_acc}','${bank_ifsc}','${bank_address}','${with_liebherr}','${last_working_date}','${contract_acti}','${contract_expir}' `);
+         
+//       return res.json({
+//         message: "Franchise Master added successfully!",
+//       });
+//     }
+//   } catch (err) {
+//     console.error(err);
+//     return res.status(500).json({ error: 'An error occurred while processing the request', });
+//   }
+// });
+
+app.post("/postfranchisedata", async (req, res) => {
+  const { 
+    title, contact_person, email, mobile_no, password, address, country_id, region_id, state, area, city, 
+    pincode_id, website, gst_no, panno, bank_name, bank_acc, bank_ifsc, bank_address, with_liebherr, 
+    last_working_date, contract_acti, contract_expir, licarecode, partner_name 
+  } = req.body;
+
+  try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
+
     // Check for duplicate entries in awt_franchisemaster
- 
-    const checkDuplicateResult = await pool.request().query(`SELECT * FROM awt_franchisemaster WHERE title = '${title}' AND deleted = 0`);
+    const checkDuplicateResult = await pool.request()
+      .input('title', sql.VarChar, title)  // Parameterized query
+      .query(`
+        SELECT * FROM awt_franchisemaster WHERE title = @title AND deleted = 0
+      `);
+
     if (checkDuplicateResult.recordset.length > 0) {
       return res.status(409).json({
         message: "Duplicate entry, Franchise Master already exists!",
       });
     }
-   
+
     // Check for soft deleted entries
-    const checkSoftDeletedResult = await pool.request().query(`SELECT * FROM awt_franchisemaster WHERE title = '${title}' AND deleted = 1`);
+    const checkSoftDeletedResult = await pool.request()
+      .input('title', sql.VarChar, title)  // Parameterized query
+      .query(`
+        SELECT * FROM awt_franchisemaster WHERE title = @title AND deleted = 1
+      `);
 
     if (checkSoftDeletedResult.recordset.length > 0) {
       // Restore soft deleted record
-    
-      await pool.request().query(`UPDATE awt_franchisemaster SET deleted = 0 WHERE title = '${title}'`);
-      ifa = 'if'
-   
+      await pool.request()
+        .input('title', sql.VarChar, title)  // Parameterized query
+        .query(`
+          UPDATE awt_franchisemaster SET deleted = 0 WHERE title = @title
+        `);
+
       return res.json({
         message: "Soft-deleted Franchise Master restored successfully!",
       });
     } else {
-      
-  
-      // Insert new record
-      await pool.request().query(`INSERT INTO awt_franchisemaster (title,licarecode,partner_name,contact_person,email,mobile_no,password,address,country_id,region_id,geostate_id,area_id,geocity_id,pincode_id,webste,gstno,panno,bankname,bankacc,bankifsc,bankaddress,withliebher,lastworkinddate,contractacti,contractexpir)
-          VALUES ('${title}','${licarecode}','${partner_name}','${contact_person}','${email}','${mobile_no}','${password}','${address}','${country_id}','${region_id}','${state}','${area}','${city}','${pincode_id}','${website}','${gst_no}','${panno}','${bank_name}','${bank_acc}','${bank_ifsc}','${bank_address}','${with_liebherr}','${last_working_date}','${contract_acti}','${contract_expir}' `);
-         
+      // Insert new record using parameterized query
+      await pool.request()
+        .input('title', sql.VarChar, title)
+        .input('licarecode', sql.VarChar, licarecode)
+        .input('partner_name', sql.VarChar, partner_name)
+        .input('contact_person', sql.VarChar, contact_person)
+        .input('email', sql.VarChar, email)
+        .input('mobile_no', sql.VarChar, mobile_no)
+        .input('password', sql.VarChar, password)
+        .input('address', sql.VarChar, address)
+        .input('country_id', sql.Int, country_id)
+        .input('region_id', sql.Int, region_id)
+        .input('state', sql.VarChar, state)
+        .input('area', sql.VarChar, area)
+        .input('city', sql.VarChar, city)
+        .input('pincode_id', sql.Int, pincode_id)
+        .input('website', sql.VarChar, website)
+        .input('gst_no', sql.VarChar, gst_no)
+        .input('panno', sql.VarChar, panno)
+        .input('bank_name', sql.VarChar, bank_name)
+        .input('bank_acc', sql.VarChar, bank_acc)
+        .input('bank_ifsc', sql.VarChar, bank_ifsc)
+        .input('bank_address', sql.VarChar, bank_address)
+        .input('with_liebherr', sql.Bit, with_liebherr)
+        .input('last_working_date', sql.DateTime, last_working_date)
+        .input('contract_acti', sql.DateTime, contract_acti)
+        .input('contract_expir', sql.DateTime, contract_expir)
+        .query(`
+          INSERT INTO awt_franchisemaster 
+          (title, licarecode, partner_name, contact_person, email, mobile_no, password, address, country_id, region_id, geostate_id, 
+           area_id, geocity_id, pincode_id, webste, gstno, panno, bankname, bankacc, bankifsc, bankaddress, withliebher, 
+           lastworkinddate, contractacti, contractexpir)
+          VALUES 
+          (@title, @licarecode, @partner_name, @contact_person, @email, @mobile_no, @password, @address, @country_id, 
+           @region_id, @state, @area, @city, @pincode_id, @website, @gst_no, @panno, @bank_name, @bank_acc, @bank_ifsc, 
+           @bank_address, @with_liebherr, @last_working_date, @contract_acti, @contract_expir)
+        `);
+
       return res.json({
         message: "Franchise Master added successfully!",
       });
     }
+
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: 'An error occurred while processing the request', });
+    return res.status(500).json({ error: 'An error occurred while processing the request' });
   }
 });
+
+
 // app.post("/postfranchisedata", async (req, res) => {
 //   const { 
 //     title, contact_person, email, mobile_no, password, address, country_id, region_id,
