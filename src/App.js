@@ -342,6 +342,11 @@ const Router = createBrowserRouter([
 
       },
       {
+        path: "/registercomaplaint/:Comp_id",
+        element: <Registercomplaint />,
+
+      },
+      {
         path: "/complaintview/:complaintid",
         element: <Complaintview />,
 

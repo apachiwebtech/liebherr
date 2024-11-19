@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import toast, { Toaster } from 'react-hot-toast';
 import { Base_Url } from '../../Utils/Base_Url'
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { FaEye } from "react-icons/fa";
 
 export function Registercomplaint(params) {
@@ -16,15 +16,17 @@ export function Registercomplaint(params) {
     const [hasSearched, setHasSearched] = useState(false)
     const [form, setForm] = useState(false)
     const [state, setState] = useState([])
+    const [area, setdistricts] = useState([])
     const [city, setCity] = useState([])
-    const [area, setArea] = useState([])
     const [pincode, setPincode] = useState([])
     const [product, setProduct] = useState([])
     const [MasterPartner, setMasterPartner] = useState([])
     const [ChildPartner, setChildPartner] = useState([])
     const [duplicate, setDuplicate] = useState([]);
     const [ticket, setTicket] = useState([])
-
+    const [ticketid , setTicketid] = useState('')
+    const {Comp_id} = useParams()
+    const [location, setLocation] = useState([])
     const created_by = localStorage.getItem("userId"); // Get user ID from localStorage
     const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
 
@@ -35,7 +37,7 @@ export function Registercomplaint(params) {
         const year = date.getFullYear();
 
         return `${day}-${month}-${year}`;
-      };
+    };
 
     //setting the values
 
@@ -64,7 +66,7 @@ export function Registercomplaint(params) {
         child_service_partner: "",
         customer_id: "",
         additional_remarks: "",
-        specification: "", 
+        specification: "",
         created_by: created_by,
 
     })
@@ -109,23 +111,23 @@ export function Registercomplaint(params) {
 
     }
 
-   // Child Service Partner
-async function getChildPartner(MasterId) {
-    try {
-        const res = await axios.get(`${Base_Url}/getchildpartner/${MasterId}`);
-        if (res.data) {
-            setChildPartner(res.data);
+    // Child Service Partner
+    async function getChildPartner(MasterId) {
+        try {
+            const res = await axios.get(`${Base_Url}/getchildpartner/${MasterId}`);
+            if (res.data) {
+                setChildPartner(res.data);
+            }
+        } catch (err) {
+            console.error("Error fetching child partners:", err);
         }
-    } catch (err) {
-        console.error("Error fetching child partners:", err);
     }
-}
 
     useEffect(() => {
-        console.log("DuplicateCustomerNumber",DuplicateCustomerNumber);
+        console.log("DuplicateCustomerNumber", DuplicateCustomerNumber);
         if (DuplicateCustomerNumber) {
             fetchComplaintDuplicate(DuplicateCustomerNumber);
-          }
+        }
         getState()
         getProduct()
         getMasterPartner()
@@ -139,7 +141,7 @@ async function getChildPartner(MasterId) {
     const searchResult = () => {
         setHasSearched(true); // Set that a search has been performed
 
-        axios.post(`${Base_Url}/getticketendcustomer`, { searchparam: serachval })
+        axios.post(`${Base_Url}/getticketendcustomer`, { searchparam: serachval || Comp_id })
             .then((res) => {
                 console.log(res.data.information)
                 if (res.data.information && res.data.information.length > 0) {
@@ -149,6 +151,8 @@ async function getChildPartner(MasterId) {
                     setDuplicateCustomerNumber(res.data.information[0].mobileno);
                     setSearchData(res.data.information[0])
                     setProductCustomer(res.data.product)
+
+                    console.log(searchdata,"EEE")
 
                     setHideticket(true)
                     // setTicket(res.data)
@@ -183,7 +187,7 @@ async function getChildPartner(MasterId) {
 
 
                 } else {
-                     // If no results found, clear previous data
+                    // If no results found, clear previous data
                     setSearchData([])
                     setHideticket(false)
                     setTicket([])
@@ -191,6 +195,10 @@ async function getChildPartner(MasterId) {
             })
 
     }
+
+    useEffect(() =>{
+        searchResult()
+    },[Comp_id])
 
     const notify = () => toast.success('Data Submitted..');
 
@@ -226,30 +234,59 @@ async function getChildPartner(MasterId) {
             child_service_partner: value.child_service_partner,
             additional_remarks: value.additional_remarks,
             specification: value.specification,
-            created_by: value.created_by
+            created_by: value.created_by,
+            ticket_id : ticketid
         };
 
         console.log("Submitting data:", data);
 
         axios.post(`${Base_Url}/add_complaintt`, data)
-        .then((res) => {
-            if (res.data) {
-                notify();
-                setTimeout(() => {
-                    navigate('/complaintlist');
-                }, 500);
-            }
-        })
-        .catch(error => {
-            console.error("Error submitting form:", error);
-            toast.error('Error submitting data');
-        });
+            .then((res) => {
+                if (res.data) {
+                    notify();
+                    setTimeout(() => {
+                        navigate('/complaintlist');
+                    }, 500);
+                }
+            })
+            .catch(error => {
+                console.error("Error submitting form:", error);
+                toast.error('Error submitting data');
+            });
     }
+
+
+    const fetchdistricts = async (geostateID) => {
+        try {
+            const response = await axios.get(`${Base_Url}/getdistrictcity/${geostateID}`);
+            setdistricts(response.data);
+        } catch (error) {
+            console.error("Error fetching disctricts:", error);
+        }
+    };
+
+    const fetchCity = async (area_id) => {
+        try {
+            const response = await axios.get(`${Base_Url}/getgeocities_p/${area_id}`);
+            setCity(response.data);
+        } catch (error) {
+            console.error("Error fetching City:", error);
+        }
+    };
+
+    const fetchPincodes = async (pin_id) => {
+        try {
+            const response = await axios.get(`${Base_Url}/citywise_pincode/${pin_id}`);
+            setPincode(response.data);
+        } catch (error) {
+            console.error("Error fetching City:", error);
+        }
+    };
 
     // Fix the onHandleChange function
     const onHandleChange = (e) => {
         const { name, value: inputValue } = e.target;
-        
+
         setValue(prevState => ({
             ...prevState,
             [name]: inputValue
@@ -258,20 +295,52 @@ async function getChildPartner(MasterId) {
         if (name === "master_service_partner") {
             getChildPartner(inputValue);
         }
+
+        if (name === "state") {
+            fetchdistricts(inputValue);
+        }
+
+        if (name === "area") {
+            fetchCity(inputValue);
+        }
+        if (name === "city") {
+            fetchPincodes(inputValue);
+        }
     };
 
-   
+
 
     const fetchComplaintDuplicate = async () => {
         try {
-          const response = await axios.get(
-            `${Base_Url}/getComplaintDuplicateRegisterPage/${DuplicateCustomerNumber}`
-          );
-          setDuplicate(response.data);
+            const response = await axios.get(
+                `${Base_Url}/getComplaintDuplicateRegisterPage/${DuplicateCustomerNumber}`
+            );
+            setDuplicate(response.data);
+            setLocation(response.data[0]);
         } catch (error) {
-          console.error("Error fetching complaint details:", error);
+            console.error("Error fetching complaint details:", error);
         }
-      };
+    };
+
+    const addnewticket = (product_id) =>{
+       setForm(true)
+        const data = {
+            customer_name: searchdata.customer_name,
+            contact_person: searchdata.contact_person,
+            email: searchdata.email,
+            mobile: searchdata.mobile,
+            cust_id: searchdata.id,
+            product_id: product_id
+        }
+
+        axios.post(`${Base_Url}/add_new_ticket` , data)
+        .then((res) =>{
+            setTicketid(res.data.id)
+        }).catch((err) =>{
+            console.log(err)
+        })
+    }
+
 
 
 
@@ -336,13 +405,13 @@ async function getChildPartner(MasterId) {
                                 <div className="tab-pane active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
                                     <table className="table table-striped">
                                         <tbody>
-
-                                            {ProductCustomer.map((item, index) => (
+                                        
+                                            {!form &&  ProductCustomer.map((item, index) => (
                                                 <tr key={index}>
                                                     <td><div>{item.product}</div></td>
                                                     <td>
                                                         <div className="text-right pb-2">
-                                                            <button onClick={() => setForm(true)} className="btn btn-sm btn-primary generateTicket">New Ticket</button>
+                                                            <button onClick={() => addnewticket(item.id)} className="btn btn-sm btn-primary generateTicket">New Ticket</button>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -359,43 +428,43 @@ async function getChildPartner(MasterId) {
                                 </li>
                             </ul>
 
-                                <div className="tab-content">
-                                    <div className="tab-pane active" id="home" role="tabpanel" aria-labelledby="home-tab">
-                                        <table className="table table-striped">
+                            <div className="tab-content">
+                                <div className="tab-pane active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                                    <table className="table table-striped">
                                         <tbody>
-                                                {duplicate.map((item, index) => (
-                                                    <tr key={index}>
-                                                        <td>
-                                                            <div style={{ fontSize: "14px"}}>{item.ticket_no}</div>
-                                                            <span style={{ fontSize: "14px"}}>{formatDate(item.ticket_date)}</span>
-                                                        </td>
-                                                        <td style={{ fontSize: "14px"}}>{item.ModelNumber}</td>
-                                                        <td>
-                                                            <div style={{ fontSize: "14px"}}>{item.call_status}</div>
-                                                            <span style={{ fontSize: "14px"}}><button
-                                                    className='btn'
-                                                    onClick={() => navigate(`/complaintview/${item.id}`)}
-                                                    title="View"
-                                                    style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                                                >
-                                                    <FaEye />
-                                                </button>view Info</span>
-                                                        </td>
-                                                    </tr>
-                                                ))}
+                                            {duplicate.map((item, index) => (
+                                                <tr key={index}>
+                                                    <td>
+                                                        <div style={{ fontSize: "14px" }}>{item.ticket_no}</div>
+                                                        <span style={{ fontSize: "14px" }}>{formatDate(item.ticket_date)}</span>
+                                                    </td>
+                                                    <td style={{ fontSize: "14px" }}>{item.ModelNumber}</td>
+                                                    <td>
+                                                        <div style={{ fontSize: "14px" }}>{item.call_status}</div>
+                                                        <span style={{ fontSize: "14px" }}><button
+                                                            className='btn'
+                                                            onClick={() => navigate(`/complaintview/${item.id}`)}
+                                                            title="View"
+                                                            style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                                                        >
+                                                            <FaEye />
+                                                        </button>view Info</span>
+                                                    </td>
+                                                </tr>
+                                            ))}
                                         </tbody>
 
-                                        </table>
-                                    </div>
+                                    </table>
                                 </div>
+                            </div>
 
                         </div>
 
                     </div> : <div className="card">
                         <div className="card-body">
-                             {/* Only show "No Result Found" if a search was performed and no results were found */}
-                                {hasSearched && searchdata.length === 0 && <p>No Result Found</p>}
-                                <button onClick={() => setForm(true)} className="btn btn-sm btn-primary">New Ticket</button>
+                            {/* Only show "No Result Found" if a search was performed and no results were found */}
+                            {hasSearched && searchdata.length === 0 && <p>No Result Found</p>}
+                            <button onClick={() => setForm(true)} className="btn btn-sm btn-primary">New Ticket</button>
                         </div>
                     </div>}
 
@@ -404,7 +473,7 @@ async function getChildPartner(MasterId) {
 
 
                 </div>
-                {form && <>
+                {form || Comp_id  && <>
                     <div className="col-6">
                         <div className="card" id="formInfo">
                             <div className="card-body">
@@ -440,29 +509,29 @@ async function getChildPartner(MasterId) {
                                         </div>
 
                                     </div>                                       {/* Add Purchase Date field */}
-                                        <div className="col-md-3">
-                                            <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Purchase Date</p>
-                                            <div className="mb-3">
-                                                <input
-                                                    type="date"
-                                                    name="purchase_date"
-                                                    onChange={onHandleChange}
-                                                    value={value.purchase_date}
-                                                    className="form-control"
-                                                />
-                                            </div>
+                                    <div className="col-md-3">
+                                        <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Purchase Date</p>
+                                        <div className="mb-3">
+                                            <input
+                                                type="date"
+                                                name="purchase_date"
+                                                onChange={onHandleChange}
+                                                value={value.purchase_date}
+                                                className="form-control"
+                                            />
                                         </div>
-                                     {/* Add Warranty Status field */}
-                                        <div className="col-md-3">
-                                            <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Warranty Status</p>
-                                            <div className="mb-3">
+                                    </div>
+                                    {/* Add Warranty Status field */}
+                                    <div className="col-md-3">
+                                        <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Warranty Status</p>
+                                        <div className="mb-3">
                                             <select className="form-control" onChange={onHandleChange} value={value.warrenty_status} name="warrenty_status">
                                                 <option value="">Select Option</option>
                                                 <option value="WARRANTY">IN WARRANTY</option>
                                                 <option value="OUT OF WARRANTY">OUT OF WARRANTY</option>
                                             </select>
-                                            </div>
                                         </div>
+                                    </div>
                                 </div>
 
                                 <div className="row">
@@ -515,7 +584,8 @@ async function getChildPartner(MasterId) {
                                         </div>
                                     </div>
 
-                                    <div className="col-md-3">
+
+                                   {!duplicate ? <>    <div className="col-md-3">
                                         <div className="mb-3">
                                             <label className="form-label">State</label>
                                             <select className="form-control" value={value.state} name="state" onChange={onHandleChange}>
@@ -529,6 +599,23 @@ async function getChildPartner(MasterId) {
                                             </select>
                                         </div>
                                     </div>
+
+
+                                    <div className="col-md-3">
+                                        <div className="mb-3">
+                                            <label className="form-label">Area</label>
+                                            <select className="form-control" onChange={onHandleChange} name="area" value={value.area}>
+                                                <option value="">Select Area</option>
+                                                {area.map((item) => {
+                                                    return (
+                                                        <option value={item.id} key={item.id}>{item.title}</option>
+                                                    );
+                                                })}
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    {/* city */}
                                     <div className="col-md-3">
                                         <div className="mb-3">
                                             <label className="form-label">City</label>
@@ -545,31 +632,43 @@ async function getChildPartner(MasterId) {
 
                                     <div className="col-md-3">
                                         <div className="mb-3">
-                                            <label className="form-label">Area</label>
-                                            <select className="form-control" onChange={onHandleChange} name="area" value={value.area}>
-                                                <option value="">Select Area</option>
-                                                {area.map((item) => {
-                                                    return (
-                                                        <option value={item.id} key={item.id}>{item.title}</option>
-                                                    );
-                                                })}
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div className="col-md-3">
-                                        <div className="mb-3">
                                             <label className="form-label">Pincode</label>
                                             <select className="form-control" value={value.pincode} name="pincode" onChange={onHandleChange}>
                                                 <option value="">Select Pincode</option>
                                                 {pincode.map((item) => {
                                                     return (
-                                                        <option value={item.id} key={item.id}>{item.title}</option>
+                                                        <option value={item.id} key={item.id}>{item.pincode}</option>
                                                     );
                                                 })}
                                             </select>
                                         </div>
+                                    </div></> : <>      <div className="col-md-3">
+                                        <div className="mb-3">
+                                            <label htmlFor="exampleFormControlInput1" className="form-label">State</label>
+                                            <input type="text" className="form-control" value={location.state} name="" onChange={onHandleChange} placeholder="" disabled/>
+                                        </div>
                                     </div>
+                                    <div className="col-md-3">
+                                        <div className="mb-3">
+                                            <label htmlFor="exampleFormControlInput1" className="form-label">City</label>
+                                            <input type="text" className="form-control" value={location.city} name="" onChange={onHandleChange} placeholder="" disabled/>
+                                        </div>
+                                    </div>
+                                    <div className="col-md-3">
+                                        <div className="mb-3">
+                                            <label htmlFor="exampleFormControlInput1" className="form-label">Area</label>
+                                            <input type="text" className="form-control" value={location.area} name="" onChange={onHandleChange} placeholder="" disabled/>
+                                        </div>
+                                    </div>
+                                    <div className="col-md-3">
+                                        <div className="mb-3">
+                                            <label htmlFor="exampleFormControlInput1" className="form-label">Pincode</label>
+                                            <input type="text" className="form-control" value={location.pincode} name="" onChange={onHandleChange} placeholder="" disabled/>
+                                        </div>
+                                    </div> </> }
+                                
+
+                              
 
 
                                     <div className="col-md-4">
@@ -589,9 +688,11 @@ async function getChildPartner(MasterId) {
                                             <label className="form-label">Ticket Type</label>
                                             <select className="form-control" onChange={onHandleChange} value={value.ticket_type} name="ticket_type">
                                                 <option value="">Select</option>
-                                                <option value="BREAKDOWN">BREAKDOWN</option>
-                                                <option value="INSTALLATION">INSTALLATION</option>
-                                                <option value="Technician">OTHERS</option>
+                                                <option value="B">BREAKDOWN</option>
+                                                <option value="D">Demo</option>
+                                                <option value="I">INSTALLATION</option>
+                                                <option value="M">PM / Ex Warrenty Scedulling</option>
+                                                <option value="V">Pre-Site Visit</option>
                                             </select>
                                         </div>
                                     </div>
@@ -647,43 +748,43 @@ async function getChildPartner(MasterId) {
 
                         <>
                             <div className="card mb-3" id="productInfo">
-                            <div className="card-body">
+                                <div className="card-body">
 
-                                <h4 className="pname">Master Service Partner</h4>
-                                <div className="mb-3">
-                                    <select
-                                        className="form-control"
-                                        name="master_service_partner"
-                                        value={value.master_service_partner}
-                                        onChange={onHandleChange}
-                                    >
-                                        <option value="">Select</option>
-                                        {MasterPartner.map((partner, index) => (
-                                        <option key={index} value={partner.id}>
-                                            {partner.title}
-                                        </option>
-                                        ))}
-                                    </select>
+                                    <h4 className="pname">Master Service Partner</h4>
+                                    <div className="mb-3">
+                                        <select
+                                            className="form-control"
+                                            name="master_service_partner"
+                                            value={value.master_service_partner}
+                                            onChange={onHandleChange}
+                                        >
+                                            <option value="">Select</option>
+                                            {MasterPartner.map((partner, index) => (
+                                                <option key={index} value={partner.id}>
+                                                    {partner.title}
+                                                </option>
+                                            ))}
+                                        </select>
                                     </div>
 
 
-                                <h4 className="pname">Child Service Partner</h4>
-                                <div className="mb-3">
-                                    <select
-                                        className="form-control"
-                                        name="child_service_partner"
-                                        value={value.child_service_partner}
-                                        onChange={onHandleChange}
-                                    >
-                                        <option value="">Select</option>
-                                        {ChildPartner.map((child, index) => (
-                                        <option key={index} value={child.title}>
-                                            {child.title}
-                                        </option>
-                                        ))}
-                                    </select>
+                                    <h4 className="pname">Child Service Partner</h4>
+                                    <div className="mb-3">
+                                        <select
+                                            className="form-control"
+                                            name="child_service_partner"
+                                            value={value.child_service_partner}
+                                            onChange={onHandleChange}
+                                        >
+                                            <option value="">Select</option>
+                                            {ChildPartner.map((child, index) => (
+                                                <option key={index} value={child.title}>
+                                                    {child.title}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
                                 </div>
-                            </div>
                             </div>
 
                             <div className="card mb-3" id="engineerInfo">
@@ -711,7 +812,7 @@ async function getChildPartner(MasterId) {
                                 <div className="card-body">
                                     <h4 className="pname">Additional Remarks</h4>
                                     <div className="mb-3">
-                                        <textarea 
+                                        <textarea
                                             className="form-control"
                                             name="additional_remarks"
                                             value={value.additional_remarks}
@@ -725,7 +826,7 @@ async function getChildPartner(MasterId) {
                                 <div className="card-body">
                                     <h4 className="pname">Specification</h4>
                                     <div className="mb-3">
-                                        <textarea 
+                                        <textarea
                                             className="form-control"
                                             name="specification"
                                             value={value.specification}

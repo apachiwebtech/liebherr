@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
 
@@ -8,6 +8,7 @@ export function Complaintlist(params) {
     const [Complaintdata, setComplaintdata] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
+
     const [formData, setFormData] = useState({
         title: '',
         cfranchise_id: '',
@@ -363,9 +364,9 @@ export function Complaintlist(params) {
                                         <td>{item.assigned_name}</td>
                                         <td>{item.call_status}</td>
                                         <td>
-                                        <button
+                                        <Link to={`/registercomaplaint/${item.customer_mobile}`}><button
                                                 className='btn'
-                                                onClick={() => edit(item.id)}
+                                    
                                                 disabled={isActionDisabled(item.call_status)}
                                                 title={isActionDisabled(item.call_status) ? "Cannot edit closed or cancelled complaints" : "Edit"}
                                                 style={{
@@ -377,7 +378,7 @@ export function Complaintlist(params) {
                                                 }}
                                             >
                                                 <FaPencilAlt />
-                                            </button>
+                                            </button></Link>
                                         </td>
                                         <td>
                                         <button

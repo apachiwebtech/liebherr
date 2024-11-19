@@ -704,6 +704,7 @@ app.get("/getdistrictcity/:geostateID", async (req, res) => {
     // Execute the query
     const result = await pool.request().query(sql);
 
+
     // Return the fetched geostates
     return res.json(result.recordset);
 
@@ -1180,6 +1181,24 @@ app.get("/getareas/:geostate_id", async (req, res) => {
 
     // Direct SQL query without parameter binding
     const sql = `SELECT * FROM awt_district WHERE geostate_id = ${geostate_id} AND deleted = 0`;
+    const result = await pool.request().query(sql);
+
+    return res.json(result.recordset); // Return only the recordset data
+  } catch (err) {
+    console.error(err); // Log the error for debugging
+    return res.status(500).json(err); // Return error response
+  }
+});
+// API to fetch pincodes based on selected areas (for the area dropdown)
+app.get("/citywise_pincode/:pin_id", async (req, res) => {
+  const { pin_id } = req.params;
+
+  try {
+    // Access the connection pool using poolPromise
+    const pool = await poolPromise;
+
+    // Direct SQL query without parameter binding
+    const sql = `SELECT * FROM awt_pincode WHERE area_id = ${pin_id} AND deleted = 0`;
     const result = await pool.request().query(sql);
 
     return res.json(result.recordset); // Return only the recordset data
@@ -3009,7 +3028,7 @@ app.post("/add_complaintt", async (req, res) => {
   let {
     complaint_date, customer_name, contact_person, email, mobile, address,
     state, city, area, pincode, mode_of_contact, ticket_type, cust_type,
-    warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks
+    warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks,ticket_id
   } = req.body;
 
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
@@ -3046,7 +3065,7 @@ app.post("/add_complaintt", async (req, res) => {
     // Insert into awt_customerlocation using insertedCustomerId as customer_id
     const customerLocationSQL = `
       INSERT INTO awt_customerlocation (
-        customer_id, geostate_id, geocity_id, area_id, pincode_id, 
+        customer_id, geostate_id, geocity_id, district_id, pincode_id, 
         created_date, created_by, ccperson, ccnumber, address
       )
       VALUES (
@@ -3095,27 +3114,67 @@ app.post("/add_complaintt", async (req, res) => {
 
     const count = checkResult.recordset[0].count + 1;
     const formatDate = `${(new Date().getMonth() + 1).toString().padStart(2, '0')}${new Date().getDate().toString().padStart(2, '0')}`;
-    const ticket_no = `IG${formatDate}-${count.toString().padStart(4, "0")}`;
+    const ticket_no = `${ticket_type}G${formatDate}-${count.toString().padStart(4, "0")}`;
 
     // Insert into complaint_ticket
+    // const complaintSQL = `
+    //   INSERT INTO complaint_ticket (
+    //     ticket_no, ticket_date, customer_name, customer_mobile, customer_email, address, 
+    //     state, city, area, pincode, customer_id, ModelNumber, ticket_type, call_type, 
+    //     call_status, warranty_status, invoice_date, call_charges, mode_of_contact, 
+    //     contact_person, assigned_to, created_date, created_by, engineer_id, purchase_date, serial_no, child_service_partner, sevice_partner,specification
+    //   ) 
+    //   VALUES (
+    //     @ticket_no, @complaint_date, @customer_name, @mobile, @email, @address, 
+    //     @state, @city, @area, @pincode, @customer_id, @model, @ticket_type, @cust_type, 
+    //     'Pending', @warrenty_status, @invoice_date, @call_charge, @mode_of_contact, 
+    //     @contact_person, 1, @formattedDate, @created_by, 1, @purchase_date, @serial, @child_service_partner,@master_service_partner,@specification
+    //   )`;
+
     const complaintSQL = `
-      INSERT INTO complaint_ticket (
-        ticket_no, ticket_date, customer_name, customer_mobile, customer_email, address, 
-        state, city, area, pincode, customer_id, ModelNumber, ticket_type, call_type, 
-        call_status, warranty_status, invoice_date, call_charges, mode_of_contact, 
-        contact_person, assigned_to, created_date, created_by, engineer_id, purchase_date, serial_no, child_service_partner, sevice_partner,specification
-      ) 
-      VALUES (
-        @ticket_no, @complaint_date, @customer_name, @mobile, @email, @address, 
-        @state, @city, @area, @pincode, @customer_id, @model, @ticket_type, @cust_type, 
-        'Pending', @warrenty_status, @invoice_date, @call_charge, @mode_of_contact, 
-        @contact_person, 1, @formattedDate, @created_by, 1, @purchase_date, @serial, @child_service_partner,@master_service_partner,@specification
-      )`;
+  UPDATE complaint_ticket
+  SET
+    ticket_no = @ticket_no,
+    ticket_date = @complaint_date,
+    customer_name = @customer_name,
+    customer_mobile = @mobile,
+    customer_email = @email,
+    address = @address,
+    state = @state,
+    city = @city,
+    area = @area,
+    pincode = @pincode,
+    customer_id = @customer_id,
+    ModelNumber = @model,
+    ticket_type = @ticket_type,
+    call_type = @cust_type,
+    call_status = 'Pending',
+    warranty_status = @warranty_status,
+    invoice_date = @invoice_date,
+    call_charges = @call_charge,
+    mode_of_contact = @mode_of_contact,
+    contact_person = @contact_person,
+    assigned_to = 1,
+    created_date = @formattedDate,
+    created_by = @created_by,
+    engineer_id = 1,
+    purchase_date = @purchase_date,
+    serial_no = @serial,
+    child_service_partner = @child_service_partner,
+    sevice_partner = @master_service_partner,
+    specification = @specification
+  WHERE
+    id = @ticket_id
+`;
+
+    console.log(complaintSQL,"$$")
+    console.log(warrenty_status,"$$")
 
     console.log("Executing complaint SQL:", complaintSQL);  // Debugging log
 
     await pool.request()
       .input('ticket_no', ticket_no)
+      .input('ticket_id', ticket_id)
       .input('complaint_date', complaint_date)
       .input('customer_name', customer_name)
       .input('mobile', mobile)
@@ -3130,7 +3189,7 @@ app.post("/add_complaintt", async (req, res) => {
       .input('model', model)
       .input('ticket_type', ticket_type)
       .input('cust_type', cust_type)
-      .input('warrenty_status', warrenty_status)
+      .input("warranty_status", sql.NVarChar, warrenty_status || "WARRENTY") 
       .input('invoice_date', invoice_date)
       .input('call_charge', call_charge)
       .input('mode_of_contact', mode_of_contact)
@@ -5704,6 +5763,81 @@ app.post("/ticketFormData", async (req, res) => {
     return res.status(500).json({ error: "An error occurred while updating the ticket" });
   }
 });
+
+
+app.post("/add_new_ticket", async (req, res) => {
+  const {
+    customer_name,
+    contact_person,
+    email,
+    mobile,
+    cust_id,
+    product_id,
+    address,
+    created_by
+  } = req.body;
+
+  const formattedDate = new Date().toISOString().slice(0, 19).replace("T", " ");
+
+  try {
+    const pool = await poolPromise;
+
+    // Fetch product details if required
+    const productQuery = `
+      SELECT item_description 
+      FROM product_master 
+      WHERE id = @product_id
+    `;
+    const productResult = await pool
+      .request()
+      .input("product_id", sql.Int, product_id)
+      .query(productQuery);
+
+    console.log(productResult, "###")
+
+    const model = productResult.recordset[0].item_description;
+
+    // Insert complaint ticket and return the inserted ID
+    const complaintSQL = `
+ INSERT INTO complaint_ticket (
+   customer_name, customer_mobile, customer_email, address, 
+   customer_id, ModelNumber, assigned_to, created_date, created_by
+ ) 
+ OUTPUT INSERTED.id
+ VALUES (
+   @customer_name, @mobile, @email, @address, 
+   @customer_id, @model, 1, @formattedDate, @created_by
+ )
+`;
+
+    const result = await pool
+      .request()
+      .input("customer_name", sql.NVarChar, customer_name)
+      .input("mobile", sql.NVarChar, mobile)
+      .input("email", sql.NVarChar, email)
+      .input("address", sql.NVarChar, address)
+      .input("customer_id", sql.Int, cust_id)
+      .input("model", sql.NVarChar, model)
+      .input("formattedDate", sql.DateTime, formattedDate)
+      .input("created_by", sql.Int, created_by)
+      .query(complaintSQL);
+
+    const insertedId = result.recordset[0].id;
+
+    console.log(insertedId)
+
+
+    return res
+      .status(200)
+      .json({ message: "Ticket Form data added successfully!" , id: insertedId });
+  } catch (err) {
+    console.error(err);
+    return res
+      .status(500)
+      .json({ error: "An error occurred while adding the ticket." });
+  }
+});
+
 
 app.post("/updatestatus", async (req, res) => {
   const { dataId } = req.body;
