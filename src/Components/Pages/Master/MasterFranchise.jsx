@@ -849,8 +849,9 @@ const MasterFranchise = () => {
                       )}
                       {/* Show duplicate error */}
                     </div>
+                    </div>
 
-
+                      <div className="row">
                     <div className="col-6">
                       <label htmlFor="BankAddressInput" className="input-field">
                         Bank Address

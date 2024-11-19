@@ -71,6 +71,7 @@ import { Complaintreport } from './Components/Pages/Reports/Complaintreport';
 import Claimreporttabs from './Components/Pages/Reports/Claimreporttabs';
 import { Claimreport } from './Components/Pages/Reports/Claimreport';
 import { MSP_Login } from './Components/Authenticate/MSP_Login';
+import { Franchisemasterlist } from './Components/Pages/Master/Franchisemasterlist';
 
 
 
@@ -320,6 +321,10 @@ const Router = createBrowserRouter([
         path: "/franchisemaster",
         element: <Franchisemaster />,
 
+      },
+      {
+        path:"/franchisemasterlist",
+        element: <Franchisemasterlist/>
       },
       {
         path: "/engineermaster",

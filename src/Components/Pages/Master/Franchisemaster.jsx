@@ -63,6 +63,14 @@ function MasterFranchiseTabs() {
                    FRANCHISE MASTER
                   </button>
                 </li></Link>
+                <Link to={`/Franchisemasterlist`}><li className="nav-item">
+                  <button
+                    className={`nav-link ${activeTab === '/Franchisemasterlist' ? 'active' : ' onClick={() => setActiveTab("Franchisemasterlist")}'}`}
+                   
+                  >
+                   FRANCHISE MASTER LIST
+                  </button>
+                </li></Link>
                 
                 <Link to={`/Childfranchisemaster`}><li className="nav-item">
                   <button
