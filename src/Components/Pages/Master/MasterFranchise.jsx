@@ -376,7 +376,7 @@ const MasterFranchise = () => {
                       )}
                       {/* Show duplicate error */}
                     </div>
-                    {/* <div className="col-md-3 mb-3">
+                     <div className="col-md-3 mb-3">
                       <label htmlFor="country" className="form-label">
                         Country
                       </label>
@@ -427,7 +427,7 @@ const MasterFranchise = () => {
                       )}
                     </div>
 
-                    {/* Geo State Dropdown 
+                    {/* Geo State Dropdown */} 
                     <div className="col-md-3 mb-3">
                       <label htmlFor="geostate" className="form-label">
                         Geo State
@@ -454,7 +454,7 @@ const MasterFranchise = () => {
                       )}
                     </div>
 
-                    {/* Geo District Dropdown *
+                    {/* Geo District Dropdown **/}
                     <div className="col-md-3 mb-3">
                       <label htmlFor="area" className="form-label">
                         District
@@ -479,7 +479,7 @@ const MasterFranchise = () => {
                       )}
                     </div>
 
-                    {/* Geo City Dropdown *
+                    {/* Geo City Dropdown */}
                     <div className="col-md-3 mb-3">
                       <label htmlFor="geocity" className="form-label">
                         Geo City
@@ -507,7 +507,7 @@ const MasterFranchise = () => {
                     </div>
 
 
-                    {/* Pincode Dropdown *
+                    {/* Pincode Dropdown */}
                     <div className="col-md-3 mb-3">
                       <label htmlFor="area" className="form-label">
                         Pincode
@@ -530,7 +530,7 @@ const MasterFranchise = () => {
                       {errors.pincode_id && (
                         <small className="text-danger">{errors.pincode_id}</small>
                       )}
-                    </div> */}
+                    </div>x
 
                     <div className="col-12">
                       <label

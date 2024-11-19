@@ -3992,7 +3992,7 @@ app.post("/postfranchisedata", async (req, res) => {
 });
 
 app.put("/putfranchisedata", async (req, res) => {
-  const { title, id, contact_person, email, mobile_no, password, address, country_id, region_id, geostate_id, area_id, geocity_id, pincode_id } = req.body;
+  const { title, id, contact_person, email, mobile_no, password, address, } = req.body;
 
 
   try {
@@ -4006,9 +4006,8 @@ app.put("/putfranchisedata", async (req, res) => {
     } else {
       // Update the engineer record if no duplicates are found
       const updateSql = `UPDATE awt_franchisemaster
-                         SET title = '${title}', mobile_no = '${mobile_no}', email = '${email}', password = '${password}',
-                         address = '${address}', contact_person = '${contact_person}',country_id = '${country_id}',region_id = '${region_id}',
-                         geostate_id = '${geostate_id}', area_id = '${area_id}', geocity_id = '${geocity_id}',pincode_id = '${pincode_id}' 
+                         SET title = '${title}', mobile_no = '${mobile_no}', email = '${email}', password = '${newpassword}',
+                         address = '${address}', contact_person = '${contact_person}', 
                          WHERE id = '${id}'`;
 
       await pool.request().query(updateSql);
