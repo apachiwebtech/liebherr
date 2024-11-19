@@ -6595,15 +6595,23 @@ app.get("/getcomplainlist", async (req, res) => {
     if (status === 'Closed' || status === 'Cancelled') {
       sql += ` AND c.call_status = '${status}'`;
     } else if (status === '') {
-      sql += ` AND c.call_status  IN ('Closed', 'Cancelled')`;
+      // sql += ` AND c.call_status  IN ('Closed', 'Cancelled')`;
+      sql += ``;
     } else if (status) {
       sql += ` AND c.call_status = '${status}'`;
     } else {
-      sql += ` AND c.call_status ${nots} IN ('Closed', 'Cancelled')`;
+      // sql += ` AND c.call_status ${nots} IN ('Closed', 'Cancelled')`;
+      sql += ``;
     }
+
+    if(status == undefined){
+      sql += ``
+     }
 
 
     sql += " ORDER BY c.id DESC";
+
+
 
     console.log('SQL Query:', sql); // Debug log
     const result = await pool.request().query(sql);
