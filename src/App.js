@@ -351,6 +351,11 @@ const Router = createBrowserRouter([
 
       },
       {
+        path: "/Childfranchisemaster/:childid",
+        element: <Childfranchisemaster />,
+
+      },
+      {
         path: "/registercomaplaint",
         element: <Registercomplaint />,
 

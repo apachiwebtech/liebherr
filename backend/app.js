@@ -4503,6 +4503,34 @@ AND m.area_id = d.id AND m.geocity_id = ct.id AND m.pfranchise_id = p.id AND m.d
 });
 
 
+//request Child Franchise populate data
+
+app.get("/getchildfranchisepopulate/:childid", async (req, res) => {
+  const { childid } = req.params;
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    // SQL query to fetch data from the master list, customize based on your needs
+    const sql = `
+     SELECT m.*,p.title as parentfranchisetitle,c.title as country_name, r.title as region_name, s. title as state_name, d.title as district_name,ct. title city_name from  awt_childfranchisemaster as m,
+awt_country as c,awt_region as r,awt_geostate as s,awt_district as d,awt_geocity as ct,awt_franchisemaster as p WHERE m.country_id = c.id AND m.region_id = r.id AND m.geostate_id = s.id 
+AND m.area_id = d.id AND m.geocity_id = ct.id AND m.pfranchise_id = p.id AND m.deleted = 0 and m.id = ${childid}
+    `;
+    // Execute the SQL query
+    const result = await pool.request().query(sql);
+
+    // Return the result as JSON
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
+
+//End of Request Child Franchise populate data
+
 app.get("/requestchildfranchise/:id", async (req, res) => {
   const { id } = req.params;
 

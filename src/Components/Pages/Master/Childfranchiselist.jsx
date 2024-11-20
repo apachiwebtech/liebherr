@@ -183,7 +183,7 @@ export function ChildFranchiselist(params) {
                                                 <td >{item.district_name}</td>
 
                                                 <td >
-                                                <Link to={`/registercomaplaint/${item.ticket_no}`}><button
+                                                <Link to={`/Childfranchisemaster/${item.id}`}><button
                                                 className='btn'
                                                 style={{
                                                     backgroundColor: 'transparent',

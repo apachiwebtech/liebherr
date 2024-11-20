@@ -3,7 +3,9 @@ import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
 import Franchisemaster from '../Master/Franchisemaster';
+import { useParams } from "react-router-dom";
 const Childfranchisemaster = () => {
+  const { childid } = useParams();
 
   const [Parentfranchise, setParentfranchise] = useState([]);
   const [errors, setErrors] = useState({});
@@ -52,7 +54,24 @@ const Childfranchisemaster = () => {
     with_liebherr: ""
   });
 
+
+
+  //Fetch Child Franchise Deatils for populate
   
+ 
+  const fetchchildfranchisepopulate = async (childid) => {
+    try {
+      
+      const response = await axios.get(`${Base_Url}/getchildfranchisepopulate/${childid}`);
+
+      setFormData(response.data[0]);
+    } catch (error) {
+      console.error("Error fetching Parentfranchise:", error);
+    }
+  };
+
+  // End Fetch Child Franchise Deatils for populate
+
   const fetchParentfranchise = async () => {
     try {
       const response = await axios.get(`${Base_Url}/getparentfranchise`);
@@ -147,6 +166,9 @@ const Childfranchisemaster = () => {
     fetchcountries();
     fetchUsers();
     fetchParentfranchise();
+    if(childid != 0){
+      fetchchildfranchisepopulate(childid);
+    }
   }, []);
 
   const handleChange = (e) => {
@@ -255,6 +277,30 @@ const Childfranchisemaster = () => {
               setFormData({
                 title: "",
                 pfranchise_id: "",
+                contact_person: "",
+                email: "",
+                mobile_no: "",
+                password: "",
+                country_id: "",
+                region_id: "",
+                state: "",
+                area: "",
+                city: "",
+                pincode_id: "",
+                address: "",
+                licare_code: "",
+                partner_name: "",
+                website: "",
+                gst_number: "",
+                pan_number: "",
+                bank_name: "",
+                bank_account_number: "",
+                bank_ifsc_code: "",
+                bank_address: "",
+                last_working_date: "",
+                contract_activation_date: "",
+                contract_expiration_date: "",
+                with_liebherr: ""
               });
               fetchUsers();
             })
