@@ -4133,6 +4133,29 @@ app.post("/addEngineer", async (req, res) => {
 
 // End Engineer Master
 
+app.get("/getmasterlist", async (req, res) => {
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    // SQL query to fetch data from the master list, customize based on your needs
+    const sql = `
+    SELECT m.*,c.title as country_name, r.title as region_name, s. title as state_name, d.title as district_name,ct. title city_name from  awt_franchisemaster as m,
+awt_country as c,awt_region as r,awt_geostate as s,awt_district as d,awt_geocity as ct WHERE m.country_id = c.id AND m.region_id = r.id AND m.geostate_id = s.id 
+AND m.area_id = d.id AND m.geocity_id = ct.id AND m.deleted = 0
+    `;
+    // Execute the SQL query
+    const result = await pool.request().query(sql);
+
+    // Return the result as JSON
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
+
+
 // Start Franchise Master - Parent
 app.get("/getfranchisedata", async (req, res) => {
   try {

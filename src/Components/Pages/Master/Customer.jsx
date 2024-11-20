@@ -42,6 +42,7 @@ const Customer = () => {
   useEffect(() => {
     
       fetchCustomerData();
+      edit();
 
     
   }, []);

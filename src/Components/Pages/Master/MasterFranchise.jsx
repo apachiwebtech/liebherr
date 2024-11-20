@@ -456,7 +456,7 @@ const MasterFranchise = () => {
                       )}
                       {/* Show duplicate error */}
                     </div>
-                    {/* <div className="col-3">
+                     <div className="col-3">
                       <label htmlFor="PartnerNameInput" className="input-field">
                         Partner Name
                       </label>
@@ -475,8 +475,8 @@ const MasterFranchise = () => {
                       {duplicateError && (
                         <small className="text-danger">{duplicateError}</small>
                       )}
-                      {/* Show duplicate error 
-                    </div> */}
+                      {/* Show duplicate error  */}
+                    </div> 
 
                     <div className="col-3">
                       <label

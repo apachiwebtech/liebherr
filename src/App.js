@@ -337,6 +337,10 @@ const Router = createBrowserRouter([
 
       },
       {
+        path: "/masterfranchise/:id",
+        element: <MasterFranchise />,
+     },
+      {
         path: "/Childfranchisemaster",
         element: <Childfranchisemaster />,
 
@@ -379,9 +383,14 @@ const Router = createBrowserRouter([
         element: <AddProduct />,
       },
       {
-        path: "/addengineer/:engineerid",
+        path: "/addengineer/:engineer_id",
         element: <EngineerMaster />,
       },
+      {
+        path: "/addmaster/:master_id",
+        element: <MasterFranchise />,
+      },
+     
       {
         path: "/engineer",
         element: <Engineer />,

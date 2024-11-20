@@ -140,17 +140,22 @@ export function Franchisemasterlist(params) {
 
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
                             <div className='p-1 text-right'>
-                                <Link to={`/addengineer/requestengineer/`}><button className='btn btn-primary'>Add  Master Franchise </button></Link>
+                                <Link to={`/addmaster/masterid`}><button className='btn btn-primary'>Add  Master Franchise </button></Link>
                             </div>
                             <table className="table">
                                 <thead>
-                                    <tr>
+                                     <tr>
                                         <th width="3%">#</th>
-                                        <th width="7%">Name</th>
+                                        <th width="2%">Name</th>
                                         <th width="8%">Email</th>
-                                        <th width="20%">Mobile Number</th>
+                                        <th width="8%">Mobile Number</th>
                                         <th width="10%">Licare Code</th>
-                                        <th width="5%">Edit</th>                                        <th width="5%">Status</th>
+                                        <th width="8%">Partner Name</th>
+                                        <th width="8%">Country</th>
+                                        <th width="8%">Region</th>
+                                        <th width="8%">State</th>
+                                        <th width="8%">District</th>
+                                        <th width="5%">Edit</th>                                       
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -162,10 +167,15 @@ export function Franchisemasterlist(params) {
                                                 <td >{item.title}</td>
                                                 <td >{item.email}</td>
                                                 <td >{item.mobile_no}</td>
-                                                <td >{item.licare_code}</td>
+                                                <td >{item.licarecode}</td>
+                                                <td >{item.partner_name}</td>
+                                                <td >{item.country_name}</td>
+                                                <td >{item.region_name}</td>
+                                                <td >{item.state_name}</td>
+                                                <td >{item.district_name}</td>
 
                                                 <td >
-                                                    <Link to={`/requestengineer/${item.id}`}> <button
+                                                    <Link to={`/addmaster/${item.id}`}> <button
                                                         className='btn'
                                                         onClick={() => {
                                                             // alert(item.id)
@@ -189,7 +199,7 @@ export function Franchisemasterlist(params) {
                                                         <FaEye />
                                                     </button>
                                                 </td> */}
-                                                <td style={{ padding: "10px" }}>
+                                                {/* <td style={{ padding: "10px" }}>
                                                     <label class="switch">
                                                         <input
                                                             type="checkbox"
@@ -203,7 +213,7 @@ export function Franchisemasterlist(params) {
                                                         <span class="slider round"></span>
                                                     </label>
 
-                                                </td>
+                                                </td> */}
                                             </tr>
                                         )
                                     })}
