@@ -175,12 +175,8 @@ export function Franchisemasterlist(params) {
                                                 <td >{item.district_name}</td>
 
                                                 <td >
-                                                    <Link to={`/addmaster/${item.id}`}> <button
+                                                    <Link to={`/Masterfranchise/${item.id}`}> <button
                                                         className='btn'
-                                                        onClick={() => {
-                                                            // alert(item.id)
-                                                            edit(item.id)
-                                                        }}
                                                         title="Edit"
                                                         style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
                                                     >

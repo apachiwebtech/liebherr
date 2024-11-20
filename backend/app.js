@@ -3373,12 +3373,20 @@ app.post("/update_complaint", async (req, res) => {
 
 
 //Master Service Partner
-app.get("/getmasterpartner", async (req, res) => {
+app.get("/getmasterlist/:masterid", async (req, res) => {
+  const { masterid } = req.params;
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
-    const result = await pool.request().query("SELECT * FROM awt_franchisemaster WHERE deleted = 0");
-    return res.json(result.recordset);
+    const sql=`SELECT * FROM awt_franchisemaster WHERE id = ${masterid} deleted = 0`;
+    const result = await pool.request().query(sql);
+   
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "Master not found" });
+    }
+
+    // Return the first result
+    return res.json(result.recordset[0]);
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'An error occurred while fetching data' });

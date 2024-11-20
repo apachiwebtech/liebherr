@@ -4,8 +4,9 @@ import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
 import md5 from "js-md5";
+import { useParams } from "react-router-dom";
 import Franchisemaster from '../Master/Franchisemaster';
-const MasterFranchise = () => {
+const MasterFranchise = (params) => {
   // Step 1: Add this state to track errors
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
@@ -22,7 +23,7 @@ const MasterFranchise = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [duplicateError, setDuplicateError] = useState(""); // State to track duplicate error
-
+  const {masterid} = useParams();
   const [formData, setFormData] = useState({
     title: "",
     password: "",
@@ -129,9 +130,23 @@ const MasterFranchise = () => {
     }
   };
 
+  const fetchmasterlist = async (masterid) => {
+    try {
+      const response = await axios.get(
+        `${Base_Url}/getmasterlist/${masterid}`
+      );
+      console.log(response.data);
+      setFormData(response.data);    
+    
+    } catch (error) {
+      console.error("Error fetching master data:", error);
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
     fetchcountries();
+    fetchmasterlist();
 
 
 
