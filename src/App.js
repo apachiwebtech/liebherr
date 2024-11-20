@@ -42,6 +42,7 @@ import Area from './Components/Pages/Master/Area';
 import ProMaster from './Components/Pages/Master/ProMaster';
 import { Products } from './Components/Pages/Master/Products';
 import Franchisemaster from './Components/Pages/Master/Franchisemaster';
+import { ChildFranchiselist } from './Components/Pages/Master/Childfranchiselist';
 import EngineerMaster from './Components/Pages/Master/EngineerMaster';
 import Channelpartnertabs from './Components/Pages/Master/Channelpartnertabs';
 import Complainttabs from './Components/Pages/Master/Complainttabs';
@@ -323,13 +324,17 @@ const Router = createBrowserRouter([
 
       },
       {
-        path:"/franchisemasterlist",
-        element: <Franchisemasterlist/>
+        path:"/childFranchiselist",
+        element: <ChildFranchiselist/>
       },
       {
         path: "/engineermaster",
         element: <EngineerMaster />,
 
+      },
+      {
+        path:"/franchisemasterlist",
+        element: <Franchisemasterlist/>
       },
       {
         path: "/MasterFranchise",

@@ -144,6 +144,7 @@ const Childfranchisemaster = () => {
     }
   };
   useEffect(() => {
+    fetchcountries();
     fetchUsers();
     fetchParentfranchise();
   }, []);

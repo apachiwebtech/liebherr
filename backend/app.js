@@ -4477,16 +4477,20 @@ app.get("/getchildFranchiseDetails", async (req, res) => {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
 
-    // Directly inject the query string without parameters
-    const sql = `SELECT r.*, m.title as totle FROM awt_childfranchisemaster as r,awt_franchisemaster as m where r.pfranchise_id = m.id And r.deleted = 0`;
-
+    // SQL query to fetch data from the master list, customize based on your needs
+    const sql = `
+     SELECT m.*,p.title as parentfranchisetitle,c.title as country_name, r.title as region_name, s. title as state_name, d.title as district_name,ct. title city_name from  awt_childfranchisemaster as m,
+awt_country as c,awt_region as r,awt_geostate as s,awt_district as d,awt_geocity as ct,awt_franchisemaster as p WHERE m.country_id = c.id AND m.region_id = r.id AND m.geostate_id = s.id 
+AND m.area_id = d.id AND m.geocity_id = ct.id AND m.pfranchise_id = p.id AND m.deleted = 0
+    `;
     // Execute the SQL query
     const result = await pool.request().query(sql);
 
+    // Return the result as JSON
     return res.json(result.recordset);
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: "Error fetching child franchise data" });
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
   }
 });
 
@@ -4554,49 +4558,178 @@ app.get("/requestchildfranchise/:id", async (req, res) => {
 // });
 
 app.post("/postchildfranchise", async (req, res) => {
-  const { title, pfranchise_id, address, area, city, contact_person, country_id, email, mobile_no,password , pincode_id, region_id, state, } = req.body;
+  const {
+    address, area, bank_account_number, bank_address, bank_ifsc_code, bank_name,
+    city, contact_person, contract_activation_date, contract_expiration_date,
+    country_id, email, gst_number, last_working_date, licare_code, mobile_no,
+    pan_number, partner_name, password, pfranchise_id, pincode_id, region_id,
+    state, title, website, with_liebherr
+  } = req.body;
 
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
 
-    // Check if the title already exists and is not deleted
-    const checkDuplicateSql = `SELECT * FROM awt_childfranchisemaster WHERE title = '${title}' AND pfranchise_id = '${pfranchise_id}' AND deleted = 0`;
-    const duplicateResult = await pool.request().query(checkDuplicateSql);
+    // Check if the data already exists and is not deleted
+    const checkDuplicateResult = await pool.request()
+      .input('pfranchise_id', sql.Int, pfranchise_id)
+      .input('title', sql.VarChar, title)
+      .input('licare_code', sql.VarChar, licare_code)
+      .input('mobile_no', sql.VarChar, mobile_no)
+      .input('pan_number', sql.VarChar, pan_number)
+      .query(`
+        SELECT * FROM awt_childfranchisemaster 
+        WHERE (title = @title OR licare_code = @licare_code OR mobile_no = @mobile_no OR panno = @pan_number)
+          AND pfranchise_id = @pfranchise_id
+          AND deleted = 0
+      `);
 
-    if (duplicateResult.recordset.length > 0) {
+
+    if (checkDuplicateResult.recordset.length > 0) {
       return res.status(409).json({
         message: "Duplicate entry, Child Franchise Master already exists!",
       });
     }
 
-    // Check if the title exists and is soft-deleted
-    const checkSoftDeletedSql = `SELECT * FROM awt_childfranchisemaster WHERE title = '${title}' AND pfranchise_id = '${pfranchise_id}' AND deleted = 1`;
-    const softDeletedResult = await pool.request().query(checkSoftDeletedSql);
+    // Check if the data exists in a soft-deleted state
 
-    if (softDeletedResult.recordset.length > 0) {
-      const restoreSoftDeletedSql = `UPDATE awt_childfranchisemaster SET deleted = 0 WHERE title = '${title}'`;
-      await pool.request().query(restoreSoftDeletedSql);
+  
+
+  
+    const checkSoftDeletedResult = await pool.request()
+      .input('pfranchise_id', sql.Int, pfranchise_id)
+      .input('title', sql.VarChar, title)
+      .input('licare_code', sql.VarChar, licare_code)
+      .input('mobile_no', sql.VarChar, mobile_no)
+      .input('pan_number', sql.VarChar, pan_number)
+      .query(`
+        SELECT * FROM awt_childfranchisemaster 
+        WHERE (title = @title OR licare_code = @licare_code OR mobile_no = @mobile_no OR panno = @pan_number)
+          AND pfranchise_id = @pfranchise_id
+          AND deleted = 1
+      `);
+
+
+
+    if (checkSoftDeletedResult.recordset.length > 0) {
+      // Restore the soft-deleted record with updated data
+      await pool.request()
+        .input('title', sql.VarChar, title)
+        .input('pfranchise_id', sql.Int, pfranchise_id)
+        .input('licare_code', sql.VarChar, licare_code)
+        .input('partner_name', sql.VarChar, partner_name)
+        .input('contact_person', sql.VarChar, contact_person)
+        .input('email', sql.VarChar, email)
+        .input('mobile_no', sql.VarChar, mobile_no)
+        .input('password', sql.VarChar, password)
+        .input('address', sql.VarChar, address)
+        .input('country_id', sql.Int, country_id)
+        .input('region_id', sql.Int, region_id)
+        .input('state', sql.VarChar, state)
+        .input('area', sql.VarChar, area)
+        .input('city', sql.VarChar, city)
+        .input('pincode_id', sql.Int, pincode_id)
+        .input('website', sql.VarChar, website)
+        .input('gst_number', sql.VarChar, gst_number)
+        .input('pan_number', sql.VarChar, pan_number)
+        .input('bank_name', sql.VarChar, bank_name)
+        .input('bank_account_number', sql.VarChar, bank_account_number)
+        .input('bank_ifsc_code', sql.VarChar, bank_ifsc_code)
+        .input('bank_address', sql.VarChar, bank_address)
+        .input('with_liebherr', sql.Bit, with_liebherr)
+        .input('last_working_date', sql.DateTime, last_working_date)
+        .input('contract_activation_date', sql.DateTime, contract_activation_date)
+        .input('contract_expiration_date', sql.DateTime, contract_expiration_date)
+        .query(`
+          UPDATE awt_childfranchisemaster 
+          SET 
+            title = @title,
+            licare_code = @licare_code,
+            partner_name = @partner_name,
+            contact_person = @contact_person,
+            email = @email,
+            mobile_no = @mobile_no,
+            password = @password,
+            address = @address,
+            country_id = @country_id,
+            region_id = @region_id,
+            geostate_id = @state,
+            area_id = @area,
+            geocity_id = @city,
+            pincode_id = @pincode_id,
+            webste = @website,
+            gstno = @gst_number,
+            panno = @pan_number,
+            bankname = @bank_name,
+            bankacc = @bank_account_number,
+            bankifsc = @bank_ifsc_code,
+            bankaddress = @bank_address,
+            withliebher = @with_liebherr,
+            lastworkinddate = @last_working_date,
+            contractacti = @contract_activation_date,
+            contractexpir = @contract_expiration_date,
+            deleted = 0
+          WHERE title = @title AND pfranchise_id = @pfranchise_id
+        `);
 
       return res.json({
-        message: "Soft-deleted Child Franchise Master restored successfully!",
+        message: "Soft-deleted Child Franchise Master restored successfully with updated data!",
       });
     }
 
+
     // Insert the new child franchise if no duplicates or soft-deleted records found
-    const insertSql = `INSERT INTO awt_childfranchisemaster (title, pfranchise_id) VALUES ('${title}', '${pfranchise_id}')`;
-    await pool.request().query(insertSql);
+   const insert = await pool.request()
+      .input('title', sql.VarChar, title)
+      .input('pfranchise_id', sql.Int, pfranchise_id)
+      .input('licare_code', sql.VarChar, licare_code)
+      .input('partner_name', sql.VarChar, partner_name)
+      .input('contact_person', sql.VarChar, contact_person)
+      .input('email', sql.VarChar, email)
+      .input('mobile_no', sql.VarChar, mobile_no)
+      .input('password', sql.VarChar, password)
+      .input('address', sql.VarChar, address)
+      .input('country_id', sql.Int, country_id)
+      .input('region_id', sql.Int, region_id)
+      .input('state', sql.VarChar, state)
+      .input('area', sql.VarChar, area)
+      .input('city', sql.VarChar, city)
+      .input('pincode_id', sql.Int, pincode_id)
+      .input('website', sql.VarChar, website)
+      .input('gst_number', sql.VarChar, gst_number)
+      .input('pan_number', sql.VarChar, pan_number)
+      .input('bank_name', sql.VarChar, bank_name)
+      .input('bank_account_number', sql.VarChar, bank_account_number)
+      .input('bank_ifsc_code', sql.VarChar, bank_ifsc_code)
+      .input('bank_address', sql.VarChar, bank_address)
+      .input('with_liebherr', sql.Bit, with_liebherr)
+      .input('last_working_date', sql.DateTime, last_working_date)
+      .input('contract_activation_date', sql.DateTime, contract_activation_date)
+      .input('contract_expiration_date', sql.DateTime, contract_expiration_date)
+      .query(`
+        INSERT INTO awt_childfranchisemaster 
+        (title, pfranchise_id, licare_code, partner_name, contact_person, email, mobile_no, password, address, 
+         country_id, region_id, geostate_id, area_id, geocity_id, pincode_id, webste, gstno, panno, bankname, 
+         bankacc, bankifsc, bankaddress, withliebher, lastworkinddate, contractacti, contractexpir)
+        VALUES 
+        (@title, @pfranchise_id, @licare_code, @partner_name, @contact_person, @email, @mobile_no, @password, 
+         @address, @country_id, @region_id, @state, @area, @city, @pincode_id, @website, @gst_number, @pan_number, 
+         @bank_name, @bank_account_number, @bank_ifsc_code, @bank_address, @with_liebherr, @last_working_date, 
+         @contract_activation_date, @contract_expiration_date)
+      `);
+
 
     return res.json({
       message: "Child Franchise Master added successfully!",
     });
   } catch (err) {
     console.error(err);
-    return res.status(500).json(err);
-  }
+    return res.status(500).json({ error: 'An error occurred while processing the request' });
+  }
 });
 
 
+// Update Child Master Page
 app.put("/putchildfranchise", (req, res) => {
   const { title, id, pfranchise_id } = req.body;
 
@@ -4624,6 +4757,7 @@ app.put("/putchildfranchise", (req, res) => {
     }
   });
 });
+
 app.post("/deletechildfranchise", (req, res) => {
   const { id } = req.body;
   const sql = `UPDATE awt_childfranchisemaster SET deleted = 1 WHERE id = '${id}'`;
@@ -6720,5 +6854,4 @@ app.post("/getcomplaintticket", async (req, res) => {
 });
 
 //Register Page Complaint Duplicate End
-
 

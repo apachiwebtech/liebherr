@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import MasterFranchise from './MasterFranchise';
 import Childfranchisemaster from './Childfranchisemaster';
+import { ChildFranchiselist } from './Childfranchiselist';
 import EngineerMaster from './EngineerMaster';
 import { Link } from 'react-router-dom';
 
@@ -63,6 +64,7 @@ function MasterFranchiseTabs() {
                    FRANCHISE MASTER
                   </button>
                 </li></Link>
+
                 <Link to={`/Franchisemasterlist`}><li className="nav-item">
                   <button
                     className={`nav-link ${activeTab === '/Franchisemasterlist' ? 'active' : ' onClick={() => setActiveTab("Franchisemasterlist")}'}`}
@@ -80,6 +82,16 @@ function MasterFranchiseTabs() {
                    CHILD FRANCHISE MASTER
                   </button>
                 </li></Link>
+
+                <Link to={`/Childfranchiselist`}><li className="nav-item">
+                  <button
+                    className={`nav-link ${activeTab === '/Childfranchiselist' ? 'active' : ' onClick={() => setActiveTab("Childfranchiselist")}'}`}
+                   
+                  >
+                  CHILD FRANCHISE MASTER LIST
+                  </button>
+                </li></Link>
+
                 <Link to={`/EngineerMaster`}><li className="nav-item">
                   <button
                     className={`nav-link ${activeTab === '/EngineerMaster' ? 'active' : 'onClick={() => setActiveTab("EngineerMaster")}'}`}
