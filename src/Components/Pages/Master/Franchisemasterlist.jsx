@@ -1,11 +1,12 @@
 import axios from 'axios';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
 import Franchisemaster from './Franchisemaster';
 
 export function Franchisemasterlist(params) {
+    
     const [Franchisemasterdata, setFranchisemasterdata] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
     const [formData, setFormData] = useState({
@@ -41,7 +42,7 @@ export function Franchisemasterlist(params) {
         const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
         return date.toLocaleDateString('en-GB', options).replace(/\//g, '-'); // Convert to 'DD-MM-YYYY' format
     };
-
+   
     const fetchFranchisemasterlist = async () => {
         try {
             const response = await axios.get(`${Base_Url}/getmasterlist`);
@@ -51,6 +52,7 @@ export function Franchisemasterlist(params) {
             setFranchisemasterdata([]);
         }
     };
+   
     const handleChangestatus = (e) => {
         try {
           const dataId = e.target.getAttribute('data-id');

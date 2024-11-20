@@ -5,7 +5,7 @@ const cors = require('cors');
 const complaint = require("./Routes/complaint");
 const common = require("./Routes/common");
 const Category = require("./Routes/ProductMaster/Category");
-const multer = require("multer");
+const multer = require("multer"); 
 const bodyParser = require("body-parser");
 const path = require("path");
 const fs = require("fs");
@@ -3373,12 +3373,15 @@ app.post("/update_complaint", async (req, res) => {
 
 
 //Master Service Partner
-app.get("/getmasterlist/:masterid", async (req, res) => {
+app.get("/getmasterfranchisepopulate/:masterid", async (req, res) => {
   const { masterid } = req.params;
+ 
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
-    const sql=`SELECT * FROM awt_franchisemaster WHERE id = ${masterid} deleted = 0`;
+    const sql=`SELECT m.*,c.title as country_name, r.title as region_name, s. title as state_name, d.title as district_name,ct. title city_name from  awt_franchisemaster as m,
+awt_country as c,awt_region as r,awt_geostate as s,awt_district as d,awt_geocity as ct WHERE m.country_id = c.id AND m.region_id = r.id AND m.geostate_id = s.id 
+AND m.area_id = d.id AND m.geocity_id = ct.id AND m.deleted =	0 AND m.id = ${masterid}`;
     const result = await pool.request().query(sql);
    
     if (result.recordset.length === 0) {

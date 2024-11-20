@@ -8,10 +8,12 @@ import { useParams } from "react-router-dom";
 import Franchisemaster from '../Master/Franchisemaster';
 const MasterFranchise = (params) => {
   // Step 1: Add this state to track errors
+  const { masterid } = useParams();
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [countries, setCountries] = useState([]);
+  const [Franchisemasterdata, setFranchisemasterdata] = useState([]);
   const [regions, setRegions] = useState([]);
   const [state, setState] = useState([])
   const [area, setdistricts] = useState([])
@@ -23,7 +25,7 @@ const MasterFranchise = (params) => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [duplicateError, setDuplicateError] = useState(""); // State to track duplicate error
-  const {masterid} = useParams();
+  
   const [formData, setFormData] = useState({
     title: "",
     password: "",
@@ -130,23 +132,25 @@ const MasterFranchise = (params) => {
     }
   };
 
-  const fetchmasterlist = async (masterid) => {
-    try {
-      const response = await axios.get(
-        `${Base_Url}/getmasterlist/${masterid}`
-      );
-      console.log(response.data);
-      setFormData(response.data);    
+  const fetchFranchisemasterpopulate = async (masterid) => {
     
+    try {
+        const response = await axios.get(`${Base_Url}/getmasterfranchisepopulate/${masterid}`);
+        setFormData(response.data);
+        
     } catch (error) {
-      console.error("Error fetching master data:", error);
+        console.error('Error fetching franchisemasterdata:', error);
+        setFormData([]);
     }
-  };
+};
 
   useEffect(() => {
     fetchUsers();
     fetchcountries();
-    fetchmasterlist();
+   
+    if (masterid!=0){
+      fetchFranchisemasterpopulate(masterid);
+    }
 
 
 
@@ -205,24 +209,55 @@ const MasterFranchise = (params) => {
 
   // Step 2: Add form validation function
   const validateForm = () => {
-    const newErrors = {}; // Initialize an empty error object
-    if (!formData.title.trim()) {
-      // Check if the title is empty
-      newErrors.title = "Franchise Master Field is required."; // Set error message if title is empty
-    }
-    return newErrors; // Return the error object
+    const newErrors = {};
+  
+    // Text/Email/Number inputs validation
+    if (!formData.title.trim()) newErrors.title = "Franchise Master Field is required.";
+    if (!formData.licarecode.trim()) newErrors.licarecode = "Licare Code is required.";
+    if (!formData.contact_person.trim()) newErrors.contact_person = "Contact Person is required.";
+    if (!formData.email.trim()) newErrors.email = "Email is required.";
+    if (!formData.mobile_no.trim()) newErrors.mobile_no = "Mobile Number is required.";
+    if (!formData.partner_name.trim()) newErrors.partner_name = "Partner Name is required.";
+    if (!formData.password.trim()) newErrors.password = "Password is required.";
+    // if (!formData.website.trim()) newErrors.website = "Website is required.";
+    if (!formData.gst_no.trim()) newErrors.gst_no = "GST Number is required.";
+    if (!formData.panno.trim()) newErrors.panno = "PAN Number is required.";
+    // if (!formData.bank_name.trim()) newErrors.bank_name = "Bank Name is required.";
+    // if (!formData.bank_acc.trim()) newErrors.bank_acc = "Bank Account Number is required.";
+    // if (!formData.bank_ifsc.trim()) newErrors.bank_ifsc = "Bank IFSC Code is required.";
+  
+    // Date inputs validation
+    if (!formData.with_liebherr) newErrors.with_liebherr = "With Liebherr date is required.";
+    if (!formData.last_working_date) newErrors.last_working_date = "Last Working Date is required.";
+    if (!formData.contract_acti) newErrors.contract_acti = "Contract Activation Date is required.";
+    if (!formData.contract_expir) newErrors.contract_expir = "Contract Expiration Date is required.";
+  
+    // Dropdown validations
+    if (!formData.country_id) newErrors.country_id = "Country is required.";
+    if (!formData.region_id) newErrors.region_id = "Region is required.";
+    if (!formData.state) newErrors.state = "State is required.";
+    if (!formData.area) newErrors.area = "District is required.";
+    if (!formData.city) newErrors.city = "City is required.";
+    if (!formData.pincode_id) newErrors.pincode_id = "Pincode is required.";
+  
+    // Textarea validations
+    // if (!formData.bank_address.trim()) newErrors.bank_address = "Bank Address is required.";
+    if (!formData.address.trim()) newErrors.address = "Address is required.";
+  
+    return newErrors;
   };
-
   //handlesubmit form
   const handleSubmit = async (e) => {
     e.preventDefault();
 
 
     const validationErrors = validateForm();
+    const newErrors = {};
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
+
 
     setDuplicateError(""); // Clear duplicate error before submitting
 

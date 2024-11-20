@@ -342,7 +342,7 @@ const Router = createBrowserRouter([
 
       },
       {
-        path: "/Masterfranchise/:id",
+        path: "/Masterfranchise/:masterid",
         element: <MasterFranchise />,
      },
       {
