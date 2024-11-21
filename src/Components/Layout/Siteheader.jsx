@@ -54,7 +54,7 @@ export function Siteheader(params) {
             </li>
             <li className="nav-item dropdown">
               <Link to={`/complaintlist`} className="nav-link  site" href="#" id="navbarDropdown" role="button"  aria-expanded="false" >
-                Complaints
+                Tickets
               </Link>
            
             </li>
@@ -63,7 +63,7 @@ export function Siteheader(params) {
                 Reports</Link>
               <ul className="dropdown-menu site" aria-labelledby="navbarDropdown">
                 <li>
-                  <Link className="dropdown-item" to="/complaintreport">Complaint Report</Link></li>
+                  <Link className="dropdown-item" to="/complaintreport">Ticket Report</Link></li>
                 <li>
                   <Link className="dropdown-item" to="/claimreport">Claim Report</Link></li>
               </ul>
@@ -75,7 +75,7 @@ export function Siteheader(params) {
 
 
           <div className="dropdown text-end">
-            <Link className="btn btn-primary newcomplaint" to="/registercomaplaint">New Complaint</Link>
+            <Link className="btn btn-primary newcomplaint" to="/registercomaplaint">New Ticket</Link>
 
             <a href="#" className="link-dark text-decoration-none dropdown-toggle" id="dropdownUser1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               <img src="https://github.com/mdo.png" alt="mdo" width="32" height="32" className="rounded-circle" />

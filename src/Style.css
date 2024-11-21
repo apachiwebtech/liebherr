@@ -30,7 +30,7 @@ select{
 }
 
 select option{
-    font-family: 'Nunito';
+    font-family: "Nunito", sans-serif !important;
 
 }
 

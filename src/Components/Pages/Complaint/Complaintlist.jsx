@@ -172,7 +172,7 @@ export function Complaintlist(params) {
                             </div>
                             <div className="col-md-2">
                                 <div className="form-group">
-                                    <label>Complaint No.</label>
+                                    <label>Ticket No.</label>
                                     <input
                                         type="text"
                                         className="form-control"
@@ -236,7 +236,7 @@ export function Complaintlist(params) {
                             </div>
                             <div className="col-md-2">
                                 <div className="form-group">
-                                    <label>Product Code</label>
+                                    <label>Model No.</label>
                                     <input
                                         type="text"
                                         className="form-control"
@@ -249,7 +249,7 @@ export function Complaintlist(params) {
                             </div>
                             <div className="col-md-2">
                                 <div className="form-group">
-                                    <label>Status</label>
+                                    <label>Call Status</label>
                                     <select
                                         className="form-control"
                                         name="status"
