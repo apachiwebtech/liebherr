@@ -7,7 +7,7 @@ import logo from  '../../images/Liebherr-logo-768x432.png'
 import back from '../../images/login.jpeg'
 
 export function CSP_Login() {
-    const [Csp, setCspuser] = useState("");
+    const [Lhiuser, setLhiuser] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
 
@@ -19,7 +19,7 @@ export function CSP_Login() {
 
             const hashpass = md5(password)
             
-            const response = await axios.post(`${Base_Url}/Cspuser`, {
+            const response = await axios.post(`${Base_Url}/csplogin`, {
                 Lhiuser: Lhiuser,
                 password: hashpass,
             });
@@ -30,7 +30,7 @@ export function CSP_Login() {
                 localStorage.setItem("Lhiuser", response.data.Lhiuser);
 
                 // Navigate to the home page
-                navigate('/');
+                navigate('/Childfranchiselist');
             } else {
                 alert("Invalid username or password");
             }

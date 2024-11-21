@@ -10,6 +10,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 import { Login } from './Components/Authenticate/Login';
+import { CSP_Login } from './Components/Authenticate/CSP_Login';
 import Callstatus from './Components/Pages/Master/Callstatus';
 import Category from './Components/Pages/Master/Category';
 import ProductType from './Components/Pages/Master/ProductType';
@@ -86,6 +87,11 @@ const Router = createBrowserRouter([
   {
     path: "/login",
     element: <Login />,
+
+  },
+  {
+    path: "/csplogin",
+    element: <CSP_Login />,
 
   },
    {

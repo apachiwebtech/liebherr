@@ -105,7 +105,7 @@ app.post("/csplogin", async (req, res) => {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
 
-    const sql = `SELECT  FROM awt_childfranchisemaster WHERE email = '${Lhiuser}' AND password = '${password}'`;
+    const sql = `SELECT * FROM awt_childfranchisemaster WHERE email = '${Lhiuser}' AND password = '${password}'`;
 
     console.log(sql)
 
