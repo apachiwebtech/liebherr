@@ -3,7 +3,6 @@ import CryptoJS from 'crypto-js';
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
-import md5 from "js-md5";
 import { useParams } from "react-router-dom";
 import Franchisemaster from '../Master/Franchisemaster';
 const MasterFranchise = (params) => {
@@ -530,7 +529,7 @@ const MasterFranchise = (params) => {
 
                     <div className="col-3">
                       <label
-                        htmlFor="MasterFranchiseInput"
+                        htmlFor="PassInput"
                         className="input-field"
                       >
                         Franchise Master (Password)
