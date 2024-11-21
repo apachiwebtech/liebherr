@@ -96,6 +96,34 @@ app.post("/loginuser", async (req, res) => {
   }
 });
 
+//CSP Login
+
+app.post("/csplogin", async (req, res) => {
+  const { Lhiuser, password } = req.body;
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    const sql = `SELECT  FROM awt_childfranchisemaster WHERE email = '${Lhiuser}' AND password = '${password}'`;
+
+    console.log(sql)
+
+    const result = await pool.request().query(sql);
+
+    if (result.recordset.length > 0) {
+      res.json({ id: result.recordset[0].id, Lhiuser: result.recordset[0].email });
+    } else {
+      res.status(401).json({ message: "Invalid username or password" });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Database error", error: err });
+  }
+});
+
+//CSP End
+
 app.post("/loginmsp", async (req, res) => {
   const { title, password } = req.body;
 
@@ -3378,13 +3406,9 @@ app.get("/getmasterlist/:masterid", async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
-<<<<<<< Updated upstream
     const sql=`SELECT m.*,c.title as country_name, r.title as region_name, s. title as state_name, d.title as district_name,ct. title city_name from  awt_franchisemaster as m,
 awt_country as c,awt_region as r,awt_geostate as s,awt_district as d,awt_geocity as ct WHERE m.country_id = c.id AND m.region_id = r.id AND m.geostate_id = s.id 
 AND m.area_id = d.id AND m.geocity_id = ct.id AND m.deleted =	0 AND m.id = ${ masterid }`;
-=======
-    const sql=`SELECT * FROM awt_franchisemaster WHERE id = ${masterid} deleted = 0`;
->>>>>>> Stashed changes
     const result = await pool.request().query(sql);
    
     if (result.recordset.length === 0) {
