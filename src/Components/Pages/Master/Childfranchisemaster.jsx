@@ -24,6 +24,8 @@ const Childfranchisemaster = () => {
   const [area, setdistricts] = useState([])
   const [city, setCity] = useState([])
   const [pincode, setPincode] = useState([])
+  const created_by = localStorage.getItem("userId"); // Get user ID from localStorage
+  const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
   
   const [formData, setFormData] = useState({
     title: "",
@@ -51,19 +53,13 @@ const Childfranchisemaster = () => {
     last_working_date: "",
     contract_activation_date: "",
     contract_expiration_date: "",
-    with_liebherr: ""
+    with_liebherr: "",
   });
 
-
-
-  //Fetch Child Franchise Deatils for populate
-  
- 
   const fetchchildfranchisepopulate = async (childid) => {
     try {
       
       const response = await axios.get(`${Base_Url}/getchildfranchisepopulate/${childid}`);
-      console.log(response.data);
       setFormData({
         ...response.data[0],
         // Rename keys to match your formData structure
@@ -95,6 +91,8 @@ const Childfranchisemaster = () => {
         with_liebherr: response.data[0].withliebher
       });
       
+      setIsEdit(true);
+
       if (response.data[0].country_id) {
         fetchregion(response.data[0].country_id);
       }
@@ -208,14 +206,16 @@ const Childfranchisemaster = () => {
       console.error("Error fetching City:", error);
     }
   };
+
   useEffect(() => {
     fetchcountries();
     fetchUsers();
     fetchParentfranchise();
-    if(childid != 0){
+    
+    if (childid && childid !== '0') {
       fetchchildfranchisepopulate(childid);
     }
-  }, []);
+  }, [childid]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -282,16 +282,14 @@ const Childfranchisemaster = () => {
   //handlesubmit form
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form Data:", formData); // Log payload before submission
    
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
-      console.log("Validation Errors:", validationErrors); // Log validation errors
+      console.log("Validation Errors:", validationErrors);
       setErrors(validationErrors);
       return;
     }
-
-    setDuplicateError(""); // Clear duplicate error before submitting
+    setDuplicateError("");
 
     try {
       const confirmSubmission = window.confirm(
@@ -299,26 +297,50 @@ const Childfranchisemaster = () => {
       );
       if (confirmSubmission) {
         if (isEdit) {
-          // For update, include duplicate check
           await axios
-            .put(`${Base_Url}/putchildfranchise`, { ...formData })
+            .put(`${Base_Url}/putchildfranchise`, { ...formData, created_by })
             .then((response) => {
-              setFormData({
-                title: "",
-                pfranchise_id: "",
-              });
+                setFormData({
+                  title: "",
+                  pfranchise_id: "",
+                  contact_person: "",
+                  email: "",
+                  mobile_no: "",
+                  password: "",
+                  country_id: "",
+                  region_id: "",
+                  state: "",
+                  area: "",
+                  city: "",
+                  pincode_id: "",
+                  address: "",
+                  licare_code: "",
+                  partner_name: "",
+                  website: "",
+                  gst_number: "",
+                  pan_number: "",
+                  bank_name: "",
+                  bank_account_number: "",
+                  bank_ifsc_code: "",
+                  bank_address: "",
+                  last_working_date: "",
+                  contract_activation_date: "",
+                  contract_expiration_date: "",
+                  with_liebherr: ""
+                });
               fetchUsers();
+              setIsEdit(false);
             })
             .catch((error) => {
               if (error.response && error.response.status === 409) {
                 setDuplicateError(
                   "Duplicate entry, Child Franchise already exists!"
-                ); // Show duplicate error for update
+                );
               }
             });
         } else {
-          console.log("Attempting to submit data"); // Add logging
-          await axios.post(`${Base_Url}/postchildfranchise`, formData)
+
+          await axios.post(`${Base_Url}/postchildfranchise`, { ...formData, created_by })
             .then((response) => {
               setFormData({
                 title: "",
@@ -354,41 +376,13 @@ const Childfranchisemaster = () => {
               if (error.response && error.response.status === 409) {
                 setDuplicateError(
                   "Duplicate entry, Child Franchise already exists!"
-                ); // Show duplicate error for insert
+                );
               }
             });
         }
       }
     } catch (error) {
       console.error("Error during form submission:", error);
-    }
-  };
-
-  const deleted = async (id) => {
-    try {
-      const response = await axios.post(`${Base_Url}/deletechildfranchise`, {
-        id,
-      });
-      setFormData({
-        title: "",
-        pfranchise_id: "",
-      });
-      fetchUsers();
-    } catch (error) {
-      console.error("Error deleting user:", error);
-    }
-  };
-
-  const edit = async (id) => {
-    try {
-      const response = await axios.get(
-        `${Base_Url}/requestchildfranchise/${id}`
-      );
-      setFormData(response.data);
-      setIsEdit(true);
-      console.log(response.data);
-    } catch (error) {
-      console.error("Error editing user:", error);
     }
   };
 
@@ -781,7 +775,7 @@ const Childfranchisemaster = () => {
                   </div>
 
                   <div className="col-12 text-right">
-                  <button
+                       <button
                           className="btn btn-liebherr"
                           type="submit"
                           style={{ marginTop: "15px" }}

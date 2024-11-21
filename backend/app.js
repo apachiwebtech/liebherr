@@ -5,7 +5,7 @@ const cors = require('cors');
 const complaint = require("./Routes/complaint");
 const common = require("./Routes/common");
 const Category = require("./Routes/ProductMaster/Category");
-const multer = require("multer"); 
+const multer = require("multer");
 const bodyParser = require("body-parser");
 const path = require("path");
 const fs = require("fs");
@@ -3023,7 +3023,8 @@ app.post("/getticketendcustomer", async (req, res) => {
     // Product of End Customer using customer_id | in Table awt_customer id is primary key and customer_id is foreign key in awt_customerlocation
     const sql1 = `
     SELECT * FROM awt_uniqueproductmaster
-    WHERE deleted = 0 AND CustomerID = @customerId `;
+    WHERE deleted = 0 AND CustomerID = @customerId
+  `;
     // console.log(result.recordset[0])
     const result1 = await pool.request()
       .input('customerId', result.recordset[0].customer_id)
@@ -3372,15 +3373,18 @@ app.post("/update_complaint", async (req, res) => {
 
 
 //Master Service Partner
-app.get("/getmasterfranchisepopulate/:masterid", async (req, res) => {
+app.get("/getmasterlist/:masterid", async (req, res) => {
   const { masterid } = req.params;
- 
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
+<<<<<<< Updated upstream
     const sql=`SELECT m.*,c.title as country_name, r.title as region_name, s. title as state_name, d.title as district_name,ct. title city_name from  awt_franchisemaster as m,
 awt_country as c,awt_region as r,awt_geostate as s,awt_district as d,awt_geocity as ct WHERE m.country_id = c.id AND m.region_id = r.id AND m.geostate_id = s.id 
 AND m.area_id = d.id AND m.geocity_id = ct.id AND m.deleted =	0 AND m.id = ${ masterid }`;
+=======
+    const sql=`SELECT * FROM awt_franchisemaster WHERE id = ${masterid} deleted = 0`;
+>>>>>>> Stashed changes
     const result = await pool.request().query(sql);
    
     if (result.recordset.length === 0) {
@@ -4601,8 +4605,9 @@ app.post("/postchildfranchise", async (req, res) => {
     city, contact_person, contract_activation_date, contract_expiration_date,
     country_id, email, gst_number, last_working_date, licare_code, mobile_no,
     pan_number, partner_name, password, pfranchise_id, pincode_id, region_id,
-    state, title, website, with_liebherr
+    state, title, website, with_liebherr,created_by
   } = req.body;
+
 
   try {
     // Use the poolPromise to get the connection pool
@@ -4610,16 +4615,9 @@ app.post("/postchildfranchise", async (req, res) => {
 
     // Check if the data already exists and is not deleted
     const checkDuplicateResult = await pool.request()
-      .input('pfranchise_id', sql.Int, pfranchise_id)
-      .input('title', sql.VarChar, title)
-      .input('licare_code', sql.VarChar, licare_code)
-      .input('mobile_no', sql.VarChar, mobile_no)
-      .input('pan_number', sql.VarChar, pan_number)
+      .input('email', sql.VarChar, email)
       .query(`
-        SELECT * FROM awt_childfranchisemaster 
-        WHERE (title = @title OR licare_code = @licare_code OR mobile_no = @mobile_no OR panno = @pan_number)
-          AND pfranchise_id = @pfranchise_id
-          AND deleted = 0
+        SELECT * FROM awt_childfranchisemaster WHERE email = @email AND deleted = 0
       `);
 
 
@@ -4629,25 +4627,11 @@ app.post("/postchildfranchise", async (req, res) => {
       });
     }
 
-    // Check if the data exists in a soft-deleted state
-
-  
-
-  
     const checkSoftDeletedResult = await pool.request()
-      .input('pfranchise_id', sql.Int, pfranchise_id)
-      .input('title', sql.VarChar, title)
-      .input('licare_code', sql.VarChar, licare_code)
-      .input('mobile_no', sql.VarChar, mobile_no)
-      .input('pan_number', sql.VarChar, pan_number)
+      .input('email', sql.VarChar, email)
       .query(`
-        SELECT * FROM awt_childfranchisemaster 
-        WHERE (title = @title OR licare_code = @licare_code OR mobile_no = @mobile_no OR panno = @pan_number)
-          AND pfranchise_id = @pfranchise_id
-          AND deleted = 1
+        SELECT * FROM awt_childfranchisemaster WHERE email = @email AND deleted = 1
       `);
-
-
 
     if (checkSoftDeletedResult.recordset.length > 0) {
       // Restore the soft-deleted record with updated data
@@ -4668,13 +4652,14 @@ app.post("/postchildfranchise", async (req, res) => {
         .input('city', sql.VarChar, city)
         .input('pincode_id', sql.Int, pincode_id)
         .input('website', sql.VarChar, website)
+        // .input('created_by', sql.VarChar, created_by)
         .input('gst_number', sql.VarChar, gst_number)
         .input('pan_number', sql.VarChar, pan_number)
         .input('bank_name', sql.VarChar, bank_name)
         .input('bank_account_number', sql.VarChar, bank_account_number)
         .input('bank_ifsc_code', sql.VarChar, bank_ifsc_code)
         .input('bank_address', sql.VarChar, bank_address)
-        .input('with_liebherr', sql.Bit, with_liebherr)
+        .input('with_liebherr', sql.DateTime, with_liebherr)
         .input('last_working_date', sql.DateTime, last_working_date)
         .input('contract_activation_date', sql.DateTime, contract_activation_date)
         .input('contract_expiration_date', sql.DateTime, contract_expiration_date)
@@ -4694,6 +4679,7 @@ app.post("/postchildfranchise", async (req, res) => {
             geostate_id = @state,
             area_id = @area,
             geocity_id = @city,
+            created_by = ${created_by},
             pincode_id = @pincode_id,
             webste = @website,
             gstno = @gst_number,
@@ -4714,8 +4700,6 @@ app.post("/postchildfranchise", async (req, res) => {
         message: "Soft-deleted Child Franchise Master restored successfully with updated data!",
       });
     }
-
-
     // Insert the new child franchise if no duplicates or soft-deleted records found
    const insert = await pool.request()
       .input('title', sql.VarChar, title)
@@ -4740,7 +4724,6 @@ app.post("/postchildfranchise", async (req, res) => {
       .input('bank_account_number', sql.VarChar, bank_account_number)
       .input('bank_ifsc_code', sql.VarChar, bank_ifsc_code)
       .input('bank_address', sql.VarChar, bank_address)
-      .input('with_liebherr', sql.Bit, with_liebherr)
       .input('last_working_date', sql.DateTime, last_working_date)
       .input('contract_activation_date', sql.DateTime, contract_activation_date)
       .input('contract_expiration_date', sql.DateTime, contract_expiration_date)
@@ -4748,15 +4731,13 @@ app.post("/postchildfranchise", async (req, res) => {
         INSERT INTO awt_childfranchisemaster 
         (title, pfranchise_id, licare_code, partner_name, contact_person, email, mobile_no, password, address, 
          country_id, region_id, geostate_id, area_id, geocity_id, pincode_id, webste, gstno, panno, bankname, 
-         bankacc, bankifsc, bankaddress, withliebher, lastworkinddate, contractacti, contractexpir)
+         bankacc, bankifsc, bankaddress, withliebher, lastworkinddate, contractacti, contractexpir, created_by)
         VALUES 
         (@title, @pfranchise_id, @licare_code, @partner_name, @contact_person, @email, @mobile_no, @password, 
          @address, @country_id, @region_id, @state, @area, @city, @pincode_id, @website, @gst_number, @pan_number, 
-         @bank_name, @bank_account_number, @bank_ifsc_code, @bank_address, @with_liebherr, @last_working_date, 
-         @contract_activation_date, @contract_expiration_date)
+         @bank_name, @bank_account_number, @bank_ifsc_code, @bank_address,${with_liebherr} , @last_working_date, 
+         @contract_activation_date, @contract_expiration_date,${created_by})
       `);
-
-
     return res.json({
       message: "Child Franchise Master added successfully!",
     });
@@ -4768,33 +4749,119 @@ app.post("/postchildfranchise", async (req, res) => {
 
 
 // Update Child Master Page
-app.put("/putchildfranchise", (req, res) => {
-  const { title, id, pfranchise_id } = req.body;
+app.put("/putchildfranchise", async (req, res) => {
+  const {
+    title, id, pfranchise_id, licare_code, partner_name, contact_person,
+    email, mobile_no, password, address, country_id, region_id, state,
+    area, city, pincode_id, website, gst_number, pan_number, bank_name,
+    bank_account_number, bank_ifsc_code, bank_address, with_liebherr,
+    last_working_date, contract_activation_date, contract_expiration_date, created_by
+  } = req.body;
 
-  // Check for duplicates
-  const checkDuplicateSql = `SELECT * FROM awt_childfranchisemaster WHERE title = '${title}' AND id != '${id}' AND deleted = 0`;
+  try {
+    const pool = await poolPromise;
 
-  con.query(checkDuplicateSql, (err, data) => {
-    if (err) {
-      return res.status(500).json(err);
-    }
+    // Step 1: Duplicate Check Query
+    const duplicateCheckSQL = `
+      SELECT * FROM awt_childfranchisemaster 
+      WHERE email = @email
+      AND deleted = 0
+      AND id != @id
+    `;
 
-    if (data.length > 0) {
-      // If a duplicate exists (other than the current record)
-      return res.status(409).json({ message: "Duplicate entry, Child Franchise already exists!" });
-    } else {
-      // Step 2: Update the record if no duplicates are found
-      const updateSql = `UPDATE awt_childfranchisemaster SET title = '${title}', pfranchise_id = '${pfranchise_id}' WHERE id = '${id}'`;
+    console.log("Executing Duplicate Check SQL:", duplicateCheckSQL);
 
-      con.query(updateSql, (err, data) => {
-        if (err) {
-          return res.status(500).json(err);
-        }
-        return res.json({ message: "Child Franchise updated successfully!" });
+    const duplicateCheckResult = await pool.request()
+      .input('email', email)
+      .input('id', id)
+      .query(duplicateCheckSQL);
+
+    if (duplicateCheckResult.recordset.length > 0) {
+      return res.status(409).json({
+        message: "Duplicate entry, Child Franchise Master already exists!"
       });
     }
-  });
+
+    // Step 2: Update Query
+    const updateSQL = `
+      UPDATE awt_childfranchisemaster
+      SET 
+        title = @title,
+        pfranchise_id = @pfranchise_id,
+        licare_code = @licare_code,
+        partner_name = @partner_name,
+        contact_person = @contact_person,
+        email = @email,
+        mobile_no = @mobile_no,
+        password = @password,
+        address = @address,
+        country_id = @country_id,
+        region_id = @region_id,
+        geostate_id = @state,
+        area_id = @area,
+        geocity_id = @city,
+        pincode_id = @pincode_id,
+        webste = @website,
+        gstno = @gst_number,
+        panno = @pan_number,
+        bankname = @bank_name,
+        bankacc = @bank_account_number,
+        bankifsc = @bank_ifsc_code,
+        bankaddress = @bank_address,
+        withliebher = @with_liebherr,
+        lastworkinddate = @last_working_date,
+        contractacti = @contract_activation_date,
+        contractexpir = @contract_expiration_date,
+        updated_by = @created_by
+      WHERE id = @id
+    `;
+
+    console.log("Executing Update SQL:", updateSQL);
+
+    await pool.request()
+      .input('title', title)
+      .input('pfranchise_id', pfranchise_id)
+      .input('licare_code', licare_code)
+      .input('partner_name', partner_name)
+      .input('contact_person', contact_person)
+      .input('email', email)
+      .input('mobile_no', mobile_no)
+      .input('password', password)
+      .input('address', address)
+      .input('country_id', country_id)
+      .input('region_id', region_id)
+      .input('state', state)
+      .input('area', area)
+      .input('city', city)
+      .input('pincode_id', pincode_id)
+      .input('website', website)
+      .input('gst_number', gst_number)
+      .input('pan_number', pan_number)
+      .input('bank_name', bank_name)
+      .input('bank_account_number', bank_account_number)
+      .input('bank_ifsc_code', bank_ifsc_code)
+      .input('bank_address', bank_address)
+      .input('with_liebherr', with_liebherr)
+      .input('last_working_date', last_working_date)
+      .input('contract_activation_date', contract_activation_date)
+      .input('contract_expiration_date', contract_expiration_date)
+      .input('created_by', created_by)
+      .input('id', id)
+      .query(updateSQL);
+
+    return res.json({
+      message: "Child Franchise updated successfully!"
+    });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "An error occurred while processing the request" });
+  }
 });
+
+
+
+
 
 app.post("/deletechildfranchise", (req, res) => {
   const { id } = req.body;
