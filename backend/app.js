@@ -6914,43 +6914,17 @@ app.get("/getcomplainlist", async (req, res) => {
 
 //Register Page Complaint Duplicate Start
 
-app.get("/getComplaintDuplicateRegisterPage/:DuplicateCustomerNumber", async (req, res) => {
-  const { DuplicateCustomerNumber } = req.params;
+app.get("/getmultiplelocation/:pincode", async (req, res) => {
+  const { pincode } = req.params;
 
   try {
-    if (!DuplicateCustomerNumber) {
-      return res.status(400).json({ error: "DuplicateCustomerNumber parameter is required" });
-    }
-
+    
     const pool = await poolPromise;
 
-    // Modified SQL query to skip the latest entry for duplicates
-    // const sql = `
-    //   WITH DuplicateNumbers AS (
-    //     SELECT customer_mobile
-    //     FROM complaint_ticket
-    //     WHERE deleted = 0
-    //     GROUP BY customer_mobile
-    //     HAVING COUNT(*) > 1
-    //   ),
-    //   RankedComplaints AS (
-    //     SELECT *,
-    //       ROW_NUMBER() OVER (PARTITION BY customer_mobile ORDER BY id DESC) as rn
-    //     FROM complaint_ticket
-    //     WHERE deleted = 0
-    //     AND customer_mobile IN (SELECT customer_mobile FROM DuplicateNumbers)
-    //   )
-    //   SELECT *
-    //   FROM RankedComplaints
-    //   WHERE rn > 1
-    //   AND customer_mobile = @DuplicateCustomerNumber
-    //   ORDER BY id DESC
-    // `;
-
-    const sql = 'select * from complaint_ticket where customer_mobile = @DuplicateCustomerNumber order by id desc'
+    const sql = `SELECT r.title as region, s.title as state, d.title as district, c.title as city FROM awt_pincode as p LEFT JOIN awt_region as r on p.region_id = r.id LEFT JOIN awt_geostate as s on p.geostate_id = s.id LEFT JOIN awt_district as d on p.area_id = d.id LEFT JOIN awt_geocity as c on p.geocity_id = c.id where pincode = @pincode`
 
     const result = await pool.request()
-      .input('DuplicateCustomerNumber', DuplicateCustomerNumber)
+      .input('pincode', pincode)
       .query(sql);
 
     return res.json(result.recordset);

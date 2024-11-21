@@ -32,6 +32,8 @@ export function Registercomplaint(params) {
     const created_by = localStorage.getItem("userId"); // Get user ID from localStorage
     const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
 
+    const [locations, setlocations] = useState([])
+
     const formatDate = (dateString) => {
         const date = new Date(dateString);
         const day = String(date.getDate()).padStart(2, "0");
@@ -101,7 +103,7 @@ export function Registercomplaint(params) {
     }
 
     //Master Service Partner
-    async function getMasterPartner(params) {
+    /*async function getMasterPartner(params) {
 
         axios.get(`${Base_Url}/getmasterpartner`)
             .then((res) => {
@@ -111,7 +113,8 @@ export function Registercomplaint(params) {
                 }
             })
 
-    }
+    }*/
+
     async function getCompticket(params) {
 
         const data = {
@@ -177,9 +180,9 @@ export function Registercomplaint(params) {
         if (DuplicateCustomerNumber) {
             fetchComplaintDuplicate(DuplicateCustomerNumber);
         }
-        getState()
+        //getState()
         getProduct()
-        getMasterPartner()
+        // getMasterPartner()
         if (Comp_id) {
 
             getCompticket()
@@ -406,6 +409,28 @@ export function Registercomplaint(params) {
         }
         if (name === "city") {
             fetchPincodes(inputValue);
+        }
+
+        if(name === "pincode") {
+            fetchlocations(inputValue);
+        }
+    };
+
+    const fetchlocations = async (pincode) => {
+        try {
+            const response = await axios.get(
+                `${Base_Url}/getmultiplelocation/${pincode}`
+            );
+
+            if (response.data && response.data[0]) {
+
+                setlocations({region:response.data[0].region, state:response.data[0].state, district:response.data[0].district, city:response.data[0].city})
+
+            }
+            
+
+        } catch (error) {
+            console.error("Error fetching complaint details:", error);
         }
     };
 
@@ -793,25 +818,25 @@ export function Registercomplaint(params) {
                                         <div className="col-md-3">
                                             <div className="mb-3">
                                                 <label htmlFor="exampleFormControlInput1" className="form-label">Pincode</label>
-                                                <input type="text" className="form-control" value={location.pincode} name="pincode" onChange={onHandleChange} placeholder="" disabled />
+                                                <input type="text" className="form-control" value={location.pincode} name="pincode" onChange={onHandleChange} placeholder="" />
                                             </div>
                                         </div>
                                         <div className="col-md-3">
                                             <div className="mb-3">
                                                 <label htmlFor="exampleFormControlInput1" className="form-label">State</label>
-                                                <input type="text" className="form-control" value={location.state} name="state" onChange={onHandleChange} placeholder="" disabled />
+                                                <input type="text" className="form-control" value={locations.state} name="state" onChange={onHandleChange} placeholder="" disabled />
                                             </div>
                                         </div>
                                         <div className="col-md-3">
                                             <div className="mb-3">
                                                 <label htmlFor="exampleFormControlInput1" className="form-label">District</label>
-                                                <input type="text" className="form-control" value={location.area} name="area" onChange={onHandleChange} placeholder="" disabled />
+                                                <input type="text" className="form-control" value={locations.district} name="area" onChange={onHandleChange} placeholder="" disabled />
                                             </div>
                                         </div>
                                         <div className="col-md-3">
                                             <div className="mb-3">
                                                 <label htmlFor="exampleFormControlInput1" className="form-label">City</label>
-                                                <input type="text" className="form-control" value={location.city} name="city" onChange={onHandleChange} placeholder="" disabled />
+                                                <input type="text" className="form-control" value={locations.city} name="city" onChange={onHandleChange} placeholder="" disabled />
                                             </div>
                                         </div>
                                         
