@@ -4,6 +4,10 @@ import Logo from '../../images/Liebherr-logo-768x432.png'
 
 
 export function Siteheader(params) {
+
+  const redirect = () =>{
+    window.location.pathname = '/registercomaplaint'
+  }
   return (
 
     <header className="p-3 border-bottom">
@@ -75,7 +79,7 @@ export function Siteheader(params) {
 
 
           <div className="dropdown text-end">
-            <Link className="btn btn-primary newcomplaint" to="/registercomaplaint">New Ticket</Link>
+            <Link className="btn btn-primary newcomplaint" onClick={redirect}>New Ticket</Link>
 
             <a href="#" className="link-dark text-decoration-none dropdown-toggle" id="dropdownUser1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               <img src="https://github.com/mdo.png" alt="mdo" width="32" height="32" className="rounded-circle" />

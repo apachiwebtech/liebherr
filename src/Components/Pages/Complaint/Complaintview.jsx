@@ -647,7 +647,7 @@ const handleSubmitTicketFormData = (e) => {
                             name="attachment"
                             className="form-control"
                             multiple
-                            accept="image/*,video/*,audio/*"
+                            accept="image/*,video/*,audio/*,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,.eml"
                             onChange={handleFileChange}
                             ref={fileInputRef2} // Attach the ref to the input
                           />
@@ -819,7 +819,8 @@ const handleSubmitTicketFormData = (e) => {
                       </a>
                     </iframe>
                   ) : currentAttachment.toLowerCase().endsWith(".doc") ||
-                    currentAttachment.toLowerCase().endsWith(".docx") ? (
+                    currentAttachment.toLowerCase().endsWith(".docx") || currentAttachment.toLowerCase().endsWith(".eml") ? (
+                      
                     <iframe
                       src={`https://docs.google.com/gview?url=${Base_Url}/uploads/${currentAttachment}&embedded=true`}
                       style={{ width: "100%", height: "500px" }} // Adjust height as needed
@@ -945,7 +946,7 @@ const handleSubmitTicketFormData = (e) => {
                   type="file"
                   className="form-control"
                   multiple
-                  accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx"
+                  accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,.eml"
                   onChange={handleFile2Change}
                   ref={fileInputRef} // Attach the ref to the input
                 />
@@ -1066,7 +1067,7 @@ const handleSubmitTicketFormData = (e) => {
                     </a>
                   </iframe>
                 ) : currentAttachment2.toLowerCase().endsWith(".doc") ||
-                  currentAttachment2.toLowerCase().endsWith(".docx") ? (
+                  currentAttachment2.toLowerCase().endsWith(".docx") || currentAttachment2.toLowerCase().endsWith(".eml") ? (
                   <iframe
                     src={`https://docs.google.com/gview?url=${Base_Url}/uploads/${currentAttachment2}&embedded=true`}
                     style={{ width: "100%", height: "500px" }}
