@@ -471,7 +471,7 @@ export function Registercomplaint(params) {
                 <div className="complbread">
                     <div className="row">
                         <div className="col-md-3">
-                            <label className="breadMain">Register New Complaint</label>
+                            <label className="breadMain">Register New Ticket</label>
                         </div>
                     </div>
                 </div>
@@ -485,7 +485,7 @@ export function Registercomplaint(params) {
                     <div className="card mb-3">
                         <div className="card-body">
                             <div>
-                                <p>Search by Mobile / Email</p>
+                                <p>Search by Ticket No. / Serial No. / Mobile No./ Customer Name / Customer Id / Email Id</p>
                                 <div className="row g-3 align-items-center">
                                     <div className="col-8">
                                         <input
@@ -680,14 +680,14 @@ export function Registercomplaint(params) {
 
                                 <div className="row">
                                     <div className="col-md-12">
-                                        <h3 className="mainheade">Complaint <span id="compaintno">:{ticketno} </span></h3>
+                                        <h3 className="mainheade">Ticket <span id="compaintno">:{ticketno} </span></h3>
                                     </div>
                                 </div>
 
                                 <form className="row" onSubmit={handlesubmit}>
                                     <div className="col-md-3">
                                         <div className="mb-3">
-                                            <label className="form-label">Complaint Date</label>
+                                            <label className="form-label">Ticket Date</label>
                                             <input type="date" name="complaint_date" onChange={onHandleChange} value={value.complaint_date} className="form-control" />
                                         </div>
                                     </div>
@@ -729,7 +729,22 @@ export function Registercomplaint(params) {
                                     </div>
 
 
-                                    {!duplicate ? <>    <div className="col-md-3">
+                                    {!duplicate ? <>    
+                                        <div className="col-md-3">
+                                            <div className="mb-3">
+                                                <label className="form-label">Pincode</label>
+                                                <select className="form-control" value={value.pincode} name="pincode" onChange={onHandleChange}>
+                                                    <option value="">Select Pincode</option>
+                                                    {pincode.map((item) => {
+                                                        return (
+                                                            <option value={item.id} key={item.id}>{item.pincode}</option>
+                                                        );
+                                                    })}
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                    <div className="col-md-3">
                                         <div className="mb-3">
                                             <label className="form-label">State</label>
                                             <select className="form-control" value={value.state} name="state" onChange={onHandleChange}>
@@ -747,7 +762,7 @@ export function Registercomplaint(params) {
 
                                         <div className="col-md-3">
                                             <div className="mb-3">
-                                                <label className="form-label">Area</label>
+                                                <label className="form-label">District</label>
                                                 <select className="form-control" onChange={onHandleChange} name="area" value={value.area}>
                                                     <option value="">Select Area</option>
                                                     {area.map((item) => {
@@ -774,22 +789,23 @@ export function Registercomplaint(params) {
                                             </div>
                                         </div>
 
+                                        </> : <>      
                                         <div className="col-md-3">
                                             <div className="mb-3">
-                                                <label className="form-label">Pincode</label>
-                                                <select className="form-control" value={value.pincode} name="pincode" onChange={onHandleChange}>
-                                                    <option value="">Select Pincode</option>
-                                                    {pincode.map((item) => {
-                                                        return (
-                                                            <option value={item.id} key={item.id}>{item.pincode}</option>
-                                                        );
-                                                    })}
-                                                </select>
+                                                <label htmlFor="exampleFormControlInput1" className="form-label">Pincode</label>
+                                                <input type="text" className="form-control" value={location.pincode} name="pincode" onChange={onHandleChange} placeholder="" disabled />
                                             </div>
-                                        </div></> : <>      <div className="col-md-3">
+                                        </div>
+                                        <div className="col-md-3">
                                             <div className="mb-3">
                                                 <label htmlFor="exampleFormControlInput1" className="form-label">State</label>
                                                 <input type="text" className="form-control" value={location.state} name="state" onChange={onHandleChange} placeholder="" disabled />
+                                            </div>
+                                        </div>
+                                        <div className="col-md-3">
+                                            <div className="mb-3">
+                                                <label htmlFor="exampleFormControlInput1" className="form-label">District</label>
+                                                <input type="text" className="form-control" value={location.area} name="area" onChange={onHandleChange} placeholder="" disabled />
                                             </div>
                                         </div>
                                         <div className="col-md-3">
@@ -798,18 +814,8 @@ export function Registercomplaint(params) {
                                                 <input type="text" className="form-control" value={location.city} name="city" onChange={onHandleChange} placeholder="" disabled />
                                             </div>
                                         </div>
-                                        <div className="col-md-3">
-                                            <div className="mb-3">
-                                                <label htmlFor="exampleFormControlInput1" className="form-label">Area</label>
-                                                <input type="text" className="form-control" value={location.area} name="area" onChange={onHandleChange} placeholder="" disabled />
-                                            </div>
-                                        </div>
-                                        <div className="col-md-3">
-                                            <div className="mb-3">
-                                                <label htmlFor="exampleFormControlInput1" className="form-label">Pincode</label>
-                                                <input type="text" className="form-control" value={location.pincode} name="pincode" onChange={onHandleChange} placeholder="" disabled />
-                                            </div>
-                                        </div> </>}
+                                        
+                                         </>}
 
 
 
@@ -832,11 +838,12 @@ export function Registercomplaint(params) {
                                             <label className="form-label">Ticket Type</label>
                                             <select className="form-control" onChange={onHandleChange} value={value.ticket_type} name="ticket_type">
                                                 <option value="">Select</option>
-                                                <option value="Breakdown">BREAKDOWN</option>
+                                                <option value="Installation">Installation</option>
+                                                <option value="Breakdown">Breakdown</option>
+                                                <option value="Visit">Visit</option>
+                                                <option value="Helpdesk">Helpdesk</option>
+                                                <option value="Maintenance">Maintenance</option>
                                                 <option value="Demo">Demo</option>
-                                                <option value="Installation">INSTALLATION</option>
-                                                <option value="PM / Ex warranty Scheduling">PM / Ex Warrenty Scedulling</option>
-                                                <option value="Pre-Site Visit">Pre-Site Visit</option>
                                             </select>
                                         </div>
                                     </div>
@@ -955,28 +962,28 @@ export function Registercomplaint(params) {
 
                             <div className="card mb-3" id="engineerInfo">
                                 <div className="card-body">
-                                    <h4 className="pname">Additional Remarks</h4>
+                                    <h4 className="pname">Remarks</h4>
                                     <div className="mb-3">
                                         <textarea
                                             className="form-control"
                                             name="additional_remarks"
                                             value={value.additional_remarks}
                                             onChange={onHandleChange}
-                                            placeholder="Enter additional remarks..."
+                                            placeholder="Enter remarks..."
                                         ></textarea>
                                     </div>
                                 </div>
                             </div>
                             <div className="card mb-3" id="engineerInfo">
                                 <div className="card-body">
-                                    <h4 className="pname">Specification</h4>
+                                    <h4 className="pname">Fault Description</h4>
                                     <div className="mb-3">
                                         <textarea
                                             className="form-control"
                                             name="specification"
                                             value={value.specification}
                                             onChange={onHandleChange}
-                                            placeholder="Enter specifications..."
+                                            placeholder="Enter Fault Description..."
                                         ></textarea>
                                     </div>
                                 </div>

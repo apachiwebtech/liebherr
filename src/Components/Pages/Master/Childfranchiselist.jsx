@@ -1,16 +1,17 @@
 import axios from 'axios';
-import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
 import Franchisemaster from './Franchisemaster';
 
-export function Franchisemasterlist(params) {
-    
-    const [Franchisemasterdata, setFranchisemasterdata] = useState([]);
+
+export function ChildFranchiselist(params) {
+    const [Franchisemasterdata, setChildfranchisemasterdata] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
     const [formData, setFormData] = useState({
         title: "",
+        pfranchise_id: "",
         password: "",
         contact_person: '',
         email:"",
@@ -42,17 +43,16 @@ export function Franchisemasterlist(params) {
         const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
         return date.toLocaleDateString('en-GB', options).replace(/\//g, '-'); // Convert to 'DD-MM-YYYY' format
     };
-   
-    const fetchFranchisemasterlist = async () => {
+
+    const fetchChildfranchisemasterlist = async () => {
         try {
-            const response = await axios.get(`${Base_Url}/getmasterlist`);
-            setFranchisemasterdata(response.data);
+            const response = await axios.get(`${Base_Url}/getchildFranchiseDetails`);
+            setChildfranchisemasterdata(response.data);
         } catch (error) {
             console.error('Error fetching franchisemasterdata:', error);
-            setFranchisemasterdata([]);
+            setChildfranchisemasterdata([]);
         }
     };
-   
     const handleChangestatus = (e) => {
         try {
           const dataId = e.target.getAttribute('data-id');
@@ -96,7 +96,7 @@ export function Franchisemasterlist(params) {
                 licarecode:'',
                 partner_name:'',
             })
-            fetchFranchisemasterlist();
+            fetchChildfranchisemasterlist();
         } catch (error) {
             console.error('Error deleting user:', error);
         }
@@ -113,7 +113,7 @@ export function Franchisemasterlist(params) {
         }
     };
     useEffect(() => {
-        fetchFranchisemasterlist();
+        fetchChildfranchisemasterlist();
     }, []);
 
     const [isOpen, setIsOpen] = useState({}); // State to track which rows are expanded
@@ -135,29 +135,34 @@ export function Franchisemasterlist(params) {
 
     return (
         <div className="tab-content">
-            <Franchisemaster />
             <div className="row mp0" >
                 <div className="col-md-12 col-12">
                     <div className="card mb-3 tab_box">
 
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
-                            <div className='p-1 text-right'>
-                                <Link to={`/addmaster/masterid`}><button className='btn btn-primary'>Add  Master Franchise </button></Link>
-                            </div>
+                        <div className="p-1 text-right">
+                        <button
+                            className="btn btn-primary"
+                            onClick={() => navigate("/Childfranchisemaster")}
+                        >
+                            Add Master Franchise
+                        </button>
+                        </div>
                             <table className="table">
                                 <thead>
                                      <tr>
                                         <th width="3%">#</th>
-                                        <th width="2%">Name</th>
+                                        <th width="15%">Parent Franchise Name</th>
+                                        <th width="15%">Child Franchise Name</th>
                                         <th width="8%">Email</th>
-                                        <th width="8%">Mobile Number</th>
-                                        <th width="10%">Licare Code</th>
-                                        <th width="8%">Partner Name</th>
-                                        <th width="8%">Country</th>
+                                        <th width="8%">Mobile No</th>
+                                        <th width="8%">Licare Code</th>
+                                        <th width="15%">Partner Name</th>
+                                        <th width="10%">Country</th>
                                         <th width="8%">Region</th>
-                                        <th width="8%">State</th>
-                                        <th width="8%">District</th>
-                                        <th width="5%">Edit</th>                                       
+                                        <th width="10%">State</th>
+                                        <th width="10%">District</th>
+                                        <th width="5%">Edit</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -166,10 +171,11 @@ export function Franchisemasterlist(params) {
                                         return (
                                             <tr key={item.id}>
                                                 <td >{index + 1}</td>
+                                                <td >{item.parentfranchisetitle}</td>
                                                 <td >{item.title}</td>
                                                 <td >{item.email}</td>
                                                 <td >{item.mobile_no}</td>
-                                                <td >{item.licarecode}</td>
+                                                <td >{item.licare_code}</td>
                                                 <td >{item.partner_name}</td>
                                                 <td >{item.country_name}</td>
                                                 <td >{item.region_name}</td>
@@ -177,13 +183,18 @@ export function Franchisemasterlist(params) {
                                                 <td >{item.district_name}</td>
 
                                                 <td >
-                                                    <Link to={`/Masterfranchise/${item.id}`}> <button
-                                                        className='btn'
-                                                        title="Edit"
-                                                        style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                                                    >
-                                                        <FaPencilAlt />
-                                                    </button></Link>
+                                                <Link to={`/Childfranchisemaster/${item.id}`}><button
+                                                className='btn'
+                                                style={{
+                                                    backgroundColor: 'transparent',
+                                                    border: 'none',
+                                                    color:  'blue',
+                                                    fontSize: '20px',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                <FaPencilAlt />
+                                            </button></Link>
                                                 </td>
                                                 {/* <td >
                                                     <button
@@ -196,21 +207,6 @@ export function Franchisemasterlist(params) {
                                                     >
                                                         <FaEye />
                                                     </button>
-                                                </td> */}
-                                                {/* <td style={{ padding: "10px" }}>
-                                                    <label class="switch">
-                                                        <input
-                                                            type="checkbox"
-                                                            onChange={handleChangestatus}
-                                                            data-id={item.id}
-                                                            checked={item.status === 1}  // Check if status is 1 (checked)
-                                                            className="status"
-                                                        />
-
-
-                                                        <span class="slider round"></span>
-                                                    </label>
-
                                                 </td> */}
                                             </tr>
                                         )

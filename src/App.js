@@ -42,6 +42,7 @@ import Area from './Components/Pages/Master/Area';
 import ProMaster from './Components/Pages/Master/ProMaster';
 import { Products } from './Components/Pages/Master/Products';
 import Franchisemaster from './Components/Pages/Master/Franchisemaster';
+import { ChildFranchiselist } from './Components/Pages/Master/Childfranchiselist';
 import EngineerMaster from './Components/Pages/Master/EngineerMaster';
 import Channelpartnertabs from './Components/Pages/Master/Channelpartnertabs';
 import Complainttabs from './Components/Pages/Master/Complainttabs';
@@ -323,8 +324,8 @@ const Router = createBrowserRouter([
 
       },
       {
-        path:"/franchisemasterlist",
-        element: <Franchisemasterlist/>
+        path:"/childFranchiselist",
+        element: <ChildFranchiselist/>
       },
       {
         path: "/engineermaster",
@@ -332,12 +333,25 @@ const Router = createBrowserRouter([
 
       },
       {
+        path:"/franchisemasterlist",
+        element: <Franchisemasterlist/>
+      },
+      {
         path: "/MasterFranchise",
         element: <MasterFranchise />,
 
       },
       {
+        path: "/Masterfranchise/:masterid",
+        element: <MasterFranchise />,
+     },
+      {
         path: "/Childfranchisemaster",
+        element: <Childfranchisemaster />,
+
+      },
+      {
+        path: "/Childfranchisemaster/:childid",
         element: <Childfranchisemaster />,
 
       },
@@ -379,9 +393,11 @@ const Router = createBrowserRouter([
         element: <AddProduct />,
       },
       {
-        path: "/addengineer/:engineerid",
+        path: "/addengineer/:engineer_id",
         element: <EngineerMaster />,
       },
+      
+     
       {
         path: "/engineer",
         element: <Engineer />,
