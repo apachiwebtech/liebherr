@@ -63,8 +63,54 @@ const Childfranchisemaster = () => {
     try {
       
       const response = await axios.get(`${Base_Url}/getchildfranchisepopulate/${childid}`);
+      console.log(response.data);
+      setFormData({
+        ...response.data[0],
+        // Rename keys to match your formData structure
+        pfranchise_id: response.data[0].pfranchise_id,
+        title: response.data[0].title,
+        contact_person: response.data[0].contact_person,
+        email: response.data[0].email,
+        mobile_no: response.data[0].mobile_no,
+        password: response.data[0].password,
+        country_id: response.data[0].country_id,
+        region_id: response.data[0].region_id,
+        state: response.data[0].geostate_id,
+        area: response.data[0].area_id,
+        city: response.data[0].geocity_id,
+        pincode_id: response.data[0].pincode_id,
+        address: response.data[0].address,
+        licare_code: response.data[0].licare_code,
+        partner_name: response.data[0].partner_name,
+        website: response.data[0].webste,
+        gst_number: response.data[0].gstno,
+        pan_number: response.data[0].panno,
+        bank_name: response.data[0].bankname,
+        bank_account_number: response.data[0].bankacc,
+        bank_ifsc_code: response.data[0].bankifsc,
+        bank_address: response.data[0].bankaddress,
+        last_working_date: response.data[0].lastworkinddate,
+        contract_activation_date: response.data[0].contractacti,
+        contract_expiration_date: response.data[0].contractexpir,
+        with_liebherr: response.data[0].withliebher
+      });
+      
+      if (response.data[0].country_id) {
+        fetchregion(response.data[0].country_id);
+      }
+      if (response.data[0].region_id) {
+        fetchState(response.data[0].region_id);
+      }
+      if (response.data[0].geostate_id) {
+        fetchdistricts(response.data[0].geostate_id);
+      }
+      if (response.data[0].area_id) {
+        fetchCity(response.data[0].area_id);
+      }
+      if (response.data[0].geocity_id) {
+        fetchpincode(response.data[0].geocity_id);
+      }
 
-      setFormData(response.data[0]);
     } catch (error) {
       console.error("Error fetching Parentfranchise:", error);
     }
@@ -671,7 +717,7 @@ const Childfranchisemaster = () => {
                       type="date"
                       className="form-control"
                       name="last_working_date"
-                      value={formData.last_working_date}
+                      value={formData.last_working_date ? formData.last_working_date.split('T')[0] : ''}
                       onChange={handleChange}
                     />
                   </div>
@@ -682,7 +728,7 @@ const Childfranchisemaster = () => {
                       type="date"
                       className="form-control"
                       name="contract_activation_date"
-                      value={formData.contract_activation_date}
+                      value={formData.contract_activation_date ? formData.contract_activation_date.split('T')[0] : ''}
                       onChange={handleChange}
                     />
                   </div>
@@ -693,7 +739,7 @@ const Childfranchisemaster = () => {
                       type="date"
                       className="form-control"
                       name="contract_expiration_date"
-                      value={formData.contract_expiration_date}
+                      value={formData.contract_expiration_date ? formData.contract_expiration_date.split('T')[0] : ''}
                       onChange={handleChange}
                     />
                   </div>
@@ -704,7 +750,7 @@ const Childfranchisemaster = () => {
                       type="date"
                       className="form-control"
                       name="with_liebherr"
-                      value={formData.with_liebherr}
+                      value={formData.with_liebherr ? formData.with_liebherr.split('T')[0] : ''}
                       onChange={handleChange}
                     />
                   </div>
