@@ -3023,8 +3023,7 @@ app.post("/getticketendcustomer", async (req, res) => {
     // Product of End Customer using customer_id | in Table awt_customer id is primary key and customer_id is foreign key in awt_customerlocation
     const sql1 = `
     SELECT * FROM awt_uniqueproductmaster
-    WHERE deleted = 0 AND CustomerID = @customerId
-  `;
+    WHERE deleted = 0 AND CustomerID = @customerId `;
     // console.log(result.recordset[0])
     const result1 = await pool.request()
       .input('customerId', result.recordset[0].customer_id)

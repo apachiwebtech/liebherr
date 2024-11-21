@@ -195,6 +195,8 @@ export function Registercomplaint(params) {
     const searchResult = () => {
         setHasSearched(true); // Set that a search has been performed
 
+        setForm(false)
+
         axios.post(`${Base_Url}/getticketendcustomer`, { searchparam: serachval })
             .then((res) => {
                 console.log(res.data.information)
