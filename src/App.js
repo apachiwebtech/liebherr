@@ -399,7 +399,7 @@ const Router = createBrowserRouter([
         element: <AddProduct />,
       },
       {
-        path: "/addengineer/:engineer_id",
+        path: "/emgineermaster/:engineerid",
         element: <EngineerMaster />,
       },
       

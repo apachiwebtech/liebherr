@@ -113,7 +113,7 @@ export function Engineerlist(params) {
 
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
                             <div className='p-1 text-right'>
-                                <Link to={`/addengineer/requestengineer/`}><button className='btn btn-primary'>Add Engineer</button></Link>
+                                <Link to={`/engineermaster`}><button className='btn btn-primary'>Add Engineer</button></Link>
                             </div>
                             <table className="table">
                                 <thead>
@@ -140,12 +140,8 @@ export function Engineerlist(params) {
                                                 <td >{item.employee_code}</td>
 
                                                 <td >
-                                                    <Link to={`/requestengineer/${item.id}`}> <button
+                                                    <Link to={`/engineermaster/${item.id}`}> <button
                                                         className='btn'
-                                                        onClick={() => {
-                                                            // alert(item.id)
-                                                            edit(item.id)
-                                                        }}
                                                         title="Edit"
                                                         style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
                                                     >

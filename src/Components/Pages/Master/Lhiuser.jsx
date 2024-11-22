@@ -147,6 +147,12 @@ const Lhiuser = () => {
               .then((response) => {
                 setFormData({
                   Lhiuser: "",
+                  Usercode: "",
+                  Password: "",
+                  mobile_no: "",
+                  email: "",
+                  status: "",
+                  remarks: "",
                 });
                 fetchUsers();
 
