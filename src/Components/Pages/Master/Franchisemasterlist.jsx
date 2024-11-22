@@ -142,7 +142,7 @@ export function Franchisemasterlist(params) {
 
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
                             <div className='p-1 text-right'>
-                                <Link to={`/addmaster/masterid`}><button className='btn btn-primary'>Add  Master Franchise </button></Link>
+                                <Link to={`/Masterfranchise`}><button className='btn btn-primary'>Add  Master Franchise </button></Link>
                             </div>
                             <table className="table">
                                 <thead>

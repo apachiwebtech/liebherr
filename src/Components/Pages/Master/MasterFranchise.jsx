@@ -1,10 +1,11 @@
 import axios from "axios";
-import CryptoJS from 'crypto-js'; 
+import CryptoJS from 'crypto-js';
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
 import { useParams } from "react-router-dom";
 import Franchisemaster from '../Master/Franchisemaster';
+import md5 from 'md5';
 const MasterFranchise = (params) => {
   // Step 1: Add this state to track errors
   const { masterid } = useParams();
@@ -28,30 +29,29 @@ const MasterFranchise = (params) => {
   const [formData, setFormData] = useState({
     title: "",
     password: "",
-    passwordmd5: "",
     contact_person: '',
-    email:"",
-    mobile_no:'',
-    address:'',
-    country_id:'',
-    region_id:'',
-    state:'',
-    area:'',
-    city:'',
-    pincode_id:'',
-    website:'',
-    gst_no:'',
-    panno:'',
-    bank_name:'',
-    bank_acc:'',
-    bank_ifsc:'',
-    withliebher:'',
-    lastworkinddate:'' || '',
-    contract_acti:'',
-    contract_expir:'',
-    bank_address:'',
-    licarecode:'',
-    partner_name:'',
+    email: "",
+    mobile_no: '',
+    address: '',
+    country_id: '',
+    region_id: '',
+    state: '',
+    area: '',
+    city: '',
+    pincode_id: '',
+    website: '',
+    gst_no: '',
+    panno: '',
+    bank_name: '',
+    bank_acc: '',
+    bank_ifsc: '',
+    withliebher: '',
+    lastworkinddate: '' || '',
+    contract_acti: '',
+    contract_expir: '',
+    bank_address: '',
+    licarecode: '',
+    partner_name: '',
 
 
 
@@ -133,69 +133,69 @@ const MasterFranchise = (params) => {
   };
 
   const fetchFranchisemasterpopulate = async (masterid) => {
-    
-    try {
-        const response = await axios.get(`${Base_Url}/getmasterfranchisepopulate/${masterid}`);
-        setFormData({
-          ...response.data[0],
-          // Rename keys to match your formData structure
-          title: response.data[0].title,
-          contact_person: response.data[0].contact_person,
-          email: response.data[0].email,
-          mobile_no: response.data[0].mobile_no,
-          password: response.data[0].password,
-          country_id: response.data[0].country_id,
-          region_id: response.data[0].region_id,
-          state: response.data[0].geostate_id,
-          area: response.data[0].area_id,
-          city: response.data[0].geocity_id,
-          pincode_id: response.data[0].pincode_id,
-          address: response.data[0].address,
-          licare_code: response.data[0].licare_code,
-          partner_name: response.data[0].partner_name,
-          website: response.data[0].webste,
-          gst_no: response.data[0].gstno,
-          panno: response.data[0].panno,
-          bank_name: response.data[0].bankname,
-          bank_acc: response.data[0].bankacc,
-          bank_ifsc: response.data[0].bankifsc,
-          bank_address: response.data[0].bankaddress,
-          lastworkinddate: response.data[0].lastworkinddate,
-          contract_acti: response.data[0].contractacti,
-          contract_expir: response.data[0].contractexpir,
-          withliebher: response.data[0].withliebher
-        });
 
-        
+    try {
+      const response = await axios.get(`${Base_Url}/getmasterfranchisepopulate/${masterid}`);
+      setFormData({
+        ...response.data[0],
+        // Rename keys to match your formData structure
+        title: response.data[0].title,
+        contact_person: response.data[0].contact_person,
+        email: response.data[0].email,
+        mobile_no: response.data[0].mobile_no,
+        password: response.data[0].password,
+        country_id: response.data[0].country_id,
+        region_id: response.data[0].region_id,
+        state: response.data[0].geostate_id,
+        area: response.data[0].area_id,
+        city: response.data[0].geocity_id,
+        pincode_id: response.data[0].pincode_id,
+        address: response.data[0].address,
+        licare_code: response.data[0].licare_code,
+        partner_name: response.data[0].partner_name,
+        website: response.data[0].webste,
+        gst_no: response.data[0].gstno,
+        panno: response.data[0].panno,
+        bank_name: response.data[0].bankname,
+        bank_acc: response.data[0].bankacc,
+        bank_ifsc: response.data[0].bankifsc,
+        bank_address: response.data[0].bankaddress,
+        lastworkinddate: response.data[0].lastworkinddate,
+        contract_acti: response.data[0].contractacti,
+        contract_expir: response.data[0].contractexpir,
+        withliebher: response.data[0].withliebher
+      });
+
+
       setIsEdit(true);
 
-        if (response.data[0].country_id) {
-          fetchregion(response.data[0].country_id);
-        }
-        if (response.data[0].region_id) {
-          fetchState(response.data[0].region_id);
-        }
-        if (response.data[0].geostate_id) {
-          fetchdistricts(response.data[0].geostate_id);
-        }
-        if (response.data[0].area_id) {
-          fetchCity(response.data[0].area_id);
-        }
-        if (response.data[0].geocity_id) {
-          fetchpincode(response.data[0].geocity_id);
-        }
-        
+      if (response.data[0].country_id) {
+        fetchregion(response.data[0].country_id);
+      }
+      if (response.data[0].region_id) {
+        fetchState(response.data[0].region_id);
+      }
+      if (response.data[0].geostate_id) {
+        fetchdistricts(response.data[0].geostate_id);
+      }
+      if (response.data[0].area_id) {
+        fetchCity(response.data[0].area_id);
+      }
+      if (response.data[0].geocity_id) {
+        fetchpincode(response.data[0].geocity_id);
+      }
+
     } catch (error) {
-        console.error('Error fetching franchisemasterdata:', error);
-        setFormData([]);
+      console.error('Error fetching franchisemasterdata:', error);
+      setFormData([]);
     }
-};
+  };
 
   useEffect(() => {
     fetchUsers();
     fetchcountries();
-   
-    if (masterid!=0){
+
+    if (masterid != 0) {
       fetchFranchisemasterpopulate(masterid);
     }
 
@@ -210,7 +210,7 @@ const MasterFranchise = (params) => {
     if (name === 'password') {
       // Hash the password before setting the state
       const hashedPassword = CryptoJS.MD5(value).toString();
-      setFormData(prev =>({
+      setFormData(prev => ({
         ...prev,
         password: value,  // Update the password field itself
         passwordmd5: hashedPassword,  // Update the hashed password
@@ -257,10 +257,10 @@ const MasterFranchise = (params) => {
   // Step 2: Add form validation function
   const validateForm = () => {
     const newErrors = {};
-    
+
     // Helper function to safely check empty values
     const isEmpty = (value) => {
-        return value === undefined || value === null || String(value).trim() === '';
+      return value === undefined || value === null || String(value).trim() === '';
     };
 
     // Text/Email/Number inputs validation
@@ -297,7 +297,7 @@ const MasterFranchise = (params) => {
     if (isEmpty(formData.address)) newErrors.address = "Address is required.";
 
     return newErrors;
-};
+  };
   //handlesubmit form
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -318,24 +318,46 @@ const MasterFranchise = (params) => {
         "Do you want to submit the data?"
       );
       if (confirmSubmission) {
-
-        const apiData = {
+        const hashedFormData = {
           ...formData,
-          password: formData.passwordmd5, // Send hashed password to API
-          created_by
+          password: md5(formData.password) // Hash the password using MD5
         };
         if (isEdit) {
           // For update, include duplicate check
           await axios
-            .put(`${Base_Url}/putfranchisedata`, { ...formData, created_by })
+            .put(`${Base_Url}/putfranchisedata`, { ...hashedFormData, created_by })
             .then((response) => {
               setFormData({
                 title: "",
                 password: "",
-                passwordmd5: "",
-                
+                contact_person: '',
+                email: "",
+                mobile_no: '',
+                address: '',
+                country_id: '',
+                region_id: '',
+                state: '',
+                area: '',
+                city: '',
+                pincode_id: '',
+                website: '',
+                gst_no: '',
+                panno: '',
+                bank_name: '',
+                bank_acc: '',
+                bank_ifsc: '',
+                withliebher: '',
+                lastworkinddate: '' || '',
+                contract_acti: '',
+                contract_expir: '',
+                bank_address: '',
+                licarecode: '',
+                partner_name: '',
+
+
               });
               fetchUsers();
+              setIsEdit(false);
             })
             .catch((error) => {
               if (error.response && error.response.status === 409) {
@@ -354,30 +376,29 @@ const MasterFranchise = (params) => {
               setFormData({
                 title: "",
                 password: '',
-                passwordmd5: "",
                 contact_person: '',
-                email:"",
-                mobile_no:'',
-                address:'',
-                country_id:'',
-                region_id:'',
-                state:'',
-                area:'',
-                city:'',
-                pincode_id:'',
-                website:'',
-                gst_no:'',
-                panno:'',
-                bank_name:'',
-                bank_acc:'',
-                bank_ifsc:'',
-                withliebher:'',
-                lastworkinddate:'',
-                contract_acti:'',
-                contract_expir:'',
-                bank_address:'',
-                licarecode:'',
-                partner_name:'',
+                email: "",
+                mobile_no: '',
+                address: '',
+                country_id: '',
+                region_id: '',
+                state: '',
+                area: '',
+                city: '',
+                pincode_id: '',
+                website: '',
+                gst_no: '',
+                panno: '',
+                bank_name: '',
+                bank_acc: '',
+                bank_ifsc: '',
+                withliebher: '',
+                lastworkinddate: '',
+                contract_acti: '',
+                contract_expir: '',
+                bank_address: '',
+                licarecode: '',
+                partner_name: '',
 
               });
               fetchUsers();
@@ -568,7 +589,7 @@ const MasterFranchise = (params) => {
                       )}
                       {/* Show duplicate error */}
                     </div>
-                     <div className="col-3">
+                    <div className="col-3">
                       <label htmlFor="PartnerNameInput" className="input-field">
                         Partner Name
                       </label>
@@ -588,7 +609,7 @@ const MasterFranchise = (params) => {
                         <small className="text-danger">{duplicateError}</small>
                       )}
                       {/* Show duplicate error  */}
-                    </div> 
+                    </div>
 
                     <div className="col-3">
                       <label
@@ -961,9 +982,9 @@ const MasterFranchise = (params) => {
                       )}
                       {/* Show duplicate error */}
                     </div>
-                    </div>
+                  </div>
 
-                      <div className="row">
+                  <div className="row">
                     <div className="col-6">
                       <label htmlFor="BankAddressInput" className="input-field">
                         Bank Address
