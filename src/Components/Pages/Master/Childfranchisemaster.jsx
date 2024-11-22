@@ -4,6 +4,8 @@ import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
 import Franchisemaster from '../Master/Franchisemaster';
 import { useParams } from "react-router-dom";
+import md5 from 'md5';
+
 const Childfranchisemaster = () => {
   const { childid } = useParams();
 
@@ -296,9 +298,13 @@ const Childfranchisemaster = () => {
         "Do you want to submit the data?"
       );
       if (confirmSubmission) {
+        const hashedFormData = {
+          ...formData,
+          password: md5(formData.password) // Hash the password using MD5
+        };
         if (isEdit) {
           await axios
-            .put(`${Base_Url}/putchildfranchise`, { ...formData, created_by })
+          .put(`${Base_Url}/putchildfranchise`, { ...hashedFormData, created_by })
             .then((response) => {
               setFormData({
                 title: "",
@@ -340,7 +346,7 @@ const Childfranchisemaster = () => {
             });
         } else {
 
-          await axios.post(`${Base_Url}/postchildfranchise`, { ...formData, created_by })
+          await axios.post(`${Base_Url}/postchildfranchise`, { ...hashedFormData, created_by })
             .then((response) => {
               setFormData({
                 title: "",

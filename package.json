@@ -13,6 +13,7 @@
     "datatables.net-dt": "^2.1.8",
     "datatables.net-react": "^1.0.0",
     "js-md5": "^0.8.3",
+    "md5": "^2.3.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hot-toast": "^2.4.1",
