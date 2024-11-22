@@ -5,7 +5,6 @@ import { Base_Url } from "../../Utils/Base_Url";
 import Franchisemaster from '../Master/Franchisemaster';
 import { useParams } from "react-router-dom";
 import md5 from 'md5';
-
 const Childfranchisemaster = () => {
   const { childid } = useParams();
 
@@ -121,7 +120,7 @@ const Childfranchisemaster = () => {
   const fetchParentfranchise = async () => {
     try {
       const response = await axios.get(`${Base_Url}/getparentfranchise`);
-      console.log(response.data);
+      console.log("pf",response.data);
       setParentfranchise(response.data);
     } catch (error) {
       console.error("Error fetching Parentfranchise:", error);
