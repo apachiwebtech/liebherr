@@ -937,7 +937,7 @@ const handleSubmitTicketFormData = (e) => {
               </div>
             </div>
             
-
+{/* // */}
           <div className="card" id="attachmentInfocs">
             <div className="card-body">
               <h4 className="pname" style={{ fontSize: "14px"}}>Attachment 2</h4>
