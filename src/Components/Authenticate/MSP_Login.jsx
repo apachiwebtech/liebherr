@@ -5,9 +5,10 @@ import { useNavigate } from "react-router-dom";
 import md5 from "js-md5";
 import logo from  '../../images/Liebherr-logo-768x432.png'
 import back from '../../images/login.jpeg'
+import { Franchisemasterlist } from "../Pages/Master/Franchisemasterlist";
 
 export function MSP_Login() {
-    const [title, settitle] = useState("");
+    const [Lhiuser, setLhiuser] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
 
@@ -20,17 +21,17 @@ export function MSP_Login() {
             const hashpass = md5(password)
            
             const response = await axios.post(`${Base_Url}/loginmsp`, {
-                title: title,
+                Lhiuser: Lhiuser,
                 password: hashpass,
             });
 
           
             if (response.data) {
                 localStorage.setItem("userId", response.data.id);
-                localStorage.setItem("title", response.data.title);
+                localStorage.setItem("title", response.data.Lhiuser);
 
                 // Navigate to the home page
-                navigate('/');
+                navigate('/Franchisemasterlist');
             } else {
                 alert("Invalid username or password");
             }
@@ -57,11 +58,11 @@ export function MSP_Login() {
                                 <input
                                     type="tel"
                                     style={{ borderRadius: '5px' }}
-                                    name="title"
+                                    name="Lhiuser"
                                     className="form-control form-control-user"
                                     placeholder="Enter Username..."
-                                    value={title}
-                                    onChange={(e) => settitle(e.target.value)}
+                                    value={Lhiuser}
+                                    onChange={(e) => setLhiuser(e.target.value)}
                                 />
                             </div>
                             <div className="form-group mb-3">

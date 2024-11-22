@@ -1,5 +1,5 @@
 import axios from "axios";
-import CryptoJS from 'crypto-js';
+import CryptoJS from 'crypto-js'; 
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
@@ -28,6 +28,7 @@ const MasterFranchise = (params) => {
   const [formData, setFormData] = useState({
     title: "",
     password: "",
+    passwordmd5: "",
     contact_person: '',
     email:"",
     mobile_no:'',
@@ -45,7 +46,7 @@ const MasterFranchise = (params) => {
     bank_acc:'',
     bank_ifsc:'',
     withliebher:'',
-    last_working_date:'',
+    lastworkinddate:'' || '',
     contract_acti:'',
     contract_expir:'',
     bank_address:'',
@@ -138,7 +139,6 @@ const MasterFranchise = (params) => {
         setFormData({
           ...response.data[0],
           // Rename keys to match your formData structure
-          pfranchise_id: response.data[0].pfranchise_id,
           title: response.data[0].title,
           contact_person: response.data[0].contact_person,
           email: response.data[0].email,
@@ -160,7 +160,7 @@ const MasterFranchise = (params) => {
           bank_acc: response.data[0].bankacc,
           bank_ifsc: response.data[0].bankifsc,
           bank_address: response.data[0].bankaddress,
-          last_working_date: response.data[0].lastworkinddate,
+          lastworkinddate: response.data[0].lastworkinddate,
           contract_acti: response.data[0].contractacti,
           contract_expir: response.data[0].contractexpir,
           withliebher: response.data[0].withliebher
@@ -210,11 +210,11 @@ const MasterFranchise = (params) => {
     if (name === 'password') {
       // Hash the password before setting the state
       const hashedPassword = CryptoJS.MD5(value).toString();
-      setFormData({
-        ...formData,
-        [name]: value,  // Update the password field itself
+      setFormData(prev =>({
+        ...prev,
+        password: value,  // Update the password field itself
         passwordmd5: hashedPassword,  // Update the hashed password
-      });
+      }));
     } else {
       // Update other fields normally
       setFormData({
@@ -270,7 +270,7 @@ const MasterFranchise = (params) => {
     if (isEmpty(formData.email)) newErrors.email = "Email is required.";
     if (isEmpty(formData.mobile_no)) newErrors.mobile_no = "Mobile Number is required.";
     if (isEmpty(formData.partner_name)) newErrors.partner_name = "Partner Name is required.";
-    if (isEmpty(formData.password)) newErrors.password = "Password is required.";
+    if (isEmpty(formData.password || !formData.passwordmd5)) newErrors.password = "Password is required.";
     // if (isEmpty(formData.website)) newErrors.website = "Website is required.";
     // if (isEmpty(formData.gst_no)) newErrors.gst_no = "GST Number is required.";
     // if (isEmpty(formData.panno)) newErrors.panno = "PAN Number is required.";
@@ -280,7 +280,7 @@ const MasterFranchise = (params) => {
 
     // Date inputs validation
     if (!formData.withliebher) newErrors.withliebher = "With Liebherr date is required.";
-    // if (!formData.last_working_date) newErrors.last_working_date = "Last Working Date is required.";
+    // if (!formData.lastworkinddate) newErrors.lastworkinddate = "Last Working Date is required.";
     //if (!formData.contract_acti) newErrors.contract_acti = "Contract Activation Date is required.";
     //if (!formData.contract_expir) newErrors.contract_expir = "Contract Expiration Date is required.";
 
@@ -318,6 +318,12 @@ const MasterFranchise = (params) => {
         "Do you want to submit the data?"
       );
       if (confirmSubmission) {
+
+        const apiData = {
+          ...formData,
+          password: formData.passwordmd5, // Send hashed password to API
+          created_by
+        };
         if (isEdit) {
           // For update, include duplicate check
           await axios
@@ -325,6 +331,8 @@ const MasterFranchise = (params) => {
             .then((response) => {
               setFormData({
                 title: "",
+                password: "",
+                passwordmd5: "",
                 
               });
               fetchUsers();
@@ -346,6 +354,7 @@ const MasterFranchise = (params) => {
               setFormData({
                 title: "",
                 password: '',
+                passwordmd5: "",
                 contact_person: '',
                 email:"",
                 mobile_no:'',
@@ -363,7 +372,7 @@ const MasterFranchise = (params) => {
                 bank_acc:'',
                 bank_ifsc:'',
                 withliebher:'',
-                last_working_date:'',
+                lastworkinddate:'',
                 contract_acti:'',
                 contract_expir:'',
                 bank_address:'',
@@ -896,14 +905,14 @@ const MasterFranchise = (params) => {
                       <input
                         type="date"
                         className="form-control"
-                        name="last_working_date"
+                        name="lastworkinddate"
                         id="LastWorkingDateInput"
-                        value={formData.last_working_date ? formData.last_working_date.split('T')[0] : ''}
+                        value={formData.lastworkinddate ? formData.lastworkinddate.split('T')[0] : ''}
                         onChange={handleChange}
                         placeholder="Select Last Working Date"
                       />
-                      {errors.last_working_date && (
-                        <small className="text-danger">{errors.last_working_date}</small>
+                      {errors.lastworkinddate && (
+                        <small className="text-danger">{errors.lastworkinddate}</small>
                       )}
                       {duplicateError && (
                         <small className="text-danger">{duplicateError}</small>
