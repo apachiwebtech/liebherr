@@ -12,7 +12,7 @@ const Childfranchisemaster = () => {
   const [users, setUsers] = useState([]);
   const [duplicateError, setDuplicateError] = useState("");
   const [isEdit, setIsEdit] = useState(false);
-  
+
   // const [filteredUsers, setFilteredUsers] = useState([]);
   // const [currentPage, setCurrentPage] = useState(0);
   // const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -24,9 +24,9 @@ const Childfranchisemaster = () => {
   const [area, setdistricts] = useState([])
   const [city, setCity] = useState([])
   const [pincode, setPincode] = useState([])
-  const created_by = localStorage.getItem("userId"); // Get user ID from localStorage
-  const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
-  
+    const created_by = localStorage.getItem("userId"); // Get user ID from localStorage
+    const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
+
   const [formData, setFormData] = useState({
     title: "",
     pfranchise_id: "",
@@ -58,7 +58,7 @@ const Childfranchisemaster = () => {
 
   const fetchchildfranchisepopulate = async (childid) => {
     try {
-      
+
       const response = await axios.get(`${Base_Url}/getchildfranchisepopulate/${childid}`);
       setFormData({
         ...response.data[0],
@@ -90,7 +90,7 @@ const Childfranchisemaster = () => {
         contract_expiration_date: response.data[0].contractexpir,
         with_liebherr: response.data[0].withliebher
       });
-      
+
       setIsEdit(true);
 
       if (response.data[0].country_id) {
@@ -137,21 +137,21 @@ const Childfranchisemaster = () => {
     }
   };
 
-    //This is for State Dropdown
+  //This is for State Dropdown
 
-    async function getState(params) {
-      axios.get(`${Base_Url}/getstate`)
-          .then((res) => {
-              if (res.data) {
+  async function getState(params) {
+    axios.get(`${Base_Url}/getstate`)
+      .then((res) => {
+        if (res.data) {
 
-                  setState(res.data)
+          setState(res.data)
 
-              }
-          })
+        }
+      })
   }
 
 
-  const fetchcountries= async () => {
+  const fetchcountries = async () => {
     try {
       const response = await axios.get(`${Base_Url}/getcountries`);
       setCountries(response.data);
@@ -161,7 +161,7 @@ const Childfranchisemaster = () => {
   };
 
   //region
-  const fetchregion= async (country_id) => {
+  const fetchregion = async (country_id) => {
     try {
       const response = await axios.get(`${Base_Url}/getregionscity/${country_id}`);
       setRegions(response.data);
@@ -171,7 +171,7 @@ const Childfranchisemaster = () => {
   };
 
   //geostate
-  const fetchState= async (region_id) => {
+  const fetchState = async (region_id) => {
     try {
       const response = await axios.get(`${Base_Url}/getgeostatescity/${region_id}`);
       setState(response.data);
@@ -180,7 +180,7 @@ const Childfranchisemaster = () => {
     }
   };
 
-  const fetchdistricts= async (geostateID) => {
+  const fetchdistricts = async (geostateID) => {
     try {
       const response = await axios.get(`${Base_Url}/getdistrictcity/${geostateID}`);
       setdistricts(response.data);
@@ -189,7 +189,7 @@ const Childfranchisemaster = () => {
     }
   };
 
-  const fetchCity= async (area_id) => {
+  const fetchCity = async (area_id) => {
     try {
       const response = await axios.get(`${Base_Url}/getgeocities_p/${area_id}`);
       setCity(response.data);
@@ -198,7 +198,7 @@ const Childfranchisemaster = () => {
     }
   };
 
-  const fetchpincode= async (cityid) => {
+  const fetchpincode = async (cityid) => {
     try {
       const response = await axios.get(`${Base_Url}/getpincodebyid/${cityid}`);
       setPincode(response.data);
@@ -211,7 +211,7 @@ const Childfranchisemaster = () => {
     fetchcountries();
     fetchUsers();
     fetchParentfranchise();
-    
+
     if (childid && childid !== '0') {
       fetchchildfranchisepopulate(childid);
     }
@@ -225,7 +225,7 @@ const Childfranchisemaster = () => {
     }));
 
     // Handle dependent dropdowns
-    switch(name) {
+    switch (name) {
       case "country_id":
         fetchregion(value);
         break;
@@ -253,7 +253,7 @@ const Childfranchisemaster = () => {
     const newErrors = {};
 
     if (!formData.pfranchise_id) newErrors.pfranchise_id = "Parent Franchise selection is required.";
-  if (!formData.title.trim()) newErrors.title = "Child Franchise Field is required.";
+    if (!formData.title.trim()) newErrors.title = "Child Franchise Field is required.";
     if (!formData.contact_person.trim()) newErrors.contact_person = "Contact Person is required.";
     if (!formData.email.trim()) newErrors.email = "Email is required.";
     if (!formData.mobile_no.trim()) newErrors.mobile_no = "Mobile Number is required.";
@@ -282,7 +282,7 @@ const Childfranchisemaster = () => {
   //handlesubmit form
   const handleSubmit = async (e) => {
     e.preventDefault();
-   
+
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
       console.log("Validation Errors:", validationErrors);
@@ -300,34 +300,34 @@ const Childfranchisemaster = () => {
           await axios
             .put(`${Base_Url}/putchildfranchise`, { ...formData, created_by })
             .then((response) => {
-                setFormData({
-                  title: "",
-                  pfranchise_id: "",
-                  contact_person: "",
-                  email: "",
-                  mobile_no: "",
-                  password: "",
-                  country_id: "",
-                  region_id: "",
-                  state: "",
-                  area: "",
-                  city: "",
-                  pincode_id: "",
-                  address: "",
-                  licare_code: "",
-                  partner_name: "",
-                  website: "",
-                  gst_number: "",
-                  pan_number: "",
-                  bank_name: "",
-                  bank_account_number: "",
-                  bank_ifsc_code: "",
-                  bank_address: "",
-                  last_working_date: "",
-                  contract_activation_date: "",
-                  contract_expiration_date: "",
-                  with_liebherr: ""
-                });
+              setFormData({
+                title: "",
+                pfranchise_id: "",
+                contact_person: "",
+                email: "",
+                mobile_no: "",
+                password: "",
+                country_id: "",
+                region_id: "",
+                state: "",
+                area: "",
+                city: "",
+                pincode_id: "",
+                address: "",
+                licare_code: "",
+                partner_name: "",
+                website: "",
+                gst_number: "",
+                pan_number: "",
+                bank_name: "",
+                bank_account_number: "",
+                bank_ifsc_code: "",
+                bank_address: "",
+                last_working_date: "",
+                contract_activation_date: "",
+                contract_expiration_date: "",
+                with_liebherr: ""
+              });
               fetchUsers();
               setIsEdit(false);
             })
@@ -396,53 +396,53 @@ const Childfranchisemaster = () => {
             <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
               <form onSubmit={handleSubmit}>
                 <div className="row">
-                <div className="col-md-3">
-                        <label htmlFor="Parent Franchise" className="form-label pb-0 dropdown-label">
-                          Parent Franchise
-                        </label>
-                        <select
-                          className="form-select dropdown-select"
-                          name="pfranchise_id"
-                          value={formData.pfranchise_id}
-                          onChange={handleChange}
-                          style={{ fontSize: "18px" }}
-                        >
-                          <option value="">Select Parent Franchise</option>
-                          {Parentfranchise.map((pf) => (
-                            <option key={pf.id} value={pf.id}>
-                              {pf.title}
-                            </option>
-                          ))}
-                        </select>
-                        {errors.pfranchise_id && (
-                          <small className="text-danger">
-                            {errors.pfranchise_id}
-                          </small>
-                        )}
-                      </div>
+                  <div className="col-md-3">
+                    <label htmlFor="Parent Franchise" className="form-label pb-0 dropdown-label">
+                      Parent Franchise
+                    </label>
+                    <select
+                      className="form-select dropdown-select"
+                      name="pfranchise_id"
+                      value={formData.pfranchise_id}
+                      onChange={handleChange}
+                      style={{ fontSize: "18px" }}
+                    >
+                      <option value="">Select Parent Franchise</option>
+                      {Parentfranchise.map((pf) => (
+                        <option key={pf.id} value={pf.id}>
+                          {pf.title}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.pfranchise_id && (
+                      <small className="text-danger">
+                        {errors.pfranchise_id}
+                      </small>
+                    )}
+                  </div>
 
-                      <div className="col-md-3">
-                      <label
-                        htmlFor="ChildFranchiseMasterInput"
-                        className="input-field"
-                        style={{ marginBottom: "15px", fontSize: "18px" }}
-                      >
-                        Child Franchise Master
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        name="title"
-                        id="ChildFranchiseMasterInput"
-                        value={formData.title}
-                        onChange={handleChange}
-                        placeholder="Enter Child Franchise Master"
-                        style={{ fontSize: "18px" }}
-                      />
-                      {errors.title && (
-                        <small className="text-danger">{errors.title}</small>
-                      )}
-                      </div>
+                  <div className="col-md-3">
+                    <label
+                      htmlFor="ChildFranchiseMasterInput"
+                      className="input-field"
+                      style={{ marginBottom: "15px", fontSize: "18px" }}
+                    >
+                      Child Franchise Master
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="title"
+                      id="ChildFranchiseMasterInput"
+                      value={formData.title}
+                      onChange={handleChange}
+                      placeholder="Enter Child Franchise Master"
+                      style={{ fontSize: "18px" }}
+                    />
+                    {errors.title && (
+                      <small className="text-danger">{errors.title}</small>
+                    )}
+                  </div>
 
                   <div className="col-md-3">
                     <label className="input-field">Child Licare Code</label>
@@ -605,28 +605,28 @@ const Childfranchisemaster = () => {
                   </div>
 
                   <div className="col-md-3">
-                          <label htmlFor="area" className="input-field">
-                          Pincode
-                        </label>
-                        <select
-                          id="pincode"
-                          name="pincode_id"
-                          className="form-select"
-                          aria-label=".form-select-lg example"
-                          value={formData.pincode_id}
-                          onChange={handleChange}
-                        >
-                          <option value="">Select Pincode</option>
-                          {pincode.map((geoPincode) => (
-                            <option key={geoPincode.id} value={geoPincode.id}>
-                              {geoPincode.pincode}
-                            </option>
-                          ))}
-                        </select>
-                        {errors.pincode_id && (
-                          <small className="text-danger">{errors.pincode_id}</small>
-                        )}
-                      </div>
+                    <label htmlFor="area" className="input-field">
+                      Pincode
+                    </label>
+                    <select
+                      id="pincode"
+                      name="pincode_id"
+                      className="form-select"
+                      aria-label=".form-select-lg example"
+                      value={formData.pincode_id}
+                      onChange={handleChange}
+                    >
+                      <option value="">Select Pincode</option>
+                      {pincode.map((geoPincode) => (
+                        <option key={geoPincode.id} value={geoPincode.id}>
+                          {geoPincode.pincode}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.pincode_id && (
+                      <small className="text-danger">{errors.pincode_id}</small>
+                    )}
+                  </div>
 
                   <div className="col-md-3">
                     <label className="input-field">Website</label>
@@ -775,13 +775,13 @@ const Childfranchisemaster = () => {
                   </div>
 
                   <div className="col-12 text-right">
-                       <button
-                          className="btn btn-liebherr"
-                          type="submit"
-                          style={{ marginTop: "15px" }}
-                        >
-                          {isEdit ? "Update" : "Submit"}
-                        </button>
+                    <button
+                      className="btn btn-liebherr"
+                      type="submit"
+                      style={{ marginTop: "15px" }}
+                    >
+                      {isEdit ? "Update" : "Submit"}
+                    </button>
                   </div>
                 </div>
               </form>

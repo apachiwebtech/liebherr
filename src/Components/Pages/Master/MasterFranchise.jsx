@@ -24,7 +24,7 @@ const MasterFranchise = (params) => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [duplicateError, setDuplicateError] = useState(""); // State to track duplicate error
-  
+  const created_by = localStorage.getItem("id");
   const [formData, setFormData] = useState({
     title: "",
     password: "",
@@ -44,7 +44,7 @@ const MasterFranchise = (params) => {
     bank_name:'',
     bank_acc:'',
     bank_ifsc:'',
-    with_liebherr:'',
+    withliebher:'',
     last_working_date:'',
     contract_acti:'',
     contract_expir:'',
@@ -135,7 +135,55 @@ const MasterFranchise = (params) => {
     
     try {
         const response = await axios.get(`${Base_Url}/getmasterfranchisepopulate/${masterid}`);
-        setFormData(response.data);
+        setFormData({
+          ...response.data[0],
+          // Rename keys to match your formData structure
+          pfranchise_id: response.data[0].pfranchise_id,
+          title: response.data[0].title,
+          contact_person: response.data[0].contact_person,
+          email: response.data[0].email,
+          mobile_no: response.data[0].mobile_no,
+          password: response.data[0].password,
+          country_id: response.data[0].country_id,
+          region_id: response.data[0].region_id,
+          state: response.data[0].geostate_id,
+          area: response.data[0].area_id,
+          city: response.data[0].geocity_id,
+          pincode_id: response.data[0].pincode_id,
+          address: response.data[0].address,
+          licare_code: response.data[0].licare_code,
+          partner_name: response.data[0].partner_name,
+          website: response.data[0].webste,
+          gst_no: response.data[0].gstno,
+          panno: response.data[0].panno,
+          bank_name: response.data[0].bankname,
+          bank_acc: response.data[0].bankacc,
+          bank_ifsc: response.data[0].bankifsc,
+          bank_address: response.data[0].bankaddress,
+          last_working_date: response.data[0].lastworkinddate,
+          contract_acti: response.data[0].contractacti,
+          contract_expir: response.data[0].contractexpir,
+          withliebher: response.data[0].withliebher
+        });
+
+        
+      setIsEdit(true);
+
+        if (response.data[0].country_id) {
+          fetchregion(response.data[0].country_id);
+        }
+        if (response.data[0].region_id) {
+          fetchState(response.data[0].region_id);
+        }
+        if (response.data[0].geostate_id) {
+          fetchdistricts(response.data[0].geostate_id);
+        }
+        if (response.data[0].area_id) {
+          fetchCity(response.data[0].area_id);
+        }
+        if (response.data[0].geocity_id) {
+          fetchpincode(response.data[0].geocity_id);
+        }
         
     } catch (error) {
         console.error('Error fetching franchisemasterdata:', error);
@@ -209,28 +257,33 @@ const MasterFranchise = (params) => {
   // Step 2: Add form validation function
   const validateForm = () => {
     const newErrors = {};
-  
+    
+    // Helper function to safely check empty values
+    const isEmpty = (value) => {
+        return value === undefined || value === null || String(value).trim() === '';
+    };
+
     // Text/Email/Number inputs validation
-    if (!formData.title.trim()) newErrors.title = "Franchise Master Field is required.";
-    if (!formData.licarecode.trim()) newErrors.licarecode = "Licare Code is required.";
-    if (!formData.contact_person.trim()) newErrors.contact_person = "Contact Person is required.";
-    if (!formData.email.trim()) newErrors.email = "Email is required.";
-    if (!formData.mobile_no.trim()) newErrors.mobile_no = "Mobile Number is required.";
-    if (!formData.partner_name.trim()) newErrors.partner_name = "Partner Name is required.";
-    if (!formData.password.trim()) newErrors.password = "Password is required.";
-    // if (!formData.website.trim()) newErrors.website = "Website is required.";
-    if (!formData.gst_no.trim()) newErrors.gst_no = "GST Number is required.";
-    if (!formData.panno.trim()) newErrors.panno = "PAN Number is required.";
-    // if (!formData.bank_name.trim()) newErrors.bank_name = "Bank Name is required.";
-    // if (!formData.bank_acc.trim()) newErrors.bank_acc = "Bank Account Number is required.";
-    // if (!formData.bank_ifsc.trim()) newErrors.bank_ifsc = "Bank IFSC Code is required.";
-  
+    if (isEmpty(formData.title)) newErrors.title = "Franchise Master Field is required.";
+    if (isEmpty(formData.licarecode)) newErrors.licarecode = "Licare Code is required.";
+    if (isEmpty(formData.contact_person)) newErrors.contact_person = "Contact Person is required.";
+    if (isEmpty(formData.email)) newErrors.email = "Email is required.";
+    if (isEmpty(formData.mobile_no)) newErrors.mobile_no = "Mobile Number is required.";
+    if (isEmpty(formData.partner_name)) newErrors.partner_name = "Partner Name is required.";
+    if (isEmpty(formData.password)) newErrors.password = "Password is required.";
+    // if (isEmpty(formData.website)) newErrors.website = "Website is required.";
+    // if (isEmpty(formData.gst_no)) newErrors.gst_no = "GST Number is required.";
+    // if (isEmpty(formData.panno)) newErrors.panno = "PAN Number is required.";
+    // if (isEmpty(formData.bank_name)) newErrors.bank_name = "Bank Name is required.";
+    // if (isEmpty(formData.bank_acc)) newErrors.bank_acc = "Bank Account Number is required.";
+    // if (isEmpty(formData.bank_ifsc)) newErrors.bank_ifsc = "Bank IFSC Code is required.";
+
     // Date inputs validation
-    if (!formData.with_liebherr) newErrors.with_liebherr = "With Liebherr date is required.";
-    if (!formData.last_working_date) newErrors.last_working_date = "Last Working Date is required.";
-    if (!formData.contract_acti) newErrors.contract_acti = "Contract Activation Date is required.";
-    if (!formData.contract_expir) newErrors.contract_expir = "Contract Expiration Date is required.";
-  
+    if (!formData.withliebher) newErrors.withliebher = "With Liebherr date is required.";
+    // if (!formData.last_working_date) newErrors.last_working_date = "Last Working Date is required.";
+    //if (!formData.contract_acti) newErrors.contract_acti = "Contract Activation Date is required.";
+    //if (!formData.contract_expir) newErrors.contract_expir = "Contract Expiration Date is required.";
+
     // Dropdown validations
     if (!formData.country_id) newErrors.country_id = "Country is required.";
     if (!formData.region_id) newErrors.region_id = "Region is required.";
@@ -238,13 +291,13 @@ const MasterFranchise = (params) => {
     if (!formData.area) newErrors.area = "District is required.";
     if (!formData.city) newErrors.city = "City is required.";
     if (!formData.pincode_id) newErrors.pincode_id = "Pincode is required.";
-  
+
     // Textarea validations
-    // if (!formData.bank_address.trim()) newErrors.bank_address = "Bank Address is required.";
-    if (!formData.address.trim()) newErrors.address = "Address is required.";
-  
+    // if (isEmpty(formData.bank_address)) newErrors.bank_address = "Bank Address is required.";
+    if (isEmpty(formData.address)) newErrors.address = "Address is required.";
+
     return newErrors;
-  };
+};
   //handlesubmit form
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -268,7 +321,7 @@ const MasterFranchise = (params) => {
         if (isEdit) {
           // For update, include duplicate check
           await axios
-            .put(`${Base_Url}/putfranchisedata`, { ...formData })
+            .put(`${Base_Url}/putfranchisedata`, { ...formData, created_by })
             .then((response) => {
               setFormData({
                 title: "",
@@ -286,7 +339,7 @@ const MasterFranchise = (params) => {
         } else {
           // For insert, include duplicate check
           await axios
-            .post(`${Base_Url}/postfranchisedata`, { ...formData })
+            .post(`${Base_Url}/postfranchisedata`, { ...formData, created_by })
             .then((response) => {
               //const newpassword = md5(formData.password)
 
@@ -309,7 +362,7 @@ const MasterFranchise = (params) => {
                 bank_name:'',
                 bank_acc:'',
                 bank_ifsc:'',
-                with_liebherr:'',
+                withliebher:'',
                 last_working_date:'',
                 contract_acti:'',
                 contract_expir:'',
@@ -319,6 +372,7 @@ const MasterFranchise = (params) => {
 
               });
               fetchUsers();
+              setIsEdit(false);
             })
             .catch((error) => {
               if (error.response && error.response.status === 409) {
@@ -821,14 +875,14 @@ const MasterFranchise = (params) => {
                       <input
                         type="date"
                         className="form-control"
-                        name="with_liebherr"
+                        name="withliebher"
                         id="WithLiebherrInput"
-                        value={formData.with_liebherr}
+                        value={formData.withliebher ? formData.withliebher.split('T')[0] : ''}
                         onChange={handleChange}
                         placeholder="Enter With Liebherr"
                       />
-                      {errors.with_liebherr && (
-                        <small className="text-danger">{errors.with_liebherr}</small>
+                      {errors.withliebher && (
+                        <small className="text-danger">{errors.withliebher}</small>
                       )}
                       {duplicateError && (
                         <small className="text-danger">{duplicateError}</small>
@@ -844,7 +898,7 @@ const MasterFranchise = (params) => {
                         className="form-control"
                         name="last_working_date"
                         id="LastWorkingDateInput"
-                        value={formData.last_working_date}
+                        value={formData.last_working_date ? formData.last_working_date.split('T')[0] : ''}
                         onChange={handleChange}
                         placeholder="Select Last Working Date"
                       />
@@ -865,7 +919,7 @@ const MasterFranchise = (params) => {
                         className="form-control"
                         name="contract_acti"
                         id="ContractActiInput"
-                        value={formData.contract_acti}
+                        value={formData.contract_acti ? formData.contract_acti.split('T')[0] : ''}
                         onChange={handleChange}
                         placeholder="Select Contract Activation Date"
                       />
@@ -886,7 +940,7 @@ const MasterFranchise = (params) => {
                         className="form-control"
                         name="contract_expir"
                         id="ContractExpirInput"
-                        value={formData.contract_expir}
+                        value={formData.contract_expir ? formData.contract_expir.split('T')[0] : ''}
                         onChange={handleChange}
                         placeholder="Select Contract Expiration Date"
                       />

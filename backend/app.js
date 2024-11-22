@@ -4280,6 +4280,8 @@ app.post("/postfranchisedata", async (req, res) => {
         SELECT * FROM awt_franchisemaster WHERE title = @title AND deleted = 0
       `);
 
+      
+
     if (checkDuplicateResult.recordset.length > 0) {
       return res.status(409).json({
         message: "Duplicate entry, Franchise Master already exists!",
@@ -4293,6 +4295,7 @@ app.post("/postfranchisedata", async (req, res) => {
         SELECT * FROM awt_franchisemaster WHERE title = @title AND deleted = 1
       `);
 
+  
     if (checkSoftDeletedResult.recordset.length > 0) {
       // Restore soft deleted record
       await pool.request()
@@ -4306,7 +4309,7 @@ app.post("/postfranchisedata", async (req, res) => {
       });
     } else {
       // Insert new record using parameterized query
-      await pool.request()
+   await pool.request()
         .input('title', sql.VarChar, title)
         .input('licarecode', sql.VarChar, licarecode)
         .input('partner_name', sql.VarChar, partner_name)
@@ -4343,6 +4346,7 @@ app.post("/postfranchisedata", async (req, res) => {
            @bank_address, @with_liebherr, @last_working_date, @contract_acti, @contract_expir)
         `);
 
+       
       return res.json({
         message: "Franchise Master added successfully!",
       });
@@ -4436,8 +4440,8 @@ app.post("/postfranchisedata", async (req, res) => {
 
 app.put("/putfranchisedata", async (req, res) => {
   const { title, id, contact_person, email, mobile_no, password, address, country_id, region_id, state, area, city, pincode_id,
-    website, gst_no, panno, bank_name, bank_acc, bank_ifsc, bank_address, with_liebherr, last_working_date, contract_acti, contract_expir, licarecode
-    , partner_name
+    website, gst_no, panno, bank_name, bank_acc, bank_ifsc, bank_address, withliebher, last_working_date, contract_acti, contract_expir, licarecode
+    , partner_name, created_by
   } = req.body;
 
 
@@ -4445,27 +4449,96 @@ app.put("/putfranchisedata", async (req, res) => {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
 
-    // Check for duplicate entries (excluding the current record)
-    const checkDuplicateResult = await pool.request().query(`SELECT * FROM awt_franchisemaster WHERE title = '${title}' AND id != '${id}' AND deleted = 0`);
-    if (checkDuplicateResult.recordset.length > 0) {
-      return res.status(409).json({ message: "Duplicate entry, Franchise Master already exists!" });
-    } else {
-      // Update the engineer record if no duplicates are found
-      const updateSql = `UPDATE awt_franchisemaster
-                         SET title = '${title}', mobile_no = '${mobile_no}', email = '${email}', password = '${password}',
-                         address = '${address}', contact_person = '${contact_person}',country_id = '${country_id}',region_id = '${region_id}',
-                         geostate_id = '${state}', area_id = '${area}', geocity_id = '${city}',pincode_id = '${pincode_id}' ,
-                         webste = '${website}', gstno = '${gst_no}', panno = '${panno}',
-                         bankname = '${bank_name}', bankacc = '${bank_acc}', bankifsc = '${bank_ifsc}
-                         bankaddress = '${bank_address}', withliebher = '${with_liebherr}
-                         lastworkinddate = '${last_working_date}', contractacti = '${contract_acti}', contractexpir = '${contract_expir}', 
-                         licarecode = '${licarecode}', partnername = '${partner_name}' 
-                         WHERE id = '${id}'`;
+    
+    // Step 1: Duplicate Check Query
+    const duplicateCheckSQL = `
+      SELECT * FROM awt_franchisemaster
+      WHERE email = @email
+      AND deleted = 0
+      AND id != @id
+    `;
 
-      await pool.request().query(updateSql);
+    console.log("Executing Duplicate Check SQL:", duplicateCheckSQL);
 
-      return res.json({ message: "Franchise Master updated successfully!" });
+    const duplicateCheckResult = await pool.request()
+      .input('email', email)
+      .input('id', id)
+      .query(duplicateCheckSQL);
+
+    if (duplicateCheckResult.recordset.length > 0) {
+      return res.status(409).json({
+        message: "Duplicate entry,  Franchise Master already exists!"
+      });
     }
+
+     // Step 2: Update Query
+     const updateSQL = `
+     UPDATE awt_franchisemaster
+     SET 
+       title = @title,
+       licarecode = @licarecode,
+       partner_name = @partner_name,
+       contact_person = @contact_person,
+       email = @email,
+       mobile_no = @mobile_no,
+       password = @password,
+       address = @address,
+       country_id = @country_id,
+       region_id = @region_id,
+       geostate_id = @state,
+       area_id = @area,
+       geocity_id = @city,
+       pincode_id = @pincode_id,
+       webste = @website,
+       gstno = @gst_no,
+       panno = @panno,
+       bankname = @bank_name,
+       bankacc = @bank_acc,
+       bankifsc = @bank_ifsc,
+       bankaddress = @bank_address,
+       withliebher = @withliebher,
+       lastworkinddate = @last_working_date,
+       contractacti = @contract_acti,
+       contractexpir = @contract_expir,
+       updated_by = @created_by
+     WHERE id = @id
+   `;
+   console.log("Executing Update SQL:", updateSQL);
+
+   await pool.request()
+   .input('title', title)
+   .input('licarecode', licarecode)
+   .input('partner_name', partner_name)
+   .input('contact_person', contact_person)
+   .input('email', email)
+   .input('mobile_no', mobile_no)
+   .input('password', password)
+   .input('address', address)
+   .input('country_id', country_id)
+   .input('region_id', region_id)
+   .input('state', state)
+   .input('area', area)
+   .input('city', city)
+   .input('pincode_id', pincode_id)
+   .input('website', website)
+   .input('gst_no', gst_no)
+   .input('panno', panno)
+   .input('bank_name', bank_name)
+   .input('bank_acc', bank_acc)
+   .input('bank_ifsc', bank_ifsc)
+   .input('bank_address', bank_address)
+   .input('withliebher', withliebher)
+   .input('last_working_date', last_working_date)
+   .input('contract_acti', contract_acti)
+   .input('contract_expir', contract_expir)
+   .input('created_by', created_by)
+   .input('id', id)
+   .query(updateSQL);
+
+ return res.json({
+   message: "Master Franchise updated successfully!"
+ });
+    
 
   } catch (err) {
     console.error(err);
@@ -4559,7 +4632,33 @@ AND m.area_id = d.id AND m.geocity_id = ct.id AND m.pfranchise_id = p.id AND m.d
   }
 });
 
+
+
 //End of Request Child Franchise populate data
+
+app.get("/getmasterfranchisepopulate/:masterid", async (req, res) => {
+  const { masterid } = req.params;
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    // SQL query to fetch data from the master list, customize based on your needs
+    const sql = `
+     SELECT m.*,c.title as country_name, r.title as region_name, s. title as state_name, d.title as district_name,ct. title city_name from  awt_franchisemaster as m,
+awt_country as c,awt_region as r,awt_geostate as s,awt_district as d,awt_geocity as ct,awt_franchisemaster as p WHERE m.country_id = c.id AND m.region_id = r.id AND m.geostate_id = s.id 
+AND m.area_id = d.id AND m.geocity_id = ct.id  AND m.deleted = 0 and m.id = ${masterid}
+    `;
+    // Execute the SQL query
+    const result = await pool.request().query(sql);
+
+    // Return the result as JSON
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
 
 app.get("/requestchildfranchise/:id", async (req, res) => {
   const { id } = req.params;
