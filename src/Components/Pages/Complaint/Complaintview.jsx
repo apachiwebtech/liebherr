@@ -869,6 +869,19 @@ const handleSubmitTicketFormData = (e) => {
                   <option value="DOA">DOA</option>
                 </select>
               </div>
+              <h4 className="pname" style={{ fontSize: "14px"}}>Sub Call Status</h4>
+              <div className="mb-3">
+                <select name="call_status" className="form-control" style={{ fontSize: "14px"}} onChange={handleModelChange}>
+                  <option value="" >Select Status</option>
+                  <option value="Quotation">Quotation</option>
+                  <option value="Closed">Closed</option>
+                  <option value="Cancelled">Cancelled</option>
+                  <option value="Duplicates">Duplicates</option>
+                  <option value="Spares">Spares</option>
+                  <option value="In Process">In Process</option>
+                  <option value="DOA">DOA</option>
+                </select>
+              </div>
             </div>
           </div>
 
