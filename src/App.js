@@ -33,6 +33,7 @@ import Serviceagent from './Components/Pages/Master/Serviceagent';
 import Serviceproduct from './Components/Pages/Master/Serviceproduct';
 import Subcategory from './Components/Pages/Master/Subcategory';
 import { Siteheader } from './Components/Layout/Siteheader';
+import Loginheader from './Components/Layout/Loginheader';
 import { Sitefooter } from './Components/Layout/Sitefooter';
 import Location from './Components/Pages/Master/Location';
 import Regions from './Components/Pages/Master/Regions';
@@ -478,6 +479,13 @@ function checkLocalStorageAndRedirect(navigate) {
   }
 }
 
+function checkLocalStorageAndRedirectCSP(navigate) {
+  const user_id = localStorage.getItem('licare_code')
+  if (user_id == null) {
+    navigate('/csp/csplogin'); // Redirect to dashboard if id exists in localStorage
+  }
+}
+
 function App() {
 
   const navigate = useNavigate()
@@ -500,11 +508,11 @@ function CSPAPP() {
   const navigate = useNavigate()
 
   React.useEffect(() =>{
-    checkLocalStorageAndRedirect(navigate);
+    checkLocalStorageAndRedirectCSP(navigate)
   },[navigate])
   return (
     <>
-      
+      <Loginheader/>
       <Outlet />
       <Sitefooter />
     </>
@@ -521,7 +529,7 @@ function MSPAPP() {
   },[navigate])
   return (
     <>
-      
+       <Loginheader/>
       <Outlet />
       <Sitefooter />
     </>

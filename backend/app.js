@@ -107,10 +107,10 @@ app.post("/csplogin", async (req, res) => {
 
     const sql = `SELECT * FROM awt_childfranchisemaster WHERE email = '${Lhiuser}' AND password = '${password}'`;
 
-    console.log(sql)
+    // console.log(sql)
 
     const result = await pool.request().query(sql);
-
+  
     if (result.recordset.length > 0) {
       res.json({ id: result.recordset[0].id, Lhiuser: result.recordset[0].email ,licare_code : result.recordset[0].licare_code});
     } else {
@@ -6888,6 +6888,8 @@ app.get("/getcomplainlist", async (req, res) => {
 
 // CSP complaint list
 
+// CSP complaint list
+
 app.get("/getcomplainlistcsp", async (req, res) => {
   const { licare_code } = req.query;
 
@@ -6996,6 +6998,8 @@ app.get("/getcomplainlistcsp", async (req, res) => {
     return res.status(500).json({ message: "An error occurred while fetching the complaint list" });
   }
 });
+
+//CSP LIST END 
 
 // end Complaint list
 
