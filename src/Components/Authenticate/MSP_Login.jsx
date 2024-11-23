@@ -28,10 +28,11 @@ export function MSP_Login() {
           
             if (response.data) {
                 localStorage.setItem("userId", response.data.id);
-                localStorage.setItem("title", response.data.Lhiuser);
+                localStorage.setItem("Lhiuser", response.data.Lhiuser);
+                localStorage.setItem("licarecode", response.data.licarecode);
 
                 // Navigate to the home page
-                navigate('/Franchisemasterlist');
+                navigate('/msp/ticketlistmsp');
             } else {
                 alert("Invalid username or password");
             }

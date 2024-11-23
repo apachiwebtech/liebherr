@@ -138,7 +138,7 @@ const { Lhiuser, password } = req.body;
     const result = await pool.request().query(sql);
 
     if (result.recordset.length > 0) {
-      res.json({ id: result.recordset[0].id, Lhiuser: result.recordset[0].email });
+      res.json({ id: result.recordset[0].id, Lhiuser: result.recordset[0].email,licarecode: result.recordset[0].licarecode  });
     } else {
       res.status(500).json({ message: "Invalid username or password" });
     }

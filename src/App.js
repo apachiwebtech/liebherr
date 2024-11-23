@@ -76,6 +76,8 @@ import { Claimreport } from './Components/Pages/Reports/Claimreport';
 import { MSP_Login } from './Components/Authenticate/MSP_Login';
 import { Franchisemasterlist } from './Components/Pages/Master/Franchisemasterlist';
 import Servicecontract from './Components/Pages/Master/Servicecontract';
+import Ticketlistmsp from './Components/Pages/Master/Ticketlistmsp';
+import Servicecontracttabs from './Components/Pages/Master/Servicecontracttabs';
 
 
 
@@ -93,8 +95,19 @@ const Router = createBrowserRouter([
   },
  
    {
-    path: "/msplogin",
-    element: <MSP_Login />,
+    path: "/msp",
+    element: <MSPAPP />,
+    children: [
+      {
+        path: "/msp/msplogin",
+        element: <MSP_Login />,
+      },
+      {
+        path: "/msp/ticketlistmsp",
+        element: <Ticketlistmsp />,
+      }
+
+    ]
    },
    {
     path: "/csp",
@@ -443,6 +456,10 @@ const Router = createBrowserRouter([
         element: <Servicecontract/>
       },
       {
+        path: "/servicecontracttabs",
+        element: <Servicecontracttabs/>
+      },
+      {
         path: "claimreport",
         element: <Claimreport/>
       },
@@ -479,6 +496,23 @@ function App() {
 }
 
 function CSPAPP() {
+
+  const navigate = useNavigate()
+
+  React.useEffect(() =>{
+    checkLocalStorageAndRedirect(navigate);
+  },[navigate])
+  return (
+    <>
+      
+      <Outlet />
+      <Sitefooter />
+    </>
+
+  );
+}
+
+function MSPAPP() {
 
   const navigate = useNavigate()
 

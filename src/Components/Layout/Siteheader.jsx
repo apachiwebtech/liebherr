@@ -45,9 +45,9 @@ export function Siteheader(params) {
                 <li>
                   <Link className="dropdown-item" to="/lhiusertabs">LHI User Master</Link></li>
                   <li>
-                  <Link className="dropdown-item" to="/servicecontract">Service Contract Registration</Link></li>
+                  <Link className="dropdown-item" to="/servicecontracttabs">Service Contract Registration</Link></li>
                 <li>
-                  
+                    
                   <Link className="dropdown-item" to="/serviceproducttabs">Service Product Master</Link></li>
                 <li>
                   <Link className="dropdown-item" to="/complainttabs">Complain code, Reason code & Action code</Link></li>
