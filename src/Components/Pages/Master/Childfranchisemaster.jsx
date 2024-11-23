@@ -414,7 +414,7 @@ const Childfranchisemaster = () => {
                     >
                       <option value="">Select Parent Franchise</option>
                       {Parentfranchise.map((pf) => (
-                        <option key={pf.id} value={pf.id}>
+                        <option key={pf.id} value={pf.licarecode}>
                           {pf.title}
                         </option>
                       ))}

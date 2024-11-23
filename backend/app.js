@@ -4469,7 +4469,7 @@ app.get("/getchildFranchiseDetails", async (req, res) => {
     const sql = `
      SELECT m.*,p.title as parentfranchisetitle,c.title as country_name, r.title as region_name, s. title as state_name, d.title as district_name,ct. title city_name from  awt_childfranchisemaster as m,
 awt_country as c,awt_region as r,awt_geostate as s,awt_district as d,awt_geocity as ct,awt_franchisemaster as p WHERE m.country_id = c.id AND m.region_id = r.id AND m.geostate_id = s.id 
-AND m.area_id = d.id AND m.geocity_id = ct.id AND m.pfranchise_id = p.id AND m.deleted = 0
+AND m.area_id = d.id AND m.geocity_id = ct.id AND m.pfranchise_id = p.licarecode AND m.deleted = 0
     `;
     // Execute the SQL query
     const result = await pool.request().query(sql);
@@ -4496,7 +4496,7 @@ app.get("/getchildfranchisepopulate/:childid", async (req, res) => {
     const sql = `
      SELECT m.*,p.title as parentfranchisetitle,c.title as country_name, r.title as region_name, s. title as state_name, d.title as district_name,ct. title city_name from  awt_childfranchisemaster as m,
 awt_country as c,awt_region as r,awt_geostate as s,awt_district as d,awt_geocity as ct,awt_franchisemaster as p WHERE m.country_id = c.id AND m.region_id = r.id AND m.geostate_id = s.id 
-AND m.area_id = d.id AND m.geocity_id = ct.id AND m.pfranchise_id = p.id AND m.deleted = 0 and m.id = ${childid}
+AND m.area_id = d.id AND m.geocity_id = ct.id AND m.pfranchise_id = p.licarecode AND m.deleted = 0 and m.id = ${childid}
     `;
     // Execute the SQL query
     const result = await pool.request().query(sql);
