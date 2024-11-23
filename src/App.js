@@ -62,6 +62,7 @@ import Material from './Components/Pages/Master/Material';
 import Manufacturer from './Components/Pages/Master/Manufacturer';
 import { AddProduct } from './Components/Pages/Master/AddProduct';
 import { Customerlist } from './Components/Pages/Master/Customerlist';
+import Ticketlistcsp from './Components/Pages/Master/Ticketlistcsp';
 import Customer from './Components/Pages/Master/Customer';
 import Uniqueproduct from './Components/Pages/Master/Uniqueproduct';
 import Childfranchisemaster from './Components/Pages/Master/Childfranchisemaster';
@@ -89,14 +90,26 @@ const Router = createBrowserRouter([
     element: <Login />,
 
   },
-  {
-    path: "/csplogin",
-    element: <CSP_Login />,
-
-  },
+ 
    {
     path: "/msplogin",
     element: <MSP_Login />,
+   },
+   {
+    path: "/csp",
+    element: <CSPAPP />,
+    children: [
+      {
+        path: "/csp/csplogin",
+        element: <CSP_Login />,
+    
+      },
+      {
+        path: "/csp/ticketlist",
+        element: <Ticketlistcsp />,
+    
+      },
+    ],
    },
   {
     path: "/",
@@ -459,5 +472,24 @@ function App() {
 
   );
 }
+
+function CSPAPP() {
+
+  const navigate = useNavigate()
+
+  React.useEffect(() =>{
+    checkLocalStorageAndRedirect(navigate);
+  },[navigate])
+  return (
+    <>
+      
+      <Outlet />
+      <Sitefooter />
+    </>
+
+  );
+}
+
+
 
 export default Router;

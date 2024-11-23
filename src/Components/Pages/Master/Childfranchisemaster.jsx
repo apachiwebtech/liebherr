@@ -4,7 +4,7 @@ import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
 import Franchisemaster from '../Master/Franchisemaster';
 import { useParams } from "react-router-dom";
-import md5 from 'md5';
+import md5 from "js-md5";
 const Childfranchisemaster = () => {
   const { childid } = useParams();
 
@@ -711,15 +711,16 @@ const Childfranchisemaster = () => {
                   </div>
 
                   <div className="col-md-3">
-                    <label className="input-field">Last Working Date</label>
+                    <label className="input-field">With Liebherr</label>
                     <input
                       type="date"
                       className="form-control"
-                      name="last_working_date"
-                      value={formData.last_working_date ? formData.last_working_date.split('T')[0] : ''}
+                      name="with_liebherr"
+                      value={formData.with_liebherr ? formData.with_liebherr.split('T')[0] : ''}
                       onChange={handleChange}
                     />
                   </div>
+
 
                   <div className="col-md-3">
                     <label className="input-field">Contract Activation Date</label>
@@ -744,15 +745,16 @@ const Childfranchisemaster = () => {
                   </div>
 
                   <div className="col-md-3">
-                    <label className="input-field">With Liebherr</label>
+                    <label className="input-field">Last Working Date</label>
                     <input
                       type="date"
                       className="form-control"
-                      name="with_liebherr"
-                      value={formData.with_liebherr ? formData.with_liebherr.split('T')[0] : ''}
+                      name="last_working_date"
+                      value={formData.last_working_date ? formData.last_working_date.split('T')[0] : ''}
                       onChange={handleChange}
                     />
                   </div>
+
 
                   <div className="col-md-6">
                     <label className="input-field">Bank Address</label>
