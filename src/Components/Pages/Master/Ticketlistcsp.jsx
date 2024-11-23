@@ -1,11 +1,10 @@
-
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
 
-const CSPticketlist = (params) => {
+const Ticketlistcsp = (params) => {
     const [Complaintdata, setComplaintdata] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
@@ -424,4 +423,4 @@ const CSPticketlist = (params) => {
     );
 }
 
-export default CSPticketlist
+export default Ticketlistcsp

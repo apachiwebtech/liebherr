@@ -30,7 +30,7 @@ export function CSP_Login() {
                 localStorage.setItem("Lhiuser", response.data.Lhiuser);
 
                 // Navigate to the home page
-                navigate('/Childfranchiselist');
+                navigate('/csp/ticketlist');
             } else {
                 alert("Invalid username or password");
             }
