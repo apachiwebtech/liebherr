@@ -9,6 +9,10 @@ const Ticketlistmsp = (params) => {
     const [filteredData, setFilteredData] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
 
+    const created_by = localStorage.getItem("userId"); // Get user ID from localStorage
+    const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
+    const licare_code = localStorage.getItem("licare_code");
+
     const [formData, setFormData] = useState({
         title: '',
         cfranchise_id: '',
@@ -38,7 +42,7 @@ const Ticketlistmsp = (params) => {
 
     const fetchComplaintlist = async () => {
         try {
-            const response = await axios.get(`${Base_Url}/getcomplainlist`);
+            const response = await axios.get(`${Base_Url}/getcomplainlistmsp?licare_code=${licare_code}`);
             // Filter out 'Closed' and 'Cancelled' status complaints by default
             const filteredComplaints = response.data.filter(complaint => 
                 !['Closed', 'Cancelled'].includes(complaint.call_status)
@@ -63,9 +67,11 @@ const Ticketlistmsp = (params) => {
                 }
             });
     
+            params.append('licare_code', licare_code);
+            
             console.log('Sending params:', params.toString()); // Debug log
             
-            const response = await axios.get(`${Base_Url}/getcomplainlist?${params}`);
+            const response = await axios.get(`${Base_Url}/getcomplainlistmsp?${params}`);
             setFilteredData(response.data);
         } catch (error) {
             console.error('Error fetching filtered data:', error);
@@ -179,7 +185,7 @@ const Ticketlistmsp = (params) => {
                                         className="form-control"
                                         name="ticketno"
                                         value={searchFilters.ticketno}
-                                        placeholder="Search by complaint no"
+                                        placeholder="Search by ticket no"
                                         onChange={handleFilterChange}
                                     />
                                 </div>
@@ -243,7 +249,7 @@ const Ticketlistmsp = (params) => {
                                         className="form-control"
                                         name="productCode"
                                         value={searchFilters.productCode}
-                                        placeholder="Search by product code"
+                                        placeholder="Search by model no"
                                         onChange={handleFilterChange}
                                     />
                                 </div>
@@ -257,7 +263,7 @@ const Ticketlistmsp = (params) => {
                                         value={searchFilters.status}
                                         onChange={handleFilterChange}
                                     >
-                                        <option value="">All Active Status</option>
+                                        <option value="">All</option>
                                         <option value="Closed">Closed</option>
                                         <option value="Cancelled">Cancelled</option>
                                         <option value="Pending">Pending</option>
@@ -341,14 +347,14 @@ const Ticketlistmsp = (params) => {
                             <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>Complaint No.</th>
-                                    <th>Complaint Date</th>
+                                    <th>Ticket No.</th>
+                                    <th>Ticket Date</th>
                                     <th>Customer Name</th>
-                                    <th>Product</th>
+                                    <th>Model No</th>
+                                    <th>Serial No</th>
                                     <th>Age</th>
                                     <th>Assigned Users</th>
                                     <th>Status</th>
-                                    <th>Edit</th>
                                     <th>View</th>
                                     {/* <th>Delete</th> */}
                                 </tr>
@@ -361,26 +367,10 @@ const Ticketlistmsp = (params) => {
                                         <td>{formatDate(item.ticket_date)}</td>
                                         <td>{item.customer_name}</td>
                                         <td>{item.ModelNumber}</td>
+                                        <td>{item.serial_no}</td>
                                         <td>{item.ageingdays}</td>
                                         <td>{item.assigned_name}</td>
                                         <td>{item.call_status}</td>
-                                        <td>
-                                        <Link to={`/registercomaplaint/${item.ticket_no}`}><button
-                                                className='btn'
-                                    
-                                                disabled={isActionDisabled(item.call_status)}
-                                                title={isActionDisabled(item.call_status) ? "Cannot edit closed or cancelled complaints" : "Edit"}
-                                                style={{
-                                                    backgroundColor: 'transparent',
-                                                    border: 'none',
-                                                    color: isActionDisabled(item.call_status) ? 'gray' : 'blue',
-                                                    fontSize: '20px',
-                                                    cursor: isActionDisabled(item.call_status) ? 'not-allowed' : 'pointer'
-                                                }}
-                                            >
-                                                <FaPencilAlt />
-                                            </button></Link>
-                                        </td>
                                         <td>
                                         <button
                                                 className='btn'

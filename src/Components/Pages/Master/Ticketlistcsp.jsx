@@ -187,7 +187,7 @@ const Ticketlistcsp = (params) => {
                                         className="form-control"
                                         name="ticketno"
                                         value={searchFilters.ticketno}
-                                        placeholder="Search by complaint no"
+                                        placeholder="Search by ticket no"
                                         onChange={handleFilterChange}
                                     />
                                 </div>
@@ -251,7 +251,7 @@ const Ticketlistcsp = (params) => {
                                         className="form-control"
                                         name="productCode"
                                         value={searchFilters.productCode}
-                                        placeholder="Search by product code"
+                                        placeholder="Search by model no"
                                         onChange={handleFilterChange}
                                     />
                                 </div>
@@ -265,7 +265,7 @@ const Ticketlistcsp = (params) => {
                                         value={searchFilters.status}
                                         onChange={handleFilterChange}
                                     >
-                                        <option value="">All Active Status</option>
+                                        <option value="">All</option>
                                         <option value="Closed">Closed</option>
                                         <option value="Cancelled">Cancelled</option>
                                         <option value="Pending">Pending</option>
@@ -349,10 +349,11 @@ const Ticketlistcsp = (params) => {
                             <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>Complaint No.</th>
-                                    <th>Complaint Date</th>
+                                    <th>Ticket No.</th>
+                                    <th>Ticket Date</th>
                                     <th>Customer Name</th>
-                                    <th>Product</th>
+                                    <th>Model No</th>
+                                    <th>Serial No</th>
                                     <th>Age</th>
                                     <th>Assigned Users</th>
                                     <th>Status</th>
@@ -369,6 +370,7 @@ const Ticketlistcsp = (params) => {
                                         <td>{formatDate(item.ticket_date)}</td>
                                         <td>{item.customer_name}</td>
                                         <td>{item.ModelNumber}</td>
+                                        <td>{item.serial_no}</td>
                                         <td>{item.ageingdays}</td>
                                         <td>{item.assigned_name}</td>
                                         <td>{item.call_status}</td>

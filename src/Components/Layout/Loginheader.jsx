@@ -37,7 +37,7 @@ const Loginheader = (params) => {
     
     
               <div className="dropdown text-end">
-                <Link className="btn btn-primary newcomplaint" onClick={redirect}>New Ticket</Link>
+                {/* <Link className="btn btn-primary newcomplaint" onClick={redirect}>New Ticket</Link> */}
     
                 <a href="#" className="link-dark text-decoration-none dropdown-toggle" id="dropdownUser1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                   <img src="https://github.com/mdo.png" alt="mdo" width="32" height="32" className="rounded-circle" />

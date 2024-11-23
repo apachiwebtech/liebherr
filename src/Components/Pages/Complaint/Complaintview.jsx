@@ -558,7 +558,7 @@ const handleSubmitTicketFormData = (e) => {
 
 
                                       <div className="col-md-4">
-                                        <h4 className="pname" style={{ fontSize: "11px"}}>Model</h4>
+                                        <h4 className="pname" style={{ fontSize: "11px"}}>Model No</h4>
                                        
                                         <select
                                             className="form-select dropdown-select"
@@ -606,7 +606,7 @@ const handleSubmitTicketFormData = (e) => {
 
                 <div className="col-md-12">
                   <h3 className="mainheade" style={{ fontSize: "14px"}}>
-                    Complaint{" "}
+                    Ticket{" "}
                     <span style={{ fontSize: "14px"}} id="compaintno1">: {complaintview.ticket_no}</span>
                   </h3>
                 </div>

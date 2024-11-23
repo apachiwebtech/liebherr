@@ -29,13 +29,15 @@ export function MSP_Login() {
             if (response.data) {
                 localStorage.setItem("userId", response.data.id);
                 localStorage.setItem("Lhiuser", response.data.Lhiuser);
-                localStorage.setItem("licarecode", response.data.licarecode);
+                localStorage.setItem("licare_code", response.data.licare_code);
 
                 // Navigate to the home page
                 navigate('/msp/ticketlistmsp');
             } else {
                 alert("Invalid username or password");
             }
+
+          
         } catch (error) {
             console.error("Login failed:", error);
             alert("Login failed, please check your credentials.");
