@@ -7,6 +7,11 @@ import { Base_Url } from '../../Utils/Base_Url';
 const Ticketlistcsp = (params) => {
     const [Complaintdata, setComplaintdata] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
+
+    const created_by = localStorage.getItem("userId"); // Get user ID from localStorage
+    const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
+    const licare_code = localStorage.getItem("licare_code");
+
     const [isEdit, setIsEdit] = useState(false);
 
     const [formData, setFormData] = useState({
@@ -36,9 +41,10 @@ const Ticketlistcsp = (params) => {
         return date.toLocaleDateString('en-GB', options).replace(/\//g, '-');
     };
 
+    
     const fetchComplaintlist = async () => {
         try {
-            const response = await axios.get(`${Base_Url}/getcomplainlist`);
+            const response = await axios.get(`${Base_Url}/getcomplainlistcsp?licare_code=${licare_code}`);
             // Filter out 'Closed' and 'Cancelled' status complaints by default
             const filteredComplaints = response.data.filter(complaint => 
                 !['Closed', 'Cancelled'].includes(complaint.call_status)
@@ -62,10 +68,12 @@ const Ticketlistcsp = (params) => {
                     params.append(key, value);
                 }
             });
-    
+
+            params.append('licare_code', licare_code);
+
             console.log('Sending params:', params.toString()); // Debug log
             
-            const response = await axios.get(`${Base_Url}/getcomplainlist?${params}`);
+            const response = await axios.get(`${Base_Url}/getcomplainlistcsp?${params}`);
             setFilteredData(response.data);
         } catch (error) {
             console.error('Error fetching filtered data:', error);
@@ -348,7 +356,7 @@ const Ticketlistcsp = (params) => {
                                     <th>Age</th>
                                     <th>Assigned Users</th>
                                     <th>Status</th>
-                                    <th>Edit</th>
+                                    {/* <th>Edit</th> */}
                                     <th>View</th>
                                     {/* <th>Delete</th> */}
                                 </tr>
@@ -364,7 +372,7 @@ const Ticketlistcsp = (params) => {
                                         <td>{item.ageingdays}</td>
                                         <td>{item.assigned_name}</td>
                                         <td>{item.call_status}</td>
-                                        <td>
+                                        {/* <td>
                                         <Link to={`/registercomaplaint/${item.ticket_no}`}><button
                                                 className='btn'
                                     
@@ -380,7 +388,7 @@ const Ticketlistcsp = (params) => {
                                             >
                                                 <FaPencilAlt />
                                             </button></Link>
-                                        </td>
+                                        </td> */}
                                         <td>
                                         <button
                                                 className='btn'

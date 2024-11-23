@@ -112,7 +112,7 @@ app.post("/csplogin", async (req, res) => {
     const result = await pool.request().query(sql);
 
     if (result.recordset.length > 0) {
-      res.json({ id: result.recordset[0].id, Lhiuser: result.recordset[0].email });
+      res.json({ id: result.recordset[0].id, Lhiuser: result.recordset[0].email ,licare_code : result.recordset[0].licare_code});
     } else {
       res.status(401).json({ message: "Invalid username or password" });
     }
@@ -6804,6 +6804,118 @@ app.get("/getcomplainlist", async (req, res) => {
         FROM complaint_ticket AS c
         JOIN awt_engineermaster AS e ON c.engineer_id = e.id
         WHERE c.deleted = 0
+    `;
+
+    let nots = 'NOT';
+
+
+
+    if (fromDate && toDate) {
+      sql += ` AND CAST(c.ticket_date AS DATE) >= CAST('${fromDate}' AS DATE)
+                AND CAST(c.ticket_date AS DATE) <= CAST('${toDate}' AS DATE)`;
+      nots = ''
+    }
+
+    if (customerName) {
+      sql += ` AND c.customer_name LIKE '%${customerName}%'`;
+      nots = ''
+    }
+
+    if (customerEmail) {
+      sql += ` AND c.customer_email LIKE '%${customerEmail}%'`;
+      nots = ''
+    }
+
+    if (customerMobile) {
+      sql += ` AND c.customer_mobile LIKE '%${customerMobile}%'`;
+      nots = ''
+    }
+
+    if (serialNo) {
+      sql += ` AND c.serial_no LIKE '%${serialNo}%'`;
+      nots = ''
+    }
+
+    if (productCode) {
+      sql += ` AND c.ModelNumber LIKE '%${productCode}%'`;
+      nots = ''
+    }
+
+    if (ticketno) {
+      sql += ` AND c.ticket_no LIKE '%${ticketno}%'`;
+      nots = ''
+    }
+    if (customerID) {
+      sql += ` AND c.customer_id LIKE '%${customerID}%'`;
+      nots = ''
+    }
+
+
+
+
+    // Modified status filtering logic
+    if (status === 'Closed' || status === 'Cancelled') {
+      sql += ` AND c.call_status = '${status}'`;
+    } else if (status === '') {
+      // sql += ` AND c.call_status  IN ('Closed', 'Cancelled')`;
+      sql += ``;
+    } else if (status) {
+      sql += ` AND c.call_status = '${status}'`;
+    } else {
+      // sql += ` AND c.call_status ${nots} IN ('Closed', 'Cancelled')`;
+      sql += ``;
+    }
+
+    if(status == undefined){
+      sql += ``
+     }
+
+
+    sql += " ORDER BY c.id DESC";
+
+
+
+    console.log('SQL Query:', sql); // Debug log
+    const result = await pool.request().query(sql);
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "An error occurred while fetching the complaint list" });
+  }
+});
+
+
+// CSP complaint list
+
+app.get("/getcomplainlistcsp", async (req, res) => {
+  const { licare_code } = req.query;
+
+
+
+  try {
+    const pool = await poolPromise;
+    const {
+      fromDate,
+      toDate,
+      customerName,
+      customerEmail,
+      serialNo,
+      productCode,
+      customerMobile,
+      ticketno,
+      status,
+      customerID,
+    } = req.query;
+
+    console.log('Received status:', status); // Debug log
+
+    let sql = `
+        SELECT c.*, e.title as assigned_name, 
+        DATEDIFF(day, (c.ticket_date), GETDATE()) AS ageingdays 
+        FROM complaint_ticket AS c
+        JOIN awt_engineermaster AS e ON c.engineer_id = e.id
+        WHERE c.deleted = 0 AND c.csp = '${licare_code}'
     `;
 
     let nots = 'NOT';
