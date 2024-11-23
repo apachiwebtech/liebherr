@@ -5,7 +5,9 @@ import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
 import { useParams } from "react-router-dom";
 import Franchisemaster from '../Master/Franchisemaster';
-import md5 from 'md5';
+import { useNavigate } from "react-router-dom";
+import md5 from 'js-md5';
+
 const MasterFranchise = (params) => {
   // Step 1: Add this state to track errors
   const { masterid } = useParams();
@@ -204,24 +206,11 @@ const MasterFranchise = (params) => {
   }, []);
 
   const handleChange = (e) => {
-    let { name, value } = e.target;
-
-    // If the field is Password, hash the value
-    if (name === 'password') {
-      // Hash the password before setting the state
-      const hashedPassword = CryptoJS.MD5(value).toString();
-      setFormData(prev => ({
-        ...prev,
-        password: value,  // Update the password field itself
-        passwordmd5: hashedPassword,  // Update the hashed password
-      }));
-    } else {
-      // Update other fields normally
-      setFormData({
-        ...formData,
-        [name]: value,
-      });
-    }
+   const { name, value } = e.target;
+   setFormData(prevState => ({
+    ...prevState,
+    [name]: value
+  }));
 
     switch (name) {
       case "country_id":

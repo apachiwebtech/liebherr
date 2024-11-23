@@ -75,6 +75,7 @@ import Claimreporttabs from './Components/Pages/Reports/Claimreporttabs';
 import { Claimreport } from './Components/Pages/Reports/Claimreport';
 import { MSP_Login } from './Components/Authenticate/MSP_Login';
 import { Franchisemasterlist } from './Components/Pages/Master/Franchisemasterlist';
+import Servicecontract from './Components/Pages/Master/Servicecontract';
 
 
 
@@ -412,7 +413,7 @@ const Router = createBrowserRouter([
         element: <AddProduct />,
       },
       {
-        path: "/emgineermaster/:engineerid",
+        path: "/engineermaster/:engineerid",
         element: <EngineerMaster />,
       },
       
@@ -436,6 +437,10 @@ const Router = createBrowserRouter([
       {
         path: "/claimreporttabs",
         element: <Claimreporttabs />
+      },
+      {
+        path: "/servicecontract",
+        element: <Servicecontract/>
       },
       {
         path: "claimreport",
