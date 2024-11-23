@@ -411,7 +411,7 @@ export function Registercomplaint(params) {
             fetchPincodes(inputValue);
         }
 
-        if(name === "pincode") {
+        if (name === "pincode") {
             fetchlocations(inputValue);
         }
     };
@@ -424,10 +424,10 @@ export function Registercomplaint(params) {
 
             if (response.data && response.data[0]) {
 
-                setlocations({region:response.data[0].region, state:response.data[0].state, district:response.data[0].district, city:response.data[0].city})
+                setlocations({ region: response.data[0].region, state: response.data[0].state, district: response.data[0].district, city: response.data[0].city })
 
             }
-            
+
 
         } catch (error) {
             console.error("Error fetching complaint details:", error);
@@ -460,10 +460,10 @@ export function Registercomplaint(params) {
             email: searchdata.email,
             mobile: searchdata.mobile,
             cust_id: searchdata.id,
-            state:searchdata.state,
-            city:searchdata.city,
-            area:searchdata.area,
-            pincode:searchdata.pincode,
+            state: searchdata.state,
+            city: searchdata.city,
+            area: searchdata.area,
+            pincode: searchdata.pincode,
             product_id: product_id
         }
 
@@ -474,14 +474,14 @@ export function Registercomplaint(params) {
                 setModelNumber(res.data.rowdata[0].ModelNumber)
 
                 setValue({
-                    model : res.data.rowdata[0].ModelNumber,
+                    model: res.data.rowdata[0].ModelNumber,
                     customer_name: res.data.rowdata[0].customer_name,
-                    state : res.data.rowdata[0].state,
-                    city : res.data.rowdata[0].city,
-                    area : res.data.rowdata[0].area,
-                    pincode :res.data.rowdata[0].pincode
+                    state: res.data.rowdata[0].state,
+                    city: res.data.rowdata[0].city,
+                    area: res.data.rowdata[0].area,
+                    pincode: res.data.rowdata[0].pincode
                 })
-                
+
             }).catch((err) => {
                 console.log(err)
             })
@@ -754,7 +754,7 @@ export function Registercomplaint(params) {
                                     </div>
 
 
-                                    {!duplicate ? <>    
+                                    {!duplicate ? <>
                                         <div className="col-md-3">
                                             <div className="mb-3">
                                                 <label className="form-label">Pincode</label>
@@ -769,20 +769,20 @@ export function Registercomplaint(params) {
                                             </div>
                                         </div>
 
-                                    <div className="col-md-3">
-                                        <div className="mb-3">
-                                            <label className="form-label">State</label>
-                                            <select className="form-control" value={value.state} name="state" onChange={onHandleChange}>
-                                                <option value="">Select State</option>
-                                                {state.map((item) => {
-                                                    return (
+                                        <div className="col-md-3">
+                                            <div className="mb-3">
+                                                <label className="form-label">State</label>
+                                                <select className="form-control" value={value.state} name="state" onChange={onHandleChange}>
+                                                    <option value="">Select State</option>
+                                                    {state.map((item) => {
+                                                        return (
 
-                                                        <option value={item.id}>{item.title}</option>
-                                                    )
-                                                })}
-                                            </select>
+                                                            <option value={item.id}>{item.title}</option>
+                                                        )
+                                                    })}
+                                                </select>
+                                            </div>
                                         </div>
-                                    </div>
 
 
                                         <div className="col-md-3">
@@ -814,7 +814,7 @@ export function Registercomplaint(params) {
                                             </div>
                                         </div>
 
-                                        </> : <>      
+                                    </> : <>
                                         <div className="col-md-3">
                                             <div className="mb-3">
                                                 <label htmlFor="exampleFormControlInput1" className="form-label">Pincode</label>
@@ -839,8 +839,8 @@ export function Registercomplaint(params) {
                                                 <input type="text" className="form-control" value={locations.city} name="city" onChange={onHandleChange} placeholder="" disabled />
                                             </div>
                                         </div>
-                                        
-                                         </>}
+
+                                    </>}
 
 
 

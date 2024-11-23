@@ -8,6 +8,7 @@ import Endcustomertabs from './Endcustomertabs';
 export function Customerlist(params) {
     const [Customerdata, setCustomerdata] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
+    const [filteredData, setFilteredData] = useState([]);
     const [formData, setFormData] = useState({
         customer_fname: '',
         customer_lname: '',
@@ -18,7 +19,22 @@ export function Customerlist(params) {
         email: '',
         alt_mobileno: '',
         anniversary_date: '',
+        salutation: ''
 
+
+    });
+
+    const [searchFilters, setSearchFilters] = useState({
+        fromDate: '',
+        toDate: '',
+        customerName: '',
+        customerEmail: '',
+        serialNo: '',
+        productCode: '',
+        customerMobile: '',
+        ticketno: '',
+        status: '',
+        customerID: '',
 
     });
 
@@ -35,6 +51,7 @@ export function Customerlist(params) {
         } catch (error) {
             console.error('Error fetching Customerdata:', error);
             setCustomerdata([]);
+            setFilteredData([]);
         }
     };
 
@@ -57,6 +74,54 @@ export function Customerlist(params) {
         } catch (error) {
             console.error('Error deleting user:', error);
         }
+    };
+
+    const fetchFilteredData = async () => {
+        try {
+            const params = new URLSearchParams();
+
+            // Add all filters to params
+            Object.entries(searchFilters).forEach(([key, value]) => {
+                if (value) { // Only add if value is not empty
+                    params.append(key, value);
+                }
+            });
+
+            console.log('Sending params:', params.toString()); // Debug log
+
+            const response = await axios.get(`${Base_Url}/getcustomerlist?${params}`);
+            setFilteredData(response.data);
+        } catch (error) {
+            console.error('Error fetching filtered data:', error);
+            setFilteredData([]);
+        }
+    };
+
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+        console.log('Filter changed:', name, value); // Debug log
+        setSearchFilters(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const applyFilters = () => {
+        console.log('Applying filters:', searchFilters); // Debug log
+        fetchFilteredData();
+    };
+
+    const resetFilters = () => {
+        setSearchFilters({
+            fromDate: '',
+            toDate: '',
+            customerName: '',
+            customerEmail: '',
+            serialNo: '',
+            productCode: '',
+          
+        });
+        fetchCustomerlist(); // Reset to original data
     };
 
     const edit = async (id) => {
@@ -100,8 +165,177 @@ export function Customerlist(params) {
 
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
                             <div className='p-1 text-right'>
-                                <Link to={`/addproduct/:productid`}><button className='btn btn-primary'>Add Customer</button></Link>
+                                <Link to={`/Customer`}><button className='btn btn-primary'>Add Customer</button></Link>
                             </div>
+                            <div className="row mb-3">
+                            <div className="col-md-2">
+                                <div className="form-group">
+                                    <label>From Date</label>
+                                    <input
+                                        type="date"
+                                        className="form-control"
+                                        name="fromDate"
+                                        value={searchFilters.fromDate}
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
+                            <div className="col-md-2">
+                                <div className="form-group">
+                                    <label>To Date</label>
+                                    <input
+                                        type="date"
+                                        className="form-control"
+                                        name="toDate"
+                                        value={searchFilters.toDate}
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
+                            <div className="col-md-2">
+                                <div className="form-group">
+                                    <label>Ticket No.</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="ticketno"
+                                        value={searchFilters.ticketno}
+                                        placeholder="Search by complaint no"
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="col-md-3">
+                                <div className="form-group">
+                                    <label>Customer ID</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="customerID"
+                                        value={searchFilters.customerID}
+                                        placeholder="Search by customer Id"
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="col-md-3">
+                                <div className="form-group">
+                                    <label>Customer Name</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="customerName"
+                                        value={searchFilters.customerName}
+                                        placeholder="Search by customer name"
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
+
+
+                        </div>
+
+                        {/* second row of filter */}
+
+
+
+                        <div className="row mb-3">
+
+                            <div className="col-md-2">
+                                <div className="form-group">
+                                    <label>Serial No</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="serialNo"
+                                        value={searchFilters.serialNo}
+                                        placeholder="Search by serial no"
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
+                            <div className="col-md-2">
+                                <div className="form-group">
+                                    <label>Model No.</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="productCode"
+                                        value={searchFilters.productCode}
+                                        placeholder="Search by product code"
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
+                            
+
+                            <div className="col-md-3">
+                                <div className="form-group">
+                                    <label>Customer Mobile</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="customerMobile"
+                                        value={searchFilters.customerMobile}
+                                        placeholder="Search by customer mobile"
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="col-md-3">
+                                <div className="form-group">
+                                    <label>Customer Email</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="customerEmail"
+                                        value={searchFilters.customerEmail}
+                                        placeholder="Search by customer email"
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Buttons and message at the far-right corner */}
+                            <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
+                                <div className="form-group">
+                                    <button
+                                        className="btn btn-primary mr-2"
+                                        onClick={applyFilters}
+                                    >
+                                        Search
+                                    </button>
+                                    <button
+                                        className="btn btn-secondary"
+                                        onClick={resetFilters}
+                                        style={{
+                                            marginLeft: '5px',
+                                        }}
+                                    >
+                                        Reset
+                                    </button>
+                                    {filteredData.length === 0 && (
+                                        <div
+                                            style={{
+                                                backgroundColor: '#f8d7da',
+                                                color: '#721c24',
+                                                padding: '5px 10px',
+                                                marginLeft: '10px',
+                                                borderRadius: '4px',
+                                                border: '1px solid #f5c6cb',
+                                                fontSize: '14px',
+                                                display: 'inline-block'
+                                            }}
+                                        >
+                                            No Record Found
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
                             <table className="table">
                                 <thead>
                                     <tr>

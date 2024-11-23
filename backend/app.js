@@ -1472,6 +1472,16 @@ app.get("/getcustomerlist", async (req, res) => {
 
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
+    const{
+      fromDate,
+      toDate,
+      customer_fname,
+      mobileno,
+      email,
+      
+
+
+    } = req.query;
 
     // Directly use the query (no parameter binding)
     const sql = "SELECT * FROM awt_customer ORDER BY id ASC";
@@ -3594,6 +3604,7 @@ app.post("/postcustomer", async (req, res) => {
     dateofbirth,
     anniversary_date,
     email,
+    salutation,
   } = req.body;
 
   try {
@@ -3613,8 +3624,8 @@ app.post("/postcustomer", async (req, res) => {
       });
     } else {
       // Insert the customer if no duplicate is found
-      const insertSql = `INSERT INTO awt_customer (customer_fname, customer_lname, customer_type, customer_classification, mobileno, alt_mobileno, dateofbirth, anniversary_date, email)
-                         VALUES ('${customer_fname}', '${customer_lname}', '${customer_type}', '${customer_classification}', '${mobileno}', '${alt_mobileno}', '${dateofbirth}', '${anniversary_date}', '${email}')`;
+      const insertSql = `INSERT INTO awt_customer (customer_fname, customer_lname, customer_type, customer_classification, mobileno, alt_mobileno, dateofbirth, anniversary_date, email,salutation)
+                         VALUES ('${customer_fname}', '${customer_lname}', '${customer_type}', '${customer_classification}', '${mobileno}', '${alt_mobileno}', '${dateofbirth}', '${anniversary_date}', '${email}','${salutation}')`;
 
       // Execute the insert query
       await pool.request().query(insertSql);
@@ -3627,6 +3638,82 @@ app.post("/postcustomer", async (req, res) => {
   } catch (err) {
     console.error("Database error:", err);
     return res.status(500).json({ error: "Database error occurred" });
+  }
+});
+
+// customer put 
+
+app.put("/putcustomer", async (req, res) => {
+  const { id,customer_fname, customer_lname, customer_type, customer_classification, mobileno, alt_mobileno, dateofbirth, anniversary_date, email, salutation } = req.body;
+
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    
+    // Step 1: Duplicate Check Query
+    const duplicateCheckSQL = `
+      SELECT * FROM awt_customer
+      WHERE email = @email
+      AND deleted = 0
+      
+    `;
+
+    console.log("Executing Duplicate Check SQL:", duplicateCheckSQL);
+
+    const duplicateCheckResult = await pool.request()
+      .input('email', email)
+      .query(duplicateCheckSQL);
+
+    if (duplicateCheckResult.recordset.length > 0) {
+      return res.status(409).json({
+        message: "Duplicate entry,  Franchise Master already exists!"
+      });
+    }
+
+     // Step 2: Update Query
+     const updateSQL = `
+     UPDATE awt_customer
+     SET 
+       customer_fname = @customer_fname,
+       email = @email,
+       mobileno = @mobileno,
+       customer_lname = @customer_lname,
+       customer_type = @customer_type,
+       customer_classification = @customer_classification,
+       alt_mobileno = @alt_mobileno,
+       dateofbirth = @dateofbirth,
+       anniversary_date = @anniversary_date,
+       salutation = @salutation,      
+       updated_by = @created_by
+     WHERE id = @id
+   `;
+   console.log("Executing Update SQL:", updateSQL);
+
+   await pool.request()
+   .input('customer_fname', customer_fname)
+   .input('customer_lname', customer_lname)
+   .input('customer_type', customer_type)
+   .input('customer_classification', customer_classification)
+   .input('email', email)
+   .input('mobileno', mobileno)
+   .input('alt_mobileno', alt_mobileno)
+   .input('dateofbirth', dateofbirth)
+   .input('anniversary_date', anniversary_date)
+   .input('salutation', salutation)   
+   .input('created_by', created_by)
+   .input('id', id)
+   .query(updateSQL);
+
+ return res.json({
+   message: "Customer updated successfully!"
+ });
+    
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while updating the Franchise Master' });
   }
 });
 
@@ -4537,6 +4624,29 @@ AND m.area_id = d.id AND m.geocity_id = ct.id  AND m.deleted = 0 and m.id = ${ma
   }
 });
 
+// customer populate 
+
+app.get("/getcustomerpopulate/:customerid", async (req, res) => {
+  const { customerid } = req.params;
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    // SQL query to fetch data from the master list, customize based on your needs
+    const sql = `
+     SELECT c.* from  awt_customer as c Where c.deleted = 0 AND c.id = ${customerid}
+    `;
+    // Execute the SQL query
+    const result = await pool.request().query(sql);
+
+    // Return the result as JSON
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
 app.get("/requestchildfranchise/:id", async (req, res) => {
   const { id } = req.params;
 

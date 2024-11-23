@@ -27,7 +27,7 @@ export function Complaintlist(params) {
         ticketno: '',
         status: '',
         customerID: '',
-        
+
     });
 
     const formatDate = (dateString) => {
@@ -40,7 +40,7 @@ export function Complaintlist(params) {
         try {
             const response = await axios.get(`${Base_Url}/getcomplainlist`);
             // Filter out 'Closed' and 'Cancelled' status complaints by default
-            const filteredComplaints = response.data.filter(complaint => 
+            const filteredComplaints = response.data.filter(complaint =>
                 !['Closed', 'Cancelled'].includes(complaint.call_status)
             );
             setComplaintdata(response.data);
@@ -55,16 +55,16 @@ export function Complaintlist(params) {
     const fetchFilteredData = async () => {
         try {
             const params = new URLSearchParams();
-            
+
             // Add all filters to params
             Object.entries(searchFilters).forEach(([key, value]) => {
                 if (value) { // Only add if value is not empty
                     params.append(key, value);
                 }
             });
-    
+
             console.log('Sending params:', params.toString()); // Debug log
-            
+
             const response = await axios.get(`${Base_Url}/getcomplainlist?${params}`);
             setFilteredData(response.data);
         } catch (error) {
@@ -103,7 +103,7 @@ export function Complaintlist(params) {
         fetchComplaintlist(); // Reset to original data
     };
 
-	//  const deleted = async (id) => { 
+    //  const deleted = async (id) => { 
     //     try {
     //         const response = await axios.post(`${Base_Url}/deleteengineer`, { id });
     //         setFormData({
@@ -211,18 +211,18 @@ export function Complaintlist(params) {
                                     />
                                 </div>
                             </div>
-                           
-                            
+
+
                         </div>
 
                         {/* second row of filter */}
 
-                       
+
 
                         <div className="row mb-3">
 
                             <div className="col-md-2">
-                            <div className="form-group">
+                                <div className="form-group">
                                     <label>Serial No</label>
                                     <input
                                         type="text"
@@ -295,45 +295,45 @@ export function Complaintlist(params) {
                             </div>
 
                             {/* Buttons and message at the far-right corner */}
-    <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
-        <div className="form-group">
-            <button
-                className="btn btn-primary mr-2"
-                onClick={applyFilters}
-            >
-                Search
-            </button>
-            <button
-                className="btn btn-secondary"
-                onClick={resetFilters}
-                style={{
-                    marginLeft: '5px',
-                }}
-            >
-                Reset
-            </button>
-            {filteredData.length === 0 && (
-                <div
-                    style={{
-                        backgroundColor: '#f8d7da',
-                        color: '#721c24',
-                        padding: '5px 10px',
-                        marginLeft: '10px',
-                        borderRadius: '4px',
-                        border: '1px solid #f5c6cb',
-                        fontSize: '14px',
-                        display: 'inline-block'
-                    }}
-                >
-                    No Record Found
-                </div>
-            )}
-        </div>
-    </div>
-</div>
+                            <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
+                                <div className="form-group">
+                                    <button
+                                        className="btn btn-primary mr-2"
+                                        onClick={applyFilters}
+                                    >
+                                        Search
+                                    </button>
+                                    <button
+                                        className="btn btn-secondary"
+                                        onClick={resetFilters}
+                                        style={{
+                                            marginLeft: '5px',
+                                        }}
+                                    >
+                                        Reset
+                                    </button>
+                                    {filteredData.length === 0 && (
+                                        <div
+                                            style={{
+                                                backgroundColor: '#f8d7da',
+                                                color: '#721c24',
+                                                padding: '5px 10px',
+                                                marginLeft: '10px',
+                                                borderRadius: '4px',
+                                                border: '1px solid #f5c6cb',
+                                                fontSize: '14px',
+                                                display: 'inline-block'
+                                            }}
+                                        >
+                                            No Record Found
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
 
                         {/* No Record Found Message */}
-                       
+
 
                         {/* Table */}
                         <table className="table">
@@ -364,9 +364,9 @@ export function Complaintlist(params) {
                                         <td>{item.assigned_name}</td>
                                         <td>{item.call_status}</td>
                                         <td>
-                                        <Link to={`/registercomaplaint/${item.ticket_no}`}><button
+                                            <Link to={`/registercomaplaint/${item.ticket_no}`}><button
                                                 className='btn'
-                                    
+
                                                 disabled={isActionDisabled(item.call_status)}
                                                 title={isActionDisabled(item.call_status) ? "Cannot edit closed or cancelled complaints" : "Edit"}
                                                 style={{
@@ -381,7 +381,7 @@ export function Complaintlist(params) {
                                             </button></Link>
                                         </td>
                                         <td>
-                                        <button
+                                            <button
                                                 className='btn'
                                                 onClick={() => navigate(`/complaintview/${item.id}`)}
                                                 title="View"
