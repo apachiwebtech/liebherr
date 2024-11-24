@@ -2,127 +2,404 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
-import Endcustomertabs from "./Endcustomertabs";
+import Franchisemaster from '../Master/Franchisemaster';
+import { useParams } from "react-router-dom";
+import md5 from "js-md5";
+const Childfranchisemaster = () => {
+  const { childid } = useParams();
 
-const Customerlocation = () => {
+  const [Parentfranchise, setParentfranchise] = useState([]);
+  const [errors, setErrors] = useState({});
+  const [users, setUsers] = useState([]);
+  const [locations, setlocations] = useState({
+    country: '',
+    region: '',
+    state: '',
+    district: '',
+    city: '',
+  });
+  const [duplicateError, setDuplicateError] = useState("");
+  const [isEdit, setIsEdit] = useState(false);
+
+  // const [filteredUsers, setFilteredUsers] = useState([]);
+  // const [currentPage, setCurrentPage] = useState(0);
+  // const [itemsPerPage, setItemsPerPage] = useState(10);
+  // const [searchTerm, setSearchTerm] = useState("");
+
   const [countries, setCountries] = useState([]);
   const [regions, setRegions] = useState([]);
-  const [geoStates, setGeoStates] = useState([]);
-  const [geoCities, setGeoCities] = useState([]);
-  const [geoAreas, setGeoAreas] = useState([]);
-  const [geoPincodes, setGeoPincodes] = useState([]);
-  const [customerLocation, setCustomerLocation] = useState([]);
-  const [errors, setErrors] = useState({});
-  const [filteredUsers, setFilteredUsers] = useState([]);
-  const [filteredAreas, setFilteredAreas] = useState([]);
-  const [isEdit, setIsEdit] = useState(false);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [duplicateError, setDuplicateError] = useState("");
+  const [state, setState] = useState([])
+  const [area, setdistricts] = useState([])
+  const [city, setCity] = useState([])
+  const [pincode, setPincode] = useState([])
+    const created_by = localStorage.getItem("userId"); // Get user ID from localStorage
+    const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
 
-  const [locations, setlocations] = useState([])
-  
   const [formData, setFormData] = useState({
+    title: "",
+    pfranchise_id: "",
+    contact_person: "",
+    email: "",
+    mobile_no: "",
+    password: "",
     country_id: "",
     region_id: "",
-    geostate_id: "",
-    geocity_id: "",
-    area_id: "",
+    state: "",
+    area: "",
+    city: "",
     pincode_id: "",
     address: "",
-    ccperson: "",
-    ccnumber: "",
-    address_type: "",
+    licare_code: "",
+    partner_name: "",
+    website: "",
+    gst_number: "",
+    pan_number: "",
+    bank_name: "",
+    bank_account_number: "",
+    bank_ifsc_code: "",
+    bank_address: "",
+    last_working_date: "",
+    contract_activation_date: "",
+    contract_expiration_date: "",
+    with_liebherr: "",
   });
 
-  const fetchCountries = async () => {
+  // const fetchchildfranchisepopulate = async (childid) => {
+  //   try {
+
+  //     const response = await axios.get(`${Base_Url}/getchildfranchisepopulate/${childid}`);
+  //     setFormData({
+  //       ...response.data[0],
+  //       // Rename keys to match your formData structure
+  //       pfranchise_id: response.data[0].pfranchise_id,
+  //       title: response.data[0].title,
+  //       contact_person: response.data[0].contact_person,
+  //       email: response.data[0].email,
+  //       mobile_no: response.data[0].mobile_no,
+  //       password: response.data[0].password,
+  //       country_id: response.data[0].country_id,
+  //       region_id: response.data[0].region_id,
+  //       state: response.data[0].geostate_id,
+  //       area: response.data[0].area_id,
+  //       city: response.data[0].geocity_id,
+  //       pincode_id: response.data[0].pincode_id,
+  //       address: response.data[0].address,
+  //       licare_code: response.data[0].licare_code,
+  //       partner_name: response.data[0].partner_name,
+  //       website: response.data[0].webste,
+  //       gst_number: response.data[0].gstno,
+  //       pan_number: response.data[0].panno,
+  //       bank_name: response.data[0].bankname,
+  //       bank_account_number: response.data[0].bankacc,
+  //       bank_ifsc_code: response.data[0].bankifsc,
+  //       bank_address: response.data[0].bankaddress,
+  //       last_working_date: response.data[0].lastworkinddate,
+  //       contract_activation_date: response.data[0].contractacti,
+  //       contract_expiration_date: response.data[0].contractexpir,
+  //       with_liebherr: response.data[0].withliebher
+  //     });
+
+  //     setIsEdit(true);
+
+  //     if (response.data[0].country_id) {
+  //       fetchregion(response.data[0].country_id);
+  //     }
+  //     if (response.data[0].region_id) {
+  //       fetchState(response.data[0].region_id);
+  //     }
+  //     if (response.data[0].geostate_id) {
+  //       fetchdistricts(response.data[0].geostate_id);
+  //     }
+  //     if (response.data[0].area_id) {
+  //       fetchCity(response.data[0].area_id);
+  //     }
+  //     if (response.data[0].geocity_id) {
+  //       fetchpincode(response.data[0].geocity_id);
+  //     }
+
+  //   } catch (error) {
+  //     console.error("Error fetching Parentfranchise:", error);
+  //   }
+  // };
+
+  // End Fetch Child Franchise Deatils for populate
+
+  const fetchchildfranchisepopulate = async (childid) => {
+    try {
+      const response = await axios.get(`${Base_Url}/getchildfranchisepopulate/${childid}`);
+      const data = response.data[0];
+
+      // Update locations state with the names from API
+      setlocations({
+        country: data.country_name || '',
+        region: data.region_name || '',
+        state: data.state_name || '',
+        district: data.district_name || '',
+        city: data.city_name || ''
+      });
+
+      setFormData({
+        ...response.data[0],
+        pfranchise_id: data.pfranchise_id,
+        title: data.title,
+        contact_person: data.contact_person,
+        email: data.email,
+        mobile_no: data.mobile_no,
+        password: data.password,
+        country_id: data.country_id,
+        region_id: data.region_id,
+        state: data.geostate_id,
+        area: data.area_id,
+        city: data.geocity_id,
+        pincode_id: data.pincode_id,
+        address: data.address,
+        licare_code: data.licare_code,
+        partner_name: data.partner_name,
+        website: data.webste,
+        gst_number: data.gstno,
+        pan_number: data.panno,
+        bank_name: data.bankname,
+        bank_account_number: data.bankacc,
+        bank_ifsc_code: data.bankifsc,
+        bank_address: data.bankaddress,
+        last_working_date: data.lastworkinddate,
+        contract_activation_date: data.contractacti,
+        contract_expiration_date: data.contractexpir,
+        with_liebherr: data.withliebher
+      });
+
+      setIsEdit(true);
+
+      // Fetch dependent dropdowns data
+      if (data.country_id) {
+        fetchregion(data.country_id);
+      }
+      if (data.region_id) {
+        fetchState(data.region_id);
+      }
+      if (data.geostate_id) {
+        fetchdistricts(data.geostate_id);
+      }
+      if (data.area_id) {
+        fetchCity(data.area_id);
+      }
+      if (data.geocity_id) {
+        fetchpincode(data.geocity_id);
+      }
+
+    } catch (error) {
+      console.error("Error fetching Parentfranchise:", error);
+    }
+  };
+
+
+  const fetchParentfranchise = async () => {
+    try {
+      const response = await axios.get(`${Base_Url}/getparentfranchise`);
+      console.log("pf",response.data);
+      setParentfranchise(response.data);
+    } catch (error) {
+      console.error("Error fetching Parentfranchise:", error);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const response = await axios.get(`${Base_Url}/getchildFranchiseDetails`);
+      console.log(response.data);
+      setUsers(response.data);
+      // setFilteredUsers(response.data);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
+
+  //This is for State Dropdown
+
+  async function getState(params) {
+    axios.get(`${Base_Url}/getstate`)
+      .then((res) => {
+        if (res.data) {
+
+          setState(res.data)
+
+        }
+      })
+  }
+
+
+  const fetchcountries = async () => {
     try {
       const response = await axios.get(`${Base_Url}/getcountries`);
       setCountries(response.data);
     } catch (error) {
-      console.error("Error fetching countries:", error);
+      console.error("Error fetching disctricts:", error);
     }
   };
 
-  const fetchRegions = async (countryId) => {
+  //region
+  const fetchregion = async (country_id) => {
     try {
-      const response = await axios.get(`${Base_Url}/getregions/${countryId}`);
+      const response = await axios.get(`${Base_Url}/getregionscity/${country_id}`);
       setRegions(response.data);
     } catch (error) {
-      console.error("Error fetching regions:", error);
+      console.error("Error fetching disctricts:", error);
     }
   };
 
-  const fetchGeoStates = async (regionId) => {
+  //geostate
+  const fetchState = async (region_id) => {
     try {
-      const response = await axios.get(`${Base_Url}/getgeostates/${regionId}`);
-      setGeoStates(response.data);
+      const response = await axios.get(`${Base_Url}/getgeostatescity/${region_id}`);
+      setState(response.data);
     } catch (error) {
-      console.error("Error fetching geo states:", error);
+      console.error("Error fetching disctricts:", error);
     }
   };
 
-  const fetchGeoCities = async (district_id) => {
+  const fetchdistricts = async (geostateID) => {
     try {
-      const response = await axios.get(
-        `${Base_Url}/getgeocities_a/${district_id}`
-      );
-      console.log("Geo Cities:", response.data);
-      setGeoCities(response.data);
+      const response = await axios.get(`${Base_Url}/getdistrictcity/${geostateID}`);
+      setdistricts(response.data);
     } catch (error) {
-      console.error("Error fetching geo cities:", error);
+      console.error("Error fetching disctricts:", error);
     }
   };
 
-
-  const fetchDistrict = async (geostate_id) => {
+  const fetchCity = async (area_id) => {
     try {
-      const response = await axios.get(
-        `${Base_Url}/getareadrop/${geostate_id}`
-      );
-      console.log("Area Dropdown:", response.data);
-      setGeoAreas(response.data);
+      const response = await axios.get(`${Base_Url}/getgeocities_p/${area_id}`);
+      setCity(response.data);
     } catch (error) {
-      console.error("Error fetching Area:", error);
+      console.error("Error fetching City:", error);
     }
   };
 
-  const fetchPincodedrop = async (geocity_id) => {
+  const fetchpincode = async (cityid) => {
     try {
-      const response = await axios.get(
-        `${Base_Url}/getpincodedrop/${geocity_id}`
-      );
-      console.log("Pincode Dropdown:", response.data);
-      setGeoPincodes(response.data);
+      const response = await axios.get(`${Base_Url}/getpincodebyid/${cityid}`);
+      setPincode(response.data);
     } catch (error) {
-      console.error("Error fetching Pincode:", error);
-    }
-  };
-
-  const fetchCustomerlocation = async () => {
-    try {
-      const response = await axios.get(`${Base_Url}/getcustomerlocation`);
-      setCustomerLocation(response.data);
-      setFilteredAreas(response.data);
-    } catch (error) {
-      console.error("Error fetching areas:", error);
+      console.error("Error fetching City:", error);
     }
   };
 
   useEffect(() => {
-    fetchCountries();
-    fetchCustomerlocation();
-  }, []);
+    fetchcountries();
+    fetchUsers();
+    fetchParentfranchise();
 
+    if (childid && childid !== '0') {
+      fetchchildfranchisepopulate(childid);
+    }
+  }, [childid]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prevState => ({
+      ...prevState,
+      [name]: value
+    }));
+
+    // Handle dependent dropdowns
+    switch (name) {
+      case "country_id":
+        fetchregion(value);
+        break;
+      case "region_id":
+        fetchState(value);
+        break;
+      case "state":
+        fetchdistricts(value);
+        break;
+      case "area":
+        fetchCity(value);
+        break;
+      case "city":
+        fetchpincode(value);
+        break;
+        case "pincode_id":
+          fetchlocations(value);
+          break;
+      default:
+        break;
+    }
+  };
+
+  const fetchlocations = async (pincode) => {
+    try {
+      const response = await axios.get(
+        `${Base_Url}/getmultiplelocation/${pincode}`
+      );
+
+      if (response.data && response.data[0]) {
+        // Update locations display state
+        setlocations({
+          region: response.data[0].region,
+          state: response.data[0].state,
+          district: response.data[0].district,
+          city: response.data[0].city,
+          country: response.data[0].country
+        });
+
+        // Update formData with the new location values
+        setFormData(prevState => ({
+          ...prevState,
+          country_id: response.data[0].country,
+          region_id: response.data[0].region,
+          state: response.data[0].state,
+          area: response.data[0].district,
+          city: response.data[0].city,
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching complaint details:", error);
+    }
+  };
+
+
+
+  // Step 2: Add form validation function
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.pfranchise_id) newErrors.pfranchise_id = "Parent Franchise selection is required.";
+    if (!formData.title.trim()) newErrors.title = "Child Franchise Field is required.";
+    if (!formData.contact_person.trim()) newErrors.contact_person = "Contact Person is required.";
+    if (!formData.email.trim()) newErrors.email = "Email is required.";
+    if (!formData.mobile_no.trim()) newErrors.mobile_no = "Mobile Number is required.";
+    if (!formData.password.trim()) newErrors.password = "Password is required.";
+    // if (!formData.country_id) newErrors.country_id = "Country selection is required.";
+    // if (!formData.region_id) newErrors.region_id = "Region selection is required.";
+    // if (!formData.state) newErrors.state = "State selection is required.";
+    // if (!formData.area) newErrors.area = "Area selection is required.";
+    // if (!formData.city) newErrors.city = "City selection is required.";
+    // if (!formData.pincode_id) newErrors.pincode_id = "Pincode selection is required.";
+    if (!formData.address.trim()) newErrors.address = "Address is required.";
+
+    // Add validations for new fields
+    if (!formData.licare_code.trim()) newErrors.licare_code = "Licare Code is required.";
+    if (!formData.partner_name.trim()) newErrors.partner_name = "Partner Name is required.";
+    if (!formData.gst_number.trim()) newErrors.gst_number = "GST Number is required.";
+    if (!formData.pan_number.trim()) newErrors.pan_number = "PAN Number is required.";
+    if (!formData.bank_name.trim()) newErrors.bank_name = "Bank Name is required.";
+    if (!formData.bank_account_number.trim()) newErrors.bank_account_number = "Bank Account Number is required.";
+    if (!formData.bank_ifsc_code.trim()) newErrors.bank_ifsc_code = "Bank IFSC Code is required.";
+
+    return newErrors;
+  };
+
+
+  //handlesubmit form
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
+      console.log("Validation Errors:", validationErrors);
       setErrors(validationErrors);
       return;
     }
-
     setDuplicateError("");
 
     try {
@@ -130,49 +407,91 @@ const Customerlocation = () => {
         "Do you want to submit the data?"
       );
       if (confirmSubmission) {
+        const hashedFormData = {
+          ...formData,
+          password: md5(formData.password) // Hash the password using MD5
+        };
         if (isEdit) {
           await axios
-            .put(`${Base_Url}/putcustomerlocation`, { ...formData })
+          .put(`${Base_Url}/putchildfranchise`, { ...hashedFormData, created_by })
             .then((response) => {
               setFormData({
+                title: "",
+                pfranchise_id: "",
+                contact_person: "",
+                email: "",
+                mobile_no: "",
+                password: "",
                 country_id: "",
                 region_id: "",
-                geostate_id: "",
-                geocity_id: "",
-                district_id: "",
+                state: "",
+                area: "",
+                city: "",
                 pincode_id: "",
                 address: "",
-                ccperson: "",
-                ccnumber: "",
+                licare_code: "",
+                partner_name: "",
+                website: "",
+                gst_number: "",
+                pan_number: "",
+                bank_name: "",
+                bank_account_number: "",
+                bank_ifsc_code: "",
+                bank_address: "",
+                last_working_date: "",
+                contract_activation_date: "",
+                contract_expiration_date: "",
+                with_liebherr: ""
               });
-              fetchCustomerlocation();
+              fetchUsers();
+              setIsEdit(false);
             })
             .catch((error) => {
               if (error.response && error.response.status === 409) {
-                setDuplicateError("Duplicate entry, Customer with same number already exists !");
+                setDuplicateError(
+                  "Duplicate entry, Child Franchise already exists!"
+                );
               }
             });
         } else {
-          await axios
-            .post(`${Base_Url}/postcustomerlocation`, { ...formData })
+
+          await axios.post(`${Base_Url}/postchildfranchise`, { ...hashedFormData, created_by })
             .then((response) => {
               setFormData({
+                title: "",
+                pfranchise_id: "",
+                contact_person: "",
+                email: "",
+                mobile_no: "",
+                password: "",
                 country_id: "",
                 region_id: "",
-                geostate_id: "",
-                geocity_id: "",
-                district_id: "",
+                state: "",
+                area: "",
+                city: "",
                 pincode_id: "",
                 address: "",
-                ccperson: "",
-                ccnumber: "",
-                address_type: "",
+                licare_code: "",
+                partner_name: "",
+                website: "",
+                gst_number: "",
+                pan_number: "",
+                bank_name: "",
+                bank_account_number: "",
+                bank_ifsc_code: "",
+                bank_address: "",
+                last_working_date: "",
+                contract_activation_date: "",
+                contract_expiration_date: "",
+                with_liebherr: ""
               });
-              fetchCustomerlocation();
+              fetchUsers();
             })
             .catch((error) => {
               if (error.response && error.response.status === 409) {
-                setDuplicateError("Duplicate entry, Customer with same number already exists !");
+                setDuplicateError(
+                  "Duplicate entry, Child Franchise already exists!"
+                );
               }
             });
         }
@@ -182,592 +501,406 @@ const Customerlocation = () => {
     }
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-
-    if (name === "country_id") {
-      fetchRegions(value);
-    }
-    if (name === "region_id") {
-      fetchGeoStates(value);
-    }
-    if (name === "geostate_id") {
-      fetchGeoCities(value); // Fetch Geo Cities when Geo State is selected
-    }
-    if (name === "geocity_id") {
-      fetchDistrict(value); // Fetch Geo Cities when Geo State is selected
-    }
-    if (name === "district_id") {
-      fetchPincodedrop(value); // Fetch Geo Cities when Geo State is selected
-    }
-
-    if (name === "pincode_id") {
-      fetchlocations(value);
-  }
-  
-  };
-
-  const fetchlocations = async (pincode) => {
-    try {
-        const response = await axios.get(
-            `${Base_Url}/getmultiplelocation/${pincode}`
-        );
-
-        if (response.data && response.data[0]) {
-
-            setlocations({ region: response.data[0].region, state: response.data[0].state, district: response.data[0].district, city: response.data[0].city })
-
-        }
-
-
-    } catch (error) {
-        console.error("Error fetching complaint details:", error);
-    }
-};
-
-  const handleSearch = (e) => {
-    const searchValue = e.target.value.toLowerCase();
-    setSearchTerm(searchValue);
-    setFilteredAreas(
-      customerLocation.filter(
-        (area) =>
-          area.title.toLowerCase().includes(searchValue) ||
-          area.country_title.toLowerCase().includes(searchValue) ||
-          area.region_title.toLowerCase().includes(searchValue) ||
-          area.geostate_title.toLowerCase().includes(searchValue)
-      )
-    );
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-
-    // Address validation
-    if (!formData.address || formData.address.trim() === '') {
-      newErrors.address = "Address field is required.";
-    }
-
-    // Area validation
-    if (!formData.district_id) {
-      newErrors.district_id = "Area selection is required.";
-    }
-
-    // Address Type validation
-    if (!formData.address_type) {
-      newErrors.address_type = "Address Type selection is required.";
-    }
-
-    // Contact Person validation
-    if (!formData.ccperson || formData.ccperson.trim() === '') {
-      newErrors.ccperson = "Contact Person field is required.";
-    }
-
-    // Other existing validations
-    if (!formData.country_id) {
-      newErrors.country_id = "Country selection is required.";
-    }
-    if (!formData.region_id) {
-      newErrors.region_id = "Region selection is required.";
-    }
-    if (!formData.geostate_id) {
-      newErrors.geostate_id = "Geo State selection is required.";
-    }
-    if (!formData.geocity_id) {
-      newErrors.geocity_id = "Geo City selection is required.";
-    }
-    if (!formData.pincode_id) {
-      newErrors.pincode_id = "Pincode selection is required.";
-    }
-    if (!formData.ccnumber) {
-      newErrors.ccnumber = "Customer Contact Number is required.";
-    }
-
-    return newErrors;
-  };
-
-
-  console.log("locations data",locations)
-
-  const deleted = async (id) => {
-    try {
-      await axios.post(`${Base_Url}/deletepincode`, { id });
-      setFormData({
-        country_id: "",
-        region_id: "",
-        geostate_id: "",
-        geocity_id: "",
-        district_id: "",
-        pincode_id: "",
-        address: "",
-        ccperson: "",
-        ccnumber: "",
-        address_type: "",
-      });
-      fetchCustomerlocation();
-    } catch (error) {
-      console.error("Error deleting Customer Location:", error);
-    }
-  };
-
-  const edit = async (id) => {
-    try {
-      const response = await axios.get(`${Base_Url}/requestcustomerlocation/${id}`);
-      setFormData(response.data);
-      console.log("Form Data", setFormData);
-      fetchRegions(response.data.country_id);
-      fetchGeoStates(response.data.region_id);
-      fetchGeoCities(response.data.geostate_id);
-      fetchDistrict(response.data.geocity_id);
-      fetchPincodedrop(response.data.district_id);
-      setIsEdit(true);
-    } catch (error) {
-      console.error("Error editing Customer Location:", error);
-    }
-  };
-
-  const indexOfLastUser = (currentPage + 1) * itemsPerPage;
-  const indexOfFirstUser = indexOfLastUser - itemsPerPage;
-  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
   return (
     <div className="tab-content">
-      <Endcustomertabs></Endcustomertabs>
+      <Franchisemaster />
       <div className="row mp0">
         <div className="col-12">
           <div className="card mb-3 tab_box">
-            <div className="card-body">
-              <div className="row mp0">
-                <div className="col-6">
-                  <form onSubmit={handleSubmit}>
-                    <div className="row">
-                      <div className="col-md-12 mb-3">
-                        <label htmlFor="exampleFormControlTextarea1">
-                          Address
-                        </label>
-                        <textarea
-                          className="form-control"
-                          id="exampleFormControlTextarea1"
-                          rows="3"
-                          name="address"
-                          value={formData.address}
-                          onChange={handleChange}
-                        ></textarea>
-                        {errors.address && (
-                          <small className="text-danger">
-                            {errors.address}
-                          </small>
-                        )}
-                      </div>
-                      <div className="col-md-4 mb-3">
-                        <label htmlFor="country" className="form-label">
-                          Country
-                        </label>
-
-    <input type="text" className="form-control" value={locations.city} name="country_id" onChange={handleChange} placeholder="" disabled />
-
-                        {/* <select
-                          id="country"
-                          name="country_id"
-                          className="form-select"
-                          aria-label=".form-select-lg example"
-                          value={formData.country_id}
-                          onChange={handleChange}
-                        >
-                          <option value="">Select Country</option>
-                          {countries.map((country) => (
-                            <option key={country.id} value={country.id}>
-                              {country.title}
-                            </option>
-                          ))}
-                        </select> */}
-                        {errors.country_id && (
-                          <small className="text-danger">
-                            {errors.country_id}
-                          </small>
-                        )}
-                      </div>
-                      <div className="col-md-4 mb-3">
-                        <label htmlFor="region" className="form-label">
-                          Region
-                        </label>
-    <input type="text" className="form-control" value={locations.city} name="region_id" onChange={handleChange} placeholder="" disabled />
-                        
-                        {/* <select
-                          id="region"
-                          name="region_id"
-                          className="form-select"
-                          aria-label=".form-select-lg example"
-                          value={formData.region_id}
-                          onChange={handleChange}
-                        >
-                          <option value="">Select Region</option>
-                          {regions.map((region) => (
-                            <option key={region.id} value={region.id}>
-                              {region.title}
-                            </option>
-                          ))}
-                        </select> */}
-                        {errors.region_id && (
-                          <small className="text-danger">
-                            {errors.region_id}
-                          </small>
-                        )}
-                      </div>
-
-                      {/* Geo State Dropdown */}
-                      <div className="col-md-4 mb-3">
-                        <label htmlFor="geostate" className="form-label">
-                          Geo States
-                        </label>
-                        <input type="text" className="form-control" value={locations.state} name="geostate_id" onChange={handleChange} placeholder="" disabled />
-                        {/* <select
-                          id="geostate"
-                          name="geostate_id"
-                          className="form-select"
-                          aria-label=".form-select-lg example"
-                          value={formData.geostate_id}
-                          onChange={handleChange}
-                        >
-                          <option value="">Select Geo State</option>
-                          {geoStates.map((geoState) => (
-                            <option key={geoState.id} value={geoState.id}>
-                              {geoState.title}
-                            </option>
-                          ))}
-                        </select> */}
-                        {errors.geostate_id && (
-                          <small className="text-danger">
-                            {errors.geostate_id}
-                          </small>
-                        )}
-                      </div>
-
-                      {/* Geo District Dropdown */}
-                      <div className="col-md-4 mb-3">
-                        <label htmlFor="area" className="form-label">
-                          District
-                        </label>
-
-                        <input type="text" className="form-control" value={locations.district} name="area_id" onChange={handleChange} placeholder="" disabled />
-                        {/* <select
-                          id="area"
-                          name="area_id"
-                          className="form-select"
-                          aria-label=".form-select-lg example"
-                          value={formData.area_id}
-                          onChange={handleChange}
-                        >
-                          <option value="">Select District</option>
-                          {geoAreas.map((geoArea) => (
-                            <option key={geoArea.id} value={geoArea.id}>
-                              {geoArea.title}
-                            </option>
-                          ))}
-                        </select> */}
-                        {errors.area_id && (
-                          <small className="text-danger">{errors.area_id}</small>
-                        )}
-                      </div>
-
-                      {/* Geo City Dropdown */}
-                      <div className="col-md-4 mb-3">
-                        <label htmlFor="geocity" className="form-label">
-                          Geo City
-                        </label>
-                        <input type="text" className="form-control" value={locations.city} name="geocity_id" onChange={handleChange} placeholder="" disabled />
-                        {/* <select
-                          id="geocity"
-                          name="geocity_id"
-                          className="form-select"
-                          aria-label=".form-select-lg example"
-                          value={formData.geocity_id}
-                          onChange={handleChange}
-                        >
-                          <option value="">Select Geo City</option>
-                          {geoCities.map((geoCity) => (
-                            <option key={geoCity.id} value={geoCity.id}>
-                              {geoCity.title}
-                            </option>
-                          ))}
-                        </select> */}
-                        {errors.geocity_id && (
-                          <small className="text-danger">
-                            {errors.geocity_id}
-                          </small>
-                        )}
-                      </div>
-
-
-                      {/* Pincode Dropdown */}
-                      <div className="col-md-4 mb-3">
-                        <label htmlFor="area" className="form-label">
-                          Pincode
-                        </label>
-
-              
-                        <input type="text" className="form-control" value={formData.pincode_id} name="pincode_id" onChange={handleChange} placeholder="" />
-
-                        {/* <select
-                          id="pincode"
-                          name="pincode_id"
-                          className="form-select"
-                          aria-label=".form-select-lg example"
-                          value={formData.pincode_id}
-                          onChange={handleChange}
-                        >
-                          <option value="">Select Pincode</option>
-                          {geoPincodes.map((geoPincode) => (
-                            <option key={geoPincode.id} value={geoPincode.id}>
-                              {geoPincode.pincode}
-                            </option>
-                          ))}
-                        </select> */}
-                        {errors.pincode_id && (
-                          <small className="text-danger">{errors.pincode_id}</small>
-                        )}
-                      </div>
-
-
-
-                      <div className="col-md-4 mb-3">
-                        <label htmlFor="addtype" className="form-label">
-                          Address Type
-                        </label>
-                        <select
-                          id="addtype"
-                          name="address_type"
-                          className="form-select"
-                          aria-label=".form-select-lg example"
-                          value={formData.address_type}
-                          onChange={handleChange}
-                        >
-                          <option value="">Select Address Type</option>
-                          <option value="Commercial">Commercial</option>
-                          <option value="Residential">Residential</option>
-                        </select>
-                        {errors.address_type && (
-                          <small className="text-danger">{errors.address_type}</small>
-                        )}
-                      </div>
-                      <div className="col-md-4 mb-3">
-                        <label htmlFor="ccperson" className="form-label">
-                          Customer Contact Person
-                        </label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          id="ccperson"
-                          name="ccperson"
-                          value={formData.ccperson}
-                          onChange={handleChange}
-                          aria-describedby="cperson"
-                        />
-                        {errors.ccperson && (
-                          <small className="text-danger">{errors.ccperson}</small>
-                        )}
-                      </div>
-                      <div className="col-md-4 mb-3">
-                        <label htmlFor="ccnumber" className="form-label">
-                          Customer Contact Number
-                        </label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          name="ccnumber"
-                          id="ccnumber"
-                          value={formData.ccnumber}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            if (!isNaN(value)) {
-                              if (value.length <= 15) {
-                                handleChange(e);
-
-                              }
-                            }
-                          }}
-                          placeholder="Enter Customer Contact Number"
-                          pattern="[0-9]*"
-                          maxLength="15"
-                          aria-describedby="cpnumber"
-                        />
-                        {formData.ccnumber.length > 0 && formData.ccnumber.length < 10 && (
-                          <small className="text-danger">Mobile number must be at least 10 digits</small>
-                        )}
-                        {errors.ccnumber && <small className="text-danger">{errors.ccnumber}</small>}
-                        {duplicateError && (
-                          <small className="text-danger">{duplicateError}</small>
-                        )}
-                      </div>
-
-                      {/* <div className="col-md-4 mb-3">
-                      <label htmlFor="ccnumber" className="form-label">
-                        Customer Contact Number
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        id="ccnumber"
-                        name="ccnumber"
-                        value={formData.ccnumber}
-                         onChange={handleChange}
-                        aria-describedby="cpnumber"
-                      />
-                        {duplicateError && (
-                      <small className="text-danger">{duplicateError}</small>
+            <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
+              <form onSubmit={handleSubmit}>
+                <div className="row">
+                  <div className="col-md-3">
+                    <label htmlFor="Parent Franchise" className="form-label pb-0 dropdown-label">
+                      Parent Franchise
+                    </label>
+                    <select
+                      className="form-select dropdown-select"
+                      name="pfranchise_id"
+                      value={formData.pfranchise_id}
+                      onChange={handleChange}
+                      style={{ fontSize: "18px" }}
+                    >
+                      <option value="">Select Parent Franchise</option>
+                      {Parentfranchise.map((pf) => (
+                        <option key={pf.id} value={pf.licarecode}>
+                          {pf.title}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.pfranchise_id && (
+                      <small className="text-danger">
+                        {errors.pfranchise_id}
+                      </small>
                     )}
-                    </div> */}
+                  </div>
 
-                      <div className="col-md-12 text-right">
-                        <button type="submit" className="btn btn-liebherr">
-                          Submit
-                        </button>
-                      </div>
-                    </div>
-                  </form>
-                </div>
-
-                <div className="col-6">
-                  <div className="d-flex justify-content-between align-items-center mb-3">
-                    <span>
-                      Show
-                      <select
-                        value={itemsPerPage}
-                        onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                        className="form-control d-inline-block"
-                        style={{
-                          width: "51px",
-                          display: "inline-block",
-                          marginLeft: "5px",
-                          marginRight: "5px",
-                        }}
-                      >
-                        <option value={10}>10</option>
-                        <option value={15}>15</option>
-                        <option value={20}>20</option>
-                      </select>
-                      entries
-                    </span>
-
+                  <div className="col-md-3">
+                    <label
+                      htmlFor="ChildFranchiseMasterInput"
+                      className="input-field"
+                      style={{ marginBottom: "15px", fontSize: "18px" }}
+                    >
+                      Child Franchise Master
+                    </label>
                     <input
                       type="text"
-                      placeholder="Search..."
-                      value={searchTerm}
-                      onChange={handleSearch}
-                      className="form-control d-inline-block"
-                      style={{ width: "300px" }}
+                      className="form-control"
+                      name="title"
+                      id="ChildFranchiseMasterInput"
+                      value={formData.title}
+                      onChange={handleChange}
+                      placeholder="Enter Child Franchise Master"
+                      style={{ fontSize: "18px" }}
+                    />
+                    {errors.title && (
+                      <small className="text-danger">{errors.title}</small>
+                    )}
+                  </div>
+
+                  <div className="col-md-3">
+                    <label className="input-field">Child Licare Code</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="licare_code"
+                      value={formData.licare_code}
+                      onChange={handleChange}
+                      placeholder="Enter Licare Code"
+                    />
+                    {errors.licare_code && <small className="text-danger">{errors.licare_code}</small>}
+                  </div>
+
+                  <div className="col-md-3">
+                    <label className="input-field"> Child Franchise Master(Contact Person)</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="contact_person"
+                      value={formData.contact_person}
+                      onChange={handleChange}
+                      placeholder="Enter Contact Person"
+                    />
+                    {errors.contact_person && <small className="text-danger">{errors.contact_person}</small>}
+                  </div>
+
+                  <div className="col-md-3">
+                    <label className="input-field">Child Franchise Master (Email)</label>
+                    <input
+                      type="email"
+                      className="form-control"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="Enter Franchise Master Email"
+                    />
+                    {errors.email && <small className="text-danger">{errors.email}</small>}
+                  </div>
+
+                  <div className="col-md-3">
+                    <label className="input-field">Child Franchise Master (Mobile Number)</label>
+                    <input
+                      type="tel"
+                      className="form-control"
+                      name="mobile_no"
+                      value={formData.mobile_no}
+                      onChange={handleChange}
+                      placeholder="Enter Mobile Number"
+                      pattern="[0-9]{10}"
+                      maxLength="15"
+                    />
+                    {errors.mobile_no && <small className="text-danger">{errors.mobile_no}</small>}
+                  </div>
+
+                  <div className="col-md-3">
+                    <label className="input-field">Child Partner Name</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="partner_name"
+                      value={formData.partner_name}
+                      onChange={handleChange}
+                      placeholder="Enter Partner Name"
+                    />
+                    {errors.partner_name && <small className="text-danger">{errors.partner_name}</small>}
+                  </div>
+
+                  <div className="col-md-3">
+                    <label className="input-field">Child Franchise Master (Password)</label>
+                    <input
+                      type="password"
+                      className="form-control"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      placeholder="Enter Password"
+                    />
+                    {errors.password && <small className="text-danger">{errors.password}</small>}
+                  </div>
+
+                  <div className="col-md-3">
+                   <label className="input-field">Country</label>
+        <input 
+          type="text" 
+          className="form-control" 
+          value={locations.country}
+          name="country_id"
+          onChange={handleChange}
+          placeholder="Country"
+          readOnly 
+        />
+        {errors.country_id && <small className="text-danger">{errors.country_id}</small>}
+      </div>
+
+                  <div className="col-md-3">
+                  <label className="input-field">Region</label>
+        <input 
+          type="text" 
+          className="form-control" 
+          value={locations.region}
+          name="region_id"
+          onChange={handleChange}
+          placeholder="Region"
+          readOnly 
+        />
+        {errors.region_id && <small className="text-danger">{errors.region_id}</small>}
+      </div>
+
+                  <div className="col-md-3">
+                  <label className="input-field">Geo State</label>
+        <input 
+          type="text" 
+          className="form-control" 
+          value={locations.state}
+          name="state"
+          onChange={handleChange}
+          placeholder="State"
+          readOnly 
+        />
+        {errors.state && <small className="text-danger">{errors.state}</small>}
+      </div>
+
+
+                  <div className="col-md-3">
+                  <label className="input-field">District</label>
+        <input 
+          type="text" 
+          className="form-control" 
+          value={locations.district}
+          name="area"
+          onChange={handleChange}
+          placeholder="District"
+          readOnly 
+        />
+        {errors.state && <small className="text-danger">{errors.state}</small>}
+      </div>
+
+                  <div className="col-md-3">
+                  <label className="input-field">Geo City</label>
+        <input 
+          type="text" 
+          className="form-control" 
+          value={locations.city}
+          name="city"
+          onChange={handleChange}
+          placeholder="City"
+          readOnly 
+        />
+        {errors.city && <small className="text-danger">{errors.city}</small>}
+      </div>
+
+                  <div className="col-md-3">
+                    <label htmlFor="area" className="input-field">
+                      Pincode
+                    </label>
+
+                    <input type="text" className="form-control" value={formData.pincode_id} name="pincode_id" onChange={handleChange} placeholder="" />
+                    {/* <select
+                      id="pincode"
+                      name="pincode_id"
+                      className="form-select"
+                      aria-label=".form-select-lg example"
+                      value={formData.pincode_id}
+                      onChange={handleChange}
+                    >
+                      <option value="">Select Pincode</option>
+                      {pincode.map((geoPincode) => (
+                        <option key={geoPincode.id} value={geoPincode.id}>
+                          {geoPincode.pincode}
+                        </option>
+                      ))}
+                    </select> */}
+                    {errors.pincode_id && (
+                      <small className="text-danger">{errors.pincode_id}</small>
+                    )}
+                  </div>
+
+                  <div className="col-md-3">
+                    <label className="input-field">Website</label>
+                    <input
+                      type="url"
+                      className="form-control"
+                      name="website"
+                      value={formData.website}
+                      onChange={handleChange}
+                      placeholder="Enter Website URL"
                     />
                   </div>
-                  <table
 
-                    className="table table-bordered table dt-responsive nowrap w-100 table-css"
-                    style={{ marginTop: "20px", tableLayout: "fixed" }}
-                  >
-                    <thead>
-                      <tr>
-                        <th scope="col" width="10%">
-                          #
-                        </th>
-                        <th scope="col">Contact Person</th>
-                        <th scope="col">Contact Person No</th>
-                        <th scope="col">Address</th>
-                        <th
-                          scope="col"
-                          width="15%"
-                          style={{ textAlign: "center" }}
-                        >
-                          Edit
-                        </th>
-                        <th
-                          scope="col"
-                          width="15%"
-                          style={{ textAlign: "center" }}
-                        >
-                          Delete
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {customerLocation.map((item, index) => (
-                        <tr key={item.id}>
-                          <td style={{ padding: "2px", textAlign: "center" }}>
-                            {index + 1 + indexOfFirstUser}
-                          </td>
-                          <th scope="row">{index + 1}</th>
-                          <td>{item.ccperson}</td>
-                          <td>{item.ccnumber}</td>
-                          <td>{item.address}</td>
-                          <td className="text-center">
-                            <button
-                              className="btn btn-link text-primary"
-                              onClick={() => edit(item.id)}
-                              title="Edit"
-                            >
-                              <FaPencilAlt />
-                            </button>
-                          </td>
-                          <td className="text-center">
-                            <button
-                              className="btn btn-link text-danger"
-                              onClick={() => deleted(item.id)}
-                              title="Delete"
-                            >
-                              <FaTrash />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  <div
-                    className="d-flex justify-content-between"
-                    style={{ marginTop: "10px" }}
-                  >
-                    <div>
-                      Showing {indexOfFirstUser + 1} to{" "}
-                      {Math.min(indexOfLastUser, filteredUsers.length)} of{" "}
-                      {filteredUsers.length} entries
-                    </div>
+                  <div className="col-md-3">
+                    <label className="input-field">GST Number</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="gst_number"
+                      value={formData.gst_number}
+                      onChange={handleChange}
+                      placeholder="Enter GST Number"
+                    />
+                    {errors.gst_number && <small className="text-danger">{errors.gst_number}</small>}
+                  </div>
 
-                    <div className="pagination" style={{ marginLeft: "auto" }}>
-                      <button
-                        onClick={() => setCurrentPage(currentPage - 1)}
-                        disabled={currentPage === 0}
-                      >
-                        {"<"}
-                      </button>
-                      {Array.from(
-                        {
-                          length: Math.ceil(filteredUsers.length / itemsPerPage),
-                        },
-                        (_, index) => (
-                          <button
-                            key={index}
-                            onClick={() => setCurrentPage(index)}
-                            className={currentPage === index ? "active" : ""}
-                          >
-                            {index + 1}
-                          </button>
-                        )
-                      )}
-                      <button
-                        onClick={() => setCurrentPage(currentPage + 1)}
-                        disabled={
-                          currentPage ===
-                          Math.ceil(filteredUsers.length / itemsPerPage) - 1
-                        }
-                      >
-                        {">"}
-                      </button>
-                    </div>
+                  <div className="col-md-3">
+                    <label className="input-field">PAN Number</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="pan_number"
+                      value={formData.pan_number}
+                      onChange={handleChange}
+                      placeholder="Enter PAN Number"
+                    />
+                    {errors.pan_number && <small className="text-danger">{errors.pan_number}</small>}
+                  </div>
+
+                  <div className="col-md-3">
+                    <label className="input-field">Bank Name</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="bank_name"
+                      value={formData.bank_name}
+                      onChange={handleChange}
+                      placeholder="Enter Bank Name"
+                    />
+                    {errors.bank_name && <small className="text-danger">{errors.bank_name}</small>}
+                  </div>
+
+                  <div className="col-md-3">
+                    <label className="input-field">Bank Account Number</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="bank_account_number"
+                      value={formData.bank_account_number}
+                      onChange={handleChange}
+                      placeholder="Enter Bank Account Number"
+                    />
+                    {errors.bank_account_number && <small className="text-danger">{errors.bank_account_number}</small>}
+                  </div>
+
+                  <div className="col-md-3">
+                    <label className="input-field">Bank IFSC Code</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="bank_ifsc_code"
+                      value={formData.bank_ifsc_code}
+                      onChange={handleChange}
+                      placeholder="Enter Bank IFSC Code"
+                    />
+                    {errors.bank_ifsc_code && <small className="text-danger">{errors.bank_ifsc_code}</small>}
+                  </div>
+
+                  <div className="col-md-3">
+                    <label className="input-field">With Liebherr</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      name="with_liebherr"
+                      value={formData.with_liebherr ? formData.with_liebherr.split('T')[0] : ''}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+
+                  <div className="col-md-3">
+                    <label className="input-field">Contract Activation Date</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      name="contract_activation_date"
+                      value={formData.contract_activation_date ? formData.contract_activation_date.split('T')[0] : ''}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div className="col-md-3">
+                    <label className="input-field">Contract Expiration Date</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      name="contract_expiration_date"
+                      value={formData.contract_expiration_date ? formData.contract_expiration_date.split('T')[0] : ''}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div className="col-md-3">
+                    <label className="input-field">Last Working Date</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      name="last_working_date"
+                      value={formData.last_working_date ? formData.last_working_date.split('T')[0] : ''}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+
+                  <div className="col-md-6">
+                    <label className="input-field">Bank Address</label>
+                    <textarea
+                      className="form-control"
+                      name="bank_address"
+                      value={formData.bank_address}
+                      onChange={handleChange}
+                      placeholder="Enter Bank Address"
+                      rows="3"
+                    />
+                  </div>
+
+                  <div className="col-md-6">
+                    <label className="input-field">Address</label>
+                    <textarea
+                      className="form-control"
+                      name="address"
+                      value={formData.address}
+                      onChange={handleChange}
+                      placeholder="Enter Address"
+                      rows="3"
+                    />
+                    {errors.address && <small className="text-danger">{errors.address}</small>}
+                  </div>
+
+                  <div className="col-12 text-right">
+                    <button
+                      className="btn btn-liebherr"
+                      type="submit"
+                      style={{ marginTop: "15px" }}
+                    >
+                      {isEdit ? "Update" : "Submit"}
+                    </button>
                   </div>
                 </div>
-              </div>
+              </form>
             </div>
           </div>
         </div>
-      </div></div>
+      </div>
+    </div>
   );
 };
 
-export default Customerlocation;
+export default Childfranchisemaster;

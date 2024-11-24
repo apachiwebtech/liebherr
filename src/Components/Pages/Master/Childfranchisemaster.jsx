@@ -683,14 +683,14 @@ const Childfranchisemaster = () => {
 
 
                   <div className="col-md-3">
-                  <label className="input-field">Geo State</label>
+                  <label className="input-field">District</label>
         <input 
           type="text" 
           className="form-control" 
-          value={locations.state}
-          name="state"
+          value={locations.district}
+          name="area"
           onChange={handleChange}
-          placeholder="State"
+          placeholder="District"
           readOnly 
         />
         {errors.state && <small className="text-danger">{errors.state}</small>}
