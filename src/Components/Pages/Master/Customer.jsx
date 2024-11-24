@@ -171,7 +171,7 @@ const Customer = () => {
             })
             .catch(error => {
               if (error.response && error.response.status === 409) {
-                setDuplicateError('Duplicate entry, Region already exists!'); // Show duplicate error for update
+                setDuplicateError('Duplicate entry, Customer already exists!'); // Show duplicate error for update
               }
             });
         } else {
@@ -196,7 +196,7 @@ const Customer = () => {
             })
             .catch(error => {
               if (error.response && error.response.status === 409) {
-                setDuplicateError('Duplicate entry, Region already exists!'); // Show duplicate error for insert
+                setDuplicateError('Duplicate entry, Customer already exists!'); // Show duplicate error for insert
               }
             });
         }

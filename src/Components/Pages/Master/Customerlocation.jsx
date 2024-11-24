@@ -11,6 +11,7 @@ const Customerlocation = () => {
   const [geoCities, setGeoCities] = useState([]);
   const [geoAreas, setGeoAreas] = useState([]);
   const [geoPincodes, setGeoPincodes] = useState([]);
+  const [Customernumber, setCustomernumber] = useState([]);
   const [customerLocation, setCustomerLocation] = useState([]);
   const [errors, setErrors] = useState({});
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -35,6 +36,32 @@ const Customerlocation = () => {
     ccnumber: "",
     address_type: "",
   });
+
+  // const fetchCustomermobile = async () => {
+  //   try {
+  //     const response = await axios.get(`${Base_Url}/getcustomer`);
+  //     console.log("pf",response.data);
+  //     setCustomernumber(response.data);
+  //   } catch (error) {
+  //     console.error("Error fetching Customer Mobileno:", error);
+  //   }
+  // };
+
+  const fetchCustomermobile = async () => {
+    try {
+      const response = await axios.get(`${Base_Url}/getcustomer`);
+      console.log("Customer data:", response.data); // Check data structure
+      console.log("Data type:", typeof response.data); // Check data type
+      console.log("Is Array:", Array.isArray(response.data)); // Check if it's an array
+      
+      // Ensure we're setting an array
+      const customerData = Array.isArray(response.data) ? response.data : [];
+      setCustomernumber(customerData);
+    } catch (error) {
+      console.error("Error fetching Customer Mobileno:", error);
+      setCustomernumber([]); // Set empty array on error
+    }
+  };
 
   const fetchCountries = async () => {
     try {
@@ -113,6 +140,7 @@ const Customerlocation = () => {
   useEffect(() => {
     fetchCountries();
     fetchCustomerlocation();
+    fetchCustomermobile();
   }, []);
 
   const handleSubmit = async (e) => {
@@ -567,30 +595,29 @@ const Customerlocation = () => {
                           <small className="text-danger">{errors.ccperson}</small>
                         )}
                       </div>
-                      <div className="col-md-4 mb-3">
+                      {/* <div className="col-md-4 mb-3">
                         <label htmlFor="ccnumber" className="form-label">
                           Customer Contact Number
                         </label>
-                        <input
-                          type="text"
-                          className="form-control"
+                        <select
+                          
+                          className="form-select"
                           name="ccnumber"
                           id="ccnumber"
                           value={formData.ccnumber}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            if (!isNaN(value)) {
-                              if (value.length <= 15) {
-                                handleChange(e);
-
-                              }
-                            }
-                          }}
+                          onChange={handleChange}
                           placeholder="Enter Customer Contact Number"
                           pattern="[0-9]*"
                           maxLength="15"
                           aria-describedby="cpnumber"
-                        />
+                        >
+                          <option value="">Select Customer Contact Number</option>
+                          {Customernumber.map((pf) => ( 
+                            <option key={pf.id} value={pf.id}>
+                              {pf.mobileno}
+                            </option>
+                          ))}
+                        </select>
                         {formData.ccnumber.length > 0 && formData.ccnumber.length < 10 && (
                           <small className="text-danger">Mobile number must be at least 10 digits</small>
                         )}
@@ -598,7 +625,7 @@ const Customerlocation = () => {
                         {duplicateError && (
                           <small className="text-danger">{duplicateError}</small>
                         )}
-                      </div>
+                      </div> */}
 
                       {/* <div className="col-md-4 mb-3">
                       <label htmlFor="ccnumber" className="form-label">

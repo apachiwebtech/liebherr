@@ -110,9 +110,9 @@ app.post("/csplogin", async (req, res) => {
     // console.log(sql)
 
     const result = await pool.request().query(sql);
-  
+
     if (result.recordset.length > 0) {
-      res.json({ id: result.recordset[0].id, Lhiuser: result.recordset[0].email ,licare_code : result.recordset[0].licare_code});
+      res.json({ id: result.recordset[0].id, Lhiuser: result.recordset[0].email, licare_code: result.recordset[0].licare_code });
     } else {
       res.status(401).json({ message: "Invalid username or password" });
     }
@@ -125,7 +125,7 @@ app.post("/csplogin", async (req, res) => {
 //CSP End
 
 app.post("/loginmsp", async (req, res) => {
-const { Lhiuser, password } = req.body;
+  const { Lhiuser, password } = req.body;
 
   try {
     // Use the poolPromise to get the connection pool
@@ -138,7 +138,7 @@ const { Lhiuser, password } = req.body;
     const result = await pool.request().query(sql);
 
     if (result.recordset.length > 0) {
-      res.json({ id: result.recordset[0].id, Lhiuser: result.recordset[0].email,licare_code: result.recordset[0].licarecode  });
+      res.json({ id: result.recordset[0].id, Lhiuser: result.recordset[0].email, licare_code: result.recordset[0].licarecode });
     } else {
       res.status(500).json({ message: "Invalid username or password" });
     }
@@ -1472,13 +1472,13 @@ app.get("/getcustomerlist", async (req, res) => {
 
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
-    const{
+    const {
       fromDate,
       toDate,
       customer_fname,
       mobileno,
       email,
-      
+
 
 
     } = req.query;
@@ -3037,22 +3037,22 @@ app.post("/getticketendcustomer", async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
-//     const sql = `
-// SELECT c.*, 
-//        l.address, 
-//        CONCAT(c.customer_fname, ' ', c.customer_lname) AS customer_name
-// FROM awt_customer AS c 
-// LEFT JOIN awt_customerlocation AS l ON c.id = l.customer_id 
-// WHERE c.deleted = 0 
-//   AND (c.email LIKE '%${searchparam}%' 
-//        OR c.mobileno LIKE '%${searchparam}%')
+    //     const sql = `
+    // SELECT c.*, 
+    //        l.address, 
+    //        CONCAT(c.customer_fname, ' ', c.customer_lname) AS customer_name
+    // FROM awt_customer AS c 
+    // LEFT JOIN awt_customerlocation AS l ON c.id = l.customer_id 
+    // WHERE c.deleted = 0 
+    //   AND (c.email LIKE '%${searchparam}%' 
+    //        OR c.mobileno LIKE '%${searchparam}%')
 
 
-//     `;
+    //     `;
 
-  const checkincomplaint = `select * from complaint_ticket where (customer_email LIKE '%${searchparam}%' OR ticket_no LIKE '%${searchparam}%' OR customer_name LIKE '%${searchparam}%' OR serial_no LIKE '%${searchparam}%' OR customer_mobile LIKE '%${searchparam}%' OR customer_id LIKE '%${searchparam}%')`
+    const checkincomplaint = `select * from complaint_ticket where (customer_email LIKE '%${searchparam}%' OR ticket_no LIKE '%${searchparam}%' OR customer_name LIKE '%${searchparam}%' OR serial_no LIKE '%${searchparam}%' OR customer_mobile LIKE '%${searchparam}%' OR customer_id LIKE '%${searchparam}%')`
 
-  console.log(checkincomplaint)
+    console.log(checkincomplaint)
 
     const result = await pool.request().query(checkincomplaint);
 
@@ -3089,57 +3089,57 @@ app.post("/add_complaintt", async (req, res) => {
     warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks, ticket_id
   } = req.body;
 
-  console.log(ticket_id,"$$$")
+  console.log(ticket_id, "$$$")
 
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
-   let t_type;
+  let t_type;
 
-   if(ticket_type == 'Breakdown'){
+  if (ticket_type == 'Breakdown') {
     t_type = 'B'
-   }
-   else if(ticket_type == 'Demo'){
+  }
+  else if (ticket_type == 'Demo') {
     t_type = 'D'
 
-   }else if(ticket_type == 'Installation'){
+  } else if (ticket_type == 'Installation') {
     t_type = 'I'
 
-   }else if(ticket_type == 'PM / Ex warranty Scheduling'){
+  } else if (ticket_type == 'PM / Ex warranty Scheduling') {
     t_type = 'M'
 
-   }else if(ticket_type == 'Pre-Site Visit'){
-     t_type = 'V'
-   }
+  } else if (ticket_type == 'Pre-Site Visit') {
+    t_type = 'V'
+  }
 
 
   try {
     const pool = await poolPromise;
 
 
-    if(ticket_id == ''){
-    // Split customer_name into customer_fname and customer_lname
-    const [customer_fname, ...customer_lnameArr] = customer_name.split(' ');
-    const customer_lname = customer_lnameArr.join(' ');
+    if (ticket_id == '') {
+      // Split customer_name into customer_fname and customer_lname
+      const [customer_fname, ...customer_lnameArr] = customer_name.split(' ');
+      const customer_lname = customer_lnameArr.join(' ');
 
-    // Insert into awt_customer
-    const customerSQL = `
+      // Insert into awt_customer
+      const customerSQL = `
     INSERT INTO awt_customer (customer_fname, customer_lname, email, mobileno, alt_mobileno, created_date, created_by)
     OUTPUT INSERTED.id
     VALUES (@customer_fname, @customer_lname, @email, @mobile, @alt_mobile, @formattedDate, @created_by)`;
-// Debugging log
+      // Debugging log
 
-    const customerResult = await pool.request()
-      .input('customer_fname', customer_fname)
-      .input('customer_lname', customer_lname)
-      .input('email', email)
-      .input('mobile', mobile)
-      .input('alt_mobile', alt_mobile)
-      .input('formattedDate', formattedDate)
-      .input('created_by', created_by)
-      .query(customerSQL);
+      const customerResult = await pool.request()
+        .input('customer_fname', customer_fname)
+        .input('customer_lname', customer_lname)
+        .input('email', email)
+        .input('mobile', mobile)
+        .input('alt_mobile', alt_mobile)
+        .input('formattedDate', formattedDate)
+        .input('created_by', created_by)
+        .query(customerSQL);
 
-    const insertedCustomerId = customerResult.recordset[0].id;
-    console.log("Inserted Customer ID:", insertedCustomerId); 
+      const insertedCustomerId = customerResult.recordset[0].id;
+      console.log("Inserted Customer ID:", insertedCustomerId);
     }
 
 
@@ -3260,34 +3260,34 @@ app.post("/add_complaintt", async (req, res) => {
     // console.log("Executing complaint SQL:", complaintSQL); 
 
     await pool.request()
-    .input('ticket_no', ticket_no)
-    .input('ticket_id', ticket_id)
-    .input('complaint_date', complaint_date)
-    .input('customer_name', customer_name)
-    .input('mobile', mobile)
-    .input('email', email)
-    .input('address', address)
-    .input('state', state)
-    .input('created_by', created_by)
-    .input('city', city)
-    .input('area', area)
-    .input('pincode', pincode)
-    .input('customer_id', cust_id)
-    .input('model', model)
-    .input('ticket_type', ticket_type)
-    .input('cust_type', cust_type)
-    .input('warranty_status', sql.NVarChar, warrenty_status || "WARRENTY")
-    .input('invoice_date', invoice_date)
-    .input('call_charge', call_charge)
-    .input('mode_of_contact', mode_of_contact)
-    .input('contact_person', contact_person)
-    .input('formattedDate', formattedDate)
-    .input('purchase_date', purchase_date)
-    .input('serial', serial)
-    .input('master_service_partner', master_service_partner)
-    .input('child_service_partner', child_service_partner)
-    .input('specification', specification)
-    .query(complaintSQL);
+      .input('ticket_no', ticket_no)
+      .input('ticket_id', ticket_id)
+      .input('complaint_date', complaint_date)
+      .input('customer_name', customer_name)
+      .input('mobile', mobile)
+      .input('email', email)
+      .input('address', address)
+      .input('state', state)
+      .input('created_by', created_by)
+      .input('city', city)
+      .input('area', area)
+      .input('pincode', pincode)
+      .input('customer_id', cust_id)
+      .input('model', model)
+      .input('ticket_type', ticket_type)
+      .input('cust_type', cust_type)
+      .input('warranty_status', sql.NVarChar, warrenty_status || "WARRENTY")
+      .input('invoice_date', invoice_date)
+      .input('call_charge', call_charge)
+      .input('mode_of_contact', mode_of_contact)
+      .input('contact_person', contact_person)
+      .input('formattedDate', formattedDate)
+      .input('purchase_date', purchase_date)
+      .input('serial', serial)
+      .input('master_service_partner', master_service_partner)
+      .input('child_service_partner', child_service_partner)
+      .input('specification', specification)
+      .query(complaintSQL);
 
     //Remark insert query
     const reamrks = `
@@ -3318,7 +3318,7 @@ app.post("/update_complaint", async (req, res) => {
   let {
     complaint_date, customer_name, contact_person, email, mobile, address,
     state, city, area, pincode, mode_of_contact, ticket_type, cust_type,
-    warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks,ticket_no
+    warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks, ticket_no
   } = req.body;
 
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
@@ -3364,8 +3364,8 @@ app.post("/update_complaint", async (req, res) => {
     ticket_no = @ticket_no
 `;
 
-    console.log(complaintSQL,"$$")
-    console.log(warrenty_status,"$$")
+    console.log(complaintSQL, "$$")
+    console.log(warrenty_status, "$$")
 
     console.log("Executing complaint SQL:", complaintSQL);  // Debugging log
 
@@ -3385,7 +3385,7 @@ app.post("/update_complaint", async (req, res) => {
       .input('model', model)
       .input('ticket_type', ticket_type)
       .input('cust_type', cust_type)
-      .input("warranty_status", sql.NVarChar, warrenty_status || "WARRENTY") 
+      .input("warranty_status", sql.NVarChar, warrenty_status || "WARRENTY")
       .input('invoice_date', invoice_date)
       .input('call_charge', call_charge)
       .input('mode_of_contact', mode_of_contact)
@@ -3429,11 +3429,11 @@ app.get("/getmasterlist/:masterid", async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
-    const sql=`SELECT m.*,c.title as country_name, r.title as region_name, s. title as state_name, d.title as district_name,ct. title city_name from  awt_franchisemaster as m,
+    const sql = `SELECT m.*,c.title as country_name, r.title as region_name, s. title as state_name, d.title as district_name,ct. title city_name from  awt_franchisemaster as m,
 awt_country as c,awt_region as r,awt_geostate as s,awt_district as d,awt_geocity as ct WHERE m.country_id = c.id AND m.region_id = r.id AND m.geostate_id = s.id 
-AND m.area_id = d.id AND m.geocity_id = ct.id AND m.deleted =	0 AND m.id = ${ masterid }`;
+AND m.area_id = d.id AND m.geocity_id = ct.id AND m.deleted =	0 AND m.id = ${masterid}`;
     const result = await pool.request().query(sql);
-   
+
     if (result.recordset.length === 0) {
       return res.status(404).json({ message: "Master not found" });
     }
@@ -3567,7 +3567,7 @@ app.post("/deletecustomer", async (req, res) => {
     const pool = await poolPromise;
 
     // Create the SQL query with string interpolation (no parameter binding)
-    const sql = `UPDATE awt_customer SET deleted = 1 WHERE id = ${id}`;
+    const sql = `UPDATE awt_customer SET deleted = 1 WHERE id = '${id}'`;
 
     // Execute the query
     const result = await pool.request().query(sql);
@@ -3659,36 +3659,37 @@ app.post("/postcustomer", async (req, res) => {
 // customer put 
 
 app.put("/putcustomer", async (req, res) => {
-  const { id,customer_fname, customer_lname, customer_type, customer_classification, mobileno, alt_mobileno, dateofbirth, anniversary_date, email, salutation } = req.body;
+  const { id, customer_fname, customer_lname, customer_type, customer_classification, mobileno, alt_mobileno, dateofbirth, anniversary_date, email, salutation ,created_by} = req.body;
 
 
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
 
-    
+
     // Step 1: Duplicate Check Query
     const duplicateCheckSQL = `
       SELECT * FROM awt_customer
       WHERE email = @email
       AND deleted = 0
-      
+      AND id != @id      
     `;
 
     console.log("Executing Duplicate Check SQL:", duplicateCheckSQL);
 
     const duplicateCheckResult = await pool.request()
       .input('email', email)
+      .input('id', id)
       .query(duplicateCheckSQL);
 
     if (duplicateCheckResult.recordset.length > 0) {
       return res.status(409).json({
-        message: "Duplicate entry,  Franchise Master already exists!"
+        message: "Duplicate entry,  Customer already exists!"
       });
     }
 
-     // Step 2: Update Query
-     const updateSQL = `
+    // Step 2: Update Query
+    const updateSQL = `
      UPDATE awt_customer
      SET 
        customer_fname = @customer_fname,
@@ -3704,27 +3705,27 @@ app.put("/putcustomer", async (req, res) => {
        updated_by = @created_by
      WHERE id = @id
    `;
-   console.log("Executing Update SQL:", updateSQL);
+    console.log("Executing Update SQL:", updateSQL);
 
-   await pool.request()
-   .input('customer_fname', customer_fname)
-   .input('customer_lname', customer_lname)
-   .input('customer_type', customer_type)
-   .input('customer_classification', customer_classification)
-   .input('email', email)
-   .input('mobileno', mobileno)
-   .input('alt_mobileno', alt_mobileno)
-   .input('dateofbirth', dateofbirth)
-   .input('anniversary_date', anniversary_date)
-   .input('salutation', salutation)   
-   .input('created_by', created_by)
-   .input('id', id)
-   .query(updateSQL);
+    await pool.request()
+      .input('customer_fname', customer_fname)
+      .input('customer_lname', customer_lname)
+      .input('customer_type', customer_type)
+      .input('customer_classification', customer_classification)
+      .input('email', email)
+      .input('mobileno', mobileno)
+      .input('alt_mobileno', alt_mobileno)
+      .input('dateofbirth', dateofbirth)
+      .input('anniversary_date', anniversary_date)
+      .input('salutation', salutation)
+      .input('created_by', created_by)
+      .input('id', id)
+      .query(updateSQL);
 
- return res.json({
-   message: "Customer updated successfully!"
- });
-    
+    return res.json({
+      message: "Customer updated successfully!"
+    });
+
 
   } catch (err) {
     console.error(err);
@@ -3995,12 +3996,12 @@ app.post("/postproductunique", async (req, res) => {
       });
     } else {
       // Check for soft-deleted products
-      const checkSoftDeletedSql = `SELECT * FROM awt_uniqueproductmaster WHERE serialnumber = '${serialnumber}' AND deleted = 1`;
+      const checkSoftDeletedSql = `SELECT * FROM awt_uniqueproductmaster WHERE serial_no = '${serialnumber}' AND deleted = 1`;
       const softDeletedResult = await pool.request().query(checkSoftDeletedSql);
 
       if (softDeletedResult.recordset.length > 0) {
         // Restore soft-deleted product
-        const restoreSoftDeletedSql = `UPDATE awt_uniqueproductmaster SET deleted = 0 WHERE serialnumber = '${serialnumber}'`;
+        const restoreSoftDeletedSql = `UPDATE awt_uniqueproductmaster SET deleted = 0 WHERE serial_no = '${serialnumber}'`;
         await pool.request().query(restoreSoftDeletedSql);
 
         return res.json({
@@ -4008,7 +4009,7 @@ app.post("/postproductunique", async (req, res) => {
         });
       } else {
         // Insert new product
-        const insertSql = `INSERT INTO awt_uniqueproductmaster (product, location, date, serialnumber)
+        const insertSql = `INSERT INTO awt_uniqueproductmaster (product, location, date, serial_no)
                           VALUES ('${product}', '${location}', '${date}', '${serialnumber}')`;
         await pool.request().query(insertSql);
 
@@ -4320,10 +4321,10 @@ app.get("/requestfranchisedata/:id", async (req, res) => {
 
 
 app.post("/postfranchisedata", async (req, res) => {
-  const { 
-    title, contact_person, email, mobile_no, password, address, country_id, region_id, state, area, city, 
-    pincode_id, website, gst_no, panno, bank_name, bank_acc, bank_ifsc, bank_address, with_liebherr, 
-    lastworkindate, contract_acti, contract_expir, licarecode, partner_name 
+  const {
+    title, contact_person, email, mobile_no, password, address, country_id, region_id, state, area, city,
+    pincode_id, website, gst_no, panno, bank_name, bank_acc, bank_ifsc, bank_address, with_liebherr,
+    lastworkindate, contract_acti, contract_expir, licarecode, partner_name
   } = req.body;
 
   try {
@@ -4337,7 +4338,7 @@ app.post("/postfranchisedata", async (req, res) => {
         SELECT * FROM awt_franchisemaster WHERE title = @title AND deleted = 0
       `);
 
-      
+
 
     if (checkDuplicateResult.recordset.length > 0) {
       return res.status(409).json({
@@ -4352,7 +4353,7 @@ app.post("/postfranchisedata", async (req, res) => {
         SELECT * FROM awt_franchisemaster WHERE title = @title AND deleted = 1
       `);
 
-  
+
     if (checkSoftDeletedResult.recordset.length > 0) {
       // Restore soft deleted record
       await pool.request()
@@ -4366,7 +4367,7 @@ app.post("/postfranchisedata", async (req, res) => {
       });
     } else {
       // Insert new record using parameterized query
-   await pool.request()
+      await pool.request()
         .input('title', sql.VarChar, title)
         .input('licarecode', sql.VarChar, licarecode)
         .input('partner_name', sql.VarChar, partner_name)
@@ -4403,7 +4404,7 @@ app.post("/postfranchisedata", async (req, res) => {
            @bank_address, @with_liebherr, @lastworkindate, @contract_acti, @contract_expir)
         `);
 
-       
+
       return res.json({
         message: "Franchise Master added successfully!",
       });
@@ -4428,7 +4429,7 @@ app.put("/putfranchisedata", async (req, res) => {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
 
-    
+
     // Step 1: Duplicate Check Query
     const duplicateCheckSQL = `
       SELECT * FROM awt_franchisemaster
@@ -4450,8 +4451,8 @@ app.put("/putfranchisedata", async (req, res) => {
       });
     }
 
-     // Step 2: Update Query
-     const updateSQL = `
+    // Step 2: Update Query
+    const updateSQL = `
      UPDATE awt_franchisemaster
      SET 
        title = @title,
@@ -4482,42 +4483,42 @@ app.put("/putfranchisedata", async (req, res) => {
        updated_by = @created_by
      WHERE id = @id
    `;
-   console.log("Executing Update SQL:", updateSQL);
+    console.log("Executing Update SQL:", updateSQL);
 
-   await pool.request()
-   .input('title', title)
-   .input('licarecode', licarecode)
-   .input('partner_name', partner_name)
-   .input('contact_person', contact_person)
-   .input('email', email)
-   .input('mobile_no', mobile_no)
-   .input('password', password)
-   .input('address', address)
-   .input('country_id', country_id)
-   .input('region_id', region_id)
-   .input('state', state)
-   .input('area', area)
-   .input('city', city)
-   .input('pincode_id', pincode_id)
-   .input('website', website)
-   .input('gst_no', gst_no)
-   .input('panno', panno)
-   .input('bank_name', bank_name)
-   .input('bank_acc', bank_acc)
-   .input('bank_ifsc', bank_ifsc)
-   .input('bank_address', bank_address)
-   .input('withliebher', withliebher)
-   .input('lastworkindate', lastworkindate)
-   .input('contract_acti', contract_acti)
-   .input('contract_expir', contract_expir)
-   .input('created_by', created_by)
-   .input('id', id)
-   .query(updateSQL);
+    await pool.request()
+      .input('title', title)
+      .input('licarecode', licarecode)
+      .input('partner_name', partner_name)
+      .input('contact_person', contact_person)
+      .input('email', email)
+      .input('mobile_no', mobile_no)
+      .input('password', password)
+      .input('address', address)
+      .input('country_id', country_id)
+      .input('region_id', region_id)
+      .input('state', state)
+      .input('area', area)
+      .input('city', city)
+      .input('pincode_id', pincode_id)
+      .input('website', website)
+      .input('gst_no', gst_no)
+      .input('panno', panno)
+      .input('bank_name', bank_name)
+      .input('bank_acc', bank_acc)
+      .input('bank_ifsc', bank_ifsc)
+      .input('bank_address', bank_address)
+      .input('withliebher', withliebher)
+      .input('lastworkindate', lastworkindate)
+      .input('contract_acti', contract_acti)
+      .input('contract_expir', contract_expir)
+      .input('created_by', created_by)
+      .input('id', id)
+      .query(updateSQL);
 
- return res.json({
-   message: "Master Franchise updated successfully!"
- });
-    
+    return res.json({
+      message: "Master Franchise updated successfully!"
+    });
+
 
   } catch (err) {
     console.error(err);
@@ -4764,7 +4765,7 @@ app.post("/postchildfranchise", async (req, res) => {
     city, contact_person, contract_activation_date, contract_expiration_date,
     country_id, email, gst_number, last_working_date, licare_code, mobile_no,
     pan_number, partner_name, password, pfranchise_id, pincode_id, region_id,
-    state, title, website, with_liebherr,created_by
+    state, title, website, with_liebherr, created_by
   } = req.body;
 
 
@@ -4860,7 +4861,7 @@ app.post("/postchildfranchise", async (req, res) => {
       });
     }
     // Insert the new child franchise if no duplicates or soft-deleted records found
-   const insert = await pool.request()
+    const insert = await pool.request()
       .input('title', sql.VarChar, title)
       .input('pfranchise_id', sql.Int, pfranchise_id)
       .input('licare_code', sql.VarChar, licare_code)
@@ -7025,9 +7026,9 @@ app.get("/getcomplainlist", async (req, res) => {
       sql += ``;
     }
 
-    if(status == undefined){
+    if (status == undefined) {
       sql += ``
-     }
+    }
 
 
     sql += " ORDER BY c.id DESC";
@@ -7139,9 +7140,9 @@ app.get("/getcomplainlistcsp", async (req, res) => {
       sql += ``;
     }
 
-    if(status == undefined){
+    if (status == undefined) {
       sql += ``
-     }
+    }
 
 
     sql += " ORDER BY c.id DESC";
@@ -7253,9 +7254,9 @@ app.get("/getcomplainlistmsp", async (req, res) => {
       sql += ``;
     }
 
-    if(status == undefined){
+    if (status == undefined) {
       sql += ``
-     }
+    }
 
 
     sql += " ORDER BY c.id DESC";
@@ -7283,7 +7284,7 @@ app.get("/getmultiplelocation/:pincode", async (req, res) => {
   const { pincode } = req.params;
 
   try {
-    
+
     const pool = await poolPromise;
 
     const sql = `SELECT cn.title as country,r.title as region, s.title as state, d.title as district, c.title as city, o.owner, f.title as franchiseem, fm.title as childfranchiseem FROM awt_pincode as p 
