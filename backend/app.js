@@ -4562,6 +4562,28 @@ app.get("/getparentfranchise", async (req, res) => {
   }
 });
 
+// app.get("/getchildFranchiseDetails", async (req, res) => {
+//   try {
+//     // Use the poolPromise to get the connection pool
+//     const pool = await poolPromise;
+
+//     // SQL query to fetch data from the master list, customize based on your needs
+//     const sql = `
+//     SELECT m.*,p.title as parentfranchisetitle,c.title as country_name, r.title as region_name, s. title as state_name, d.title as district_name,ct. title city_name from  awt_childfranchisemaster as m,
+//     awt_country as c,awt_region as r,awt_geostate as s,awt_district as d,awt_geocity as ct,awt_franchisemaster as p WHERE m.country_id = c.id AND m.region_id = r.id AND m.geostate_id = s.id 
+//     AND m.area_id = d.id AND m.geocity_id = ct.id AND m.pfranchise_id = p.licarecode AND m.deleted = 0
+//     `;
+//     // Execute the SQL query
+//     const result = await pool.request().query(sql);
+
+//     // Return the result as JSON
+//     return res.json(result.recordset);
+//   } catch (err) {
+//     console.error(err);
+//     return res.status(500).json({ error: 'An error occurred while fetching data' });
+//   }
+// });
+
 app.get("/getchildFranchiseDetails", async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
@@ -4569,9 +4591,21 @@ app.get("/getchildFranchiseDetails", async (req, res) => {
 
     // SQL query to fetch data from the master list, customize based on your needs
     const sql = `
-     SELECT m.*,p.title as parentfranchisetitle,c.title as country_name, r.title as region_name, s. title as state_name, d.title as district_name,ct. title city_name from  awt_childfranchisemaster as m,
-awt_country as c,awt_region as r,awt_geostate as s,awt_district as d,awt_geocity as ct,awt_franchisemaster as p WHERE m.country_id = c.id AND m.region_id = r.id AND m.geostate_id = s.id 
-AND m.area_id = d.id AND m.geocity_id = ct.id AND m.pfranchise_id = p.licarecode AND m.deleted = 0
+    SELECT m.*,
+    p.title as parentfranchisetitle,
+    c.title as country_name, 
+    r.title as region_name, 
+    s.title as state_name, 
+    d.title as district_name,
+    ct.title as city_name 
+FROM awt_childfranchisemaster as m
+INNER JOIN awt_country as c ON m.country_id = c.id
+INNER JOIN awt_region as r ON m.region_id = r.id
+INNER JOIN awt_geostate as s ON m.geostate_id = s.id
+INNER JOIN awt_district as d ON m.area_id = d.id
+INNER JOIN awt_geocity as ct ON TRY_CAST(m.geocity_id AS INT) = ct.id  -- Safer casting
+INNER JOIN awt_franchisemaster as p ON m.pfranchise_id = p.licarecode
+WHERE m.deleted = 0
     `;
     // Execute the SQL query
     const result = await pool.request().query(sql);
@@ -4836,12 +4870,12 @@ app.post("/postchildfranchise", async (req, res) => {
       .input('mobile_no', sql.VarChar, mobile_no)
       .input('password', sql.VarChar, password)
       .input('address', sql.VarChar, address)
-      .input('country_id', sql.Int, country_id)
-      .input('region_id', sql.Int, region_id)
+      .input('country_id', sql.VarChar, country_id)
+      .input('region_id', sql.VarChar, region_id)
       .input('state', sql.VarChar, state)
       .input('area', sql.VarChar, area)
       .input('city', sql.VarChar, city)
-      .input('pincode_id', sql.Int, pincode_id)
+      .input('pincode_id', sql.VarChar, pincode_id)
       .input('website', sql.VarChar, website)
       .input('gst_number', sql.VarChar, gst_number)
       .input('pan_number', sql.VarChar, pan_number)
@@ -7252,7 +7286,16 @@ app.get("/getmultiplelocation/:pincode", async (req, res) => {
     
     const pool = await poolPromise;
 
-    const sql = `SELECT r.title as region, s.title as state, d.title as district, c.title as city FROM awt_pincode as p LEFT JOIN awt_region as r on p.region_id = r.id LEFT JOIN awt_geostate as s on p.geostate_id = s.id LEFT JOIN awt_district as d on p.area_id = d.id LEFT JOIN awt_geocity as c on p.geocity_id = c.id where pincode = @pincode`
+    const sql = `SELECT cn.title as country,r.title as region, s.title as state, d.title as district, c.title as city, o.owner, f.title as franchiseem, fm.title as childfranchiseem FROM awt_pincode as p 
+    LEFT JOIN awt_region as r on p.region_id = r.id 
+    LEFT JOIN awt_country as cn on p.country_id = cn.id
+    LEFT JOIN awt_geostate as s on p.geostate_id = s.id 
+    LEFT JOIN awt_district as d on p.area_id = d.id 
+    LEFT JOIN awt_geocity as c on p.geocity_id = c.id 
+    LEFT JOIN pincode_allocation as o on p.pincode = o.pincode
+    LEFT JOIN awt_childfranchisemaster as fm on fm.licare_code = o.owner
+    LEFT JOIN awt_franchisemaster as f on f.licarecode = fm.pfranchise_id
+    where p.pincode = @pincode`
 
     const result = await pool.request()
       .input('pincode', pincode)

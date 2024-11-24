@@ -11,6 +11,13 @@ const Childfranchisemaster = () => {
   const [Parentfranchise, setParentfranchise] = useState([]);
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
+  const [locations, setlocations] = useState({
+    country: '',
+    region: '',
+    state: '',
+    district: '',
+    city: '',
+  });
   const [duplicateError, setDuplicateError] = useState("");
   const [isEdit, setIsEdit] = useState(false);
 
@@ -57,57 +64,127 @@ const Childfranchisemaster = () => {
     with_liebherr: "",
   });
 
+  // const fetchchildfranchisepopulate = async (childid) => {
+  //   try {
+
+  //     const response = await axios.get(`${Base_Url}/getchildfranchisepopulate/${childid}`);
+  //     setFormData({
+  //       ...response.data[0],
+  //       // Rename keys to match your formData structure
+  //       pfranchise_id: response.data[0].pfranchise_id,
+  //       title: response.data[0].title,
+  //       contact_person: response.data[0].contact_person,
+  //       email: response.data[0].email,
+  //       mobile_no: response.data[0].mobile_no,
+  //       password: response.data[0].password,
+  //       country_id: response.data[0].country_id,
+  //       region_id: response.data[0].region_id,
+  //       state: response.data[0].geostate_id,
+  //       area: response.data[0].area_id,
+  //       city: response.data[0].geocity_id,
+  //       pincode_id: response.data[0].pincode_id,
+  //       address: response.data[0].address,
+  //       licare_code: response.data[0].licare_code,
+  //       partner_name: response.data[0].partner_name,
+  //       website: response.data[0].webste,
+  //       gst_number: response.data[0].gstno,
+  //       pan_number: response.data[0].panno,
+  //       bank_name: response.data[0].bankname,
+  //       bank_account_number: response.data[0].bankacc,
+  //       bank_ifsc_code: response.data[0].bankifsc,
+  //       bank_address: response.data[0].bankaddress,
+  //       last_working_date: response.data[0].lastworkinddate,
+  //       contract_activation_date: response.data[0].contractacti,
+  //       contract_expiration_date: response.data[0].contractexpir,
+  //       with_liebherr: response.data[0].withliebher
+  //     });
+
+  //     setIsEdit(true);
+
+  //     if (response.data[0].country_id) {
+  //       fetchregion(response.data[0].country_id);
+  //     }
+  //     if (response.data[0].region_id) {
+  //       fetchState(response.data[0].region_id);
+  //     }
+  //     if (response.data[0].geostate_id) {
+  //       fetchdistricts(response.data[0].geostate_id);
+  //     }
+  //     if (response.data[0].area_id) {
+  //       fetchCity(response.data[0].area_id);
+  //     }
+  //     if (response.data[0].geocity_id) {
+  //       fetchpincode(response.data[0].geocity_id);
+  //     }
+
+  //   } catch (error) {
+  //     console.error("Error fetching Parentfranchise:", error);
+  //   }
+  // };
+
+  // End Fetch Child Franchise Deatils for populate
+
   const fetchchildfranchisepopulate = async (childid) => {
     try {
-
       const response = await axios.get(`${Base_Url}/getchildfranchisepopulate/${childid}`);
+      const data = response.data[0];
+
+      // Update locations state with the names from API
+      setlocations({
+        country: data.country_name || '',
+        region: data.region_name || '',
+        state: data.state_name || '',
+        district: data.district_name || '',
+        city: data.city_name || ''
+      });
+
       setFormData({
         ...response.data[0],
-        // Rename keys to match your formData structure
-        pfranchise_id: response.data[0].pfranchise_id,
-        title: response.data[0].title,
-        contact_person: response.data[0].contact_person,
-        email: response.data[0].email,
-        mobile_no: response.data[0].mobile_no,
-        password: response.data[0].password,
-        country_id: response.data[0].country_id,
-        region_id: response.data[0].region_id,
-        state: response.data[0].geostate_id,
-        area: response.data[0].area_id,
-        city: response.data[0].geocity_id,
-        pincode_id: response.data[0].pincode_id,
-        address: response.data[0].address,
-        licare_code: response.data[0].licare_code,
-        partner_name: response.data[0].partner_name,
-        website: response.data[0].webste,
-        gst_number: response.data[0].gstno,
-        pan_number: response.data[0].panno,
-        bank_name: response.data[0].bankname,
-        bank_account_number: response.data[0].bankacc,
-        bank_ifsc_code: response.data[0].bankifsc,
-        bank_address: response.data[0].bankaddress,
-        last_working_date: response.data[0].lastworkinddate,
-        contract_activation_date: response.data[0].contractacti,
-        contract_expiration_date: response.data[0].contractexpir,
-        with_liebherr: response.data[0].withliebher
+        pfranchise_id: data.pfranchise_id,
+        title: data.title,
+        contact_person: data.contact_person,
+        email: data.email,
+        mobile_no: data.mobile_no,
+        password: data.password,
+        country_id: data.country_id,
+        region_id: data.region_id,
+        state: data.geostate_id,
+        area: data.area_id,
+        city: data.geocity_id,
+        pincode_id: data.pincode_id,
+        address: data.address,
+        licare_code: data.licare_code,
+        partner_name: data.partner_name,
+        website: data.webste,
+        gst_number: data.gstno,
+        pan_number: data.panno,
+        bank_name: data.bankname,
+        bank_account_number: data.bankacc,
+        bank_ifsc_code: data.bankifsc,
+        bank_address: data.bankaddress,
+        last_working_date: data.lastworkinddate,
+        contract_activation_date: data.contractacti,
+        contract_expiration_date: data.contractexpir,
+        with_liebherr: data.withliebher
       });
 
       setIsEdit(true);
 
-      if (response.data[0].country_id) {
-        fetchregion(response.data[0].country_id);
+      // Fetch dependent dropdowns data
+      if (data.country_id) {
+        fetchregion(data.country_id);
       }
-      if (response.data[0].region_id) {
-        fetchState(response.data[0].region_id);
+      if (data.region_id) {
+        fetchState(data.region_id);
       }
-      if (response.data[0].geostate_id) {
-        fetchdistricts(response.data[0].geostate_id);
+      if (data.geostate_id) {
+        fetchdistricts(data.geostate_id);
       }
-      if (response.data[0].area_id) {
-        fetchCity(response.data[0].area_id);
+      if (data.area_id) {
+        fetchCity(data.area_id);
       }
-      if (response.data[0].geocity_id) {
-        fetchpincode(response.data[0].geocity_id);
+      if (data.geocity_id) {
+        fetchpincode(data.geocity_id);
       }
 
     } catch (error) {
@@ -115,7 +192,6 @@ const Childfranchisemaster = () => {
     }
   };
 
-  // End Fetch Child Franchise Deatils for populate
 
   const fetchParentfranchise = async () => {
     try {
@@ -242,8 +318,42 @@ const Childfranchisemaster = () => {
       case "city":
         fetchpincode(value);
         break;
+        case "pincode_id":
+          fetchlocations(value);
+          break;
       default:
         break;
+    }
+  };
+
+  const fetchlocations = async (pincode) => {
+    try {
+      const response = await axios.get(
+        `${Base_Url}/getmultiplelocation/${pincode}`
+      );
+
+      if (response.data && response.data[0]) {
+        // Update locations display state
+        setlocations({
+          region: response.data[0].region,
+          state: response.data[0].state,
+          district: response.data[0].district,
+          city: response.data[0].city,
+          country: response.data[0].country
+        });
+
+        // Update formData with the new location values
+        setFormData(prevState => ({
+          ...prevState,
+          country_id: response.data[0].country,
+          region_id: response.data[0].region,
+          state: response.data[0].state,
+          area: response.data[0].district,
+          city: response.data[0].city,
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching complaint details:", error);
     }
   };
 
@@ -259,12 +369,12 @@ const Childfranchisemaster = () => {
     if (!formData.email.trim()) newErrors.email = "Email is required.";
     if (!formData.mobile_no.trim()) newErrors.mobile_no = "Mobile Number is required.";
     if (!formData.password.trim()) newErrors.password = "Password is required.";
-    if (!formData.country_id) newErrors.country_id = "Country selection is required.";
-    if (!formData.region_id) newErrors.region_id = "Region selection is required.";
-    if (!formData.state) newErrors.state = "State selection is required.";
-    if (!formData.area) newErrors.area = "Area selection is required.";
-    if (!formData.city) newErrors.city = "City selection is required.";
-    if (!formData.pincode_id) newErrors.pincode_id = "Pincode selection is required.";
+    // if (!formData.country_id) newErrors.country_id = "Country selection is required.";
+    // if (!formData.region_id) newErrors.region_id = "Region selection is required.";
+    // if (!formData.state) newErrors.state = "State selection is required.";
+    // if (!formData.area) newErrors.area = "Area selection is required.";
+    // if (!formData.city) newErrors.city = "City selection is required.";
+    // if (!formData.pincode_id) newErrors.pincode_id = "Pincode selection is required.";
     if (!formData.address.trim()) newErrors.address = "Address is required.";
 
     // Add validations for new fields
@@ -530,90 +640,83 @@ const Childfranchisemaster = () => {
                   </div>
 
                   <div className="col-md-3">
-                    <label className="input-field">Country</label>
-                    <select
-                      name="country_id"
-                      className="form-select"
-                      value={formData.country_id}
-                      onChange={handleChange}
-                    >
-                      <option value="">Select Country</option>
-                      {countries.map((country) => (
-                        <option key={country.id} value={country.id}>{country.title}</option>
-                      ))}
-                    </select>
-                    {errors.country_id && <small className="text-danger">{errors.country_id}</small>}
-                  </div>
+                   <label className="input-field">Country</label>
+        <input 
+          type="text" 
+          className="form-control" 
+          value={locations.country}
+          name="country_id"
+          onChange={handleChange}
+          placeholder="Country"
+          readOnly 
+        />
+        {errors.country_id && <small className="text-danger">{errors.country_id}</small>}
+      </div>
 
                   <div className="col-md-3">
-                    <label className="input-field">Region</label>
-                    <select
-                      name="region_id"
-                      className="form-select"
-                      value={formData.region_id}
-                      onChange={handleChange}
-                    >
-                      <option value="">Select Region</option>
-                      {regions.map((region) => (
-                        <option key={region.id} value={region.id}>{region.title}</option>
-                      ))}
-                    </select>
-                    {errors.region_id && <small className="text-danger">{errors.region_id}</small>}
-                  </div>
+                  <label className="input-field">Region</label>
+        <input 
+          type="text" 
+          className="form-control" 
+          value={locations.region}
+          name="region_id"
+          onChange={handleChange}
+          placeholder="Region"
+          readOnly 
+        />
+        {errors.region_id && <small className="text-danger">{errors.region_id}</small>}
+      </div>
 
                   <div className="col-md-3">
-                    <label className="input-field">Geo State</label>
-                    <select
-                      name="state"
-                      className="form-select"
-                      value={formData.state}
-                      onChange={handleChange}
-                    >
-                      <option value="">Select State</option>
-                      {state.map((item) => (
-                        <option key={item.id} value={item.id}>{item.title}</option>
-                      ))}
-                    </select>
-                    {errors.state && <small className="text-danger">{errors.state}</small>}
-                  </div>
+                  <label className="input-field">Geo State</label>
+        <input 
+          type="text" 
+          className="form-control" 
+          value={locations.state}
+          name="state"
+          onChange={handleChange}
+          placeholder="State"
+          readOnly 
+        />
+        {errors.state && <small className="text-danger">{errors.state}</small>}
+      </div>
+
 
                   <div className="col-md-3">
-                    <label className="input-field">District</label>
-                    <select
-                      name="area"
-                      className="form-select"
-                      value={formData.area}
-                      onChange={handleChange}
-                    >
-                      <option value="">Select District</option>
-                      {area.map((item) => (
-                        <option key={item.id} value={item.id}>{item.title}</option>
-                      ))}
-                    </select>
-                    {errors.area && <small className="text-danger">{errors.area}</small>}
-                  </div>
+                  <label className="input-field">Geo State</label>
+        <input 
+          type="text" 
+          className="form-control" 
+          value={locations.state}
+          name="state"
+          onChange={handleChange}
+          placeholder="State"
+          readOnly 
+        />
+        {errors.state && <small className="text-danger">{errors.state}</small>}
+      </div>
 
                   <div className="col-md-3">
-                    <label className="input-field">Geo City</label>
-                    <select
-                      name="city"
-                      className="form-select"
-                      value={formData.city}
-                      onChange={handleChange}
-                    >
-                      <option value="">Select City</option>
-                      {city.map((item) => (
-                        <option key={item.id} value={item.id}>{item.title}</option>
-                      ))}
-                    </select>
-                    {errors.city && <small className="text-danger">{errors.city}</small>}
-                  </div>
+                  <label className="input-field">Geo City</label>
+        <input 
+          type="text" 
+          className="form-control" 
+          value={locations.city}
+          name="city"
+          onChange={handleChange}
+          placeholder="City"
+          readOnly 
+        />
+        {errors.city && <small className="text-danger">{errors.city}</small>}
+      </div>
 
                   <div className="col-md-3">
                     <label htmlFor="area" className="input-field">
                       Pincode
                     </label>
-                    <select
+
+                    <input type="text" className="form-control" value={formData.pincode_id} name="pincode_id" onChange={handleChange} placeholder="" />
+                    {/* <select
                       id="pincode"
                       name="pincode_id"
                       className="form-select"
@@ -627,7 +730,7 @@ const Childfranchisemaster = () => {
                           {geoPincode.pincode}
                         </option>
                       ))}
-                    </select>
+                    </select> */}
                     {errors.pincode_id && (
                       <small className="text-danger">{errors.pincode_id}</small>
                     )}

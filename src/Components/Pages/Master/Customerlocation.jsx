@@ -20,6 +20,9 @@ const Customerlocation = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [duplicateError, setDuplicateError] = useState("");
+
+  const [locations, setlocations] = useState([])
+  
   const [formData, setFormData] = useState({
     country_id: "",
     region_id: "",
@@ -198,7 +201,30 @@ const Customerlocation = () => {
     if (name === "district_id") {
       fetchPincodedrop(value); // Fetch Geo Cities when Geo State is selected
     }
+
+    if (name === "pincode_id") {
+      fetchlocations(value);
+  }
+  
   };
+
+  const fetchlocations = async (pincode) => {
+    try {
+        const response = await axios.get(
+            `${Base_Url}/getmultiplelocation/${pincode}`
+        );
+
+        if (response.data && response.data[0]) {
+
+            setlocations({ region: response.data[0].region, state: response.data[0].state, district: response.data[0].district, city: response.data[0].city , country: response.data[0].country})
+
+        }
+
+
+    } catch (error) {
+        console.error("Error fetching complaint details:", error);
+    }
+};
 
   const handleSearch = (e) => {
     const searchValue = e.target.value.toLowerCase();
@@ -259,6 +285,9 @@ const Customerlocation = () => {
 
     return newErrors;
   };
+
+
+  console.log("locations data",locations)
 
   const deleted = async (id) => {
     try {
@@ -334,7 +363,10 @@ const Customerlocation = () => {
                         <label htmlFor="country" className="form-label">
                           Country
                         </label>
-                        <select
+
+    <input type="text" className="form-control" value={locations.country} name="country_id" onChange={handleChange} placeholder="" disabled />
+
+                        {/* <select
                           id="country"
                           name="country_id"
                           className="form-select"
@@ -348,7 +380,7 @@ const Customerlocation = () => {
                               {country.title}
                             </option>
                           ))}
-                        </select>
+                        </select> */}
                         {errors.country_id && (
                           <small className="text-danger">
                             {errors.country_id}
@@ -359,7 +391,9 @@ const Customerlocation = () => {
                         <label htmlFor="region" className="form-label">
                           Region
                         </label>
-                        <select
+    <input type="text" className="form-control" value={locations.region} name="region_id" onChange={handleChange} placeholder="" disabled />
+                        
+                        {/* <select
                           id="region"
                           name="region_id"
                           className="form-select"
@@ -373,7 +407,7 @@ const Customerlocation = () => {
                               {region.title}
                             </option>
                           ))}
-                        </select>
+                        </select> */}
                         {errors.region_id && (
                           <small className="text-danger">
                             {errors.region_id}
@@ -384,9 +418,10 @@ const Customerlocation = () => {
                       {/* Geo State Dropdown */}
                       <div className="col-md-4 mb-3">
                         <label htmlFor="geostate" className="form-label">
-                          Geo State
+                          Geo States
                         </label>
-                        <select
+                        <input type="text" className="form-control" value={locations.state} name="geostate_id" onChange={handleChange} placeholder="" disabled />
+                        {/* <select
                           id="geostate"
                           name="geostate_id"
                           className="form-select"
@@ -400,7 +435,7 @@ const Customerlocation = () => {
                               {geoState.title}
                             </option>
                           ))}
-                        </select>
+                        </select> */}
                         {errors.geostate_id && (
                           <small className="text-danger">
                             {errors.geostate_id}
@@ -413,7 +448,9 @@ const Customerlocation = () => {
                         <label htmlFor="area" className="form-label">
                           District
                         </label>
-                        <select
+
+                        <input type="text" className="form-control" value={locations.district} name="area_id" onChange={handleChange} placeholder="" disabled />
+                        {/* <select
                           id="area"
                           name="area_id"
                           className="form-select"
@@ -427,7 +464,7 @@ const Customerlocation = () => {
                               {geoArea.title}
                             </option>
                           ))}
-                        </select>
+                        </select> */}
                         {errors.area_id && (
                           <small className="text-danger">{errors.area_id}</small>
                         )}
@@ -438,7 +475,8 @@ const Customerlocation = () => {
                         <label htmlFor="geocity" className="form-label">
                           Geo City
                         </label>
-                        <select
+                        <input type="text" className="form-control" value={locations.city} name="geocity_id" onChange={handleChange} placeholder="" disabled />
+                        {/* <select
                           id="geocity"
                           name="geocity_id"
                           className="form-select"
@@ -452,7 +490,7 @@ const Customerlocation = () => {
                               {geoCity.title}
                             </option>
                           ))}
-                        </select>
+                        </select> */}
                         {errors.geocity_id && (
                           <small className="text-danger">
                             {errors.geocity_id}
@@ -466,7 +504,11 @@ const Customerlocation = () => {
                         <label htmlFor="area" className="form-label">
                           Pincode
                         </label>
-                        <select
+
+              
+                        <input type="text" className="form-control" value={formData.pincode_id} name="pincode_id" onChange={handleChange} placeholder="" />
+
+                        {/* <select
                           id="pincode"
                           name="pincode_id"
                           className="form-select"
@@ -480,11 +522,14 @@ const Customerlocation = () => {
                               {geoPincode.pincode}
                             </option>
                           ))}
-                        </select>
+                        </select> */}
                         {errors.pincode_id && (
                           <small className="text-danger">{errors.pincode_id}</small>
                         )}
                       </div>
+
+
+
                       <div className="col-md-4 mb-3">
                         <label htmlFor="addtype" className="form-label">
                           Address Type
