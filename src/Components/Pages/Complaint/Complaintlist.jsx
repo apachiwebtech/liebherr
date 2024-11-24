@@ -366,21 +366,23 @@ export function Complaintlist(params) {
                                         <td>{item.assigned_name}</td>
                                         <td>{item.call_status}</td>
                                         <td>
-                                            <Link to={`/registercomaplaint/${item.ticket_no}`}><button
-                                                className='btn'
-
-                                                disabled={isActionDisabled(item.call_status)}
-                                                title={isActionDisabled(item.call_status) ? "Cannot edit closed or cancelled complaints" : "Edit"}
-                                                style={{
-                                                    backgroundColor: 'transparent',
-                                                    border: 'none',
-                                                    color: isActionDisabled(item.call_status) ? 'gray' : 'blue',
-                                                    fontSize: '20px',
-                                                    cursor: isActionDisabled(item.call_status) ? 'not-allowed' : 'pointer'
-                                                }}
-                                            >
-                                                <FaPencilAlt />
-                                            </button></Link>
+                                                <button
+                                                    className='btn'
+                                                    onClick={() => navigate(`/registercomaplaint/${item.ticket_no}`)}
+                                                    disabled={isActionDisabled(item.call_status)}
+                                                    title={isActionDisabled(item.call_status) ? "Cannot edit closed or cancelled complaints" : "Edit"}
+                                                    style={{
+                                                        backgroundColor: 'transparent',
+                                                        border: 'none',
+                                                        color: isActionDisabled(item.call_status) ? 'gray' : 'blue',
+                                                        fontSize: '20px',
+                                                        cursor: isActionDisabled(item.call_status) ? 'not-allowed' : 'pointer'
+                                                    }}
+                                                >
+                                                    <FaPencilAlt />
+                                                </button>
+                                            {/* <Link to={}>
+                                            </Link> */}
                                         </td>
                                         <td>
                                             <button

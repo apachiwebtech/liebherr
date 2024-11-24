@@ -3089,6 +3089,8 @@ app.post("/add_complaintt", async (req, res) => {
     warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks, ticket_id
   } = req.body;
 
+  console.log(ticket_id,"$$$")
+
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
    let t_type;
@@ -3113,29 +3115,35 @@ app.post("/add_complaintt", async (req, res) => {
   try {
     const pool = await poolPromise;
 
+
+    if(ticket_id == ''){
     // Split customer_name into customer_fname and customer_lname
-    // const [customer_fname, ...customer_lnameArr] = customer_name.split(' ');
-    // const customer_lname = customer_lnameArr.join(' ');
+    const [customer_fname, ...customer_lnameArr] = customer_name.split(' ');
+    const customer_lname = customer_lnameArr.join(' ');
 
-//     // Insert into awt_customer
-//     const customerSQL = `
-//     INSERT INTO awt_customer (customer_fname, customer_lname, email, mobileno, alt_mobileno, created_date, created_by)
-//     OUTPUT INSERTED.id
-//     VALUES (@customer_fname, @customer_lname, @email, @mobile, @alt_mobile, @formattedDate, @created_by)`;
-// // Debugging log
+    // Insert into awt_customer
+    const customerSQL = `
+    INSERT INTO awt_customer (customer_fname, customer_lname, email, mobileno, alt_mobileno, created_date, created_by)
+    OUTPUT INSERTED.id
+    VALUES (@customer_fname, @customer_lname, @email, @mobile, @alt_mobile, @formattedDate, @created_by)`;
+// Debugging log
 
-//     const customerResult = await pool.request()
-//       .input('customer_fname', customer_fname)
-//       .input('customer_lname', customer_lname)
-//       .input('email', email)
-//       .input('mobile', mobile)
-//       .input('alt_mobile', alt_mobile)
-//       .input('formattedDate', formattedDate)
-//       .input('created_by', created_by)
-//       .query(customerSQL);
+    const customerResult = await pool.request()
+      .input('customer_fname', customer_fname)
+      .input('customer_lname', customer_lname)
+      .input('email', email)
+      .input('mobile', mobile)
+      .input('alt_mobile', alt_mobile)
+      .input('formattedDate', formattedDate)
+      .input('created_by', created_by)
+      .query(customerSQL);
 
-//     const insertedCustomerId = customerResult.recordset[0].id;
-//     console.log("Inserted Customer ID:", insertedCustomerId); 
+    const insertedCustomerId = customerResult.recordset[0].id;
+    console.log("Inserted Customer ID:", insertedCustomerId); 
+    }
+
+
+
 
     // Insert into awt_customerlocation using insertedCustomerId as customer_id
     const customerLocationSQL = `
@@ -3191,88 +3199,95 @@ app.post("/add_complaintt", async (req, res) => {
     const formatDate = `${(new Date().getMonth() + 1).toString().padStart(2, '0')}${new Date().getDate().toString().padStart(2, '0')}`;
     const ticket_no = `${t_type}G${formatDate}-${count.toString().padStart(4, "0")}`;
 
-    // Insert into complaint_ticket
-    // const complaintSQL = `
-    //   INSERT INTO complaint_ticket (
-    //     ticket_no, ticket_date, customer_name, customer_mobile, customer_email, address, 
-    //     state, city, area, pincode, customer_id, ModelNumber, ticket_type, call_type, 
-    //     call_status, warranty_status, invoice_date, call_charges, mode_of_contact, 
-    //     contact_person, assigned_to, created_date, created_by, engineer_id, purchase_date, serial_no, child_service_partner, sevice_partner,specification
-    //   ) 
-    //   VALUES (
-    //     @ticket_no, @complaint_date, @customer_name, @mobile, @email, @address, 
-    //     @state, @city, @area, @pincode, @customer_id, @model, @ticket_type, @cust_type, 
-    //     'Pending', @warrenty_status, @invoice_date, @call_charge, @mode_of_contact, 
-    //     @contact_person, 1, @formattedDate, @created_by, 1, @purchase_date, @serial, @child_service_partner,@master_service_partner,@specification
-    //   )`;
+    let complaintSQL
 
-    const complaintSQL = `
-  UPDATE complaint_ticket
-  SET
-    ticket_no = @ticket_no,
-    ticket_date = @complaint_date,
-    customer_name = @customer_name,
-    customer_mobile = @mobile,
-    customer_email = @email,
-    address = @address,
-    state = @state,
-    city = @city,
-    area = @area,
-    pincode = @pincode,
-    customer_id = @customer_id,
-    ModelNumber = @model,
-    ticket_type = @ticket_type,
-    call_type = @cust_type,
-    call_status = 'Pending',
-    warranty_status = @warranty_status,
-    invoice_date = @invoice_date,
-    call_charges = @call_charge,
-    mode_of_contact = @mode_of_contact,
-    contact_person = @contact_person,
-    assigned_to = 1,
-    created_date = @formattedDate,
-    created_by = @created_by,
-    engineer_id = 1,
-    purchase_date = @purchase_date,
-    serial_no = @serial,
-    child_service_partner = @child_service_partner,
-    sevice_partner = @master_service_partner,
-    specification = @specification
-  WHERE
-    id = @ticket_id
-`;
+    if (!ticket_id) {
+      complaintSQL = `
+        INSERT INTO complaint_ticket (
+          ticket_no, ticket_date, customer_name, customer_mobile, customer_email, address, 
+          state, city, area, pincode, customer_id, ModelNumber, ticket_type, call_type, 
+          call_status, warranty_status, invoice_date, call_charges, mode_of_contact, 
+          contact_person, assigned_to, created_date, created_by, engineer_id, purchase_date, serial_no, child_service_partner, sevice_partner, specification
+        ) 
+        VALUES (
+          @ticket_no, @complaint_date, @customer_name, @mobile, @email, @address, 
+          @state, @city, @area, @pincode, @customer_id, @model, @ticket_type, @cust_type, 
+          'Pending', @warranty_status, @invoice_date, @call_charge, @mode_of_contact, 
+          @contact_person, 1, @formattedDate, @created_by, 1, @purchase_date, @serial, @child_service_partner, @master_service_partner, @specification
+        )
+      `;
+    } else {
+      complaintSQL = `
+        UPDATE complaint_ticket
+        SET
+          ticket_no = @ticket_no,
+          ticket_date = @complaint_date,
+          customer_name = @customer_name,
+          customer_mobile = @mobile,
+          customer_email = @email,
+          address = @address,
+          state = @state,
+          city = @city,
+          area = @area,
+          pincode = @pincode,
+          customer_id = @customer_id,
+          ModelNumber = @model,
+          ticket_type = @ticket_type,
+          call_type = @cust_type,
+          call_status = 'Pending',
+          warranty_status = @warranty_status,
+          invoice_date = @invoice_date,
+          call_charges = @call_charge,
+          mode_of_contact = @mode_of_contact,
+          contact_person = @contact_person,
+          assigned_to = 1,
+          created_date = @formattedDate,
+          created_by = @created_by,
+          engineer_id = 1,
+          purchase_date = @purchase_date,
+          serial_no = @serial,
+          child_service_partner = @child_service_partner,
+          sevice_partner = @master_service_partner,
+          specification = @specification
+        WHERE
+          id = @ticket_id
+      `;
+    }
 
-    console.log("Executing complaint SQL:", complaintSQL);  // Debugging log
+
+
+
+    // console.log("Executing complaint SQL:", complaintSQL); 
 
     await pool.request()
-      .input('ticket_no', ticket_no)
-      .input('ticket_id', ticket_id)
-      .input('complaint_date', complaint_date)
-      .input('customer_name', customer_name)
-      .input('mobile', mobile)
-      .input('email', email)
-      .input('address', address)
-      .input('state', state)
-      .input('created_by', created_by)
-      .input('city', city)
-      .input('area', area)
-      .input('pincode', pincode)
-      .input('customer_id', cust_id)
-      .input('model', model)
-      .input('ticket_type', ticket_type)
-      .input('cust_type', cust_type)
-      .input("warranty_status", sql.NVarChar, warrenty_status || "WARRENTY")
-      .input('invoice_date', invoice_date)
-      .input('call_charge', call_charge)
-      .input('mode_of_contact', mode_of_contact)
-      .input('contact_person', contact_person)
-      .input('formattedDate', formattedDate)
-      .input('purchase_date', purchase_date)
-      .input('serial', serial)
-      .input('master_service_partner', master_service_partner)
-      .input('child_service_partner', child_service_partner)
-      .input('specification', specification)
-      .query(complaintSQL);
+    .input('ticket_no', ticket_no)
+    .input('ticket_id', ticket_id)
+    .input('complaint_date', complaint_date)
+    .input('customer_name', customer_name)
+    .input('mobile', mobile)
+    .input('email', email)
+    .input('address', address)
+    .input('state', state)
+    .input('created_by', created_by)
+    .input('city', city)
+    .input('area', area)
+    .input('pincode', pincode)
+    .input('customer_id', cust_id)
+    .input('model', model)
+    .input('ticket_type', ticket_type)
+    .input('cust_type', cust_type)
+    .input('warranty_status', sql.NVarChar, warrenty_status || "WARRENTY")
+    .input('invoice_date', invoice_date)
+    .input('call_charge', call_charge)
+    .input('mode_of_contact', mode_of_contact)
+    .input('contact_person', contact_person)
+    .input('formattedDate', formattedDate)
+    .input('purchase_date', purchase_date)
+    .input('serial', serial)
+    .input('master_service_partner', master_service_partner)
+    .input('child_service_partner', child_service_partner)
+    .input('specification', specification)
+    .query(complaintSQL);
 
     //Remark insert query
     const reamrks = `
