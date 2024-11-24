@@ -495,26 +495,32 @@ export function Complaintview(params) {
                 >
                   <table className="table table-striped">
                     <tbody>
-                      {duplicate.map((item, index) => (
-                        <tr key={index}>
-                          <td>
-                            <div style={{ fontSize: "14px" }}>{item.ticket_no}</div>
-                            <span style={{ fontSize: "14px" }}>{formatDate(item.ticket_date)}</span>
-                          </td>
-                          <td style={{ fontSize: "14px" }}>{item.ModelNumber}</td>
-                          <td>
-                            <div style={{ fontSize: "14px" }}>{item.call_status}</div>
-                            <span style={{ fontSize: "14px" }}><button
-                              className='btn'
-                              onClick={() => navigate(`/complaintview/${item.id}`)}
-                              title="View"
-                              style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                            >
-                              <FaEye />
-                            </button>View Info</span>
-                          </td>
-                        </tr>
-                      ))}
+                      {duplicate
+                        .filter((_, index) => index !== 0) // Exclude 0th index
+                        .map((item, index) => (
+                          <tr key={index}>
+                            <td>
+                              <div style={{ fontSize: "14px" }}>{item.ticket_no}</div>
+                              <span style={{ fontSize: "14px" }}>{formatDate(item.ticket_date)}</span>
+                            </td>
+                            <td style={{ fontSize: "14px" }}>{item.ModelNumber}</td>
+                            <td>
+                              <div style={{ fontSize: "14px" }}>{item.call_status}</div>
+                              <span style={{ fontSize: "14px" }}>
+                                <button
+                                  className="btn"
+                                  onClick={() => navigate(`/complaintview/${item.id}`)}
+                                  title="View"
+                                  style={{ backgroundColor: "transparent", border: "none", color: "blue", fontSize: "20px" }}
+                                >
+                                  <FaEye />
+                                </button>
+                                View Info
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+
                     </tbody>
                   </table>
 
@@ -558,7 +564,7 @@ export function Complaintview(params) {
                 <div className="col-md-4">
                   <h4 className="pname" style={{ fontSize: "11px" }}>Model</h4>
 
-                  {complaintview.ModelNumber ? <p>{complaintview.ModelNumber}</p> :  <select
+                  {complaintview.ModelNumber ? <p>{complaintview.ModelNumber}</p> : <select
                     className="form-select dropdown-select"
                     name="ModelNumber"
                     value={complaintview.ModelNumber}
@@ -572,7 +578,7 @@ export function Complaintview(params) {
                     ))}
                   </select>}
 
-                
+
 
                 </div>
 
