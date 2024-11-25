@@ -3908,7 +3908,7 @@ app.put("/putcustomerlocation", async (req, res) => {
         message: "Duplicate entry, Customer with same number already exists!",
       });
     } else {
-      const updateSql = `UPDATE awt_customerlocation SET country_id = '${country_id}', region_id = '${region_id}', geostate_id = '${geostate_id}', geocity_id = '${geocity_id}', area_id = '${area_id}', pincode_id = '${pincode_id}', address = '${address}', ccperson = '${ccperson}', ccnumber = '${ccnumber}', address_type = '${address_type}' WHERE id = '${id}'`;
+      const updateSql = `UPDATE awt_customerlocation SET country_id = '${country_id}', region_id = '${region_id}', geostate_id = '${geostate_id}', geocity_id = '${geocity_id}', district_id = '${area_id}', pincode_id = '${pincode_id}', address = '${address}', ccperson = '${ccperson}', ccnumber = '${ccnumber}', address_type = '${address_type}' WHERE id = '${id}'`;
 
       await pool.request().query(updateSql);
 
@@ -4288,7 +4288,7 @@ AND m.area_id = d.id AND m.geocity_id = ct.id AND m.deleted = 0
     `;
     // Execute the SQL query
     const result = await pool.request().query(sql);
-
+x
     // Return the result as JSON
     return res.json(result.recordset);
   } catch (err) {
