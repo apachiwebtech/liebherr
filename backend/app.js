@@ -3104,10 +3104,13 @@ app.post("/add_complaintt", async (req, res) => {
   } else if (ticket_type == 'Installation') {
     t_type = 'I'
 
-  } else if (ticket_type == 'PM / Ex warranty Scheduling') {
+  } else if (ticket_type == 'Maintenance') {
     t_type = 'M'
 
-  } else if (ticket_type == 'Pre-Site Visit') {
+  } else if (ticket_type == 'Helpdesk') {
+    t_type = 'H'
+  }
+   else if (ticket_type == 'Visit') {
     t_type = 'V'
   }
 
@@ -6571,6 +6574,7 @@ app.post("/add_new_ticket", async (req, res) => {
     mobile,
     cust_id,
     product_id,
+    serial_no,
     address,
     created_by,
     state,
@@ -6588,12 +6592,12 @@ app.post("/add_new_ticket", async (req, res) => {
     const complaintSQL = `
       INSERT INTO complaint_ticket (
         customer_name, customer_mobile, customer_email, address, 
-        customer_id, ModelNumber, assigned_to,state,city,area,pincode, created_date, created_by
+        customer_id, ModelNumber,serial_no, assigned_to,state,city,area,pincode, created_date, created_by
       ) 
       OUTPUT INSERTED.id
       VALUES (
         @customer_name, @mobile, @email, @address, 
-        @customer_id, @model, 1,@state, @city,@area,@pincode, @formattedDate, @created_by
+        @customer_id, @model,@serial_no, 1,@state, @city,@area,@pincode, @formattedDate, @created_by
       )
     `;
 
@@ -6605,6 +6609,7 @@ app.post("/add_new_ticket", async (req, res) => {
       .input("address", sql.NVarChar, address)
       .input("customer_id", sql.Int, cust_id)
       .input("model", sql.NVarChar, product_id)
+      .input("serial_no", serial_no)
       .input("state", sql.NVarChar, state)
       .input("city", sql.NVarChar, city)
       .input("area", sql.NVarChar, area)

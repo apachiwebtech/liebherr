@@ -460,6 +460,7 @@ export function Registercomplaint(params) {
             email: searchdata.email,
             mobile: searchdata.mobile,
             cust_id: searchdata.id,
+            serial_no: searchdata.serial_no,
             state: searchdata.state,
             city: searchdata.city,
             area: searchdata.area,
@@ -479,7 +480,8 @@ export function Registercomplaint(params) {
                     state: res.data.rowdata[0].state,
                     city: res.data.rowdata[0].city,
                     area: res.data.rowdata[0].area,
-                    pincode: res.data.rowdata[0].pincode
+                    pincode: res.data.rowdata[0].pincode,
+                    serial: res.data.rowdata[0].serial_no
                 })
 
             }).catch((err) => {
