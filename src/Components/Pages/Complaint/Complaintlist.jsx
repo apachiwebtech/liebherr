@@ -28,6 +28,12 @@ export function Complaintlist(params) {
         status: '',
         customerID: '',
 
+        csp: '',
+        msp: '',
+        mode_of_contact: '',
+        customer_class: '',
+
+
     });
 
     const formatDate = (dateString) => {
@@ -99,6 +105,10 @@ export function Complaintlist(params) {
             ticketno: '',
             status: '',
             customerID: '',
+            csp: '',
+            msp: '',
+            mode_of_contact: '',
+            customer_class: '',
         });
         fetchComplaintlist(); // Reset to original data
     };
@@ -293,6 +303,126 @@ export function Complaintlist(params) {
                                     />
                                 </div>
                             </div>
+
+                            {/* Buttons and message at the far-right corner */}
+                            {/* <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
+                                <div className="form-group">
+                                    <button
+                                        className="btn btn-primary mr-2"
+                                        onClick={applyFilters}
+                                    >
+                                        Search
+                                    </button>
+                                    <button
+                                        className="btn btn-secondary"
+                                        onClick={resetFilters}
+                                        style={{
+                                            marginLeft: '5px',
+                                        }}
+                                    >
+                                        Reset
+                                    </button>
+                                    {filteredData.length === 0 && (
+                                        <div
+                                            style={{
+                                                backgroundColor: '#f8d7da',
+                                                color: '#721c24',
+                                                padding: '5px 10px',
+                                                marginLeft: '10px',
+                                                borderRadius: '4px',
+                                                border: '1px solid #f5c6cb',
+                                                fontSize: '14px',
+                                                display: 'inline-block'
+                                            }}
+                                        >
+                                            No Record Found
+                                        </div>
+                                    )}
+                                </div>
+                            </div> */}
+                        </div>
+
+                        
+                        {/* Third row of filter */}
+
+
+
+                        <div className="row mb-3">
+
+                            <div className="col-md-2">
+                                <div className="form-group">
+                                    <label>Master Service Partner</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="msp"
+                                        value={searchFilters.msp}
+                                        placeholder="Search by Msp"
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
+                            <div className="col-md-2">
+                                <div className="form-group">
+                                    <label>Child Service partner</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="csp"
+                                        value={searchFilters.csp}
+                                        placeholder="Search by Csp"
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
+                            <div className="col-md-2">
+                                <div className="form-group">
+                                    <label>Call Category</label>
+                                    <select
+                                        className="form-control"
+                                        name="mode_of_contact"
+                                        value={searchFilters.mode_of_contact}
+                                        onChange={handleFilterChange}
+                                    >
+                                        <option value=""> SELECT</option>
+                                        <option value="Call">Call</option>
+                                        <option value="SMS">SMS</option>
+                                        <option value="Email">Email</option>
+                                        <option value="In Person">InPerson</option>
+                                    </select>
+                                </div>
+                            </div>
+
+
+                            <div className="col-md-2">
+                                <div className="form-group">
+                                    <label>Customer Classification</label>
+                                    <select
+                                        className="form-control"
+                                        name="customer_class"
+                                        value={searchFilters.customer_class}
+                                        onChange={handleFilterChange}
+                                    >
+                                        <option value=""> SELECT</option>
+                                        <option value="Import">Import</option>
+                                        <option value="India">India</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            {/* <div className="col-md-3">
+                                <div className="form-group">
+                                    <label>Customer Email</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="customerEmail"
+                                        value={searchFilters.customerEmail}
+                                        placeholder="Search by customer email"
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div> */}
 
                             {/* Buttons and message at the far-right corner */}
                             <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">

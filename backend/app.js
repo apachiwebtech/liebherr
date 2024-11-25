@@ -6959,6 +6959,11 @@ app.get("/getcomplainlist", async (req, res) => {
       ticketno,
       status,
       customerID,
+
+      csp,
+      msp,
+      mode_of_contact,
+      customer_class,
     } = req.query;
 
     console.log('Received status:', status); // Debug log
@@ -7014,7 +7019,27 @@ app.get("/getcomplainlist", async (req, res) => {
       sql += ` AND c.customer_id LIKE '%${customerID}%'`;
       nots = ''
     }
+//csp msp call_type and customer_class
 
+if (csp) {
+  sql += ` AND c.csp LIKE '%${csp}%'`;
+  nots = ''
+}
+
+if (msp) {
+  sql += ` AND c.msp LIKE '%${msp}%'`;
+  nots = ''
+}
+
+if (mode_of_contact) {
+  sql += ` AND c.mode_of_contact LIKE '%${mode_of_contact}%'`;
+  nots = ''
+}
+
+if (customer_class) {
+  sql += ` AND c.customer_class LIKE '%${customer_class}%'`;
+  nots = ''
+}
 
 
 
@@ -7073,6 +7098,11 @@ app.get("/getcomplainlistcsp", async (req, res) => {
       ticketno,
       status,
       customerID,
+
+      csp,
+      msp,
+      mode_of_contact,
+      customer_class,
     } = req.query;
 
     console.log('Received status:', status); // Debug log
@@ -7129,7 +7159,27 @@ app.get("/getcomplainlistcsp", async (req, res) => {
       nots = ''
     }
 
+//csp msp call_type and customer_class
 
+if (csp) {
+  sql += ` AND c.csp LIKE '%${csp}%'`;
+  nots = ''
+}
+
+// if (msp) {
+//   sql += ` AND c.msp LIKE '%${msp}%'`;
+//   nots = ''
+// }
+
+if (mode_of_contact) {
+  sql += ` AND c.mode_of_contact LIKE '%${mode_of_contact}%'`;
+  nots = ''
+}
+
+if (customer_class) {
+  sql += ` AND c.customer_class LIKE '%${customer_class}%'`;
+  nots = ''
+}
 
 
     // Modified status filtering logic
@@ -7187,6 +7237,10 @@ app.get("/getcomplainlistmsp", async (req, res) => {
       ticketno,
       status,
       customerID,
+
+      msp,
+      mode_of_contact,
+      customer_class,
     } = req.query;
 
     console.log('Received status:', status); // Debug log
@@ -7243,7 +7297,23 @@ app.get("/getcomplainlistmsp", async (req, res) => {
       nots = ''
     }
 
+//csp msp call_type and customer_class
 
+
+if (msp) {
+  sql += ` AND c.msp LIKE '%${msp}%'`;
+  nots = ''
+}
+
+if (mode_of_contact) {
+  sql += ` AND c.mode_of_contact LIKE '%${mode_of_contact}%'`;
+  nots = ''
+}
+
+if (customer_class) {
+  sql += ` AND c.customer_class LIKE '%${customer_class}%'`;
+  nots = ''
+}
 
 
     // Modified status filtering logic

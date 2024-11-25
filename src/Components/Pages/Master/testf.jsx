@@ -1,906 +1,560 @@
-import axios from "axios";
-import React, { useEffect, useState } from "react";
-import { FaPencilAlt, FaTrash } from "react-icons/fa";
-import { Base_Url } from "../../Utils/Base_Url";
-import Franchisemaster from '../Master/Franchisemaster';
-import { useParams } from "react-router-dom";
-import md5 from "js-md5";
-const Childfranchisemaster = () => {
-  const { childid } = useParams();
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
+import { Base_Url } from '../../Utils/Base_Url';
 
-  const [Parentfranchise, setParentfranchise] = useState([]);
-  const [errors, setErrors] = useState({});
-  const [users, setUsers] = useState([]);
-  const [locations, setlocations] = useState({
-    country: '',
-    region: '',
-    state: '',
-    district: '',
-    city: '',
-  });
-  const [duplicateError, setDuplicateError] = useState("");
-  const [isEdit, setIsEdit] = useState(false);
+export function Complaintlist(params) {
+    const [Complaintdata, setComplaintdata] = useState([]);
+    const [filteredData, setFilteredData] = useState([]);
+    const [isEdit, setIsEdit] = useState(false);
 
-  // const [filteredUsers, setFilteredUsers] = useState([]);
-  // const [currentPage, setCurrentPage] = useState(0);
-  // const [itemsPerPage, setItemsPerPage] = useState(10);
-  // const [searchTerm, setSearchTerm] = useState("");
+    const [formData, setFormData] = useState({
+        title: '',
+        cfranchise_id: '',
+        password: '',
+        email: '',
+        mobile_no: '',
+    });
+    const [searchFilters, setSearchFilters] = useState({
+        fromDate: '',
+        toDate: '',
+        customerName: '',
+        customerEmail: '',
+        serialNo: '',
+        productCode: '',
+        customerMobile: '',
+        ticketno: '',
+        status: '',
+        customerID: '',
 
-  const [countries, setCountries] = useState([]);
-  const [regions, setRegions] = useState([]);
-  const [state, setState] = useState([])
-  const [area, setdistricts] = useState([])
-  const [city, setCity] = useState([])
-  const [pincode, setPincode] = useState([])
-    const created_by = localStorage.getItem("userId"); // Get user ID from localStorage
-    const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
-
-  const [formData, setFormData] = useState({
-    title: "",
-    pfranchise_id: "",
-    contact_person: "",
-    email: "",
-    mobile_no: "",
-    password: "",
-    country_id: "",
-    region_id: "",
-    state: "",
-    area: "",
-    city: "",
-    pincode_id: "",
-    address: "",
-    licare_code: "",
-    partner_name: "",
-    website: "",
-    gst_number: "",
-    pan_number: "",
-    bank_name: "",
-    bank_account_number: "",
-    bank_ifsc_code: "",
-    bank_address: "",
-    last_working_date: "",
-    contract_activation_date: "",
-    contract_expiration_date: "",
-    with_liebherr: "",
-  });
-
-  // const fetchchildfranchisepopulate = async (childid) => {
-  //   try {
-
-  //     const response = await axios.get(`${Base_Url}/getchildfranchisepopulate/${childid}`);
-  //     setFormData({
-  //       ...response.data[0],
-  //       // Rename keys to match your formData structure
-  //       pfranchise_id: response.data[0].pfranchise_id,
-  //       title: response.data[0].title,
-  //       contact_person: response.data[0].contact_person,
-  //       email: response.data[0].email,
-  //       mobile_no: response.data[0].mobile_no,
-  //       password: response.data[0].password,
-  //       country_id: response.data[0].country_id,
-  //       region_id: response.data[0].region_id,
-  //       state: response.data[0].geostate_id,
-  //       area: response.data[0].area_id,
-  //       city: response.data[0].geocity_id,
-  //       pincode_id: response.data[0].pincode_id,
-  //       address: response.data[0].address,
-  //       licare_code: response.data[0].licare_code,
-  //       partner_name: response.data[0].partner_name,
-  //       website: response.data[0].webste,
-  //       gst_number: response.data[0].gstno,
-  //       pan_number: response.data[0].panno,
-  //       bank_name: response.data[0].bankname,
-  //       bank_account_number: response.data[0].bankacc,
-  //       bank_ifsc_code: response.data[0].bankifsc,
-  //       bank_address: response.data[0].bankaddress,
-  //       last_working_date: response.data[0].lastworkinddate,
-  //       contract_activation_date: response.data[0].contractacti,
-  //       contract_expiration_date: response.data[0].contractexpir,
-  //       with_liebherr: response.data[0].withliebher
-  //     });
-
-  //     setIsEdit(true);
-
-  //     if (response.data[0].country_id) {
-  //       fetchregion(response.data[0].country_id);
-  //     }
-  //     if (response.data[0].region_id) {
-  //       fetchState(response.data[0].region_id);
-  //     }
-  //     if (response.data[0].geostate_id) {
-  //       fetchdistricts(response.data[0].geostate_id);
-  //     }
-  //     if (response.data[0].area_id) {
-  //       fetchCity(response.data[0].area_id);
-  //     }
-  //     if (response.data[0].geocity_id) {
-  //       fetchpincode(response.data[0].geocity_id);
-  //     }
-
-  //   } catch (error) {
-  //     console.error("Error fetching Parentfranchise:", error);
-  //   }
-  // };
-
-  // End Fetch Child Franchise Deatils for populate
-
-  const fetchchildfranchisepopulate = async (childid) => {
-    try {
-      const response = await axios.get(`${Base_Url}/getchildfranchisepopulate/${childid}`);
-      const data = response.data[0];
-
-      // Update locations state with the names from API
-      setlocations({
-        country: data.country_name || '',
-        region: data.region_name || '',
-        state: data.state_name || '',
-        district: data.district_name || '',
-        city: data.city_name || ''
-      });
-
-      setFormData({
-        ...response.data[0],
-        pfranchise_id: data.pfranchise_id,
-        title: data.title,
-        contact_person: data.contact_person,
-        email: data.email,
-        mobile_no: data.mobile_no,
-        password: data.password,
-        country_id: data.country_id,
-        region_id: data.region_id,
-        state: data.geostate_id,
-        area: data.area_id,
-        city: data.geocity_id,
-        pincode_id: data.pincode_id,
-        address: data.address,
-        licare_code: data.licare_code,
-        partner_name: data.partner_name,
-        website: data.webste,
-        gst_number: data.gstno,
-        pan_number: data.panno,
-        bank_name: data.bankname,
-        bank_account_number: data.bankacc,
-        bank_ifsc_code: data.bankifsc,
-        bank_address: data.bankaddress,
-        last_working_date: data.lastworkinddate,
-        contract_activation_date: data.contractacti,
-        contract_expiration_date: data.contractexpir,
-        with_liebherr: data.withliebher
-      });
-
-      setIsEdit(true);
-
-      // Fetch dependent dropdowns data
-      if (data.country_id) {
-        fetchregion(data.country_id);
-      }
-      if (data.region_id) {
-        fetchState(data.region_id);
-      }
-      if (data.geostate_id) {
-        fetchdistricts(data.geostate_id);
-      }
-      if (data.area_id) {
-        fetchCity(data.area_id);
-      }
-      if (data.geocity_id) {
-        fetchpincode(data.geocity_id);
-      }
-
-    } catch (error) {
-      console.error("Error fetching Parentfranchise:", error);
-    }
-  };
+        csp: '',
+        msp: '',
+        mode_of_contact: '',
+        customer_class: '',
 
 
-  const fetchParentfranchise = async () => {
-    try {
-      const response = await axios.get(`${Base_Url}/getparentfranchise`);
-      console.log("pf",response.data);
-      setParentfranchise(response.data);
-    } catch (error) {
-      console.error("Error fetching Parentfranchise:", error);
-    }
-  };
+    });
 
-  const fetchUsers = async () => {
-    try {
-      const response = await axios.get(`${Base_Url}/getchildFranchiseDetails`);
-      console.log(response.data);
-      setUsers(response.data);
-      // setFilteredUsers(response.data);
-    } catch (error) {
-      console.error("Error fetching users:", error);
-    }
-  };
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+        return date.toLocaleDateString('en-GB', options).replace(/\//g, '-');
+    };
 
-  //This is for State Dropdown
-
-  async function getState(params) {
-    axios.get(`${Base_Url}/getstate`)
-      .then((res) => {
-        if (res.data) {
-
-          setState(res.data)
-
+    const fetchComplaintlist = async () => {
+        try {
+            const response = await axios.get(`${Base_Url}/getcomplainlist`);
+            // Filter out 'Closed' and 'Cancelled' status complaints by default
+            const filteredComplaints = response.data.filter(complaint =>
+                !['Closed', 'Cancelled'].includes(complaint.call_status)
+            );
+            setComplaintdata(response.data);
+            setFilteredData(filteredComplaints);
+        } catch (error) {
+            console.error('Error fetching Complaintdata:', error);
+            setComplaintdata([]);
+            setFilteredData([]);
         }
-      })
-  }
+    };
 
+    const fetchFilteredData = async () => {
+        try {
+            const params = new URLSearchParams();
 
-  const fetchcountries = async () => {
-    try {
-      const response = await axios.get(`${Base_Url}/getcountries`);
-      setCountries(response.data);
-    } catch (error) {
-      console.error("Error fetching disctricts:", error);
-    }
-  };
+            // Add all filters to params
+            Object.entries(searchFilters).forEach(([key, value]) => {
+                if (value) { // Only add if value is not empty
+                    params.append(key, value);
+                }
+            });
 
-  //region
-  const fetchregion = async (country_id) => {
-    try {
-      const response = await axios.get(`${Base_Url}/getregionscity/${country_id}`);
-      setRegions(response.data);
-    } catch (error) {
-      console.error("Error fetching disctricts:", error);
-    }
-  };
+            console.log('Sending params:', params.toString()); // Debug log
 
-  //geostate
-  const fetchState = async (region_id) => {
-    try {
-      const response = await axios.get(`${Base_Url}/getgeostatescity/${region_id}`);
-      setState(response.data);
-    } catch (error) {
-      console.error("Error fetching disctricts:", error);
-    }
-  };
+            const response = await axios.get(`${Base_Url}/getcomplainlist?${params}`);
+            setFilteredData(response.data);
+        } catch (error) {
+            console.error('Error fetching filtered data:', error);
+            setFilteredData([]);
+        }
+    };
 
-  const fetchdistricts = async (geostateID) => {
-    try {
-      const response = await axios.get(`${Base_Url}/getdistrictcity/${geostateID}`);
-      setdistricts(response.data);
-    } catch (error) {
-      console.error("Error fetching disctricts:", error);
-    }
-  };
-
-  const fetchCity = async (area_id) => {
-    try {
-      const response = await axios.get(`${Base_Url}/getgeocities_p/${area_id}`);
-      setCity(response.data);
-    } catch (error) {
-      console.error("Error fetching City:", error);
-    }
-  };
-
-  const fetchpincode = async (cityid) => {
-    try {
-      const response = await axios.get(`${Base_Url}/getpincodebyid/${cityid}`);
-      setPincode(response.data);
-    } catch (error) {
-      console.error("Error fetching City:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchcountries();
-    fetchUsers();
-    fetchParentfranchise();
-
-    if (childid && childid !== '0') {
-      fetchchildfranchisepopulate(childid);
-    }
-  }, [childid]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prevState => ({
-      ...prevState,
-      [name]: value
-    }));
-
-    // Handle dependent dropdowns
-    switch (name) {
-      case "country_id":
-        fetchregion(value);
-        break;
-      case "region_id":
-        fetchState(value);
-        break;
-      case "state":
-        fetchdistricts(value);
-        break;
-      case "area":
-        fetchCity(value);
-        break;
-      case "city":
-        fetchpincode(value);
-        break;
-        case "pincode_id":
-          fetchlocations(value);
-          break;
-      default:
-        break;
-    }
-  };
-
-  const fetchlocations = async (pincode) => {
-    try {
-      const response = await axios.get(
-        `${Base_Url}/getmultiplelocation/${pincode}`
-      );
-
-      if (response.data && response.data[0]) {
-        // Update locations display state
-        setlocations({
-          region: response.data[0].region,
-          state: response.data[0].state,
-          district: response.data[0].district,
-          city: response.data[0].city,
-          country: response.data[0].country
-        });
-
-        // Update formData with the new location values
-        setFormData(prevState => ({
-          ...prevState,
-          country_id: response.data[0].country,
-          region_id: response.data[0].region,
-          state: response.data[0].state,
-          area: response.data[0].district,
-          city: response.data[0].city,
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+        console.log('Filter changed:', name, value); // Debug log
+        setSearchFilters(prev => ({
+            ...prev,
+            [name]: value
         }));
-      }
-    } catch (error) {
-      console.error("Error fetching complaint details:", error);
-    }
-  };
+    };
 
+    const applyFilters = () => {
+        console.log('Applying filters:', searchFilters); // Debug log
+        fetchFilteredData();
+    };
 
+    const resetFilters = () => {
+        setSearchFilters({
+            fromDate: '',
+            toDate: '',
+            customerName: '',
+            customerEmail: '',
+            serialNo: '',
+            productCode: '',
+            customerMobile: '',
+            ticketno: '',
+            status: '',
+            customerID: '',
+            
+            csp: '',
+            msp: '',
+            mode_of_contact: '',
+            customer_class: '',
+        });
+        fetchComplaintlist(); // Reset to original data
+    };
 
-  // Step 2: Add form validation function
-  const validateForm = () => {
-    const newErrors = {};
+    //  const deleted = async (id) => { 
+    //     try {
+    //         const response = await axios.post(`${Base_Url}/deleteengineer`, { id });
+    //         setFormData({
+    //             title: '',
+    //             cfranchise_id: ''
+    //         })
+    //         fetchComplaintlist();
+    //     } catch (error) {
+    //         console.error('Error deleting user:', error);
+    //     }
+    // };
 
-    if (!formData.pfranchise_id) newErrors.pfranchise_id = "Parent Franchise selection is required.";
-    if (!formData.title.trim()) newErrors.title = "Child Franchise Field is required.";
-    if (!formData.contact_person.trim()) newErrors.contact_person = "Contact Person is required.";
-    if (!formData.email.trim()) newErrors.email = "Email is required.";
-    if (!formData.mobile_no.trim()) newErrors.mobile_no = "Mobile Number is required.";
-    if (!formData.password.trim()) newErrors.password = "Password is required.";
-    // if (!formData.country_id) newErrors.country_id = "Country selection is required.";
-    // if (!formData.region_id) newErrors.region_id = "Region selection is required.";
-    // if (!formData.state) newErrors.state = "State selection is required.";
-    // if (!formData.area) newErrors.area = "Area selection is required.";
-    // if (!formData.city) newErrors.city = "City selection is required.";
-    // if (!formData.pincode_id) newErrors.pincode_id = "Pincode selection is required.";
-    if (!formData.address.trim()) newErrors.address = "Address is required.";
-
-    // Add validations for new fields
-    if (!formData.licare_code.trim()) newErrors.licare_code = "Licare Code is required.";
-    if (!formData.partner_name.trim()) newErrors.partner_name = "Partner Name is required.";
-    if (!formData.gst_number.trim()) newErrors.gst_number = "GST Number is required.";
-    if (!formData.pan_number.trim()) newErrors.pan_number = "PAN Number is required.";
-    if (!formData.bank_name.trim()) newErrors.bank_name = "Bank Name is required.";
-    if (!formData.bank_account_number.trim()) newErrors.bank_account_number = "Bank Account Number is required.";
-    if (!formData.bank_ifsc_code.trim()) newErrors.bank_ifsc_code = "Bank IFSC Code is required.";
-
-    return newErrors;
-  };
-
-
-  //handlesubmit form
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const validationErrors = validateForm();
-    if (Object.keys(validationErrors).length > 0) {
-      console.log("Validation Errors:", validationErrors);
-      setErrors(validationErrors);
-      return;
-    }
-    setDuplicateError("");
-
-    try {
-      const confirmSubmission = window.confirm(
-        "Do you want to submit the data?"
-      );
-      if (confirmSubmission) {
-        const hashedFormData = {
-          ...formData,
-          password: md5(formData.password) // Hash the password using MD5
-        };
-        if (isEdit) {
-          await axios
-          .put(`${Base_Url}/putchildfranchise`, { ...hashedFormData, created_by })
-            .then((response) => {
-              setFormData({
-                title: "",
-                pfranchise_id: "",
-                contact_person: "",
-                email: "",
-                mobile_no: "",
-                password: "",
-                country_id: "",
-                region_id: "",
-                state: "",
-                area: "",
-                city: "",
-                pincode_id: "",
-                address: "",
-                licare_code: "",
-                partner_name: "",
-                website: "",
-                gst_number: "",
-                pan_number: "",
-                bank_name: "",
-                bank_account_number: "",
-                bank_ifsc_code: "",
-                bank_address: "",
-                last_working_date: "",
-                contract_activation_date: "",
-                contract_expiration_date: "",
-                with_liebherr: ""
-              });
-              fetchUsers();
-              setIsEdit(false);
-            })
-            .catch((error) => {
-              if (error.response && error.response.status === 409) {
-                setDuplicateError(
-                  "Duplicate entry, Child Franchise already exists!"
-                );
-              }
-            });
-        } else {
-
-          await axios.post(`${Base_Url}/postchildfranchise`, { ...hashedFormData, created_by })
-            .then((response) => {
-              setFormData({
-                title: "",
-                pfranchise_id: "",
-                contact_person: "",
-                email: "",
-                mobile_no: "",
-                password: "",
-                country_id: "",
-                region_id: "",
-                state: "",
-                area: "",
-                city: "",
-                pincode_id: "",
-                address: "",
-                licare_code: "",
-                partner_name: "",
-                website: "",
-                gst_number: "",
-                pan_number: "",
-                bank_name: "",
-                bank_account_number: "",
-                bank_ifsc_code: "",
-                bank_address: "",
-                last_working_date: "",
-                contract_activation_date: "",
-                contract_expiration_date: "",
-                with_liebherr: ""
-              });
-              fetchUsers();
-            })
-            .catch((error) => {
-              if (error.response && error.response.status === 409) {
-                setDuplicateError(
-                  "Duplicate entry, Child Franchise already exists!"
-                );
-              }
-            });
+    const edit = async (id) => {
+        try {
+            const response = await axios.get(`${Base_Url}/requestengineer/${id}`);
+            setFormData(response.data)
+            setIsEdit(true);
+            console.log(response.data);
+        } catch (error) {
+            console.error('Error editing user:', error);
         }
-      }
-    } catch (error) {
-      console.error("Error during form submission:", error);
-    }
-  };
+    };
+
+    useEffect(() => {
+        fetchComplaintlist();
+    }, []);
+
+    const navigate = useNavigate();
+
+    const isActionDisabled = (status) => {
+        return ['Closed', 'Cancelled'].includes(status);
+    };
 
 
-  return (
-    <div className="tab-content">
-      <Franchisemaster />
-      <div className="row mp0">
-        <div className="col-12">
-          <div className="card mb-3 tab_box">
-            <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
-              <form onSubmit={handleSubmit}>
-                <div className="row">
-                  <div className="col-md-3">
-                    <label htmlFor="Parent Franchise" className="form-label pb-0 dropdown-label">
-                      Parent Franchise
-                    </label>
-                    <select
-                      className="form-select dropdown-select"
-                      name="pfranchise_id"
-                      value={formData.pfranchise_id}
-                      onChange={handleChange}
-                      style={{ fontSize: "18px" }}
-                    >
-                      <option value="">Select Parent Franchise</option>
-                      {Parentfranchise.map((pf) => (
-                        <option key={pf.id} value={pf.licarecode}>
-                          {pf.title}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.pfranchise_id && (
-                      <small className="text-danger">
-                        {errors.pfranchise_id}
-                      </small>
-                    )}
-                  </div>
 
-                  <div className="col-md-3">
-                    <label
-                      htmlFor="ChildFranchiseMasterInput"
-                      className="input-field"
-                      style={{ marginBottom: "15px", fontSize: "18px" }}
-                    >
-                      Child Franchise Master
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="title"
-                      id="ChildFranchiseMasterInput"
-                      value={formData.title}
-                      onChange={handleChange}
-                      placeholder="Enter Child Franchise Master"
-                      style={{ fontSize: "18px" }}
-                    />
-                    {errors.title && (
-                      <small className="text-danger">{errors.title}</small>
-                    )}
-                  </div>
+    return (
+        <div className="row mp0">
+            <div className="col-md-12 col-12">
+                <div className="card mb-3 tab_box">
+                    <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
+                        {/* Search Filters */}
+                        <div className="row mb-3">
+                            <div className="col-md-2">
+                                <div className="form-group">
+                                    <label>From Date</label>
+                                    <input
+                                        type="date"
+                                        className="form-control"
+                                        name="fromDate"
+                                        value={searchFilters.fromDate}
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
+                            <div className="col-md-2">
+                                <div className="form-group">
+                                    <label>To Date</label>
+                                    <input
+                                        type="date"
+                                        className="form-control"
+                                        name="toDate"
+                                        value={searchFilters.toDate}
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
+                            <div className="col-md-2">
+                                <div className="form-group">
+                                    <label>Ticket No.</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="ticketno"
+                                        value={searchFilters.ticketno}
+                                        placeholder="Search by ticket no"
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
 
-                  <div className="col-md-3">
-                    <label className="input-field">Child Licare Code</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="licare_code"
-                      value={formData.licare_code}
-                      onChange={handleChange}
-                      placeholder="Enter Licare Code"
-                    />
-                    {errors.licare_code && <small className="text-danger">{errors.licare_code}</small>}
-                  </div>
+                            <div className="col-md-3">
+                                <div className="form-group">
+                                    <label>Customer ID</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="customerID"
+                                        value={searchFilters.customerID}
+                                        placeholder="Search by customer Id"
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
 
-                  <div className="col-md-3">
-                    <label className="input-field"> Child Franchise Master(Contact Person)</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="contact_person"
-                      value={formData.contact_person}
-                      onChange={handleChange}
-                      placeholder="Enter Contact Person"
-                    />
-                    {errors.contact_person && <small className="text-danger">{errors.contact_person}</small>}
-                  </div>
-
-                  <div className="col-md-3">
-                    <label className="input-field">Child Franchise Master (Email)</label>
-                    <input
-                      type="email"
-                      className="form-control"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      placeholder="Enter Franchise Master Email"
-                    />
-                    {errors.email && <small className="text-danger">{errors.email}</small>}
-                  </div>
-
-                  <div className="col-md-3">
-                    <label className="input-field">Child Franchise Master (Mobile Number)</label>
-                    <input
-                      type="tel"
-                      className="form-control"
-                      name="mobile_no"
-                      value={formData.mobile_no}
-                      onChange={handleChange}
-                      placeholder="Enter Mobile Number"
-                      pattern="[0-9]{10}"
-                      maxLength="15"
-                    />
-                    {errors.mobile_no && <small className="text-danger">{errors.mobile_no}</small>}
-                  </div>
-
-                  <div className="col-md-3">
-                    <label className="input-field">Child Partner Name</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="partner_name"
-                      value={formData.partner_name}
-                      onChange={handleChange}
-                      placeholder="Enter Partner Name"
-                    />
-                    {errors.partner_name && <small className="text-danger">{errors.partner_name}</small>}
-                  </div>
-
-                  <div className="col-md-3">
-                    <label className="input-field">Child Franchise Master (Password)</label>
-                    <input
-                      type="password"
-                      className="form-control"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      placeholder="Enter Password"
-                    />
-                    {errors.password && <small className="text-danger">{errors.password}</small>}
-                  </div>
-
-                  <div className="col-md-3">
-                   <label className="input-field">Country</label>
-        <input 
-          type="text" 
-          className="form-control" 
-          value={locations.country}
-          name="country_id"
-          onChange={handleChange}
-          placeholder="Country"
-          readOnly 
-        />
-        {errors.country_id && <small className="text-danger">{errors.country_id}</small>}
-      </div>
-
-                  <div className="col-md-3">
-                  <label className="input-field">Region</label>
-        <input 
-          type="text" 
-          className="form-control" 
-          value={locations.region}
-          name="region_id"
-          onChange={handleChange}
-          placeholder="Region"
-          readOnly 
-        />
-        {errors.region_id && <small className="text-danger">{errors.region_id}</small>}
-      </div>
-
-                  <div className="col-md-3">
-                  <label className="input-field">Geo State</label>
-        <input 
-          type="text" 
-          className="form-control" 
-          value={locations.state}
-          name="state"
-          onChange={handleChange}
-          placeholder="State"
-          readOnly 
-        />
-        {errors.state && <small className="text-danger">{errors.state}</small>}
-      </div>
+                            <div className="col-md-3">
+                                <div className="form-group">
+                                    <label>Customer Name</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="customerName"
+                                        value={searchFilters.customerName}
+                                        placeholder="Search by customer name"
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
 
 
-                  <div className="col-md-3">
-                  <label className="input-field">District</label>
-        <input 
-          type="text" 
-          className="form-control" 
-          value={locations.district}
-          name="area"
-          onChange={handleChange}
-          placeholder="District"
-          readOnly 
-        />
-        {errors.state && <small className="text-danger">{errors.state}</small>}
-      </div>
+                        </div>
 
-                  <div className="col-md-3">
-                  <label className="input-field">Geo City</label>
-        <input 
-          type="text" 
-          className="form-control" 
-          value={locations.city}
-          name="city"
-          onChange={handleChange}
-          placeholder="City"
-          readOnly 
-        />
-        {errors.city && <small className="text-danger">{errors.city}</small>}
-      </div>
-
-                  <div className="col-md-3">
-                    <label htmlFor="area" className="input-field">
-                      Pincode
-                    </label>
-
-                    <input type="text" className="form-control" value={formData.pincode_id} name="pincode_id" onChange={handleChange} placeholder="" />
-                    {/* <select
-                      id="pincode"
-                      name="pincode_id"
-                      className="form-select"
-                      aria-label=".form-select-lg example"
-                      value={formData.pincode_id}
-                      onChange={handleChange}
-                    >
-                      <option value="">Select Pincode</option>
-                      {pincode.map((geoPincode) => (
-                        <option key={geoPincode.id} value={geoPincode.id}>
-                          {geoPincode.pincode}
-                        </option>
-                      ))}
-                    </select> */}
-                    {errors.pincode_id && (
-                      <small className="text-danger">{errors.pincode_id}</small>
-                    )}
-                  </div>
-
-                  <div className="col-md-3">
-                    <label className="input-field">Website</label>
-                    <input
-                      type="url"
-                      className="form-control"
-                      name="website"
-                      value={formData.website}
-                      onChange={handleChange}
-                      placeholder="Enter Website URL"
-                    />
-                  </div>
-
-                  <div className="col-md-3">
-                    <label className="input-field">GST Number</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="gst_number"
-                      value={formData.gst_number}
-                      onChange={handleChange}
-                      placeholder="Enter GST Number"
-                    />
-                    {errors.gst_number && <small className="text-danger">{errors.gst_number}</small>}
-                  </div>
-
-                  <div className="col-md-3">
-                    <label className="input-field">PAN Number</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="pan_number"
-                      value={formData.pan_number}
-                      onChange={handleChange}
-                      placeholder="Enter PAN Number"
-                    />
-                    {errors.pan_number && <small className="text-danger">{errors.pan_number}</small>}
-                  </div>
-
-                  <div className="col-md-3">
-                    <label className="input-field">Bank Name</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="bank_name"
-                      value={formData.bank_name}
-                      onChange={handleChange}
-                      placeholder="Enter Bank Name"
-                    />
-                    {errors.bank_name && <small className="text-danger">{errors.bank_name}</small>}
-                  </div>
-
-                  <div className="col-md-3">
-                    <label className="input-field">Bank Account Number</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="bank_account_number"
-                      value={formData.bank_account_number}
-                      onChange={handleChange}
-                      placeholder="Enter Bank Account Number"
-                    />
-                    {errors.bank_account_number && <small className="text-danger">{errors.bank_account_number}</small>}
-                  </div>
-
-                  <div className="col-md-3">
-                    <label className="input-field">Bank IFSC Code</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="bank_ifsc_code"
-                      value={formData.bank_ifsc_code}
-                      onChange={handleChange}
-                      placeholder="Enter Bank IFSC Code"
-                    />
-                    {errors.bank_ifsc_code && <small className="text-danger">{errors.bank_ifsc_code}</small>}
-                  </div>
-
-                  <div className="col-md-3">
-                    <label className="input-field">With Liebherr</label>
-                    <input
-                      type="date"
-                      className="form-control"
-                      name="with_liebherr"
-                      value={formData.with_liebherr ? formData.with_liebherr.split('T')[0] : ''}
-                      onChange={handleChange}
-                    />
-                  </div>
+                        {/* second row of filter */}
 
 
-                  <div className="col-md-3">
-                    <label className="input-field">Contract Activation Date</label>
-                    <input
-                      type="date"
-                      className="form-control"
-                      name="contract_activation_date"
-                      value={formData.contract_activation_date ? formData.contract_activation_date.split('T')[0] : ''}
-                      onChange={handleChange}
-                    />
-                  </div>
 
-                  <div className="col-md-3">
-                    <label className="input-field">Contract Expiration Date</label>
-                    <input
-                      type="date"
-                      className="form-control"
-                      name="contract_expiration_date"
-                      value={formData.contract_expiration_date ? formData.contract_expiration_date.split('T')[0] : ''}
-                      onChange={handleChange}
-                    />
-                  </div>
+                        <div className="row mb-3">
 
-                  <div className="col-md-3">
-                    <label className="input-field">Last Working Date</label>
-                    <input
-                      type="date"
-                      className="form-control"
-                      name="last_working_date"
-                      value={formData.last_working_date ? formData.last_working_date.split('T')[0] : ''}
-                      onChange={handleChange}
-                    />
-                  </div>
+                            <div className="col-md-2">
+                                <div className="form-group">
+                                    <label>Serial No</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="serialNo"
+                                        value={searchFilters.serialNo}
+                                        placeholder="Search by serial no"
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
+                            <div className="col-md-2">
+                                <div className="form-group">
+                                    <label>Model No.</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="productCode"
+                                        value={searchFilters.productCode}
+                                        placeholder="Search by model no"
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
+                            <div className="col-md-2">
+                                <div className="form-group">
+                                    <label>Call Status</label>
+                                    <select
+                                        className="form-control"
+                                        name="status"
+                                        value={searchFilters.status}
+                                        onChange={handleFilterChange}
+                                    >
+                                        <option value=""> All</option>
+                                        <option value="Closed">Closed</option>
+                                        <option value="Cancelled">Cancelled</option>
+                                        <option value="Pending">Pending</option>
+                                        <option value="Quotation">Quotation</option>
+                                        <option value="Duplicates">Duplicates</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="col-md-3">
+                                <div className="form-group">
+                                    <label>Customer Mobile</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="customerMobile"
+                                        value={searchFilters.customerMobile}
+                                        placeholder="Search by customer mobile"
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="col-md-3">
+                                <div className="form-group">
+                                    <label>Customer Email</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="customerEmail"
+                                        value={searchFilters.customerEmail}
+                                        placeholder="Search by customer email"
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Buttons and message at the far-right corner */}
+                            {/* <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
+                                <div className="form-group">
+                                    <button
+                                        className="btn btn-primary mr-2"
+                                        onClick={applyFilters}
+                                    >
+                                        Search
+                                    </button>
+                                    <button
+                                        className="btn btn-secondary"
+                                        onClick={resetFilters}
+                                        style={{
+                                            marginLeft: '5px',
+                                        }}
+                                    >
+                                        Reset
+                                    </button>
+                                    {filteredData.length === 0 && (
+                                        <div
+                                            style={{
+                                                backgroundColor: '#f8d7da',
+                                                color: '#721c24',
+                                                padding: '5px 10px',
+                                                marginLeft: '10px',
+                                                borderRadius: '4px',
+                                                border: '1px solid #f5c6cb',
+                                                fontSize: '14px',
+                                                display: 'inline-block'
+                                            }}
+                                        >
+                                            No Record Found
+                                        </div>
+                                    )}
+                                </div>
+                            </div> */}
+                        </div>
+
+                        
+                        {/* Third row of filter */}
 
 
-                  <div className="col-md-6">
-                    <label className="input-field">Bank Address</label>
-                    <textarea
-                      className="form-control"
-                      name="bank_address"
-                      value={formData.bank_address}
-                      onChange={handleChange}
-                      placeholder="Enter Bank Address"
-                      rows="3"
-                    />
-                  </div>
 
-                  <div className="col-md-6">
-                    <label className="input-field">Address</label>
-                    <textarea
-                      className="form-control"
-                      name="address"
-                      value={formData.address}
-                      onChange={handleChange}
-                      placeholder="Enter Address"
-                      rows="3"
-                    />
-                    {errors.address && <small className="text-danger">{errors.address}</small>}
-                  </div>
+                        <div className="row mb-3">
 
-                  <div className="col-12 text-right">
-                    <button
-                      className="btn btn-liebherr"
-                      type="submit"
-                      style={{ marginTop: "15px" }}
-                    >
-                      {isEdit ? "Update" : "Submit"}
-                    </button>
-                  </div>
+                            <div className="col-md-2">
+                                <div className="form-group">
+                                    <label>Master Service Partner</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="msp"
+                                        value={searchFilters.msp}
+                                        placeholder="Search by Msp"
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
+                            <div className="col-md-2">
+                                <div className="form-group">
+                                    <label>Child Service partner</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="csp"
+                                        value={searchFilters.csp}
+                                        placeholder="Search by Csp"
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
+                            <div className="col-md-2">
+                                <div className="form-group">
+                                    <label>Call Category</label>
+                                    <select
+                                        className="form-control"
+                                        name="mode_of_contact"
+                                        value={searchFilters.mode_of_contact}
+                                        onChange={handleFilterChange}
+                                    >
+                                        <option value=""> SELECT</option>
+                                        <option value="Call">Call</option>
+                                        <option value="SMS">SMS</option>
+                                        <option value="Email">Email</option>
+                                        <option value="In Person">InPerson</option>
+                                    </select>
+                                </div>
+                            </div>
+
+
+                            <div className="col-md-2">
+                                <div className="form-group">
+                                    <label>Customer Classification</label>
+                                    <select
+                                        className="form-control"
+                                        name="customer_class"
+                                        value={searchFilters.customer_class}
+                                        onChange={handleFilterChange}
+                                    >
+                                        <option value=""> SELECT</option>
+                                        <option value="Import">Import</option>
+                                        <option value="India">India</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            {/* <div className="col-md-3">
+                                <div className="form-group">
+                                    <label>Customer Email</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="customerEmail"
+                                        value={searchFilters.customerEmail}
+                                        placeholder="Search by customer email"
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div> */}
+
+                            {/* Buttons and message at the far-right corner */}
+                            <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
+                                <div className="form-group">
+                                    <button
+                                        className="btn btn-primary mr-2"
+                                        onClick={applyFilters}
+                                    >
+                                        Search
+                                    </button>
+                                    <button
+                                        className="btn btn-secondary"
+                                        onClick={resetFilters}
+                                        style={{
+                                            marginLeft: '5px',
+                                        }}
+                                    >
+                                        Reset
+                                    </button>
+                                    {filteredData.length === 0 && (
+                                        <div
+                                            style={{
+                                                backgroundColor: '#f8d7da',
+                                                color: '#721c24',
+                                                padding: '5px 10px',
+                                                marginLeft: '10px',
+                                                borderRadius: '4px',
+                                                border: '1px solid #f5c6cb',
+                                                fontSize: '14px',
+                                                display: 'inline-block'
+                                            }}
+                                        >
+                                            No Record Found
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* No Record Found Message */}
+
+
+                        {/* Table */}
+                        <table className="table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Ticket No.</th>
+                                    <th>Ticket Date</th>
+                                    <th>Customer Name</th>
+                                    <th>Model No</th>
+                                    <th>Serials No</th>
+                                    <th>Age</th>
+                                    <th>Assigned Users</th>
+                                    <th>Status</th>
+                                    <th>Edit</th>
+                                    <th>View</th>
+                                    {/* <th>Delete</th> */}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredData.map((item, index) => (
+                                    <tr key={item.id}>
+                                        <td>{index + 1}</td>
+                                        <td>{item.ticket_no}</td>
+                                        <td>{formatDate(item.ticket_date)}</td>
+                                        <td>{item.customer_name}</td>
+                                        <td>{item.ModelNumber}</td>
+                                        <td>{item.serial_no}</td>
+                                        <td>{item.ageingdays}</td>
+                                        <td>{item.assigned_name}</td>
+                                        <td>{item.call_status}</td>
+                                        <td>
+                                                <button
+                                                    className='btn'
+                                                    onClick={() => navigate(`/registercomaplaint/${item.ticket_no}`)}
+                                                    disabled={isActionDisabled(item.call_status)}
+                                                    title={isActionDisabled(item.call_status) ? "Cannot edit closed or cancelled complaints" : "Edit"}
+                                                    style={{
+                                                        backgroundColor: 'transparent',
+                                                        border: 'none',
+                                                        color: isActionDisabled(item.call_status) ? 'gray' : 'blue',
+                                                        fontSize: '20px',
+                                                        cursor: isActionDisabled(item.call_status) ? 'not-allowed' : 'pointer'
+                                                    }}
+                                                >
+                                                    <FaPencilAlt />
+                                                </button>
+                                            {/* <Link to={}>
+                                            </Link> */}
+                                        </td>
+                                        <td>
+                                            <button
+                                                className='btn'
+                                                onClick={() => navigate(`/complaintview/${item.id}`)}
+                                                title="View"
+                                                style={{
+                                                    backgroundColor: 'transparent',
+                                                    border: 'none',
+                                                    color: 'blue',
+                                                    fontSize: '20px',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                <FaEye />
+                                            </button>
+                                        </td>
+                                        {/* <td>
+                                            <button
+                                                    className='btn'
+                                                    onClick={() => deleted(item.id)}
+                                                    title="Delete"
+                                                    style={{
+                                                        backgroundColor: 'transparent',
+                                                        border: 'none',
+                                                        color: 'red',
+                                                        fontSize: '20px'
+                                                    }}
+                                                >
+                                                    <FaTrash />
+                                                </button>
+                                        </td> */}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-              </form>
             </div>
-          </div>
         </div>
-      </div>
-    </div>
-  );
-};
+    );
+}
 
-export default Childfranchisemaster;
+export default Complaintlist;
