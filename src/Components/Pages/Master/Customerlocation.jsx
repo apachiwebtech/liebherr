@@ -21,6 +21,7 @@ const Customerlocation = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [duplicateError, setDuplicateError] = useState("");
+  const [successMessage, setSuccessMessage] = useState('');
 
   const [locations, setlocations] = useState([])
   
@@ -173,6 +174,8 @@ const Customerlocation = () => {
                 ccperson: "",
                 ccnumber: "",
               });
+              setSuccessMessage('Customer Updated Successfully!');
+              setTimeout(() => setSuccessMessage(''), 3000);
               fetchCustomerlocation();
             })
             .catch((error) => {
@@ -196,6 +199,8 @@ const Customerlocation = () => {
                 ccnumber: "",
                 address_type: "",
               });
+              setSuccessMessage('Customer Updated Successfully!');
+              setTimeout(() => setSuccessMessage(''), 3000);
               fetchCustomerlocation();
             })
             .catch((error) => {
@@ -341,6 +346,11 @@ const Customerlocation = () => {
         <div className="col-12">
           <div className="card mb-3 tab_box">
             <div className="card-body">
+            {successMessage && (
+                <div className="alert alert-success text-center mb-3" role="alert">
+                  {successMessage}
+                </div>
+              )}
               <div className="row mp0">
                 <div className="col-6">
                   <form onSubmit={handleSubmit}>

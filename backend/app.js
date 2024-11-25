@@ -3868,7 +3868,7 @@ app.post("/postcustomerlocation", async (req, res) => {
     const pool = await poolPromise;
 
     // Check for duplicates
-    const checkDuplicateSql = `SELECT * FROM awt_customerlocation WHERE ccnumber = '${ccnumber}' AND deleted = 0`;
+    const checkDuplicateSql = `SELECT * FROM awt_customerlocation WHERE ccperson = '${ccperson}' AND deleted = 0`;
     const duplicateResult = await pool.request().query(checkDuplicateSql);
 
     if (duplicateResult.recordset.length > 0) {
@@ -3876,7 +3876,7 @@ app.post("/postcustomerlocation", async (req, res) => {
         message: "Duplicate entry, Customer with same number already exists!",
       });
     } else {
-      const insertSql = `INSERT INTO awt_customerlocation (country_id, region_id, geostate_id, geocity_id, area_id, pincode_id, address, ccperson, ccnumber, address_type)
+      const insertSql = `INSERT INTO awt_customerlocation (country_id, region_id, geostate_id, geocity_id, district_id, pincode_id, address, ccperson, ccnumber, address_type)
                          VALUES ('${country_id}', '${region_id}', '${geostate_id}', '${geocity_id}', '${area_id}', '${pincode_id}', '${address}', '${ccperson}', '${ccnumber}', '${address_type}')`;
 
       await pool.request().query(insertSql);
