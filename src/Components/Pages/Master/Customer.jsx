@@ -92,26 +92,26 @@ const Customer = () => {
   // Step 2: Add form validation function
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.customer_fname.trim()) {
-      newErrors.customer_fname = "Customer First Name Field is required.";
-    }
+    // if (!formData.customer_fname) {
+    //   newErrors.customer_fname = "Customer First Name Field is required.";
+    // }
 
 
-    if (!formData.customer_lname) {
-      newErrors.customer_lname = "Customer Last Name Field is required.";
-    }
+    // if (!formData.customer_lname) {
+    //   newErrors.customer_lname = "Customer Last Name Field is required.";
+    // }
 
-    if (!formData.customer_type) {
-      newErrors.customer_type = "Customer Type Dropdown is required.";
-    }
+    // if (!formData.customer_type) {
+    //   newErrors.customer_type = "Customer Type Dropdown is required.";
+    // }
 
-    if (!formData.customer_classification) {
-      newErrors.customer_classification = "Customer Classification Dropdown is required.";
-    }
+    // if (!formData.customer_classification) {
+    //   newErrors.customer_classification = "Customer Classification Dropdown is required.";
+    // }
 
-    if (!formData.mobileno) {
-      newErrors.mobileno = "Mobile Number Field is required.";
-    }
+    // if (!formData.mobileno) {
+    //   newErrors.mobileno = "Mobile Number Field is required.";
+    // }
 
     // if (!formData.alt_mobileno) {
     //   newErrors.alt_mobileno = "Alternate Mobile Number Field is required.";
@@ -312,7 +312,12 @@ const Customer = () => {
                         <label htmlFor="custype" className="form-label">Customer Type</label>
                         <select id="custype" className="form-select" aria-label=".form-select-lg example" name="customer_type" value={formData.customer_type} onChange={handleChange} >
                           <option value="selected">Select Customer Type</option>
-                          <option value="Customer">Customer</option>
+                          <option value="Customer">EndCustomer</option>
+                          <option value="Dealer">Sales Dealer WH/Display</option>
+                          <option value="Partner">Service Partner</option>
+                          <option value="Warehouse">Warehouse</option>
+                          <option value="Lhidisplay">LHI Display/WH</option>
+                          <option value="Subdealer">Sub-Dealer</option>
                         </select>
                         {errors.customer_type && (
                           <small className="text-danger">{errors.customer_type}</small>

@@ -3622,7 +3622,7 @@ app.post("/postcustomer", async (req, res) => {
     dateofbirth,
     anniversary_date,
     email,
-    salutation,
+    salutation
   } = req.body;
 
   try {
@@ -3630,7 +3630,7 @@ app.post("/postcustomer", async (req, res) => {
     const pool = await poolPromise;
 
     // Check for duplicates
-    const checkDuplicateSql = `SELECT * FROM awt_customer WHERE mobileno = ${mobileno} AND dateofbirth = '${dateofbirth}' AND deleted = 0`;
+    const checkDuplicateSql = `SELECT * FROM awt_customer WHERE mobileno = ${mobileno} AND deleted = 0`;
 
     // Execute the duplicate check query
     const checkDuplicateResult = await pool.request().query(checkDuplicateSql);

@@ -269,46 +269,22 @@ const Customerlocation = () => {
   };
 
   const validateForm = () => {
-    const newErrors = {};
-
-    // Address validation
-    if (!formData.address || formData.address.trim() === '') {
-      newErrors.address = "Address field is required.";
+    let newErrors = {};
+    
+    if (!formData.address?.trim()) {
+      newErrors.address = "Address is required";
     }
-
-    // Area validation
-    if (!formData.district_id) {
-      newErrors.district_id = "Area selection is required.";
-    }
-
-    // Address Type validation
-    if (!formData.address_type) {
-      newErrors.address_type = "Address Type selection is required.";
-    }
-
-    // Contact Person validation
-    if (!formData.ccperson || formData.ccperson.trim() === '') {
-      newErrors.ccperson = "Contact Person field is required.";
-    }
-
-    // Other existing validations
-    if (!formData.country_id) {
-      newErrors.country_id = "Country selection is required.";
-    }
-    if (!formData.region_id) {
-      newErrors.region_id = "Region selection is required.";
-    }
-    if (!formData.geostate_id) {
-      newErrors.geostate_id = "Geo State selection is required.";
-    }
-    if (!formData.geocity_id) {
-      newErrors.geocity_id = "Geo City selection is required.";
-    }
+    
     if (!formData.pincode_id) {
-      newErrors.pincode_id = "Pincode selection is required.";
+      newErrors.pincode_id = "Pincode is required";
     }
-    if (!formData.ccnumber) {
-      newErrors.ccnumber = "Customer Contact Number is required.";
+    
+    if (!formData.ccperson?.trim()) {
+      newErrors.ccperson = "Contact person is required";
+    }
+    
+    if (!formData.address_type) {
+      newErrors.address_type = "Address type is required";
     }
 
     return newErrors;
