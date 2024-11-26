@@ -151,10 +151,11 @@ export function Complaintlist(params) {
 
     return (
         <div className="row mp0">
-            <div className="col-md-12 col-12">
-                <div className="card mb-3 tab_box">
-                    <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
-                        {/* Search Filters */}
+
+            <div className="searchFilter">
+
+                <div className='m-3'>
+
                         <div className="row mb-3">
                             <div className="col-md-2">
                                 <div className="form-group">
@@ -226,8 +227,6 @@ export function Complaintlist(params) {
                         </div>
 
                         {/* second row of filter */}
-
-
 
                         <div className="row mb-3">
 
@@ -342,10 +341,7 @@ export function Complaintlist(params) {
                             </div> */}
                         </div>
 
-                        
                         {/* Third row of filter */}
-
-
 
                         <div className="row mb-3">
 
@@ -466,89 +462,104 @@ export function Complaintlist(params) {
 
 
                         {/* Table */}
-                        <table className="table">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Ticket No.</th>
-                                    <th>Ticket Date</th>
-                                    <th>Customer Name</th>
-                                    <th>Model No</th>
-                                    <th>Serials No</th>
-                                    <th>Age</th>
-                                    <th>Assigned Users</th>
-                                    <th>Status</th>
-                                    <th>Edit</th>
-                                    <th>View</th>
-                                    {/* <th>Delete</th> */}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filteredData.map((item, index) => (
-                                    <tr key={item.id}>
-                                        <td>{index + 1}</td>
-                                        <td>{item.ticket_no}</td>
-                                        <td>{formatDate(item.ticket_date)}</td>
-                                        <td>{item.customer_name}</td>
-                                        <td>{item.ModelNumber}</td>
-                                        <td>{item.serial_no}</td>
-                                        <td>{item.ageingdays}</td>
-                                        <td>{item.assigned_name}</td>
-                                        <td>{item.call_status}</td>
-                                        <td>
-                                                <button
-                                                    className='btn'
-                                                    onClick={() => navigate(`/registercomaplaint/${item.ticket_no}`)}
-                                                    disabled={isActionDisabled(item.call_status)}
-                                                    title={isActionDisabled(item.call_status) ? "Cannot edit closed or cancelled complaints" : "Edit"}
-                                                    style={{
-                                                        backgroundColor: 'transparent',
-                                                        border: 'none',
-                                                        color: isActionDisabled(item.call_status) ? 'gray' : 'blue',
-                                                        fontSize: '20px',
-                                                        cursor: isActionDisabled(item.call_status) ? 'not-allowed' : 'pointer'
-                                                    }}
-                                                >
-                                                    <FaPencilAlt />
-                                                </button>
-                                            {/* <Link to={}>
-                                            </Link> */}
-                                        </td>
-                                        <td>
-                                            <button
-                                                className='btn'
-                                                onClick={() => navigate(`/complaintview/${item.id}`)}
-                                                title="View"
-                                                style={{
-                                                    backgroundColor: 'transparent',
-                                                    border: 'none',
-                                                    color: 'blue',
-                                                    fontSize: '20px',
-                                                    cursor: 'pointer'
-                                                }}
-                                            >
-                                                <FaEye />
-                                            </button>
-                                        </td>
-                                        {/* <td>
-                                            <button
-                                                    className='btn'
-                                                    onClick={() => deleted(item.id)}
-                                                    title="Delete"
-                                                    style={{
-                                                        backgroundColor: 'transparent',
-                                                        border: 'none',
-                                                        color: 'red',
-                                                        fontSize: '20px'
-                                                    }}
-                                                >
-                                                    <FaTrash />
-                                                </button>
-                                        </td> */}
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                </div>
+            </div>
+
+            <div className="col-md-12 col-12">
+                <div className="card mb-3 tab_box">
+                    <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
+                        {/* Search Filters */}
+
+
+                            
+
+                            <div className="gridbox">
+
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Ticket No.</th>
+                                            <th>Ticket Date</th>
+                                            <th>Customer Name</th>
+                                            <th>Model No</th>
+                                            <th>Serials No</th>
+                                            <th>Age</th>
+                                            <th>Assigned Users</th>
+                                            <th>Status</th>
+                                            <th>Edit</th>
+                                            <th>View</th>
+                                            {/* <th>Delete</th> */}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {filteredData.map((item, index) => (
+                                            <tr key={item.id}>
+                                                <td>{index + 1}</td>
+                                                <td>{item.ticket_no}</td>
+                                                <td>{formatDate(item.ticket_date)}</td>
+                                                <td>{item.customer_name}</td>
+                                                <td>{item.ModelNumber}</td>
+                                                <td>{item.serial_no}</td>
+                                                <td>{item.ageingdays}</td>
+                                                <td>{item.assigned_name}</td>
+                                                <td>{item.call_status}</td>
+                                                <td>
+                                                        <button
+                                                            className='btn'
+                                                            onClick={() => navigate(`/registercomaplaint/${item.ticket_no}`)}
+                                                            disabled={isActionDisabled(item.call_status)}
+                                                            title={isActionDisabled(item.call_status) ? "Cannot edit closed or cancelled complaints" : "Edit"}
+                                                            style={{
+                                                                backgroundColor: 'transparent',
+                                                                border: 'none',
+                                                                color: isActionDisabled(item.call_status) ? 'gray' : 'blue',
+                                                                fontSize: '20px',
+                                                                cursor: isActionDisabled(item.call_status) ? 'not-allowed' : 'pointer'
+                                                            }}
+                                                        >
+                                                            <FaPencilAlt />
+                                                        </button>
+                                                    {/* <Link to={}>
+                                                    </Link> */}
+                                                </td>
+                                                <td>
+                                                    <button
+                                                        className='btn'
+                                                        onClick={() => navigate(`/complaintview/${item.id}`)}
+                                                        title="View"
+                                                        style={{
+                                                            backgroundColor: 'transparent',
+                                                            border: 'none',
+                                                            color: 'blue',
+                                                            fontSize: '20px',
+                                                            cursor: 'pointer'
+                                                        }}
+                                                    >
+                                                        <FaEye />
+                                                    </button>
+                                                </td>
+                                                {/* <td>
+                                                    <button
+                                                            className='btn'
+                                                            onClick={() => deleted(item.id)}
+                                                            title="Delete"
+                                                            style={{
+                                                                backgroundColor: 'transparent',
+                                                                border: 'none',
+                                                                color: 'red',
+                                                                fontSize: '20px'
+                                                            }}
+                                                        >
+                                                            <FaTrash />
+                                                        </button>
+                                                </td> */}
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            
+                            </div>
                     </div>
                 </div>
             </div>

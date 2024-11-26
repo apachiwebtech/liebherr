@@ -109,6 +109,7 @@ header {
 .breadMain {
     background: #2779C4;
     padding: 15px;
+    color:#fff;
 }
 
 .breadcrumbc{
@@ -416,5 +417,8 @@ input:checked+.slider:before {
     transform: translateX(26px);
 }
 
-
+.searchFilter {
+    background-color:beige;
+    padding: 10px;
+}
   

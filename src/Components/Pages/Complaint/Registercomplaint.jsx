@@ -71,6 +71,8 @@ export function Registercomplaint(params) {
         customer_id: "",
         additional_remarks: "",
         specification: "",
+        msp: "",
+        csp: "",
         created_by: created_by,
 
     })
@@ -153,6 +155,8 @@ export function Registercomplaint(params) {
                         master_service_partner: res.data[0].master_service_partner || "",
                         child_service_partner: res.data[0].child_service_partner || "",
                         model: res.data[0].ModelNumber,
+                        msp: res.data[0].franchisee,
+                        csp: res.data[0].childPartner,
 
 
                     })
@@ -424,7 +428,7 @@ export function Registercomplaint(params) {
 
             if (response.data && response.data[0]) {
 
-                setlocations({ region: response.data[0].region, state: response.data[0].state, district: response.data[0].district, city: response.data[0].city })
+                setlocations({ region: response.data[0].region, state: response.data[0].state, district: response.data[0].district, city: response.data[0].city, franchiseem: response.data[0].franchiseem, childfranchiseem: response.data[0].childfranchiseem })
 
             }
 
@@ -817,6 +821,7 @@ export function Registercomplaint(params) {
                                         </div>
 
                                     </> : <>
+                                        
                                         <div className="col-md-3">
                                             <div className="mb-3">
                                                 <label htmlFor="exampleFormControlInput1" className="form-label">Pincode</label>
@@ -826,19 +831,19 @@ export function Registercomplaint(params) {
                                         <div className="col-md-3">
                                             <div className="mb-3">
                                                 <label htmlFor="exampleFormControlInput1" className="form-label">State</label>
-                                                <input type="text" className="form-control" value={locations.state} name="state" onChange={onHandleChange} placeholder="" disabled />
+                                                <input type="text" className="form-control" value={Comp_id ? value.state : locations.state} name="state" onChange={onHandleChange} placeholder="" disabled />
                                             </div>
                                         </div>
                                         <div className="col-md-3">
                                             <div className="mb-3">
                                                 <label htmlFor="exampleFormControlInput1" className="form-label">District</label>
-                                                <input type="text" className="form-control" value={locations.district} name="area" onChange={onHandleChange} placeholder="" disabled />
+                                                <input type="text" className="form-control" value={Comp_id ? value.area : locations.district} name="area" onChange={onHandleChange} placeholder="" disabled />
                                             </div>
                                         </div>
                                         <div className="col-md-3">
                                             <div className="mb-3">
                                                 <label htmlFor="exampleFormControlInput1" className="form-label">City</label>
-                                                <input type="text" className="form-control" value={locations.city} name="city" onChange={onHandleChange} placeholder="" disabled />
+                                                <input type="text" className="form-control" value={Comp_id ? value.city : locations.city} name="city" onChange={onHandleChange} placeholder="" disabled />
                                             </div>
                                         </div>
 
@@ -930,39 +935,12 @@ export function Registercomplaint(params) {
                                 <div className="card-body">
 
                                     <h4 className="pname">Master Service Partner</h4>
-                                    <div className="mb-3">
-                                        <select
-                                            className="form-control"
-                                            name="master_service_partner"
-                                            value={value.master_service_partner}
-                                            onChange={onHandleChange}
-                                        >
-                                            <option value="">Select</option>
-                                            {MasterPartner.map((partner, index) => (
-                                                <option key={index} value={partner.id}>
-                                                    {partner.title}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
+                                    <p>{Comp_id ? value.msp : locations.franchiseem}</p>
 
 
                                     <h4 className="pname">Child Service Partner</h4>
-                                    <div className="mb-3">
-                                        <select
-                                            className="form-control"
-                                            name="child_service_partner"
-                                            value={value.child_service_partner}
-                                            onChange={onHandleChange}
-                                        >
-                                            <option value="">Select</option>
-                                            {ChildPartner.map((child, index) => (
-                                                <option key={index} value={child.title}>
-                                                    {child.title}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
+                                    <p>{Comp_id ? value.csp : locations.childfranchiseem}</p>
+                                    
                                 </div>
                             </div>
 

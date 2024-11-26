@@ -2780,7 +2780,7 @@ app.get("/getComplaintDetails/:ticket_no", async (req, res) => {
     const pool = await poolPromise;
 
     // Direct SQL query without parameter binding for remarks
-    const remarkQuery = `SELECT ac.*, lu.Lhiuser FROM awt_complaintremark as ac LEFT JOIN lhi_user as lu ON lu.id = ac.created_by WHERE ac.ticket_no = ${"'" + ticket_no + "'"}`;
+    const remarkQuery = `SELECT ac.*, lu.Lhiuser FROM awt_complaintremark as ac LEFT JOIN lhi_user as lu ON lu.id = ac.created_by WHERE ac.ticket_no = ${"'" + ticket_no + "'"} order by id DESC`;
 
     // Execute remark query
     const remarksResult = await pool.request().query(remarkQuery);
@@ -7655,7 +7655,7 @@ app.post("/getcomplaintticket", async (req, res) => {
     const pool = await poolPromise;
 
     // Modified SQL query using parameterized query
-    const sql = "SELECT * FROM complaint_ticket WHERE ticket_no = @comp_no";
+    const sql = "EXEC GetComplaintDetails @comp_no = @comp_no";
 
     const result = await pool.request()
       .input('comp_no', comp_no) // Parameterized input

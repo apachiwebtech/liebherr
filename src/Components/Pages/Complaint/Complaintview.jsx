@@ -425,7 +425,7 @@ export function Complaintview(params) {
           <div className="row">
             <div className="col-md-3">
               <label className="breadMain">
-                <span style={{ fontSize: "14px" }}>Complaint : {complaintview.ticket_no}</span>
+                <span style={{ fontSize: "14px" }}>Ticket : {complaintview.ticket_no}</span>
               </label>
             </div>
             <div className="col-md-9 text-right pt-2">
@@ -613,7 +613,7 @@ export function Complaintview(params) {
 
                 <div className="col-md-12">
                   <h3 className="mainheade" style={{ fontSize: "14px" }}>
-                    Complaint{" "}
+                    Ticket{" "}
                     <span style={{ fontSize: "14px" }} id="compaintno1">: {complaintview.ticket_no}</span>
                   </h3>
                 </div>
