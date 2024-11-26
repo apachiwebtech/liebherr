@@ -255,7 +255,7 @@ const Customer = () => {
                 <div className="col-12">
                   <form onSubmit={handleSubmit}>
                     <div className="row">
-                      <div className="col-md-3 mb-3">
+                      <div className="col-md-2 mb-3">
                         <label htmlFor="Salutation" className="form-label">Salutation</label>
                         <select
                           type="text"
@@ -309,6 +309,32 @@ const Customer = () => {
                         )}
                       </div>
                       <div className="col-md-3 mb-3">
+                        <label htmlFor="emailid" className="form-label">Email ID</label>
+                        <input
+                          type="email"
+                          className="form-control"
+                          id="emailid"
+                          aria-describedby="emailid"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                        />
+                        {errors.email && (
+                          <small className="text-danger">{errors.email}</small>
+                        )}
+                      </div>
+                      <div className="col-md-2 mb-3">
+                        <label htmlFor="cclassification" className="form-label">Customer Classification</label>
+                        <select id="cclassification" name="customer_classification" className="form-select" aria-label=".form-select-lg example" value={formData.customer_classification} onChange={handleChange} >
+                          <option value="selected">Select Customer Classification</option>
+                          <option value="Import">Import</option>
+                          <option value="India">India</option>
+                        </select>
+                        {errors.customer_classification && (
+                          <small className="text-danger">{errors.customer_classification}</small>
+                        )}
+                      </div>
+                      <div className="col-md-3 mb-3">
                         <label htmlFor="custype" className="form-label">Customer Type</label>
                         <select id="custype" className="form-select" aria-label=".form-select-lg example" name="customer_type" value={formData.customer_type} onChange={handleChange} >
                           <option value="selected">Select Customer Type</option>
@@ -323,17 +349,7 @@ const Customer = () => {
                           <small className="text-danger">{errors.customer_type}</small>
                         )}
                       </div>
-                      <div className="col-md-3 mb-3">
-                        <label htmlFor="cclassification" className="form-label">Customer Classification</label>
-                        <select id="cclassification" name="customer_classification" className="form-select" aria-label=".form-select-lg example" value={formData.customer_classification} onChange={handleChange} >
-                          <option value="selected">Select Customer Classification</option>
-                          <option value="Import">Import</option>
-                          <option value="India">India</option>
-                        </select>
-                        {errors.customer_classification && (
-                          <small className="text-danger">{errors.customer_classification}</small>
-                        )}
-                      </div>
+                      
                       <div className="col-md-3 mb-3">
                         <label htmlFor="mobilenumber" className="form-label">Mobile No. <input type="checkbox" />Whatsapp </label>
                         <input
@@ -364,7 +380,7 @@ const Customer = () => {
                           <small className="text-danger">{errors.alt_mobileno}</small>
                         )}
                       </div>
-                      <div className="col-md-3 mb-3">
+                      <div className="col-md-2 mb-3">
                         <label htmlFor="dbirth" className="form-label">Date of Birth</label>
                         <input
                           type="date"
@@ -379,7 +395,7 @@ const Customer = () => {
                           <small className="text-danger">{errors.dateofbirth}</small>
                         )}
                       </div>
-                      <div className="col-md-3 mb-3">
+                      <div className="col-md-2 mb-3">
                         <label htmlFor="Anidate" className="form-label">Anniversary Date</label>
                         <input
                           type="date"
@@ -392,21 +408,6 @@ const Customer = () => {
                         />
                         {errors.anniversary_date && (
                           <small className="text-danger">{errors.anniversary_date}</small>
-                        )}
-                      </div>
-                      <div className="col-md-3 mb-3">
-                        <label htmlFor="emailid" className="form-label">Email ID</label>
-                        <input
-                          type="email"
-                          className="form-control"
-                          id="emailid"
-                          aria-describedby="emailid"
-                          name="email"
-                          value={formData.email}
-                          onChange={handleChange}
-                        />
-                        {errors.email && (
-                          <small className="text-danger">{errors.email}</small>
                         )}
                       </div>
                       <div className="col-md-12 text-right">

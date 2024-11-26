@@ -120,7 +120,7 @@ export function Customerlist(params) {
             customerEmail: '',
             serialNo: '',
             productCode: '',
-          
+
         });
         fetchCustomerlist(); // Reset to original data
     };
@@ -137,7 +137,7 @@ export function Customerlist(params) {
     };
     useEffect(() => {
         fetchCustomerlist();
-        
+
     }, []);
 
     const [isOpen, setIsOpen] = useState({}); // State to track which rows are expanded
@@ -169,140 +169,135 @@ export function Customerlist(params) {
                                 <Link to={`/Customer`}><button className='btn btn-primary'>Add Customer</button></Link>
                             </div>
                             <div className="row mb-3">
-                           
-                            <div className="col-md-2">
-                                <div className="form-group">
-                                    <label>Ticket No.</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        name="ticketno"
-                                        value={searchFilters.ticketno}
-                                        placeholder="Search by complaint no"
-                                        onChange={handleFilterChange}
-                                    />
+
+                                <div className="col-md-2">
+                                    <div className="form-group">
+                                        <label>Ticket No.</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="ticketno"
+                                            value={searchFilters.ticketno}
+                                            placeholder="Search by complaint no"
+                                            onChange={handleFilterChange}
+                                        />
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div className="col-md-3">
-                                <div className="form-group">
-                                    <label>Customer Type</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        name="customertype"
-                                        value={searchFilters.customertype}
-                                        placeholder="Search by customer Id"
-                                        onChange={handleFilterChange}
-                                    />
+                                <div className="col-md-3">
+                                    <div className="form-group">
+                                        <label>Customer Type</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="customertype"
+                                            value={searchFilters.customertype}
+                                            placeholder="Search by customer Id"
+                                            onChange={handleFilterChange}
+                                        />
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div className="col-md-3">
-                                <div className="form-group">
-                                    <label>Customer First Name</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        name="customerName"
-                                        value={searchFilters.customerName}
-                                        placeholder="Search by customer name"
-                                        onChange={handleFilterChange}
-                                    />
+                                <div className="col-md-3">
+                                    <div className="form-group">
+                                        <label>Customer First Name</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="customerName"
+                                            value={searchFilters.customerName}
+                                            placeholder="Search by customer name"
+                                            onChange={handleFilterChange}
+                                        />
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="col-md-2">
-                                <div className="form-group">
-                                    <label>Customer Last Name</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        name="serialNo"
-                                        value={searchFilters.serialNo}
-                                        placeholder="Search by serial no"
-                                        onChange={handleFilterChange}
-                                    />
+                                <div className="col-md-2">
+                                    <div className="form-group">
+                                        <label>Customer Last Name</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="serialNo"
+                                            value={searchFilters.serialNo}
+                                            placeholder="Search by serial no"
+                                            onChange={handleFilterChange}
+                                        />
+                                    </div>
                                 </div>
+
+
                             </div>
-
-
-                        </div>
-
-                        {/* second row of filter */}
+                            <div className="row mb-3">
 
 
 
-                        <div className="row mb-3">
 
-                           
-                           
-                            
 
-                            <div className="col-md-3">
-                                <div className="form-group">
-                                    <label>Customer Mobile</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        name="customerMobile"
-                                        value={searchFilters.customerMobile}
-                                        placeholder="Search by customer mobile"
-                                        onChange={handleFilterChange}
-                                    />
+                                <div className="col-md-3">
+                                    <div className="form-group">
+                                        <label>Customer Mobile</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="customerMobile"
+                                            value={searchFilters.customerMobile}
+                                            placeholder="Search by customer mobile"
+                                            onChange={handleFilterChange}
+                                        />
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div className="col-md-3">
-                                <div className="form-group">
-                                    <label>Customer Email</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        name="customerEmail"
-                                        value={searchFilters.customerEmail}
-                                        placeholder="Search by customer email"
-                                        onChange={handleFilterChange}
-                                    />
+                                <div className="col-md-3">
+                                    <div className="form-group">
+                                        <label>Customer Email</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="customerEmail"
+                                            value={searchFilters.customerEmail}
+                                            placeholder="Search by customer email"
+                                            onChange={handleFilterChange}
+                                        />
+                                    </div>
                                 </div>
-                            </div>
 
-                            {/* Buttons and message at the far-right corner */}
-                            <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
-                                <div className="form-group">
-                                    <button
-                                        className="btn btn-primary mr-2"
-                                        onClick={applyFilters}
-                                    >
-                                        Search
-                                    </button>
-                                    <button
-                                        className="btn btn-secondary"
-                                        onClick={resetFilters}
-                                        style={{
-                                            marginLeft: '5px',
-                                        }}
-                                    >
-                                        Reset
-                                    </button>
-                                    {filteredData.length === 0 && (
-                                        <div
+                                {/* Buttons and message at the far-right corner */}
+                                <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
+                                    <div className="form-group">
+                                        <button
+                                            className="btn btn-primary mr-2"
+                                            onClick={applyFilters}
+                                        >
+                                            Search
+                                        </button>
+                                        <button
+                                            className="btn btn-secondary"
+                                            onClick={resetFilters}
                                             style={{
-                                                backgroundColor: '#f8d7da',
-                                                color: '#721c24',
-                                                padding: '5px 10px',
-                                                marginLeft: '10px',
-                                                borderRadius: '4px',
-                                                border: '1px solid #f5c6cb',
-                                                fontSize: '14px',
-                                                display: 'inline-block'
+                                                marginLeft: '5px',
                                             }}
                                         >
-                                            No Record Found
-                                        </div>
-                                    )}
+                                            Reset
+                                        </button>
+                                        {filteredData.length === 0 && (
+                                            <div
+                                                style={{
+                                                    backgroundColor: '#f8d7da',
+                                                    color: '#721c24',
+                                                    padding: '5px 10px',
+                                                    marginLeft: '10px',
+                                                    borderRadius: '4px',
+                                                    border: '1px solid #f5c6cb',
+                                                    fontSize: '14px',
+                                                    display: 'inline-block'
+                                                }}
+                                            >
+                                                No Record Found
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
                             <table className="table">
                                 <thead>
                                     <tr>
@@ -333,7 +328,7 @@ export function Customerlist(params) {
                                                 <td >{item.email}</td>
                                                 <td>
                                                     <Link to={`/Customerlocation/${item.id}`}>
-                                                        <button  style={{ backgroundColor: '#0D6EFD',color:"white" }} className='btn'
+                                                        <button style={{ backgroundColor: '#0D6EFD', color: "white" }} className='btn'
                                                             onClick={() => {
                                                                 navigate(`/Customerlocation/${item.id}`)
                                                             }}>Add</button>
@@ -342,7 +337,7 @@ export function Customerlist(params) {
                                                 </td>
                                                 <td>
                                                     <Link to={`/uniqueproduct/${item.id}`}>
-                                                        <button  style={{ backgroundColor: '#0D6EFD',color:'white' }} className='btn' 
+                                                        <button style={{ backgroundColor: '#0D6EFD', color: 'white' }} className='btn'
                                                             onClick={() => {
                                                                 navigate(`/uniqueproduct/${item.id}`)
                                                             }}>Add</button>

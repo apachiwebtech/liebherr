@@ -281,7 +281,7 @@ const Servicecontract = () => {
                         htmlFor="CustomerMobileInput"
                         className="input-field"
                       >
-                        Customer Mobile Number
+                       Customer Mobile No <input type="checkbox" />Whatsapp
                       </label>
                       <input
                         type="tel"

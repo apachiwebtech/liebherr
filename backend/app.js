@@ -5973,11 +5973,40 @@ app.post("/deleteservicecontract", async (req, res) => {
 });
 
 //Service contract listing 
+// app.get("/getservicecontractlist", async (req, res) => {
+//   try {
+//     // Use the poolPromise to get the connection pool
+//     const pool = await poolPromise;
+//     const{
+//       customerName,
+//       customerMobile,
+//       contractNumber,
+//       contractType,
+//       startDate,
+//       endDate,
+//       productName,
+//       serialNumber,
+      
+//     } = req.query;
+
+//     // SQL query to fetch data from the master list, customize based on your needs
+//     const sql = "SELECT * FROM awt_servicecontract WHERE deleted = 0";
+//     // Execute the SQL query
+//     const result = await pool.request().query(sql);
+
+//     // Return the result as JSON
+//     return res.json(result.recordset);
+//   } catch (err) {
+//     console.error(err);
+//     return res.status(500).json({ error: 'An error occurred while fetching data' });
+//   }
+// });
+
+// Service Contract list api with filters 
 app.get("/getservicecontractlist", async (req, res) => {
   try {
-    // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
-    const{
+    const {
       customerName,
       customerMobile,
       contractNumber,
@@ -5986,19 +6015,43 @@ app.get("/getservicecontractlist", async (req, res) => {
       endDate,
       productName,
       serialNumber,
-      
+  
     } = req.query;
 
-    // SQL query to fetch data from the master list, customize based on your needs
-    const sql = "SELECT * FROM awt_servicecontract WHERE deleted = 0";
-    // Execute the SQL query
+    // Debug log
+
+    let sql = `
+       SELECT s.* FROM awt_servicecontract as s  WHERE s.deleted = 0
+    `; 
+
+    if (customerName) {
+      sql += ` AND s.customerName LIKE '%${customerName}%'`;
+    
+    }
+
+    if (contractNumber) {
+      sql += ` AND s.contractNumber LIKE '%${contractNumber}%'`;
+    }
+
+    if (customerMobile) {
+      sql += ` AND s.c.customer_mobile LIKE '%${customerMobile}%'`;
+    }
+
+    if (serialNumber) {
+      sql += ` AND s.serialNumber LIKE '%${serialNumber}%'`;
+    }
+
+    if (productName) {
+      sql += ` AND s.productName LIKE '%${productName}%'`;
+    }
+
+ console.log('SQL Query:', sql); // Debug log
     const result = await pool.request().query(sql);
 
-    // Return the result as JSON
     return res.json(result.recordset);
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: 'An error occurred while fetching data' });
+    return res.status(500).json({ message: "An error occurred while fetching the complaint list" });
   }
 });
 
