@@ -79,6 +79,7 @@ import { Franchisemasterlist } from './Components/Pages/Master/Franchisemasterli
 import Servicecontract from './Components/Pages/Master/Servicecontract';
 import Ticketlistmsp from './Components/Pages/Master/Ticketlistmsp';
 import Servicecontracttabs from './Components/Pages/Master/Servicecontracttabs';
+import { Servicecontractlist } from './Components/Pages/Master/Servicecontractlist';
 
 
 
@@ -457,8 +458,16 @@ const Router = createBrowserRouter([
         element: <Servicecontract/>
       },
       {
+        path: "/Servicecontract/:serviceid",
+        element: <Servicecontract/>
+      },
+      {
         path: "/servicecontracttabs",
         element: <Servicecontracttabs/>
+      },
+      {
+        path: "/servicecontractlist",
+        element: <Servicecontractlist/>
       },
       {
         path: "claimreport",

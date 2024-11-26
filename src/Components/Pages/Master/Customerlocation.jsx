@@ -682,18 +682,18 @@ const Customerlocation = () => {
                           #
                         </th>
                         <th scope="col">Contact Person</th>
-                        <th scope="col">Contact Person No</th>
-                        <th scope="col">Address</th>
+                        <th scope="col" width='23%'>Contact Person No</th>
+                        <th scope="col" width='25%'>Address</th>
                         <th
                           scope="col"
-                          width="15%"
+                          width="13%"
                           style={{ textAlign: "center" }}
                         >
                           Edit
                         </th>
                         <th
                           scope="col"
-                          width="15%"
+                          width="13%"
                           style={{ textAlign: "center" }}
                         >
                           Delete
@@ -706,7 +706,7 @@ const Customerlocation = () => {
                           <td style={{ padding: "2px", textAlign: "center" }}>
                             {index + 1 + indexOfFirstUser}
                           </td>
-                          <th scope="row">{index + 1}</th>
+                          
                           <td>{item.ccperson}</td>
                           <td>{item.ccnumber}</td>
                           <td>{item.address}</td>

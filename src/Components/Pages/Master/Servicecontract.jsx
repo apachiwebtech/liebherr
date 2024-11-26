@@ -2,9 +2,12 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
+import { Navigate, useParams } from "react-router-dom";
+import Servicecontracttabs from "./Servicecontracttabs";
 
 const Servicecontract = () => {
   // Step 1: Add this state to track errors
+  const { serviceid } = useParams();
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -13,16 +16,25 @@ const Servicecontract = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [duplicateError, setDuplicateError] = useState(""); // State to track duplicate error
+  const [successMessage, setSuccessMessage] = useState('');
   const createdBy = 1; // Static value for created_by
   const updatedBy = 2; // Static value for updated_by
 
   const [formData, setFormData] = useState({
-    Serviceproduct: "",
+    customerName: "",
+    customerMobile: "",
+    contractNumber: "",
+    contractType: "",
+    productName: "",
+    serialNumber: "",
+    startDate: "",
+    endDate: ""
+
   });
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getprodata`);
+      const response = await axios.get(`${Base_Url}/getservicecontract`);
       console.log(response.data);
       setUsers(response.data);
       setFilteredUsers(response.data);
@@ -30,9 +42,43 @@ const Servicecontract = () => {
       console.error("Error fetching users:", error);
     }
   };
+  const fetchservicecontractpopulate = async (serviceid) => {
+
+    try {
+      const response = await axios.get(`${Base_Url}/getservicecontractpopulate/${serviceid}`);
+      setFormData({
+        ...response.data[0],
+        // Rename keys to match your formData structure
+        customerName: response.data[0].customerName,
+        customerMobile: response.data[0].customerMobile,
+        contractNumber: response.data[0].contractNumber,
+        contractType: response.data[0].contractType,
+        productName: response.data[0].productName,
+        serialNumber: response.data[0].serialNumber,
+        startDate: response.data[0].startDate,
+        endDate: response.data[0].endDate
+
+      });
+
+
+      setIsEdit(true);
+
+
+
+
+    } catch (error) {
+      console.error('Error fetching Servicecontractdata:', error);
+      setFormData([]);
+    }
+  };
 
   useEffect(() => {
     fetchUsers();
+
+
+    if (serviceid != 0) {
+      fetchservicecontractpopulate(serviceid);
+    }
   }, []);
 
   const handleChange = (e) => {
@@ -54,10 +100,20 @@ const Servicecontract = () => {
   // Step 2: Add form validation function
   const validateForm = () => {
     const newErrors = {}; // Initialize an empty error object
-    if (!formData.Serviceproduct.trim()) {
-      // Check if the Serviceproduct is empty
-      newErrors.Serviceproduct = "Serviceproduct Field is required."; // Set error message if Serviceproduct is empty
-    }
+
+    const isEmpty = (value) => {
+      return value === undefined || value === null || String(value).trim() === '';
+    };
+
+    // Text/Email/Number inputs validation
+    if (isEmpty(formData.contractNumber)) newErrors.contractNumber = "Contract Number Field is required.";
+    if (isEmpty(formData.customerName)) newErrors.customerName = "Customer Name is required.";
+    if (isEmpty(formData.customerMobile)) newErrors.customerMobile = "Customer Mobile Number is required.";
+    if (isEmpty(formData.productName)) newErrors.productName = "Product Name is required.";
+    if (isEmpty(formData.serialNumber)) newErrors.serialNumber = "Serial Number is required.";
+
+    // Dropdown validations 
+    if (!formData.contractType) newErrors.contractType = "Contract Type is required.";
     return newErrors; // Return the error object
   };
 
@@ -81,42 +137,63 @@ const Servicecontract = () => {
         if (isEdit) {
           // For update, include 'updated_by'
           await axios
-            .put(`${Base_Url}/putprodata`, {
+            .put(`${Base_Url}/putservicecontract`, {
               ...formData,
               updated_by: updatedBy,
             })
             .then((response) => {
               //window.location.reload();
+              setSuccessMessage('Customer Updated Successfully!');
+              setTimeout(() => setSuccessMessage(''), 3000);
+              
               setFormData({
-                Serviceproduct: "",
+                customerName: "",
+                customerMobile: "",
+                contractNumber: "",
+                contractType: "",
+                productName: "",
+                serialNumber: "",
+                startDate: "",
+                endDate: "",
               });
+              
+              
               fetchUsers();
             })
             .catch((error) => {
               if (error.response && error.response.status === 409) {
                 setDuplicateError(
-                  "Duplicate entry, Serviceproduct already exists!"
+                  "Duplicate entry, Servicecontract already exists!"
                 ); // Show duplicate error for update
               }
             });
         } else {
           // For insert, include 'created_by'
           await axios
-            .post(`${Base_Url}/postprodata`, {
+            .post(`${Base_Url}/postservicecontract`, {
               ...formData,
               created_by: createdBy,
             })
             .then((response) => {
               // window.location.reload();
               setFormData({
-                Serviceproduct: "",
+                customerName: "",
+                customerMobile: "",
+                contractNumber: "",
+                contractType: "",
+                productName: "",
+                serialNumber: "",
+                startDate: "",
+                endDate: "",
               });
+              setSuccessMessage('Customer Updated Successfully!');
+              setTimeout(() => setSuccessMessage(''), 3000);
               fetchUsers();
             })
             .catch((error) => {
               if (error.response && error.response.status === 409) {
                 setDuplicateError(
-                  "Duplicate entry, Serviceproduct already exists!"
+                  "Duplicate entry, Servicecontract already exists!"
                 ); // Show duplicate error for insert
               }
             });
@@ -127,19 +204,25 @@ const Servicecontract = () => {
     }
   };
 
+
   const deleted = async (id) => {
     try {
-      const response = await axios.post(`${Base_Url}/deleteprodata`, { id });
-      // alert(response.data[0]);
-      window.location.reload();
+        // Add confirmation dialog
+        const isConfirmed = window.confirm("Are you sure you want to delete?");
+        
+        // Only proceed with deletion if user clicks "OK"
+        if (isConfirmed) {
+            const response = await axios.post(`${Base_Url}/deleteservicecontract`, { id });
+            window.location.reload();
+        }
     } catch (error) {
-      console.error("Error deleting user:", error);
+        console.error('Error deleting user:', error);
     }
-  };
+};
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestprodata/${id}`);
+      const response = await axios.get(`${Base_Url}/requestservicecontract/${id}`);
       setFormData(response.data);
       setIsEdit(true);
       console.log(response.data);
@@ -153,55 +236,212 @@ const Servicecontract = () => {
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
   return (
-    <div className="row mp0">
-      <div className="col-12">
-        <div className="card mb-3 tab_box">
-          <div
-            className="card-body"
-            style={{ flex: "1 1 auto", padding: "13px 28px" }}
-          >
-            <div className="row mp0">
-              <div className="col-6">
+    <div className="tab-content">
+      <Servicecontracttabs />
+      <div className="row mp0">
+        <div className="col-12">
+          <div className="card mb-3 tab_box">
+            <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
+              {successMessage && (
+                <div className="alert alert-success text-center mb-3" role="alert">
+                  {successMessage}
+                </div>
+              )}
+              <div className="row">
+
+
                 <form
                   onSubmit={handleSubmit}
-                  style={{ width: "50%" }}
-                  className="text-left"
                 >
-                  <div className="mb-3">
-                    <label
-                      htmlFor="CustomernameInput"
-                      className="input-field"
-                    >
-                      Customer Name
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="customerName"
-                      id="ServiceproductInput"
-                      value={formData.customerName}
-                      onChange={handleChange}
-                      placeholder="Enter Customer Name "
-                    />
-                    {errors.Serviceproduct && (
-                      <small className="text-danger">
-                        {errors.Serviceproduct}
-                      </small>
-                    )}
-                    {duplicateError && (
-                      <small className="text-danger">{duplicateError}</small>
-                    )}{" "}
-                    {/* Show duplicate error */}
+                  <div className="row">
+                    <div className="col-3 mb-3">
+                      <label
+                        htmlFor="CustomernameInput"
+                        className="input-field"
+                      >
+                        Customer Name
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="customerName"
+                        id="ServiceproductInput"
+                        value={formData.customerName}
+                        onChange={handleChange}
+                        placeholder="Enter Customer Name "
+                      />
+                      {errors.customerName && (
+                        <small className="text-danger">
+                          {errors.customerName}
+                        </small>
+                      )}
+                    </div>
+                    <div className="col-3 mb-3">
+                      <label
+                        htmlFor="CustomerMobileInput"
+                        className="input-field"
+                      >
+                        Customer Mobile Number
+                      </label>
+                      <input
+                        type="tel"
+                        className="form-control"
+                        name="customerMobile"
+                        id="CustomerMobileInput"
+                        value={formData.customerMobile}
+                        onChange={handleChange}
+                        placeholder="Enter Customer Mobile Number "
+                        pattern="[0-9]*"
+                        maxLength="15"
+                      />
+                      {errors.customerMobile && (
+                        <small className="text-danger">
+                          {errors.customerMobile}
+                        </small>
+                      )}
+                    </div>
+                    <div className="col-3 mb-3">
+                      <label
+                        htmlFor="CustomernameInput"
+                        className="input-field"
+                      >
+                        Contract Number
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="contractNumber"
+                        id="ServiceproductInput"
+                        value={formData.contractNumber}
+                        onChange={handleChange}
+                        placeholder="Enter Contract Number "
+                      />
+                      {errors.contractNumber && (
+                        <small className="text-danger">
+                          {errors.contractNumber}
+                        </small>
+                      )}
+                      {duplicateError && (
+                        <small className="text-danger">{duplicateError}</small>
+                      )}{" "}
+                      {/* Show duplicate error */}
+                    </div>
+                    <div className="col-3 mb-3">
+                      <label htmlFor="contracttypeInput" className="input-field">
+                        Contract Type
+                      </label>
+                      <select
+                        className="form-select"
+                        name="contractType"
+                        id="contracttypeInput"
+                        value={formData.contractType}
+                        onChange={handleChange}
+                        placeholder="Select End Date"
+                      >
+                        <option value="">Select Contract Type</option>
+                        <option value="AMC">AMC</option>
+                        <option value="ExtWarranty">Extended Warranty</option>
+                      </select>
+                      {errors.contractType && (
+                        <small className="text-danger">{errors.contractType}</small>
+                      )}
+                    </div>
                   </div>
+                  <div className="row">
+
+                    <div className="col-3 mb-3">
+                      <label
+                        htmlFor="CustomernameInput"
+                        className="input-field"
+                      >
+                        Product Name
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="productName"
+                        id="ServiceproductInput"
+                        value={formData.productName}
+                        onChange={handleChange}
+                        placeholder="Enter Product Name "
+                      />
+                      {errors.productName && (
+                        <small className="text-danger">
+                          {errors.productName}
+                        </small>
+                      )}
+                      {duplicateError && (
+                        <small className="text-danger">{duplicateError}</small>
+                      )}{" "}
+                      {/* Show duplicate error */}
+                    </div>
+                    <div className="col-3 mb-3">
+                      <label
+                        htmlFor="CustomernameInput"
+                        className="input-field"
+                      >
+                        Serial Number
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="serialNumber"
+                        id="ServiceproductInput"
+                        value={formData.serialNumber}
+                        onChange={handleChange}
+                        placeholder="Enter Serial Number "
+                      />
+                      {errors.serialNumber && (
+                        <small className="text-danger">
+                          {errors.serialNumber}
+                        </small>
+                      )}
+                    </div>
+                    <div className="col -3 mb-3">
+                      <label htmlFor="StartDateInput" className="input-field">
+                        Start Date
+                      </label>
+                      <input
+                        type="date"
+                        className="form-control"
+                        name="startDate"
+                        id="StartDateInput"
+                        value={formData.startDate}
+                        onChange={handleChange}
+                        placeholder="Select Start Date"
+                      />
+                      {errors.startDate && (
+                        <small className="text-danger">{errors.startDate}</small>
+                      )}
+                    </div>
+                    <div className="col-3 mb-3">
+                      <label htmlFor="EndDateInput" className="input-field">
+                        End Date
+                      </label>
+                      <input
+                        type="date"
+                        className="form-control"
+                        name="endDate"
+                        id="EndDateInput"
+                        value={formData.endDate}
+                        onChange={handleChange}
+                        placeholder="Select End Date"
+                      />
+                      {errors.endDate && (
+                        <small className="text-danger">{errors.endDate}</small>
+                      )}
+                    </div>
+                  </div>
+
                   <div className="text-right">
                     <button className="btn btn-liebherr" type="submit">
                       {isEdit ? "Update" : "Submit"}
                     </button>
                   </div>
                 </form>
-              </div>
 
-              <div className="col-md-6">
+
+                {/* <div className="col-md-6">
                 <div className="d-flex justify-content-between align-items-center mb-3">
                   <span>
                     Show
@@ -233,7 +473,7 @@ const Servicecontract = () => {
                   />
                 </div>
 
-                {/* Adjust table padding and spacing */}
+                {/* Adjust table padding and spacing 
                 <table
                   className="table table-bordered table dt-responsive nowrap w-100 table-css"
                   style={{ marginTop: "20px", tableLayout: "fixed" }}
@@ -343,12 +583,12 @@ const Servicecontract = () => {
                     </button>
                   </div>
                 </div>
+              </div> */}
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </div></div>
   );
 };
 

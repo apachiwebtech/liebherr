@@ -1,21 +1,18 @@
-import React, { useState } from "react";
+import React, {useEffect, useState } from "react";
 import Servicecontract from './Servicecontract';
 
 import "bootstrap/dist/css/bootstrap.min.css";
+import { Link } from 'react-router-dom';
 
 
 function Servicecontracttabs() {
-  const [activeTab, setActiveTab] = useState("Servicecontract");
+  const [activeTab, setActiveTab] = useState("/servicecontract");
 
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case "Servicecontract":
-        return <Servicecontract />;
+  useEffect(() => {
 
-      default:
-        return <Servicecontract />;
-    }
-  };
+    setActiveTab(window.location.pathname);
+
+  }, [window.location.pathname]);
 
   return (
     <>
@@ -65,16 +62,26 @@ function Servicecontracttabs() {
                 }}
               >
                 <ul className="nav nav-tabs ">
-                  <li className="nav-item">
+                 <Link to={`/servicecontract`}> <li className="nav-item">
                     <button
-                      className={`nav-link ${
-                        activeTab === "Servicecontract" ? "active" : "onClick={() => setActiveTab('Servicecontract')}"
-                      }`}
-                      
+                      className={`nav-link ${activeTab === "/servicecontract" ? "active" : "onClick={() => setActiveTab('Servicecontract')}"
+                      }`}                      
                     >
                       SERVICE CONTRACT REGISTRATION
                     </button>
-                  </li>
+                  </li></Link>
+                  <Link to={`/servicecontractlist`}><li className="nav-item">
+                    <button
+                      className={`nav-link ${
+                        activeTab === "/servicecontractlist" ? "active" : "onClick={() => setActiveTab('Servicecontractlist')}"
+                      }`}
+                      
+                    >
+                      SERVICE CONTRACT LIST
+                    </button>
+                  </li></Link>
+
+                  
                 </ul>
               </div>
             </div>
@@ -84,7 +91,7 @@ function Servicecontracttabs() {
               className="col-12 col-custom"
               style={{ paddingLeft: "12px", paddingRight: "12px" }}
             >
-              <div className="tab-content">{renderTabContent()}</div>
+              <div className="tab-content"></div>
             </div>
           </div>
         </div>

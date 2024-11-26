@@ -3787,22 +3787,7 @@ app.get("/getcustomerlocation", async (req, res) => {
 
     // Construct the SQL query (no parameter binding)
     const sql = `
-        SELECT
-          ccl.*,
-          c.title AS country_title,
-          r.title AS region_title,
-          gs.title AS geostate_title,
-          gc.title AS geocity_title,
-          a.title AS district_title,
-          p.pincode AS pincode_title
-        FROM awt_customerlocation ccl
-        JOIN awt_country c ON ccl.country_id = c.id
-        JOIN awt_region r ON ccl.region_id = r.id
-        JOIN awt_geostate gs ON ccl.geostate_id = gs.id
-        JOIN awt_geocity gc ON ccl.geocity_id = gc.id
-        JOIN awt_district a ON ccl.district_id = a.id
-        JOIN awt_pincode p ON ccl.pincode_id = p.id
-        WHERE ccl.deleted = 0;
+       SELECT * FROM awt_customerlocation ORDER BY id ASC
       `;
 
     // Execute the query
@@ -3831,15 +3816,15 @@ app.get("/requestcustomerlocation/:id", async (req, res) => {
                   r.title as region_title,
                   gs.title as geostate_title,
                   gc.title as geocity_title,
-                  a.title as area_title,
+                  a.title as district_title,
                   p.pincode as pincode_title
-                FROM awt_customerlocation ccl
-                JOIN awt_country c ON ccl.country_id = c.id
-                JOIN awt_region r ON ccl.region_id = r.id
-                JOIN awt_geostate gs ON ccl.geostate_id = gs.id
-                JOIN awt_geocity gc ON ccl.geocity_id = gc.id
-                JOIN awt_area a ON ccl.area_id = a.id
-                JOIN awt_pincode p ON ccl.pincode_id = p.id
+                FROM awt_customerlocation as ccl,
+                 awt_country as c ,
+                 awt_region as r ,
+                 awt_geostate as gs,
+                 awt_geocity as gc,
+                 awt_district as a ,
+                 awt_pincode as p -
                 WHERE ccl.deleted = 0 AND ccl.id = ${id}`;
 
     // Execute the query
@@ -5817,6 +5802,230 @@ app.post("/deleteprodata", async (req, res) => {
   }
 });
 // Service product end
+
+// Service Contract code Start
+
+app.get("/getservicecontract", async (req, res) => {
+  try {
+    const pool = await poolPromise;
+
+    // SQL query to fetch service product data where deleted is 0
+    const sql = "SELECT * FROM awt_servicecontract WHERE deleted = 0";
+    const result = await pool.request().query(sql);
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "An error occurred while fetching service_contract data" });
+  }
+});
+
+// Insert for Servicecontract
+app.post("/postservicecontract", async (req, res) => {
+  const { customerName,customerMobile,contractNumber,contractType,productName,serialNumber,startDate,endDate} = req.body;
+
+  try {
+    const pool = await poolPromise;
+
+    // Check if Servicecontract already exists
+    let sql = `SELECT * FROM awt_servicecontract WHERE customerName = '${customerName}' AND deleted = 0`;
+    const result = await pool.request().query(sql); 
+
+    if (result.recordset.length > 0) {
+      return res.status(409).json({ message: "Duplicate entry, Customer already exists!" });
+    } else {
+      // Check if the Servicecontract is soft-deleted
+      sql = `SELECT * FROM awt_servicecontract WHERE customerName = '${customerName}' AND deleted = 1`;
+      const softDeletedData = await pool.request().query(sql);
+
+      if (softDeletedData.recordset.length > 0) {
+        // Restore soft-deleted Servicecontract
+        sql = `UPDATE awt_servicecontract SET deleted = 0 WHERE customerName = '${customerName}'`;
+        await pool.request().query(sql);
+        return res.json({ message: "Soft-deleted data restored successfully!" });
+      } else {
+        // Insert new Servicecontract
+        sql = `INSERT INTO awt_servicecontract (customerName,customerMobile,contractNumber,contractType,productName,serialNumber,startDate,endDate,deleted) VALUES ('${customerName}','${customerMobile}','${contractNumber}','${contractType}','${productName}','${serialNumber}','${startDate}','${endDate}',0)`
+        await pool.request().query(sql);
+        return res.json({ message: "Service Contract added successfully!" });
+      
+      }
+    }
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "An error occurred while processing the product data" });
+  }
+});
+
+// edit for Servicecontract
+app.get("/requestservicecontract/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const pool = await poolPromise;
+
+    // SQL query to fetch service product by id and ensure it is not deleted
+    const sql = `SELECT * FROM awt_servicecontract WHERE id = ${id} AND deleted = 0`;
+    const result = await pool.request().query(sql);
+
+    if (result.recordset.length > 0) {
+      return res.json(result.recordset[0]);
+    } else {
+      return res.status(404).json({ message: "Servicecontract not found" });
+    }
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "An error occurred while fetching product data" });
+  }
+});
+//update for service contract
+
+
+app.put("/putservicecontract", async (req, res) => {
+  const {id, customerName,customerMobile,contractNumber,contractType,productName,serialNumber,startDate,endDate,created_by} = req.body;
+
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+
+    // Step 1: Duplicate Check Query
+    const duplicateCheckSQL = `
+      SELECT * FROM awt_servicecontract
+      WHERE customerMobile = @customerMobile
+      AND deleted = 0
+      AND id != @id      
+    `;
+
+    console.log("Executing Duplicate Check SQL:", duplicateCheckSQL);
+
+    const duplicateCheckResult = await pool.request()
+      .input('customerMobile', customerMobile)
+      .input('id', id)
+      .query(duplicateCheckSQL);
+
+    if (duplicateCheckResult.recordset.length > 0) {
+      return res.status(409).json({
+        message: "Duplicate entry,  Service Contract already exists!"
+      });
+    }
+
+    // Step 2: Update Query
+    const updateSQL = `
+     UPDATE awt_servicecontract
+     SET 
+       customerName = @customerName,
+       customerMobile = @customerMobile,
+       contractNumber = @contractNumber,
+       contractType = @contractType,
+       productName = @productName,
+       serialNumber = @serialNumber,
+       startDate = @startDate,
+       endDate = @endDate,     
+       updated_by = @created_by
+     WHERE id = @id
+   `;
+    console.log("Executing Update SQL:", updateSQL);
+
+    await pool.request()
+      .input('customerName', customerName)
+      .input('customerMobile', customerMobile)
+      .input('contractNumber', contractNumber)
+      .input('contractType', contractType)
+      .input('productName', productName)
+      .input('serialNumber', serialNumber)
+      .input('startDate', startDate)
+      .input('endDate', endDate)
+      .input('created_by', created_by)
+      .input('id', id)
+      .query(updateSQL);
+
+    return res.json({
+      message: "Service contract updated successfully!"
+    });
+
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while updating the Service Contract' });
+  }
+});
+
+app.post("/deleteservicecontract", async (req, res) => {
+  const { id } = req.body;
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    // Directly inject `id` into the SQL query (no parameter binding)
+    const sql = `UPDATE awt_servicecontract SET deleted = 1 WHERE id = '${id}'`;
+
+    // Execute the SQL query
+    await pool.request().query(sql);
+
+    return res.json({ message: "Service Contract deleted successfully!" });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Error updating Service Contract" });
+  }
+});
+
+//Service contract listing 
+app.get("/getservicecontractlist", async (req, res) => {
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+    const{
+      customerName,
+      customerMobile,
+      contractNumber,
+      contractType,
+      startDate,
+      endDate,
+      productName,
+      serialNumber,
+      
+    } = req.query;
+
+    // SQL query to fetch data from the master list, customize based on your needs
+    const sql = "SELECT * FROM awt_servicecontract WHERE deleted = 0";
+    // Execute the SQL query
+    const result = await pool.request().query(sql);
+
+    // Return the result as JSON
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
+
+// fetching data populate
+app.get("/getservicecontractpopulate/:serviceid", async (req, res) => {
+  const { serviceid } = req.params;
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    // SQL query to fetch data from the master list, customize based on your needs
+    const sql = `
+         SELECT s.* from  awt_servicecontract as s Where s.deleted = 0 AND s.id = ${serviceid}
+        `;
+    // Execute the SQL query
+    const result = await pool.request().query(sql);
+
+    // Return the result as JSON
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
+
+// Service Contract Code End
 
 // Lhi User code start
 app.get("/getlhidata", async (req, res) => {
