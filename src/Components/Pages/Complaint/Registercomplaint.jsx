@@ -33,6 +33,16 @@ export function Registercomplaint(params) {
     const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
 
     const [locations, setlocations] = useState([])
+    
+    const getTodayDate = () => {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0'); // Add leading zero
+        const day = String(today.getDate()).padStart(2, '0'); // Add leading zero
+        return `${year}-${month}-${day}`;
+    };
+
+    const [date, setDate] = useState(getTodayDate());
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -418,6 +428,10 @@ export function Registercomplaint(params) {
         if (name === "pincode") {
             fetchlocations(inputValue);
         }
+
+        if (name === "complaint_date") {
+            setDate(e.target.value);
+        }
     };
 
     const fetchlocations = async (pincode) => {
@@ -719,7 +733,7 @@ export function Registercomplaint(params) {
                                     <div className="col-md-3">
                                         <div className="mb-3">
                                             <label className="form-label">Ticket Date</label>
-                                            <input type="date" name="complaint_date" onChange={onHandleChange} value={value.complaint_date} className="form-control" />
+                                            <input type="date" name="complaint_date" onChange={onHandleChange} value={Comp_id ? value.complaint_date : date} className="form-control" />
                                         </div>
                                     </div>
                                     <div className="col-md-5">
