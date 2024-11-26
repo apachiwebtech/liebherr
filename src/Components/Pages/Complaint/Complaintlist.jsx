@@ -483,7 +483,7 @@ export function Complaintlist(params) {
                                             <th>Ticket Date</th>
                                             <th>Customer Name</th>
                                             <th>Model No</th>
-                                            <th>Serials No</th>
+                                            <th>Serial No</th>
                                             <th>Age</th>
                                             <th>Assigned Users</th>
                                             <th>Status</th>

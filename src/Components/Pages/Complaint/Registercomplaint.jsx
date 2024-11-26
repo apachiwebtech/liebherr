@@ -84,6 +84,8 @@ export function Registercomplaint(params) {
         msp: "",
         csp: "",
         created_by: created_by,
+        dealer_info: "",
+        salutation: "",
 
     })
 
@@ -237,6 +239,7 @@ export function Registercomplaint(params) {
                         mobile: res.data.information[0].mobileno,
                         address: res.data.information[0].address,
                         customer_id: res.data.information[0].id,
+                        custo_id: res.data.information[0].customer_id,
 
 
 
@@ -573,14 +576,16 @@ export function Registercomplaint(params) {
 
                             <div className="row">
                                 <div className="col-md-12">
+                                    <p><strong>Customer Id :</strong> {searchdata.customer_id}</p>
                                     <h4 className="pname">{searchdata.customer_name}</h4>
                                 </div>
                             </div>
                             <p>{searchdata.address}</p>
+                            
 
                             <div className="row mb-3">
                                 <div className="col-md-5">
-                                    <p className="mp0">M: {searchdata.customer_mobile}</p>
+                                    <p className="mp0">Mobile : {searchdata.customer_mobile}</p>
                                 </div>
                             </div>
 
@@ -730,13 +735,28 @@ export function Registercomplaint(params) {
                                 </div>
 
                                 <form className="row" onSubmit={handlesubmit}>
+                                    
                                     <div className="col-md-3">
                                         <div className="mb-3">
                                             <label className="form-label">Ticket Date</label>
                                             <input type="date" name="complaint_date" onChange={onHandleChange} value={Comp_id ? value.complaint_date : date} className="form-control" />
                                         </div>
                                     </div>
-                                    <div className="col-md-5">
+                                    <div className="col-md-2">
+                                        <div className="mb-3">
+                                            <label className="form-label">Salutation</label>
+                                            <select className="form-control" onChange={onHandleChange} value={value.salutation} name="salutation">
+                                                <option value="">Salutation</option>
+                                                <option value="1">Mr</option>
+                                                <option value="2">Mrs</option>
+                                                <option value="3">Miss</option>
+                                                <option value="4">M.</option>
+                                                <option value="5">Lhi</option>
+                                                <option value="6">Dl</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div className="col-md-3">
                                         <div className="mb-3">
                                             <label htmlFor="exampleFormControlInput1" className="form-label">Customer Name</label>
                                             <input type="text" name="customer_name" onChange={onHandleChange} value={value.customer_name} className="form-control" placeholder="Enter Customer Name" />
@@ -962,19 +982,31 @@ export function Registercomplaint(params) {
                                 <div className="card-body">
                                     <div className="row">
                                         <div className="col-md-8">
-                                            <h4 className="pname">Dealer Info</h4>
+                                            <h4 className="pname">Dealer : Vijay Sales</h4>
                                         </div>
                                         <div className="col-md-4 text-right">
-                                            <a href="#" style={{ fontSize: '12px' }}>Add New</a>
+                                            
                                         </div>
                                     </div>
 
                                     <div className="mb-3">
-                                        <select className="form-control" id="exampleFormControlInput1">
-                                            <option value="">Select Dealer</option>
-                                            <option value="Abhishek Pangerkar">Abhishek Pangerkar</option>
-                                            <option value="Amol Jadhav">Amol Jadhav</option>
-                                        </select>
+                                        <input type="text" className="form-control" name="sub_dealer" value={value.dealer_info} onChange={onHandleChange} placeholder="Enter Sub Dealer Name" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            
+                            <div className="card mb-3" id="engineerInfo">
+                                <div className="card-body">
+                                    <h4 className="pname">Fault Description</h4>
+                                    <div className="mb-3">
+                                        <textarea
+                                            className="form-control"
+                                            name="specification"
+                                            value={value.specification}
+                                            onChange={onHandleChange}
+                                            placeholder="Enter Fault Description..."
+                                        ></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -989,20 +1021,6 @@ export function Registercomplaint(params) {
                                             value={value.additional_remarks}
                                             onChange={onHandleChange}
                                             placeholder="Enter remarks..."
-                                        ></textarea>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="card mb-3" id="engineerInfo">
-                                <div className="card-body">
-                                    <h4 className="pname">Fault Description</h4>
-                                    <div className="mb-3">
-                                        <textarea
-                                            className="form-control"
-                                            name="specification"
-                                            value={value.specification}
-                                            onChange={onHandleChange}
-                                            placeholder="Enter Fault Description..."
                                         ></textarea>
                                     </div>
                                 </div>
