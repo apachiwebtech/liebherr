@@ -86,6 +86,7 @@ export function Registercomplaint(params) {
         created_by: created_by,
         dealer_info: "",
         salutation: "",
+        mdealer_info: "",
 
     })
 
@@ -169,6 +170,7 @@ export function Registercomplaint(params) {
                         model: res.data[0].ModelNumber,
                         msp: res.data[0].franchisee,
                         csp: res.data[0].childPartner,
+                        mdealer_info: res.data[0].sales_partner,
 
 
                     })
@@ -691,6 +693,8 @@ export function Registercomplaint(params) {
                                     </div>
                                     <div className="col-md-2">
                                         <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Serial No</p>
+
+                                        {searchdata.length == 0 && !Comp_id || value.serial == null ?
                                         <div className="mb-3">
                                             <input
                                                 type="text"
@@ -700,11 +704,13 @@ export function Registercomplaint(params) {
                                                 className="form-control"
                                                 placeholder="Enter.."
                                             />
-                                        </div>
+                                        </div> : <div>{value.serial}</div>}
 
                                     </div>                                       {/* Add Purchase Date field */}
                                     <div className="col-md-3">
                                         <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Purchase Date</p>
+
+                                        {searchdata.length == 0 && !Comp_id || value.purchase_date == null ?
                                         <div className="mb-3">
                                             <input
                                                 type="date"
@@ -713,8 +719,9 @@ export function Registercomplaint(params) {
                                                 value={value.purchase_date}
                                                 className="form-control"
                                             />
-                                        </div>
+                                        </div> : <div>{value.purchase_date}</div>}
                                     </div>
+                                    
                                     {/* Add Warranty Status field */}
                                     <div className="col-md-3">
                                         <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Warranty Status</p>
@@ -723,6 +730,7 @@ export function Registercomplaint(params) {
                                                 <option value="">Select Option</option>
                                                 <option value="WARRANTY">IN WARRANTY</option>
                                                 <option value="OUT OF WARRANTY">OUT OF WARRANTY</option>
+                                                <option value="NA">NA</option>
                                             </select>
                                         </div>
                                     </div>
@@ -981,11 +989,8 @@ export function Registercomplaint(params) {
                             <div className="card mb-3" id="engineerInfo">
                                 <div className="card-body">
                                     <div className="row">
-                                        <div className="col-md-8">
-                                            <h4 className="pname">Dealer : Vijay Sales</h4>
-                                        </div>
-                                        <div className="col-md-4 text-right">
-                                            
+                                        <div className="col-md-12">
+                                            <h4 className="pname">Dealer : {value.mdealer_info}</h4>
                                         </div>
                                     </div>
 
