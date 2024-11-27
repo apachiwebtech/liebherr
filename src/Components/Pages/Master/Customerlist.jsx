@@ -25,16 +25,12 @@ export function Customerlist(params) {
     });
 
     const [searchFilters, setSearchFilters] = useState({
-        fromDate: '',
-        toDate: '',
-        customerName: '',
-        customerEmail: '',
-        serialNo: '',
-        productCode: '',
-        customerMobile: '',
-        ticketno: '',
-        status: '',
-        customerID: '',
+        customer_fname: '',
+        customer_id: '',
+        customer_type: '',
+        customer_lname: '',
+        mobileno: '',
+        email: '',
 
     });
 
@@ -48,6 +44,7 @@ export function Customerlist(params) {
         try {
             const response = await axios.get(`${Base_Url}/getcustomerlist`);
             setCustomerdata(response.data);
+            setFilteredData(response.data);
         } catch (error) {
             console.error('Error fetching Customerdata:', error);
             setCustomerdata([]);
@@ -91,6 +88,7 @@ export function Customerlist(params) {
             console.log('Sending params:', params.toString()); // Debug log
 
             const response = await axios.get(`${Base_Url}/getcustomerlist?${params}`);
+            setCustomerdata(response.data);
             setFilteredData(response.data);
         } catch (error) {
             console.error('Error fetching filtered data:', error);
@@ -114,12 +112,12 @@ export function Customerlist(params) {
 
     const resetFilters = () => {
         setSearchFilters({
-            fromDate: '',
-            toDate: '',
-            customerName: '',
-            customerEmail: '',
-            serialNo: '',
-            productCode: '',
+            customer_fname: '',
+            customer_id: '',
+            customer_type: '',
+            customer_lname: '',
+            mobileno: '',
+            email: '',
 
         });
         fetchCustomerlist(); // Reset to original data
@@ -213,8 +211,8 @@ export function Customerlist(params) {
                                         <input
                                             type="text"
                                             className="form-control"
-                                            name="customerName"
-                                            value={searchFilters.customerName}
+                                            name="customer_fname"
+                                            value={searchFilters.customer_fname}
                                             placeholder="Search by customer name"
                                             onChange={handleFilterChange}
                                         />
@@ -240,8 +238,8 @@ export function Customerlist(params) {
                                         <input
                                             type="text"
                                             className="form-control"
-                                            name="customerMobile"
-                                            value={searchFilters.customerMobile}
+                                            name="mobileno"
+                                            value={searchFilters.mobileno}
                                             placeholder="Search by customer mobile"
                                             onChange={handleFilterChange}
                                         />
@@ -254,8 +252,8 @@ export function Customerlist(params) {
                                         <input
                                             type="text"
                                             className="form-control"
-                                            name="customerEmail"
-                                            value={searchFilters.customerEmail}
+                                            name="email"
+                                            value={searchFilters.email}
                                             placeholder="Search by customer email"
                                             onChange={handleFilterChange}
                                         />
