@@ -25,16 +25,12 @@ export function Customerlist(params) {
     });
 
     const [searchFilters, setSearchFilters] = useState({
-        fromDate: '',
-        toDate: '',
-        customerName: '',
-        customerEmail: '',
-        serialNo: '',
-        productCode: '',
-        customerMobile: '',
-        ticketno: '',
-        status: '',
-        customerID: '',
+        customer_fname: '',
+        customer_id: '',
+        customer_type: '',
+        customer_lname: '',
+        mobileno: '',
+        email: '',
 
     });
 
@@ -48,6 +44,7 @@ export function Customerlist(params) {
         try {
             const response = await axios.get(`${Base_Url}/getcustomerlist`);
             setCustomerdata(response.data);
+            setFilteredData(response.data);
         } catch (error) {
             console.error('Error fetching Customerdata:', error);
             setCustomerdata([]);
@@ -91,6 +88,7 @@ export function Customerlist(params) {
             console.log('Sending params:', params.toString()); // Debug log
 
             const response = await axios.get(`${Base_Url}/getcustomerlist?${params}`);
+            setCustomerdata(response.data);
             setFilteredData(response.data);
         } catch (error) {
             console.error('Error fetching filtered data:', error);
@@ -114,12 +112,12 @@ export function Customerlist(params) {
 
     const resetFilters = () => {
         setSearchFilters({
-            fromDate: '',
-            toDate: '',
-            customerName: '',
-            customerEmail: '',
-            serialNo: '',
-            productCode: '',
+            customer_fname: '',
+            customer_id: '',
+            customer_type: '',
+            customer_lname: '',
+            mobileno: '',
+            email: '',
 
         });
         fetchCustomerlist(); // Reset to original data
@@ -172,40 +170,49 @@ export function Customerlist(params) {
 
                                 <div className="col-md-2">
                                     <div className="form-group">
-                                        <label>Ticket No.</label>
+                                        <label>Customer ID</label>
                                         <input
                                             type="text"
                                             className="form-control"
-                                            name="ticketno"
-                                            value={searchFilters.ticketno}
-                                            placeholder="Search by complaint no"
+                                            name="customer_id"
+                                            value={searchFilters.customer_id}
+                                            placeholder="Search by customer_id"
                                             onChange={handleFilterChange}
                                         />
                                     </div>
                                 </div>
 
-                                <div className="col-md-3">
+                                <div className="col-md-2">
                                     <div className="form-group">
                                         <label>Customer Type</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="customertype"
-                                            value={searchFilters.customertype}
-                                            placeholder="Search by customer Id"
+                                        <select
+
+                                            className="form-select"
+                                            name="customer_type"
+                                            value={searchFilters.customer_type}
+                                            placeholder="Search by customer Type"
                                             onChange={handleFilterChange}
-                                        />
+                                        >
+                                            <option value="selected">Select Customer Type</option>
+                                            <option value="EndCustomer">EndCustomer</option>
+                                            <option value="Sales Dealer WH/Display">Sales Dealer WH/Display</option>
+                                            <option value=" Service Partner">Service Partner</option>
+                                            <option value="Warehouse">Warehouse</option>
+                                            <option value="Lhidisplay">LHI Display/WH</option>
+                                            <option value="Sub-Dealer">Sub-Dealer</option>
+
+                                        </select>
                                     </div>
                                 </div>
 
-                                <div className="col-md-3">
+                                <div className="col-md-2">
                                     <div className="form-group">
                                         <label>Customer First Name</label>
                                         <input
                                             type="text"
                                             className="form-control"
-                                            name="customerName"
-                                            value={searchFilters.customerName}
+                                            name="customer_fname"
+                                            value={searchFilters.customer_fname}
                                             placeholder="Search by customer name"
                                             onChange={handleFilterChange}
                                         />
@@ -217,9 +224,37 @@ export function Customerlist(params) {
                                         <input
                                             type="text"
                                             className="form-control"
-                                            name="serialNo"
-                                            value={searchFilters.serialNo}
-                                            placeholder="Search by serial no"
+                                            name="customer_lname"
+                                            value={searchFilters.customer_lname}
+                                            placeholder="Search by Customer Last name"
+                                            onChange={handleFilterChange}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="col-md-2">
+                                    <div className="form-group">
+                                        <label>Customer Mobile</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="mobileno"
+                                            value={searchFilters.mobileno}
+                                            placeholder="Search by customer mobile"
+                                            onChange={handleFilterChange}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="col-md-2">
+                                    <div className="form-group">
+                                        <label>Customer Email</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="email"
+                                            value={searchFilters.email}
+                                            placeholder="Search by customer email"
                                             onChange={handleFilterChange}
                                         />
                                     </div>
@@ -233,33 +268,7 @@ export function Customerlist(params) {
 
 
 
-                                <div className="col-md-3">
-                                    <div className="form-group">
-                                        <label>Customer Mobile</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="customerMobile"
-                                            value={searchFilters.customerMobile}
-                                            placeholder="Search by customer mobile"
-                                            onChange={handleFilterChange}
-                                        />
-                                    </div>
-                                </div>
 
-                                <div className="col-md-3">
-                                    <div className="form-group">
-                                        <label>Customer Email</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="customerEmail"
-                                            value={searchFilters.customerEmail}
-                                            placeholder="Search by customer email"
-                                            onChange={handleFilterChange}
-                                        />
-                                    </div>
-                                </div>
 
                                 {/* Buttons and message at the far-right corner */}
                                 <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">

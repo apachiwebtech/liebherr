@@ -1473,9 +1473,10 @@ app.get("/getcustomerlist", async (req, res) => {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
     const {
-      fromDate,
-      toDate,
       customer_fname,
+      customer_id,
+      customer_type,
+      customer_lname,
       mobileno,
       email,
 
@@ -1483,18 +1484,42 @@ app.get("/getcustomerlist", async (req, res) => {
 
     } = req.query;
 
-    // Directly use the query (no parameter binding)
-    const sql = "SELECT * FROM awt_customer ORDER BY id ASC";
+    let sql = `
+    SELECT c.* FROM awt_customer as c  WHERE c.deleted = 0
+ `;
 
-    // Execute the query
-    const result = await pool.request().query(sql);
+ if (customer_fname) {
+   sql += ` AND c.customer_fname LIKE '%${customer_fname}%'`;
 
-    // Return the result as JSON
-    return res.json(result.recordset);
-  } catch (err) {
-    console.error("Database error:", err);
-    return res.status(500).json({ error: "Database error occurred" });
-  }
+ }
+
+ if (customer_lname) {
+   sql += ` AND c.customer_lname LIKE '%${customer_lname}%'`;
+ }
+
+ if (mobileno) {
+   sql += ` AND c.mobileno LIKE '%${mobileno}%'`;
+ }
+
+ if (email) {
+   sql += ` AND c.email LIKE '%${email}%'`;
+ }
+
+ if (customer_type) {
+   sql += ` AND c.customer_type LIKE '%${customer_type}%'`;
+ }
+ if (customer_id) {
+  sql += ` AND c.customer_id LIKE '%${customer_id}%'`;
+}
+
+ console.log('SQL Query:', sql); // Debug log
+ const result = await pool.request().query(sql);
+
+ return res.json(result.recordset);
+} catch (err) {
+ console.error(err);
+ return res.status(500).json({ message: "An error occurred while fetching the complaint list" });
+}
 });
 
 app.get("/requestcustomerlist/:id", async (req, res) => {
@@ -3110,7 +3135,7 @@ app.post("/add_complaintt", async (req, res) => {
   } else if (ticket_type == 'Helpdesk') {
     t_type = 'H'
   }
-   else if (ticket_type == 'Visit') {
+  else if (ticket_type == 'Visit') {
     t_type = 'V'
   }
 
@@ -3622,7 +3647,8 @@ app.post("/postcustomer", async (req, res) => {
     dateofbirth,
     anniversary_date,
     email,
-    salutation
+    salutation,
+    customer_id
   } = req.body;
 
   try {
@@ -3642,8 +3668,8 @@ app.post("/postcustomer", async (req, res) => {
       });
     } else {
       // Insert the customer if no duplicate is found
-      const insertSql = `INSERT INTO awt_customer (customer_fname, customer_lname, customer_type, customer_classification, mobileno, alt_mobileno, dateofbirth, anniversary_date, email,salutation)
-                         VALUES ('${customer_fname}', '${customer_lname}', '${customer_type}', '${customer_classification}', '${mobileno}', '${alt_mobileno}', '${dateofbirth}', '${anniversary_date}', '${email}','${salutation}')`;
+      const insertSql = `INSERT INTO awt_customer (customer_fname, customer_lname, customer_type, customer_classification, mobileno, alt_mobileno, dateofbirth, anniversary_date, email,salutation,customer_id)
+                         VALUES ('${customer_fname}', '${customer_lname}', '${customer_type}', '${customer_classification}', '${mobileno}', '${alt_mobileno}', '${dateofbirth}', '${anniversary_date}', '${email}','${salutation}','${customer_id}')`;
 
       // Execute the insert query
       await pool.request().query(insertSql);
@@ -3662,7 +3688,7 @@ app.post("/postcustomer", async (req, res) => {
 // customer put 
 
 app.put("/putcustomer", async (req, res) => {
-  const { id, customer_fname, customer_lname, customer_type, customer_classification, mobileno, alt_mobileno, dateofbirth, anniversary_date, email, salutation ,created_by} = req.body;
+  const { id, customer_fname, customer_lname, customer_type, customer_classification, mobileno, alt_mobileno, dateofbirth, anniversary_date, email, salutation, customer_id, created_by } = req.body;
 
 
   try {
@@ -3704,7 +3730,8 @@ app.put("/putcustomer", async (req, res) => {
        alt_mobileno = @alt_mobileno,
        dateofbirth = @dateofbirth,
        anniversary_date = @anniversary_date,
-       salutation = @salutation,      
+       salutation = @salutation,
+       customer_id = @customer_id,      
        updated_by = @created_by
      WHERE id = @id
    `;
@@ -3721,6 +3748,7 @@ app.put("/putcustomer", async (req, res) => {
       .input('dateofbirth', dateofbirth)
       .input('anniversary_date', anniversary_date)
       .input('salutation', salutation)
+      .input('customer_id', customer_id)
       .input('created_by', created_by)
       .input('id', id)
       .query(updateSQL);
@@ -4273,7 +4301,7 @@ AND m.area_id = d.id AND m.geocity_id = ct.id AND m.deleted = 0
     `;
     // Execute the SQL query
     const result = await pool.request().query(sql);
-x
+    x
     // Return the result as JSON
     return res.json(result.recordset);
   } catch (err) {
@@ -5822,14 +5850,14 @@ app.get("/getservicecontract", async (req, res) => {
 
 // Insert for Servicecontract
 app.post("/postservicecontract", async (req, res) => {
-  const { customerName,customerMobile,contractNumber,contractType,productName,serialNumber,startDate,endDate} = req.body;
+  const { customerName, customerMobile, contractNumber, contractType, productName, serialNumber, startDate, endDate } = req.body;
 
   try {
     const pool = await poolPromise;
 
     // Check if Servicecontract already exists
     let sql = `SELECT * FROM awt_servicecontract WHERE customerName = '${customerName}' AND deleted = 0`;
-    const result = await pool.request().query(sql); 
+    const result = await pool.request().query(sql);
 
     if (result.recordset.length > 0) {
       return res.status(409).json({ message: "Duplicate entry, Customer already exists!" });
@@ -5848,7 +5876,7 @@ app.post("/postservicecontract", async (req, res) => {
         sql = `INSERT INTO awt_servicecontract (customerName,customerMobile,contractNumber,contractType,productName,serialNumber,startDate,endDate,deleted) VALUES ('${customerName}','${customerMobile}','${contractNumber}','${contractType}','${productName}','${serialNumber}','${startDate}','${endDate}',0)`
         await pool.request().query(sql);
         return res.json({ message: "Service Contract added successfully!" });
-      
+
       }
     }
   } catch (err) {
@@ -5882,7 +5910,7 @@ app.get("/requestservicecontract/:id", async (req, res) => {
 
 
 app.put("/putservicecontract", async (req, res) => {
-  const {id, customerName,customerMobile,contractNumber,contractType,productName,serialNumber,startDate,endDate,created_by} = req.body;
+  const { id, customerName, customerMobile, contractNumber, contractType, productName, serialNumber, startDate, endDate, created_by } = req.body;
 
 
   try {
@@ -5986,7 +6014,7 @@ app.post("/deleteservicecontract", async (req, res) => {
 //       endDate,
 //       productName,
 //       serialNumber,
-      
+
 //     } = req.query;
 
 //     // SQL query to fetch data from the master list, customize based on your needs
@@ -6015,18 +6043,18 @@ app.get("/getservicecontractlist", async (req, res) => {
       endDate,
       productName,
       serialNumber,
-  
+
     } = req.query;
 
     // Debug log
 
     let sql = `
        SELECT s.* FROM awt_servicecontract as s  WHERE s.deleted = 0
-    `; 
+    `;
 
     if (customerName) {
       sql += ` AND s.customerName LIKE '%${customerName}%'`;
-    
+
     }
 
     if (contractNumber) {
@@ -6045,7 +6073,7 @@ app.get("/getservicecontractlist", async (req, res) => {
       sql += ` AND s.productName LIKE '%${productName}%'`;
     }
 
- console.log('SQL Query:', sql); // Debug log
+    console.log('SQL Query:', sql); // Debug log
     const result = await pool.request().query(sql);
 
     return res.json(result.recordset);
@@ -7281,27 +7309,27 @@ app.get("/getcomplainlist", async (req, res) => {
       sql += ` AND c.customer_id LIKE '%${customerID}%'`;
       nots = ''
     }
-//csp msp call_type and customer_class
+    //csp msp call_type and customer_class
 
-if (csp) {
-  sql += ` AND c.csp LIKE '%${csp}%'`;
-  nots = ''
-}
+    if (csp) {
+      sql += ` AND c.csp LIKE '%${csp}%'`;
+      nots = ''
+    }
 
-if (msp) {
-  sql += ` AND c.msp LIKE '%${msp}%'`;
-  nots = ''
-}
+    if (msp) {
+      sql += ` AND c.msp LIKE '%${msp}%'`;
+      nots = ''
+    }
 
-if (mode_of_contact) {
-  sql += ` AND c.mode_of_contact LIKE '%${mode_of_contact}%'`;
-  nots = ''
-}
+    if (mode_of_contact) {
+      sql += ` AND c.mode_of_contact LIKE '%${mode_of_contact}%'`;
+      nots = ''
+    }
 
-if (customer_class) {
-  sql += ` AND c.customer_class LIKE '%${customer_class}%'`;
-  nots = ''
-}
+    if (customer_class) {
+      sql += ` AND c.customer_class LIKE '%${customer_class}%'`;
+      nots = ''
+    }
 
 
 
@@ -7421,27 +7449,27 @@ app.get("/getcomplainlistcsp", async (req, res) => {
       nots = ''
     }
 
-//csp msp call_type and customer_class
+    //csp msp call_type and customer_class
 
-if (csp) {
-  sql += ` AND c.csp LIKE '%${csp}%'`;
-  nots = ''
-}
+    if (csp) {
+      sql += ` AND c.csp LIKE '%${csp}%'`;
+      nots = ''
+    }
 
-// if (msp) {
-//   sql += ` AND c.msp LIKE '%${msp}%'`;
-//   nots = ''
-// }
+    // if (msp) {
+    //   sql += ` AND c.msp LIKE '%${msp}%'`;
+    //   nots = ''
+    // }
 
-if (mode_of_contact) {
-  sql += ` AND c.mode_of_contact LIKE '%${mode_of_contact}%'`;
-  nots = ''
-}
+    if (mode_of_contact) {
+      sql += ` AND c.mode_of_contact LIKE '%${mode_of_contact}%'`;
+      nots = ''
+    }
 
-if (customer_class) {
-  sql += ` AND c.customer_class LIKE '%${customer_class}%'`;
-  nots = ''
-}
+    if (customer_class) {
+      sql += ` AND c.customer_class LIKE '%${customer_class}%'`;
+      nots = ''
+    }
 
 
     // Modified status filtering logic
@@ -7559,23 +7587,23 @@ app.get("/getcomplainlistmsp", async (req, res) => {
       nots = ''
     }
 
-//csp msp call_type and customer_class
+    //csp msp call_type and customer_class
 
 
-if (msp) {
-  sql += ` AND c.msp LIKE '%${msp}%'`;
-  nots = ''
-}
+    if (msp) {
+      sql += ` AND c.msp LIKE '%${msp}%'`;
+      nots = ''
+    }
 
-if (mode_of_contact) {
-  sql += ` AND c.mode_of_contact LIKE '%${mode_of_contact}%'`;
-  nots = ''
-}
+    if (mode_of_contact) {
+      sql += ` AND c.mode_of_contact LIKE '%${mode_of_contact}%'`;
+      nots = ''
+    }
 
-if (customer_class) {
-  sql += ` AND c.customer_class LIKE '%${customer_class}%'`;
-  nots = ''
-}
+    if (customer_class) {
+      sql += ` AND c.customer_class LIKE '%${customer_class}%'`;
+      nots = ''
+    }
 
 
     // Modified status filtering logic

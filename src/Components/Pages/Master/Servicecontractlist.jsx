@@ -104,7 +104,9 @@ export function Servicecontractlist(params) {
             console.log('Sending params:', params.toString()); // Debug log
 
             const response = await axios.get(`${Base_Url}/getservicecontractlist?${params}`);
+            setServicecontractdata(response.data);
             setFilteredData(response.data);
+            
         } catch (error) {
             console.error('Error fetching filtered data:', error);
             setFilteredData([]);
