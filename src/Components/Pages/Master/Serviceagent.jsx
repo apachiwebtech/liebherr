@@ -13,6 +13,7 @@ const Serviceagent = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [duplicateError, setDuplicateError] = useState(""); // State to track duplicate error
+  const token = localStorage.getItem("token"); // Get token from localStorage
   const createdBy = 1; // Static value for created_by
   const updatedBy = 2; // Static value for updated_by
 
@@ -22,7 +23,11 @@ const Serviceagent = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getsdata`);
+      const response = await axios.get(`${Base_Url}/getsdata`,{
+        headers: {
+            Authorization: token, // Send token in headers
+            }, 
+        });
       console.log(response.data);
       setUsers(response.data);
       setFilteredUsers(response.data);
@@ -81,7 +86,11 @@ const Serviceagent = () => {
         if (isEdit) {
           // For update, include 'updated_by'
           await axios
-            .put(`${Base_Url}/putsdata`, { ...formData, updated_by: updatedBy })
+            .put(`${Base_Url}/putsdata`, { ...formData, updated_by: updatedBy },{
+              headers: {
+                  Authorization: token, // Send token in headers
+                  }, 
+              })
             .then((response) => {
               setFormData({
                 serviceagent: "",
@@ -101,7 +110,11 @@ const Serviceagent = () => {
             .post(`${Base_Url}/postsdata`, {
               ...formData,
               created_by: createdBy,
-            })
+            },{
+              headers: {
+                  Authorization: token, // Send token in headers
+                  }, 
+              })
 
             .then((response) => {
               setFormData({
@@ -125,7 +138,11 @@ const Serviceagent = () => {
 
   const deleted = async (id) => {
     try {
-      const response = await axios.post(`${Base_Url}/deletesdata`, { id });
+      const response = await axios.post(`${Base_Url}/deletesdata`, { id },{
+        headers: {
+            Authorization: token, // Send token in headers
+            }, 
+        });
       // alert(response.data[0]);
       //  window.location.reload();
     } catch (error) {
@@ -135,7 +152,11 @@ const Serviceagent = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestsdata/${id}`);
+      const response = await axios.get(`${Base_Url}/requestsdata/${id}`,{
+        headers: {
+            Authorization: token, // Send token in headers
+            }, 
+        });
       setFormData(response.data);
       setIsEdit(true);
       console.log(response.data);

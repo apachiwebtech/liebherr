@@ -27,6 +27,7 @@ const MasterFranchise = (params) => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [duplicateError, setDuplicateError] = useState(""); // State to track duplicate error
+  const token = localStorage.getItem("token"); // Get token from localStorage
   const created_by = localStorage.getItem("id");
   const [formData, setFormData] = useState({
     title: "",
@@ -61,7 +62,11 @@ const MasterFranchise = (params) => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getfranchisedata`);
+      const response = await axios.get(`${Base_Url}/getfranchisedata`,{
+        headers: {
+           Authorization: token, // Send token in headers
+         }, 
+       });
       console.log(response.data);
       setUsers(response.data);
       setFilteredUsers(response.data);
@@ -80,7 +85,11 @@ const MasterFranchise = (params) => {
   };
   const fetchcountries = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getcountries`);
+      const response = await axios.get(`${Base_Url}/getcountries`,{
+        headers: {
+           Authorization: token, // Send token in headers
+         }, 
+       });
       setCountries(response.data);
     } catch (error) {
       console.error("Error fetching disctricts:", error);
@@ -90,7 +99,11 @@ const MasterFranchise = (params) => {
   //region
   const fetchregion = async (country_id) => {
     try {
-      const response = await axios.get(`${Base_Url}/getregionscity/${country_id}`);
+      const response = await axios.get(`${Base_Url}/getregionscity/${country_id}`,{
+        headers: {
+           Authorization: token, // Send token in headers
+         }, 
+       });
       setRegions(response.data);
     } catch (error) {
       console.error("Error fetching disctricts:", error);
@@ -100,7 +113,11 @@ const MasterFranchise = (params) => {
   //geostate
   const fetchState = async (region_id) => {
     try {
-      const response = await axios.get(`${Base_Url}/getgeostatescity/${region_id}`);
+      const response = await axios.get(`${Base_Url}/getgeostatescity/${region_id}`,{
+        headers: {
+           Authorization: token, // Send token in headers
+         }, 
+       });
       setState(response.data);
     } catch (error) {
       console.error("Error fetching disctricts:", error);
@@ -109,7 +126,11 @@ const MasterFranchise = (params) => {
 
   const fetchdistricts = async (geostateID) => {
     try {
-      const response = await axios.get(`${Base_Url}/getdistrictcity/${geostateID}`);
+      const response = await axios.get(`${Base_Url}/getdistrictcity/${geostateID}`,{
+        headers: {
+           Authorization: token, // Send token in headers
+         }, 
+       });
       setdistricts(response.data);
     } catch (error) {
       console.error("Error fetching disctricts:", error);
@@ -118,7 +139,11 @@ const MasterFranchise = (params) => {
 
   const fetchCity = async (area_id) => {
     try {
-      const response = await axios.get(`${Base_Url}/getgeocities_p/${area_id}`);
+      const response = await axios.get(`${Base_Url}/getgeocities_p/${area_id}`,{
+        headers: {
+           Authorization: token, // Send token in headers
+         }, 
+       });
       setCity(response.data);
     } catch (error) {
       console.error("Error fetching City:", error);
@@ -127,7 +152,11 @@ const MasterFranchise = (params) => {
 
   const fetchpincode = async (cityid) => {
     try {
-      const response = await axios.get(`${Base_Url}/getpincodebyid/${cityid}`);
+      const response = await axios.get(`${Base_Url}/getpincodebyid/${cityid}`,{
+        headers: {
+           Authorization: token, // Send token in headers
+         }, 
+       });
       setPincode(response.data);
     } catch (error) {
       console.error("Error fetching City:", error);
@@ -137,7 +166,11 @@ const MasterFranchise = (params) => {
   const fetchFranchisemasterpopulate = async (masterid) => {
 
     try {
-      const response = await axios.get(`${Base_Url}/getmasterfranchisepopulate/${masterid}`);
+      const response = await axios.get(`${Base_Url}/getmasterfranchisepopulate/${masterid}`,{
+        headers: {
+           Authorization: token, // Send token in headers
+         }, 
+       });
       setFormData({
         ...response.data[0],
         // Rename keys to match your formData structure
@@ -314,7 +347,11 @@ const MasterFranchise = (params) => {
         if (isEdit) {
           // For update, include duplicate check
           await axios
-            .put(`${Base_Url}/putfranchisedata`, { ...hashedFormData, created_by })
+            .put(`${Base_Url}/putfranchisedata`, { ...hashedFormData, created_by },{
+              headers: {
+                 Authorization: token, // Send token in headers
+               }, 
+             })
             .then((response) => {
               setFormData({
                 title: "",
@@ -358,7 +395,11 @@ const MasterFranchise = (params) => {
         } else {
           // For insert, include duplicate check
           await axios
-            .post(`${Base_Url}/postfranchisedata`, { ...formData, created_by })
+            .post(`${Base_Url}/postfranchisedata`, { ...formData, created_by },{
+              headers: {
+                 Authorization: token, // Send token in headers
+               }, 
+             })
             .then((response) => {
               //const newpassword = md5(formData.password)
 
@@ -411,7 +452,11 @@ const MasterFranchise = (params) => {
     try {
       const response = await axios.post(`${Base_Url}/deletefranchisedata`, {
         id,
-      });
+      },{
+        headers: {
+           Authorization: token, // Send token in headers
+         }, 
+       });
 
       setFormData({
         title: "",
@@ -426,7 +471,11 @@ const MasterFranchise = (params) => {
     try {
       const response = await axios.get(
         `${Base_Url}/requestfranchisedata/${id}`
-      );
+        ,{
+          headers: {
+             Authorization: token, // Send token in headers
+           }, 
+         });
       setFormData(response.data);
       setIsEdit(true);
       console.log(response.data);

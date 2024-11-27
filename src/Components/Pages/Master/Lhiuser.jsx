@@ -15,6 +15,7 @@ const Lhiuser = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
+  const token = localStorage.getItem("token"); // Get token from localStorage
   const [duplicateError, setDuplicateError] = useState(""); // State to track duplicate error
   const createdBy = 1; // Static value for created_by
   const updatedBy = 2; // Static value for updated_by
@@ -27,7 +28,11 @@ const Lhiuser = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getlhidata`);
+      const response = await axios.get(`${Base_Url}/getlhidata`,{
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      });
       console.log(response.data);
       setUsers(response.data);
       setFilteredUsers(response.data);
@@ -125,7 +130,12 @@ const Lhiuser = () => {
               .put(`${Base_Url}/putlhidata`, {
                 ...formData,
                 updated_by: updatedBy,
-              })
+              },
+              {
+              headers: {
+                Authorization: token, // Send token in headers
+              },
+            })
               .then((response) => {
                 setFormData({
                   Lhiuser: "",
@@ -141,8 +151,13 @@ const Lhiuser = () => {
             // For insert, include 'created_by'
             await axios
               .post(`${Base_Url}/postlhidata`, {
-                ...formData,
+                ...formData,      
                 created_by: createdBy,
+              },
+              {
+                headers: {
+                  Authorization: token, // Send token in headers
+                },
               })
               .then((response) => {
                 setFormData({
@@ -182,7 +197,11 @@ const Lhiuser = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestlhidata/${id}`);
+      const response = await axios.get(`${Base_Url}/requestlhidata/${id}`,{
+        headers: {
+           Authorization: token, // Send token in headers
+         }, 
+       });
       setFormData(response.data);
       setIsEdit(true);
       console.log(response.data);
@@ -195,7 +214,11 @@ const Lhiuser = () => {
     try {
       const dataId = e.target.getAttribute('data-id');
 
-      const response = axios.post(`${Base_Url}/updatestatus`, { dataId: dataId });
+      const response = axios.post(`${Base_Url}/updatestatus`, { dataId: dataId },{
+        headers: {
+           Authorization: token, // Send token in headers
+         }, 
+       });
 
     } catch (error) {
       console.error("Error editing user:", error);

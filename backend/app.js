@@ -232,7 +232,7 @@ app.get("/getdata",authenticateToken,async (req, res) => {
 });
 
 
-app.get("/requestdata/:id", async (req, res) => {
+app.get("/requestdata/:id",authenticateToken, async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -255,7 +255,7 @@ app.get("/requestdata/:id", async (req, res) => {
 });
 
 
-app.post("/postdata", async (req, res) => {
+app.post("/postdata",authenticateToken, async (req, res) => {
   const { title } = req.body;
 
   try {
@@ -306,7 +306,7 @@ app.post("/postdata", async (req, res) => {
 
 
 // Update existing user with duplicate check
-app.put("/putdata", async (req, res) => {
+app.put("/putdata",authenticateToken, async (req, res) => {
   const { title, id } = req.body;
 
   try {
@@ -343,7 +343,7 @@ app.put("/putdata", async (req, res) => {
 });
 
 
-app.post("/deletedata", async (req, res) => {
+app.post("/deletedata",authenticateToken, async (req, res) => {
   const { id } = req.body;
 
   try {
@@ -700,7 +700,7 @@ app.post("/deletegeostate", async (req, res) => {
 
 //Geo City Start
 // API to fetch regions based on selected country (for the region dropdown)
-app.get("/getregionscity/:country_id", async (req, res) => {
+app.get("/getregionscity/:country_id",authenticateToken, async (req, res) => {
   const { country_id } = req.params;
 
   try {
@@ -728,7 +728,7 @@ app.get("/getregionscity/:country_id", async (req, res) => {
 
 
 // API to fetch geostates based on selected region (for the geostate dropdown)
-app.get("/getgeostatescity/:region_id", async (req, res) => {
+app.get("/getgeostatescity/:region_id",authenticateToken, async (req, res) => {
   const { region_id } = req.params;
 
   try {
@@ -755,7 +755,7 @@ app.get("/getgeostatescity/:region_id", async (req, res) => {
 });
 
 
-app.get("/getdistrictcity/:geostateID", async (req, res) => {
+app.get("/getdistrictcity/:geostateID",authenticateToken, async (req, res) => {
   const { geostateID } = req.params;
 
   try {
@@ -782,7 +782,7 @@ app.get("/getdistrictcity/:geostateID", async (req, res) => {
   }
 });
 
-app.get("/getpincodebyid/:cityid", async (req, res) => {
+app.get("/getpincodebyid/:cityid",authenticateToken, async (req, res) => {
   const { cityid } = req.params;
 
   try {
@@ -948,7 +948,7 @@ app.post("/deletegeocity", async (req, res) => {
 // Area Master Start
 // API to fetch all countries (for the country dropdown)
 // API to fetch countries
-app.get("/getcountries", async (req, res) => {
+app.get("/getcountries",authenticateToken, async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
@@ -1198,7 +1198,7 @@ app.post("/deletearea", async (req, res) => {
 
 // Pincode Master Start
 // API to fetch regions based on selected country (for the region dropdown)
-app.get("/getregionspincode/:country_id", async (req, res) => {
+app.get("/getregionspincode/:country_id",authenticateToken, async (req, res) => {
   const { country_id } = req.params;
 
   try {
@@ -1218,7 +1218,7 @@ app.get("/getregionspincode/:country_id", async (req, res) => {
 
 
 // API to fetch geostates based on selected region (for the geostate dropdown)
-app.get("/getgeostatespincode/:region_id", async (req, res) => {
+app.get("/getgeostatespincode/:region_id",authenticateToken, async (req, res) => {
   const { region_id } = req.params;
 
   try {
@@ -1238,7 +1238,7 @@ app.get("/getgeostatespincode/:region_id", async (req, res) => {
 
 
 // API to fetch geocities based on selected geostate (for the geocity dropdown)
-app.get("/getgeocities_p/:area_id", async (req, res) => {
+app.get("/getgeocities_p/:area_id",authenticateToken, async (req, res) => {
   const { area_id } = req.params;
 
   try {
@@ -1258,7 +1258,7 @@ app.get("/getgeocities_p/:area_id", async (req, res) => {
 
 
 // API to fetch areas based on selected geocity (for the area dropdown)
-app.get("/getareas/:geostate_id", async (req, res) => {
+app.get("/getareas/:geostate_id",authenticateToken, async (req, res) => {
   const { geostate_id } = req.params;
 
   try {
@@ -1489,7 +1489,7 @@ app.post("/deletepincode", async (req, res) => {
 // Pincode Master End
 
 //Start Product List
-app.get("/getproductlist", async (req, res) => {
+app.get("/getproductlist",authenticateToken, async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
@@ -4357,7 +4357,7 @@ AND m.area_id = d.id AND m.geocity_id = ct.id AND m.deleted = 0
 
 
 // Start Franchise Master - Parent
-app.get("/getfranchisedata", async (req, res) => {
+app.get("/getfranchisedata",authenticateToken, async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
@@ -4367,7 +4367,7 @@ app.get("/getfranchisedata", async (req, res) => {
     console.error(err); return res.status(500).json({ error: 'An error occurred while fetching franchise data' });
   }
 });
-app.get("/requestfranchisedata/:id", async (req, res) => {
+app.get("/requestfranchisedata/:id",authenticateToken, async (req, res) => {
   const { id } = req.params;
   try {
     // Use the poolPromise to get the connection pool
@@ -4381,7 +4381,7 @@ app.get("/requestfranchisedata/:id", async (req, res) => {
 });
 
 
-app.post("/postfranchisedata", async (req, res) => {
+app.post("/postfranchisedata",authenticateToken, async (req, res) => {
   const {
     title, contact_person, email, mobile_no, password, address, country_id, region_id, state, area, city,
     pincode_id, website, gst_no, panno, bank_name, bank_acc, bank_ifsc, bank_address, with_liebherr,
@@ -4479,7 +4479,7 @@ app.post("/postfranchisedata", async (req, res) => {
 
 
 
-app.put("/putfranchisedata", async (req, res) => {
+app.put("/putfranchisedata",authenticateToken, async (req, res) => {
   const { title, id, contact_person, email, mobile_no, password, address, country_id, region_id, state, area, city, pincode_id,
     website, gst_no, panno, bank_name, bank_acc, bank_ifsc, bank_address, withliebher, lastworkindate, contract_acti, contract_expir, licarecode
     , partner_name, created_by
@@ -4586,7 +4586,7 @@ app.put("/putfranchisedata", async (req, res) => {
     return res.status(500).json({ error: 'An error occurred while updating the Franchise Master' });
   }
 });
-app.post("/deletefranchisedata", async (req, res) => {
+app.post("/deletefranchisedata",authenticateToken, async (req, res) => {
   const { id } = req.body;
 
   try {
@@ -4711,7 +4711,7 @@ AND m.area_id = d.id AND m.geocity_id = ct.id AND m.pfranchise_id = p.licarecode
 
 //End of Request Child Franchise populate data
 
-app.get("/getmasterfranchisepopulate/:masterid", async (req, res) => {
+app.get("/getmasterfranchisepopulate/:masterid",authenticateToken, async (req, res) => {
   const { masterid } = req.params;
 
   try {
@@ -5103,7 +5103,7 @@ app.post("/deletechildfranchise", (req, res) => {
 
 // ProductType Start
 // API to fetch all Product Types that are not soft-deleted
-app.get("/getproducttype", async (req, res) => {
+app.get("/getproducttype",authenticateToken, async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
@@ -5115,7 +5115,7 @@ app.get("/getproducttype", async (req, res) => {
   }
 });
 // Insert for Product Type
-app.post("/postdataproducttype", async (req, res) => {
+app.post("/postdataproducttype",authenticateToken, async (req, res) => {
   const { id, product_type, created_by } = req.body;
 
   try {
@@ -5168,7 +5168,7 @@ app.post("/postdataproducttype", async (req, res) => {
 });
 
 // Edit for Product Type
-app.get("/requestdataproducttype/:id", async (req, res) => {
+app.get("/requestdataproducttype/:id",authenticateToken, async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -5192,7 +5192,7 @@ app.get("/requestdataproducttype/:id", async (req, res) => {
   }
 });
 // Update for Product Type
-app.put("/putproducttypedata", async (req, res) => {
+app.put("/putproducttypedata",authenticateToken, async (req, res) => {
   const { id, product_type, updated_by } = req.body;
 
   try {
@@ -5218,7 +5218,7 @@ app.put("/putproducttypedata", async (req, res) => {
   }
 });
 // Delete for Product Type
-app.post("/deleteproducttypedata", async (req, res) => {
+app.post("/deleteproducttypedata",authenticateToken, async (req, res) => {
   const { id } = req.body;
 
   try {
@@ -5239,7 +5239,7 @@ app.post("/deleteproducttypedata", async (req, res) => {
 
 //Product Line Start
 // API to fetch all product lines that are not soft deleted
-app.get("/getproductline", async (req, res) => {
+app.get("/getproductline",authenticateToken, async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
@@ -5255,7 +5255,7 @@ app.get("/getproductline", async (req, res) => {
   }
 });
 // Insert for product line
-app.post("/postdataproductline", async (req, res) => {
+app.post("/postdataproductline",authenticateToken, async (req, res) => {
   const { id, product_line, pline_code, created_by } = req.body;
 
   try {
@@ -5306,7 +5306,7 @@ app.post("/postdataproductline", async (req, res) => {
   }
 });
 // Edit for product line
-app.get("/requestdataproductline/:id", async (req, res) => {
+app.get("/requestdataproductline/:id",authenticateToken, async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -5329,7 +5329,7 @@ app.get("/requestdataproductline/:id", async (req, res) => {
   }
 });
 // Update for product line
-app.put("/putproductlinedata", async (req, res) => {
+app.put("/putproductlinedata",authenticateToken, async (req, res) => {
   const { id, product_line, pline_code, updated_by } = req.body;
 
   try {
@@ -5354,7 +5354,7 @@ app.put("/putproductlinedata", async (req, res) => {
   }
 });
 // Delete for product line
-app.post("/deleteproductlinedata", async (req, res) => {
+app.post("/deleteproductlinedata",authenticateToken, async (req, res) => {
   const { id } = req.body;
 
   try {
@@ -5375,7 +5375,7 @@ app.post("/deleteproductlinedata", async (req, res) => {
 
 //Material Start
 // API to fetch all materials that are not soft deleted
-app.get("/getmat", async (req, res) => {
+app.get("/getmat",authenticateToken, async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
@@ -5391,7 +5391,7 @@ app.get("/getmat", async (req, res) => {
   }
 });
 // Insert for material
-app.post("/postdatamat", async (req, res) => {
+app.post("/postdatamat",authenticateToken, async (req, res) => {
   const { id, Material, created_by } = req.body;
 
   try {
@@ -5441,7 +5441,7 @@ app.post("/postdatamat", async (req, res) => {
   }
 });
 // Edit for material
-app.get("/requestdatamat/:id", async (req, res) => {
+app.get("/requestdatamat/:id",authenticateToken, async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -5459,7 +5459,7 @@ app.get("/requestdatamat/:id", async (req, res) => {
   }
 });
 // Update for material
-app.put("/putmatdata", async (req, res) => {
+app.put("/putmatdata",authenticateToken, async (req, res) => {
   const { id, Material, updated_by } = req.body;
 
   try {
@@ -5486,7 +5486,7 @@ app.put("/putmatdata", async (req, res) => {
   }
 });
 // Delete for material
-app.post("/deletematdata", async (req, res) => {
+app.post("/deletematdata",authenticateToken, async (req, res) => {
   const { id } = req.body;
 
   try {
@@ -5506,7 +5506,7 @@ app.post("/deletematdata", async (req, res) => {
 
 //Manufacturer Start
 // API to fetch all Manufacturer that are not soft deleted
-app.get("/getmanufacturer", async (req, res) => {
+app.get("/getmanufacturer",authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
@@ -5521,7 +5521,7 @@ app.get("/getmanufacturer", async (req, res) => {
   }
 });
 // Insert for Mnufacturer
-app.post("/postmanufacturer", async (req, res) => {
+app.post("/postmanufacturer",authenticateToken, async (req, res) => {
   const { id, Manufacturer, created_by } = req.body;
 
   try {
@@ -5577,7 +5577,7 @@ app.post("/postmanufacturer", async (req, res) => {
 
 
 // Edit for Manufacturer
-app.get("/requestmanufacturer/:id", async (req, res) => {
+app.get("/requestmanufacturer/:id",authenticateToken, async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -5599,7 +5599,7 @@ app.get("/requestmanufacturer/:id", async (req, res) => {
 });
 
 // Update for Manufacturer
-app.put("/putmanufacturer", async (req, res) => {
+app.put("/putmanufacturer",authenticateToken, async (req, res) => {
   const { id, Manufacturer, updated_by } = req.body;
 
   try {
@@ -5627,7 +5627,7 @@ app.put("/putmanufacturer", async (req, res) => {
 });
 
 // Delete for Manufacturer
-app.post("/delmanufacturer", async (req, res) => {
+app.post("/delmanufacturer",authenticateToken, async (req, res) => {
   const { id } = req.body;
 
   try {
@@ -5645,7 +5645,7 @@ app.post("/delmanufacturer", async (req, res) => {
 });
 
 // Rate Card code start
-app.get("/getratedata", async (req, res) => {
+app.get("/getratedata",authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
@@ -5660,7 +5660,7 @@ app.get("/getratedata", async (req, res) => {
   }
 });
 // Insert for Ratecard
-app.post("/postratedata", async (req, res) => {
+app.post("/postratedata",authenticateToken, async (req, res) => {
   const { Ratecard } = req.body;
 
   try {
@@ -5716,7 +5716,7 @@ app.get("/requestratedata/:id", async (req, res) => {
   }
 });
 // update for Ratecard
-app.put("/putratedata", async (req, res) => {
+app.put("/putratedata",authenticateToken, async (req, res) => {
   const { Ratecard, id } = req.body;
 
   try {
@@ -5741,7 +5741,7 @@ app.put("/putratedata", async (req, res) => {
   }
 });
 // delete for Ratecard
-app.post("/deleteratedata", async (req, res) => {
+app.post("/deleteratedata",authenticateToken, async (req, res) => {
   const { id } = req.body;
 
   try {
@@ -5812,7 +5812,7 @@ app.post("/postprodata", async (req, res) => {
   }
 });
 // edit for Serviceproduct
-app.get("/requestprodata/:id", async (req, res) => {
+app.get("/requestprodata/:id",authenticateToken, async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -5878,7 +5878,8 @@ app.post("/deleteprodata", async (req, res) => {
 
 // Service Contract code Start
 
-app.get("/getservicecontract", async (req, res) => {
+app.get("/getservicecontract",
+   async (req, res) => {
   try {
     const pool = await poolPromise;
 
@@ -6154,7 +6155,7 @@ app.get("/getservicecontractpopulate/:serviceid", async (req, res) => {
 // Service Contract Code End
 
 // Lhi User code start
-app.get("/getlhidata", async (req, res) => {
+app.get("/getlhidata", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
@@ -6169,7 +6170,7 @@ app.get("/getlhidata", async (req, res) => {
   }
 });
 // Insert for Lhiuser
-app.post("/postlhidata", async (req, res) => {
+app.post("/postlhidata", authenticateToken, async (req, res) => {
   const { Lhiuser,
     mobile_no,
     Password,
@@ -6218,7 +6219,7 @@ app.post("/postlhidata", async (req, res) => {
   }
 });
 // edit for Lhiuser
-app.get("/requestlhidata/:id", async (req, res) => {
+app.get("/requestlhidata/:id", authenticateToken, async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -6239,7 +6240,7 @@ app.get("/requestlhidata/:id", async (req, res) => {
   }
 });
 // update for Lhiuser
-app.put("/putlhidata", async (req, res) => {
+app.put("/putlhidata", authenticateToken, async (req, res) => {
   const {
     Lhiuser, id, updated_by, mobile_no, Usercode, password, status, email, remarks
   } = req.body;
@@ -6418,7 +6419,7 @@ app.post("/deletecalldata", async (req, res) => {
 
 //service agent  code start
 // Service agent code
-app.get("/getsdata", async (req, res) => {
+app.get("/getsdata",authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
@@ -6434,7 +6435,7 @@ app.get("/getsdata", async (req, res) => {
 });
 
 // Insert for serviceagent
-app.post("/postsdata", async (req, res) => {
+app.post("/postsdata",authenticateToken, async (req, res) => {
   const { id, serviceagent, created_by } = req.body;
 
   try {
@@ -6488,7 +6489,7 @@ app.post("/postsdata", async (req, res) => {
 });
 
 // Edit for serviceagent
-app.get("/requestsdata/:id", async (req, res) => {
+app.get("/requestsdata/:id",authenticateToken, async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -6510,7 +6511,7 @@ app.get("/requestsdata/:id", async (req, res) => {
 });
 
 // Update for serviceagent
-app.put("/putsdata", async (req, res) => {
+app.put("/putsdata",authenticateToken, async (req, res) => {
   const { id, serviceagent, updated_by } = req.body;
 
   try {
@@ -6535,7 +6536,7 @@ app.put("/putsdata", async (req, res) => {
   }
 });
 // Delete for serviceagent
-app.post("/deletesdata", async (req, res) => {
+app.post("/deletesdata",authenticateToken, async (req, res) => {
   const { id } = req.body;
 
   try {

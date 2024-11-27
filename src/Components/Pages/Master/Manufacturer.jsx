@@ -14,6 +14,7 @@ const Manufacturer = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const [duplicateError, setDuplicateError] = useState(''); // State to track duplicate error
+  const token = localStorage.getItem("token"); // Get token from localStorage
   const createdBy = 1;  // Static value for created_by
   const updatedBy = 2;  // Static value for updated_by
 
@@ -23,7 +24,11 @@ const Manufacturer = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getmanufacturer`);
+      const response = await axios.get(`${Base_Url}/getmanufacturer`,{
+        headers: {
+           Authorization: token, // Send token in headers
+         }, 
+       });
       console.log(response.data);
       setUsers(response.data);
       setFilteredUsers(response.data);
@@ -77,7 +82,11 @@ const Manufacturer = () => {
       if (confirmSubmission) {
         if (isEdit) {
           // For update, include 'updated_by'
-          await axios.put(`${Base_Url}/putmanufacturer`, { ...formData, updated_by: updatedBy })
+          await axios.put(`${Base_Url}/putmanufacturer`, { ...formData, updated_by: updatedBy },{
+            headers: {
+               Authorization: token, // Send token in headers
+             }, 
+           })
             .then(response => {
               setFormData({
                 Manufacturer: ''
@@ -91,7 +100,11 @@ const Manufacturer = () => {
             });
         } else {
           // For insert, include 'created_by'
-          await axios.post(`${Base_Url}/postmanufacturer`, { ...formData, created_by: createdBy })
+          await axios.post(`${Base_Url}/postmanufacturer`, { ...formData, created_by: createdBy },{
+            headers: {
+               Authorization: token, // Send token in headers
+             }, 
+           })
             .then(response => {
               setFormData({
                 Manufacturer: ''
@@ -113,7 +126,11 @@ const Manufacturer = () => {
   const deleted = async (id) => {
     console.log(id)
     try {
-      const response = await axios.post(`${Base_Url}/delmanufacturer`, { id: id });
+      const response = await axios.post(`${Base_Url}/delmanufacturer`, { id: id },{
+        headers: {
+           Authorization: token, // Send token in headers
+         }, 
+       });
       setFormData({
         Manufacturer: ''
       })
@@ -125,7 +142,11 @@ const Manufacturer = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestmanufacturer/${id}`);
+      const response = await axios.get(`${Base_Url}/requestmanufacturer/${id}`,{
+        headers: {
+           Authorization: token, // Send token in headers
+         }, 
+       });
       setFormData(response.data)
       setIsEdit(true);
       console.log(response.data);

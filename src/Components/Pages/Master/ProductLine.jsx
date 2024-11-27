@@ -13,6 +13,7 @@ const ProductLine = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [duplicateError, setDuplicateError] = useState("");
+  const token = localStorage.getItem("token"); // Get token from localStorage
   const createdBy = 1;
   const updatedBy = 2;
 
@@ -23,7 +24,11 @@ const ProductLine = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getproductline`);
+      const response = await axios.get(`${Base_Url}/getproductline`, {
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      });
       console.log(response.data);
       setUsers(response.data);
       setFilteredUsers(response.data);
@@ -82,6 +87,10 @@ const ProductLine = () => {
             .put(`${Base_Url}/putproductlinedata`, {
               ...formData,
               updated_by: updatedBy,
+            }, {
+              headers: {
+                Authorization: token, // Send token in headers
+              },
             })
             .then((response) => {
               setFormData({
@@ -102,6 +111,10 @@ const ProductLine = () => {
             .post(`${Base_Url}/postdataproductline`, {
               ...formData,
               created_by: createdBy,
+            }, {
+              headers: {
+                Authorization: token, // Send token in headers
+              },
             })
             .then((response) => {
               setFormData({
@@ -128,6 +141,10 @@ const ProductLine = () => {
     try {
       const response = await axios.post(`${Base_Url}/deleteproductlinedata`, {
         id,
+      }, {
+        headers: {
+          Authorization: token, // Send token in headers
+        },
       });
       setFormData({
         pline_code: "",
@@ -143,7 +160,11 @@ const ProductLine = () => {
     try {
       const response = await axios.get(
         `${Base_Url}/requestdataproductline/${id}`
-      );
+        , {
+          headers: {
+            Authorization: token, // Send token in headers
+          },
+        });
       setFormData(response.data);
       setIsEdit(true);
       console.log(response.data);
