@@ -9,28 +9,40 @@ const multer = require("multer");
 const bodyParser = require("body-parser");
 const path = require("path");
 const fs = require("fs");
+const jwt = require("jsonwebtoken");
 
-// Import Routes  
-const { router: Login, authenticateToken } = require("./Routes/Auth/Login");
 
+// Secret key for JWT
+const JWT_SECRET = "Lh!_Login_123"; // Replace with a strong, secret key
 
 
 app.use(cors({ origin: "*" }));
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+const authenticateToken = (req, res, next) => {
+
+  const token = req.headers["authorization"];
+
+  if (!token) {
+      return res.status(403).json({ message: "Token required" });
+  }
+
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+      if (err) {
+          return res.status(401).json({ message: "Invalid token" });
+      }
+
+      req.user = user; // Attach user info to request
+      next();
+  });
+};
 
 // this is for use routing
 
 app.use("/", complaint);
 app.use("/", common);
 app.use("/", Category);
-app.use("/", Login);
 
-// Ensure 'uploads' folder exists
-const uploadDir = path.join(__dirname, "uploads");
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -72,9 +84,58 @@ app.listen(8081, () => {
 
 
 
+app.post("/loginuser", async (req, res) => {
+
+
+  const { Lhiuser, password } = req.body;
+
+  console.log(Lhiuser);
+
+  try {
+      // Use the poolPromise to get the connection pool
+      const pool = await poolPromise;
+
+      const sql = `SELECT id, Lhiuser FROM lhi_user WHERE Lhiuser = '${Lhiuser}' AND password = '${password}'`;
+
+      console.log(sql);
+
+      const result = await pool.request().query(sql);
+
+      if (result.recordset.length > 0) {
+          const user = result.recordset[0];
+
+          // Generate JWT token
+          const token = jwt.sign(
+              { id: user.id, Lhiuser: user.Lhiuser }, // Payload
+              JWT_SECRET, // Secret key
+              { expiresIn: "1h" } // Token validity
+          );
+
+          res.json({
+              message: "Login successful",
+              token, // Send token to client
+              user: {
+                  id: user.id,
+                  Lhiuser: user.Lhiuser,
+              },
+          });
+          
+      } else {
+          res.status(401).json({ message: "Invalid username or password" });
+      }
+  } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Database error", error: err });
+  }
+});
 
 
 
+
+
+app.get("/protected-route", authenticateToken, (req, res) => {
+  res.json({ message: "You have access", user: req.user });
+});
 
 
 //CSP Login
@@ -7219,7 +7280,7 @@ app.post('/updatecomplaint', authenticateToken, async (req, res) => {
 
 //Start Complaint List
 // Complaint List API with filters
-app.get("/getcomplainlist",authenticateToken, async (req, res) => {
+app.get("/getcomplainlist", async (req, res) => {
   try {
     const pool = await poolPromise;
     const {

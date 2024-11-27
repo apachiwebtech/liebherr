@@ -525,7 +525,6 @@ function App() {
   };
 
   React.useEffect(() => {
-    // checkLocalStorageAndRedirect(navigate);
     fetchProtectedData()
 
     const timer = setTimeout(() => {

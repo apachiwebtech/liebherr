@@ -31,6 +31,8 @@ const authenticateToken = (req, res, next) => {
 
 
 router.post("/loginuser", async (req, res) => {
+
+
     const { Lhiuser, password } = req.body;
 
     console.log(Lhiuser);
@@ -63,6 +65,7 @@ router.post("/loginuser", async (req, res) => {
                     Lhiuser: user.Lhiuser,
                 },
             });
+            
         } else {
             res.status(401).json({ message: "Invalid username or password" });
         }
@@ -71,6 +74,8 @@ router.post("/loginuser", async (req, res) => {
         res.status(500).json({ message: "Database error", error: err });
     }
 });
+
+
 
 
 router.get("/protected-route", authenticateToken, (req, res) => {
