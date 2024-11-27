@@ -172,33 +172,42 @@ export function Customerlist(params) {
 
                                 <div className="col-md-2">
                                     <div className="form-group">
-                                        <label>Ticket No.</label>
+                                        <label>Customer ID</label>
                                         <input
                                             type="text"
                                             className="form-control"
-                                            name="ticketno"
-                                            value={searchFilters.ticketno}
-                                            placeholder="Search by complaint no"
+                                            name="customer_id"
+                                            value={searchFilters.customer_id}
+                                            placeholder="Search by customer_id"
                                             onChange={handleFilterChange}
                                         />
                                     </div>
                                 </div>
 
-                                <div className="col-md-3">
+                                <div className="col-md-2">
                                     <div className="form-group">
                                         <label>Customer Type</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
+                                        <select
+
+                                            className="form-select"
                                             name="customertype"
-                                            value={searchFilters.customertype}
-                                            placeholder="Search by customer Id"
+                                            value={searchFilters.customer_type}
+                                            placeholder="Search by customer Type"
                                             onChange={handleFilterChange}
-                                        />
+                                        >
+                                            <option value="selected">Select Customer Type</option>
+                                            <option value="Customer">EndCustomer</option>
+                                            <option value="Dealer">Sales Dealer WH/Display</option>
+                                            <option value="Partner">Service Partner</option>
+                                            <option value="Warehouse">Warehouse</option>
+                                            <option value="Lhidisplay">LHI Display/WH</option>
+                                            <option value="Subdealer">Sub-Dealer</option>
+
+                                        </select>
                                     </div>
                                 </div>
 
-                                <div className="col-md-3">
+                                <div className="col-md-2">
                                     <div className="form-group">
                                         <label>Customer First Name</label>
                                         <input
@@ -217,23 +226,15 @@ export function Customerlist(params) {
                                         <input
                                             type="text"
                                             className="form-control"
-                                            name="serialNo"
-                                            value={searchFilters.serialNo}
-                                            placeholder="Search by serial no"
+                                            name="customer_lname"
+                                            value={searchFilters.customer_lname}
+                                            placeholder="Search by Customer Last name"
                                             onChange={handleFilterChange}
                                         />
                                     </div>
                                 </div>
 
-
-                            </div>
-                            <div className="row mb-3">
-
-
-
-
-
-                                <div className="col-md-3">
+                                <div className="col-md-2">
                                     <div className="form-group">
                                         <label>Customer Mobile</label>
                                         <input
@@ -247,7 +248,7 @@ export function Customerlist(params) {
                                     </div>
                                 </div>
 
-                                <div className="col-md-3">
+                                <div className="col-md-2">
                                     <div className="form-group">
                                         <label>Customer Email</label>
                                         <input
@@ -260,6 +261,16 @@ export function Customerlist(params) {
                                         />
                                     </div>
                                 </div>
+
+
+                            </div>
+                            <div className="row mb-3">
+
+
+
+
+
+
 
                                 {/* Buttons and message at the far-right corner */}
                                 <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">

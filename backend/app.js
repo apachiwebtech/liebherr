@@ -3622,7 +3622,8 @@ app.post("/postcustomer", async (req, res) => {
     dateofbirth,
     anniversary_date,
     email,
-    salutation
+    salutation,
+    customer_id
   } = req.body;
 
   try {
@@ -3642,8 +3643,8 @@ app.post("/postcustomer", async (req, res) => {
       });
     } else {
       // Insert the customer if no duplicate is found
-      const insertSql = `INSERT INTO awt_customer (customer_fname, customer_lname, customer_type, customer_classification, mobileno, alt_mobileno, dateofbirth, anniversary_date, email,salutation)
-                         VALUES ('${customer_fname}', '${customer_lname}', '${customer_type}', '${customer_classification}', '${mobileno}', '${alt_mobileno}', '${dateofbirth}', '${anniversary_date}', '${email}','${salutation}')`;
+      const insertSql = `INSERT INTO awt_customer (customer_fname, customer_lname, customer_type, customer_classification, mobileno, alt_mobileno, dateofbirth, anniversary_date, email,salutation,customer_id)
+                         VALUES ('${customer_fname}', '${customer_lname}', '${customer_type}', '${customer_classification}', '${mobileno}', '${alt_mobileno}', '${dateofbirth}', '${anniversary_date}', '${email}','${salutation}','${customer_id}')`;
 
       // Execute the insert query
       await pool.request().query(insertSql);
@@ -3662,7 +3663,7 @@ app.post("/postcustomer", async (req, res) => {
 // customer put 
 
 app.put("/putcustomer", async (req, res) => {
-  const { id, customer_fname, customer_lname, customer_type, customer_classification, mobileno, alt_mobileno, dateofbirth, anniversary_date, email, salutation ,created_by} = req.body;
+  const { id, customer_fname, customer_lname, customer_type, customer_classification, mobileno, alt_mobileno, dateofbirth, anniversary_date, email, salutation ,customer_id,created_by} = req.body;
 
 
   try {
@@ -3704,7 +3705,8 @@ app.put("/putcustomer", async (req, res) => {
        alt_mobileno = @alt_mobileno,
        dateofbirth = @dateofbirth,
        anniversary_date = @anniversary_date,
-       salutation = @salutation,      
+       salutation = @salutation,
+       customer_id = @customer_id,      
        updated_by = @created_by
      WHERE id = @id
    `;
@@ -3721,6 +3723,7 @@ app.put("/putcustomer", async (req, res) => {
       .input('dateofbirth', dateofbirth)
       .input('anniversary_date', anniversary_date)
       .input('salutation', salutation)
+      .input('customer_id', customer_id)
       .input('created_by', created_by)
       .input('id', id)
       .query(updateSQL);

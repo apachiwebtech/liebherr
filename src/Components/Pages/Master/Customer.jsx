@@ -27,6 +27,7 @@ const Customer = () => {
     anniversary_date: '',
     email: '',
     salutation: '',
+    customer_id:''
   });
 
   const fetchCustomerData = async (id) => {
@@ -55,7 +56,8 @@ const Customer = () => {
         dateofbirth: response.data[0].dateofbirth,
         alt_mobileno: response.data[0].alt_mobileno,
         anniversary_date: response.data[0].anniversary_date,
-        salutation: response.data[0].salutation        
+        salutation: response.data[0].salutation,   
+        customer_id:response.data[0].customer_id     
       });
 
 
@@ -164,6 +166,7 @@ const Customer = () => {
                 anniversary_date: '',
                 email: '',
                 salutation: '',
+                customer_id:'',
               })
               setSuccessMessage('Customer Updated Successfully!');
               setTimeout(() => setSuccessMessage(''), 3000);
@@ -189,6 +192,7 @@ const Customer = () => {
                 anniversary_date: '',
                 email: '',
                 salutation: '',
+                customer_id:'',
               })
               setSuccessMessage('Customer Submitted Successfully!');
               setTimeout(() => setSuccessMessage(''), 3000);
@@ -220,6 +224,7 @@ const Customer = () => {
         dateofbirth: '',
         anniversary_date: '',
         email: '',
+        customer_id: '',
       })
       fetchCustomerData();
     } catch (error) {
@@ -309,20 +314,21 @@ const Customer = () => {
                         )}
                       </div>
                       <div className="col-md-3 mb-3">
-                        <label htmlFor="emailid" className="form-label">Email ID</label>
+                        <label htmlFor="Customerid" className="form-label">Customer ID</label>
                         <input
-                          type="email"
+                          type="text"
                           className="form-control"
-                          id="emailid"
-                          aria-describedby="emailid"
-                          name="email"
-                          value={formData.email}
+                          id="Customerid"
+                          aria-describedby="Customerid"
+                          name="customer_id"
                           onChange={handleChange}
+                          value={formData.customer_id}
                         />
-                        {errors.email && (
-                          <small className="text-danger">{errors.email}</small>
+                        {errors.customer_lname && (
+                          <small className="text-danger">{errors.customer_id}</small>
                         )}
                       </div>
+                     
                       <div className="col-md-2 mb-3">
                         <label htmlFor="cclassification" className="form-label">Customer Classification</label>
                         <select id="cclassification" name="customer_classification" className="form-select" aria-label=".form-select-lg example" value={formData.customer_classification} onChange={handleChange} >
@@ -408,6 +414,21 @@ const Customer = () => {
                         />
                         {errors.anniversary_date && (
                           <small className="text-danger">{errors.anniversary_date}</small>
+                        )}
+                      </div>
+                      <div className="col-md-3 mb-3">
+                        <label htmlFor="emailid" className="form-label">Email ID</label>
+                        <input
+                          type="email"
+                          className="form-control"
+                          id="emailid"
+                          aria-describedby="emailid"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                        />
+                        {errors.email && (
+                          <small className="text-danger">{errors.email}</small>
                         )}
                       </div>
                       <div className="col-md-12 text-right">
