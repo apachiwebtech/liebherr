@@ -188,18 +188,18 @@ export function Customerlist(params) {
                                         <select
 
                                             className="form-select"
-                                            name="customertype"
+                                            name="customer_type"
                                             value={searchFilters.customer_type}
                                             placeholder="Search by customer Type"
                                             onChange={handleFilterChange}
                                         >
                                             <option value="selected">Select Customer Type</option>
-                                            <option value="Customer">EndCustomer</option>
-                                            <option value="Dealer">Sales Dealer WH/Display</option>
-                                            <option value="Partner">Service Partner</option>
+                                            <option value="EndCustomer">EndCustomer</option>
+                                            <option value="Sales Dealer WH/Display">Sales Dealer WH/Display</option>
+                                            <option value=" Service Partner">Service Partner</option>
                                             <option value="Warehouse">Warehouse</option>
                                             <option value="Lhidisplay">LHI Display/WH</option>
-                                            <option value="Subdealer">Sub-Dealer</option>
+                                            <option value="Sub-Dealer">Sub-Dealer</option>
 
                                         </select>
                                     </div>

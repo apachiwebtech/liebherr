@@ -344,12 +344,12 @@ const Customer = () => {
                         <label htmlFor="custype" className="form-label">Customer Type</label>
                         <select id="custype" className="form-select" aria-label=".form-select-lg example" name="customer_type" value={formData.customer_type} onChange={handleChange} >
                           <option value="selected">Select Customer Type</option>
-                          <option value="Customer">EndCustomer</option>
-                          <option value="Dealer">Sales Dealer WH/Display</option>
-                          <option value="Partner">Service Partner</option>
+                          <option value="EndCustomer">EndCustomer</option>
+                          <option value="Sales Dealer WH/Display">Sales Dealer WH/Display</option>
+                          <option value="Service Partner">Service Partner</option>
                           <option value="Warehouse">Warehouse</option>
                           <option value="Lhidisplay">LHI Display/WH</option>
-                          <option value="Subdealer">Sub-Dealer</option>
+                          <option value="Sub-Dealer">Sub-Dealer</option>
                         </select>
                         {errors.customer_type && (
                           <small className="text-danger">{errors.customer_type}</small>
