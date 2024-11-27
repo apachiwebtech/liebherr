@@ -163,107 +163,107 @@ export function Customerlist(params) {
                     <div className="card mb-3 tab_box">
 
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
-                            <div className="searchFilter">
-                            <div className='p-1 text-right'>
-                                <Link to={`/Customer`}><button className='btn btn-primary'>Add Customer</button></Link>
-                            </div>
-                            <div className="row mb-3">
-
-                                <div className="col-md-2">
-                                    <div className="form-group">
-                                        <label>Customer ID</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="customer_id"
-                                            value={searchFilters.customer_id}
-                                            placeholder="Search by customer_id"
-                                            onChange={handleFilterChange}
-                                        />
-                                    </div>
+                            
+                                <div className='p-1 text-right'>
+                                    <Link to={`/Customer`}><button className='btn btn-primary'>Add Customer</button></Link>
                                 </div>
+                                <div className="row mb-3">
 
-                                <div className="col-md-2">
-                                    <div className="form-group">
-                                        <label>Customer Type</label>
-                                        <select
-
-                                            className="form-select"
-                                            name="customer_type"
-                                            value={searchFilters.customer_type}
-                                            placeholder="Search by customer Type"
-                                            onChange={handleFilterChange}
-                                        >
-                                            <option value="selected">Select Customer Type</option>
-                                            <option value="EndCustomer">EndCustomer</option>
-                                            <option value="Sales Dealer WH/Display">Sales Dealer WH/Display</option>
-                                            <option value=" Service Partner">Service Partner</option>
-                                            <option value="Warehouse">Warehouse</option>
-                                            <option value="Lhidisplay">LHI Display/WH</option>
-                                            <option value="Sub-Dealer">Sub-Dealer</option>
-
-                                        </select>
+                                    <div className="col-md-2">
+                                        <div className="form-group">
+                                            <label>Customer ID</label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                name="customer_id"
+                                                value={searchFilters.customer_id}
+                                                placeholder="Search by customer_id"
+                                                onChange={handleFilterChange}
+                                            />
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div className="col-md-2">
-                                    <div className="form-group">
-                                        <label>Customer First Name</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="customer_fname"
-                                            value={searchFilters.customer_fname}
-                                            placeholder="Search by customer name"
-                                            onChange={handleFilterChange}
-                                        />
+                                    <div className="col-md-2">
+                                        <div className="form-group">
+                                            <label>Customer Type</label>
+                                            <select
+
+                                                className="form-select"
+                                                name="customer_type"
+                                                value={searchFilters.customer_type}
+                                                placeholder="Search by customer Type"
+                                                onChange={handleFilterChange}
+                                            >
+                                                <option value="selected">Select Customer Type</option>
+                                                <option value="EndCustomer">EndCustomer</option>
+                                                <option value="Sales Dealer WH/Display">Sales Dealer WH/Display</option>
+                                                <option value=" Service Partner">Service Partner</option>
+                                                <option value="Warehouse">Warehouse</option>
+                                                <option value="Lhidisplay">LHI Display/WH</option>
+                                                <option value="Sub-Dealer">Sub-Dealer</option>
+
+                                            </select>
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="col-md-2">
-                                    <div className="form-group">
-                                        <label>Customer Last Name</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="customer_lname"
-                                            value={searchFilters.customer_lname}
-                                            placeholder="Search by Customer Last name"
-                                            onChange={handleFilterChange}
-                                        />
+
+                                    <div className="col-md-2">
+                                        <div className="form-group">
+                                            <label>Customer First Name</label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                name="customer_fname"
+                                                value={searchFilters.customer_fname}
+                                                placeholder="Search by customer name"
+                                                onChange={handleFilterChange}
+                                            />
+                                        </div>
                                     </div>
-                                </div>
-
-                                <div className="col-md-2">
-                                    <div className="form-group">
-                                        <label>Customer Mobile</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="mobileno"
-                                            value={searchFilters.mobileno}
-                                            placeholder="Search by customer mobile"
-                                            onChange={handleFilterChange}
-                                        />
+                                    <div className="col-md-2">
+                                        <div className="form-group">
+                                            <label>Customer Last Name</label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                name="customer_lname"
+                                                value={searchFilters.customer_lname}
+                                                placeholder="Search by Customer Last name"
+                                                onChange={handleFilterChange}
+                                            />
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div className="col-md-2">
-                                    <div className="form-group">
-                                        <label>Customer Email</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="email"
-                                            value={searchFilters.email}
-                                            placeholder="Search by customer email"
-                                            onChange={handleFilterChange}
-                                        />
+                                    <div className="col-md-2">
+                                        <div className="form-group">
+                                            <label>Customer Mobile</label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                name="mobileno"
+                                                value={searchFilters.mobileno}
+                                                placeholder="Search by customer mobile"
+                                                onChange={handleFilterChange}
+                                            />
+                                        </div>
                                     </div>
+
+                                    <div className="col-md-2">
+                                        <div className="form-group">
+                                            <label>Customer Email</label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                name="email"
+                                                value={searchFilters.email}
+                                                placeholder="Search by customer email"
+                                                onChange={handleFilterChange}
+                                            />
+                                        </div>
+                                    </div>
+
+
                                 </div>
-
-
-                            </div>
-                            <div className="row mb-3">
+                                <div className="row mb-3">
 
 
 
@@ -271,44 +271,44 @@ export function Customerlist(params) {
 
 
 
-                                {/* Buttons and message at the far-right corner */}
-                                <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
-                                    <div className="form-group">
-                                        <button
-                                            className="btn btn-primary mr-2"
-                                            onClick={applyFilters}
-                                        >
-                                            Search
-                                        </button>
-                                        <button
-                                            className="btn btn-secondary"
-                                            onClick={resetFilters}
-                                            style={{
-                                                marginLeft: '5px',
-                                            }}
-                                        >
-                                            Reset
-                                        </button>
-                                        {filteredData.length === 0 && (
-                                            <div
+                                    {/* Buttons and message at the far-right corner */}
+                                    <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
+                                        <div className="form-group">
+                                            <button
+                                                className="btn btn-primary mr-2"
+                                                onClick={applyFilters}
+                                            >
+                                                Search
+                                            </button>
+                                            <button
+                                                className="btn btn-secondary"
+                                                onClick={resetFilters}
                                                 style={{
-                                                    backgroundColor: '#f8d7da',
-                                                    color: '#721c24',
-                                                    padding: '5px 10px',
-                                                    marginLeft: '10px',
-                                                    borderRadius: '4px',
-                                                    border: '1px solid #f5c6cb',
-                                                    fontSize: '14px',
-                                                    display: 'inline-block'
+                                                    marginLeft: '5px',
                                                 }}
                                             >
-                                                No Record Found
-                                            </div>
-                                        )}
+                                                Reset
+                                            </button>
+                                            {filteredData.length === 0 && (
+                                                <div
+                                                    style={{
+                                                        backgroundColor: '#f8d7da',
+                                                        color: '#721c24',
+                                                        padding: '5px 10px',
+                                                        marginLeft: '10px',
+                                                        borderRadius: '4px',
+                                                        border: '1px solid #f5c6cb',
+                                                        fontSize: '14px',
+                                                        display: 'inline-block'
+                                                    }}
+                                                >
+                                                    No Record Found
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            </div>
+                            
                             <table className="table">
                                 <thead>
                                     <tr>
