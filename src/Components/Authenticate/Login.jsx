@@ -3,7 +3,7 @@ import { Base_Url } from "../Utils/Base_Url";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import md5 from "js-md5";
-import logo from  '../../images/Liebherr-logo-768x432.png'
+import logo from '../../images/Liebherr-logo-768x432.png'
 import back from '../../images/login.jpeg'
 
 
@@ -20,19 +20,24 @@ export function Login() {
         try {
 
             const hashpass = md5(password)
-           
+
             const response = await axios.post(`${Base_Url}/loginuser`, {
                 Lhiuser: Lhiuser,
                 password: hashpass,
             });
 
-          
+
             if (response.data) {
                 localStorage.setItem("userId", response.data.user.id);
                 localStorage.setItem("Lhiuser", response.data.user.Lhiuser);
                 localStorage.setItem("token", response.data.token);
 
                 // Navigate to the home page
+
+                // Start the timer to refresh the page
+                setTimeout(() => {
+                    window.location.reload();
+                }, 60 * 1000); // 1 minute in milliseconds
                 navigate('/');
             } else {
                 alert("Invalid username or password");

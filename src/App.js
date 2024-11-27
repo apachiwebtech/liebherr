@@ -97,8 +97,8 @@ const Router = createBrowserRouter([
     element: <Login />,
 
   },
- 
-   {
+
+  {
     path: "/msp",
     element: <MSPAPP />,
     children: [
@@ -112,23 +112,23 @@ const Router = createBrowserRouter([
       }
 
     ]
-   },
-   {
+  },
+  {
     path: "/csp",
     element: <CSPAPP />,
     children: [
       {
         path: "/csp/csplogin",
         element: <CSP_Login />,
-    
+
       },
       {
         path: "/csp/ticketlist",
         element: <Ticketlistcsp />,
-    
+
       },
     ],
-   },
+  },
   {
     path: "/",
     element: <App />,
@@ -301,9 +301,9 @@ const Router = createBrowserRouter([
         path: "/pincode",
         element: <Pincode />,
 
-      },{
-          path: "/products",
-          element: <Products />
+      }, {
+        path: "/products",
+        element: <Products />
       },
       {
         path: "/productspare",
@@ -361,8 +361,8 @@ const Router = createBrowserRouter([
 
       },
       {
-        path:"/childFranchiselist",
-        element: <ChildFranchiselist/>
+        path: "/childFranchiselist",
+        element: <ChildFranchiselist />
       },
       {
         path: "/engineermaster",
@@ -370,8 +370,8 @@ const Router = createBrowserRouter([
 
       },
       {
-        path:"/franchisemasterlist",
-        element: <Franchisemasterlist/>
+        path: "/franchisemasterlist",
+        element: <Franchisemasterlist />
       },
       {
         path: "/MasterFranchise",
@@ -381,7 +381,7 @@ const Router = createBrowserRouter([
       {
         path: "/Masterfranchise/:masterid",
         element: <MasterFranchise />,
-     },
+      },
       {
         path: "/Childfranchisemaster",
         element: <Childfranchisemaster />,
@@ -433,8 +433,8 @@ const Router = createBrowserRouter([
         path: "/engineermaster/:engineerid",
         element: <EngineerMaster />,
       },
-      
-     
+
+
       {
         path: "/engineer",
         element: <Engineer />,
@@ -449,7 +449,7 @@ const Router = createBrowserRouter([
       },
       {
         path: "/complaintreport",
-        element: <Complaintreport/>
+        element: <Complaintreport />
       },
       {
         path: "/claimreporttabs",
@@ -457,25 +457,25 @@ const Router = createBrowserRouter([
       },
       {
         path: "/servicecontract",
-        element: <Servicecontract/>
+        element: <Servicecontract />
       },
       {
         path: "/Servicecontract/:serviceid",
-        element: <Servicecontract/>
+        element: <Servicecontract />
       },
       {
         path: "/servicecontracttabs",
-        element: <Servicecontracttabs/>
+        element: <Servicecontracttabs />
       },
       {
         path: "/servicecontractlist",
-        element: <Servicecontractlist/>
+        element: <Servicecontractlist />
       },
       {
         path: "claimreport",
-        element: <Claimreport/>
+        element: <Claimreport />
       },
-    
+
 
 
     ],
@@ -505,10 +505,6 @@ function App() {
   const fetchProtectedData = async () => {
     const token = localStorage.getItem("token"); // Get token from localStorage
 
-    if (!token) {
-      alert("You need to log in first!");
-      return;
-    }
 
     try {
       const response = await axios.get(`${Base_Url}/protected-route`, {
@@ -524,10 +520,19 @@ function App() {
     }
   };
 
-  React.useEffect(() =>{
+  React.useEffect(() => {
     // checkLocalStorageAndRedirect(navigate);
     fetchProtectedData()
-  },[navigate])
+
+    const timer = setTimeout(() => {
+      alert("Session Timeout")
+      window.location.reload();
+    }, 3600 * 1000); // 1 hour in milliseconds
+
+    return () => clearTimeout(timer); // Cleanup the timer on unmount
+  }, [navigate])
+
+
   return (
     <>
       <Siteheader />
@@ -542,12 +547,12 @@ function CSPAPP() {
 
   const navigate = useNavigate()
 
-  React.useEffect(() =>{
+  React.useEffect(() => {
     checkLocalStorageAndRedirectCSP(navigate)
-  },[navigate])
+  }, [navigate])
   return (
     <>
-      <Loginheader/>
+      <Loginheader />
       <Outlet />
       <Sitefooter />
     </>
@@ -559,12 +564,12 @@ function MSPAPP() {
 
   const navigate = useNavigate()
 
-  React.useEffect(() =>{
+  React.useEffect(() => {
     checkLocalStorageAndRedirect(navigate);
-  },[navigate])
+  }, [navigate])
   return (
     <>
-       <Loginheader/>
+      <Loginheader />
       <Outlet />
       <Sitefooter />
     </>

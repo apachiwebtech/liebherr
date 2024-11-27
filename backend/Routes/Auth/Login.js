@@ -52,7 +52,7 @@ router.post("/loginuser", async (req, res) => {
             const token = jwt.sign(
                 { id: user.id, Lhiuser: user.Lhiuser }, // Payload
                 JWT_SECRET, // Secret key
-                { expiresIn: "1m" } // Token validity
+                { expiresIn: "1h" } // Token validity
             );
 
             res.json({

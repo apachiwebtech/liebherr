@@ -43,8 +43,15 @@ export function Complaintlist(params) {
     };
 
     const fetchComplaintlist = async () => {
+
+        const token = localStorage.getItem("token"); // Get token from localStorage
+        
         try {
-            const response = await axios.get(`${Base_Url}/getcomplainlist`);
+            const response = await axios.get(`${Base_Url}/getcomplainlist`,{
+                headers: {
+                  Authorization: token, // Send token in headers
+                },
+              });
             // Filter out 'Closed' and 'Cancelled' status complaints by default
             const filteredComplaints = response.data.filter(complaint =>
                 !['Closed', 'Cancelled'].includes(complaint.call_status)
