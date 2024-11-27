@@ -17,11 +17,15 @@ const ComplaintCode = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [duplicateError, setDuplicateError] = useState(""); // State to track duplicate error
-  const createdBy = 1; // Static value for created_by
-  const updatedBy = 2; // Static value for updated_by
+  const created_by = localStorage.getItem("userId");  
+  const updated_by = localStorage.getItem("userId"); 
+
 
   const [formData, setFormData] = useState({
-    complaintcode: "",
+    defectgroupcode: "",
+    defectgrouptitle: "",
+    description: "",
+    created_by: created_by,
   });
 
   const fetchUsers = async () => {
@@ -49,7 +53,7 @@ const ComplaintCode = () => {
     setSearchTerm(value);
     const filtered = users.filter(
       (user) =>
-        user.complaintcode && user.complaintcode.toLowerCase().includes(value)
+        user.defectgroupcode && user.defectgroupcode.toLowerCase().includes(value)
     );
     setFilteredUsers(filtered);
     setCurrentPage(0);
@@ -58,9 +62,17 @@ const ComplaintCode = () => {
   // Step 2: Add form validation function
   const validateForm = () => {
     const newErrors = {}; // Initialize an empty error object
-    if (!formData.complaintcode.trim()) {
-      // Check if the complaintcode is empty
-      newErrors.complaintcode = "ComplaintCode Field is required."; // Set error message if complaintcode is empty
+    if (!formData.defectgroupcode.trim()) {
+      // Check if the defectgroupcode is empty
+      newErrors.defectgroupcode = "Defect Group Code Field is required."; // Set error message if defectgroupcode is empty
+    }
+    if (!formData.description.trim()) {
+
+      newErrors.description = "Description Field is required."; 
+    }
+    if (!formData.defectgrouptitle.trim()) {
+
+      newErrors.defectgrouptitle = "Defect Group Title Field is required."; 
     }
     return newErrors; // Return the error object
   };
@@ -87,40 +99,44 @@ const ComplaintCode = () => {
           await axios
             .put(`${Base_Url}/putcomdata`, {
               ...formData,
-              updated_by: updatedBy,
+              updated_by: updated_by,
             })
             .then((response) => {
 
               setFormData({
-                complaintcode: "",
+                defectgroupcode: "",
+                defectgrouptitle: "",
+                description: "",
               });
               fetchUsers();
             })
             .catch((error) => {
               if (error.response && error.response.status === 409) {
                 setDuplicateError(
-                  "Duplicate entry, Complaintcode already exists!"
+                  "Duplicate entry, Defect Group Code already exists!"
                 ); // Show duplicate error for update
               }
             });
         } else {
-          // For insert, include 'created_by'
+          // For insert, include 'updated_by'
           await axios
             .post(`${Base_Url}/postdatacom`, {
               ...formData,
-              created_by: createdBy,
+              updated_by: created_by,
             })
             .then((response) => {
 
               setFormData({
-                complaintcode: "",
+                defectgroupcode: "",
+                defectgrouptitle: "",
+                description: "",
               });
               fetchUsers();
             })
             .catch((error) => {
               if (error.response && error.response.status === 409) {
                 setDuplicateError(
-                  "Duplicate entry, Complaintcode already exists!"
+                  "Duplicate entry, Defect Group Code already exists!"
                 ); // Show duplicate error for insert
               }
             });
@@ -134,8 +150,7 @@ const ComplaintCode = () => {
   const deleted = async (id) => {
     try {
       const response = await axios.post(`${Base_Url}/deletecomdata`, { id });
-
-      window.location.reload();
+      fetchUsers();
     } catch (error) {
       console.error("Error deleting user:", error);
     }
@@ -173,30 +188,73 @@ const ComplaintCode = () => {
                 >
                   <div className="mb-3">
                     <label htmlFor="ComplaintcodeInput" className="input-field">
-                      Complaint Code
+                      Defect Group Code
                     </label>
                     <input
                       type="text"
                       className="form-control"
-                      name="complaintcode"
-                      id="ComplaintcodeInput"
-                      value={formData.complaintcode}
+                      name="defectgroupcode"
+                      id="defectgroupcode"
+                      value={formData.defectgroupcode}
                       onChange={handleChange}
-                      placeholder="Enter Complaint Code "
+                      placeholder="Enter Defect Group Code "
                       pattern="[0-9]*" // This pattern ensures only numbers are allowed
                       onInput={(e) => {
                         e.target.value = e.target.value.replace(/[^0-9]/g, ""); // Remove any non-numeric characters
                       }}
                     />
-                    {errors.complaintcode && (
+                    {errors.defectgroupcode && (
                       <small className="text-danger">
-                        {errors.complaintcode}
+                        {errors.defectgroupcode}
                       </small>
                     )}
                     {duplicateError && (
                       <small className="text-danger">{duplicateError}</small>
                     )}{" "}
                     {/* Show duplicate error */}
+                  </div>
+
+                  <div className="mb-3">
+                    <label htmlFor="ComplaintcodeInput" className="input-field">
+                      Defect Group Title
+                    </label>
+                    <input
+                        type="text"
+                        className="form-control"
+                        name="defectgrouptitle"
+                        id="defectgrouptitle"
+                        value={formData.defectgrouptitle}
+                        onChange={handleChange}
+                        placeholder="Enter Defect Group Title "
+                      />
+                    {errors.defectgrouptitle && (
+                      <small className="text-danger">
+                        {errors.defectgrouptitle}
+                      </small>
+                    )}
+     
+                  </div>
+
+                  <div className="mb-3">
+                    <label htmlFor="ComplaintcodeInput" className="input-field">
+                      Description
+                    </label>
+                      <input
+                      type="text"
+                      className="form-control"
+                      name="description"
+                      id="description"
+                      value={formData.description}
+                      onChange={handleChange}
+                      placeholder="Enter Description "
+                      />
+                  
+                    {errors.description && (
+                      <small className="text-danger">
+                        {errors.description}
+                      </small>
+                    )}
+  
                   </div>
                   <div className="text-right">
                     <button className="btn btn-liebherr" type="submit">
@@ -212,7 +270,9 @@ const ComplaintCode = () => {
                     <thead className="thead-light">
                       <tr>
                         <th className="text-center">#</th>
-                        <th className="text-center">Complaint Code</th>
+                        <th className="text-center">Defect Group Code</th>
+                        <th className="text-center">Defect Group Title</th>
+                        <th className="text-center">Description</th>
                         <th className="text-center">Edit</th>
                         <th className="text-center">Delete</th>
                       </tr>
@@ -221,7 +281,9 @@ const ComplaintCode = () => {
                       {filteredUsers.map((item, index) => (
                         <tr key={item.id}>
                           <td className="text-center">{index + 1 + indexOfFirstUser}</td>
-                          <td>{item.complaintcode}</td>
+                          <td>{item.defectgroupcode}</td>
+                          <td>{item.defectgrouptitle}</td>
+                          <td>{item.description}</td>
                           <td className="text-center">
                             <button
                               className="btn btn-link text-primary"
@@ -248,7 +310,7 @@ const ComplaintCode = () => {
                   data={currentUsers}
                   columns={[
                     { title: '#', data: null, render: (data, type, row, meta) => meta.row + 1 + indexOfFirstUser },
-                    { title: 'Complaint Code', data: 'complaintcode' },
+                    { title: 'Complaint Code', data: 'defectgroupcode' },
                     {
                       title: 'Edit', data: null, render: (data, type, row) => (
                         

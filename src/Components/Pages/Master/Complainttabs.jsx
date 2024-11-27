@@ -57,7 +57,7 @@ function Complainttabs() {
       <div className="container-fluid p-0">
         {/* Top Header */}
         <div className="text-left headings">
-          <span style={{paddingLeft:"20px",color:'#FFFFFF'}}>Code</span>
+          <span style={{paddingLeft:"20px",color:'#FFFFFF'}}>Fault Code</span>
         </div>
 
         {/* Nav Tabs */}
@@ -72,7 +72,7 @@ function Complainttabs() {
                     className={`nav-link ${activeTab === 'complaintCode' ? 'active' : ''}`}
                     onClick={() => setActiveTab('complaintCode')}
                   >
-                  COMPLAINT CODE
+                  DEFECT GROUP
                   </button>
                 </li>
                 <li className="nav-item">
@@ -80,7 +80,7 @@ function Complainttabs() {
                     className={`nav-link ${activeTab === 'reasonCode' ? 'active' : ''}`}
                     onClick={() => setActiveTab('reasonCode')}
                   >
-                    REASON CODE
+                    TYPE OF DEFECT
                   </button>
                 </li>
                 <li className="nav-item">
@@ -88,7 +88,7 @@ function Complainttabs() {
                     className={`nav-link ${activeTab === 'actionCode' ? 'active' : ''}`}
                     onClick={() => setActiveTab('actionCode')}
                   >
-                   ACTION CODE 
+                   SITE DEFECT
                   </button>
                 </li>
               </ul>

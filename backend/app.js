@@ -2077,16 +2077,14 @@ app.post("/deletecdata", async (req, res) => {
 });
 
 
-// complaint code start
+// Defect Group Code start
 
 app.get("/getcom", async (req, res) => {
   try {
-    // Access the connection pool using poolPromise
     const pool = await poolPromise;
 
     const sql = `
-      SELECT *
-      FROM complaint_code
+      SELECT * FROM awt_defectgroup
       WHERE deleted = 0
     `;
 
@@ -2095,70 +2093,66 @@ app.get("/getcom", async (req, res) => {
 
     return res.json(result.recordset);
   } catch (err) {
-    console.error("Error fetching complaint codes:", err); // Log error for debugging
-    return res.status(500).json({ message: "Error fetching complaint codes" });
+    console.error("Error fetching Defect Group Code:", err); // Log error for debugging
+    return res.status(500).json({ message: "Error fetching Defect Group Codes" });
   }
 });
 
-// Insert for complaintcode
+// Insert for Defect Group Code
 app.post("/postdatacom", async (req, res) => {
   try {
-    const { id, complaintcode, created_by } = req.body;
-
-    // Access the connection pool using poolPromise
+    const { id, defectgroupcode,defectgrouptitle, description, created_by } = req.body;
     const pool = await poolPromise;
 
     if (id) {
-      // Step 1: Check if the same complaintcode exists and is not soft-deleted for other IDs
       const checkDuplicateSql = `
         SELECT *
-        FROM complaint_code
-        WHERE complaintcode = '${complaintcode}' AND id != ${id} AND deleted = 0
+        FROM awt_defectgroup
+        WHERE defectgroupcode = '${defectgroupcode}' AND id != ${id} AND deleted = 0
       `;
       const duplicateData = await pool.request().query(checkDuplicateSql);
 
       if (duplicateData.recordset.length > 0) {
-        // If duplicate data exists for another ID
-        return res.status(409).json({ message: "Duplicate entry, complaintcode already exists!" });
+
+        return res.status(409).json({ message: "Duplicate entry, Defect Group Code already exists!" });
       } else {
-        // Step 2: Update the entry with the given ID
+
         const updateSql = `
-          UPDATE complaint_code
-          SET complaintcode = '${complaintcode}', updated_date = GETDATE(), updated_by = '${created_by}'
+          UPDATE awt_defectgroup
+          SET defectgroupcode = '${defectgroupcode}', defectgrouptitle = '${defectgrouptitle}', description = '${description}', updated_date = GETDATE(), updated_by = '${created_by}'
           WHERE id = ${id}
         `;
         await pool.request().query(updateSql);
 
-        return res.json({ message: "complaintcode updated successfully!" });
+        return res.json({ message: "Defect Group updated successfully!" });
       }
     } else {
-      // Step 3: Same logic as before for insert if ID is not provided
-      // Check if the same complaintcode exists and is not soft-deleted
+
       const checkDuplicateSql = `
         SELECT *
-        FROM complaint_code
-        WHERE complaintcode = '${complaintcode}' AND deleted = 0
+        FROM awt_defectgroup
+        WHERE defectgroupcode = '${defectgroupcode}' AND deleted = 0
       `;
       const duplicateData = await pool.request().query(checkDuplicateSql);
 
       if (duplicateData.recordset.length > 0) {
         // If duplicate data exists (not soft-deleted)
-        return res.status(409).json({ message: "Duplicate entry, complaintcode already exists!" });
+        return res.status(409).json({ message: "Duplicate entry, Defect Group Code already exists!" });
       } else {
-        // Check if the same complaintcode exists but is soft-deleted
+
         const checkSoftDeletedSql = `
           SELECT *
-          FROM complaint_code
-          WHERE complaintcode = '${complaintcode}' AND deleted = 1
+          FROM awt_defectgroup
+          WHERE defectgroupcode = '${defectgroupcode}' AND deleted = 1
         `;
         const softDeletedData = await pool.request().query(checkSoftDeletedSql);
 
         if (softDeletedData.recordset.length > 0) {
           // If soft-deleted data exists, restore the entry
           const restoreSoftDeletedSql = `
-            UPDATE complaint_code
-            SET deleted = 0, updated_date = GETDATE(), updated_by = '${created_by}'
-            WHERE complaintcode = '${complaintcode}'
+            UPDATE awt_defectgroup
+           SET defectgroupcode = '${defectgroupcode}', defectgrouptitle = '${defectgrouptitle}', description = '${description}', updated_date = GETDATE(), updated_by = '${created_by}'
+            WHERE defectgroupcode = '${defectgroupcode}'
           `;
           await pool.request().query(restoreSoftDeletedSql);
 
@@ -2166,12 +2160,12 @@ app.post("/postdatacom", async (req, res) => {
         } else {
           // Insert new entry if no duplicates found
           const insertSql = `
-            INSERT INTO complaint_code (complaintcode, created_date, created_by)
-            VALUES ('${complaintcode}', GETDATE(), '${created_by}')
+            INSERT INTO awt_defectgroup (defectgroupcode,defectgrouptitle,description, created_date, created_by)
+            VALUES ('${defectgroupcode}', '${defectgrouptitle}', '${description}', GETDATE(), '${created_by}')
           `;
           await pool.request().query(insertSql);
 
-          return res.json({ message: "complaintcode added successfully!" });
+          return res.json({ message: "Defect Group added successfully!" });
         }
       }
     }
@@ -2186,21 +2180,13 @@ app.post("/postdatacom", async (req, res) => {
 app.get("/requestdatacom/:id", async (req, res) => {
   try {
     const { id } = req.params;
-
-    // Access the connection pool using poolPromise
     const pool = await poolPromise;
-
-    // Direct SQL query without parameter binding
     const sql = `
       SELECT *
-      FROM complaint_code
+      FROM awt_defectgroup
       WHERE id = ${id} AND deleted = 0
     `;
-
-    // Execute the query
     const result = await pool.request().query(sql);
-
-    // Check if data is found and return the first entry
     if (result.recordset.length > 0) {
       return res.json(result.recordset[0]);
     } else {
@@ -2213,49 +2199,48 @@ app.get("/requestdatacom/:id", async (req, res) => {
 });
 
 // update for complaintcode
-// update for complaintcode
 app.put("/putcomdata", async (req, res) => {
   try {
-    const { id, complaintcode, updated_by } = req.body;
-
-    // Access the connection pool using poolPromise
+    const { id, defectgroupcode, defectgrouptitle, description, updated_by } = req.body;
     const pool = await poolPromise;
 
-    // Step 1: Check if the updated complaintcode already exists and is not soft-deleted
-    const checkDuplicateSql = `
-      SELECT *
-      FROM complaint_code
-      WHERE complaintcode = '${complaintcode}'
-        AND deleted = 0
-        AND id != ${id}
-    `;
-
-    // Execute the query to check for duplicates
-    const duplicateResult = await pool.request().query(checkDuplicateSql);
-
-    if (duplicateResult.recordset.length > 0) {
-      // If duplicate data exists
-      return res.status(409).json({ message: "Duplicate entry, complaintcode already exists!" });
-    } else {
-      // Step 2: Update complaintcode data if no duplicates found
-      const updateSql = `
-        UPDATE complaint_code
-        SET complaintcode = '${complaintcode}',
-            updated_by = '${updated_by}',
-            updated_date = GETDATE()
-        WHERE id = ${id} AND deleted = 0
+    if (id) {
+      // Check for duplicate complaint codes (excluding the current record)
+      const checkDuplicateSql = `
+        SELECT *
+        FROM awt_defectgroup
+        WHERE defectgroupcode = '${defectgroupcode}' AND id != ${id} AND deleted = 0
       `;
+      const duplicateData = await pool.request().query(checkDuplicateSql);
 
-      // Execute the update query
-      await pool.request().query(updateSql);
+      if (duplicateData.recordset.length > 0) {
+        // Duplicate exists, respond with conflict
+        return res.status(409).json({ message: "Duplicate entry, Defect Group Code already exists!" });
+      } else {
+        // Update the existing defect group
+        const updateSql = `
+          UPDATE awt_defectgroup
+          SET defectgroupcode = '${defectgroupcode}',
+              defectgrouptitle = '${defectgrouptitle}',
+              description = '${description}',
+              updated_date = GETDATE(),
+              updated_by = '${updated_by}'
+          WHERE id = ${id}
+        `;
+        await pool.request().query(updateSql);
 
-      return res.json({ message: "Complaintcode updated successfully!" });
+        return res.json({ message: "Defect Group updated successfully!" });
+      }
+    } else {
+      // If ID is not provided, return bad request
+      return res.status(400).json({ message: "ID is required for updating a Defect Group." });
     }
   } catch (err) {
-    console.error("Error updating complaintcode:", err); // Log error for debugging
-    return res.status(500).json({ message: "Error updating complaintcode" });
+    console.error("Error updating Defect Group:", err); // Log error for debugging
+    return res.status(500).json({ message: "Error updating Defect Group" });
   }
 });
+
 
 // delete for complaintcode
 app.post("/deletecomdata", async (req, res) => {
@@ -2267,7 +2252,7 @@ app.post("/deletecomdata", async (req, res) => {
 
     // Direct SQL query without parameter binding
     const sql = `
-      UPDATE complaint_code
+      UPDATE awt_defectgroup
       SET deleted = 1
       WHERE id = ${id}
     `;
