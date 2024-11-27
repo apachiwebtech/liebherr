@@ -504,7 +504,11 @@ function App() {
 
   const fetchProtectedData = async () => {
     const token = localStorage.getItem("token"); // Get token from localStorage
+<<<<<<< Updated upstream
 
+=======
+    
+>>>>>>> Stashed changes
 
     try {
       const response = await axios.get(`${Base_Url}/protected-route`, {

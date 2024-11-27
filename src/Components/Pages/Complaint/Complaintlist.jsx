@@ -45,9 +45,16 @@ export function Complaintlist(params) {
     const fetchComplaintlist = async () => {
 
         const token = localStorage.getItem("token"); // Get token from localStorage
+<<<<<<< Updated upstream
         
         try {
             const response = await axios.get(`${Base_Url}/getcomplainlist`,{
+=======
+
+   
+        try {
+            const response = await axios.get(`${Base_Url}/getcomplainlist` , {
+>>>>>>> Stashed changes
                 headers: {
                   Authorization: token, // Send token in headers
                 },
@@ -62,6 +69,7 @@ export function Complaintlist(params) {
             console.error('Error fetching Complaintdata:', error);
             setComplaintdata([]);
             setFilteredData([]);
+            navigate('/login')
         }
     };
 

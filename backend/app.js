@@ -2251,6 +2251,23 @@ app.post("/deletecomdata", async (req, res) => {
 
 //Reason Code Start
 // Get all reason codes
+app.get("/getgroupdefectcode", async (req, res) => {
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    const sql = "select * from awt_defectgroup WHERE deleted = 0";
+
+    const result = await pool.request().query(sql);
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json(err);
+  }
+});
+
+
 app.get("/getreason", async (req, res) => {
   try {
     // Access the connection pool using poolPromise
@@ -7171,7 +7188,7 @@ app.get('/getremark', async (req, res) => {
 });
 
 // .input('call_remark', sql.VarChar, call_remark)
-app.post('/updatecomplaint', async (req, res) => {
+app.post('/updatecomplaint', authenticateToken, async (req, res) => {
   const { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode, com_id, warranty_status } = req.body;
 
   try {

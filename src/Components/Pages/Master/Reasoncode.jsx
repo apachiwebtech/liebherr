@@ -16,10 +16,25 @@ const ReasonCode = () => {
     const createdBy = 1;  // Static value for created_by
     const updatedBy = 2;  // Static value for updated_by
 
+    const [groupdefectcode, setGroupdefectcode] = useState([]);
+
     const [formData, setFormData] = useState({
-        reasoncode: ''
+        groupdefect_code: '',
+        defectcode: '',
+        defecttitle: '',
+        description: ''
     });
 
+
+    const fetchGroupDefectCode = async () => {
+        try {
+          const response = await axios.get(`${Base_Url}/getgroupdefectcode`);
+          console.log(response.data);
+          setGroupdefectcode(response.data);
+        } catch (error) {
+          console.error("Error fetching groupdefectcode:", error);
+        }
+      };
 
     const fetchUsers = async () => {
         try {
@@ -33,6 +48,7 @@ const ReasonCode = () => {
     };
 
     useEffect(() => {
+        fetchGroupDefectCode();
         fetchUsers();
     }, []);
 
@@ -149,14 +165,40 @@ const ReasonCode = () => {
                         <div className="row mp0">
                             <div className="col-6">
                                 <form onSubmit={handleSubmit} style={{ width: "50%" }} className="text-left">
+                                    
+                                <div className="mb-3">
+                                    <label
+                                                htmlFor="groupdefect_code"
+                                                className="form-label pb-0 dropdown-label"
+                                            >
+                                                Defect Group Code
+                                            </label>
+                                            <select
+                                                className="form-select dropdown-select"
+                                                name="groupdefect_code"
+                                                value={formData.groupdefect_code}
+                                                onChange={handleChange}
+                                            >
+                                                <option value="">Select</option>
+                                                {groupdefectcode.map((gdc) => (
+                                                <option key={gdc.id} value={gdc.defectgroupcode}>
+                                                    {gdc.defectgrouptitle}
+                                                </option>
+                                                ))}
+                                            </select>
+                                            {errors.groupdefect_code && (
+                                                <small className="text-danger">{errors.groupdefect_code}</small>
+                                            )}
+                                    </div>
+
                                     <div className="mb-3">
-                                        <label htmlFor="ReasoncodeInput" className="input-field" >Reason Code</label>
+                                        <label htmlFor="defectcode" className="input-field" >Defect Code</label>
                                         <input
                                             type="text"
                                             className="form-control"
-                                            name="reasoncode"
-                                            id="ReasoncodeInput"
-                                            value={formData.reasoncode}
+                                            name="defectcode"
+                                            id="defectcode"
+                                            value={formData.defectcode}
                                             onChange={handleChange}
                                             placeholder="Enter Reason Code "
                                             pattern="[0-9]*"  // This pattern ensures only numbers are allowed
@@ -165,9 +207,55 @@ const ReasonCode = () => {
                                             }}
                                         />
 
-                                        {errors.reasoncode && <small className="text-danger">{errors.reasoncode}</small>}
+                                        {errors.defectcode && <small className="text-danger">{errors.defectcode}</small>}
                                         {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
                                     </div>
+
+
+                                     <div className="mb-3">
+                    <label htmlFor="ComplaintcodeInput" className="input-field">
+                      Defect Title
+                    </label>
+                    <input
+                        type="text"
+                        className="form-control"
+                        name="defecttitle"
+                        id="defecttitle"
+                        value={formData.defecttitle}
+                        onChange={handleChange}
+                        placeholder="Enter Defect Group Title "
+                      />
+                    {errors.defecttitle && (
+                      <small className="text-danger">
+                        {errors.defecttitle}
+                      </small>
+                    )}
+     
+                  </div>
+
+                  <div className="mb-3">
+                    <label htmlFor="ComplaintcodeInput" className="input-field">
+                      Description
+                    </label>
+                      <input
+                      type="text"
+                      className="form-control"
+                      name="description"
+                      id="description"
+                      value={formData.description}
+                      onChange={handleChange}
+                      placeholder="Enter Description "
+                      />
+                  
+                    {errors.description && (
+                      <small className="text-danger">
+                        {errors.description}
+                      </small>
+                    )}
+  
+                  </div>
+
+
                                     <div className="text-right">
                                         <button className="btn btn-liebherr" type="submit">
                                             {isEdit ? "Update" : "Submit"}

@@ -50,7 +50,7 @@ export function Siteheader(params) {
                     
                   <Link className="dropdown-item" to="/serviceproducttabs">Service Product Master</Link></li>
                 <li>
-                  <Link className="dropdown-item" to="/complainttabs">Complain code, Reason code & Action code</Link></li>
+                  <Link className="dropdown-item" to="/complainttabs">Fault Code</Link></li>
                 <li>
                   <Link className="dropdown-item" to="/ratecardtabs">Rate card Matrix</Link></li>
                 <li>
