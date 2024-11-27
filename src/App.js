@@ -80,6 +80,8 @@ import Servicecontract from './Components/Pages/Master/Servicecontract';
 import Ticketlistmsp from './Components/Pages/Master/Ticketlistmsp';
 import Servicecontracttabs from './Components/Pages/Master/Servicecontracttabs';
 import { Servicecontractlist } from './Components/Pages/Master/Servicecontractlist';
+import { Base_Url } from './Components/Utils/Base_Url';
+import axios from 'axios';
 
 
 
@@ -499,8 +501,32 @@ function App() {
 
   const navigate = useNavigate()
 
+
+  const fetchProtectedData = async () => {
+    const token = localStorage.getItem("token"); // Get token from localStorage
+
+    if (!token) {
+      alert("You need to log in first!");
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${Base_Url}/protected-route`, {
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      });
+
+    } catch (error) {
+      console.error("Error fetching protected route:", error);
+      // alert(error.response.data.message || "Access denied");
+      navigate('/login')
+    }
+  };
+
   React.useEffect(() =>{
-    checkLocalStorageAndRedirect(navigate);
+    // checkLocalStorageAndRedirect(navigate);
+    fetchProtectedData()
   },[navigate])
   return (
     <>

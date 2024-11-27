@@ -6,6 +6,8 @@ import md5 from "js-md5";
 import logo from  '../../images/Liebherr-logo-768x432.png'
 import back from '../../images/login.jpeg'
 
+
+
 export function Login() {
     const [Lhiuser, setLhiuser] = useState("");
     const [password, setPassword] = useState("");
@@ -26,8 +28,9 @@ export function Login() {
 
           
             if (response.data) {
-                localStorage.setItem("userId", response.data.id);
-                localStorage.setItem("Lhiuser", response.data.Lhiuser);
+                localStorage.setItem("userId", response.data.user.id);
+                localStorage.setItem("Lhiuser", response.data.user.Lhiuser);
+                localStorage.setItem("token", response.data.token);
 
                 // Navigate to the home page
                 navigate('/');

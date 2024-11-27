@@ -10,6 +10,10 @@ const bodyParser = require("body-parser");
 const path = require("path");
 const fs = require("fs");
 
+// Import Routes  
+const { router: Login, authenticateToken } = require("./Routes/Auth/Login");
+
+
 
 app.use(cors({ origin: "*" }));
 app.use(express.json());
@@ -20,6 +24,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/", complaint);
 app.use("/", common);
 app.use("/", Category);
+app.use("/", Login);
 
 // Ensure 'uploads' folder exists
 const uploadDir = path.join(__dirname, "uploads");
@@ -70,31 +75,7 @@ app.listen(8081, () => {
 
 
 
-app.post("/loginuser", async (req, res) => {
-  const { Lhiuser, password } = req.body;
 
-  console.log(Lhiuser)
-
-  try {
-    // Use the poolPromise to get the connection pool
-    const pool = await poolPromise;
-
-    const sql = `SELECT id, Lhiuser FROM lhi_user WHERE Lhiuser = '${Lhiuser}' AND password = '${password}'`;
-
-    console.log(sql)
-
-    const result = await pool.request().query(sql);
-
-    if (result.recordset.length > 0) {
-      res.json({ id: result.recordset[0].id, Lhiuser: result.recordset[0].Lhiuser });
-    } else {
-      res.status(401).json({ message: "Invalid username or password" });
-    }
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Database error", error: err });
-  }
-});
 
 //CSP Login
 
@@ -177,7 +158,7 @@ app.post("/log", async (req, res) => {
   console.log("fffrdf")
 })
 
-app.get("/getdata", async (req, res) => {
+app.get("/getdata",authenticateToken,async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
@@ -7220,7 +7201,7 @@ app.post('/updatecomplaint', async (req, res) => {
 
 //Start Complaint List
 // Complaint List API with filters
-app.get("/getcomplainlist", async (req, res) => {
+app.get("/getcomplainlist",authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
     const {
