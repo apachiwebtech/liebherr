@@ -8,6 +8,8 @@ import { Base_Url } from "../../Utils/Base_Url";
 import { FaEye } from "react-icons/fa";
 
 export function Complaintview(params) {
+  const token = localStorage.getItem("token"); 
+
   const { complaintid } = useParams();
   const [complaintview, setComplaintview] = useState({
     ticket_no: '',
@@ -72,7 +74,11 @@ export function Complaintview(params) {
 
   async function getEngineer(params) {
     try {
-      const res = await axios.get(`${Base_Url}/getcvengineer`);
+      const res = await axios.get(`${Base_Url}/getcvengineer`,{
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      });
 
       if (res.data && Array.isArray(res.data)) {
         setEngineer(res.data);
@@ -91,7 +97,11 @@ export function Complaintview(params) {
   const fetchComplaintDetails = async () => {
     try {
       const response = await axios.get(
-        `${Base_Url}/getComplaintDetails/${complaintview.ticket_no}`
+        `${Base_Url}/getComplaintDetails/${complaintview.ticket_no}`,{
+          headers: {
+            Authorization: token, // Send token in headers
+          },
+        }
       );
       setRemarks(response.data.remarks);
       setAttachments(response.data.attachments);
@@ -103,7 +113,11 @@ export function Complaintview(params) {
   const fetchComplaintview = async (complaintid) => {
     try {
       const response = await axios.get(
-        `${Base_Url}/getcomplaintview/${complaintid}`
+        `${Base_Url}/getcomplaintview/${complaintid}`,{
+          headers: {
+            Authorization: token, // Send token in headers
+          },
+        }
       );
       console.log(response.data);
       setComplaintview(response.data);
@@ -119,7 +133,11 @@ export function Complaintview(params) {
   const fetchComplaintDuplicate = async () => {
     try {
       const response = await axios.get(
-        `${Base_Url}/getComplaintDuplicate/${complaintview.customer_mobile}`
+        `${Base_Url}/getComplaintDuplicate/${complaintview.customer_mobile}`,{
+          headers: {
+            Authorization: token, // Send token in headers
+          },
+        }
       );
       setDuplicate(response.data);
     } catch (error) {
@@ -131,7 +149,11 @@ export function Complaintview(params) {
   const fetchAttachment2Details = async () => {
     try {
       const response = await axios.get(
-        `${Base_Url}/getAttachment2Details/${complaintview.ticket_no}`
+        `${Base_Url}/getAttachment2Details/${complaintview.ticket_no}`,{
+          headers: {
+            Authorization: token, // Send token in headers
+          },
+        }
       );
       setAttachments2(response.data.attachments2);
 
@@ -163,6 +185,7 @@ export function Complaintview(params) {
         await axios.post(`${Base_Url}/uploadAttachment2`, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
+        
           },
         });
 
@@ -204,7 +227,11 @@ export function Complaintview(params) {
       ticket_no: complaintview.ticket_no
     };
 
-    axios.post(`${Base_Url}/ticketFormData`, data)
+    axios.post(`${Base_Url}/ticketFormData`, data,{
+      headers: {
+        Authorization: token, // Send token in headers
+      },
+    })
       .then(response => {
         console.log("Server response:", response.data);
         setComplaintview({
@@ -311,6 +338,7 @@ export function Complaintview(params) {
         await axios.post(`${Base_Url}/uploadcomplaintattachments`, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
+            
           },
         });
       }

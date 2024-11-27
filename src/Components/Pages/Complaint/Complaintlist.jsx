@@ -5,6 +5,7 @@ import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
 
 export function Complaintlist(params) {
+    const token = localStorage.getItem("token"); // Get token from localStorage
     const [Complaintdata, setComplaintdata] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
@@ -141,7 +142,11 @@ export function Complaintlist(params) {
 
     const edit = async (id) => {
         try {
-            const response = await axios.get(`${Base_Url}/requestengineer/${id}`);
+            const response = await axios.get(`${Base_Url}/requestengineer/${id}`,{
+                headers: {
+                  Authorization: token, // Send token in headers
+                },
+              });
             setFormData(response.data)
             setIsEdit(true);
             console.log(response.data);

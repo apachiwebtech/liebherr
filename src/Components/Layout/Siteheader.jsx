@@ -1,13 +1,26 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Logo from '../../images/Liebherr-logo-768x432.png'
 
 
-export function Siteheader(params) {
 
+
+export function Siteheader(params) {
+const navigate = useNavigate();
   const redirect = () =>{
     window.location.pathname = '/registercomaplaint'
   }
+
+  const clearLocal = async () => {
+try {
+  localStorage.clear();
+  navigate('/login');
+}
+catch(error){
+  console.error('error signing out',error)
+}
+  }
+
   return (
 
     <header className="p-3 border-bottom">
@@ -94,7 +107,7 @@ export function Siteheader(params) {
                 <Link className="dropdown-item" to="#">Profile</Link></li>
               <li><hr className="dropdown-divider" /></li>
               <li className="dropdown-item" role="button">
-                <Link className="dropdown-item" to="/login" tabIndex="0">Sign out</Link></li>
+                <Link className="dropdown-item" onClick={clearLocal} tabIndex="0">Sign out</Link></li>
             </ul>
           </div>
         </div>

@@ -728,7 +728,8 @@ app.get("/getregionscity/:country_id",authenticateToken, async (req, res) => {
 
 
 // API to fetch geostates based on selected region (for the geostate dropdown)
-app.get("/getgeostatescity/:region_id",authenticateToken, async (req, res) => {
+app.get("/getgeostatescity/:region_id", authenticateToken,
+  async (req, res) => {
   const { region_id } = req.params;
 
   try {
@@ -755,7 +756,7 @@ app.get("/getgeostatescity/:region_id",authenticateToken, async (req, res) => {
 });
 
 
-app.get("/getdistrictcity/:geostateID",authenticateToken, async (req, res) => {
+app.get("/getdistrictcity/:geostateID", authenticateToken,async (req, res) => {
   const { geostateID } = req.params;
 
   try {
@@ -948,7 +949,8 @@ app.post("/deletegeocity", async (req, res) => {
 // Area Master Start
 // API to fetch all countries (for the country dropdown)
 // API to fetch countries
-app.get("/getcountries",authenticateToken, async (req, res) => {
+app.get("/getcountries", authenticateToken,
+  async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
@@ -1033,7 +1035,7 @@ app.get("/getgeocities_a/:geostate_id", async (req, res) => {
 
 
 // API to fetch all areas (joining country, region, geostate, geocity)
-app.get("/getareas", async (req, res) => {
+app.get("/getareas",authenticateToken, async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
@@ -1238,7 +1240,8 @@ app.get("/getgeostatespincode/:region_id",authenticateToken, async (req, res) =>
 
 
 // API to fetch geocities based on selected geostate (for the geocity dropdown)
-app.get("/getgeocities_p/:area_id",authenticateToken, async (req, res) => {
+app.get("/getgeocities_p/:area_id",authenticateToken,
+  async (req, res) => {
   const { area_id } = req.params;
 
   try {
@@ -1276,7 +1279,7 @@ app.get("/getareas/:geostate_id",authenticateToken, async (req, res) => {
   }
 });
 // API to fetch pincodes based on selected areas (for the area dropdown)
-app.get("/citywise_pincode/:pin_id", async (req, res) => {
+app.get("/citywise_pincode/:pin_id",authenticateToken, async (req, res) => {
   const { pin_id } = req.params;
 
   try {
@@ -2310,8 +2313,8 @@ app.post("/deletecomdata", async (req, res) => {
   }
 });
 
-//Reason Code Start
-// Get all reason codes
+
+// Defect Code Start
 app.get("/getgroupdefectcode", async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
@@ -2349,50 +2352,42 @@ app.get("/getreason", async (req, res) => {
 });
 
 // Insert or update reason code
-app.post("/postdatareason", async (req, res) => {
-  const { id, reasoncode, created_by } = req.body;
+app.post("/postdatadefectcode", async (req, res) => {
+  const { id, defect_code, groupdefect_code,defect_title, description, created_by } = req.body;
 
   try {
-    // Access the connection pool using poolPromise
     const pool = await poolPromise;
 
     if (id) {
-      // Step 1: Check if the same reasoncode exists and is not soft-deleted for other IDs
+      // Step 1: Check if the same defect_code exists and is not soft-deleted for other IDs
       const checkDuplicateSql = `
-        SELECT * FROM reason_code
-        WHERE reasoncode = '${reasoncode}'
+        SELECT * FROM awt_defectgroup
+        WHERE defect_code = '${defect_code}'
         AND id != ${id}
         AND deleted = 0
       `;
-
-      // Execute the query
       const checkDuplicateResult = await pool.request().query(checkDuplicateSql);
 
       if (checkDuplicateResult.recordset.length > 0) {
-        // If duplicate data exists for another ID
-        return res.status(409).json({ message: "Duplicate entry, reasoncode already exists!" });
+        return res.status(409).json({ message: "Duplicate entry, defect_code already exists!" });
       } else {
-        // Step 2: Update the entry with the given ID
+
         const updateSql = `
-          UPDATE reason_code
-          SET reasoncode = '${reasoncode}',
-              updated_date = GETDATE(),
-              updated_by = '${created_by}'
-          WHERE id = ${id}
+        
         `;
 
         // Execute the query
         await pool.request().query(updateSql);
 
-        return res.json({ message: "reasoncode updated successfully!" });
+        return res.json({ message: "defect_code updated successfully!" });
       }
     } else {
       // Step 3: Same logic as before for insert if ID is not provided
 
-      // Check if the same reasoncode exists and is not soft-deleted
+      // Check if the same defect_code exists and is not soft-deleted
       const checkDuplicateSql = `
         SELECT * FROM reason_code
-        WHERE reasoncode = '${reasoncode}'
+        WHERE defect_code = '${defect_code}'
         AND deleted = 0
       `;
 
@@ -2401,12 +2396,12 @@ app.post("/postdatareason", async (req, res) => {
 
       if (checkDuplicateResult.recordset.length > 0) {
         // If duplicate data exists (not soft-deleted)
-        return res.status(409).json({ message: "Duplicate entry, reasoncode already exists!" });
+        return res.status(409).json({ message: "Duplicate entry, defect_code already exists!" });
       } else {
-        // Check if the same reasoncode exists but is soft-deleted
+        // Check if the same defect_code exists but is soft-deleted
         const checkSoftDeletedSql = `
           SELECT * FROM reason_code
-          WHERE reasoncode = '${reasoncode}'
+          WHERE defect_code = '${defect_code}'
           AND deleted = 1
         `;
 
@@ -2420,7 +2415,7 @@ app.post("/postdatareason", async (req, res) => {
             SET deleted = 0,
                 updated_date = GETDATE(),
                 updated_by = '${created_by}'
-            WHERE reasoncode = '${reasoncode}'
+            WHERE defect_code = '${defect_code}'
           `;
 
           // Execute the query
@@ -2430,20 +2425,20 @@ app.post("/postdatareason", async (req, res) => {
         } else {
           // Insert new entry if no duplicates found
           const insertSql = `
-            INSERT INTO reason_code (reasoncode, created_date, created_by)
-            VALUES ('${reasoncode}', GETDATE(), '${created_by}')
+            INSERT INTO reason_code (defect_code, created_date, created_by)
+            VALUES ('${defect_code}', GETDATE(), '${created_by}')
           `;
 
           // Execute the query
           await pool.request().query(insertSql);
 
-          return res.json({ message: "reasoncode added successfully!" });
+          return res.json({ message: "defect_code added successfully!" });
         }
       }
     }
   } catch (err) {
-    console.error("Error handling reasoncode:", err);
-    return res.status(500).json({ message: "Error handling reasoncode" });
+    console.error("Error handling defect_code:", err);
+    return res.status(500).json({ message: "Error handling defect_code" });
   }
 });
 
@@ -2550,7 +2545,7 @@ app.post("/deletereasondata", async (req, res) => {
 // Reason Code end
 
 //action code Start
-app.get("/getaction", async (req, res) => {
+app.get("/getaction",authenticateToken, async (req, res) => {
   try {
     // Access the connection pool using poolPromise
     const pool = await poolPromise;
@@ -2581,7 +2576,7 @@ app.get("/getaction", async (req, res) => {
 
 
 // Insert for actioncode
-app.post("/postdataaction", async (req, res) => {
+app.post("/postdataaction",authenticateToken, async (req, res) => {
   const { id, actioncode, created_by } = req.body;
 
   try {
@@ -2659,7 +2654,8 @@ app.post("/postdataaction", async (req, res) => {
 });
 
 // edit for actioncode
-app.get("/requestdataaction/:id", async (req, res) => {
+app.get("/requestdataaction/:id",authenticateToken,
+  async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -2685,7 +2681,7 @@ app.get("/requestdataaction/:id", async (req, res) => {
 });
 
 // update for actioncode
-app.put("/putactiondata", async (req, res) => {
+app.put("/putactiondata",authenticateToken, async (req, res) => {
   const { id, actioncode, updated_by } = req.body;
 
   try {
@@ -2719,7 +2715,8 @@ app.put("/putactiondata", async (req, res) => {
 });
 
 // delete for actioncode
-app.post("/deleteactiondata", async (req, res) => {
+app.post("/deleteactiondata",
+  authenticateToken, async (req, res) => {
   const { id } = req.body;
 
   try {
@@ -2745,7 +2742,7 @@ app.post("/deleteactiondata", async (req, res) => {
 });
 
 // Start Complaint View
-app.get("/getcomplaintview/:complaintid", async (req, res) => {
+app.get("/getcomplaintview/:complaintid",authenticateToken, async (req, res) => {
   const { complaintid } = req.params;
 
   try {
@@ -2877,7 +2874,7 @@ app.get("/getComplaintDetails/:ticket_no", async (req, res) => {
 
 
 // Complaint view Previous ticket
-app.get("/getComplaintDuplicate/:customer_mobile", async (req, res) => {
+app.get("/getComplaintDuplicate/:customer_mobile",authenticateToken,async (req, res) => {
   const { customer_mobile } = req.params;
 
   try {
@@ -2967,7 +2964,8 @@ app.post("/uploadAttachment2", upload.array("attachment2"), async (req, res) => 
 
 
 // Route to get attachment 2 details
-app.get("/getAttachment2Details/:ticket_no", async (req, res) => {
+app.get("/getAttachment2Details/:ticket_no",
+  authenticateToken, async (req, res) => {
   const ticket_no = req.params.ticket_no;
 
   try {
@@ -2997,7 +2995,7 @@ app.get("/getAttachment2Details/:ticket_no", async (req, res) => {
 
 //Complaint view  Attachment 2 End
 
-app.get("/getcvengineer", async (req, res) => {
+app.get("/getcvengineer",authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
@@ -3068,7 +3066,8 @@ app.get("/getchildfranchises", async (req, res) => {
 // S added for Complaint Registration
 
 
-app.get("/getstate", async (req, res) => {
+app.get("/getstate",
+  authenticateToken, async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
@@ -3151,7 +3150,7 @@ app.post("/getticketendcustomer", async (req, res) => {
 // Comaplint Module -> Start
 
 // Add Complaint Start
-app.post("/add_complaintt", async (req, res) => {
+app.post("/add_complaintt",authenticateToken, async (req, res) => {
   let {
     complaint_date, customer_name, contact_person, email, mobile, address,
     state, city, area, pincode, mode_of_contact, ticket_type, cust_type,
@@ -3386,7 +3385,8 @@ app.post("/add_complaintt", async (req, res) => {
 });
 
 
-app.post("/update_complaint", async (req, res) => {
+app.post("/update_complaint",authenticateToken,
+  async (req, res) => {
   let {
     complaint_date, customer_name, contact_person, email, mobile, address,
     state, city, area, pincode, mode_of_contact, ticket_type, cust_type,
@@ -3522,7 +3522,7 @@ AND m.area_id = d.id AND m.geocity_id = ct.id AND m.deleted =	0 AND m.id = ${mas
 
 //Child Service Partner
 
-app.get("/getchildpartner/:MasterId", async (req, res) => {
+app.get("/getchildpartner/:MasterId", authenticateToken,async (req, res) => {
   try {
     const MasterId = req.params.MasterId; // Get MasterId from route parameters
     console.log("MasterId received:", MasterId); // Log the MasterId for debugging
@@ -4171,7 +4171,8 @@ app.get("/getengineer", async (req, res) => {
     return res.status(500).json({ error: 'An error occurred while fetching data' });
   }
 });
-app.get("/requestengineer/:id", async (req, res) => {
+app.get("/requestengineer/:id",
+  authenticateToken, async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -6309,7 +6310,7 @@ app.post("/deletelhidata", async (req, res) => {
 //lhi user code end
 
 // call status code start
-app.get("/getcalldata", async (req, res) => {
+app.get("/getcalldata",authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
@@ -6361,7 +6362,9 @@ app.post("/postcalldata", async (req, res) => {
   }
 });
 // Edit for Callstatus
-app.get("/requestcalldata/:id", async (req, res) => {
+app.get("/requestcalldata/:id",
+  authenticateToken,
+   async (req, res) => {
   const { id } = req.params;
   const sql = `SELECT * FROM call_status WHERE id = '${id}' AND deleted = 0`;
 
@@ -6402,7 +6405,7 @@ app.put("/putcalldata", async (req, res) => {
   }
 });
 // Delete for Callstatus
-app.post("/deletecalldata", async (req, res) => {
+app.post("/deletecalldata",authenticateToken, async (req, res) => {
   const { id } = req.body;
   const sql = `UPDATE call_status SET deleted = 1 WHERE id = '${id}'`;
 
@@ -6624,7 +6627,7 @@ app.post("/uploadcomplaintattachments", upload.array("attachment"), async (req, 
   }
 });
 
-app.get("/getComplaintDetails/:ticket_no", async (req, res) => {
+app.get("/getComplaintDetails/:ticket_no", authenticateToken,async (req, res) => {
   const ticket_no = req.params.ticket_no;
 
   try {
@@ -6682,7 +6685,8 @@ app.get("/product_type", async (req, res) => {
     return res.status(500).json({ error: 'An error occurred while fetching product types' });
   }
 });
-app.get("/fetchproductline", async (req, res) => {
+app.get("/fetchproductline",
+  authenticateToken, async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
@@ -6693,7 +6697,7 @@ app.get("/fetchproductline", async (req, res) => {
     return res.status(500).json({ error: 'An error occurred while fetching product types' });
   }
 });
-app.get("/fetchmaterial", async (req, res) => {
+app.get("/fetchmaterial",authenticateToken, async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
@@ -6704,7 +6708,7 @@ app.get("/fetchmaterial", async (req, res) => {
     return res.status(500).json({ error: 'An error occurred while fetching product types' });
   }
 });
-app.get("/fetchitemtype", async (req, res) => {
+app.get("/fetchitemtype",authenticateToken, async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
@@ -6715,7 +6719,8 @@ app.get("/fetchitemtype", async (req, res) => {
     return res.status(500).json({ error: 'An error occurred while fetching product types' });
   }
 });
-app.get("/fetchproductclass", async (req, res) => {
+app.get("/fetchproductclass",authenticateToken,
+  async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
@@ -6726,7 +6731,7 @@ app.get("/fetchproductclass", async (req, res) => {
     return res.status(500).json({ error: 'An error occurred while fetching product types' });
   }
 });
-app.get("/fetchmanufacturer", async (req, res) => {
+app.get("/fetchmanufacturer",authenticateToken, async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
@@ -6738,7 +6743,7 @@ app.get("/fetchmanufacturer", async (req, res) => {
   }
 });
 
-app.post("/getupdateparam", async (req, res) => {
+app.post("/getupdateparam",authenticateToken, async (req, res) => {
 
   const { productid } = req.body;
   try {
@@ -6754,7 +6759,8 @@ app.post("/getupdateparam", async (req, res) => {
   }
 });
 
-app.post("/addProduct", async (req, res) => {
+app.post("/addProduct",authenticateToken,
+  async (req, res) => {
   const { item_code, item_description, product_model, product_type, product_class_code, product_class, product_line_code, product_line, material, manufacturer, item_type, serialized, size, crmproducttype, colour, handle_type, serial_identification, installation_type, customer_classification, price_group, mrp, service_partner_basic } = req.body;
 
 
@@ -6802,7 +6808,8 @@ app.post("/addProduct", async (req, res) => {
 });
 
 
-app.post("/updateProduct", async (req, res) => {
+app.post("/updateProduct",authenticateToken,
+  async (req, res) => {
   const {
     item_code, item_description, product_model, product_type, product_class_code, product_class,
     product_line_code, product_line, material, manufacturer, item_type, serialized, size,
@@ -6877,7 +6884,7 @@ app.post("/updateProduct", async (req, res) => {
 });
 //Complaint view Insert TicketFormData start
 
-app.post("/ticketFormData", async (req, res) => {
+app.post("/ticketFormData",authenticateToken, async (req, res) => {
   const { ticket_no, serial_no, ModelNumber, engineer_id, call_status, updated_by } = req.body;
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
@@ -6903,7 +6910,7 @@ app.post("/ticketFormData", async (req, res) => {
 });
 
 
-app.post("/add_new_ticket", async (req, res) => {
+app.post("/add_new_ticket",authenticateToken, async (req, res) => {
   const {
     customer_name,
     email,
@@ -7281,7 +7288,7 @@ app.post('/updatecomplaint', authenticateToken, async (req, res) => {
 
 //Start Complaint List
 // Complaint List API with filters
-app.get("/getcomplainlist", async (req, res) => {
+app.get("/getcomplainlist",authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
     const {
@@ -7691,7 +7698,7 @@ app.get("/getcomplainlistmsp", async (req, res) => {
 
 //Register Page Complaint Duplicate Start
 
-app.get("/getmultiplelocation/:pincode", async (req, res) => {
+app.get("/getmultiplelocation/:pincode",authenticateToken, async (req, res) => {
   const { pincode } = req.params;
 
   try {
@@ -7722,7 +7729,8 @@ app.get("/getmultiplelocation/:pincode", async (req, res) => {
 });
 
 
-app.post("/getcomplaintticket", async (req, res) => {
+app.post("/getcomplaintticket",authenticateToken,
+  async (req, res) => {
   const { comp_no } = req.body;
 
   try {
