@@ -163,6 +163,7 @@ export function Customerlist(params) {
                     <div className="card mb-3 tab_box">
 
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
+                            <div className="searchFilter">
                             <div className='p-1 text-right'>
                                 <Link to={`/Customer`}><button className='btn btn-primary'>Add Customer</button></Link>
                             </div>
@@ -307,6 +308,7 @@ export function Customerlist(params) {
                                     </div>
                                 </div>
                             </div>
+                            </div>
                             <table className="table">
                                 <thead>
                                     <tr>
@@ -317,6 +319,7 @@ export function Customerlist(params) {
                                         <th width="10%">Cutomer Mobile Number</th>
                                         <th width="15%">Customer Classification</th>
                                         <th width="20%">Customer Email</th>
+                                        <th width="10%">Customer ID</th>
                                         <th width="15%">Add Location</th>
                                         <th width="10%">Add Unique Product</th>
                                         <th width="5%">Edit</th>
@@ -335,6 +338,7 @@ export function Customerlist(params) {
                                                 <td >{item.mobileno}</td>
                                                 <td >{item.customer_classification}</td>
                                                 <td >{item.email}</td>
+                                                <td >{item.customer_id}</td>
                                                 <td>
                                                     <Link to={`/Customerlocation/${item.id}`}>
                                                         <button style={{ backgroundColor: '#0D6EFD', color: "white" }} className='btn'

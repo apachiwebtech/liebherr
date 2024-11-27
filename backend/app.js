@@ -3622,7 +3622,7 @@ app.post("/postcustomer", async (req, res) => {
     const pool = await poolPromise;
 
     // Check for duplicates
-    const checkDuplicateSql = `SELECT * FROM awt_customer WHERE mobileno = ${mobileno} AND deleted = 0`;
+    const checkDuplicateSql = `SELECT * FROM awt_customer WHERE customer_id = ${customer_id} AND deleted = 0`;
 
     // Execute the duplicate check query
     const checkDuplicateResult = await pool.request().query(checkDuplicateSql);
@@ -3630,15 +3630,15 @@ app.post("/postcustomer", async (req, res) => {
     // If a duplicate customer is found
     if (checkDuplicateResult.recordset.length > 0) {
       return res.status(409).json({
-        message: "Duplicate entry, Customer with same number and DOB already exists!",
+        message: "Duplicate entry, Customer with same Customer_id  already exists!",
       });
     } else {
       // Insert the customer if no duplicate is found
-      const insertSql = `INSERT INTO awt_customer (customer_fname, customer_lname, customer_type, customer_classification, mobileno, alt_mobileno, dateofbirth, anniversary_date, email,salutation,customer_id)
-                         VALUES ('${customer_fname}', '${customer_lname}', '${customer_type}', '${customer_classification}', '${mobileno}', '${alt_mobileno}', '${dateofbirth}', '${anniversary_date}', '${email}','${salutation}','${customer_id}')`;
+      sql = `INSERT INTO awt_customer (customer_fname, customer_lname, customer_type, customer_classification, mobileno, alt_mobileno, dateofbirth, anniversary_date, email,salutation,customer_id)
+      VALUES ('${customer_fname}', '${customer_lname}', '${customer_type}', '${customer_classification}', '${mobileno}', '${alt_mobileno}', '${dateofbirth}', '${anniversary_date}', '${email}','${salutation}','${customer_id}')`;
 
       // Execute the insert query
-      await pool.request().query(insertSql);
+      await pool.request().query(sql);
 
       // Send success response
       return res.status(201).json({
@@ -3650,6 +3650,7 @@ app.post("/postcustomer", async (req, res) => {
     return res.status(500).json({ error: "Database error occurred" });
   }
 });
+
 
 // customer put 
 
@@ -5847,7 +5848,7 @@ app.post("/postservicecontract", async (req, res) => {
     }
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: "An error occurred while processing the product data" });
+    return res.status(500).json({ message: "An error occurred while processing the Service data" });
   }
 });
 

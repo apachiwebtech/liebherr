@@ -94,26 +94,30 @@ const Customer = () => {
   // Step 2: Add form validation function
   const validateForm = () => {
     const newErrors = {};
-    // if (!formData.customer_fname) {
-    //   newErrors.customer_fname = "Customer First Name Field is required.";
-    // }
+     if (!formData.customer_fname?.trim()) {
+       newErrors.customer_fname = "Customer First Name Field is required.";
+     }
 
 
-    // if (!formData.customer_lname) {
-    //   newErrors.customer_lname = "Customer Last Name Field is required.";
-    // }
+     if (!formData.customer_lname?.trim()) {
+       newErrors.customer_lname = "Customer Last Name Field is required.";
+     }
 
-    // if (!formData.customer_type) {
-    //   newErrors.customer_type = "Customer Type Dropdown is required.";
-    // }
+    if (!formData.customer_type || formData.customer_type === 'selected') {
+      newErrors.customer_type = "Customer Type Dropdown is required.";
+    }
 
-    // if (!formData.customer_classification) {
-    //   newErrors.customer_classification = "Customer Classification Dropdown is required.";
-    // }
+     if (!formData.customer_classification || formData.customer_classification === 'selected') {
+       newErrors.customer_classification = "Customer Classification Dropdown is required.";
+     }
 
-    // if (!formData.mobileno) {
-    //   newErrors.mobileno = "Mobile Number Field is required.";
-    // }
+    if (!formData.mobileno?.trim()) {
+       newErrors.mobileno = "Mobile Number Field is required.";
+     }
+
+     if (!formData.customer_id?.trim()) {
+      newErrors.customer_id = "Customer_id Field is required.";
+    } 
 
     // if (!formData.alt_mobileno) {
     //   newErrors.alt_mobileno = "Alternate Mobile Number Field is required.";
@@ -291,6 +295,7 @@ const Customer = () => {
                           id="Customerfname"
                           aria-describedby="Customerfname"
                           name="customer_fname"
+                          placeholder='Enter Customer First Name'
                           value={formData.customer_fname}
                           onChange={handleChange}
                         />
@@ -306,6 +311,7 @@ const Customer = () => {
                           id="Customerlname"
                           aria-describedby="Customerlname"
                           name="customer_lname"
+                          placeholder='Enter Customer Last Name'
                           onChange={handleChange}
                           value={formData.customer_lname}
                         />
@@ -321,6 +327,7 @@ const Customer = () => {
                           id="Customerid"
                           aria-describedby="Customerid"
                           name="customer_id"
+                          placeholder='Enter  Customer ID'
                           onChange={handleChange}
                           value={formData.customer_id}
                         />
@@ -364,6 +371,7 @@ const Customer = () => {
                           id="mobilenumber"
                           aria-describedby="mobilenumber"
                           name="mobileno"
+                          placeholder='Enter Mobile Number'
                           value={formData.mobileno}
                           onChange={handleChange}
                         />
@@ -379,6 +387,7 @@ const Customer = () => {
                           id="Altnumber"
                           aria-describedby="Altnumber"
                           name="alt_mobileno"
+                          placeholder='Enter Alternate Mobile No.'
                           value={formData.alt_mobileno}
                           onChange={handleChange}
                         />
@@ -424,6 +433,7 @@ const Customer = () => {
                           id="emailid"
                           aria-describedby="emailid"
                           name="email"
+                          placeholder='Enter Customer Email'
                           value={formData.email}
                           onChange={handleChange}
                         />
