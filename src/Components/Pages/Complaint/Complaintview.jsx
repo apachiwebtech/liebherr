@@ -92,6 +92,19 @@ export function Complaintview(params) {
     }
   }
 
+  const Addengineer = () =>{
+    
+    const data ={
+      engineer_id : complaintview.engineer_id
+    }
+
+    axios.post(`${Base_Url}/addcomplainteng` , data)
+    .then((res) =>{
+      console.log(res)
+    })
+  
+  }
+
   // console.log("this is get product",product);
 
   const fetchComplaintDetails = async () => {
@@ -974,7 +987,7 @@ export function Complaintview(params) {
 
                   <div className="col-lg-2">
 
-                <button className=" btn btn-primary btn-sm">Add</button>
+                <button className=" btn btn-primary btn-sm" onClick={() =>Addengineer()}>Add</button>
 
                   </div>
         

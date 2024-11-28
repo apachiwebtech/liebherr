@@ -7695,3 +7695,24 @@ app.post("/getcomplaintticket", authenticateToken,
 
 //Register Page Complaint Duplicate End
 
+app.post('/addcomplainteng' , async (req,res) =>{
+
+  const {engineer_id} = req.body;
+
+  try {
+    const pool = await poolPromise;
+
+    // Modified SQL query using parameterized query
+    const sql = "update complaint_ticket set ";
+
+    const result = await pool.request()
+      .input('comp_no', comp_no) // Parameterized input
+      .query(sql);
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred", details: err.message });
+  }
+})
+
