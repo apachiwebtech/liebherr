@@ -151,7 +151,7 @@ const Ratecard = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestprodata/${id}`,{
+      const response = await axios.get(`${Base_Url}/requestratedata/${id}`,{
         headers: {
             Authorization: token, // Send token in headers
             }, 

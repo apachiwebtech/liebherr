@@ -18,7 +18,7 @@ const Channelpartner = () => {
   const updatedBy = 2; // Static value for updated_by
 
   const [formData, setFormData] = useState({
-    Channelpartner: "",
+    Channel_partner: "",
   });
 
   const fetchUsers = async () => {
@@ -59,9 +59,9 @@ const Channelpartner = () => {
   // Step 2: Add form validation function
   const validateForm = () => {
     const newErrors = {}; // Initialize an empty error object
-    if (!formData.Channelpartner.trim()) {
+    if (!formData.Channel_partner.trim()) {
       // Check if the Channelpartner is empty
-      newErrors.Channelpartner = "Channelpartner Field is required."; // Set error message if Channelpartner is empty
+      newErrors.Channel_partner = "Channelpartner Field is required."; // Set error message if Channelpartner is empty
     }
     return newErrors; // Return the error object
   };
@@ -86,11 +86,15 @@ const Channelpartner = () => {
         if (isEdit) {
           // For update, include 'updated_by'
           await axios
-            .put(`${Base_Url}/putcdata`, { ...formData, updated_by: updatedBy })
+            .put(`${Base_Url}/putcdata`, { ...formData, updated_by: updatedBy },{
+              headers: {
+                Authorization: token,
+              },
+            })
             .then((response) => {
               //window.location.reload();
               setFormData({
-                Channelpartner: "",
+                Channel_partner: "",
               });
               fetchUsers();
             })
@@ -116,7 +120,7 @@ const Channelpartner = () => {
             .then((response) => {
               // window.location.reload();
               setFormData({
-                Channelpartner: "",
+                Channel_partner: "",
               });
               fetchUsers();
             })
@@ -192,15 +196,15 @@ const Channelpartner = () => {
                     <input
                       type="text"
                       className="form-control"
-                      name="Channelpartner"
+                      name="Channel_partner"
                       id="ChannelpartnerInput"
-                      value={formData.Channelpartner}
+                      value={formData.Channel_partner}
                       onChange={handleChange}
                       placeholder="Enter Channel Partner "
                     />
-                    {errors.Channelpartner && (
+                    {errors.Channel_partner && (
                       <small className="text-danger">
-                        {errors.Channelpartner}
+                        {errors.Channel_partner}
                       </small>
                     )}
                     {duplicateError && (

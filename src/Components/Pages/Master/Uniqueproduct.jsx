@@ -208,14 +208,34 @@ const Uniqueproduct = () => {
               <div className="col-4">
                 <form onSubmit={handleSubmit}>
                   <div className="row">
+                  <div className="col-md-6 mb-3">
+                      <label htmlFor="snumber" className="form-label">
+                        Serial Number
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="snumber"
+                        name="serialnumber"
+                        value={formData.serialnumber}
+                        onChange={handleChange}
+                        aria-describedby="snumber"
+                      />
+                       {errors.serialnumber && (
+                        <small className="text-danger">{errors.serialnumber}</small>
+                      )}
+                      {duplicateError && (
+                      <small className="text-danger">{duplicateError}</small>
+                    )}
+                    </div>
                     <div className="col-md-6 mb-3">
                       <label htmlFor="pname" className="form-label">
-                        Product Name
+                        Model No
                       </label>
                       <input
                         type="text"
                         name="product"
-                        value={formData.product}
+                        value={formData.product}  
                         onChange={handleChange}
                         className="form-control"
                         id="pname"
@@ -243,26 +263,7 @@ const Uniqueproduct = () => {
                         <small className="text-danger">{errors.date}</small>
                       )}
                     </div>
-                    <div className="col-md-6 mb-3">
-                      <label htmlFor="snumber" className="form-label">
-                        Serial Number
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        id="snumber"
-                        name="serialnumber"
-                        value={formData.serialnumber}
-                        onChange={handleChange}
-                        aria-describedby="snumber"
-                      />
-                       {errors.serialnumber && (
-                        <small className="text-danger">{errors.serialnumber}</small>
-                      )}
-                      {duplicateError && (
-                      <small className="text-danger">{duplicateError}</small>
-                    )}
-                    </div>
+                    
                     <div className="col-md-6 mb-3">
                       <label htmlFor="locationc" className="form-label">
                         Location

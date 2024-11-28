@@ -2,13 +2,15 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
+import { useParams } from "react-router-dom";
 import Franchisemaster from '../Master/Franchisemaster';
 
 const EngineerMaster = () => {
   // Step 1: Add this state to track errors
+  const { engineerid } = useParams();
   const [Childfranchise, setChildfranchise] = useState([]);
   const [Parentfranchise, setParentfranchise] = useState([]);
-  const token = localStorage.getItem("token"); 
+  const token = localStorage.getItem("token");
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -41,14 +43,58 @@ const EngineerMaster = () => {
     current_address: ''
   });
 
+  const fetchEngineerpopulate = async (engineerid) => {
+
+    try {
+      const response = await axios.get(`${Base_Url}/getengineerpopulate/${engineerid}`, {
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      });
+      setFormData({
+        ...response.data[0],
+        // Rename keys to match your formData structure
+        title: response.data[0].title,
+        cfranchise_id: response.data[0].cfranchise_id,
+        mfranchise_id: response.data[0].mfranchise_id,
+        mobile_no: response.data[0].mobile_no,
+        password: response.data[0].password,
+        email: response.data[0].email,
+        employee_code: response.data[0].employee_code,
+        personal_email: response.data[0].personal_email,
+        personal_mobile: response.data[0].personal_mobile,
+        dob: response.data[0].dob,
+        blood_group: response.data[0].blood_group,
+        academic_qualification: response.data[0].academic_qualification,
+        joining_date: response.data[0].joining_date,
+        passport_picture: response.data[0].passport_picture,
+        resume: response.data[0].resume,
+        photo_proof: response.data[0].photo_proof,
+        address_proof: response.data[0].address_proof,
+        permanent_address: response.data[0].permanent_address,
+        current_address: response.data[0].current_address
+      });
+
+
+      setIsEdit(true);
+
+
+
+    } catch (error) {
+      console.error('Error fetching Enginnerdata:', error);
+      setFormData([]);
+    }
+  };
+
+
   const fetchParentfranchise = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getparentfranchise`,{
+      const response = await axios.get(`${Base_Url}/getparentfranchise`, {
         headers: {
           Authorization: token,
         },
       }
-);
+      );
       setParentfranchise(response.data);
     } catch (error) {
       console.error("Error fetching Parentfranchise:", error);
@@ -57,12 +103,12 @@ const EngineerMaster = () => {
 
   const fetchChildfranchise = async (mfranchise_id) => {
     try {
-      const response = await axios.get(`${Base_Url}/getchildfranchise/${mfranchise_id}`,{
+      const response = await axios.get(`${Base_Url}/getchildfranchise/${mfranchise_id}`, {
         headers: {
           Authorization: token,
         },
       }
-);
+      );
       setChildfranchise(response.data);
     } catch (error) {
       console.error('Error fetching Childfranchise:', error);
@@ -72,12 +118,12 @@ const EngineerMaster = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getengineer`,{
+      const response = await axios.get(`${Base_Url}/getengineer`, {
         headers: {
           Authorization: token,
         },
       }
-);
+      );
       setUsers(response.data);
       setFilteredUsers(response.data);
     } catch (error) {
@@ -88,6 +134,10 @@ const EngineerMaster = () => {
   useEffect(() => {
     fetchUsers();
     fetchParentfranchise();
+
+    if (engineerid != 0) {
+      fetchEngineerpopulate(engineerid);
+    }
   }, []);
 
   const handleChange = (e) => {
@@ -154,12 +204,12 @@ const EngineerMaster = () => {
         if (isEdit) {
           // For update, include duplicate check
           await axios.put(`${Base_Url}/putengineer`, { ...formData }
-            ,{
-                    headers: {
-                      Authorization: token,
-                    },
-                  }
-            )
+            , {
+              headers: {
+                Authorization: token,
+              },
+            }
+          )
             .then(response => {
               console.log(response.data)
               setFormData({
@@ -193,12 +243,12 @@ const EngineerMaster = () => {
         } else {
           // For insert, include duplicate check
           await axios.post(`${Base_Url}/postengineer`, { ...formData }
-            ,{
-                    headers: {
-                      Authorization: token,
-                    },
-                  }
-            )
+            , {
+              headers: {
+                Authorization: token,
+              },
+            }
+          )
             .then(response => {
               setFormData({
                 title: '',
@@ -239,12 +289,12 @@ const EngineerMaster = () => {
   const deleted = async (id) => {
     try {
       const response = await axios.post(`${Base_Url}/deleteengineer`, { id }
-        ,{
-                headers: {
-                  Authorization: token,
-                },
-              }
-        );
+        , {
+          headers: {
+            Authorization: token,
+          },
+        }
+      );
 
       fetchUsers();
     } catch (error) {
@@ -254,12 +304,12 @@ const EngineerMaster = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestengineer/${id}`,{
+      const response = await axios.get(`${Base_Url}/requestengineer/${id}`, {
         headers: {
           Authorization: token,
         },
       }
-);
+      );
       setFormData(response.data)
       setIsEdit(true);
       console.log(response.data);
@@ -321,7 +371,9 @@ const EngineerMaster = () => {
                       </div>
 
                       <div className="col-md-3">
-                        <label htmlFor="passwordInput" className="input-field" style={{ marginBottom: '15style={{ mapx', fontSize: '18px' }}>Engineer Password</label>
+                        <label htmlFor="passwordInput" className="in
+                        
+                        put-field" style={{ marginBottom: '15style={{ mapx', fontSize: '18px' }}>Engineer Password</label>
                         <input
                           type="password"
                           className="form-control"
@@ -391,7 +443,7 @@ const EngineerMaster = () => {
                           className="form-control"
                           name="mobile_no"
                           id="mobile_noInput"
-                          value={formData.mobile_no}
+                          value={formData.mobile_no || ''}  // Add default empty string
                           onChange={(e) => {
                             const value = e.target.value;
                             if (!isNaN(value)) {
@@ -404,20 +456,21 @@ const EngineerMaster = () => {
                           pattern="[0-9]*"
                           maxLength="15"
                         />
-                        {formData.mobile_no.length > 0 && formData.mobile_no.length < 10 && (
+                        {formData.mobile_no && formData.mobile_no.length > 0 && formData.mobile_no.length < 10 && (
                           <small className="text-danger">Mobile number must be at least 10 digits</small>
                         )}
                         {errors.mobile_no && <small className="text-danger">{errors.mobile_no}</small>}
-
                       </div>
                       <div className="col-md-3">
-                        <label htmlFor="mobileInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>Personal Mobile Number</label>
+                        <label htmlFor="mobileInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>
+                          Personal Mobile Number
+                        </label>
                         <input
-                          type="tel"  // Changed to "tel" for Personal Mobile Number
+                          type="tel"
                           className="form-control"
                           name="personal_mobile"
                           id="mobileInput"
-                          value={formData.personal_mobile}  // Updated value to match "mobile"
+                          value={formData.personal_mobile || ''} // Add default empty string
                           onChange={(e) => {
                             const value = e.target.value;
                             if (!isNaN(value)) {
@@ -427,14 +480,13 @@ const EngineerMaster = () => {
                             }
                           }}
                           placeholder="Enter Personal Mobile Number"
-                          pattern="[0-9]{10}"  // Optional: Pattern to enforce 10-digit mobile number (adjust as needed)
+                          pattern="[0-9]{10}"
                           maxLength="15"
                         />
-                        {formData.personal_mobile.length > 0 && formData.personal_mobile.length < 10 && (
+                        {formData.personal_mobile && formData.personal_mobile.length > 0 && formData.personal_mobile.length < 10 && (
                           <small className="text-danger">Mobile number must be at least 10 digits</small>
                         )}
                         {errors.personal_mobile && <small className="text-danger">{errors.personal_mobile}</small>}
-
                       </div>
 
                       <div className="col-md-3">

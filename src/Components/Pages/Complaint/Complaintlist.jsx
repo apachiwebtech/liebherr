@@ -9,6 +9,8 @@ export function Complaintlist(params) {
     const [Complaintdata, setComplaintdata] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
+    const token = localStorage.getItem("token"); // Get token from localStorage
+
 
     
     const [formData, setFormData] = useState({
