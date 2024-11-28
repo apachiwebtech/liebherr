@@ -13,8 +13,9 @@ const ReasonCode = () => {
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [searchTerm, setSearchTerm] = useState('');
     const [duplicateError, setDuplicateError] = useState(''); // State to track duplicate error
-    const createdBy = 1;  // Static value for created_by
-    const updatedBy = 2;  // Static value for updated_by
+    const created_by = localStorage.getItem("userId");  
+    const updated_by = localStorage.getItem("userId"); 
+  
 
     const [groupdefect_code, setGroupdefect_code] = useState([]);
 
@@ -38,7 +39,7 @@ const ReasonCode = () => {
 
     const fetchUsers = async () => {
         try {
-            const response = await axios.get(`${Base_Url}/getreason`);
+            const response = await axios.get(`${Base_Url}/gettypeofdefect`);
             console.log(response.data);
             setUsers(response.data);
             setFilteredUsers(response.data);
@@ -71,8 +72,8 @@ const ReasonCode = () => {
     // Step 2: Add form validation function
     const validateForm = () => {
         const newErrors = {}; // Initialize an empty error object
-        if (!formData.reasoncode.trim()) { // Check if the reasoncode is empty
-            newErrors.reasoncode = "Reasoncode Field is required."; // Set error message if reasoncode is empty
+        if (!formData.groupdefect_code.trim()) { // Check if the reasoncode is empty
+            newErrors.groupdefect_code = "Reasoncode Field is required."; // Set error message if reasoncode is empty
         }
         return newErrors; // Return the error object
     };
@@ -95,32 +96,38 @@ const ReasonCode = () => {
             if (confirmSubmission) {
                 if (isEdit) {
                     // For update, include 'updated_by'
-                    await axios.put(`${Base_Url}/putreasondata`, { ...formData, updated_by: updatedBy })
+                    await axios.put(`${Base_Url}/putdatatypeofdefect`, { ...formData, updated_by: updated_by })
                         .then(response => {
                            // window.location.reload();
                            setFormData({
-                            reasoncode : ''
+                            groupdefect_code: '',
+                            defect_code: '',
+                            defect_title: '',
+                            description: ''
                         })
                         fetchUsers();
                         })
                         .catch(error => {
                             if (error.response && error.response.status === 409) {
-                                setDuplicateError('Duplicate entry, Defect code already exists!'); // Show duplicate error for update
+                                setDuplicateError('Duplicate entry, Defect Type Code already exists!'); // Show duplicate error for update
                             }
                         });
                 } else {
                     // For insert, include 'created_by'
-                    await axios.post(`${Base_Url}/postdatadefect_code`, { ...formData, created_by: createdBy })
+                    await axios.post(`${Base_Url}/postdatatypeofdefect`, { ...formData, created_by: created_by })
                         .then(response => {
                             //window.location.reload();
                             setFormData({
-                                reasoncode : ''
+                                groupdefect_code: '',
+                                defect_code: '',
+                                defect_title: '',
+                                description: ''
                             })
                             fetchUsers();
                         })
                         .catch(error => {
                             if (error.response && error.response.status === 409) {
-                                setDuplicateError('Duplicate entry, Defect code already exists!'); // Show duplicate error for insert
+                                setDuplicateError('Duplicate entry, Defect Type Code already exists!'); // Show duplicate error for insert
                             }
                         });
                 }
@@ -133,9 +140,8 @@ const ReasonCode = () => {
 
     const deleted = async (id) => {
         try {
-            const response = await axios.post(`${Base_Url}/deletereasondata`, { id });
-            // alert(response.data[0]);
-            window.location.reload();
+            const response = await axios.post(`${Base_Url}/deletetypeofdefect`, { id });
+            fetchUsers();
         } catch (error) {
             console.error('Error deleting user:', error);
         }
@@ -143,7 +149,7 @@ const ReasonCode = () => {
 
     const edit = async (id) => {
         try {
-            const response = await axios.get(`${Base_Url}/requestdatareason/${id}`);
+            const response = await axios.get(`${Base_Url}/requestdatatypeofdefect/${id}`);
             setFormData(response.data)
             setIsEdit(true);
             console.log(response.data);
@@ -192,7 +198,7 @@ const ReasonCode = () => {
                                     </div>
 
                                     <div className="mb-3">
-                                        <label htmlFor="defect_code" className="input-field" >Defect Code</label>
+                                        <label htmlFor="defect_code" className="input-field" >Defect Type Code</label>
                                         <input
                                             type="text"
                                             className="form-control"
@@ -200,7 +206,7 @@ const ReasonCode = () => {
                                             id="defect_code"
                                             value={formData.defect_code}
                                             onChange={handleChange}
-                                            placeholder="Enter Defect Code "
+                                            placeholder="Enter Defect Type Code "
                                             pattern="[0-9]*"  // This pattern ensures only numbers are allowed
                                             onInput={(e) => {
                                                 e.target.value = e.target.value.replace(/[^0-9]/g, '');  // Remove any non-numeric characters
@@ -296,7 +302,10 @@ const ReasonCode = () => {
                                     <thead>
                                         <tr>
                                             <th style={{ padding: '12px 15px', textAlign: 'center' }}>#</th>
-                                            <th style={{ padding: '12px 15px', textAlign: 'center' }}>Reason Code</th>
+                                            <th style={{ padding: '12px 15px', textAlign: 'center' }}>Defect Group Title</th>
+                                            <th style={{ padding: '12px 15px', textAlign: 'center' }}>Defect Type Code</th>
+                                            <th style={{ padding: '12px 15px', textAlign: 'center' }}>Defect Type Title</th>
+                                            <th style={{ padding: '12px 15px', textAlign: 'center' }}>Description</th>
                                             <th style={{ padding: '0px 0px', textAlign: 'center' }}>Edit</th>
                                             <th style={{ padding: '0px 0px', textAlign: 'center' }}>Delete</th>
                                         </tr>
@@ -305,7 +314,10 @@ const ReasonCode = () => {
                                         {currentUsers.map((item, index) => (
                                             <tr key={item.id}>
                                                 <td style={{ padding: '2px', textAlign: 'center' }}>{index + 1 + indexOfFirstUser}</td>
-                                                <td style={{ padding: '10px' }}>{item.reasoncode}</td>
+                                                <td style={{ padding: '10px' }}>{item.grouptitle}</td>
+                                                <td style={{ padding: '10px' }}>{item.defect_code}</td>
+                                                <td style={{ padding: '10px' }}>{item.defect_title}</td>
+                                                <td style={{ padding: '10px' }}>{item.description}</td>
                                                 <td style={{ padding: '0px', textAlign: 'center' }}>
                                                     <button
                                                         className='btn'

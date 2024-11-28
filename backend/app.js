@@ -2225,7 +2225,7 @@ app.post("/postdatacom", authenticateToken, async (req, res) => {
   }
 });
 
-// edit for complaintcode
+// edit for Defect Group Code
 
 app.get("/requestdatacom/:id", authenticateToken, async (req, res) => {
   try {
@@ -2248,14 +2248,14 @@ app.get("/requestdatacom/:id", authenticateToken, async (req, res) => {
   }
 });
 
-// update for complaintcode
-app.put("/putcomdata", authenticateToken, async (req, res) => {
+// update for Defect Group Code
+app.put("/putcomdata",authenticateToken, async (req, res) => {
   try {
     const { id, defectgroupcode, defectgrouptitle, description, updated_by } = req.body;
     const pool = await poolPromise;
 
     if (id) {
-      // Check for duplicate complaint codes (excluding the current record)
+      // Check for duplicate Defect Group Code (excluding the current record)
       const checkDuplicateSql = `
         SELECT *
         FROM awt_defectgroup
@@ -2292,8 +2292,8 @@ app.put("/putcomdata", authenticateToken, async (req, res) => {
 });
 
 
-// delete for complaintcode
-app.post("/deletecomdata", authenticateToken, async (req, res) => {
+// delete for Defect Group Code
+app.post("/deletecomdata",authenticateToken, async (req, res) => {
   try {
     const { id } = req.body;
 
@@ -2317,9 +2317,10 @@ app.post("/deletecomdata", authenticateToken, async (req, res) => {
     return res.status(500).json({ message: "Error updating complaint code" });
   }
 });
+// Defect Group Code End
 
 
-// Defect Code Start
+// Type Of Defect Code Start
 app.get("/getgroupdefectcode", async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
@@ -2337,217 +2338,151 @@ app.get("/getgroupdefectcode", async (req, res) => {
 });
 
 
-app.get("/getreason", async (req, res) => {
+app.get("/gettypeofdefect", async (req, res) => {
   try {
-    // Access the connection pool using poolPromise
     const pool = await poolPromise;
-
-    // Direct SQL query without parameter binding
-    const sql = "SELECT * FROM reason_code WHERE deleted = 0";
-
-    // Execute the query
+    const sql = `
+     SELECT 
+        td.*, dg.defectgrouptitle as grouptitle
+      FROM awt_typeofdefect td
+      LEFT JOIN awt_defectgroup dg ON td.groupdefect_code = dg.defectgroupcode
+      WHERE td.deleted = 0
+    `;
     const result = await pool.request().query(sql);
-
-    // Return the result as JSON
     return res.json(result.recordset);
   } catch (err) {
-    console.error("Error fetching reason codes:", err); // Log error for debugging
-    return res.status(500).json({ message: "Error fetching reason codes" });
+    console.error("Error fetching Type of Defects:", err); // Log error for debugging
+    return res.status(500).json({ message: "Error fetching Type of Defects" });
   }
 });
 
-// Insert or update reason code
-app.post("/postdatadefectcode", async (req, res) => {
-  const { id, defect_code, groupdefect_code, defect_title, description, created_by } = req.body;
+// Insert  Type Of Defect Code
+app.post("/postdatatypeofdefect", async (req, res) => {
+  const { defect_code, groupdefect_code, defect_title, description, created_by } = req.body;
 
   try {
     const pool = await poolPromise;
 
-    if (id) {
-      // Step 1: Check if the same defect_code exists and is not soft-deleted for other IDs
-      const checkDuplicateSql = `
-        SELECT * FROM awt_defectgroup
-        WHERE defect_code = '${defect_code}'
-        AND id != ${id}
-        AND deleted = 0
-      `;
-      const checkDuplicateResult = await pool.request().query(checkDuplicateSql);
+    // Check if the same defect_code exists and is not soft-deleted
+    const checkDuplicateSql = `
+      SELECT * FROM awt_typeofdefect
+      WHERE defect_code = '${defect_code}'
+      AND deleted = 0
+    `;
 
-      if (checkDuplicateResult.recordset.length > 0) {
-        return res.status(409).json({ message: "Duplicate entry, defect_code already exists!" });
-      } else {
+    const checkDuplicateResult = await pool.request().query(checkDuplicateSql);
 
-        const updateSql = `
-        
-        `;
-
-        // Execute the query
-        await pool.request().query(updateSql);
-
-        return res.json({ message: "defect_code updated successfully!" });
-      }
+    if (checkDuplicateResult.recordset.length > 0) {
+      // If duplicate active record exists
+      return res.status(409).json({ message: "Duplicate entry, defect_code already exists!" });
     } else {
-      // Step 3: Same logic as before for insert if ID is not provided
-
-      // Check if the same defect_code exists and is not soft-deleted
-      const checkDuplicateSql = `
-        SELECT * FROM reason_code
-        WHERE defect_code = '${defect_code}'
-        AND deleted = 0
+      // Insert new record
+      const insertSql = `
+        INSERT INTO awt_typeofdefect (
+          defect_code, groupdefect_code, defect_title, description, created_date, created_by, deleted
+        )
+        VALUES (
+          '${defect_code}', '${groupdefect_code}', '${defect_title}', '${description}', GETDATE(), '${created_by}', 0
+        )
       `;
 
-      // Execute the query
-      const checkDuplicateResult = await pool.request().query(checkDuplicateSql);
+      await pool.request().query(insertSql);
 
-      if (checkDuplicateResult.recordset.length > 0) {
-        // If duplicate data exists (not soft-deleted)
-        return res.status(409).json({ message: "Duplicate entry, defect_code already exists!" });
-      } else {
-        // Check if the same defect_code exists but is soft-deleted
-        const checkSoftDeletedSql = `
-          SELECT * FROM reason_code
-          WHERE defect_code = '${defect_code}'
-          AND deleted = 1
-        `;
-
-        // Execute the query
-        const softDeletedResult = await pool.request().query(checkSoftDeletedSql);
-
-        if (softDeletedResult.recordset.length > 0) {
-          // If soft-deleted data exists, restore the entry
-          const restoreSoftDeletedSql = `
-            UPDATE reason_code
-            SET deleted = 0,
-                updated_date = GETDATE(),
-                updated_by = '${created_by}'
-            WHERE defect_code = '${defect_code}'
-          `;
-
-          // Execute the query
-          await pool.request().query(restoreSoftDeletedSql);
-
-          return res.json({ message: "Soft-deleted data restored successfully!" });
-        } else {
-          // Insert new entry if no duplicates found
-          const insertSql = `
-            INSERT INTO reason_code (defect_code, created_date, created_by)
-            VALUES ('${defect_code}', GETDATE(), '${created_by}')
-          `;
-
-          // Execute the query
-          await pool.request().query(insertSql);
-
-          return res.json({ message: "defect_code added successfully!" });
-        }
-      }
+      return res.json({ message: "Type Of defect code added successfully!" });
     }
   } catch (err) {
     console.error("Error handling defect_code:", err);
-    return res.status(500).json({ message: "Error handling defect_code" });
+    return res.status(500).json({ message: "Error handling Type Of defect code" });
   }
 });
 
-// Edit reason code by ID
-app.get("/requestdatareason/:id", async (req, res) => {
+// Edit Type Of Defect Code by ID
+app.get("/requestdatatypeofdefect/:id", async (req, res) => {
   const { id } = req.params;
-
   try {
-    // Access the connection pool using poolPromise
     const pool = await poolPromise;
-
-    // Direct SQL query with the 'id' value inserted directly into the query string
     const sql = `
-      SELECT * FROM reason_code
+      SELECT 
+        defect_code, 
+        groupdefect_code, 
+        defect_title, 
+        description, 
+        created_by, 
+        created_date, 
+        deleted
+      FROM awt_typeofdefect
       WHERE id = ${id}
       AND deleted = 0
     `;
-
-    // Execute the query
     const result = await pool.request().query(sql);
 
-    // Return the first result, assuming the ID is unique
     if (result.recordset.length > 0) {
       return res.json(result.recordset[0]);
     } else {
-      return res.status(404).json({ message: "Reason not found" });
+      return res.status(404).json({ message: "Type Of Defect not found" });
     }
   } catch (err) {
-    console.error("Error fetching reason code:", err);
-    return res.status(500).json({ message: "Error fetching reason code" });
+    console.error("Error fetching Type Of Defect:", err);
+    return res.status(500).json({ message: "Error fetching Type Of Defect" });
   }
 });
 
-// Update reason code
-app.put("/putreasondata", async (req, res) => {
-  const { id, reasoncode, updated_by } = req.body;
+// Update Type Of Defect Code
+app.put("/putdatatypeofdefect", async (req, res) => {
+  const { id, defect_code, groupdefect_code, defect_title, description, updated_by } = req.body;
 
   try {
-    // Access the connection pool using poolPromise
     const pool = await poolPromise;
-
-    // Step 1: Check if the updated reasoncode already exists and is not soft-deleted
     const checkDuplicateSql = `
-      SELECT * FROM reason_code
-      WHERE reasoncode = '${reasoncode}'
+      SELECT * FROM awt_typeofdefect
+      WHERE defect_code = '${defect_code}'
       AND deleted = 0
       AND id != ${id}
     `;
-
-    // Execute the check duplicate query
     const checkResult = await pool.request().query(checkDuplicateSql);
-
     if (checkResult.recordset.length > 0) {
-      // If duplicate data exists
-      return res.status(409).json({ message: "Duplicate entry, reasoncode already exists!" });
+      return res.status(409).json({ message: "Duplicate entry, defect_code already exists!" });
     } else {
-      // Step 2: Update reasoncode data if no duplicates found
-      const sql = `
-        UPDATE reason_code
-        SET reasoncode = '${reasoncode}',
-            updated_by = '${updated_by}',
-            updated_date = GETDATE()
+      const updateSql = `
+        UPDATE awt_typeofdefect
+        SET 
+          defect_code = '${defect_code}',
+          groupdefect_code = '${groupdefect_code}',
+          defect_title = '${defect_title}',
+          description = '${description}',
+          updated_by = '${updated_by}',
+          updated_date = GETDATE()
         WHERE id = ${id} AND deleted = 0
       `;
-
-      // Execute the update query
-      await pool.request().query(sql);
-
-      // Return success message
-      return res.json({ message: "reasoncode updated successfully!" });
+      await pool.request().query(updateSql);
+      return res.json({ message: "Type Of Defect updated successfully!" });
     }
   } catch (err) {
-    console.error("Error updating reasoncode:", err);
-    return res.status(500).json({ message: "Error updating reasoncode" });
+    console.error("Error updating Type Of Defect:", err);
+    return res.status(500).json({ message: "Error updating Type Of Defect" });
   }
 });
 
-// Soft-delete reason code by ID
-app.post("/deletereasondata", async (req, res) => {
+
+// Soft-delete rType Of Defect Code by ID
+app.post("/deletetypeofdefect", async (req, res) => {
   const { id } = req.body;
-
   try {
-    // Access the connection pool using poolPromise
     const pool = await poolPromise;
-
-    // Direct SQL query without parameter binding
     const sql = `
-      UPDATE reason_code
-      SET deleted = 1
+      UPDATE awt_typeofdefect
+      SET deleted = 1, updated_date = GETDATE()
       WHERE id = ${id}
     `;
-
-    // Execute the query
     await pool.request().query(sql);
-
-    // Return success message
-    return res.json({ message: "Reason data deleted successfully!" });
+    return res.json({ message: "Type of Defect deleted successfully!" });
   } catch (err) {
-    console.error("Error deleting reason data:", err);
-    return res.status(500).json({ message: "Error updating reason data" });
+    console.error("Error deleting Type of Defect:", err);
+    return res.status(500).json({ message: "Error deleting Type of Defect" });
   }
 });
 
-// Reason Code end
+// Type Of Defect Code End
 
 //action code Start
 app.get("/getaction", authenticateToken, async (req, res) => {
