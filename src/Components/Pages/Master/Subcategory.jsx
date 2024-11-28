@@ -15,6 +15,7 @@ const Subcategory = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [duplicateError, setDuplicateError] = useState("");
+  const token = localStorage.getItem("token"); // Get token from localStorage
 
   const [formData, setFormData] = useState({
     title: "",
@@ -23,7 +24,11 @@ const Subcategory = () => {
 
   const fetchCategory = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getcategory`);
+      const response = await axios.get(`${Base_Url}/getcategory`,{
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      });
       console.log(response.data);
       setCategory(response.data);
     } catch (error) {
@@ -33,7 +38,11 @@ const Subcategory = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getsubcategory`);
+      const response = await axios.get(`${Base_Url}/getsubcategory`,{
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      });
       console.log(response.data);
       setUsers(response.data);
       setFilteredUsers(response.data);
@@ -97,7 +106,11 @@ const Subcategory = () => {
         if (isEdit) {
           // For update, include duplicate check
           await axios
-            .put(`${Base_Url}/putsubcategory`, { ...formData })
+            .put(`${Base_Url}/putsubcategory`, { ...formData },{
+              headers: {
+                Authorization: token, // Send token in headers
+              },
+            })
             .then((response) => {
               window.location.reload();
             })
@@ -111,7 +124,11 @@ const Subcategory = () => {
         } else {
           // For insert, include duplicate check
           await axios
-            .post(`${Base_Url}/postsubcategory`, { ...formData })
+            .post(`${Base_Url}/postsubcategory`, { ...formData },{
+              headers: {
+                Authorization: token, // Send token in headers
+              },
+            })
             .then((response) => {
               window.location.reload();
             })
@@ -131,7 +148,11 @@ const Subcategory = () => {
 
   const deleted = async (id) => {
     try {
-      const response = await axios.post(`${Base_Url}/deletesubcat`, { id });
+      const response = await axios.post(`${Base_Url}/deletesubcat`, { id },{
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      });
 
       window.location.reload();
     } catch (error) {
@@ -141,7 +162,11 @@ const Subcategory = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestsubcat/${id}`);
+      const response = await axios.get(`${Base_Url}/requestsubcat/${id}`,{
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      });
       setFormData(response.data);
       setIsEdit(true);
       console.log(response.data);

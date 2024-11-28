@@ -5,7 +5,7 @@ import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
 
 export function Complaintlist(params) {
-    const token = localStorage.getItem("token"); // Get token from localStorage
+   
     const [Complaintdata, setComplaintdata] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
     const [isEdit, setIsEdit] = useState(false);

@@ -12,6 +12,7 @@ export function Servicecontractlist(params) {
     const [Servicecontractdata, setServicecontractdata] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
     const [filteredData, setFilteredData] = useState([]);
+    const token = localStorage.getItem("token"); // Get token from localStorage
     const [formData, setFormData] = useState({
         customerName: "",
         customerMobile: "",
@@ -39,7 +40,11 @@ export function Servicecontractlist(params) {
 
     const fetchServicecontractlist = async () => {
         try {
-            const response = await axios.get(`${Base_Url}/getservicecontractlist`);
+            const response = await axios.get(`${Base_Url}/getservicecontractlist`,{
+                headers: {
+                    Authorization: token, // Send token in headers
+                    }, 
+                });
          
             setServicecontractdata(response.data);
             setFilteredData(response.data);
@@ -54,7 +59,11 @@ export function Servicecontractlist(params) {
         try {
             const dataId = e.target.getAttribute('data-id');
 
-            const response = axios.post(`${Base_Url}/updatestatus`, { dataId: dataId });
+            const response = axios.post(`${Base_Url}/updatestatus`, { dataId: dataId },{
+                headers: {
+                    Authorization: token, // Send token in headers
+                    }, 
+                });
 
         } catch (error) {
             console.error("Error editing user:", error);
@@ -69,7 +78,11 @@ export function Servicecontractlist(params) {
 
             // Only proceed with deletion if user clicks "OK"
             if (isConfirmed) {
-                const response = await axios.post(`${Base_Url}/deleteservicecontract`, { id });
+                const response = await axios.post(`${Base_Url}/deleteservicecontract`, { id },{
+                    headers: {
+                        Authorization: token, // Send token in headers
+                        }, 
+                    });
                 window.location.reload();
             }
         } catch (error) {

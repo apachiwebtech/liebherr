@@ -1766,7 +1766,7 @@ app.post("/deletecatdata", async (req, res) => {
 
 //sub category start
 // fetch data for subcategory
-app.get("/getsubcategory", async (req, res) => {
+app.get("/getsubcategory",authenticateToken, async (req, res) => {
   try {
     // Access the connection pool using poolPromise
     const pool = await poolPromise;
@@ -1793,7 +1793,7 @@ app.get("/getsubcategory", async (req, res) => {
 
 // fetch subcat for specific subcats uding id
 
-app.get("/requestsubcat/:id", async (req, res) => {
+app.get("/requestsubcat/:id",authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -1819,7 +1819,7 @@ app.get("/requestsubcat/:id", async (req, res) => {
 });
 
 // insert for subcategory
-app.post("/postsubcategory", async (req, res) => {
+app.post("/postsubcategory",authenticateToken, async (req, res) => {
   try {
     const { title, category_id } = req.body;
 
@@ -1872,7 +1872,7 @@ app.post("/postsubcategory", async (req, res) => {
 });
 
 // update for subcategory
-app.put("/putsubcategory", async (req, res) => {
+app.put("/putsubcategory",authenticateToken, async (req, res) => {
   try {
     const { title, id, category_id } = req.body;
 
@@ -1907,7 +1907,7 @@ app.put("/putsubcategory", async (req, res) => {
 });
 
 // delete for subcategory
-app.post("/deletesubcat", async (req, res) => {
+app.post("/deletesubcat",authenticateToken, async (req, res) => {
   try {
     const { id } = req.body;
 
@@ -1932,7 +1932,7 @@ app.post("/deletesubcat", async (req, res) => {
 });
 
 //fetch data for category dropdown
-app.get("/getcategory", async (req, res) => {
+app.get("/getcategory",authenticateToken, async (req, res) => {
   try {
     // Access the connection pool using poolPromise
     const pool = await poolPromise;
@@ -4000,7 +4000,7 @@ app.post("/deletepincode", async (req, res) => {
 });
 
 //Unique Product Master Linked to Location Start
-app.get("/getproductunique", async (req, res) => {
+app.get("/getproductunique",authenticateToken, async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
@@ -4017,7 +4017,7 @@ app.get("/getproductunique", async (req, res) => {
     return res.status(500).json({ error: 'An error occurred while fetching data' });
   }
 });
-app.get("/requestproductunique/:id", async (req, res) => {
+app.get("/requestproductunique/:id",authenticateToken, async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -4040,7 +4040,7 @@ app.get("/requestproductunique/:id", async (req, res) => {
     return res.status(500).json({ error: 'An error occurred while fetching data' });
   }
 });
-app.post("/postproductunique", async (req, res) => {
+app.post("/postproductunique",authenticateToken, async (req, res) => {
   const { product, location, date, serialnumber } = req.body;
 
   try {
@@ -4082,7 +4082,7 @@ app.post("/postproductunique", async (req, res) => {
     return res.status(500).json({ error: 'An error occurred while processing the request' });
   }
 });
-app.put("/putproductunique", async (req, res) => {
+app.put("/putproductunique",authenticateToken, async (req, res) => {
   const { product, id, location, date, serialnumber } = req.body;
 
   try {
@@ -4110,7 +4110,7 @@ app.put("/putproductunique", async (req, res) => {
     return res.status(500).json({ error: 'An error occurred while updating the product' });
   }
 });
-app.post("/deleteproductunique", async (req, res) => {
+app.post("/deleteproductunique",authenticateToken, async (req, res) => {
   const { id } = req.body;
 
   try {
@@ -5763,7 +5763,7 @@ app.post("/deleteratedata",authenticateToken, async (req, res) => {
 
 
 // service product code start
-app.get("/getprodata", async (req, res) => {
+app.get("/getprodata",authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
@@ -5778,7 +5778,7 @@ app.get("/getprodata", async (req, res) => {
   }
 });
 // Insert for Serviceproduct
-app.post("/postprodata", async (req, res) => {
+app.post("/postprodata",authenticateToken, async (req, res) => {
   const { Serviceproduct } = req.body;
 
   try {
@@ -5834,7 +5834,7 @@ app.get("/requestprodata/:id",authenticateToken, async (req, res) => {
   }
 });
 // update for Serviceproduct
-app.put("/putprodata", async (req, res) => {
+app.put("/putprodata",authenticateToken, async (req, res) => {
   const { Serviceproduct, id } = req.body;
 
   try {
@@ -5859,7 +5859,7 @@ app.put("/putprodata", async (req, res) => {
   }
 });
 // delete for Serviceproduct
-app.post("/deleteprodata", async (req, res) => {
+app.post("/deleteprodata",authenticateToken, async (req, res) => {
   const { id } = req.body;
 
   try {
@@ -5879,7 +5879,7 @@ app.post("/deleteprodata", async (req, res) => {
 
 // Service Contract code Start
 
-app.get("/getservicecontract",
+app.get("/getservicecontract",authenticateToken,
    async (req, res) => {
   try {
     const pool = await poolPromise;
@@ -5896,7 +5896,7 @@ app.get("/getservicecontract",
 });
 
 // Insert for Servicecontract
-app.post("/postservicecontract", async (req, res) => {
+app.post("/postservicecontract",authenticateToken, async (req, res) => {
   const { customerName, customerMobile, contractNumber, contractType, productName, serialNumber, startDate, endDate } = req.body;
 
   try {
@@ -5956,7 +5956,7 @@ app.get("/requestservicecontract/:id", async (req, res) => {
 //update for service contract
 
 
-app.put("/putservicecontract", async (req, res) => {
+app.put("/putservicecontract",authenticateToken, async (req, res) => {
   const { id, customerName, customerMobile, contractNumber, contractType, productName, serialNumber, startDate, endDate, created_by } = req.body;
 
 
@@ -6027,7 +6027,7 @@ app.put("/putservicecontract", async (req, res) => {
   }
 });
 
-app.post("/deleteservicecontract", async (req, res) => {
+app.post("/deleteservicecontract",authenticateToken, async (req, res) => {
   const { id } = req.body;
 
   try {
@@ -6131,7 +6131,7 @@ app.get("/getservicecontractlist", async (req, res) => {
 });
 
 // fetching data populate
-app.get("/getservicecontractpopulate/:serviceid", async (req, res) => {
+app.get("/getservicecontractpopulate/:serviceid",authenticateToken, async (req, res) => {
   const { serviceid } = req.params;
 
   try {

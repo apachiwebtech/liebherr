@@ -10,6 +10,7 @@ const Uniqueproduct = () => {
   const [product, setProduct] = useState([]);
   const [isEdit, setIsEdit] = useState(false);
   const [duplicateError, setDuplicateError] = useState("");
+  const token = localStorage.getItem("token"); // Get token from localStorage
 
   const [formData, setFormData] = useState({
     product: "",
@@ -40,7 +41,11 @@ const Uniqueproduct = () => {
 
   const fecthProduct = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getproductunique`);
+      const response = await axios.get(`${Base_Url}/getproductunique`,{
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      });
       console.log(response.data);
       setProduct(response.data);
     } catch (error) {
@@ -99,7 +104,11 @@ const Uniqueproduct = () => {
                 if (isEdit) {
                   // For update, include duplicate check
                   await axios
-                    .put(`${Base_Url}/putproductunique`, { ...formData })
+                    .put(`${Base_Url}/putproductunique`, { ...formData },{
+                      headers: {
+                        Authorization: token, // Send token in headers
+                      },
+                    })
                     .then((response) => {
                       console.log(response.data);
                       setFormData({
@@ -120,7 +129,11 @@ const Uniqueproduct = () => {
                 } else {
                   // For insert, include duplicate check
                   await axios
-                    .post(`${Base_Url}/postproductunique`, { ...formData })
+                    .post(`${Base_Url}/postproductunique`, { ...formData },{
+                      headers: {
+                        Authorization: token, // Send token in headers
+                      },
+                    })
                     .then((response) => {
                       setFormData({
                         product: "",
@@ -146,7 +159,11 @@ const Uniqueproduct = () => {
 
   const deleted = async (id) => {
     try {
-      const response = await axios.post(`${Base_Url}/deleteproductunique`, { id });
+      const response = await axios.post(`${Base_Url}/deleteproductunique`, { id },{
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      });
       fecthProduct();
     } catch (error) {
       console.error("Error deleting user:", error);
@@ -157,7 +174,11 @@ const Uniqueproduct = () => {
     try {
       const response = await axios.get(
         `${Base_Url}/requestproductunique/${id}`
-      );
+        ,{
+          headers: {
+            Authorization: token, // Send token in headers
+          },
+        });
       console.log("Original date:", response.data.date);
 
       const formattedDate = formatDateForInput(response.data.date);

@@ -16,6 +16,7 @@ const Servicecontract = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [duplicateError, setDuplicateError] = useState(""); // State to track duplicate error
+  const token = localStorage.getItem("token"); // Get token from localStorage
   const [successMessage, setSuccessMessage] = useState('');
   const createdBy = 1; // Static value for created_by
   const updatedBy = 2; // Static value for updated_by
@@ -34,7 +35,11 @@ const Servicecontract = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getservicecontract`);
+      const response = await axios.get(`${Base_Url}/getservicecontract`,{
+        headers: {
+            Authorization: token, // Send token in headers
+            }, 
+        });
       console.log(response.data);
       setUsers(response.data);
       setFilteredUsers(response.data);
@@ -45,7 +50,11 @@ const Servicecontract = () => {
   const fetchservicecontractpopulate = async (serviceid) => {
 
     try {
-      const response = await axios.get(`${Base_Url}/getservicecontractpopulate/${serviceid}`);
+      const response = await axios.get(`${Base_Url}/getservicecontractpopulate/${serviceid}`,{
+        headers: {
+            Authorization: token, // Send token in headers
+            }, 
+        });
       setFormData({
         ...response.data[0],
         // Rename keys to match your formData structure
@@ -140,7 +149,11 @@ const Servicecontract = () => {
             .put(`${Base_Url}/putservicecontract`, {
               ...formData,
               updated_by: updatedBy,
-            })
+            },{
+              headers: {
+                  Authorization: token, // Send token in headers
+                  }, 
+              })
             .then((response) => {
               //window.location.reload();
               setSuccessMessage('Customer Updated Successfully!');
@@ -173,7 +186,11 @@ const Servicecontract = () => {
             .post(`${Base_Url}/postservicecontract`, {
               ...formData,
               created_by: createdBy,
-            })
+            },{
+              headers: {
+                  Authorization: token, // Send token in headers
+                  }, 
+              })
             .then((response) => {
               // window.location.reload();
               setFormData({
@@ -212,7 +229,11 @@ const Servicecontract = () => {
         
         // Only proceed with deletion if user clicks "OK"
         if (isConfirmed) {
-            const response = await axios.post(`${Base_Url}/deleteservicecontract`, { id });
+            const response = await axios.post(`${Base_Url}/deleteservicecontract`, { id },{
+              headers: {
+                  Authorization: token, // Send token in headers
+                  }, 
+              });
             window.location.reload();
         }
     } catch (error) {
@@ -222,7 +243,11 @@ const Servicecontract = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestservicecontract/${id}`);
+      const response = await axios.get(`${Base_Url}/requestservicecontract/${id}`,{
+        headers: {
+            Authorization: token, // Send token in headers
+            }, 
+        });
       setFormData(response.data);
       setIsEdit(true);
       console.log(response.data);
