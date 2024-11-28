@@ -28,7 +28,7 @@ const ReasonCode = () => {
 
     const fetchGroupDefectCode = async () => {
         try {
-          const response = await axios.get(`${Base_Url}/getgroupdefect_code`);
+          const response = await axios.get(`${Base_Url}/getgroupdefectcode`);
           console.log(response.data);
           setGroupdefect_code(response.data);
         } catch (error) {

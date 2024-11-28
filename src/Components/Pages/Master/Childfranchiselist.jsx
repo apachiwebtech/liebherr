@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
 import Franchisemaster from './Franchisemaster';
+const token = localStorage.getItem("token"); 
 
 
 export function ChildFranchiselist(params) {
@@ -46,7 +47,11 @@ export function ChildFranchiselist(params) {
 
     const fetchChildfranchisemasterlist = async () => {
         try {
-            const response = await axios.get(`${Base_Url}/getchildFranchiseDetails`);
+            const response = await axios.get(`${Base_Url}/getchildFranchiseDetails`,{
+                headers: {
+                  Authorization: token,
+                },
+              });
             setChildfranchisemasterdata(response.data);
         } catch (error) {
             console.error('Error fetching franchisemasterdata:', error);
@@ -57,7 +62,11 @@ export function ChildFranchiselist(params) {
         try {
           const dataId = e.target.getAttribute('data-id');
     
-          const response = axios.post(`${Base_Url}/updatestatus`, { dataId: dataId });
+          const response = axios.post(`${Base_Url}/updatestatus`, { dataId: dataId },{
+            headers: {
+              Authorization: token,
+            },
+          });
     
         } catch (error) {
           console.error("Error editing user:", error);

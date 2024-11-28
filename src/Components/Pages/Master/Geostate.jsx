@@ -1,10 +1,11 @@
-import axios from 'axios';
+ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
 import LocationTabs from './LocationTabs';
 
 const Geostate = () => {
+   const token = localStorage.getItem("token"); 
   const [countries, setCountries] = useState([]);
   const [regions, setRegions] = useState([]); // State for regions
   const [errors, setErrors] = useState({});
@@ -23,7 +24,11 @@ const Geostate = () => {
 
   const fetchCountries = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getcountries`);
+      const response = await axios.get(`${Base_Url}/getcountries`,{
+        headers: {
+          Authorization: token,
+        },
+      });
       setCountries(response.data);
     } catch (error) {
       console.error('Error fetching countries:', error);
@@ -34,7 +39,11 @@ const Geostate = () => {
 
   const fetchRegions = async (countryId) => {
     try {
-      const response = await axios.get(`${Base_Url}/getregionscity/${countryId}`); // API to fetch regions based on country_id
+      const response = await axios.get(`${Base_Url}/getregionscity/${countryId}`,{
+        headers: {
+          Authorization: token,
+        },
+      }); // API to fetch regions based on country_id
       setRegions(response.data);
       console.log(response.data);
     } catch (error) {
@@ -44,7 +53,11 @@ const Geostate = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getgeostates`); // This should be updated to fetch from your geostate table if necessary
+      const response = await axios.get(`${Base_Url}/getgeostates`,{
+        headers: {
+          Authorization: token,
+        },
+      }); // This should be updated to fetch from your geostate table if necessary
       setUsers(response.data);
       setFilteredUsers(response.data);
     } catch (error) {
@@ -107,7 +120,11 @@ const Geostate = () => {
       const confirmSubmission = window.confirm("Do you want to submit the data?");
       if (confirmSubmission) {
         if (isEdit) {
-          await axios.put(`${Base_Url}/putgeostate`, { ...formData })
+          await axios.put(`${Base_Url}/putgeostate`, { ...formData },{
+            headers: {
+              Authorization: token,
+            },
+          })
             .then(response => {
               setFormData({
                 title: '',
@@ -122,7 +139,11 @@ const Geostate = () => {
               }
             });
         } else {
-          await axios.post(`${Base_Url}/postgeostate`, { ...formData })
+          await axios.post(`${Base_Url}/postgeostate`, { ...formData },{
+            headers: {
+              Authorization: token,
+            },
+          })
             .then(response => {
               setFormData({
                 title: '',
@@ -145,7 +166,11 @@ const Geostate = () => {
 
   const deleted = async (id) => {
     try {
-      await axios.post(`${Base_Url}/deletegeostate`, { id });
+      await axios.post(`${Base_Url}/deletegeostate`, { id },{
+        headers: {
+          Authorization: token,
+        },
+      });
       setFormData({
         title: '',
         country_id: '',
@@ -159,7 +184,11 @@ const Geostate = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestgeostate/${id}`);
+      const response = await axios.get(`${Base_Url}/requestgeostate/${id}`,{
+        headers: {
+          Authorization: token,
+        },
+      });
       setFormData(response.data);
       fetchRegions(response.data.country_id);
       console.log("ddtttttt", response.data);

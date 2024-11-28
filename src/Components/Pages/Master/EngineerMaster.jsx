@@ -8,6 +8,7 @@ const EngineerMaster = () => {
   // Step 1: Add this state to track errors
   const [Childfranchise, setChildfranchise] = useState([]);
   const [Parentfranchise, setParentfranchise] = useState([]);
+  const token = localStorage.getItem("token"); 
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -42,7 +43,12 @@ const EngineerMaster = () => {
 
   const fetchParentfranchise = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getparentfranchise`);
+      const response = await axios.get(`${Base_Url}/getparentfranchise`,{
+        headers: {
+          Authorization: token,
+        },
+      }
+);
       setParentfranchise(response.data);
     } catch (error) {
       console.error("Error fetching Parentfranchise:", error);
@@ -51,7 +57,12 @@ const EngineerMaster = () => {
 
   const fetchChildfranchise = async (mfranchise_id) => {
     try {
-      const response = await axios.get(`${Base_Url}/getchildfranchise${mfranchise_id}`);
+      const response = await axios.get(`${Base_Url}/getchildfranchise/${mfranchise_id}`,{
+        headers: {
+          Authorization: token,
+        },
+      }
+);
       setChildfranchise(response.data);
     } catch (error) {
       console.error('Error fetching Childfranchise:', error);
@@ -61,7 +72,12 @@ const EngineerMaster = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getengineer`);
+      const response = await axios.get(`${Base_Url}/getengineer`,{
+        headers: {
+          Authorization: token,
+        },
+      }
+);
       setUsers(response.data);
       setFilteredUsers(response.data);
     } catch (error) {
@@ -137,7 +153,13 @@ const EngineerMaster = () => {
       if (confirmSubmission) {
         if (isEdit) {
           // For update, include duplicate check
-          await axios.put(`${Base_Url}/putengineer`, { ...formData })
+          await axios.put(`${Base_Url}/putengineer`, { ...formData }
+            ,{
+                    headers: {
+                      Authorization: token,
+                    },
+                  }
+            )
             .then(response => {
               console.log(response.data)
               setFormData({
@@ -170,7 +192,13 @@ const EngineerMaster = () => {
             });
         } else {
           // For insert, include duplicate check
-          await axios.post(`${Base_Url}/postengineer`, { ...formData })
+          await axios.post(`${Base_Url}/postengineer`, { ...formData }
+            ,{
+                    headers: {
+                      Authorization: token,
+                    },
+                  }
+            )
             .then(response => {
               setFormData({
                 title: '',
@@ -210,7 +238,13 @@ const EngineerMaster = () => {
 
   const deleted = async (id) => {
     try {
-      const response = await axios.post(`${Base_Url}/deleteengineer`, { id });
+      const response = await axios.post(`${Base_Url}/deleteengineer`, { id }
+        ,{
+                headers: {
+                  Authorization: token,
+                },
+              }
+        );
 
       fetchUsers();
     } catch (error) {
@@ -220,7 +254,12 @@ const EngineerMaster = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestengineer/${id}`);
+      const response = await axios.get(`${Base_Url}/requestengineer/${id}`,{
+        headers: {
+          Authorization: token,
+        },
+      }
+);
       setFormData(response.data)
       setIsEdit(true);
       console.log(response.data);

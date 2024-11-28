@@ -6,6 +6,7 @@ import ProMaster from "./ProMaster";
 
 const Category = () => {
   // Step 1: Add this state to track errors
+  const token = localStorage.getItem("token"); 
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -23,7 +24,11 @@ const Category = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getcat`);
+      const response = await axios.get(`${Base_Url}/getcat`,{
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      });
       console.log(response.data);
       setUsers(response.data);
       setFilteredUsers(response.data);
@@ -84,6 +89,10 @@ const Category = () => {
             .put(`${Base_Url}/putcatdata`, {
               ...formData,
               updated_by: updatedBy,
+            },{
+              headers: {
+                Authorization: token,
+              },
             })
             .then((response) => {
               window.location.reload();
@@ -99,7 +108,13 @@ const Category = () => {
             .post(`${Base_Url}/postdatacat`, {
               ...formData,
               created_by: createdBy,
-            })
+     
+            },{
+              headers: {
+                Authorization: token,
+              },
+            }
+          )
             .then((response) => {
               window.location.reload();
             })
@@ -117,7 +132,11 @@ const Category = () => {
 
   const deleted = async (id) => {
     try {
-      const response = await axios.post(`${Base_Url}/deletecatdata`, { id });
+      const response = await axios.post(`${Base_Url}/deletecatdata`, { id },{
+        headers: {
+          Authorization: token,
+        },
+      });
       window.location.reload();
     } catch (error) {
       console.error("Error deleting user:", error);
@@ -126,7 +145,12 @@ const Category = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestdatacat/${id}`);
+      const response = await axios.get(`${Base_Url}/requestdatacat/${id}`,{
+        headers: {
+          Authorization: token,
+        },
+      }
+);
       setFormData(response.data);
       setIsEdit(true);
       console.log(response.data);

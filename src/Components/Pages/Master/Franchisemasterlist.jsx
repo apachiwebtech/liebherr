@@ -9,6 +9,8 @@ export function Franchisemasterlist(params) {
     
     const [Franchisemasterdata, setFranchisemasterdata] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
+    const token = localStorage.getItem("token"); 
+
     const [formData, setFormData] = useState({
         title: "",
         password: "",
@@ -45,7 +47,11 @@ export function Franchisemasterlist(params) {
    
     const fetchFranchisemasterlist = async () => {
         try {
-            const response = await axios.get(`${Base_Url}/getmasterlist`);
+            const response = await axios.get(`${Base_Url}/getmasterlist`,{
+                headers: {
+                  Authorization: token,
+                },
+              });
             setFranchisemasterdata(response.data);
         } catch (error) {
             console.error('Error fetching franchisemasterdata:', error);
@@ -57,7 +63,11 @@ export function Franchisemasterlist(params) {
         try {
           const dataId = e.target.getAttribute('data-id');
     
-          const response = axios.post(`${Base_Url}/updatestatus`, { dataId: dataId });
+          const response = axios.post(`${Base_Url}/updatestatus`, { dataId: dataId },{
+            headers: {
+              Authorization: token,
+            },
+          });
     
         } catch (error) {
           console.error("Error editing user:", error);
@@ -68,7 +78,11 @@ export function Franchisemasterlist(params) {
 
     const deleted = async (id) => {
         try {
-            const response = await axios.post(`${Base_Url}/deletemasterlist`, { id });
+            const response = await axios.post(`${Base_Url}/deletemasterlist`, { id },{
+                headers: {
+                  Authorization: token,
+                },
+              });
             setFormData({
                 title: "",
                 password: "",
@@ -104,7 +118,11 @@ export function Franchisemasterlist(params) {
 
     const edit = async (id) => {
         try {
-            const response = await axios.get(`${Base_Url}/requestengineer/${id}`);
+            const response = await axios.get(`${Base_Url}/requestengineer/${id}`,{
+                headers: {
+                  Authorization: token,
+                },
+              });
             setFormData(response.data)
             setIsEdit(true);
             console.log(response.data);

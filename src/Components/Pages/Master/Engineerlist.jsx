@@ -7,6 +7,7 @@ import Franchisemaster from './Franchisemaster';
 
 export function Engineerlist(params) {
     const [Engineerdata, setEngineerdata] = useState([]);
+    const token = localStorage.getItem("token"); 
     const [isEdit, setIsEdit] = useState(false);
     const [formData, setFormData] = useState({
         title: '',
@@ -30,7 +31,12 @@ export function Engineerlist(params) {
 
     const fetchEngineerlist = async () => {
         try {
-            const response = await axios.get(`${Base_Url}/getengineer`);
+            const response = await axios.get(`${Base_Url}/getengineer`,{
+                headers: {
+                  Authorization: token,
+                },
+              }
+        );
             setEngineerdata(response.data);
         } catch (error) {
             console.error('Error fetching Engineerdata:', error);
@@ -41,7 +47,12 @@ export function Engineerlist(params) {
         try {
           const dataId = e.target.getAttribute('data-id');
     
-          const response = axios.post(`${Base_Url}/updatestatus`, { dataId: dataId });
+          const response = axios.post(`${Base_Url}/updatestatus`, { dataId: dataId },{
+            headers: {
+              Authorization: token,
+            },
+          }
+    );
     
         } catch (error) {
           console.error("Error editing user:", error);
@@ -52,7 +63,12 @@ export function Engineerlist(params) {
 
     const deleted = async (id) => {
         try {
-            const response = await axios.post(`${Base_Url}/deleteengineer`, { id });
+            const response = await axios.post(`${Base_Url}/deleteengineer`, { id },{
+                headers: {
+                  Authorization: token,
+                },
+              }
+        );
             setFormData({
                 title: '',
                 email: '',
@@ -75,7 +91,12 @@ export function Engineerlist(params) {
 
     const edit = async (id) => {
         try {
-            const response = await axios.get(`${Base_Url}/requestengineer/${id}`);
+            const response = await axios.get(`${Base_Url}/requestengineer/${id}`,{
+                headers: {
+                  Authorization: token,
+                },
+              }
+        );
             setFormData(response.data)
             setIsEdit(true);
             console.log(response.data);

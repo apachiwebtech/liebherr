@@ -7,6 +7,7 @@ import Endcustomertabs from './Endcustomertabs';
 
 export function Customerlist(params) {
     const [Customerdata, setCustomerdata] = useState([]);
+    const token = localStorage.getItem("token"); 
     const [isEdit, setIsEdit] = useState(false);
     const [filteredData, setFilteredData] = useState([]);
     const [formData, setFormData] = useState({
@@ -42,7 +43,12 @@ export function Customerlist(params) {
 
     const fetchCustomerlist = async () => {
         try {
-            const response = await axios.get(`${Base_Url}/getcustomerlist`);
+            const response = await axios.get(`${Base_Url}/getcustomerlist`,{
+                headers: {
+                  Authorization: token,
+                },
+              }
+        );
             setCustomerdata(response.data);
             setFilteredData(response.data);
         } catch (error) {
@@ -55,7 +61,11 @@ export function Customerlist(params) {
 
     const deleted = async (id) => {
         try {
-            const response = await axios.post(`${Base_Url}/deletecustomer`, { id });
+            const response = await axios.post(`${Base_Url}/deletecustomer`, { id },{
+                headers: {
+                  Authorization: token,
+                },
+              });
             setFormData({
                 customer_fname: '',
                 customer_lname: '',
@@ -87,7 +97,12 @@ export function Customerlist(params) {
 
             console.log('Sending params:', params.toString()); // Debug log
 
-            const response = await axios.get(`${Base_Url}/getcustomerlist?${params}`);
+            const response = await axios.get(`${Base_Url}/getcustomerlist?${params}`,{
+                headers: {
+                  Authorization: token,
+                },
+              }
+        );
             setCustomerdata(response.data);
             setFilteredData(response.data);
         } catch (error) {

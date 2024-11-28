@@ -5,6 +5,7 @@ import { Base_Url } from "../../Utils/Base_Url";
 
 const Channelpartner = () => {
   // Step 1: Add this state to track errors
+   const token = localStorage.getItem("token"); 
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -22,7 +23,11 @@ const Channelpartner = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getcdata`);
+      const response = await axios.get(`${Base_Url}/getcdata`,{
+        headers: {
+          Authorization: token,
+        },
+      });
       console.log(response.data);
       setUsers(response.data);
       setFilteredUsers(response.data);
@@ -102,7 +107,12 @@ const Channelpartner = () => {
             .post(`${Base_Url}/postcdata`, {
               ...formData,
               created_by: createdBy,
-            })
+            },{
+              headers: {
+                Authorization: token,
+              },
+            }
+      )
             .then((response) => {
               // window.location.reload();
               setFormData({
@@ -126,7 +136,11 @@ const Channelpartner = () => {
 
   const deleted = async (id) => {
     try {
-      const response = await axios.post(`${Base_Url}/deletecdata`, { id });
+      const response = await axios.post(`${Base_Url}/deletecdata`, { id },{
+        headers: {
+          Authorization: token,
+        },
+      });
       // alert(response.data[0]);
       window.location.reload();
     } catch (error) {
@@ -136,7 +150,11 @@ const Channelpartner = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestcdata/${id}`);
+      const response = await axios.get(`${Base_Url}/requestcdata/${id}`,{
+        headers: {
+          Authorization: token,
+        },
+      });
       setFormData(response.data);
       setIsEdit(true);
       console.log(response.data);
@@ -176,7 +194,7 @@ const Channelpartner = () => {
                       className="form-control"
                       name="Channelpartner"
                       id="ChannelpartnerInput"
-                      value={formData.Channel_partner}
+                      value={formData.Channelpartner}
                       onChange={handleChange}
                       placeholder="Enter Channel Partner "
                     />

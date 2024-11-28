@@ -7,7 +7,7 @@ import { useParams } from "react-router-dom";
 import md5 from "js-md5";
 const Childfranchisemaster = () => {
   const { childid } = useParams();
-
+  const token = localStorage.getItem("token"); 
   const [Parentfranchise, setParentfranchise] = useState([]);
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
@@ -126,7 +126,13 @@ const Childfranchisemaster = () => {
 
   const fetchchildfranchisepopulate = async (childid) => {
     try {
-      const response = await axios.get(`${Base_Url}/getchildfranchisepopulate/${childid}`);
+      const response = await axios.get(`${Base_Url}/getchildfranchisepopulate/${childid}`,{
+        headers: {
+          Authorization: token,
+        },
+      }
+
+);
       const data = response.data[0];
 
       // Update locations state with the names from API
@@ -195,7 +201,12 @@ const Childfranchisemaster = () => {
 
   const fetchParentfranchise = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getparentfranchise`);
+      const response = await axios.get(`${Base_Url}/getparentfranchise`,{
+        headers: {
+          Authorization: token,
+        },
+      }
+);
       console.log("pf",response.data);
       setParentfranchise(response.data);
     } catch (error) {
@@ -205,7 +216,11 @@ const Childfranchisemaster = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getchildFranchiseDetails`);
+      const response = await axios.get(`${Base_Url}/getchildFranchiseDetails`,{
+        headers: {
+          Authorization: token,
+        },
+      });
       console.log(response.data);
       setUsers(response.data);
       // setFilteredUsers(response.data);
@@ -230,7 +245,11 @@ const Childfranchisemaster = () => {
 
   const fetchcountries = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getcountries`);
+      const response = await axios.get(`${Base_Url}/getcountries`,{
+        headers: {
+          Authorization: token,
+        },
+      });
       setCountries(response.data);
     } catch (error) {
       console.error("Error fetching disctricts:", error);
@@ -240,7 +259,11 @@ const Childfranchisemaster = () => {
   //region
   const fetchregion = async (country_id) => {
     try {
-      const response = await axios.get(`${Base_Url}/getregionscity/${country_id}`);
+      const response = await axios.get(`${Base_Url}/getregionscity/${country_id}`,{
+        headers: {
+          Authorization: token,
+        },
+      });
       setRegions(response.data);
     } catch (error) {
       console.error("Error fetching disctricts:", error);
@@ -250,7 +273,11 @@ const Childfranchisemaster = () => {
   //geostate
   const fetchState = async (region_id) => {
     try {
-      const response = await axios.get(`${Base_Url}/getgeostatescity/${region_id}`);
+      const response = await axios.get(`${Base_Url}/getgeostatescity/${region_id}`,{
+        headers: {
+          Authorization: token,
+        },
+      });
       setState(response.data);
     } catch (error) {
       console.error("Error fetching disctricts:", error);
@@ -259,7 +286,12 @@ const Childfranchisemaster = () => {
 
   const fetchdistricts = async (geostateID) => {
     try {
-      const response = await axios.get(`${Base_Url}/getdistrictcity/${geostateID}`);
+      const response = await axios.get(`${Base_Url}/getdistrictcity/${geostateID}`,{
+        headers: {
+          Authorization: token,
+        },
+      }
+);
       setdistricts(response.data);
     } catch (error) {
       console.error("Error fetching disctricts:", error);
@@ -268,7 +300,11 @@ const Childfranchisemaster = () => {
 
   const fetchCity = async (area_id) => {
     try {
-      const response = await axios.get(`${Base_Url}/getgeocities_p/${area_id}`);
+      const response = await axios.get(`${Base_Url}/getgeocities_p/${area_id}`,{
+        headers: {
+          Authorization: token,
+        },
+      });
       setCity(response.data);
     } catch (error) {
       console.error("Error fetching City:", error);
@@ -277,7 +313,11 @@ const Childfranchisemaster = () => {
 
   const fetchpincode = async (cityid) => {
     try {
-      const response = await axios.get(`${Base_Url}/getpincodebyid/${cityid}`);
+      const response = await axios.get(`${Base_Url}/getpincodebyid/${cityid}`,{
+        headers: {
+          Authorization: token,
+        },
+      });
       setPincode(response.data);
     } catch (error) {
       console.error("Error fetching City:", error);
@@ -329,7 +369,11 @@ const Childfranchisemaster = () => {
   const fetchlocations = async (pincode) => {
     try {
       const response = await axios.get(
-        `${Base_Url}/getmultiplelocation/${pincode}`
+        `${Base_Url}/getmultiplelocation/${pincode}`,{
+          headers: {
+            Authorization: token,
+          },
+        }
       );
 
       if (response.data && response.data[0]) {
@@ -413,7 +457,11 @@ const Childfranchisemaster = () => {
         };
         if (isEdit) {
           await axios
-          .put(`${Base_Url}/putchildfranchise`, { ...hashedFormData, created_by })
+          .put(`${Base_Url}/putchildfranchise`, { ...hashedFormData, created_by },{
+            headers: {
+              Authorization: token,
+            },
+          })
             .then((response) => {
               setFormData({
                 title: "",
@@ -455,7 +503,11 @@ const Childfranchisemaster = () => {
             });
         } else {
 
-          await axios.post(`${Base_Url}/postchildfranchise`, { ...hashedFormData, created_by })
+          await axios.post(`${Base_Url}/postchildfranchise`, { ...hashedFormData, created_by },{
+            headers: {
+              Authorization: token,
+            },
+          })
             .then((response) => {
               setFormData({
                 title: "",

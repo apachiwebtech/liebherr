@@ -9,6 +9,7 @@ import { Navigate } from "react-router-dom";
 const Engineer = () => {
   // Step 1: Add this state to track errors
   const [errors, setErrors] = useState({});
+  const token = localStorage.getItem("token"); 
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [isEdit, setIsEdit] = useState(false);
@@ -27,7 +28,11 @@ const Engineer = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getlhidata`);
+      const response = await axios.get(`${Base_Url}/getlhidata`,{
+        headers: {
+          Authorization: token,
+        },
+      });
       console.log(response.data);
       setUsers(response.data);
       setFilteredUsers(response.data);
@@ -125,6 +130,10 @@ const Engineer = () => {
               .put(`${Base_Url}/putlhidata`, {
                 ...formData,
                 updated_by: updatedBy,
+              },{
+                headers: {
+                  Authorization: token,
+                },
               })
               .then((response) => {
                 setFormData({
@@ -143,6 +152,10 @@ const Engineer = () => {
               .post(`${Base_Url}/postlhidata`, {
                 ...formData,
                 created_by: createdBy,
+              },{
+                headers: {
+                  Authorization: token,
+                },
               })
               .then((response) => {
                 setFormData({
@@ -168,7 +181,11 @@ const Engineer = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestlhidata/${id}`);
+      const response = await axios.get(`${Base_Url}/requestlhidata/${id}`,{
+        headers: {
+          Authorization: token,
+        },
+      });
       setFormData(response.data);
       setIsEdit(true);
       console.log(response.data);
@@ -181,7 +198,11 @@ const Engineer = () => {
     try {
       const dataId = e.target.getAttribute('data-id');
 
-      const response = axios.post(`${Base_Url}/updatestatus`, { dataId: dataId });
+      const response = axios.post(`${Base_Url}/updatestatus`, { dataId: dataId },{
+        headers: {
+          Authorization: token,
+        },
+      });
 
     } catch (error) {
       console.error("Error editing user:", error);

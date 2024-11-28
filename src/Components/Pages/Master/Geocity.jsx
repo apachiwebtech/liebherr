@@ -6,6 +6,7 @@ import LocationTabs from "./LocationTabs";
 
 const Geocity = () => {
   const [countries, setCountries] = useState([]);
+  const token = localStorage.getItem("token"); 
   const [regions, setRegions] = useState([]); // State for regions
   const [geoStates, setGeoStates] = useState([]); // State for geoStates
   const [districts, setdistricts] = useState([]);
@@ -27,7 +28,11 @@ const Geocity = () => {
 
   const fetchCountries = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getcountries`);
+      const response = await axios.get(`${Base_Url}/getcountries`,{
+        headers: {
+          Authorization: token,
+        },
+      });
       setCountries(response.data);
     } catch (error) {
       console.error("Error fetching countries:", error);
@@ -36,7 +41,11 @@ const Geocity = () => {
 
   const fetchRegions = async (countryId) => {
     try {
-      const response = await axios.get(`${Base_Url}/getregionscity/${countryId}`);
+      const response = await axios.get(`${Base_Url}/getregionscity/${countryId}`,{
+        headers: {
+          Authorization: token,
+        },
+      });
       setRegions(response.data);
       console.log(response.data);
     } catch (error) {
@@ -46,7 +55,11 @@ const Geocity = () => {
 
   const fetchGeoStates = async (regionId) => {
     try {
-      const response = await axios.get(`${Base_Url}/getgeostatescity/${regionId}`);
+      const response = await axios.get(`${Base_Url}/getgeostatescity/${regionId}`,{
+        headers: {
+          Authorization: token,
+        },
+      });
       setGeoStates(response.data); // Fetch geo states based on region_id
     } catch (error) {
       console.error("Error fetching geo states:", error);
@@ -55,7 +68,11 @@ const Geocity = () => {
 
   const fetchdistricts= async (geostateID) => {
     try {
-      const response = await axios.get(`${Base_Url}/getdistrictcity/${geostateID}`);
+      const response = await axios.get(`${Base_Url}/getdistrictcity/${geostateID}`,{
+        headers: {
+          Authorization: token,
+        },
+      });
       setdistricts(response.data);
     } catch (error) {
       console.error("Error fetching disctricts:", error);
@@ -64,7 +81,11 @@ const Geocity = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getgeocities`);
+      const response = await axios.get(`${Base_Url}/getgeocities`,{
+        headers: {
+          Authorization: token,
+        },
+      });
       setUsers(response.data);
       setFilteredUsers(response.data);
     } catch (error) {
@@ -95,7 +116,11 @@ const Geocity = () => {
       if (confirmSubmission) {
         if (isEdit) {
           await axios
-            .put(`${Base_Url}/putgeocity`, { ...formData })
+            .put(`${Base_Url}/putgeocity`, { ...formData },{
+              headers: {
+                Authorization: token,
+              },
+            })
             .then((response) => {
               setFormData({
                 title: "",
@@ -113,7 +138,11 @@ const Geocity = () => {
             });
         } else {
           await axios
-            .post(`${Base_Url}/postgeocity`, { ...formData })
+            .post(`${Base_Url}/postgeocity`, { ...formData },{
+              headers: {
+                Authorization: token,
+              },
+            })
             .then((response) => {
               setFormData({
                 title: "",
@@ -188,7 +217,11 @@ const Geocity = () => {
 
   const deleted = async (id) => {
     try {
-      await axios.post(`${Base_Url}/deletegeocity`, { id });
+      await axios.post(`${Base_Url}/deletegeocity`, { id },{
+        headers: {
+          Authorization: token,
+        },
+      });
       setFormData({
         title: "",
         country_id: "",
@@ -204,7 +237,11 @@ const Geocity = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestgeocity/${id}`);
+      const response = await axios.get(`${Base_Url}/requestgeocity/${id}`,{
+        headers: {
+          Authorization: token,
+        },
+      });
       setFormData(response.data);
       await fetchRegions(response.data.country_id);
       await fetchGeoStates(response.data.region_id);

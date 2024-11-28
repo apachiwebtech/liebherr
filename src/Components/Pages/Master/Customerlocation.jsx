@@ -6,6 +6,8 @@ import Endcustomertabs from "./Endcustomertabs";
 
 const Customerlocation = () => {
   const [countries, setCountries] = useState([]);
+
+  const token = localStorage.getItem("token"); 
   const [regions, setRegions] = useState([]);
   const [geoStates, setGeoStates] = useState([]);
   const [geoCities, setGeoCities] = useState([]);
@@ -50,7 +52,11 @@ const Customerlocation = () => {
 
   const fetchCustomermobile = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getcustomer`);
+      const response = await axios.get(`${Base_Url}/getcustomer`,{
+        headers: {
+          Authorization: token,
+        },
+      });
       console.log("Customer data:", response.data); // Check data structure
       console.log("Data type:", typeof response.data); // Check data type
       console.log("Is Array:", Array.isArray(response.data)); // Check if it's an array
@@ -66,7 +72,12 @@ const Customerlocation = () => {
 
   const fetchCountries = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getcountries`);
+      const response = await axios.get(`${Base_Url}/getcountries`,{
+        headers: {
+          Authorization: token,
+        },
+      }
+);
       setCountries(response.data);
     } catch (error) {
       console.error("Error fetching countries:", error);
@@ -75,7 +86,11 @@ const Customerlocation = () => {
 
   const fetchRegions = async (countryId) => {
     try {
-      const response = await axios.get(`${Base_Url}/getregions/${countryId}`);
+      const response = await axios.get(`${Base_Url}/getregions/${countryId}`,{
+        headers: {
+          Authorization: token,
+        },
+      });
       setRegions(response.data);
     } catch (error) {
       console.error("Error fetching regions:", error);
@@ -84,7 +99,12 @@ const Customerlocation = () => {
 
   const fetchGeoStates = async (regionId) => {
     try {
-      const response = await axios.get(`${Base_Url}/getgeostates/${regionId}`);
+      const response = await axios.get(`${Base_Url}/getgeostates/${regionId}`
+,{
+        headers: {
+          Authorization: token,
+        },
+      });
       setGeoStates(response.data);
     } catch (error) {
       console.error("Error fetching geo states:", error);
@@ -94,7 +114,11 @@ const Customerlocation = () => {
   const fetchGeoCities = async (district_id) => {
     try {
       const response = await axios.get(
-        `${Base_Url}/getgeocities_a/${district_id}`
+        `${Base_Url}/getgeocities_a/${district_id}`,{
+          headers: {
+            Authorization: token,
+          },
+        }
       );
       console.log("Geo Cities:", response.data);
       setGeoCities(response.data);
@@ -107,7 +131,11 @@ const Customerlocation = () => {
   const fetchDistrict = async (geostate_id) => {
     try {
       const response = await axios.get(
-        `${Base_Url}/getareadrop/${geostate_id}`
+        `${Base_Url}/getareadrop/${geostate_id}`,{
+          headers: {
+            Authorization: token,
+          },
+        }
       );
       console.log("Area Dropdown:", response.data);
       setGeoAreas(response.data);
@@ -119,7 +147,11 @@ const Customerlocation = () => {
   const fetchPincodedrop = async (geocity_id) => {
     try {
       const response = await axios.get(
-        `${Base_Url}/getpincodedrop/${geocity_id}`
+        `${Base_Url}/getpincodedrop/${geocity_id}`,{
+          headers: {
+            Authorization: token,
+          },
+        }
       );
       console.log("Pincode Dropdown:", response.data);
       setGeoPincodes(response.data);
@@ -130,7 +162,12 @@ const Customerlocation = () => {
 
   const fetchCustomerlocation = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getcustomerlocation`);
+      const response = await axios.get(`${Base_Url}/getcustomerlocation`,{
+        headers: {
+          Authorization: token,
+        },
+      }
+);
       setCustomerLocation(response.data);
       setFilteredAreas(response.data);
     } catch (error) {
@@ -161,7 +198,11 @@ const Customerlocation = () => {
       if (confirmSubmission) {
         if (isEdit) {
           await axios
-            .put(`${Base_Url}/putcustomerlocation`, { ...formData })
+            .put(`${Base_Url}/putcustomerlocation`, { ...formData },{
+              headers: {
+                Authorization: token,
+              },
+            })
             .then((response) => {
               setFormData({
                 country_id: "",
@@ -185,7 +226,11 @@ const Customerlocation = () => {
             });
         } else {
           await axios
-            .post(`${Base_Url}/postcustomerlocation`, { ...formData })
+            .post(`${Base_Url}/postcustomerlocation`, { ...formData },{
+              headers: {
+                Authorization: token,
+              },
+            })
             .then((response) => {
               setFormData({
                 country_id: "",
@@ -244,7 +289,11 @@ const Customerlocation = () => {
   const fetchlocations = async (pincode) => {
     try {
         const response = await axios.get(
-            `${Base_Url}/getmultiplelocation/${pincode}`
+            `${Base_Url}/getmultiplelocation/${pincode}`,{
+              headers: {
+                Authorization: token,
+              },
+            }
         );
 
         if (response.data && response.data[0]) {
@@ -300,7 +349,11 @@ const Customerlocation = () => {
 
   const deleted = async (id) => {
     try {
-      await axios.post(`${Base_Url}/deletepincode`, { id });
+      await axios.post(`${Base_Url}/deletepincode`, { id },{
+        headers: {
+          Authorization: token,
+        },
+      });
       setFormData({
         country_id: "",
         region_id: "",

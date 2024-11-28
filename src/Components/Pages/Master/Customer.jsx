@@ -8,6 +8,7 @@ import { useParams } from 'react-router-dom';
 const Customer = () => {
   const { customerid } = useParams();
   const [customerData, setCustomerData] = useState([]);
+  const token = localStorage.getItem("token"); 
   const [errors, setErrors] = useState({});
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [isEdit, setIsEdit] = useState(false);
@@ -32,7 +33,11 @@ const Customer = () => {
 
   const fetchCustomerData = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/getcustomer`);
+      const response = await axios.get(`${Base_Url}/getcustomer`,{
+        headers: {
+          Authorization: token,
+        },
+      });
       console.log(response.data);
       setCustomerData(response.data);
     } catch (error) {
@@ -43,7 +48,11 @@ const Customer = () => {
   const fetchCustomerpopulate = async (customerid) => {
 
     try {
-      const response = await axios.get(`${Base_Url}/getcustomerpopulate/${customerid}`);
+      const response = await axios.get(`${Base_Url}/getcustomerpopulate/${customerid}`,{
+        headers: {
+          Authorization: token,
+        },
+      });
       setFormData({
         ...response.data[0],
         // Rename keys to match your formData structure
@@ -157,7 +166,11 @@ const Customer = () => {
       if (confirmSubmission) {
         if (isEdit) {
           // For update, include duplicate check
-          await axios.put(`${Base_Url}/putcustomer`, { ...formData })
+          await axios.put(`${Base_Url}/putcustomer`, { ...formData },{
+            headers: {
+              Authorization: token,
+            },
+          })
             .then(response => {
               setFormData({
                 customer_fname: '',
@@ -183,7 +196,11 @@ const Customer = () => {
             });
         } else {
           // For insert, include duplicate check
-          await axios.post(`${Base_Url}/postcustomer`, { ...formData })
+          await axios.post(`${Base_Url}/postcustomer`, { ...formData },{
+            headers: {
+              Authorization: token,
+            },
+          })
             .then(response => {
               setFormData({
                 customer_fname: '',
@@ -217,7 +234,11 @@ const Customer = () => {
 
   const deleted = async (id) => {
     try {
-      const response = await axios.post(`${Base_Url}/deletecustomer`, { id });
+      const response = await axios.post(`${Base_Url}/deletecustomer`, { id },{
+        headers: {
+          Authorization: token,
+        },
+      });
       setFormData({
         customer_fname: '',
         customer_lname: '',

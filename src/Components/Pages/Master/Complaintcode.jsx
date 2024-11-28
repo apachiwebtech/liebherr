@@ -8,6 +8,7 @@ import DT from 'datatables.net-dt';
 DataTable.use(DT);
 
 const ComplaintCode = () => {
+  const token = localStorage.getItem("token"); 
   // Step 1: Add this state to track errors
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
@@ -30,7 +31,11 @@ const ComplaintCode = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getcom`);
+      const response = await axios.get(`${Base_Url}/getcom`,{
+        headers: {
+          Authorization: token,
+        },
+      });
       console.log(response.data);
       setUsers(response.data);
       setFilteredUsers(response.data);
@@ -100,6 +105,10 @@ const ComplaintCode = () => {
             .put(`${Base_Url}/putcomdata`, {
               ...formData,
               updated_by: updated_by,
+            },{
+              headers: {
+                Authorization: token,
+              },
             })
             .then((response) => {
 
@@ -123,6 +132,10 @@ const ComplaintCode = () => {
             .post(`${Base_Url}/postdatacom`, {
               ...formData,
               updated_by: created_by,
+            },{
+              headers: {
+                Authorization: token,
+              },
             })
             .then((response) => {
 
@@ -149,7 +162,12 @@ const ComplaintCode = () => {
 
   const deleted = async (id) => {
     try {
-      const response = await axios.post(`${Base_Url}/deletecomdata`, { id });
+      const response = await axios.post(`${Base_Url}/deletecomdata`, { id },{
+        headers: {
+          Authorization: token,
+        },
+      }
+);
       fetchUsers();
     } catch (error) {
       console.error("Error deleting user:", error);
@@ -158,7 +176,11 @@ const ComplaintCode = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestdatacom/${id}`);
+      const response = await axios.get(`${Base_Url}/requestdatacom/${id}`,{
+        headers: {
+          Authorization: token,
+        },
+      });
       setFormData(response.data);
       setIsEdit(true);
       console.log(response.data);
