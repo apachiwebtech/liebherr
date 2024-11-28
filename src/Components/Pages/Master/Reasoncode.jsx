@@ -16,23 +16,23 @@ const ReasonCode = () => {
     const createdBy = 1;  // Static value for created_by
     const updatedBy = 2;  // Static value for updated_by
 
-    const [groupdefectcode, setGroupdefectcode] = useState([]);
+    const [groupdefect_code, setGroupdefect_code] = useState([]);
 
     const [formData, setFormData] = useState({
         groupdefect_code: '',
-        defectcode: '',
-        defecttitle: '',
+        defect_code: '',
+        defect_title: '',
         description: ''
     });
 
 
     const fetchGroupDefectCode = async () => {
         try {
-          const response = await axios.get(`${Base_Url}/getgroupdefectcode`);
+          const response = await axios.get(`${Base_Url}/getgroupdefect_code`);
           console.log(response.data);
-          setGroupdefectcode(response.data);
+          setGroupdefect_code(response.data);
         } catch (error) {
-          console.error("Error fetching groupdefectcode:", error);
+          console.error("Error fetching groupdefect_code:", error);
         }
       };
 
@@ -105,12 +105,12 @@ const ReasonCode = () => {
                         })
                         .catch(error => {
                             if (error.response && error.response.status === 409) {
-                                setDuplicateError('Duplicate entry, Reasoncode already exists!'); // Show duplicate error for update
+                                setDuplicateError('Duplicate entry, Defect code already exists!'); // Show duplicate error for update
                             }
                         });
                 } else {
                     // For insert, include 'created_by'
-                    await axios.post(`${Base_Url}/postdatareason`, { ...formData, created_by: createdBy })
+                    await axios.post(`${Base_Url}/postdatadefect_code`, { ...formData, created_by: createdBy })
                         .then(response => {
                             //window.location.reload();
                             setFormData({
@@ -120,7 +120,7 @@ const ReasonCode = () => {
                         })
                         .catch(error => {
                             if (error.response && error.response.status === 409) {
-                                setDuplicateError('Duplicate entry, Reasoncode already exists!'); // Show duplicate error for insert
+                                setDuplicateError('Duplicate entry, Defect code already exists!'); // Show duplicate error for insert
                             }
                         });
                 }
@@ -180,7 +180,7 @@ const ReasonCode = () => {
                                                 onChange={handleChange}
                                             >
                                                 <option value="">Select</option>
-                                                {groupdefectcode.map((gdc) => (
+                                                {groupdefect_code.map((gdc) => (
                                                 <option key={gdc.id} value={gdc.defectgroupcode}>
                                                     {gdc.defectgrouptitle}
                                                 </option>
@@ -192,68 +192,68 @@ const ReasonCode = () => {
                                     </div>
 
                                     <div className="mb-3">
-                                        <label htmlFor="defectcode" className="input-field" >Defect Code</label>
+                                        <label htmlFor="defect_code" className="input-field" >Defect Code</label>
                                         <input
                                             type="text"
                                             className="form-control"
-                                            name="defectcode"
-                                            id="defectcode"
-                                            value={formData.defectcode}
+                                            name="defect_code"
+                                            id="defect_code"
+                                            value={formData.defect_code}
                                             onChange={handleChange}
-                                            placeholder="Enter Reason Code "
+                                            placeholder="Enter Defect Code "
                                             pattern="[0-9]*"  // This pattern ensures only numbers are allowed
                                             onInput={(e) => {
                                                 e.target.value = e.target.value.replace(/[^0-9]/g, '');  // Remove any non-numeric characters
                                             }}
                                         />
 
-                                        {errors.defectcode && <small className="text-danger">{errors.defectcode}</small>}
+                                        {errors.defect_code && <small className="text-danger">{errors.defect_code}</small>}
                                         {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
                                     </div>
 
 
                                      <div className="mb-3">
-                    <label htmlFor="ComplaintcodeInput" className="input-field">
-                      Defect Title
-                    </label>
-                    <input
-                        type="text"
-                        className="form-control"
-                        name="defecttitle"
-                        id="defecttitle"
-                        value={formData.defecttitle}
-                        onChange={handleChange}
-                        placeholder="Enter Defect Group Title "
-                      />
-                    {errors.defecttitle && (
-                      <small className="text-danger">
-                        {errors.defecttitle}
-                      </small>
-                    )}
+                                            <label htmlFor="ComplaintcodeInput" className="input-field">
+                                            Defect Title
+                                            </label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                name="defect_title"
+                                                id="defect_title"
+                                                value={formData.defect_title}
+                                                onChange={handleChange}
+                                                placeholder="Enter Defect Title "
+                                            />
+                                            {errors.defect_title && (
+                                            <small className="text-danger">
+                                                {errors.defect_title}
+                                            </small>
+                                            )}
      
-                  </div>
+                                    </div>
 
-                  <div className="mb-3">
-                    <label htmlFor="ComplaintcodeInput" className="input-field">
-                      Description
-                    </label>
-                      <input
-                      type="text"
-                      className="form-control"
-                      name="description"
-                      id="description"
-                      value={formData.description}
-                      onChange={handleChange}
-                      placeholder="Enter Description "
-                      />
-                  
-                    {errors.description && (
-                      <small className="text-danger">
-                        {errors.description}
-                      </small>
-                    )}
-  
-                  </div>
+                                        <div className="mb-3">
+                                            <label htmlFor="ComplaintcodeInput" className="input-field">
+                                            Description
+                                            </label>
+                                            <input
+                                            type="text"
+                                            className="form-control"
+                                            name="description"
+                                            id="description"
+                                            value={formData.description}
+                                            onChange={handleChange}
+                                            placeholder="Enter Description "
+                                            />
+                                        
+                                            {errors.description && (
+                                            <small className="text-danger">
+                                                {errors.description}
+                                            </small>
+                                            )}
+                        
+                                        </div>
 
 
                                     <div className="text-right">

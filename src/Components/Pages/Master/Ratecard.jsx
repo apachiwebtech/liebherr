@@ -13,6 +13,7 @@ const Ratecard = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [duplicateError, setDuplicateError] = useState(""); // State to track duplicate error
+  const token = localStorage.getItem("token"); // Get token from localStorage
   const createdBy = 1; // Static value for created_by
   const updatedBy = 2; // Static value for updated_by
 
@@ -22,7 +23,11 @@ const Ratecard = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getratedata`);
+      const response = await axios.get(`${Base_Url}/getratedata`,{
+        headers: {
+            Authorization: token, // Send token in headers
+            }, 
+        });
       console.log(response.data);
       setUsers(response.data);
       setFilteredUsers(response.data);
@@ -83,7 +88,11 @@ const Ratecard = () => {
             .put(`${Base_Url}/putratedata`, {
               ...formData,
               updated_by: updatedBy,
-            })
+            },{
+              headers: {
+                  Authorization: token, // Send token in headers
+                  }, 
+              })
             .then((response) => {
               //window.location.reload();
               setFormData({
@@ -102,7 +111,11 @@ const Ratecard = () => {
             .post(`${Base_Url}/postratedata`, {
               ...formData,
               created_by: createdBy,
-            })
+            },{
+              headers: {
+                  Authorization: token, // Send token in headers
+                  }, 
+              })
             .then((response) => {
               // window.location.reload();
               setFormData({
@@ -124,7 +137,11 @@ const Ratecard = () => {
 
   const deleted = async (id) => {
     try {
-      const response = await axios.post(`${Base_Url}/deleteratedata`, { id });
+      const response = await axios.post(`${Base_Url}/deleteratedata`, { id },{
+        headers: {
+            Authorization: token, // Send token in headers
+            }, 
+        });
       // alert(response.data[0]);
       window.location.reload();
     } catch (error) {
@@ -134,7 +151,11 @@ const Ratecard = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestprodata/${id}`);
+      const response = await axios.get(`${Base_Url}/requestprodata/${id}`,{
+        headers: {
+            Authorization: token, // Send token in headers
+            }, 
+        });
       setFormData(response.data);
       setIsEdit(true);
       console.log(response.data);

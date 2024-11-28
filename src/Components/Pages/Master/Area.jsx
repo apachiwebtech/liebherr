@@ -7,6 +7,7 @@ import LocationTabs from "./LocationTabs";
 const Area = () => {
   const [countries, setCountries] = useState([]);
   const [regions, setRegions] = useState([]);
+  const token = localStorage.getItem("token"); 
   const [geoStates, setGeoStates] = useState([]);
   // const [geoCities, setGeoCities] = useState([]);
   const [areas, setAreas] = useState([]);
@@ -28,7 +29,11 @@ const Area = () => {
 
   const fetchCountries = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getcountries`);
+      const response = await axios.get(`${Base_Url}/getcountries`,{
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      });
       setCountries(response.data);
     } catch (error) {
       console.error("Error fetching countries:", error);
@@ -37,7 +42,12 @@ const Area = () => {
 
   const fetchRegions = async (countryId) => {
     try {
-      const response = await axios.get(`${Base_Url}/getregionscity/${countryId}`);
+      const response = await axios.get(`${Base_Url}/getregionscity/${countryId}`
+,{
+                headers: {
+                  Authorization: token, // Send token in headers
+                },
+              });
       setRegions(response.data);
     } catch (error) {
       console.error("Error fetching regions:", error);
@@ -46,7 +56,12 @@ const Area = () => {
 
   const fetchGeoStates = async (regionId) => {
     try {
-      const response = await axios.get(`${Base_Url}/getgeostatescity/${regionId}`);
+      const response = await axios.get(`${Base_Url}/getgeostatescity/${regionId}`,{
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      }
+);
       setGeoStates(response.data);
     } catch (error) {
       console.error("Error fetching geo states:", error);
@@ -67,7 +82,11 @@ const Area = () => {
 
   const fetchAreas = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getareas`);
+      const response = await axios.get(`${Base_Url}/getareas`,{
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      });
       setAreas(response.data);
       setFilteredAreas(response.data);
     } catch (error) {

@@ -14,6 +14,7 @@ const Material = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [duplicateError, setDuplicateError] = useState(""); // State to track duplicate error
+  const token = localStorage.getItem("token"); // Get token from localStorage
   const createdBy = 1; // Static value for created_by
   const updatedBy = 2; // Static value for updated_by
 
@@ -23,7 +24,11 @@ const Material = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getmat`);
+      const response = await axios.get(`${Base_Url}/getmat`,{
+        headers: {
+           Authorization: token, // Send token in headers
+         }, 
+       });
       console.log(response.data);
       setUsers(response.data);
       setFilteredUsers(response.data);
@@ -84,7 +89,11 @@ const Material = () => {
             .put(`${Base_Url}/putmatdata`, {
               ...formData,
               updated_by: updatedBy,
-            })
+            },{
+              headers: {
+                 Authorization: token, // Send token in headers
+               }, 
+             })
             .then((response) => {
               setFormData({
                 Material: "",
@@ -102,7 +111,11 @@ const Material = () => {
             .post(`${Base_Url}/postdatamat`, {
               ...formData,
               created_by: createdBy,
-            })
+            },{
+              headers: {
+                 Authorization: token, // Send token in headers
+               }, 
+             })
             .then((response) => {
               setFormData({
                 Material: "",
@@ -130,7 +143,11 @@ const Material = () => {
     try {
       const response = await axios.post(`${Base_Url}/deletematdata`, {
         id: id,
-      });
+      },{
+        headers: {
+           Authorization: token, // Send token in headers
+         }, 
+       });
       setFormData({
         Material: "",
       });
@@ -142,7 +159,11 @@ const Material = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestdatamat/${id}`);
+      const response = await axios.get(`${Base_Url}/requestdatamat/${id}`,{
+        headers: {
+           Authorization: token, // Send token in headers
+         }, 
+       });
       setFormData(response.data);
       setIsEdit(true);
       console.log(response.data);

@@ -18,6 +18,7 @@ const Pincode = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [duplicateError, setDuplicateError] = useState("");
+  const token = localStorage.getItem("token"); // Get token from localStorage
   const [formData, setFormData] = useState({
     pincode: "",
     country_id: "",
@@ -79,6 +80,7 @@ const Pincode = () => {
         setFilteredPincodes(data);
       },
       "Error fetching pincodes:"
+      
     );
 
   const handleSubmit = async (e) => {
@@ -100,7 +102,11 @@ const Pincode = () => {
           ? `${Base_Url}/putpincode`
           : `${Base_Url}/postpincode`;
         const method = isEdit ? axios.put : axios.post;
-        await method(url, formData);
+        await method(url, formData,{
+          headers: {
+             Authorization: token, // Send token in headers
+           }, 
+         });
         setFormData({
           title: "",
           pincode: "",
@@ -173,7 +179,11 @@ const Pincode = () => {
   const deleted = async (id) => {
     try {
       if (window.confirm("Are you sure you want to delete this pincode?")) {
-        await axios.post(`${Base_Url}/deletepincode`, { id });
+        await axios.post(`${Base_Url}/deletepincode`, { id },{
+          headers: {
+             Authorization: token, // Send token in headers
+           }, 
+         });
         setFormData({
           title: "",
           pincode: "",
@@ -192,7 +202,11 @@ const Pincode = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestpincode/${id}`);
+      const response = await axios.get(`${Base_Url}/requestpincode/${id}`,{
+        headers: {
+           Authorization: token, // Send token in headers
+         }, 
+       });
       setFormData(response.data);
       fetchRegions(response.data.country_id);
       fetchGeoStates(response.data.region_id);

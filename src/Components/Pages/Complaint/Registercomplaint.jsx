@@ -27,6 +27,7 @@ export function Registercomplaint(params) {
     const [ticket, setTicket] = useState([])
     const [ticketno, setTicketNo] = useState([])
     const [ticketid, setTicketid] = useState('')
+    const token = localStorage.getItem("token"); 
     const { Comp_id } = useParams()
     const [location, setLocation] = useState([])
     const created_by = localStorage.getItem("userId"); // Get user ID from localStorage
@@ -93,7 +94,11 @@ export function Registercomplaint(params) {
     //This is for State Dropdown
 
     async function getState(params) {
-        axios.get(`${Base_Url}/getstate`)
+        axios.get(`${Base_Url}/getstate`,{
+            headers: {
+              Authorization: token, // Send token in headers
+            },
+          })
             .then((res) => {
                 if (res.data) {
 
@@ -136,7 +141,13 @@ export function Registercomplaint(params) {
             comp_no: Comp_id
         }
 
-        axios.post(`${Base_Url}/getcomplaintticket`, data)
+        axios.post(`${Base_Url}/getcomplaintticket`, data
+            ,{
+                            headers: {
+                              Authorization: token, // Send token in headers
+                            },
+                          }
+            )
             .then((res) => {
                 if (res.data) {
 
@@ -184,7 +195,11 @@ export function Registercomplaint(params) {
     // Child Service Partner
     async function getChildPartner(MasterId) {
         try {
-            const res = await axios.get(`${Base_Url}/getchildpartner/${MasterId}`);
+            const res = await axios.get(`${Base_Url}/getchildpartner/${MasterId}`,{
+                headers: {
+                  Authorization: token, // Send token in headers
+                },
+              });
             if (res.data) {
                 setChildPartner(res.data);
             }
@@ -316,7 +331,12 @@ export function Registercomplaint(params) {
 
         console.log("Submitting data:", data);
 
-        axios.post(`${Base_Url}/add_complaintt`, data)
+        axios.post(`${Base_Url}/add_complaintt`, data,{
+            headers: {
+              Authorization: token, // Send token in headers
+            },
+          }
+)
             .then((res) => {
                 if (res.data) {
                     notify();
@@ -365,7 +385,11 @@ export function Registercomplaint(params) {
         };
 
 
-        axios.post(`${Base_Url}/update_complaint`, data)
+        axios.post(`${Base_Url}/update_complaint`,{
+            headers: {
+              Authorization: token, // Send token in headers
+            },
+          }, data)
             .then((res) => {
                 if (res.data) {
                     notify();
@@ -381,7 +405,12 @@ export function Registercomplaint(params) {
 
     const fetchdistricts = async (geostateID) => {
         try {
-            const response = await axios.get(`${Base_Url}/getdistrictcity/${geostateID}`);
+            const response = await axios.get(`${Base_Url}/getdistrictcity/${geostateID}`,{
+                headers: {
+                  Authorization: token, // Send token in headers
+                },
+              }
+);
             setdistricts(response.data);
         } catch (error) {
             console.error("Error fetching disctricts:", error);
@@ -390,7 +419,12 @@ export function Registercomplaint(params) {
 
     const fetchCity = async (area_id) => {
         try {
-            const response = await axios.get(`${Base_Url}/getgeocities_p/${area_id}`);
+            const response = await axios.get(`${Base_Url}/getgeocities_p/${area_id}`,{
+                headers: {
+                  Authorization: token, // Send token in headers
+                },
+              }
+);
             setCity(response.data);
         } catch (error) {
             console.error("Error fetching City:", error);
@@ -399,7 +433,11 @@ export function Registercomplaint(params) {
 
     const fetchPincodes = async (pin_id) => {
         try {
-            const response = await axios.get(`${Base_Url}/citywise_pincode/${pin_id}`);
+            const response = await axios.get(`${Base_Url}/citywise_pincode/${pin_id}`,{
+                headers: {
+                  Authorization: token, // Send token in headers
+                },
+              });
             setPincode(response.data);
         } catch (error) {
             console.error("Error fetching City:", error);
@@ -442,7 +480,11 @@ export function Registercomplaint(params) {
     const fetchlocations = async (pincode) => {
         try {
             const response = await axios.get(
-                `${Base_Url}/getmultiplelocation/${pincode}`
+                `${Base_Url}/getmultiplelocation/${pincode}`,{
+                    headers: {
+                      Authorization: token, // Send token in headers
+                    },
+                  }
             );
 
             if (response.data && response.data[0]) {
@@ -491,7 +533,12 @@ export function Registercomplaint(params) {
             product_id: product_id
         }
 
-        axios.post(`${Base_Url}/add_new_ticket`, data)
+        axios.post(`${Base_Url}/add_new_ticket`, data,{
+            headers: {
+              Authorization: token, // Send token in headers
+            },
+          }
+)
             .then((res) => {
                 setTicketid(res.data.id)
 

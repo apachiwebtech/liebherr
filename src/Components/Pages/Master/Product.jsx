@@ -7,6 +7,7 @@ import { Base_Url } from '../../Utils/Base_Url';
 export function Products(params) {
     const [Complaintdata, setComplaintdata] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
+    const token = localStorage.getItem("token"); // Get token from localStorage
     const [formData, setFormData] = useState({
         title: '',
         cfranchise_id: '',
@@ -23,7 +24,11 @@ export function Products(params) {
 
     const fetchComplaintlist = async () => {
         try {
-            const response = await axios.get(`${Base_Url}/getcomplainlist`);
+            const response = await axios.get(`${Base_Url}/getcomplainlist`,{
+                headers: {
+                    Authorization: token, // Send token in headers
+                    }, 
+                });
             setComplaintdata(response.data);
         } catch (error) {
             console.error('Error fetching Complaintdata:', error);
@@ -34,7 +39,11 @@ export function Products(params) {
 
     const deleted = async (id) => {
         try {
-            const response = await axios.post(`${Base_Url}/deleteengineer`, { id });
+            const response = await axios.post(`${Base_Url}/deleteengineer`, { id },{
+                headers: {
+                    Authorization: token, // Send token in headers
+                    }, 
+                });
             setFormData({
                 title: '',
                 cfranchise_id: ''
@@ -47,7 +56,11 @@ export function Products(params) {
 
     const edit = async (id) => {
         try {
-            const response = await axios.get(`${Base_Url}/requestengineer/${id}`);
+            const response = await axios.get(`${Base_Url}/requestengineer/${id}`,{
+                headers: {
+                    Authorization: token, // Send token in headers
+                    }, 
+                });
             setFormData(response.data)
             setIsEdit(true);
             console.log(response.data);

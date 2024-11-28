@@ -5,10 +5,12 @@ import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
 
 export function Complaintlist(params) {
+    const token = localStorage.getItem("token"); // Get token from localStorage
     const [Complaintdata, setComplaintdata] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
-
+    const token = localStorage.getItem("token"); // Get token from localStorage
+    
     const [formData, setFormData] = useState({
         title: '',
         cfranchise_id: '',
@@ -44,14 +46,14 @@ export function Complaintlist(params) {
 
     const fetchComplaintlist = async () => {
 
-        const token = localStorage.getItem("token"); // Get token from localStorage
+       
         
         try {
-            const response = await axios.get(`${Base_Url}/getcomplainlist`,{
+                const response = await axios.get(`${Base_Url}/getcomplainlist`,{
                 headers: {
-                  Authorization: token, // Send token in headers
-                },
-              });
+                    Authorization: token, // Send token in headers
+                    }, 
+                });
             // Filter out 'Closed' and 'Cancelled' status complaints by default
             const filteredComplaints = response.data.filter(complaint =>
                 !['Closed', 'Cancelled'].includes(complaint.call_status)
@@ -79,7 +81,11 @@ export function Complaintlist(params) {
 
             console.log('Sending params:', params.toString()); // Debug log
 
-            const response = await axios.get(`${Base_Url}/getcomplainlist?${params}`);
+            const response = await axios.get(`${Base_Url}/getcomplainlist?${params}`,{
+                headers: {
+                  Authorization: token, // Send token in headers
+                },
+              });
             setFilteredData(response.data);
         } catch (error) {
             console.error('Error fetching filtered data:', error);
@@ -136,7 +142,11 @@ export function Complaintlist(params) {
 
     const edit = async (id) => {
         try {
-            const response = await axios.get(`${Base_Url}/requestengineer/${id}`);
+            const response = await axios.get(`${Base_Url}/requestengineer/${id}`,{
+                headers: {
+                  Authorization: token, // Send token in headers
+                },
+              });
             setFormData(response.data)
             setIsEdit(true);
             console.log(response.data);

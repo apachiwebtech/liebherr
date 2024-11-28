@@ -11,6 +11,9 @@ export function AddProduct(params) {
     const [product_line, setProductLine] = useState([])
     const [material, setMaterial] = useState([])
     const [facturer, setManufacturer] = useState([])
+    
+   const token = localStorage.getItem("token"); 
+
     const [itemtype, setItemtype] = useState([])
     const [productclass, setPrductclass] = useState([])
     const navigate = useNavigate()
@@ -115,38 +118,64 @@ export function AddProduct(params) {
     // functions 
 
     async function getproducttype() {
-        axios.get(`${Base_Url}/product_type`)
+        axios.get(`${Base_Url}/product_type`
+,{
+                headers: {
+                  Authorization: token, // Send token in headers
+                },
+              })
             .then((res) => {
                 setProducttype(res.data)
             })
     }
 
     async function getproductline() {
-        axios.get(`${Base_Url}/fetchproductline`)
+        axios.get(`${Base_Url}/fetchproductline`,{
+            headers: {
+              Authorization: token, // Send token in headers
+            },
+          })
             .then((res) => {
                 setProductLine(res.data)
             })
     }
     async function getmaterial() {
-        axios.get(`${Base_Url}/fetchmaterial`)
+        axios.get(`${Base_Url}/fetchmaterial`
+,{
+                headers: {
+                  Authorization: token, // Send token in headers
+                },
+              })
             .then((res) => {
                 setMaterial(res.data)
             })
     }
     async function getItemtype() {
-        axios.get(`${Base_Url}/fetchitemtype`)
+        axios.get(`${Base_Url}/fetchitemtype`,{
+            headers: {
+              Authorization: token, // Send token in headers
+            },
+          })
             .then((res) => {
                 setItemtype(res.data)
             })
     }
     async function getproductclass() {
-        axios.get(`${Base_Url}/fetchproductclass`)
+        axios.get(`${Base_Url}/fetchproductclass`,{
+            headers: {
+              Authorization: token, // Send token in headers
+            },
+          })
             .then((res) => {
                 setPrductclass(res.data)
             })
     }
     async function getmanufacturer() {
-        axios.get(`${Base_Url}/fetchmanufacturer`)
+        axios.get(`${Base_Url}/fetchmanufacturer`,{
+            headers: {
+              Authorization: token, // Send token in headers
+            },
+          })
             .then((res) => {
                 setManufacturer(res.data)
             })
@@ -155,7 +184,11 @@ export function AddProduct(params) {
         const data = {
             productid: productid
         }
-        axios.post(`${Base_Url}/getupdateparam`, data)
+        axios.post(`${Base_Url}/getupdateparam`, data,{
+            headers: {
+              Authorization: token, // Send token in headers
+            },
+          })
             .then((res) => {
                 setValue({
                     item_code: res.data[0].item_code,
@@ -239,7 +272,12 @@ export function AddProduct(params) {
             }
 
             if (productid != ":productid") {
-                axios.post(`${Base_Url}/updateProduct`, data)
+                axios.post(`${Base_Url}/updateProduct`, data,{
+                    headers: {
+                      Authorization: token, // Send token in headers
+                    },
+                  }
+    )
                     .then((res) => {
                         alert("Data Submitted Successfully")
                         setValue({
@@ -268,7 +306,12 @@ export function AddProduct(params) {
                         })
                     })
             }else{
-                axios.post(`${Base_Url}/addProduct`, data)
+                axios.post(`${Base_Url}/addProduct`, data,{
+                    headers: {
+                      Authorization: token, // Send token in headers
+                    },
+                  }
+    )
                 .then((res) => {
                     alert("Data Submitted Successfully")
                     setValue({

@@ -8,6 +8,7 @@ import ProMaster from './ProMaster';
 export function Products(params) {
     const [Productdata, setProductdata] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
+    const token = localStorage.getItem("token"); // Get token from localStorage
     const [formData, setFormData] = useState({
         serial_no: '',
         item_code: '',
@@ -31,7 +32,11 @@ export function Products(params) {
 
     const fetchProductlist = async () => {
         try {
-            const response = await axios.get(`${Base_Url}/getproductlist`);
+            const response = await axios.get(`${Base_Url}/getproductlist`,{
+                headers: {
+                    Authorization: token, // Send token in headers
+                    }, 
+                });
             setProductdata(response.data);
         } catch (error) {
             console.error('Error fetching Productdata:', error);
@@ -42,7 +47,11 @@ export function Products(params) {
 
     const deleted = async (id) => {
         try {
-            const response = await axios.post(`${Base_Url}/deleteproductlist`, { id });
+            const response = await axios.post(`${Base_Url}/deleteproductlist`, { id },{
+                headers: {
+                    Authorization: token, // Send token in headers
+                    }, 
+                });
             setFormData({
                 serial_no: '',
                 item_code: '',
@@ -65,7 +74,11 @@ export function Products(params) {
 
     const edit = async (id) => {
         try {
-            const response = await axios.get(`${Base_Url}/requestproductlist/${id}`);
+            const response = await axios.get(`${Base_Url}/requestproductlist/${id}`,{
+                headers: {
+                    Authorization: token, // Send token in headers
+                    }, 
+                });
             setFormData(response.data)
             setIsEdit(true);
             console.log(response.data);

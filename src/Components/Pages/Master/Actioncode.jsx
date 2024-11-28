@@ -12,6 +12,9 @@ const ActionCode = () => {
     const [currentPage, setCurrentPage] = useState(0);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [searchTerm, setSearchTerm] = useState('');
+    
+   const token = localStorage.getItem("token"); 
+
     const [duplicateError, setDuplicateError] = useState(''); // State to track duplicate error
     const createdBy = 1;  // Static value for created_by
     const updatedBy = 2;  // Static value for updated_by
@@ -23,7 +26,12 @@ const ActionCode = () => {
 
     const fetchUsers = async () => {
         try {
-            const response = await axios.get(`${Base_Url}/getaction`);
+            const response = await axios.get(`${Base_Url}/getaction`,{
+                headers: {
+                  Authorization: token, // Send token in headers
+                },
+              }
+);
             console.log(response.data);
             setUsers(response.data);
             setFilteredUsers(response.data);
@@ -79,7 +87,11 @@ const ActionCode = () => {
             if (confirmSubmission) {
                 if (isEdit) {
                     // For update, include 'updated_by'
-                    await axios.put(`${Base_Url}/putactiondata`, { ...formData, updated_by: updatedBy })
+                    await axios.put(`${Base_Url}/putactiondata`, { ...formData, updated_by: updatedBy },{
+                        headers: {
+                          Authorization: token, // Send token in headers
+                        },
+                      })
                         .then(response => {
                           //  window.location.reload();
                           setFormData({
@@ -94,7 +106,12 @@ const ActionCode = () => {
                         });
                 } else {
                     // For insert, include 'created_by'
-                    await axios.post(`${Base_Url}/postdataaction`, { ...formData, created_by: createdBy })
+                    await axios.post(`${Base_Url}/postdataaction`, { ...formData, created_by: createdBy },{
+                        headers: {
+                          Authorization: token, // Send token in headers
+                        },
+                      }
+        )
                         .then(response => {
                            // window.location.reload();
                            setFormData({
@@ -117,7 +134,11 @@ const ActionCode = () => {
 
     const deleted = async (id) => {
         try {
-            const response = await axios.post(`${Base_Url}/deleteactiondata`, { id });
+            const response = await axios.post(`${Base_Url}/deleteactiondata`, { id },{
+                headers: {
+                  Authorization: token, // Send token in headers
+                },
+              });
             // alert(response.data[0]);
             window.location.reload();
         } catch (error) {
@@ -127,7 +148,12 @@ const ActionCode = () => {
 
     const edit = async (id) => {
         try {
-            const response = await axios.get(`${Base_Url}/requestdataaction/${id}`);
+            const response = await axios.get(`${Base_Url}/requestdataaction/${id}`
+,{
+                headers: {
+                  Authorization: token, // Send token in headers
+                },
+              });
             setFormData(response.data)
             setIsEdit(true);
             console.log(response.data);

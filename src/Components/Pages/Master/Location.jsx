@@ -14,6 +14,7 @@ const Location = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [duplicateError, setDuplicateError] = useState(""); // State to track duplicate error
+  const token = localStorage.getItem("token"); // Get token from localStorage
 
   const [formData, setFormData] = useState({
     title: "",
@@ -21,7 +22,11 @@ const Location = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getdata`);
+      const response = await axios.get(`${Base_Url}/getdata`,{
+        headers: {
+           Authorization: token, // Send token in headers
+         }, 
+       });
       console.log(response.data);
       setUsers(response.data);
       setFilteredUsers(response.data);
@@ -79,7 +84,11 @@ const Location = () => {
         if (isEdit) {
           // For update, include duplicate check
           await axios
-            .put(`${Base_Url}/putdata`, { ...formData })
+            .put(`${Base_Url}/putdata`, { ...formData },{
+              headers: {
+                 Authorization: token, // Send token in headers
+               }, 
+             })
             .then((response) => {
               setFormData({
                 title: "",
@@ -94,7 +103,11 @@ const Location = () => {
         } else {
           // For insert, include duplicate check
           await axios
-            .post(`${Base_Url}/postdata`, { ...formData })
+            .post(`${Base_Url}/postdata`, { ...formData },{
+              headers: {
+                 Authorization: token, // Send token in headers
+               }, 
+             })
             .then((response) => {
               setFormData({
                 title: "",
@@ -115,7 +128,11 @@ const Location = () => {
 
   const deleted = async (id) => {
     try {
-      const response = await axios.post(`${Base_Url}/deletedata`, { id });
+      const response = await axios.post(`${Base_Url}/deletedata`, { id },{
+        headers: {
+           Authorization: token, // Send token in headers
+         }, 
+       });
       setFormData({
         title: "",
       });
@@ -127,7 +144,11 @@ const Location = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestdata/${id}`);
+      const response = await axios.get(`${Base_Url}/requestdata/${id}`,{
+        headers: {
+           Authorization: token, // Send token in headers
+         }, 
+       });
       setFormData(response.data);
       setIsEdit(true);
       console.log(response.data);

@@ -15,6 +15,7 @@ const Callstatus = () => {
   const [duplicateError, setDuplicateError] = useState(""); // State to track duplicate error
   const createdBy = 1; // Static value for created_by
   const updatedBy = 2; // Static value for updated_by
+  const token = localStorage.getItem("token"); 
 
   const [formData, setFormData] = useState({
     Callstatus: "",
@@ -22,7 +23,12 @@ const Callstatus = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getcalldata`);
+      const response = await axios.get(`${Base_Url}/getcalldata`,{
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      }
+);
       console.log(response.data);
       setUsers(response.data);
       setFilteredUsers(response.data);
@@ -127,7 +133,11 @@ const Callstatus = () => {
 
   const deleted = async (id) => {
     try {
-      const response = await axios.post(`${Base_Url}/deletecalldata`, { id });
+      const response = await axios.post(`${Base_Url}/deletecalldata`, { id },{
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      });
 
       window.location.reload();
     } catch (error) {
@@ -137,7 +147,13 @@ const Callstatus = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestcalldata/${id}`);
+      const response = await axios.get(`${Base_Url}/requestcalldata/${id}`
+,{
+                headers: {
+                  Authorization: token, // Send token in headers
+                },
+              }
+);
       setFormData(response.data);
       setIsEdit(true);
       console.log(response.data);

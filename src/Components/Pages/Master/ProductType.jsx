@@ -14,6 +14,7 @@ const ProductType = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [duplicateError, setDuplicateError] = useState(""); // State to track duplicate error
+  const token = localStorage.getItem("token"); // Get token from localStorage
   const createdBy = 1; // Static value for created_by
   const updatedBy = 2; // Static value for updated_by
 
@@ -23,7 +24,11 @@ const ProductType = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getproducttype`);
+      const response = await axios.get(`${Base_Url}/getproducttype`,{
+        headers: {
+            Authorization: token, // Send token in headers
+            }, 
+        });
       console.log(response.data);
       setUsers(response.data);
       setFilteredUsers(response.data);
@@ -84,7 +89,11 @@ const ProductType = () => {
             .put(`${Base_Url}/putproducttypedata`, {
               ...formData,
               updated_by: updatedBy,
-            })
+            },{
+              headers: {
+                  Authorization: token, // Send token in headers
+                  }, 
+              })
             .then((response) => {
               setFormData({
                 product_type: "",
@@ -104,7 +113,11 @@ const ProductType = () => {
             .post(`${Base_Url}/postdataproducttype`, {
               ...formData,
               created_by: createdBy,
-            })
+            },{
+              headers: {
+                  Authorization: token, // Send token in headers
+                  }, 
+              })
             .then((response) => {
               setFormData({
                 product_type: "",
@@ -129,7 +142,11 @@ const ProductType = () => {
     try {
       const response = await axios.post(`${Base_Url}/deleteproducttypedata`, {
         id,
-      });
+      },{
+        headers: {
+            Authorization: token, // Send token in headers
+            }, 
+        });
       // alert(response.data[0]);
       setFormData({
         product_type: "",
@@ -143,8 +160,11 @@ const ProductType = () => {
   const edit = async (id) => {
     try {
       const response = await axios.get(
-        `${Base_Url}/requestdataproducttype/${id}`
-      );
+        `${Base_Url}/requestdataproducttype/${id}`,{
+          headers: {
+              Authorization: token, // Send token in headers
+              }, 
+          });
       setFormData(response.data);
       setIsEdit(true);
       console.log(response.data);
