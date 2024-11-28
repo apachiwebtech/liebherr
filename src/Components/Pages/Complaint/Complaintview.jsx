@@ -889,6 +889,87 @@ export function Complaintview(params) {
                   <option value="DOA">DOA</option>
                 </select>
               </div>
+
+              <div className="d-flex mb-3">
+                <div className="form-check me-3">
+                  <input
+                    type="radio"
+                    className="form-check-input"
+                    id="lhi"
+                    name="engineer_type"
+                    value="LHI"
+                    checked
+                    onChange={handleModelChange}
+                  />
+                  <label className="form-check-label" htmlFor="lhi" style={{ fontSize: "14px" }}>
+                    LHI
+                  </label>
+                </div>
+                <div className="form-check">
+                  <input
+                    type="radio"
+                    className="form-check-input"
+                    id="franchisee"
+                    name="engineer_type"
+                    value="Franchisee"
+                    checked={complaintview.engineer_type === "Franchisee"}
+                    onChange={handleModelChange}
+                  />
+                  <label className="form-check-label" htmlFor="franchisee" style={{ fontSize: "14px" }}>
+                    Franchisee
+                  </label>
+                </div>
+              </div>
+
+              <h4 className="pname" style={{ fontSize: "14px" }}>Engineer</h4>
+
+              <div className="row">
+                <div className="col-lg-10">
+                <select
+                  className="form-select dropdown-select "
+                  name="engineer_id"
+                  value={complaintview.engineer_id} // Add this to control the value
+                  onChange={handleModelChange}
+                >
+                  <option value="">Select Engineer</option>
+                  {Array.isArray(engineer) && engineer.length > 0 ? (
+                    engineer.map((engineers) => (
+                      <option key={engineers.id} value={engineers.id}>
+                        {engineers.title}
+                      </option>
+                    ))
+                  ) : (
+                    <option value="" disabled>No engineers available</option>
+                  )}
+                </select>
+                  </div>
+
+                  <div className="col-lg-2">
+
+                <button className=" btn btn-primary btn-sm">Add</button>
+
+                  </div>
+        
+              </div>
+
+
+
+
+              <div className="d-flex justify-content-end">
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  style={{ fontSize: "14px" }}
+                  onClick={handleSubmitTicketFormData}
+                >
+                  Submit
+                </button>
+              </div>
+              {TicketUpdateSuccess.visible && (
+                <div style={successMessageStyle}>
+                  {TicketUpdateSuccess.message}
+                </div>
+              )}
             </div>
           </div>
 
@@ -920,40 +1001,7 @@ export function Complaintview(params) {
 
           <div className="card mb-3" id="engineerInfocs">
             <div className="card-body">
-              <h4 className="pname" style={{ fontSize: "14px" }}>Engineer</h4>
-              <select
-                className="form-select dropdown-select"
-                name="engineer_id"
-                value={complaintview.engineer_id} // Add this to control the value
-                onChange={handleModelChange}
-              >
-                <option value="">Select Engineer</option>
-                {Array.isArray(engineer) && engineer.length > 0 ? (
-                  engineer.map((engineers) => (
-                    <option key={engineers.id} value={engineers.id}>
-                      {engineers.title}
-                    </option>
-                  ))
-                ) : (
-                  <option value="" disabled>No engineers available</option>
-                )}
-              </select>
 
-              <div className="d-flex justify-content-end">
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  style={{ fontSize: "14px" }}
-                  onClick={handleSubmitTicketFormData}
-                >
-                  Submit
-                </button>
-              </div>
-              {TicketUpdateSuccess.visible && (
-                <div style={successMessageStyle}>
-                  {TicketUpdateSuccess.message}
-                </div>
-              )}
             </div>
           </div>
 

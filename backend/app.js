@@ -6887,11 +6887,8 @@ app.post("/ticketFormData", async (req, res) => {
 
     const updateSql = `
       UPDATE complaint_ticket
-      SET ModelNumber = '${ModelNumber}', engineer_id = '${engineer_id}',
-          call_status = '${call_status}', serial_no = '${serial_no}' , updated_by = '${updated_by}', updated_date = '${formattedDate}'
-      WHERE ticket_no = '${ticket_no}'`;
+      SET engineer_id = '${engineer_id}',call_status = '${call_status}' , updated_by = '${updated_by}', updated_date = '${formattedDate}' WHERE ticket_no = '${ticket_no}'`;
 
-    console.log(updateSql, "UpdateSql");
     await pool.request().query(updateSql);
 
     return res.status(200).json({ message: "Ticket Formdata updated successfully!" });
