@@ -612,7 +612,7 @@ const EngineerMaster = () => {
                         {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
                       </div>
 
-                      <div className="col-md-6">
+                      <div className="col-md-4">
                         <label htmlFor="permanentAddressInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>Permanent Address</label>
                         <textarea
                           className="form-control"
@@ -621,13 +621,13 @@ const EngineerMaster = () => {
                           value={formData.permanent_address}  // Updated value to match "permanentAddress"
                           onChange={handleChange}
                           placeholder="Enter Permanent Address"
-                          rows="4"  // Adjust the number of rows (height) as needed
+                          rows="2"  // Adjust the number of rows (height) as needed
                         />
                         {errors.permanent_address && <small className="text-danger">{errors.permanent_address}</small>}
                         {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
                       </div>
 
-                      <div className="col-md-6">
+                      <div className="col-md-5">
                         <label htmlFor="currentAddressInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>Current Address</label>
                         <textarea
                           className="form-control"
@@ -636,7 +636,7 @@ const EngineerMaster = () => {
                           value={formData.current_address}  // Updated value to match "permanentAddress"
                           onChange={handleChange}
                           placeholder="Enter Current Address"
-                          rows="4"  // Adjust the number of rows (height) as needed
+                          rows="2"  // Adjust the number of rows (height) as needed
                         />
                         {errors.current_address && <small className="text-danger">{errors.current_address}</small>}
                         {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
