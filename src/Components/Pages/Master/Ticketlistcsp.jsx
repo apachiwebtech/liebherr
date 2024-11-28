@@ -7,6 +7,7 @@ import { Base_Url } from '../../Utils/Base_Url';
 const Ticketlistcsp = (params) => {
     const [Complaintdata, setComplaintdata] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
+    const token = localStorage.getItem("token"); // Get token from localStorage
 
     const created_by = localStorage.getItem("userId"); // Get user ID from localStorage
     const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
@@ -49,7 +50,11 @@ const Ticketlistcsp = (params) => {
     
     const fetchComplaintlist = async () => {
         try {
-            const response = await axios.get(`${Base_Url}/getcomplainlistcsp?licare_code=${licare_code}`);
+            const response = await axios.get(`${Base_Url}/getcomplainlistcsp?licare_code=${licare_code}`,{
+                headers: {
+                    Authorization: token, // Send token in headers
+                    }, 
+                });
             // Filter out 'Closed' and 'Cancelled' status complaints by default
             const filteredComplaints = response.data.filter(complaint => 
                 !['Closed', 'Cancelled'].includes(complaint.call_status)
@@ -78,7 +83,11 @@ const Ticketlistcsp = (params) => {
 
             console.log('Sending params:', params.toString()); // Debug log
             
-            const response = await axios.get(`${Base_Url}/getcomplainlistcsp?${params}`);
+            const response = await axios.get(`${Base_Url}/getcomplainlistcsp?${params}`,{
+                headers: {
+                    Authorization: token, // Send token in headers
+                    }, 
+                });
             setFilteredData(response.data);
         } catch (error) {
             console.error('Error fetching filtered data:', error);
@@ -136,7 +145,11 @@ const Ticketlistcsp = (params) => {
 
     const edit = async (id) => {
         try {
-            const response = await axios.get(`${Base_Url}/requestengineer/${id}`);
+            const response = await axios.get(`${Base_Url}/requestengineer/${id}`,{
+                headers: {
+                    Authorization: token, // Send token in headers
+                    }, 
+                });
             setFormData(response.data)
             setIsEdit(true);
             console.log(response.data);

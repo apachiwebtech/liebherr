@@ -4171,7 +4171,7 @@ app.get("/getengineer", async (req, res) => {
     return res.status(500).json({ error: 'An error occurred while fetching data' });
   }
 });
-app.get("/requestengineer/:id",
+app.get("/requestengineer/:id",authenticateToken,
   authenticateToken, async (req, res) => {
   const { id } = req.params;
 
@@ -7420,7 +7420,7 @@ app.get("/getcomplainlist",authenticateToken, async (req, res) => {
 
 // CSP complaint list
 
-app.get("/getcomplainlistcsp", async (req, res) => {
+app.get("/getcomplainlistcsp",authenticateToken, async (req, res) => {
   const { licare_code } = req.query;
 
 
@@ -7559,7 +7559,7 @@ app.get("/getcomplainlistcsp", async (req, res) => {
 
 //MSP complaint list
 
-app.get("/getcomplainlistmsp", async (req, res) => {
+app.get("/getcomplainlistmsp",authenticateToken, async (req, res) => {
   const { licare_code } = req.query;
 
 
