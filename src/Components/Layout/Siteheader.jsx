@@ -63,7 +63,7 @@ catch(error){
                     
                   <Link className="dropdown-item" to="/serviceproducttabs">Service Product Master</Link></li>
                 <li>
-                  <Link className="dropdown-item" to="/faultcodetabs">Fault Code</Link></li>
+                  <Link className="dropdown-item" to="/DefectGroup">Fault Code</Link></li>
                 <li>
                   <Link className="dropdown-item" to="/ratecardtabs">Rate card Matrix</Link></li>
                 <li>

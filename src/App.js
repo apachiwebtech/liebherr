@@ -180,7 +180,7 @@ const Router = createBrowserRouter([
 
       },
       {
-        path: "/complaintcode",
+        path: "/DefectGroup",
         element: <Complaintcode />,
 
       },
@@ -196,7 +196,7 @@ const Router = createBrowserRouter([
 
       },
       {
-        path: "/actioncode",
+        path: "/SiteDefect",
         element: <ActionCode />,
 
       },

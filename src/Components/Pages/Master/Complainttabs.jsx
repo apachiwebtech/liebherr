@@ -7,7 +7,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { Link } from 'react-router-dom';
 
 function Complainttabs() {
-  const [activeTab, setActiveTab] = useState('complaintCode');
+  const [activeTab, setActiveTab] = useState('DefectGroup');
 
   useEffect(() => {
 
@@ -56,30 +56,30 @@ function Complainttabs() {
             <div className="tabsMenu" style={{fontSize:"14px", marginLeft: "12px",fontWeight:"600",fontFamily:"Nunito"}}>
               <ul className="nav nav-tabs ">
               
-                <li className="nav-item">
+              <Link to={`/DefectGroup`}><li className="nav-item">
                   <button
-                    className={`nav-link ${activeTab === 'complaintCode' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('complaintCode')}
+                    className={`nav-link ${activeTab === "/DefectGroup" ? "active" : "onClick={() => setActiveTab('DefectGroup')}"}`}
+                    
                   >
                   DEFECT GROUP
                   </button>
-                </li>
+                </li></Link>
                 <Link to={`/TypeOfDefect`}> <li className="nav-item">
                   <button
-                    className={`nav-link ${activeTab === 'reasonCode' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('reasonCode')}
+                    className={`nav-link ${activeTab === "/TypeOfDefect" ? "active" : "onClick={() => setActiveTab('TypeOfDefect')}"}`}
+                    
                   >
                     TYPE OF DEFECT
                   </button>
                 </li></Link>
-                <li className="nav-item">
+                <Link to={`/SiteDefect`}>  <li className="nav-item">
                   <button
-                    className={`nav-link ${activeTab === 'actionCode' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('actionCode')}
+                    className={`nav-link ${activeTab === "/SiteDefect" ? "active" : "onClick={() => setActiveTab('SiteDefect')}"}`}
+                    
                   >
                    SITE DEFECT
                   </button>
-                </li>
+                </li></Link>
               </ul>
             </div> 
             </div>

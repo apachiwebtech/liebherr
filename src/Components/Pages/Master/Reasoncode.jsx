@@ -6,6 +6,7 @@ import Complainttabs from './Complainttabs';
 
 const ReasonCode = () => {
     // Step 1: Add this state to track errors
+    const token = localStorage.getItem("token"); 
     const [errors, setErrors] = useState({});
     const [users, setUsers] = useState([]);
     const [filteredUsers, setFilteredUsers] = useState([]);
@@ -30,7 +31,11 @@ const ReasonCode = () => {
 
     const fetchGroupDefectCode = async () => {
         try {
-          const response = await axios.get(`${Base_Url}/getgroupdefectcode`);
+          const response = await axios.get(`${Base_Url}/getgroupdefectcode`,{
+            headers: {
+                Authorization: token, // Send token in headers
+                }, 
+            });
           console.log(response.data);
           setGroupdefect_code(response.data);
         } catch (error) {
@@ -40,7 +45,11 @@ const ReasonCode = () => {
 
     const fetchUsers = async () => {
         try {
-            const response = await axios.get(`${Base_Url}/gettypeofdefect`);
+            const response = await axios.get(`${Base_Url}/gettypeofdefect`,{
+                headers: {
+                    Authorization: token, // Send token in headers
+                    }, 
+                });
             console.log(response.data);
             setUsers(response.data);
             setFilteredUsers(response.data);
@@ -74,7 +83,10 @@ const ReasonCode = () => {
     const validateForm = () => {
         const newErrors = {}; // Initialize an empty error object
         if (!formData.groupdefect_code.trim()) { // Check if the reasoncode is empty
-            newErrors.groupdefect_code = "Reasoncode Field is required."; // Set error message if reasoncode is empty
+            newErrors.groupdefect_code = "Defect Group Code Field is required."; // Set error message if reasoncode is empty
+        }
+        if (!formData.defect_code.trim()) { // Check if the reasoncode is empty
+            newErrors.defect_code = "Defect Code Field is required."; // Set error message if reasoncode is empty
         }
         return newErrors; // Return the error object
     };
@@ -97,7 +109,18 @@ const ReasonCode = () => {
             if (confirmSubmission) {
                 if (isEdit) {
                     // For update, include 'updated_by'
-                    await axios.put(`${Base_Url}/putdatatypeofdefect`, { ...formData, updated_by: updated_by })
+                    await axios.put(`${Base_Url}/putdatatypeofdefect`, {
+                        id: formData.id,  // Explicitly pass the ID
+                        groupdefect_code: formData.groupdefect_code,
+                        defect_code: formData.defect_code,
+                        defect_title: formData.defect_title,
+                        description: formData.description,
+                        updated_by: updated_by
+                    },{
+                        headers: {
+                            Authorization: token, // Send token in headers
+                            }, 
+                        })
                         .then(response => {
                            // window.location.reload();
                            setFormData({
@@ -115,7 +138,11 @@ const ReasonCode = () => {
                         });
                 } else {
                     // For insert, include 'created_by'
-                    await axios.post(`${Base_Url}/postdatatypeofdefect`, { ...formData, created_by: created_by })
+                    await axios.post(`${Base_Url}/postdatatypeofdefect`, { ...formData, created_by: created_by },{
+                        headers: {
+                            Authorization: token, // Send token in headers
+                            }, 
+                        })
                         .then(response => {
                             //window.location.reload();
                             setFormData({
@@ -141,23 +168,38 @@ const ReasonCode = () => {
 
     const deleted = async (id) => {
         try {
-            const response = await axios.post(`${Base_Url}/deletetypeofdefect`, { id });
+            const response = await axios.post(`${Base_Url}/deletetypeofdefect`, { id },{
+                headers: {
+                    Authorization: token, // Send token in headers
+                    }, 
+                });
             fetchUsers();
         } catch (error) {
             console.error('Error deleting user:', error);
         }
     };
-
     const edit = async (id) => {
         try {
-            const response = await axios.get(`${Base_Url}/requestdatatypeofdefect/${id}`);
-            setFormData(response.data)
+            const response = await axios.get(`${Base_Url}/requestdatatypeofdefect/${id}`,{
+                headers: {
+                    Authorization: token, // Send token in headers
+                    }, 
+                });
+            // Ensure all fields are spread, including potential missing fields
+            setFormData({
+                id: id,  // Explicitly set the ID
+                groupdefect_code: response.data.groupdefect_code || '',
+                defect_code: response.data.defect_code || '',
+                defect_title: response.data.defect_title || '',
+                description: response.data.description || ''
+            });
             setIsEdit(true);
             console.log(response.data);
         } catch (error) {
             console.error('Error editing user:', error);
         }
     };
+    
 
 
     const indexOfLastUser = (currentPage + 1) * itemsPerPage;

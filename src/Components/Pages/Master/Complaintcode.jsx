@@ -4,6 +4,7 @@ import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
 import DataTable from 'datatables.net-react';
 import DT from 'datatables.net-dt';
+import Complainttabs from './Complainttabs';
 
 DataTable.use(DT);
 
@@ -13,6 +14,7 @@ const ComplaintCode = () => {
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
+  
   const [isEdit, setIsEdit] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -194,6 +196,8 @@ const ComplaintCode = () => {
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
   return (
+    <div className="tab-content">
+    <Complainttabs />
     <div className="row mp0">
       <div className="col-12">
         <div className="card mb-3 tab_box">
@@ -368,6 +372,7 @@ const ComplaintCode = () => {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 };
