@@ -38,6 +38,7 @@ const Customerlocation = () => {
     ccperson: "",
     ccnumber: "",
     address_type: "",
+    customer_id: "",
   });
 
   // const fetchCustomermobile = async () => {
@@ -160,9 +161,9 @@ const Customerlocation = () => {
     }
   };
 
-  const fetchCustomerlocation = async () => {
+  const fetchCustomerlocation = async (customer_id) => {
     try {
-      const response = await axios.get(`${Base_Url}/getcustomerlocation`,{
+      const response = await axios.get(`${Base_Url}/getcustomerlocation/${customer_id}`,{
         headers: {
           Authorization: token,
         },
