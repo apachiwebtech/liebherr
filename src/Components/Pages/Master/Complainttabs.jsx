@@ -1,30 +1,19 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import ComplaintCode from './Complaintcode';
 import ActionCode from './Actioncode';
 import ReasonCode from './Reasoncode';
 import { Complaintlist } from '../Complaint/Complaintlist';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { Link } from 'react-router-dom';
 
 function Complainttabs() {
   const [activeTab, setActiveTab] = useState('complaintCode');
 
-  const renderTabContent = () => {
-    switch (activeTab) {
- 
-      case 'complaintCode':
-        return <ComplaintCode />;
-      case 'reasonCode':
-        return <ReasonCode />;
-      case 'actionCode':
-        return <ActionCode />;
-        
-     
+  useEffect(() => {
 
+    setActiveTab(window.location.pathname);
 
-      default:
-        return <Complaintlist />;
-    }
-  };
+  }, [window.location.pathname]);
 
   return (
     <>
@@ -75,14 +64,14 @@ function Complainttabs() {
                   DEFECT GROUP
                   </button>
                 </li>
-                <li className="nav-item">
+                <Link to={`/TypeOfDefect`}> <li className="nav-item">
                   <button
                     className={`nav-link ${activeTab === 'reasonCode' ? 'active' : ''}`}
                     onClick={() => setActiveTab('reasonCode')}
                   >
                     TYPE OF DEFECT
                   </button>
-                </li>
+                </li></Link>
                 <li className="nav-item">
                   <button
                     className={`nav-link ${activeTab === 'actionCode' ? 'active' : ''}`}
@@ -99,7 +88,7 @@ function Complainttabs() {
             {/* Tab Content */}       
               <div className="col-12 col-custom" style={{paddingLeft:"12px",paddingRight:"12px"}}>
                 <div className="tab-content">
-                  {renderTabContent()}
+                  {/* {renderTabContent()} */}
                 </div>
               </div>
           </div>

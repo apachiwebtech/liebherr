@@ -185,12 +185,12 @@ const Router = createBrowserRouter([
 
       },
       {
-        path: "/complainttabs",
+        path: "/faultcodetabs",
         element: <Complainttabs />,
 
       },
       {
-        path: "/reasoncode",
+        path: "/TypeOfDefect",
         element: <ReasonCode />,
 
 

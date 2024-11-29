@@ -2,6 +2,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
+import Complainttabs from './Complainttabs';
 
 const ReasonCode = () => {
     // Step 1: Add this state to track errors
@@ -164,6 +165,8 @@ const ReasonCode = () => {
     const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
     return (
+        <div className="tab-content">
+        <Complainttabs />
         <div className="row mp0" >
             <div className="col-12">
                 <div className="card mb-3 tab_box">
@@ -380,6 +383,7 @@ const ReasonCode = () => {
                     </div>
                 </div>
             </div>
+        </div>
         </div>
 
     );
