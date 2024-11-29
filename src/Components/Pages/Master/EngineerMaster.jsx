@@ -4,6 +4,7 @@ import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
 import { useParams } from "react-router-dom";
 import Franchisemaster from '../Master/Franchisemaster';
+import md5 from "js-md5";
 
 const EngineerMaster = () => {
   // Step 1: Add this state to track errors
@@ -19,6 +20,8 @@ const EngineerMaster = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const [duplicateError, setDuplicateError] = useState('');
+  const created_by = localStorage.getItem("userId"); // Get user ID from localStorage
+  const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
 
 
   const [formData, setFormData] = useState({
@@ -201,15 +204,18 @@ const EngineerMaster = () => {
     try {
       const confirmSubmission = window.confirm("Do you want to submit the data?");
       if (confirmSubmission) {
+        const hashedFormData = {
+          ...formData,
+          password: md5(formData.password) // Hash the password using MD5
+        };
         if (isEdit) {
           // For update, include duplicate check
-          await axios.put(`${Base_Url}/putengineer`, { ...formData }
+          await axios.put(`${Base_Url}/putengineer`, { ...hashedFormData, created_by }
             , {
               headers: {
                 Authorization: token,
               },
-            }
-          )
+            }          )
             .then(response => {
               console.log(response.data)
               setFormData({
@@ -242,7 +248,7 @@ const EngineerMaster = () => {
             });
         } else {
           // For insert, include duplicate check
-          await axios.post(`${Base_Url}/postengineer`, { ...formData }
+          await axios.post(`${Base_Url}/postengineer`, { ...hashedFormData ,created_by}
             , {
               headers: {
                 Authorization: token,

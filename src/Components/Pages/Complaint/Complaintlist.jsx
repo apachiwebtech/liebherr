@@ -9,13 +9,9 @@ export function Complaintlist(params) {
     const [Complaintdata, setComplaintdata] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
-<<<<<<< Updated upstream
     const token = localStorage.getItem("token"); // Get token from localStorage
 
 
-=======
-    const token = localStorage.getItem("token"); 
->>>>>>> Stashed changes
     
     const [formData, setFormData] = useState({
         title: '',
@@ -67,7 +63,7 @@ export function Complaintlist(params) {
             setComplaintdata(response.data);
             setFilteredData(filteredComplaints);
         } catch (error) {
-            console.error('Error fetching Complaintdata:', error);
+            console.error('Error fetching Ticketdata:', error);
             setComplaintdata([]);
             setFilteredData([]);
             navigate('/login')
@@ -533,7 +529,7 @@ export function Complaintlist(params) {
                                                             className='btn'
                                                             onClick={() => navigate(`/registercomaplaint/${item.ticket_no}`)}
                                                             disabled={isActionDisabled(item.call_status)}
-                                                            title={isActionDisabled(item.call_status) ? "Cannot edit closed or cancelled complaints" : "Edit"}
+                                                            title={isActionDisabled(item.call_status) ? "Cannot edit closed or cancelled ticket" : "Edit"}
                                                             style={{
                                                                 backgroundColor: 'transparent',
                                                                 border: 'none',

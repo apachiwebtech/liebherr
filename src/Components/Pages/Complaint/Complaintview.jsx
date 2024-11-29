@@ -119,7 +119,7 @@ export function Complaintview(params) {
       setRemarks(response.data.remarks);
       setAttachments(response.data.attachments);
     } catch (error) {
-      console.error("Error fetching complaint details:", error);
+      console.error("Error fetching ticket details:", error);
     }
   };
   //  console.log(remarks , "$$$$")
@@ -139,7 +139,7 @@ export function Complaintview(params) {
 
       }
     } catch (error) {
-      console.error("Error fetching complaint view:", error);
+      console.error("Error fetching ticket view:", error);
     }
   };
 
@@ -154,7 +154,7 @@ export function Complaintview(params) {
       );
       setDuplicate(response.data);
     } catch (error) {
-      console.error("Error fetching complaint details:", error);
+      console.error("Error fetching ticket details:", error);
     }
   };
 
@@ -365,11 +365,11 @@ export function Complaintview(params) {
         fileInputRef2.current.value = ""; // Reset the file input for remarks
       }
 
-      alert("Complaint remark and files submitted successfully!");
+      alert("Ticket remark and files submitted successfully!");
 
       fetchComplaintDetails();
     } catch (error) {
-      console.error("Error submitting complaint remark or files:", error);
+      console.error("Error submitting ticket remark or files:", error);
       alert(
         `Error submitting data: ${error.response ? error.response.data.error : error.message
         }`

@@ -4074,7 +4074,7 @@ app.post("/deleteproductunique", authenticateToken, async (req, res) => {
 //Unique Product Master Linked to Location End
 
 //Start Engineer Master
-app.get("/getchildfranchise",
+app.get("/getchildfranchise/:mfranchise_id",
   authenticateToken, async (req, res) => {
     try {
       // Use the poolPromise to get the connection pool
@@ -4179,7 +4179,7 @@ app.post("/postengineer",
     }
   });
 app.put("/putengineer", authenticateToken, async (req, res) => {
-  const { title, id,mfranchise_id, cfranchise_id, password, email, mobile_no, personal_email, employee_code, personal_mobile, dob, blood_group, academic_qualification, joining_date, passport_picture, resume, photo_proof, address_proof, permanent_address, current_address } = req.body;
+  const { title,mfranchise_id, cfranchise_id, password, email, mobile_no, personal_email, employee_code, personal_mobile, dob, blood_group, academic_qualification, joining_date, passport_picture, resume, photo_proof, address_proof, permanent_address, current_address, id } = req.body;
 
   try {
     // Use the poolPromise to get the connection pool
@@ -4198,7 +4198,7 @@ app.put("/putengineer", authenticateToken, async (req, res) => {
       const updateSql = `UPDATE awt_engineermaster
                          SET title = '${title}',mfranchise_id = '${mfranchise_id}', cfranchise_id = '${cfranchise_id}', mobile_no = '${mobile_no}', email = '${email}', password = '${password}',
                          personal_email = '${personal_email}', employee_code = '${employee_code}', personal_mobile = '${personal_mobile}', dob = '${dob}',
-                         blood_group = '${blood_group}', academic_qualification = '${academic_qualification}', joining_date = '${joining_date}', passport_picture = '${passport_picture},
+                         blood_group = '${blood_group}', academic_qualification = '${academic_qualification}', joining_date = '${joining_date}', passport_picture = '${passport_picture}',
                          resume = '${resume}', photo_proof = '${photo_proof}', address_proof = '${address_proof}', permanent_address = '${permanent_address}', current_address = '${current_address}'
                          WHERE id = '${id}'`;
 

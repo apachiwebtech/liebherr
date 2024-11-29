@@ -495,7 +495,7 @@ export function Registercomplaint(params) {
 
 
         } catch (error) {
-            console.error("Error fetching complaint details:", error);
+            console.error("Error fetching ticket details:", error);
         }
     };
 
@@ -513,7 +513,7 @@ export function Registercomplaint(params) {
             }
             setDuplicate(response.data);
         } catch (error) {
-            console.error("Error fetching complaint details:", error);
+            console.error("Error fetching ticket details:", error);
         }
     };
 

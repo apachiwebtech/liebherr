@@ -15,6 +15,7 @@ const Location = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [duplicateError, setDuplicateError] = useState("");
+  const token = localStorage.getItem("token"); // Get token from localStorage
   const [paginatedUsers, setPaginatedUsers] = useState([]);
 
   const [formData, setFormData] = useState({
@@ -24,7 +25,11 @@ const Location = () => {
 
   const fetchCountries = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getcountries`);
+      const response = await axios.get(`${Base_Url}/getcountries`,{
+        headers: {
+           Authorization: token, // Send token in headers
+         }, 
+       });
       console.log(response.data);
       setCountries(response.data);
     } catch (error) {
@@ -34,7 +39,11 @@ const Location = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getregionsr`);
+      const response = await axios.get(`${Base_Url}/getregionsr`,{
+        headers: {
+           Authorization: token, // Send token in headers
+         }, 
+       });
       console.log(response.data);
       setUsers(response.data);
       setFilteredUsers(response.data);

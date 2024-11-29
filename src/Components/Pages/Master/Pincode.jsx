@@ -4,6 +4,7 @@ import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
 import LocationTabs from "./LocationTabs";
 
+
 const Pincode = () => {
   const [countries, setCountries] = useState([]);
   const [regions, setRegions] = useState([]);
@@ -42,35 +43,71 @@ const Pincode = () => {
     }
   };
 
-  const fetchCountries = () =>
-    fetchData(
-      `${Base_Url}/getcountries`,
-      setCountries,
-      "Error fetching countries:"
-    );
-  const fetchRegions = (countryId) =>
-    fetchData(
-      `${Base_Url}/getregionspincode/${countryId}`,
-      setRegions,
-      "Error fetching regions:"
-    );
+
+
+  const fetchCountries = async () => {
+    try {
+      const response = await axios.get(`${Base_Url}/getcountries`, {
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      });
+  
+      setCountries(response.data); // Update countries with the response data
+    } catch (error) {
+      console.error("Error fetching countries:", error.message);
+      // Optionally, handle errors in a user-friendly way, e.g., show a message
+    }
+  };
+
+  const fetchRegions = async (countryId) => {
+    try {
+      const response = await axios.get(`${Base_Url}/getregionspincode`, {
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      });
+  
+      setRegions(response.data); // Update countries with the response data
+    } catch (error) {
+      console.error("Error fetching Regions:", error.message);
+      // Optionally, handle errors in a user-friendly way, e.g., show a message
+    }
+  };
+  
+  
+   
+
+    
   const fetchGeoStates = (regionId) =>
     fetchData(
       `${Base_Url}/getgeostatespincode/${regionId}`,
       setGeoStates,
-      "Error fetching geo states:"
+      "Error fetching geo states:",{
+        headers: {
+           Authorization: token, // Send token in headers
+         }, 
+       }
     );
   const fetchGeoCities = (area_id) =>
     fetchData(
       `${Base_Url}/getgeocities_p/${area_id}`,
       setGeoCities,
-      "Error fetching geo cities:"
+      "Error fetching geo cities:",{
+        headers: {
+           Authorization: token, // Send token in headers
+         }, 
+       }
     );
   const fetchAreas = (geocity_id) =>
     fetchData(
       `${Base_Url}/getareas/${geocity_id}`,
       setAreas,
-      "Error fetching areas:"
+      "Error fetching areas:",{
+        headers: {
+           Authorization: token, // Send token in headers
+         }, 
+       }
     );
   const fetchPincodes = () =>
     fetchData(
@@ -79,7 +116,11 @@ const Pincode = () => {
         setPincodes(data);
         setFilteredPincodes(data);
       },
-      "Error fetching pincodes:"
+      "Error fetching pincodes:",{
+        headers: {
+           Authorization: token, // Send token in headers
+         }, 
+       }
       
     );
 
