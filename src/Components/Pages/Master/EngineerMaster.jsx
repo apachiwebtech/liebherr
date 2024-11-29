@@ -355,7 +355,7 @@ const EngineerMaster = () => {
                         <select className='form-select dropdown-select' name='mfranchise_id' value={formData.mfranchise_id} onChange={handleChange} >
                           <option value="">Select Master Franchise</option>
                           {Parentfranchise.map((pf) => (
-                            <option key={pf.id} value={pf.id}>{pf.title}</option>
+                            <option key={pf.id} value={pf.licarecode}>{pf.title}</option>
                           ))}
                         </select>
                         {errors.mfranchise_id && <small className="text-danger">{errors.mfranchise_id}</small>} {/* Show error for Child Franchise selection */}

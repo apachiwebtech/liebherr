@@ -3639,35 +3639,78 @@ app.post("/postcustomer", authenticateToken, async (req, res) => {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
 
-    // Check for duplicates
-    const checkDuplicateSql = `SELECT * FROM awt_customer WHERE customer_id = ${customer_id} AND deleted = 0`;
-
-    // Execute the duplicate check query
-    const checkDuplicateResult = await pool.request().query(checkDuplicateSql);
+    // Step 1: Check for duplicates using parameterized query
+    const checkDuplicateSql = `
+      SELECT * FROM awt_customer
+      WHERE customer_id = @customer_id
+      AND deleted = 0
+    `;
+    const checkDuplicateResult = await pool.request()
+      .input('customer_id', customer_id)
+      .query(checkDuplicateSql);
 
     // If a duplicate customer is found
     if (checkDuplicateResult.recordset.length > 0) {
       return res.status(409).json({
-        message: "Duplicate entry, Customer with same Customer_id  already exists!",
-      });
-    } else {
-      // Insert the customer if no duplicate is found
-      sql = `INSERT INTO awt_customer (customer_fname, customer_lname, customer_type, customer_classification, mobileno, alt_mobileno, dateofbirth, anniversary_date, email,salutation,customer_id)
-      VALUES ('${customer_fname}', '${customer_lname}', '${customer_type}', '${customer_classification}', '${mobileno}', '${alt_mobileno}', '${dateofbirth}', '${anniversary_date}', '${email}','${salutation}','${customer_id}')`;
-
-      // Execute the insert query
-      await pool.request().query(sql);
-
-      // Send success response
-      return res.status(201).json({
-        message: "Customer master added successfully",
+        message: "Duplicate entry, Customer with the same Customer_id already exists!"
       });
     }
+
+    // Step 2: Insert the customer if no duplicate is found
+    const insertSql = `
+      INSERT INTO awt_customer (
+        customer_fname,
+        customer_lname,
+        customer_type,
+        customer_classification,
+        mobileno,
+        alt_mobileno,
+        dateofbirth,
+        anniversary_date,
+        email,
+        salutation,
+        customer_id
+      ) VALUES (
+        @customer_fname,
+        @customer_lname,
+        @customer_type,
+        @customer_classification,
+        @mobileno,
+        @alt_mobileno,
+        @dateofbirth,
+        @anniversary_date,
+        @email,
+        @salutation,
+        @customer_id
+      )
+    `;
+
+    // Execute the insert query
+    await pool.request()
+      .input('customer_fname', customer_fname)
+      .input('customer_lname', customer_lname)
+      .input('customer_type', customer_type)
+      .input('customer_classification', customer_classification)
+      .input('mobileno', mobileno)
+      .input('alt_mobileno', alt_mobileno)
+      .input('dateofbirth', dateofbirth)
+      .input('anniversary_date', anniversary_date)
+      .input('email', email)
+      .input('salutation', salutation)
+      .input('customer_id', customer_id)
+      .query(insertSql);
+
+    // Send success response
+    return res.status(201).json({
+      message: "Customer master added successfully",
+    });
+
   } catch (err) {
     console.error("Database error:", err);
     return res.status(500).json({ error: "Database error occurred" });
   }
 });
+
 
 
 // customer put 
