@@ -8,7 +8,7 @@ import { Base_Url } from "../../Utils/Base_Url";
 import { FaEye } from "react-icons/fa";
 
 export function Complaintview(params) {
-  const token = localStorage.getItem("token"); 
+  const token = localStorage.getItem("token");
 
   const { complaintid } = useParams();
   const [complaintview, setComplaintview] = useState({
@@ -38,6 +38,7 @@ export function Complaintview(params) {
   const [duplicate, setDuplicate] = useState([]);
   const [attachments, setAttachments] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
+  const [addedEngineers, setAddedEngineers] = useState([]);
 
   const [files2, setFiles2] = useState([]); // New state for Attachment 2 files
   const fileInputRef = useRef(); // Ref for Attachment 1 input
@@ -74,7 +75,7 @@ export function Complaintview(params) {
 
   async function getEngineer(params) {
     try {
-      const res = await axios.get(`${Base_Url}/getcvengineer`,{
+      const res = await axios.get(`${Base_Url}/getcvengineer`, {
         headers: {
           Authorization: token, // Send token in headers
         },
@@ -92,29 +93,30 @@ export function Complaintview(params) {
     }
   }
 
-  const Addengineer = () =>{
-    
-    const data ={
-      engineer_id : complaintview.engineer_id
+  const AddEngineer = () => {
+    const selectedEngineer = engineer.find(
+      (eng) => eng.id === parseInt(complaintview.engineer_id)
+    );
+    if (
+      selectedEngineer &&
+      !addedEngineers.some((eng) => eng.id === selectedEngineer.id)
+    ) {
+      setAddedEngineers([...addedEngineers, selectedEngineer]);
+      setComplaintview({ ...complaintview, engineer_id: '' }); // Reset the dropdown
     }
 
-    axios.post(`${Base_Url}/addcomplainteng` , data)
-    .then((res) =>{
-      console.log(res)
-    })
-  
-  }
+  };
 
-  // console.log("this is get product",product);
+
 
   const fetchComplaintDetails = async () => {
     try {
       const response = await axios.get(
-        `${Base_Url}/getComplaintDetails/${complaintview.ticket_no}`,{
-          headers: {
-            Authorization: token, // Send token in headers
-          },
-        }
+        `${Base_Url}/getComplaintDetails/${complaintview.ticket_no}`, {
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      }
       );
       setRemarks(response.data.remarks);
       setAttachments(response.data.attachments);
@@ -126,11 +128,11 @@ export function Complaintview(params) {
   const fetchComplaintview = async (complaintid) => {
     try {
       const response = await axios.get(
-        `${Base_Url}/getcomplaintview/${complaintid}`,{
-          headers: {
-            Authorization: token, // Send token in headers
-          },
-        }
+        `${Base_Url}/getcomplaintview/${complaintid}`, {
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      }
       );
       console.log(response.data);
       setComplaintview(response.data);
@@ -146,11 +148,11 @@ export function Complaintview(params) {
   const fetchComplaintDuplicate = async () => {
     try {
       const response = await axios.get(
-        `${Base_Url}/getComplaintDuplicate/${complaintview.customer_mobile}`,{
-          headers: {
-            Authorization: token, // Send token in headers
-          },
-        }
+        `${Base_Url}/getComplaintDuplicate/${complaintview.customer_mobile}`, {
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      }
       );
       setDuplicate(response.data);
     } catch (error) {
@@ -162,11 +164,11 @@ export function Complaintview(params) {
   const fetchAttachment2Details = async () => {
     try {
       const response = await axios.get(
-        `${Base_Url}/getAttachment2Details/${complaintview.ticket_no}`,{
-          headers: {
-            Authorization: token, // Send token in headers
-          },
-        }
+        `${Base_Url}/getAttachment2Details/${complaintview.ticket_no}`, {
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      }
       );
       setAttachments2(response.data.attachments2);
 
@@ -198,7 +200,7 @@ export function Complaintview(params) {
         await axios.post(`${Base_Url}/uploadAttachment2`, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
-        
+
           },
         });
 
@@ -237,10 +239,11 @@ export function Complaintview(params) {
       engineer_id: complaintview.engineer_id,
       call_status: complaintview.call_status,
       updated_by: 1,
-      ticket_no: complaintview.ticket_no
+      ticket_no: complaintview.ticket_no,
+      engineerdata : addedEngineers.map((item) => item.employee_code)
     };
 
-    axios.post(`${Base_Url}/ticketFormData`, data,{
+    axios.post(`${Base_Url}/ticketFormData`, data, {
       headers: {
         Authorization: token, // Send token in headers
       },
@@ -351,7 +354,7 @@ export function Complaintview(params) {
         await axios.post(`${Base_Url}/uploadcomplaintattachments`, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
-            
+
           },
         });
       }
@@ -966,37 +969,53 @@ export function Complaintview(params) {
 
               <div className="row">
                 <div className="col-lg-10">
-                <select
-                  className="form-select dropdown-select "
-                  name="engineer_id"
-                  value={complaintview.engineer_id} // Add this to control the value
-                  onChange={handleModelChange}
-                >
-                  <option value="">Select Engineer</option>
-                  {Array.isArray(engineer) && engineer.length > 0 ? (
-                    engineer.map((engineers) => (
-                      <option key={engineers.id} value={engineers.id}>
-                        {engineers.title}
+                  <select
+                    className="form-select dropdown-select"
+                    name="engineer_id"
+                    value={complaintview.engineer_id}
+                    onChange={handleModelChange}
+                  >
+                    <option value="">Select Engineer</option>
+                    {Array.isArray(engineer) && engineer.length > 0 ? (
+                      engineer.map((engineers) => (
+                        <option key={engineers.id} value={engineers.id}>
+                          {engineers.title}
+                        </option>
+                      ))
+                    ) : (
+                      <option value="" disabled>
+                        No engineers available
                       </option>
-                    ))
-                  ) : (
-                    <option value="" disabled>No engineers available</option>
-                  )}
-                </select>
-                  </div>
+                    )}
+                  </select>
+                </div>
 
-                  <div className="col-lg-2">
+                <div className="col-lg-2">
+                  <button
+                    className="btn btn-primary btn-sm"
+                    onClick={AddEngineer}
+                  >
+                    Add
+                  </button>
+                </div>
+              </div>
 
-                <button className=" btn btn-primary btn-sm" onClick={() =>Addengineer()}>Add</button>
-
-                  </div>
-        
+              {/* Display added engineers */}
+              <div className="mt-3">
+                <h5>Added Engineers:</h5>
+                <ul className="list-group">
+                  {addedEngineers.map((eng) => (
+                    <li key={eng.id} className="list-group-item">
+                      {eng.title}
+                    </li>
+                  ))}
+                </ul>
               </div>
 
 
 
 
-              <div className="d-flex justify-content-end">
+              <div className="d-flex justify-content-end py-2">
                 <button
                   type="submit"
                   className="btn btn-primary"
@@ -1006,6 +1025,7 @@ export function Complaintview(params) {
                   Submit
                 </button>
               </div>
+
               {TicketUpdateSuccess.visible && (
                 <div style={successMessageStyle}>
                   {TicketUpdateSuccess.message}

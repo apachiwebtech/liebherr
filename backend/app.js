@@ -6831,17 +6831,18 @@ app.post("/updateProduct", authenticateToken,
 //Complaint view Insert TicketFormData start
 
 app.post("/ticketFormData", authenticateToken, async (req, res) => {
-  const { ticket_no, serial_no, ModelNumber, engineer_id, call_status, updated_by } = req.body;
+  const { ticket_no, serial_no, ModelNumber, engineerdata, call_status, updated_by } = req.body;
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
-  console.log(ticket_no, serial_no, ModelNumber, engineer_id, call_status, updated_by, "Values")
+  
+  const engineer_code = engineerdata.join(',')
 
   try {
     const pool = await poolPromise;
 
     const updateSql = `
       UPDATE complaint_ticket
-      SET engineer_id = '${engineer_id}',call_status = '${call_status}' , updated_by = '${updated_by}', updated_date = '${formattedDate}' WHERE ticket_no = '${ticket_no}'`;
+      SET engineer_code = '${engineer_code}',call_status = '${call_status}' , updated_by = '${updated_by}', updated_date = '${formattedDate}' WHERE ticket_no = '${ticket_no}'`;
 
     await pool.request().query(updateSql);
 
@@ -7695,24 +7696,5 @@ app.post("/getcomplaintticket", authenticateToken,
 
 //Register Page Complaint Duplicate End
 
-app.post('/addcomplainteng' , async (req,res) =>{
 
-  const {engineer_id} = req.body;
-
-  try {
-    const pool = await poolPromise;
-
-    // Modified SQL query using parameterized query
-    const sql = "update complaint_ticket set ";
-
-    const result = await pool.request()
-      .input('comp_no', comp_no) // Parameterized input
-      .query(sql);
-
-    return res.json(result.recordset);
-  } catch (err) {
-    console.error("Database error:", err);
-    return res.status(500).json({ error: "Database error occurred", details: err.message });
-  }
-})
 
