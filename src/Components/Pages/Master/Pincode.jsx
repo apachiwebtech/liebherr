@@ -62,7 +62,7 @@ const Pincode = () => {
 
   const fetchRegions = async (countryId) => {
     try {
-      const response = await axios.get(`${Base_Url}/getregionspincode`, {
+      const response = await axios.get(`${Base_Url}/getregionspincode/${countryId}`, {
         headers: {
           Authorization: token, // Send token in headers
         },
@@ -74,55 +74,71 @@ const Pincode = () => {
       // Optionally, handle errors in a user-friendly way, e.g., show a message
     }
   };
-  
-  
-   
 
-    
-  const fetchGeoStates = (regionId) =>
-    fetchData(
-      `${Base_Url}/getgeostatespincode/${regionId}`,
-      setGeoStates,
-      "Error fetching geo states:",{
+  const fetchGeoStates = async (regionId) => {
+    try {
+      const response = await axios.get(`${Base_Url}/getgeostatespincode/${regionId}`, {
         headers: {
-           Authorization: token, // Send token in headers
-         }, 
-       }
-    );
-  const fetchGeoCities = (area_id) =>
-    fetchData(
-      `${Base_Url}/getgeocities_p/${area_id}`,
-      setGeoCities,
-      "Error fetching geo cities:",{
+          Authorization: token, // Send token in headers
+        },
+      });
+  
+      setGeoStates(response.data); // Update countries with the response data
+    } catch (error) {
+      console.error("Error fetching geo states:", error.message);
+      // Optionally, handle errors in a user-friendly way, e.g., show a message
+    }
+  };
+
+  const fetchGeoCities = async (area_id) => {
+    try {
+      const response = await axios.get(`${Base_Url}/getgeocities_p/${area_id}`, {
         headers: {
-           Authorization: token, // Send token in headers
-         }, 
-       }
-    );
-  const fetchAreas = (geocity_id) =>
-    fetchData(
-      `${Base_Url}/getareas/${geocity_id}`,
-      setAreas,
-      "Error fetching areas:",{
+          Authorization: token, // Send token in headers
+        },
+      });
+  
+      setGeoCities(response.data); // Update countries with the response data
+    } catch (error) {
+      console.error("Error fetching geo cities:", error.message);
+      // Optionally, handle errors in a user-friendly way, e.g., show a message
+    }
+  };
+
+  const fetchAreas = async (geocity_id) => {
+    try {
+      const response = await axios.get(`${Base_Url}/getareas/${geocity_id}`, {
         headers: {
-           Authorization: token, // Send token in headers
-         }, 
-       }
-    );
-  const fetchPincodes = () =>
-    fetchData(
-      `${Base_Url}/getpincodes`,
-      (data) => {
-        setPincodes(data);
-        setFilteredPincodes(data);
-      },
-      "Error fetching pincodes:",{
+          Authorization: token, // Send token in headers
+        },
+      });
+  
+      setAreas(response.data); // Update countries with the response data
+    } catch (error) {
+      console.error("Error fetching areas:", error.message);
+      // Optionally, handle errors in a user-friendly way, e.g., show a message
+    }
+  };
+
+  const fetchPincodes = async () => {
+    try {
+      const response = await axios.get(`${Base_Url}/getpincodes`,
+         {
         headers: {
-           Authorization: token, // Send token in headers
-         }, 
-       }
-      
-    );
+          Authorization: token, // Send token in headers
+        },
+      });
+
+      setPincodes(response.data);
+      setFilteredPincodes(response.data);
+  
+     
+    } catch (error) {
+      console.error("Error fetching pincodes:", error.message);
+      // Optionally, handle errors in a user-friendly way, e.g., show a message
+    }
+  };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -348,7 +364,7 @@ const Pincode = () => {
                           margin: "0 5px",
                         }}
                       >
-                        {[10, 15, 20].map((value) => (
+                        {[10, 15, 20, 250].map((value) => (
                           <option key={value} value={value}>
                             {value}
                           </option>

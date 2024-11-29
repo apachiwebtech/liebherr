@@ -58,8 +58,8 @@ const EngineerMaster = () => {
         ...response.data[0],
         // Rename keys to match your formData structure
         title: response.data[0].title,
-        cfranchise_id: response.data[0].cfranchise_id,
         mfranchise_id: response.data[0].mfranchise_id,
+        cfranchise_id: response.data[0].cfranchise_id,
         mobile_no: response.data[0].mobile_no,
         password: response.data[0].password,
         email: response.data[0].email,
@@ -80,6 +80,13 @@ const EngineerMaster = () => {
 
 
       setIsEdit(true);
+
+      if (response.data[0].mfranchise_id) {
+        fetchParentfranchise(response.data[0].mfranchise_id);
+      }
+      if (response.data[0].cfranchise_id) {
+        fetchChildfranchise(response.data[0].cfranchise_id);
+      }
 
 
 
@@ -146,11 +153,14 @@ const EngineerMaster = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-    if (name === "mfranchise_id") {
-      fetchChildfranchise(value);
+    switch (name) {
+      case "mfranchise_id":
+        fetchChildfranchise(value);
+        break;
+      default:
+        break;
     }
   };
-
   const handleSearch = (e) => {
     const value = e.target.value.toLowerCase();
     setSearchTerm(value);

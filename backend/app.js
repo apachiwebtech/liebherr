@@ -1205,7 +1205,7 @@ app.post("/deletearea", async (req, res) => {
 
 // Pincode Master Start
 // API to fetch regions based on selected country (for the region dropdown)
-app.get("/getregionspincode/:country_id", authenticateToken, async (req, res) => {
+app.get("/getregionspincode/:country_id",authenticateToken, async (req, res) => {
   const { country_id } = req.params;
 
   try {
@@ -4076,12 +4076,14 @@ app.post("/deleteproductunique", authenticateToken, async (req, res) => {
 //Start Engineer Master
 app.get("/getchildfranchise/:mfranchise_id",
   authenticateToken, async (req, res) => {
+
+    const { mfranchise_id} = req.params;
     try {
       // Use the poolPromise to get the connection pool
       const pool = await poolPromise;
 
       // SQL query to fetch data from the database
-      const sql = "SELECT * FROM awt_childfranchisemaster WHERE deleted = 0";
+      const sql = `SELECT * FROM awt_childfranchisemaster WHERE pfranchise_id = ${mfranchise_id} AND deleted = 0`;
 
       // Execute the SQL query
       const result = await pool.request().query(sql);
