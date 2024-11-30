@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
+import Serviceagenttabs from "../Master/Serviceagenttabs";
 
 const Serviceagent = () => {
   // Step 1: Add this state to track errors
@@ -170,197 +171,171 @@ const Serviceagent = () => {
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
   return (
-    <div className="row mp0">
-      <div className="col-12">
-        <div className="card mb-3 tab_box">
-          <div
-            className="card-body"
-            style={{ flex: "1 1 auto", padding: "13px 28px" }}
-          >
-            <div className="row mp0">
-              <div className="col-6">
-                <form
-                  onSubmit={handleSubmit}
-                  style={{ width: "50%" }}
-                  className="text-left"
-                >
-                  <div className="mb-3">
-                    <label htmlFor="serviceagentInput" className="input-field">
-                      Service Agent
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="serviceagent"
-                      id="serviceagentInput"
-                      value={formData.serviceagent}
-                      onChange={handleChange}
-                      placeholder="Enter Service Agent "
-                    />
-                    {errors.serviceagent && (
-                      <small className="text-danger">
-                        {errors.serviceagent}
-                      </small>
-                    )}
-                    {duplicateError && (
-                      <small className="text-danger">{duplicateError}</small>
-                    )}{" "}
-                    {/* Show duplicate error */}
-                  </div>
-                  <div className="text-right">
-                    <button className="btn btn-liebherr" type="submit">
-                      {isEdit ? "Update" : "Submit"}
-                    </button>
-                  </div>
-                </form>
-              </div>
-
-              <div className="col-md-6">
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                  <span>
-                    Show
-                    <select
-                      value={itemsPerPage}
-                      onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                      className="form-control d-inline-block"
-                      style={{
-                        width: "51px",
-                        display: "inline-block",
-                        marginLeft: "5px",
-                        marginRight: "5px",
-                      }}
-                    >
-                      <option value={10}>10</option>
-                      <option value={15}>15</option>
-                      <option value={20}>20</option>
-                    </select>
-                    entries
-                  </span>
-
-                  <input
-                    type="text"
-                    placeholder="Search..."
-                    value={searchTerm}
-                    onChange={handleSearch}
-                    className="form-control d-inline-block"
-                    style={{ width: "300px" }}
-                  />
+    <div className="tab-content">
+      <Serviceagenttabs></Serviceagenttabs>
+      <div className="row mp0">
+        <div className="col-12">
+          <div className="card mb-3 tab_box">
+            <div
+              className="card-body"
+              style={{ flex: "1 1 auto", padding: "13px 28px" }}
+            >
+              <div className="row mp0">
+                <div className="col-6">
+                  <form
+                    onSubmit={handleSubmit}
+                    style={{ width: "50%" }}
+                    className="text-left"
+                  >
+                    <div className="mb-3">
+                      <label htmlFor="serviceagentInput" className="input-field">
+                        Service Agent
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="serviceagent"
+                        id="serviceagentInput"
+                        value={formData.serviceagent}
+                        onChange={handleChange}
+                        placeholder="Enter Service Agent "
+                      />
+                      {errors.serviceagent && (
+                        <small className="text-danger">
+                          {errors.serviceagent}
+                        </small>
+                      )}
+                      {duplicateError && (
+                        <small className="text-danger">{duplicateError}</small>
+                      )}{" "}
+                      {/* Show duplicate error */}
+                    </div>
+                    <div className="text-right">
+                      <button className="btn btn-liebherr" type="submit">
+                        {isEdit ? "Update" : "Submit"}
+                      </button>
+                    </div>
+                  </form>
                 </div>
 
-                {/* Adjust table padding and spacing */}
-                <table
-                  className="table table-bordered table dt-responsive nowrap w-100 table-css"
-                  style={{ marginTop: "20px", tableLayout: "fixed" }}
-                >
-                  <thead>
-                    <tr>
-                      <th style={{ padding: "12px 15px", textAlign: "center" }}>
-                        #
-                      </th>
-                      <th style={{ padding: "12px 15px", textAlign: "center" }}>
-                        Service Agent
-                      </th>
-                      <th style={{ padding: "0px 0px", textAlign: "center" }}>
-                        Edit
-                      </th>
-                      <th style={{ padding: "0px 0px", textAlign: "center" }}>
-                        Delete
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {currentUsers.map((item, index) => (
-                      <tr key={item.id}>
-                        <td style={{ padding: "2px", textAlign: "center" }}>
-                          {index + 1 + indexOfFirstUser}
-                        </td>
-                        <td style={{ padding: "10px" }}>{item.serviceagent}</td>
-                        <td style={{ padding: "0px", textAlign: "center" }}>
-                          <button
-                            className="btn"
-                            onClick={() => {
-                              // alert(item.id)
-                              edit(item.id);
-                            }}
-                            serviceagent="Edit"
-                            style={{
-                              backgroundColor: "transparent",
-                              border: "none",
-                              color: "blue",
-                              fontSize: "20px",
-                            }}
-                          >
-                            <FaPencilAlt />
-                          </button>
-                        </td>
-                        <td style={{ padding: "0px", textAlign: "center" }}>
-                          <button
-                            className="btn"
-                            onClick={() => deleted(item.id)}
-                            serviceagent="Delete"
-                            style={{
-                              backgroundColor: "transparent",
-                              border: "none",
-                              color: "red",
-                              fontSize: "20px",
-                            }}
-                          >
-                            <FaTrash />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                <div className="col-md-6">
+                  <div className="d-flex justify-content-between align-items-center mb-3">
+                    <span>
+                      Show
+                      <select
+                        value={itemsPerPage}
+                        onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                        className="form-control d-inline-block"
+                        style={{
+                          width: "51px",
+                          display: "inline-block",
+                          marginLeft: "5px",
+                          marginRight: "5px",
+                        }}
+                      >
+                        <option value={10}>10</option>
+                        <option value={15}>15</option>
+                        <option value={20}>20</option>
+                      </select>
+                      entries
+                    </span>
 
-                <div
-                  className="d-flex justify-content-between"
-                  style={{ marginTop: "10px" }}
-                >
-                  <div>
-                    Showing {indexOfFirstUser + 1} to{" "}
-                    {Math.min(indexOfLastUser, filteredUsers.length)} of{" "}
-                    {filteredUsers.length} entries
+                    <input
+                      type="text"
+                      placeholder="Search..."
+                      value={searchTerm}
+                      onChange={handleSearch}
+                      className="form-control d-inline-block"
+                      style={{ width: "300px" }}
+                    />
                   </div>
 
-                  <div className="pagination" style={{ marginLeft: "auto" }}>
-                    <button
-                      onClick={() => setCurrentPage(currentPage - 1)}
-                      disabled={currentPage === 0}
-                    >
-                      {"<"}
-                    </button>
-                    {Array.from(
-                      {
-                        length: Math.ceil(filteredUsers.length / itemsPerPage),
-                      },
-                      (_, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setCurrentPage(index)}
-                          className={currentPage === index ? "active" : ""}
-                        >
-                          {index + 1}
-                        </button>
-                      )
-                    )}
-                    <button
-                      onClick={() => setCurrentPage(currentPage + 1)}
-                      disabled={
-                        currentPage ===
-                        Math.ceil(filteredUsers.length / itemsPerPage) - 1
-                      }
-                    >
-                      {">"}
-                    </button>
+                  {/* Adjust table padding and spacing */}
+                  <table className="table table-bordered table-hover table-responsive" style={{ marginTop: "20px" }}>
+                    <thead className="thead-light">
+                      <tr>
+                        <th width="10%" style={{ textAlign: "center" }}>#</th>
+                        <th width="60%" style={{ textAlign: "left" }}>Service Agent</th>
+                        <th width="15%" style={{ textAlign: "center" }}>Edit</th>
+                        <th width="15%" style={{ textAlign: "center" }}>Delete</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {currentUsers.map((item, index) => (
+                        <tr key={item.id}>
+                          <td style={{ textAlign: "center" }}>{index + 1 + indexOfFirstUser}</td>
+                          <td>{item.serviceagent}</td>
+                          <td style={{ textAlign: "center" }}>
+                            <button
+                              className="btn btn-link"
+                              onClick={() => edit(item.id)}
+                              style={{ color: "blue", fontSize: "20px" }}
+                            >
+                              <FaPencilAlt />
+                            </button>
+                          </td>
+                          <td style={{ textAlign: "center" }}>
+                            <button
+                              className="btn btn-link"
+                              onClick={() => deleted(item.id)}
+                              style={{ color: "red", fontSize: "20px" }}
+                            >
+                              <FaTrash />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+
+                  <div
+                    className="d-flex justify-content-between"
+                    style={{ marginTop: "10px" }}
+                  >
+                    <div>
+                      Showing {indexOfFirstUser + 1} to{" "}
+                      {Math.min(indexOfLastUser, filteredUsers.length)} of{" "}
+                      {filteredUsers.length} entries
+                    </div>
+
+                    <div className="pagination" style={{ marginLeft: "auto" }}>
+                      <button
+                        onClick={() => setCurrentPage(currentPage - 1)}
+                        disabled={currentPage === 0}
+                      >
+                        {"<"}
+                      </button>
+                      {Array.from(
+                        {
+                          length: Math.ceil(filteredUsers.length / itemsPerPage),
+                        },
+                        (_, index) => (
+                          <button
+                            key={index}
+                            onClick={() => setCurrentPage(index)}
+                            className={currentPage === index ? "active" : ""}
+                          >
+                            {index + 1}
+                          </button>
+                        )
+                      )}
+                      <button
+                        onClick={() => setCurrentPage(currentPage + 1)}
+                        disabled={
+                          currentPage ===
+                          Math.ceil(filteredUsers.length / itemsPerPage) - 1
+                        }
+                      >
+                        {">"}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </div></div>
   );
 };
 

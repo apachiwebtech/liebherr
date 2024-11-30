@@ -1,20 +1,16 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import Serviceproduct from "./Serviceproduct";
+import { Link } from "react-router-dom";
 
 function Serviceproducttabs() {
   const [activeTab, setActiveTab] = useState("Serviceproduct");
+  useEffect(() => {
 
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case "Serviceproduct":
-        return <Serviceproduct />;
+    setActiveTab(window.location.pathname);
 
-      default:
-        return <Serviceproduct />;
-    }
-  };
+  }, [window.location.pathname]);
 
   return (
     <>
@@ -64,7 +60,7 @@ function Serviceproducttabs() {
                 }}
               >
                 <ul className="nav nav-tabs ">
-                  <li className="nav-item">
+                <Link to={`/Serviceproduct`}><li className="nav-item">
                     <button
                       className={`nav-link ${
                         activeTab === "Serviceproduct" ? "active" : "onClick={() => setActiveTab('Serviceproduct')}"
@@ -73,7 +69,7 @@ function Serviceproducttabs() {
                     >
                       SERVICE PRODUCT
                     </button>
-                  </li>
+                  </li></Link>
                 </ul>
               </div>
             </div>
@@ -83,7 +79,10 @@ function Serviceproducttabs() {
               className="col-12 col-custom"
               style={{ paddingLeft: "12px", paddingRight: "12px" }}
             >
-              <div className="tab-content">{renderTabContent()}</div>
+              <div className="tab-content">
+                {/* {renderTabContent()} */}
+
+              </div>
             </div>
           </div>
         </div>

@@ -262,7 +262,7 @@ const ProductType = () => {
                     <thead className="thead-light">
                       <tr>
                         <th width="10%" className="text-center">#</th>
-                        <th width="70%" className="text-center">Product Type</th>
+                        <th width="60%" className="text-left">Product Type</th>
                         <th width="15%" className="text-center">Edit</th>
                         <th width="15%" className="text-center">Delete</th>
                       </tr>

@@ -246,7 +246,7 @@ const Category = () => {
                     <thead className="thead-light">
                       <tr>
                         <th width="10%" className="text-center">#</th>
-                        <th width="70%" className="text-center">Title</th>
+                        <th width="60%" className="text-left">Title</th>
                         <th width="10%" className="text-center">Edit</th>
                         <th width="10%" className="text-center">Delete</th>
                       </tr>

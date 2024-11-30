@@ -268,8 +268,8 @@ const Location = () => {
                   <thead className="thead-light">
                     <tr>
                       <th width="10%" className="text-center">#</th>
-                      <th width="35%" className="text-center">Country</th>
-                      <th width="35%" className="text-center">Region</th>
+                      <th width="30%" className="text-left">Country</th>
+                      <th width="30%" className="text-left">Region</th>
                       <th width="15%" className="text-center">Edit</th>
                       <th width="15%" className="text-center">Delete</th>
                     </tr>

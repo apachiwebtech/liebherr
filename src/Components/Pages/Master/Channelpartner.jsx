@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
+import Channelpartnertabs from "./Channelpartnertabs";
 
 const Channelpartner = () => {
   // Step 1: Add this state to track errors
@@ -172,6 +173,8 @@ const Channelpartner = () => {
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
   return (
+    <div className="tab-content">
+      <Channelpartnertabs/>
     <div className="row mp0">
       <div className="col-12">
         <div className="card mb-3 tab_box">
@@ -257,7 +260,7 @@ const Channelpartner = () => {
                   <thead className="thead-light">
                     <tr>
                       <th width="10%" className="text-center">#</th>
-                      <th width="70%" className="text-center">Channel Partner</th>
+                      <th width="60%" className="text-left">Channel Partner</th>
                       <th width="15%" className="text-center">Edit</th>
                       <th width="15%" className="text-center">Delete</th>
                     </tr>
@@ -337,7 +340,7 @@ const Channelpartner = () => {
           </div>
         </div>
       </div>
-    </div>
+    </div></div>
   );
 };
 

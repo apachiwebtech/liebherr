@@ -246,7 +246,7 @@ const Location = () => {
                       <th scope="col" width="10%" className="text-center">
                         #
                       </th>
-                      <th scope="col" width="70%" className="text-center">
+                      <th scope="col" width="60%" className="text-left">
                         Title
                       </th>
                       <th scope="col" width="15%" className="text-center">

@@ -281,8 +281,8 @@ const ProductLine = () => {
                     <thead className="thead-light">
                       <tr>
                         <th width="10%" className="text-center">#</th>
-                        <th width="20%" className="text-center">Pline Code</th>
-                        <th width="50%" className="text-center">Product Line</th>
+                        <th width="20%" className="text-left">Pline Code</th>
+                        <th width="40%" className="text-left">Product Line</th>
                         <th width="15%" className="text-center">Edit</th>
                         <th width="15%" className="text-center">Delete</th>
                       </tr>

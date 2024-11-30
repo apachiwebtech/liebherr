@@ -299,8 +299,8 @@ const Subcategory = () => {
                     <thead className="table-light">
                       <tr>
                         <th width="10%" className="text-center">#</th>
-                        <th width="35%" className="text-center">Category</th>
-                        <th width="35%" className="text-center">Subcategory</th>
+                        <th width="30%" className="text-left">Category</th>
+                        <th width="30%" className="text-left">Subcategory</th>
                         <th width="15%" className="text-center">Edit</th>
                         <th width="15%" className="text-center">Delete</th>
                       </tr>

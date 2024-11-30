@@ -291,9 +291,9 @@ const Geostate = () => {
                   <thead className='thead-light'>
                     <tr>
                       <th scope='col' width="10%" className='text-center'>#</th>
-                      <th scope='col' width="23%" className='text-center'>Country</th>
-                      <th scope='col' width="24%" className='text-center'>Region</th>
-                      <th scope='col' width="23%" className='text-center'>Geo State</th>
+                      <th scope='col' width="20%" className='text-left'>Country</th>
+                      <th scope='col' width="20%" className='text-left'>Region</th>
+                      <th scope='col' width="20%" className='text-left'>Geo State</th>
                       <th scope='col' width="15%" className='text-center'>Edit</th>
                       <th scope='col' width="15%" className='text-center'>Delete</th>
                     </tr>

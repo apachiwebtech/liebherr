@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
+import Serviceproducttabs from "./Serviceproducttabs";
 
 const Serviceproduct = () => {
   // Step 1: Add this state to track errors
@@ -174,6 +175,8 @@ const Serviceproduct = () => {
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
   return (
+    <div className="tab-content">
+      <Serviceproducttabs/>
     <div className="row mp0">
       <div className="col-12">
         <div className="card mb-3 tab_box">
@@ -255,64 +258,34 @@ const Serviceproduct = () => {
                 </div>
 
                 {/* Adjust table padding and spacing */}
-                <table
-                  className="table table-bordered table dt-responsive nowrap w-100 table-css"
-                  style={{ marginTop: "20px", tableLayout: "fixed" }}
-                >
-                  <thead>
+                <table className="table table-bordered table-hover">
+                  <thead className="thead-light">
                     <tr>
-                      <th style={{ padding: "12px 15px", textAlign: "center" }}>
-                        #
-                      </th>
-                      <th style={{ padding: "12px 15px", textAlign: "center" }}>
-                        Service Product
-                      </th>
-                      <th style={{ padding: "0px 0px", textAlign: "center" }}>
-                        Edit
-                      </th>
-                      <th style={{ padding: "0px 0px", textAlign: "center" }}>
-                        Delete
-                      </th>
+                      <th scope="col" width="10%"className="text-center">#</th>
+                      <th scope="col" width="60%" className="text-left">Service Product</th>
+                      <th scope="col" width="15%" className="text-center">Edit</th>
+                      <th scope="col" width="15%" className="text-center">Delete</th>
                     </tr>
                   </thead>
                   <tbody>
                     {currentUsers.map((item, index) => (
                       <tr key={item.id}>
-                        <td style={{ padding: "2px", textAlign: "center" }}>
-                          {index + 1 + indexOfFirstUser}
-                        </td>
-                        <td style={{ padding: "10px" }}>
-                          {item.Serviceproduct}
-                        </td>
-                        <td style={{ padding: "0px", textAlign: "center" }}>
+                        <td className="text-center">{index + 1 + indexOfFirstUser}</td>
+                        <td>{item.Serviceproduct}</td>
+                        <td className="text-center">
                           <button
-                            className="btn"
-                            onClick={() => {
-                              // alert(item.id)
-                              edit(item.id);
-                            }}
-                            Serviceproduct="Edit"
-                            style={{
-                              backgroundColor: "transparent",
-                              border: "none",
-                              color: "blue",
-                              fontSize: "20px",
-                            }}
+                            className="btn btn-link text-primary"
+                            onClick={() => edit(item.id)}
+                            aria-label="Edit"
                           >
                             <FaPencilAlt />
                           </button>
                         </td>
-                        <td style={{ padding: "0px", textAlign: "center" }}>
+                        <td className="text-center">
                           <button
-                            className="btn"
+                            className="btn btn-link text-danger"
                             onClick={() => deleted(item.id)}
-                            Serviceproduct="Delete"
-                            style={{
-                              backgroundColor: "transparent",
-                              border: "none",
-                              color: "red",
-                              fontSize: "20px",
-                            }}
+                            aria-label="Delete"
                           >
                             <FaTrash />
                           </button>
@@ -369,7 +342,7 @@ const Serviceproduct = () => {
           </div>
         </div>
       </div>
-    </div>
+    </div></div>
   );
 };
 
