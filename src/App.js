@@ -82,6 +82,7 @@ import Servicecontracttabs from './Components/Pages/Master/Servicecontracttabs';
 import { Servicecontractlist } from './Components/Pages/Master/Servicecontractlist';
 import { Base_Url } from './Components/Utils/Base_Url';
 import axios from 'axios';
+import DataTable from './Components/Pages/Complaint/Compdatatablebackup';
 
 
 
@@ -474,6 +475,10 @@ const Router = createBrowserRouter([
       {
         path: "claimreport",
         element: <Claimreport />
+      },
+      {
+        path: "/datatable",
+        element: <DataTable />
       },
 
 
