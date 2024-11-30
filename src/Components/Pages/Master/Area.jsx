@@ -118,7 +118,12 @@ const Area = () => {
       if (confirmSubmission) {
         if (isEdit) {
           await axios
-            .put(`${Base_Url}/putarea`, { ...formData })
+            .put(`${Base_Url}/putarea`, { ...formData },{
+              headers: {
+                  Authorization: token, // Send token in headers
+                  }, 
+              }
+)
             .then((response) => {
               setFormData({
                 title: "",
@@ -137,7 +142,12 @@ const Area = () => {
             });
         } else {
           await axios
-            .post(`${Base_Url}/postarea`, { ...formData })
+            .post(`${Base_Url}/postarea`, { ...formData },{
+              headers: {
+                  Authorization: token, // Send token in headers
+                  }, 
+              }
+)
             .then((response) => {
               setFormData({
                 title: "",
@@ -210,7 +220,12 @@ const Area = () => {
 
   const deleted = async (id) => {
     try {
-      await axios.post(`${Base_Url}/deletearea`, { id });
+      await axios.post(`${Base_Url}/deletearea`, { id },{
+        headers: {
+            Authorization: token, // Send token in headers
+            }, 
+        }
+);
       setFormData({
         title: "",
         country_id: "",
@@ -226,7 +241,12 @@ const Area = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestarea/${id}`);
+      const response = await axios.get(`${Base_Url}/requestarea/${id}`,{
+        headers: {
+            Authorization: token, // Send token in headers
+            }, 
+        }
+);
       console.log(response.data);
       setFormData(response.data);
       fetchRegions(response.data.country_id);

@@ -2,172 +2,219 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
+import Complainttabs from './Complainttabs';
 
 const ActionCode = () => {
-    // Step 1: Add this state to track errors
-    const [errors, setErrors] = useState({});
-    const [users, setUsers] = useState([]);
-    const [filteredUsers, setFilteredUsers] = useState([]);
-    const [isEdit, setIsEdit] = useState(false);
-    const [currentPage, setCurrentPage] = useState(0);
-    const [itemsPerPage, setItemsPerPage] = useState(10);
-    const [searchTerm, setSearchTerm] = useState('');
-    
-   const token = localStorage.getItem("token"); 
-
-    const [duplicateError, setDuplicateError] = useState(''); // State to track duplicate error
-    const createdBy = 1;  // Static value for created_by
-    const updatedBy = 2;  // Static value for updated_by
-
-    const [formData, setFormData] = useState({
-       actioncode: ''
-    });
+ // Step 1: Add this state to track errors
+ const [errors, setErrors] = useState({});
+ const [users, setUsers] = useState([]);
+ const token = localStorage.getItem("token"); 
+ const [filteredUsers, setFilteredUsers] = useState([]);
+ const [isEdit, setIsEdit] = useState(false);
+ const [currentPage, setCurrentPage] = useState(0);
+ const [itemsPerPage, setItemsPerPage] = useState(10);
+ const [searchTerm, setSearchTerm] = useState('');
+ const [duplicateError, setDuplicateError] = useState(''); // State to track duplicate error
+ const created_by = localStorage.getItem("userId");  
+ const updated_by = localStorage.getItem("userId"); 
 
 
-    const fetchUsers = async () => {
-        try {
-            const response = await axios.get(`${Base_Url}/getaction`,{
-                headers: {
-                  Authorization: token, // Send token in headers
-                },
-              }
-);
-            console.log(response.data);
-            setUsers(response.data);
-            setFilteredUsers(response.data);
-        } catch (error) {
-            console.error('Error fetching users:', error);
-        }
-    };
+ const [groupdefectcode, setGroupdefect_code] = useState([]);
 
-    useEffect(() => {
-        fetchUsers();
-    }, []);
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
-    };
-
-    const handleSearch = (e) => {
-        const value = e.target.value.toLowerCase();
-        setSearchTerm(value);
-        const filtered = users.filter((user) =>
-            user.actioncode && user.actioncode.toLowerCase().includes(value)
-        );
-        setFilteredUsers(filtered);
-        setCurrentPage(0);
-    };
+ const [formData, setFormData] = useState({
+    groupdefectcode: '',
+     dsite_code: '',
+     dsite_title: '',
+     description: ''
+ });
 
 
-    // Step 2: Add form validation function
-    const validateForm = () => {
-        const newErrors = {}; // Initialize an empty error object
-        if (!formData.actioncode.trim()) { // Check if theactioncode is empty
-            newErrors.actioncode = "Actioncode Field is required."; // Set error message ifactioncode is empty
-        }
-        return newErrors; // Return the error object
-    };
+ const fetchGroupDefectCode = async () => {
+     try {
+       const response = await axios.get(`${Base_Url}/getgroupdefectcode`
+       ,{
+                       headers: {
+                           Authorization: token, // Send token in headers
+                           }, 
+                       });
+       console.log(response.data);
+       setGroupdefect_code(response.data);
+     } catch (error) {
+       console.error("Error fetching groupdefectcode:", error);
+     }
+   };
+
+ const fetchUsers = async () => {
+     try {
+         const response = await axios.get(`${Base_Url}/getsitedefect`
+         ,{
+                         headers: {
+                             Authorization: token, // Send token in headers
+                             }, 
+                         });
+         console.log(response.data);
+         setUsers(response.data);
+         setFilteredUsers(response.data);
+     } catch (error) {
+         console.error('Error fetching users:', error);
+     }
+ };
+
+ useEffect(() => {
+     fetchGroupDefectCode();
+     fetchUsers();
+ }, []);
+
+ const handleChange = (e) => {
+     const { name, value } = e.target;
+     setFormData({ ...formData, [name]: value });
+ };
+
+ const handleSearch = (e) => {
+     const value = e.target.value.toLowerCase();
+     setSearchTerm(value);
+     const filtered = users.filter((user) =>
+         user.reasoncode && user.reasoncode.toLowerCase().includes(value)
+     );
+     setFilteredUsers(filtered);
+     setCurrentPage(0);
+ };
 
 
-    //handlesubmit form
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        const validationErrors = validateForm();
-        if (Object.keys(validationErrors).length > 0) {
-            setErrors(validationErrors);
-            return;
-        }
-
-        setDuplicateError(''); // Clear duplicate error before submitting
-
-        try {
-            const confirmSubmission = window.confirm("Do you want to submit the data?");
-            if (confirmSubmission) {
-                if (isEdit) {
-                    // For update, include 'updated_by'
-                    await axios.put(`${Base_Url}/putactiondata`, { ...formData, updated_by: updatedBy },{
-                        headers: {
-                          Authorization: token, // Send token in headers
-                        },
-                      })
-                        .then(response => {
-                          //  window.location.reload();
-                          setFormData({
-                            actioncode : ''
-                        })
-                        fetchUsers();
-                        })
-                        .catch(error => {
-                            if (error.response && error.response.status === 409) {
-                                setDuplicateError('Duplicate entry, Actioncode already exists!'); // Show duplicate error for update
-                            }
-                        });
-                } else {
-                    // For insert, include 'created_by'
-                    await axios.post(`${Base_Url}/postdataaction`, { ...formData, created_by: createdBy },{
-                        headers: {
-                          Authorization: token, // Send token in headers
-                        },
-                      }
-        )
-                        .then(response => {
-                           // window.location.reload();
-                           setFormData({
-                            actioncode : ''
-                        })
-                        fetchUsers();
-                        })
-                        .catch(error => {
-                            if (error.response && error.response.status === 409) {
-                                setDuplicateError('Duplicate entry, Actioncode already exists!'); // Show duplicate error for insert
-                            }
-                        });
-                }
-            }
-        } catch (error) {
-            console.error('Error during form submission:', error);
-        }
-    };
+ // Step 2: Add form validation function
+ const validateForm = () => {
+     const newErrors = {}; // Initialize an empty error object
+     if (!formData.groupdefectcode.trim()) { // Check if the reasoncode is empty
+         newErrors.groupdefectcode = "Defect Group Code Field is required."; // Set error message if reasoncode is empty
+     }
+     if (!formData.dsite_code.trim()) { // Check if the reasoncode is empty
+         newErrors.dsite_code = "Site Defect Code Field is required."; // Set error message if reasoncode is empty
+     }
+     return newErrors; // Return the error object
+ };
 
 
-    const deleted = async (id) => {
-        try {
-            const response = await axios.post(`${Base_Url}/deleteactiondata`, { id },{
-                headers: {
-                  Authorization: token, // Send token in headers
-                },
-              });
-            // alert(response.data[0]);
-            window.location.reload();
-        } catch (error) {
-            console.error('Error deleting user:', error);
-        }
-    };
+ //handlesubmit form
+ const handleSubmit = async (e) => {
+     e.preventDefault();
 
-    const edit = async (id) => {
-        try {
-            const response = await axios.get(`${Base_Url}/requestdataaction/${id}`
-,{
-                headers: {
-                  Authorization: token, // Send token in headers
-                },
-              });
-            setFormData(response.data)
-            setIsEdit(true);
-            console.log(response.data);
-        } catch (error) {
-            console.error('Error editing user:', error);
-        }
-    };
+     const validationErrors = validateForm();
+     if (Object.keys(validationErrors).length > 0) {
+         setErrors(validationErrors);
+         return;
+     }
+
+     setDuplicateError(''); // Clear duplicate error before submitting
+
+     try {
+         const confirmSubmission = window.confirm("Do you want to submit the data?");
+         if (confirmSubmission) {
+             if (isEdit) {
+                 // For update, include 'updated_by'
+                 await axios.put(`${Base_Url}/putsitedefect`, {
+                     id: formData.id,  // Explicitly pass the ID
+                     groupdefectcode: formData.groupdefectcode,
+                     dsite_code: formData.dsite_code,
+                     dsite_title: formData.dsite_title,
+                     description: formData.description,
+                     updated_by: updated_by
+                 }
+                 ,{
+                                 headers: {
+                                     Authorization: token, // Send token in headers
+                                     }, 
+                                 })
+                     .then(response => {
+                        // window.location.reload();
+                        setFormData({
+                        groupdefectcode: '',
+                         dsite_code: '',
+                         dsite_title: '',
+                         description: ''
+                     })
+                     fetchUsers();
+                     })
+                     .catch(error => {
+                         if (error.response && error.response.status === 409) {
+                             setDuplicateError('Duplicate entry, Site Defect Code already exists!'); // Show duplicate error for update
+                         }
+                     });
+             } else {
+                 // For insert, include 'created_by'
+                 await axios.post(`${Base_Url}/postsitedefect`, { ...formData, created_by: created_by }
+                 ,{
+                                 headers: {
+                                     Authorization: token, // Send token in headers
+                                     }, 
+                                 })
+                     .then(response => {
+                         //window.location.reload();
+                         setFormData({
+                            groupdefectcode: '',
+                             dsite_code: '',
+                             dsite_title: '',
+                             description: ''
+                         })
+                         fetchUsers();
+                     })
+                     .catch(error => {
+                         if (error.response && error.response.status === 409) {
+                             setDuplicateError('Duplicate entry, Site Defect Code already exists!'); // Show duplicate error for insert
+                         }
+                     });
+             }
+         }
+     } catch (error) {
+         console.error('Error during form submission:', error);
+     }
+ };
 
 
-    const indexOfLastUser = (currentPage + 1) * itemsPerPage;
-    const indexOfFirstUser = indexOfLastUser - itemsPerPage;
-    const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+ const deleted = async (id) => {
+     try {
+         const response = await axios.post(`${Base_Url}/deletesitedefect`, { id }
+         ,{
+                         headers: {
+                             Authorization: token, // Send token in headers
+                             }, 
+                         });
+         fetchUsers();
+     } catch (error) {
+         console.error('Error deleting user:', error);
+     }
+ };
+ const edit = async (id) => {
+     try {
+         const response = await axios.get(`${Base_Url}/requestsitedefect/${id}`
+         ,{
+                         headers: {
+                             Authorization: token, // Send token in headers
+                             }, 
+                         });
+         // Ensure all fields are spread, including potential missing fields
+         setFormData({
+             id: id,  // Explicitly set the ID
+             groupdefectcode: response.data.defectgroupcode || '',
+             dsite_code: response.data.dsite_code || '',
+             dsite_title: response.data.dsite_title || '',
+             description: response.data.description || ''
+         });
+         setIsEdit(true);
+         console.log(response.data);
+     } catch (error) {
+         console.error('Error editing user:', error);
+     }
+ };
+ 
+
+
+ const indexOfLastUser = (currentPage + 1) * itemsPerPage;
+ const indexOfFirstUser = indexOfLastUser - itemsPerPage;
+ const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
     return (
+        <div className="tab-content">
+        <Complainttabs />
         <div className="row mp0" >
             <div className="col-12">
                 <div className="card mb-3 tab_box">
@@ -175,25 +222,97 @@ const ActionCode = () => {
                         <div className="row mp0">
                             <div className="col-6">
                                 <form onSubmit={handleSubmit} style={{ width: "50%" }} className="text-left">
+                                    
+                                <div className="mb-3">
+                                    <label
+                                                htmlFor="groupdefectcode"
+                                                className="form-label pb-0 dropdown-label"
+                                            >
+                                                Defect Group Code
+                                            </label>
+                                            <select
+                                                className="form-select dropdown-select"
+                                                name="groupdefectcode"
+                                                value={formData.groupdefectcode}
+                                                onChange={handleChange}
+                                            >
+                                                <option value="">Select</option>
+                                                {groupdefectcode.map((gdc) => (
+                                                <option key={gdc.id} value={gdc.defectgroupcode}>
+                                                    {gdc.defectgrouptitle}
+                                                </option>
+                                                ))}
+                                            </select>
+                                            {errors.groupdefectcode && (
+                                                <small className="text-danger">{errors.groupdefectcode}</small>
+                                            )}
+                                    </div>
+
                                     <div className="mb-3">
-                                        <label htmlFor="ActioncodeInput" className="input-field" > Action Code</label>
+                                        <label htmlFor="dsite_code" className="input-field" >Site Defect Code</label>
                                         <input
                                             type="text"
                                             className="form-control"
-                                            name="actioncode"
-                                            id="ActioncodeInput"
-                                            value={formData.actioncode}
+                                            name="dsite_code"
+                                            id="dsite_code"
+                                            value={formData.dsite_code}
                                             onChange={handleChange}
-                                            placeholder="Enter Action Code "
+                                            placeholder="Enter Site Defect Code "
                                             pattern="[0-9]*"  // This pattern ensures only numbers are allowed
                                             onInput={(e) => {
                                                 e.target.value = e.target.value.replace(/[^0-9]/g, '');  // Remove any non-numeric characters
                                             }}
                                         />
 
-                                        {errors.actioncode && <small className="text-danger">{errors.actioncode}</small>}
+                                        {errors.dsite_code && <small className="text-danger">{errors.dsite_code}</small>}
                                         {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
                                     </div>
+
+
+                                     <div className="mb-3">
+                                            <label htmlFor="ComplaintcodeInput" className="input-field">
+                                            Site Defect Title
+                                            </label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                name="dsite_title"
+                                                id="dsite_title"
+                                                value={formData.dsite_title}
+                                                onChange={handleChange}
+                                                placeholder="Enter Site Defect Title "
+                                            />
+                                            {errors.dsite_title && (
+                                            <small className="text-danger">
+                                                {errors.dsite_title}
+                                            </small>
+                                            )}
+     
+                                    </div>
+
+                                        <div className="mb-3">
+                                            <label htmlFor="ComplaintcodeInput" className="input-field">
+                                            Description
+                                            </label>
+                                            <input
+                                            type="text"
+                                            className="form-control"
+                                            name="description"
+                                            id="description"
+                                            value={formData.description}
+                                            onChange={handleChange}
+                                            placeholder="Enter Description "
+                                            />
+                                        
+                                            {errors.description && (
+                                            <small className="text-danger">
+                                                {errors.description}
+                                            </small>
+                                            )}
+                        
+                                        </div>
+
+
                                     <div className="text-right">
                                         <button className="btn btn-liebherr" type="submit">
                                             {isEdit ? "Update" : "Submit"}
@@ -234,7 +353,10 @@ const ActionCode = () => {
                                     <thead>
                                         <tr>
                                             <th style={{ padding: '12px 15px', textAlign: 'center' }}>#</th>
-                                            <th style={{ padding: '12px 15px', textAlign: 'center' }}>Action Code</th>
+                                            <th style={{ padding: '12px 15px', textAlign: 'center' }}>Defect Group Title</th>
+                                            <th style={{ padding: '12px 15px', textAlign: 'center' }}>Site Defect Code</th>
+                                            <th style={{ padding: '12px 15px', textAlign: 'center' }}>Defect Type Title</th>
+                                            <th style={{ padding: '12px 15px', textAlign: 'center' }}>Description</th>
                                             <th style={{ padding: '0px 0px', textAlign: 'center' }}>Edit</th>
                                             <th style={{ padding: '0px 0px', textAlign: 'center' }}>Delete</th>
                                         </tr>
@@ -243,7 +365,10 @@ const ActionCode = () => {
                                         {currentUsers.map((item, index) => (
                                             <tr key={item.id}>
                                                 <td style={{ padding: '2px', textAlign: 'center' }}>{index + 1 + indexOfFirstUser}</td>
-                                                <td style={{ padding: '10px' }}>{item.actioncode}</td>
+                                                <td style={{ padding: '10px' }}>{item.grouptitle}</td>
+                                                <td style={{ padding: '10px' }}>{item.dsite_code}</td>
+                                                <td style={{ padding: '10px' }}>{item.dsite_title}</td>
+                                                <td style={{ padding: '10px' }}>{item.description}</td>
                                                 <td style={{ padding: '0px', textAlign: 'center' }}>
                                                     <button
                                                         className='btn'
@@ -251,7 +376,7 @@ const ActionCode = () => {
                                                             // alert(item.id)
                                                             edit(item.id)
                                                         }}
-                                                       actioncode="Edit"
+                                                        reasoncode="Edit"
                                                         style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
                                                     >
                                                         <FaPencilAlt />
@@ -261,7 +386,7 @@ const ActionCode = () => {
                                                     <button
                                                         className='btn'
                                                         onClick={() => deleted(item.id)}
-                                                       actioncode="Delete"
+                                                        reasoncode="Delete"
                                                         style={{ backgroundColor: 'transparent', border: 'none', color: 'red', fontSize: '20px' }}
                                                     >
                                                         <FaTrash />
@@ -307,6 +432,8 @@ const ActionCode = () => {
                 </div>
             </div>
         </div>
+        </div>
+
 
     );
 };

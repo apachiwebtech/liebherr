@@ -92,7 +92,7 @@ const MasterFranchise = (params) => {
        });
       setCountries(response.data);
     } catch (error) {
-      console.error("Error fetching disctricts:", error);
+      console.error("Error fetching Countries:", error);
     }
   };
 
@@ -106,7 +106,7 @@ const MasterFranchise = (params) => {
        });
       setRegions(response.data);
     } catch (error) {
-      console.error("Error fetching disctricts:", error);
+      console.error("Error fetching Regions:", error);
     }
   };
 
@@ -120,7 +120,7 @@ const MasterFranchise = (params) => {
        });
       setState(response.data);
     } catch (error) {
-      console.error("Error fetching disctricts:", error);
+      console.error("Error fetching Geo State:", error);
     }
   };
 
@@ -133,7 +133,7 @@ const MasterFranchise = (params) => {
        });
       setdistricts(response.data);
     } catch (error) {
-      console.error("Error fetching disctricts:", error);
+      console.error("Error fetching districts:", error);
     }
   };
 
@@ -159,7 +159,7 @@ const MasterFranchise = (params) => {
        });
       setPincode(response.data);
     } catch (error) {
-      console.error("Error fetching City:", error);
+      console.error("Error fetching pincode:", error);
     }
   };
 
