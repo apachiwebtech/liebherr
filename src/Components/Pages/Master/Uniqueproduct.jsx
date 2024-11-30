@@ -1,10 +1,12 @@
 import axios from "axios";
+import { useParams } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
 import Endcustomertabs from "./Endcustomertabs";
 
 const Uniqueproduct = () => {
+  const { id } = useParams();
   const [errors, setErrors] = useState({});
   //   const [Customerlocation, setCustomerlocation] = useState({});
   const [product, setProduct] = useState([]);
@@ -39,6 +41,20 @@ const Uniqueproduct = () => {
     return `${year}-${month}-${day}`; // This format works with the date input
   };
 
+  const fetchCustomerlocationById = async () => {
+
+    try {
+      const response = await axios.post(`${Base_Url}/your-api-endpoint`, { id }, {
+        headers: {
+          Authorization: token,
+        },
+      });
+      console.log(response.data); 
+    } catch (error) {
+      console.error("Error fetching product by ID:", error);
+    }
+  };
+
   const fecthProduct = async () => {
     try {
       const response = await axios.get(`${Base_Url}/getproductunique`,{
@@ -55,8 +71,9 @@ const Uniqueproduct = () => {
 
   useEffect(() => {
     fecthProduct();
+    fetchCustomerlocationById();
     // fetchCustomerlocation();
-  }, []);
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

@@ -355,19 +355,19 @@ export function Customerlist(params) {
                                                 <td >{item.email}</td>
                                                 <td >{item.customer_id}</td>
                                                 <td>
-                                                    <Link to={`/Customerlocation/${item.id}`}>
+                                                    <Link to={`/Customerlocation/${item.customer_id}`}>
                                                         <button style={{ backgroundColor: '#0D6EFD', color: "white" }} className='btn'
                                                             onClick={() => {
-                                                                navigate(`/Customerlocation/${item.id}`)
+                                                                navigate(`/Customerlocation/${item.customer_id}`)
                                                             }}>Add</button>
 
                                                     </Link>
                                                 </td>
                                                 <td>
-                                                    <Link to={`/uniqueproduct/${item.id}`}>
+                                                    <Link to={`/uniqueproduct/${item.customer_id}`}>
                                                         <button style={{ backgroundColor: '#0D6EFD', color: 'white' }} className='btn'
                                                             onClick={() => {
-                                                                navigate(`/uniqueproduct/${item.id}`)
+                                                                navigate(`/uniqueproduct/${item.customer_id}`)
                                                             }}>Add</button>
 
                                                     </Link>
