@@ -161,9 +161,9 @@ const Customerlocation = () => {
     }
   };
 
-  const fetchCustomerlocation = async (customer_id) => {
+  const fetchCustomerlocation = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getcustomerlocation/${customer_id}`,{
+      const response = await axios.get(`${Base_Url}/getcustomerlocation`,{
         headers: {
           Authorization: token,
         },
@@ -197,6 +197,15 @@ const Customerlocation = () => {
         "Do you want to submit the data?"
       );
       if (confirmSubmission) {
+            const payload = {
+          ...formData,
+          country_id: formData.country_id,
+          region_id: formData.region_id,
+          geostate_id: formData.geostate_id,
+          district_id: formData.district_id,
+          geocity_id: formData.geocity_id,
+          pincode_id: formData.pincode_id,
+        };
         if (isEdit) {
           await axios
             .put(`${Base_Url}/putcustomerlocation`, { ...formData },{
@@ -263,52 +272,55 @@ const Customerlocation = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-
-    if (name === "country_id") {
-      fetchRegions(value);
-    }
-    if (name === "region_id") {
-      fetchGeoStates(value);
-    }
-    if (name === "geostate_id") {
-      fetchGeoCities(value); // Fetch Geo Cities when Geo State is selected
-    }
-    if (name === "geocity_id") {
-      fetchDistrict(value); // Fetch Geo Cities when Geo State is selected
-    }
-    if (name === "district_id") {
-      fetchPincodedrop(value); // Fetch Geo Cities when Geo State is selected
-    }
-
     if (name === "pincode_id") {
       fetchlocations(value);
-  }
-  
-  };
+      setFormData(prevState => ({
+        ...prevState,
+        pincode_id: value,
+      }));
+    } else {
+      setFormData(prevState => ({
+        ...prevState,
+        [name]: value
+      }));
+    }
+  };  
 
   const fetchlocations = async (pincode) => {
     try {
-        const response = await axios.get(
-            `${Base_Url}/getmultiplelocation/${pincode}`,{
-              headers: {
-                Authorization: token,
-              },
-            }
-        );
-
-        if (response.data && response.data[0]) {
-
-            setlocations({ region: response.data[0].region, state: response.data[0].state, district: response.data[0].district, city: response.data[0].city , country: response.data[0].country})
-
+      const response = await axios.get(
+        `${Base_Url}/getmultiplelocation/${pincode}`,
+        {
+          headers: {
+            Authorization: token,
+          },
         }
+      );
 
+      if (response.data && response.data[0]) {
+        const locationData = response.data[0];
+        setlocations({
+          region: locationData.region,
+          state: locationData.state,
+          district: locationData.district,
+          city: locationData.city,
+          country: locationData.country
+        });
 
+        // Update formData with location values
+        setFormData(prevState => ({
+          ...prevState,
+          country_id: locationData.country_id || "",
+          region_id: locationData.region_id || "",
+          geostate_id: locationData.state_id || "",
+          district_id: locationData.district_id || "",
+          geocity_id: locationData.city_id || "",
+        }));
+      }
     } catch (error) {
-        console.error("Error fetching complaint details:", error);
+      console.error("Error fetching location details:", error);
     }
-};
-
+  };
   const handleSearch = (e) => {
     const searchValue = e.target.value.toLowerCase();
     setSearchTerm(searchValue);

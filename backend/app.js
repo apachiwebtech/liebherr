@@ -3802,7 +3802,7 @@ app.get("/getpincodedrop/:area_id", authenticateToken, async (req, res) => {
 });
 
 // API to fetch all Customer Location
-app.get("/getcustomerlocation/:customer_id", authenticateToken, async (req, res) => {
+app.get("/getcustomerlocation", authenticateToken, async (req, res) => {
   const { id } = req.params;
   try {
     // Use the poolPromise to get the connection pool
@@ -3810,7 +3810,7 @@ app.get("/getcustomerlocation/:customer_id", authenticateToken, async (req, res)
 
     // Construct the SQL query (no parameter binding)
     const sql = `
-       SELECT * FROM awt_customerlocation Where customer_id = ${customer_id} AND deleted = 0
+       SELECT * FROM awt_customerlocation Where deleted = 0
       `;
 
     // Execute the query

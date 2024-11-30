@@ -297,12 +297,12 @@ const Customer = () => {
                           onChange={handleChange}
                         >
                           <option value="">Select Salutation</option>
-                          <option value="1">Mr</option>
-                          <option value="2">Mrs</option>
-                          <option value="3">Miss</option>
-                          <option value="4">M.</option>
-                          <option value="5">Lhi</option>
-                          <option value="6">Dl</option>
+                          <option value="Mr">Mr</option>
+                          <option value="Mrs">Mrs</option>
+                          <option value="Miss">Miss</option>
+                          <option value="M.">M.</option>
+                          <option value="Lhi">Lhi</option>
+                          <option value="Dl">Dl</option>
                           </select>
                           {errors.salutation && (
                             <small className="text-danger">{errors.salutation}</small>
