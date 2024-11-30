@@ -237,7 +237,7 @@ const Router = createBrowserRouter([
 
       },
       {
-        path: "/customerlocation/:id",
+        path: "/customerlocation/:customer_id",
         element: <Customerlocation />
       },
       {

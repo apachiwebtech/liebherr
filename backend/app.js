@@ -973,7 +973,20 @@ app.get("/getcountries", authenticateToken,
       return res.status(500).json(err);
     }
   });
+app.get("/getcustomerid", authenticateToken, async (req,res) => {
+  try {
+    const pool = await poolPromise
+    const sql = "SELECT customer_id FROM awt_customer WHERE deleted = 0";
+    const result = await pool.request().query(sql);
+    return res.json(result.recordset);
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json(err);
+      }
 
+      
+}
+);
 
 // API to fetch regions based on selected country (for the region dropdown)
 app.get("/getregions/:country_id", authenticateToken, async (req, res) => {

@@ -13,6 +13,7 @@ const Customerlocation = () => {
   const [geoCities, setGeoCities] = useState([]);
   const [geoAreas, setGeoAreas] = useState([]);
   const [geoPincodes, setGeoPincodes] = useState([]);
+  const [customerid,setCustomerId] = useState([]);
   const [Customernumber, setCustomernumber] = useState([]);
   const [customerLocation, setCustomerLocation] = useState([]);
   const [errors, setErrors] = useState({});
@@ -54,7 +55,7 @@ const Customerlocation = () => {
   const fetchCustomermobile = async () => {
     try {
       const response = await axios.get(`${Base_Url}/getcustomer`,{
-        headers: {
+        headers: { 
           Authorization: token,
         },
       });
@@ -176,10 +177,25 @@ const Customerlocation = () => {
     }
   };
 
+  const fetchcustomerid = async () => {
+    try {
+      const response = await axios.get(`${Base_Url}/getcustomerid`,{
+        headers: {
+          Authorization: token,
+        },
+    }
+  );
+  setCustomerId(response.data);
+  } catch (error) {
+    console.error("Error fetching customer id:", error);
+  }
+};
+
   useEffect(() => {
     fetchCountries();
     fetchCustomerlocation();
     fetchCustomermobile();
+    fetchcustomerid();
   }, []);
 
   const handleSubmit = async (e) => {
