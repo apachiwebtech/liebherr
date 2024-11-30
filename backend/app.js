@@ -44,6 +44,10 @@ app.use("/", common);
 app.use("/", Category);
 
 
+
+const uploadDir = path.join(__dirname, 'uploads');
+
+
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -1063,7 +1067,7 @@ app.get("/getareas", authenticateToken, async (req, res) => {
 });
 
 // API to fetch a specific area by ID (joining country, region, geostate, geocity)
-app.get("/requestarea/:id",authenticateToken, async (req, res) => {
+app.get("/requestarea/:id", authenticateToken, async (req, res) => {
   try {
     // Get the area ID from the URL parameters and ensure it is an integer
     const areaId = parseInt(req.params.id, 10);
@@ -1113,7 +1117,7 @@ app.get("/requestarea/:id",authenticateToken, async (req, res) => {
 
 
 // Insert new area with duplicate check
-app.post("/postarea",authenticateToken, async (req, res) => {
+app.post("/postarea", authenticateToken, async (req, res) => {
   const { title, country_id, region_id, geostate_id } = req.body;
 
   try {
@@ -1145,7 +1149,7 @@ app.post("/postarea",authenticateToken, async (req, res) => {
 });
 
 // Update existing area with duplicate check
-app.put("/putarea",authenticateToken, async (req, res) => {
+app.put("/putarea", authenticateToken, async (req, res) => {
   const { title, id, country_id, region_id, geostate_id } = req.body;
 
   try {
@@ -1181,7 +1185,7 @@ app.put("/putarea",authenticateToken, async (req, res) => {
 });
 
 // API to soft delete an area
-app.post("/deletearea",authenticateToken, async (req, res) => {
+app.post("/deletearea", authenticateToken, async (req, res) => {
   const { id } = req.body;
 
   try {
@@ -1205,7 +1209,7 @@ app.post("/deletearea",authenticateToken, async (req, res) => {
 
 // Pincode Master Start
 // API to fetch regions based on selected country (for the region dropdown)
-app.get("/getregionspincode/:country_id",authenticateToken, async (req, res) => {
+app.get("/getregionspincode/:country_id", authenticateToken, async (req, res) => {
   const { country_id } = req.params;
 
   try {
@@ -2249,7 +2253,7 @@ app.get("/requestdatacom/:id", authenticateToken, async (req, res) => {
 });
 
 // update for Defect Group Code
-app.put("/putcomdata",authenticateToken, async (req, res) => {
+app.put("/putcomdata", authenticateToken, async (req, res) => {
   try {
     const { id, defectgroupcode, defectgrouptitle, description, updated_by } = req.body;
     const pool = await poolPromise;
@@ -2293,7 +2297,7 @@ app.put("/putcomdata",authenticateToken, async (req, res) => {
 
 
 // delete for Defect Group Code
-app.post("/deletecomdata",authenticateToken, async (req, res) => {
+app.post("/deletecomdata", authenticateToken, async (req, res) => {
   try {
     const { id } = req.body;
 
@@ -2321,7 +2325,7 @@ app.post("/deletecomdata",authenticateToken, async (req, res) => {
 
 
 // Type Of Defect Code Start
-app.get("/getgroupdefectcode",authenticateToken, async (req, res) => {
+app.get("/getgroupdefectcode", authenticateToken, async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
@@ -2338,7 +2342,7 @@ app.get("/getgroupdefectcode",authenticateToken, async (req, res) => {
 });
 
 
-app.get("/gettypeofdefect",authenticateToken, async (req, res) => {
+app.get("/gettypeofdefect", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
     const sql = `
@@ -2357,7 +2361,7 @@ app.get("/gettypeofdefect",authenticateToken, async (req, res) => {
 });
 
 // Insert  Type Of Defect Code
-app.post("/postdatatypeofdefect",authenticateToken, async (req, res) => {
+app.post("/postdatatypeofdefect", authenticateToken, async (req, res) => {
   const { defect_code, groupdefect_code, defect_title, description, created_by } = req.body;
 
   try {
@@ -2397,7 +2401,7 @@ app.post("/postdatatypeofdefect",authenticateToken, async (req, res) => {
 });
 
 // Edit Type Of Defect Code by ID
-app.get("/requestdatatypeofdefect/:id",authenticateToken, async (req, res) => {
+app.get("/requestdatatypeofdefect/:id", authenticateToken, async (req, res) => {
   const { id } = req.params;
   try {
     const pool = await poolPromise;
@@ -2428,7 +2432,7 @@ app.get("/requestdatatypeofdefect/:id",authenticateToken, async (req, res) => {
 });
 
 // Update Type Of Defect Code
-app.put("/putdatatypeofdefect",authenticateToken, async (req, res) => {
+app.put("/putdatatypeofdefect", authenticateToken, async (req, res) => {
   const { id, defect_code, groupdefect_code, defect_title, description, updated_by } = req.body;
   try {
     const pool = await poolPromise;
@@ -2439,7 +2443,7 @@ app.put("/putdatatypeofdefect",authenticateToken, async (req, res) => {
       AND id != ${id}
     `;
 
-    console.log (checkDuplicateSql,"check duplicate ");
+    console.log(checkDuplicateSql, "check duplicate ");
 
     const checkResult = await pool.request().query(checkDuplicateSql);
     if (checkResult.recordset.length > 0) {
@@ -2457,7 +2461,7 @@ app.put("/putdatatypeofdefect",authenticateToken, async (req, res) => {
         WHERE id = ${id} AND deleted = 0
       `;
 
-      console.log(updateSql,"update sql")
+      console.log(updateSql, "update sql")
       await pool.request().query(updateSql);
       return res.json({ message: "Type Of Defect updated successfully!" });
     }
@@ -2469,7 +2473,7 @@ app.put("/putdatatypeofdefect",authenticateToken, async (req, res) => {
 
 
 // Soft-delete rType Of Defect Code by ID
-app.post("/deletetypeofdefect",authenticateToken, async (req, res) => {
+app.post("/deletetypeofdefect", authenticateToken, async (req, res) => {
   const { id } = req.body;
   try {
     const pool = await poolPromise;
@@ -2490,7 +2494,7 @@ app.post("/deletetypeofdefect",authenticateToken, async (req, res) => {
 
 
 //Site code Start
-app.get("/getsitedefect",authenticateToken, async (req, res) => {
+app.get("/getsitedefect", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
     const sql = `
@@ -2509,7 +2513,7 @@ app.get("/getsitedefect",authenticateToken, async (req, res) => {
 });
 
 // Insert  Type Of Defect Code
-app.post("/postsitedefect",authenticateToken, async (req, res) => {
+app.post("/postsitedefect", authenticateToken, async (req, res) => {
   const { dsite_code, groupdefectcode, dsite_title, description, created_by } = req.body;
 
   try {
@@ -2550,7 +2554,7 @@ app.post("/postsitedefect",authenticateToken, async (req, res) => {
 
 
 // Edit Type Of Defect Code by ID
-app.get("/requestsitedefect/:id",authenticateToken, async (req, res) => {
+app.get("/requestsitedefect/:id", authenticateToken, async (req, res) => {
   const { id } = req.params;
   try {
     const pool = await poolPromise;
@@ -2581,7 +2585,7 @@ app.get("/requestsitedefect/:id",authenticateToken, async (req, res) => {
 });
 
 // Update Type Of Defect Code
-app.put("/putsitedefect",authenticateToken, async (req, res) => {
+app.put("/putsitedefect", authenticateToken, async (req, res) => {
   const { id, dsite_code, groupdefectcode, dsite_title, description, updated_by } = req.body;
 
   try {
@@ -2626,7 +2630,7 @@ app.put("/putsitedefect",authenticateToken, async (req, res) => {
 
 
 // Soft-delete rType Of Defect Code by ID
-app.post("/deletesitedefect",authenticateToken, async (req, res) => {
+app.post("/deletesitedefect", authenticateToken, async (req, res) => {
   const { id } = req.body;
   try {
     const pool = await poolPromise;
@@ -3063,7 +3067,6 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
     warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks, ticket_id
   } = req.body;
 
-  console.log(ticket_id, "$$$")
 
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
@@ -4087,7 +4090,7 @@ app.post("/deleteproductunique", authenticateToken, async (req, res) => {
 app.get("/getchildfranchise/:mfranchise_id",
   authenticateToken, async (req, res) => {
 
-    const { mfranchise_id} = req.params;
+    const { mfranchise_id } = req.params;
     try {
       // Use the poolPromise to get the connection pool
       const pool = await poolPromise;
@@ -4152,7 +4155,7 @@ app.get("/requestengineer/:id", authenticateToken,
   });
 app.post("/postengineer",
   authenticateToken, async (req, res) => {
-    const { title,mfranchise_id, cfranchise_id, password, email, mobile_no, personal_email, employee_code, personal_mobile, dob, blood_group, academic_qualification, joining_date, passport_picture, resume, photo_proof, address_proof, permanent_address, current_address } = req.body;
+    const { title, mfranchise_id, cfranchise_id, password, email, mobile_no, personal_email, employee_code, personal_mobile, dob, blood_group, academic_qualification, joining_date, passport_picture, resume, photo_proof, address_proof, permanent_address, current_address } = req.body;
 
     try {
       // Use the poolPromise to get the connection pool
@@ -4191,7 +4194,7 @@ app.post("/postengineer",
     }
   });
 app.put("/putengineer", authenticateToken, async (req, res) => {
-  const { title,mfranchise_id, cfranchise_id, password, email, mobile_no, personal_email, employee_code, personal_mobile, dob, blood_group, academic_qualification, joining_date, passport_picture, resume, photo_proof, address_proof, permanent_address, current_address, id } = req.body;
+  const { title, mfranchise_id, cfranchise_id, password, email, mobile_no, personal_email, employee_code, personal_mobile, dob, blood_group, academic_qualification, joining_date, passport_picture, resume, photo_proof, address_proof, permanent_address, current_address, id } = req.body;
 
   try {
     // Use the poolPromise to get the connection pool
@@ -6725,7 +6728,7 @@ app.post("/addProduct", authenticateToken,
     try {
       const pool = await poolPromise;
       // SQL query to insert a new complaint remark
-      const sql = `INSERT INTO product_master (serial_no,item_code, item_description, itemCode,product_model,productType,productLineCode,productLine,productClassCode,productClass,material,manufacturer,itemType,serialized,sizeProduct,crm_productType,color,installationType,handleType,customerClassification,price_group,mrp,service_partner_basic)VALUES (@serial_identification,@item_code,@item_description,@item_code,@product_model,@product_type,@product_line_code,@product_line,@product_class_code,@product_class,@material,@manufacturer,@item_type,@serialized,@size,@crmproducttype,@colour,@installation_type,@handle_type,@customer_classification,@price_group,@mrp,@service_partner_basic);`;
+      const sql = `INSERT INTO product_master (serial_no,item_code, item_description, itemCode,item_description,productType,productLineCode,productLine,productClassCode,productClass,material,manufacturer,itemType,serialized,sizeProduct,crm_productType,color,installationType,handleType,customerClassification,price_group,mrp,service_partner_basic)VALUES (@serial_identification,@item_code,@item_description,@item_code,@product_model,@product_type,@product_line_code,@product_line,@product_class_code,@product_class,@material,@manufacturer,@item_type,@serialized,@size,@crmproducttype,@colour,@installation_type,@handle_type,@customer_classification,@price_group,@mrp,@service_partner_basic);`;
 
 
 
@@ -6846,7 +6849,7 @@ app.post("/ticketFormData", authenticateToken, async (req, res) => {
   const { ticket_no, serial_no, ModelNumber, engineerdata, call_status, updated_by } = req.body;
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
-  
+
   const engineer_code = engineerdata.join(',')
 
   try {
@@ -7709,4 +7712,173 @@ app.post("/getcomplaintticket", authenticateToken,
 //Register Page Complaint Duplicate End
 
 
+
+
+// This is for gettiing data from the another database
+
+const API_KEY = "satyam_123";
+
+
+app.post("/fetchproductmaster", async (req, res) => {
+
+  const apiKey = req.header('x-api-key'); // Get API key from request header
+
+  if (apiKey !== API_KEY) {
+    return res.status(403).json({ error: 'Forbidden: Invalid API key' });
+  }
+
+  const { item_code, ModelNumber, product_model, product_type, product_class_code, product_class, product_line_code, product_line, material, manufacturer, item_type, serialized, size, crmproducttype, colour, handle_type, serial_identification, installation_type, customer_classification, price_group, mrp, service_partner_basic } = req.body;
+
+
+  try {
+    const pool = await poolPromise;
+    // SQL query to insert a new complaint remark
+    const sql = `INSERT INTO product_master (
+  serial_no, item_code, item_description, productType, productLineCode, productLine,
+  productClassCode, productClass, material, manufacturer, itemType, serialized,
+  sizeProduct, crm_productType, color, installationType, handleType, customerClassification,
+  price_group, mrp, service_partner_basic)
+VALUES (
+  @serial_identification, @item_code, @item_description, @product_type, @product_line_code,
+  @product_line, @product_class_code, @product_class, @material, @manufacturer, @item_type,
+  @serialized, @size, @crmproducttype, @colour, @installation_type, @handle_type,
+  @customer_classification, @price_group, @mrp, @service_partner_basic
+)`;
+
+
+
+    const request = pool.request()
+      .input('item_code', item_code)
+      .input('item_description', ModelNumber)
+      .input('product_model', product_model)
+      .input('product_type', product_type)
+      .input('product_class_code', product_class_code)
+      .input('product_class', product_class)
+      .input('product_line_code', product_line_code)
+      .input('product_line', product_line)
+      .input('material', material)
+      .input('manufacturer', manufacturer)
+      .input('item_type', item_type)
+      .input('serialized', serialized)
+      .input('size', size)
+      .input('crmproducttype', crmproducttype)
+      .input('colour', colour)
+      .input('handle_type', handle_type)
+      .input('serial_identification', serial_identification)
+      .input('installation_type', installation_type)
+      .input('customer_classification', customer_classification)
+      .input('price_group', price_group)
+      .input('mrp', mrp)
+      .input('service_partner_basic', service_partner_basic);
+
+
+
+    const result = await request.query(sql);
+
+    res.json({ insertId: result.rowsAffected[0] }); // Send the inserted ID back to the client
+  } catch (err) {
+    console.error("Error inserting remark:", err);
+    return res.status(500).json({ error: "Database error", details: err.message }); // Send back more details for debugging
+  }
+});
+
+
+app.post("/fetchcustomermaster", async (req, res) => {
+
+  const apiKey = req.header('x-api-key'); // Get API key from request header
+
+  if (apiKey !== API_KEY) {
+    return res.status(403).json({ error: 'Forbidden: Invalid API key' });
+  }
+
+
+  const {
+    customer_fname,
+    customer_lname,
+    customer_type,
+    customer_classification,
+    mobileno,
+    alt_mobileno,
+    dateofbirth,
+    anniversary_date,
+    email,
+    salutation,
+    customer_id
+  } = req.body;
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    // Step 1: Check for duplicates using parameterized query
+    const checkDuplicateSql = `
+      SELECT * FROM awt_customer
+      WHERE customer_id = @customer_id
+      AND deleted = 0
+    `;
+    const checkDuplicateResult = await pool.request()
+      .input('customer_id', customer_id)
+      .query(checkDuplicateSql);
+
+    // If a duplicate customer is found
+    if (checkDuplicateResult.recordset.length > 0) {
+      return res.status(409).json({
+        message: "Duplicate entry, Customer with the same Customer_id already exists!"
+      });
+    }
+
+    // Step 2: Insert the customer if no duplicate is found
+    const insertSql = `
+      INSERT INTO awt_customer (
+        customer_fname,
+        customer_lname,
+        customer_type,
+        customer_classification,
+        mobileno,
+        alt_mobileno,
+        dateofbirth,
+        anniversary_date,
+        email,
+        salutation,
+        customer_id
+      ) VALUES (
+        @customer_fname,
+        @customer_lname,
+        @customer_type,
+        @customer_classification,
+        @mobileno,
+        @alt_mobileno,
+        @dateofbirth,
+        @anniversary_date,
+        @email,
+        @salutation,
+        @customer_id
+      )
+    `;
+
+    // Execute the insert query
+    await pool.request()
+      .input('customer_fname', customer_fname)
+      .input('customer_lname', customer_lname)
+      .input('customer_type', customer_type)
+      .input('customer_classification', customer_classification)
+      .input('mobileno', mobileno)
+      .input('alt_mobileno', alt_mobileno)
+      .input('dateofbirth', dateofbirth)
+      .input('anniversary_date', anniversary_date)
+      .input('email', email)
+      .input('salutation', salutation)
+      .input('customer_id', customer_id)
+      .query(insertSql);
+
+    // Send success response
+    return res.status(201).json({
+      message: "Customer master added successfully",
+    });
+
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred" });
+  }
+});
 

@@ -10,6 +10,10 @@ import $ from 'jquery';
 import 'datatables.net';
 import 'datatables.net-bs4';
 
+// DataTables Responsive Extension (JS and CSS for Bootstrap 4)
+import 'datatables.net-responsive';
+import 'datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css';
+
 export function Products(params) {
     const [Productdata, setProductdata] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
@@ -118,6 +122,7 @@ export function Products(params) {
                             <div className='p-1 text-right'>
                                 <Link to={`/addproduct/:productid`}><button className='btn btn-primary'>Add Product</button></Link>
                             </div>
+                            <div className='table-responsive'>
                             <table id="example" className="table table-striped">
                                 <thead>
                                     <tr>
@@ -170,6 +175,8 @@ export function Products(params) {
                                     ))}
                                 </tbody>
                             </table>
+                            </div>
+                         
                         </div>
                     </div>
                 </div>

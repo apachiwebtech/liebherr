@@ -6,6 +6,28 @@ import 'datatables.net';
 import 'datatables.net-bs4';
 import axios from 'axios';
 import { Base_Url } from '../../Utils/Base_Url';
+import 'datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css';
+import 'datatables.net-responsive';
+
+// DataTables Fixed Columns Extension
+import 'datatables.net-fixedcolumns';
+import 'datatables.net-fixedcolumns-bs4/css/fixedColumns.bootstrap4.min.css';
+
+// DataTables Fixed Header Extension
+import 'datatables.net-fixedheader';
+
+// DataTables Buttons Extension
+import 'datatables.net-buttons';
+import 'datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css';
+import 'datatables.net-buttons/js/buttons.html5.min.js';
+
+
+
+// DataTables KeyTable Extension
+import 'datatables.net-keytable';
+
+// DataTables Select Extension
+import 'datatables.net-select';
 
 const DataTable = () => {
   const token = localStorage.getItem("token");
@@ -31,7 +53,20 @@ const DataTable = () => {
   useEffect(() => {
     if (cat.length > 0) {
       // Initialize DataTable only after data has been fetched
-      const table = $('#example').DataTable();
+      const table = $('#example').DataTable({
+        responsive: true, // Enable responsiveness
+        fixedHeader: true, // Enable fixed header
+        fixedColumns: {
+          left: 1, // Fix the first column
+        },
+        keys: true, // Enable keyboard navigation
+        select: true, // Enable row selection
+        dom: '<"d-flex justify-content-between"<"table-title"><"search-box"f>>t<"d-flex justify-content-between"ip>',
+        language: {
+          search: '', // Remove the "Search:" label
+          searchPlaceholder: 'Search...', // Add placeholder text
+        },
+      });
 
       // Cleanup: Destroy DataTable instance before reinitializing
       return () => {

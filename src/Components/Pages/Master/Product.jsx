@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
 
+
 export function Products(params) {
     const [Complaintdata, setComplaintdata] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
@@ -93,7 +94,8 @@ export function Products(params) {
         <div className="row mp0" >
             <div className="col-md-12 col-12">
                 <div className="card mb-3 tab_box">
-                    <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
+                    <div className="card-body " style={{ flex: "1 1 auto", padding: "13px 28px" }}>
+                        <div className='table-responsive'>
                         <table className="table table-hover table-bordered">
                             <thead className="thead-dark">
                                 <tr>
@@ -154,6 +156,8 @@ export function Products(params) {
                                 })}
                             </tbody>
                         </table>
+                        </div>
+                  
                     </div>
                 </div>
             </div>

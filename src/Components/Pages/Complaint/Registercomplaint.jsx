@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import toast, { Toaster } from 'react-hot-toast';
 import { Base_Url } from '../../Utils/Base_Url'
 import { useNavigate, useParams } from "react-router-dom";
@@ -27,14 +27,18 @@ export function Registercomplaint(params) {
     const [ticket, setTicket] = useState([])
     const [ticketno, setTicketNo] = useState([])
     const [ticketid, setTicketid] = useState('')
-    const token = localStorage.getItem("token"); 
+    const token = localStorage.getItem("token");
+    const fileInputRef = useRef();
     const { Comp_id } = useParams()
+    const [files2, setFiles2] = useState([]); // New state for Attachment 2 files
     const [location, setLocation] = useState([])
     const created_by = localStorage.getItem("userId"); // Get user ID from localStorage
     const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
-
+    const [attachments2, setAttachments2] = useState([]);
     const [locations, setlocations] = useState([])
-    
+    const [currentAttachment2, setCurrentAttachment2] = useState(""); // Current attachment 2 for modal
+    const [isModal2Open, setIsModal2Open] = useState(false); 
+
     const getTodayDate = () => {
         const today = new Date();
         const year = today.getFullYear();
@@ -94,11 +98,11 @@ export function Registercomplaint(params) {
     //This is for State Dropdown
 
     async function getState(params) {
-        axios.get(`${Base_Url}/getstate`,{
+        axios.get(`${Base_Url}/getstate`, {
             headers: {
-              Authorization: token, // Send token in headers
+                Authorization: token, // Send token in headers
             },
-          })
+        })
             .then((res) => {
                 if (res.data) {
 
@@ -122,6 +126,75 @@ export function Registercomplaint(params) {
 
     }
 
+    // New handler for Attachment 2 preview
+    const handleAttachment2Click = (attachment) => {
+        setCurrentAttachment2(attachment);
+        setIsModal2Open(true);
+    };
+
+
+    // New handler for Attachment 2
+    const handleFile2Change = (e) => {
+        setFiles2(e.target.files);
+    };
+
+    // New function to fetch Attachment 2 list
+    const fetchAttachment2Details = async () => {
+        try {
+            const response = await axios.get(
+                `${Base_Url}/getAttachment2Details/${Comp_id}`, {
+                headers: {
+                    Authorization: token, // Send token in headers
+                },
+            }
+            );
+            setAttachments2(response.data.attachments2);
+
+        } catch (error) {
+            console.error("Error fetching attachment 2 details:", error);
+        }
+    };
+
+    const handleAttachment2Submit = async (e) => {
+        e.preventDefault();
+
+
+        try {
+            if (files2.length > 0) {
+                const formData = new FormData();
+                formData.append("ticket_no", Comp_id);
+                formData.append("created_by", created_by);
+
+                Array.from(files2).forEach((file) => {
+                    formData.append("attachment2", file);
+                });
+
+                await axios.post(`${Base_Url}/uploadAttachment2`, formData, {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+
+                    },
+                });
+
+                alert("Attachment 2 files submitted successfully!");
+
+                // Reset the file input and state
+                setFiles2([]); // Clear the state
+                if (fileInputRef.current) {
+                    fileInputRef.current.value = ""; // Reset the file input element
+                }
+
+                fetchAttachment2Details(); // Fetch updated attachment details
+            }
+        } catch (error) {
+            console.error("Error submitting attachment 2:", error);
+            alert(
+                `Error submitting files: ${error.response ? error.response.data.error : error.message
+                }`
+            );
+        }
+    };
+
     //Master Service Partner
     /*async function getMasterPartner(params) {
 
@@ -142,12 +215,12 @@ export function Registercomplaint(params) {
         }
 
         axios.post(`${Base_Url}/getcomplaintticket`, data
-            ,{
-                            headers: {
-                              Authorization: token, // Send token in headers
-                            },
-                          }
-            )
+            , {
+                headers: {
+                    Authorization: token, // Send token in headers
+                },
+            }
+        )
             .then((res) => {
                 if (res.data) {
 
@@ -195,11 +268,11 @@ export function Registercomplaint(params) {
     // Child Service Partner
     async function getChildPartner(MasterId) {
         try {
-            const res = await axios.get(`${Base_Url}/getchildpartner/${MasterId}`,{
+            const res = await axios.get(`${Base_Url}/getchildpartner/${MasterId}`, {
                 headers: {
-                  Authorization: token, // Send token in headers
+                    Authorization: token, // Send token in headers
                 },
-              });
+            });
             if (res.data) {
                 setChildPartner(res.data);
             }
@@ -331,12 +404,12 @@ export function Registercomplaint(params) {
 
         console.log("Submitting data:", data);
 
-        axios.post(`${Base_Url}/add_complaintt`, data,{
+        axios.post(`${Base_Url}/add_complaintt`, data, {
             headers: {
-              Authorization: token, // Send token in headers
+                Authorization: token, // Send token in headers
             },
-          }
-)
+        }
+        )
             .then((res) => {
                 if (res.data) {
                     notify();
@@ -385,11 +458,11 @@ export function Registercomplaint(params) {
         };
 
 
-        axios.post(`${Base_Url}/update_complaint`,{
+        axios.post(`${Base_Url}/update_complaint`, {
             headers: {
-              Authorization: token, // Send token in headers
+                Authorization: token, // Send token in headers
             },
-          }, data)
+        }, data)
             .then((res) => {
                 if (res.data) {
                     notify();
@@ -405,12 +478,12 @@ export function Registercomplaint(params) {
 
     const fetchdistricts = async (geostateID) => {
         try {
-            const response = await axios.get(`${Base_Url}/getdistrictcity/${geostateID}`,{
+            const response = await axios.get(`${Base_Url}/getdistrictcity/${geostateID}`, {
                 headers: {
-                  Authorization: token, // Send token in headers
+                    Authorization: token, // Send token in headers
                 },
-              }
-);
+            }
+            );
             setdistricts(response.data);
         } catch (error) {
             console.error("Error fetching disctricts:", error);
@@ -419,12 +492,12 @@ export function Registercomplaint(params) {
 
     const fetchCity = async (area_id) => {
         try {
-            const response = await axios.get(`${Base_Url}/getgeocities_p/${area_id}`,{
+            const response = await axios.get(`${Base_Url}/getgeocities_p/${area_id}`, {
                 headers: {
-                  Authorization: token, // Send token in headers
+                    Authorization: token, // Send token in headers
                 },
-              }
-);
+            }
+            );
             setCity(response.data);
         } catch (error) {
             console.error("Error fetching City:", error);
@@ -433,11 +506,11 @@ export function Registercomplaint(params) {
 
     const fetchPincodes = async (pin_id) => {
         try {
-            const response = await axios.get(`${Base_Url}/citywise_pincode/${pin_id}`,{
+            const response = await axios.get(`${Base_Url}/citywise_pincode/${pin_id}`, {
                 headers: {
-                  Authorization: token, // Send token in headers
+                    Authorization: token, // Send token in headers
                 },
-              });
+            });
             setPincode(response.data);
         } catch (error) {
             console.error("Error fetching City:", error);
@@ -480,11 +553,11 @@ export function Registercomplaint(params) {
     const fetchlocations = async (pincode) => {
         try {
             const response = await axios.get(
-                `${Base_Url}/getmultiplelocation/${pincode}`,{
-                    headers: {
-                      Authorization: token, // Send token in headers
-                    },
-                  }
+                `${Base_Url}/getmultiplelocation/${pincode}`, {
+                headers: {
+                    Authorization: token, // Send token in headers
+                },
+            }
             );
 
             if (response.data && response.data[0]) {
@@ -533,12 +606,12 @@ export function Registercomplaint(params) {
             product_id: product_id
         }
 
-        axios.post(`${Base_Url}/add_new_ticket`, data,{
+        axios.post(`${Base_Url}/add_new_ticket`, data, {
             headers: {
-              Authorization: token, // Send token in headers
+                Authorization: token, // Send token in headers
             },
-          }
-)
+        }
+        )
             .then((res) => {
                 setTicketid(res.data.id)
 
@@ -630,7 +703,7 @@ export function Registercomplaint(params) {
                                 </div>
                             </div>
                             <p>{searchdata.address}</p>
-                            
+
 
                             <div className="row mb-3">
                                 <div className="col-md-5">
@@ -742,33 +815,33 @@ export function Registercomplaint(params) {
                                         <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Serial No</p>
 
                                         {searchdata.length == 0 && !Comp_id || value.serial == null ?
-                                        <div className="mb-3">
-                                            <input
-                                                type="text"
-                                                name="serial"
-                                                value={value.serial}
-                                                onChange={onHandleChange}
-                                                className="form-control"
-                                                placeholder="Enter.."
-                                            />
-                                        </div> : <div>{value.serial}</div>}
+                                            <div className="mb-3">
+                                                <input
+                                                    type="text"
+                                                    name="serial"
+                                                    value={value.serial}
+                                                    onChange={onHandleChange}
+                                                    className="form-control"
+                                                    placeholder="Enter.."
+                                                />
+                                            </div> : <div>{value.serial}</div>}
 
                                     </div>                                       {/* Add Purchase Date field */}
                                     <div className="col-md-3">
                                         <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Purchase Date</p>
 
                                         {searchdata.length == 0 && !Comp_id || value.purchase_date == null ?
-                                        <div className="mb-3">
-                                            <input
-                                                type="date"
-                                                name="purchase_date"
-                                                onChange={onHandleChange}
-                                                value={value.purchase_date}
-                                                className="form-control"
-                                            />
-                                        </div> : <div>{value.purchase_date}</div>}
+                                            <div className="mb-3">
+                                                <input
+                                                    type="date"
+                                                    name="purchase_date"
+                                                    onChange={onHandleChange}
+                                                    value={value.purchase_date}
+                                                    className="form-control"
+                                                />
+                                            </div> : <div>{value.purchase_date}</div>}
                                     </div>
-                                    
+
                                     {/* Add Warranty Status field */}
                                     <div className="col-md-3">
                                         <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Warranty Status</p>
@@ -790,7 +863,7 @@ export function Registercomplaint(params) {
                                 </div>
 
                                 <form className="row" onSubmit={handlesubmit}>
-                                    
+
                                     <div className="col-md-3">
                                         <div className="mb-3">
                                             <label className="form-label">Ticket Date</label>
@@ -910,7 +983,7 @@ export function Registercomplaint(params) {
                                         </div>
 
                                     </> : <>
-                                        
+
                                         <div className="col-md-3">
                                             <div className="mb-3">
                                                 <label htmlFor="exampleFormControlInput1" className="form-label">Pincode</label>
@@ -1029,7 +1102,7 @@ export function Registercomplaint(params) {
 
                                     <h4 className="pname">Child Service Partner</h4>
                                     <p>{Comp_id ? value.csp : locations.childfranchiseem}</p>
-                                    
+
                                 </div>
                             </div>
 
@@ -1047,7 +1120,7 @@ export function Registercomplaint(params) {
                                 </div>
                             </div>
 
-                            
+
                             <div className="card mb-3" id="engineerInfo">
                                 <div className="card-body">
                                     <h4 className="pname">Fault Description</h4>
@@ -1078,39 +1151,35 @@ export function Registercomplaint(params) {
                                 </div>
                             </div>
 
-                            <div className="card" id="attachmentInfo">
+                            <div className="card" id="attachmentInfocs">
                                 <div className="card-body">
-                                    <h4 className="pname">Attachment</h4>
+                                    <h4 className="pname" style={{ fontSize: "14px" }}>Attachment 2</h4>
                                     <div className="mb-3">
-                                        <input type="file" className="form-control" id="exampleFormControlInput1" />
+                                        <input
+                                            type="file"
+                                            className="form-control"
+                                            multiple
+                                            accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,.eml"
+                                            onChange={handleFile2Change}
+                                            ref={fileInputRef} // Attach the ref to the input
+                                        />
                                     </div>
-                                    <div id="allattachme">
-                                        <table className="table table-striped">
-                                            <tbody>
-                                                <tr>
-                                                    <td>
-                                                        <div>02-06-2024</div>
-                                                    </td>
-                                                    <td>abc.jpg</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>
-                                                        <div>02-06-2024</div>
-                                                    </td>
-                                                    <td>Liebherr 472L</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>
-                                                        <div>02-06-2024</div>
-                                                    </td>
-                                                    <td>Liebherr 472L</td>
-                                                </tr>
-                                            </tbody>
+                                    <div className="d-flex justify-content-end mb-3">
+                                        <button
+                                            type="button"
+                                            className="btn btn-primary"
+                                            onClick={handleAttachment2Submit}
+                                            style={{ fontSize: "14px" }}
+                                        >
+                                            Upload
+                                        </button>
+                                    </div>
 
-                                        </table>
-                                    </div>
+                                
                                 </div>
                             </div>
+
+                           
                         </>
 
                     </div>
