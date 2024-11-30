@@ -102,7 +102,7 @@ const ProductLine = () => {
             .catch((error) => {
               if (error.response && error.response.status === 409) {
                 setDuplicateError(
-                  "Duplicate entry, Product Line already exists!"
+                  "Duplicate entry, Product Line Code already exists!"
                 );
               }
             });
@@ -126,7 +126,7 @@ const ProductLine = () => {
             .catch((error) => {
               if (error.response && error.response.status === 409) {
                 setDuplicateError(
-                  "Duplicate entry, Product Line already exists!"
+                  "Duplicate entry, Product Line Code already exists!"
                 );
               }
             });

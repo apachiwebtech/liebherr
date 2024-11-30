@@ -2635,7 +2635,7 @@ app.post("/deletesitedefect", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
     const sql = `
-      UPDATE awt_site_defect
+      UPDATE awt_typeofdefect
       SET deleted = 1, updated_date = GETDATE()
       WHERE id = ${id}
     `;
@@ -4002,8 +4002,8 @@ app.post("/postproductunique", authenticateToken, async (req, res) => {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
 
-    // Check for duplicates
-    const checkDuplicateSql = `SELECT * FROM awt_uniqueproductmaster WHERE serialnumber = '${serialnumber}' AND deleted = 0`;
+    // Check for duplicates customer_ id will be add
+    const checkDuplicateSql = `SELECT * FROM awt_uniqueproductmaster WHERE serial_no = '${serialnumber}'AND deleted = 0`;
     const duplicateResult = await pool.request().query(checkDuplicateSql);
 
     if (duplicateResult.recordset.length > 0) {
@@ -4011,32 +4011,19 @@ app.post("/postproductunique", authenticateToken, async (req, res) => {
         message: "Product with same serial number already exists!",
       });
     } else {
-      // Check for soft-deleted products
-      const checkSoftDeletedSql = `SELECT * FROM awt_uniqueproductmaster WHERE serial_no = '${serialnumber}' AND deleted = 1`;
-      const softDeletedResult = await pool.request().query(checkSoftDeletedSql);
+      // Insert new product
+      const insertSql = `INSERT INTO awt_uniqueproductmaster (product, location, date, serial_no)
+                        VALUES ('${product}', '${location}', '${date}', '${serialnumber}')`;
+      await pool.request().query(insertSql);
 
-      if (softDeletedResult.recordset.length > 0) {
-        // Restore soft-deleted product
-        const restoreSoftDeletedSql = `UPDATE awt_uniqueproductmaster SET deleted = 0 WHERE serial_no = '${serialnumber}'`;
-        await pool.request().query(restoreSoftDeletedSql);
-
-        return res.json({
-          message: "Soft-deleted Product with same serial number restored successfully!",
-        });
-      } else {
-        // Insert new product
-        const insertSql = `INSERT INTO awt_uniqueproductmaster (product, location, date, serial_no)
-                          VALUES ('${product}', '${location}', '${date}', '${serialnumber}')`;
-        await pool.request().query(insertSql);
-
-        return res.json({ message: "Product added successfully!" });
-      }
+      return res.json({ message: "Product added successfully!" });
     }
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'An error occurred while processing the request' });
   }
 });
+
 app.put("/putproductunique", authenticateToken, async (req, res) => {
   const { product, id, location, date, serialnumber } = req.body;
 
@@ -4044,7 +4031,7 @@ app.put("/putproductunique", authenticateToken, async (req, res) => {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
 
-    // Check for duplicates (excluding the current product)
+    // Check for duplicates (excluding the current product) customer_ id will be add
     const checkDuplicateSql = `SELECT * FROM awt_uniqueproductmaster WHERE serialnumber = '${serialnumber}' AND id != '${id}' AND deleted = 0`;
     const duplicateResult = await pool.request().query(checkDuplicateSql);
 
@@ -4065,6 +4052,7 @@ app.put("/putproductunique", authenticateToken, async (req, res) => {
     return res.status(500).json({ error: 'An error occurred while updating the product' });
   }
 });
+
 app.post("/deleteproductunique", authenticateToken, async (req, res) => {
   const { id } = req.body;
 
@@ -5225,11 +5213,11 @@ app.post("/postdataproductline", authenticateToken, async (req, res) => {
 
     if (id) {
       // Check for duplicate entries excluding the current ID
-      const checkDuplicateSql = `SELECT * FROM product_line WHERE product_line = '${product_line}' AND id != ${id} AND deleted = 0`;
+      const checkDuplicateSql = `SELECT * FROM product_line WHERE pline_code = '${pline_code}' AND id != ${id}`;
       const duplicateCheckResult = await pool.request().query(checkDuplicateSql);
 
       if (duplicateCheckResult.recordset.length > 0) {
-        return res.status(409).json({ message: "Duplicate entry, Product Line already exists!" });
+        return res.status(409).json({ message: "Duplicate entry, Product Line Code already exists!" });
       } else {
         // Update the existing product line
         const updateSql = `UPDATE product_line SET product_line = '${product_line}', pline_code = '${pline_code}', updated_date = GETDATE(), updated_by = '${created_by}' WHERE id = ${id}`;
@@ -5238,27 +5226,16 @@ app.post("/postdataproductline", authenticateToken, async (req, res) => {
       }
     } else {
       // Check for duplicate entries for a new product line
-      const checkDuplicateSql = `SELECT * FROM product_line WHERE product_line = '${product_line}' AND deleted = 0`;
+      const checkDuplicateSql = `SELECT * FROM product_line WHERE pline_code = '${pline_code}'`;
       const duplicateCheckResult = await pool.request().query(checkDuplicateSql);
 
       if (duplicateCheckResult.recordset.length > 0) {
-        return res.status(409).json({ message: "Duplicate entry, Product Line already exists!" });
+        return res.status(409).json({ message: "Duplicate entry, Product Line Code already exists!" });
       } else {
-        // Check for soft-deleted entries with the same product line
-        const checkSoftDeletedSql = `SELECT * FROM product_line WHERE product_line = '${product_line}' AND deleted = 1`;
-        const softDeletedResult = await pool.request().query(checkSoftDeletedSql);
-
-        if (softDeletedResult.recordset.length > 0) {
-          // Restore the soft-deleted entry
-          const restoreSoftDeletedSql = `UPDATE product_line SET deleted = 0, updated_date = GETDATE(), updated_by = '${created_by}' WHERE product_line = '${product_line}'`;
-          await pool.request().query(restoreSoftDeletedSql);
-          return res.json({ message: "Soft-deleted data restored successfully!" });
-        } else {
-          // Insert new product line
-          const insertSql = `INSERT INTO product_line (product_line, pline_code, created_date, created_by) VALUES ('${product_line}', '${pline_code}', GETDATE(), '${created_by}')`;
-          await pool.request().query(insertSql);
-          return res.json({ message: "Product Line added successfully!" });
-        }
+        // Insert new product line
+        const insertSql = `INSERT INTO product_line (product_line, pline_code, created_date, created_by) VALUES ('${product_line}', '${pline_code}', GETDATE(), '${created_by}')`;
+        await pool.request().query(insertSql);
+        return res.json({ message: "Product Line added successfully!" });
       }
     }
   } catch (err) {
@@ -5266,6 +5243,8 @@ app.post("/postdataproductline", authenticateToken, async (req, res) => {
     return res.status(500).json({ error: "An error occurred while processing the request" });
   }
 });
+
+
 // Edit for product line
 app.get("/requestdataproductline/:id", authenticateToken, async (req, res) => {
   const { id } = req.params;
@@ -5298,7 +5277,7 @@ app.put("/putproductlinedata", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
 
     // Check for duplicate entries excluding the current ID
-    const checkDuplicateSql = `SELECT * FROM product_line WHERE product_line = '${product_line}' AND deleted = 0 AND id != ${id}`;
+    const checkDuplicateSql = `SELECT * FROM product_line WHERE pline_code = '${pline_code}' AND deleted = 0 AND id != ${id}`;
     const duplicateCheckResult = await pool.request().query(checkDuplicateSql);
 
     if (duplicateCheckResult.recordset.length > 0) {
@@ -5314,6 +5293,7 @@ app.put("/putproductlinedata", authenticateToken, async (req, res) => {
     return res.status(500).json({ error: "An error occurred while updating the product line" });
   }
 });
+
 // Delete for product line
 app.post("/deleteproductlinedata", authenticateToken, async (req, res) => {
   const { id } = req.body;
