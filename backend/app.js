@@ -2631,7 +2631,7 @@ app.post("/deletesitedefect",authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
     const sql = `
-      UPDATE awt_typeofdefect
+      UPDATE awt_site_defect
       SET deleted = 1, updated_date = GETDATE()
       WHERE id = ${id}
     `;

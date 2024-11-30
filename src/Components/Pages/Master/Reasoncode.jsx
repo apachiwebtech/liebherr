@@ -288,7 +288,7 @@ const ReasonCode = () => {
                                             <label htmlFor="ComplaintcodeInput" className="input-field">
                                             Description
                                             </label>
-                                            <input
+                                            <textarea
                                             type="text"
                                             className="form-control"
                                             name="description"
