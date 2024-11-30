@@ -14,6 +14,26 @@ import 'datatables.net-bs4';
 import 'datatables.net-responsive';
 import 'datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css';
 
+// DataTables Fixed Columns Extension
+import 'datatables.net-fixedcolumns';
+import 'datatables.net-fixedcolumns-bs4/css/fixedColumns.bootstrap4.min.css';
+
+// DataTables Fixed Header Extension
+import 'datatables.net-fixedheader';
+
+// DataTables Buttons Extension
+import 'datatables.net-buttons';
+import 'datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css';
+import 'datatables.net-buttons/js/buttons.html5.min.js';
+
+
+
+// DataTables KeyTable Extension
+import 'datatables.net-keytable';
+
+// DataTables Select Extension
+import 'datatables.net-select';
+
 export function Products(params) {
     const [Productdata, setProductdata] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
@@ -101,6 +121,19 @@ export function Products(params) {
                 info: true,
                 lengthChange: false,
                 autoWidth: false,
+                responsive: true,
+                fixedHeader: true,
+                fixedColumns: {
+                    left: 5,
+                },
+                keys: true,
+                select: true,
+                dom: '<"d-flex justify-content-between"<"table-title"><"search-box"f>>t<"d-flex justify-content-between"ip>',
+                language: {
+                  search: '', // Remove the "Search:" label
+                  searchPlaceholder: 'Search...', // Add placeholder text
+                },
+
             });
 
             // Cleanup: Destroy DataTable instance before reinitializing when Productdata changes
