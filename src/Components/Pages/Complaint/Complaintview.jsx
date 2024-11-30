@@ -38,6 +38,7 @@ export function Complaintview(params) {
   const [duplicate, setDuplicate] = useState([]);
   const [attachments, setAttachments] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
+  const [engtype, setEngType] = useState("");
   const [addedEngineers, setAddedEngineers] = useState([]);
 
   const [files2, setFiles2] = useState([]); // New state for Attachment 2 files
@@ -74,6 +75,8 @@ export function Complaintview(params) {
   }
 
   async function getEngineer(params) {
+
+
     try {
       const res = await axios.get(`${Base_Url}/getcvengineer`, {
         headers: {
@@ -81,16 +84,25 @@ export function Complaintview(params) {
         },
       });
 
+
+
       if (res.data && Array.isArray(res.data)) {
         setEngineer(res.data);
       } else {
         console.error("Expected array from API but got:", typeof res.data);
         setEngineer([]); // Set empty array as fallback
       }
+
+
+
+
+
     } catch (error) {
       console.error("Error fetching engineers:", error);
       setEngineer([]); // Set empty array on error
     }
+
+
   }
 
   const AddEngineer = () => {
@@ -106,6 +118,12 @@ export function Complaintview(params) {
     }
 
   };
+
+  const handleRemoveEngineer = (id) => {
+    const updatedEngineers = addedEngineers.filter((eng) => eng.id !== id);
+    setAddedEngineers(updatedEngineers); // Update the state (assuming you use React's useState)
+  };
+
 
 
 
@@ -182,6 +200,13 @@ export function Complaintview(params) {
     setFiles2(e.target.files);
   };
 
+  const handleengchange = (value) => {
+
+
+    setEngType(value)
+  }
+
+
   // New submit handler for Attachment 2
   const handleAttachment2Submit = async (e) => {
     e.preventDefault();
@@ -240,7 +265,7 @@ export function Complaintview(params) {
       call_status: complaintview.call_status,
       updated_by: 1,
       ticket_no: complaintview.ticket_no,
-      engineerdata : addedEngineers.map((item) => item.employee_code)
+      engineerdata: addedEngineers.map((item) => item.employee_code)
     };
 
     axios.post(`${Base_Url}/ticketFormData`, data, {
@@ -396,8 +421,18 @@ export function Complaintview(params) {
       fetchAttachment2Details(); // Add this line to fetch Attachment 2
     }
     getProduct();
-    getEngineer();
+
+
   }, [complaintid, complaintview.ticket_no, complaintview.customer_mobile]);
+
+  useEffect(() => {
+    if (engtype == "Franchisee") {
+
+      getEngineer();
+    } else {
+      setEngineer([])
+    }
+  }, [engtype])
 
   const handleAttachmentClick = (attachment) => {
     console.log("Attachment clicked:", attachment);
@@ -935,6 +970,7 @@ export function Complaintview(params) {
               </div>
 
               <div className="d-flex mb-3">
+
                 <div className="form-check me-3">
                   <input
                     type="radio"
@@ -942,13 +978,13 @@ export function Complaintview(params) {
                     id="lhi"
                     name="engineer_type"
                     value="LHI"
-                    checked
-                    onChange={handleModelChange}
+                    onChange={(e) => handleengchange(e.target.value)}
                   />
                   <label className="form-check-label" htmlFor="lhi" style={{ fontSize: "14px" }}>
                     LHI
                   </label>
                 </div>
+
                 <div className="form-check">
                   <input
                     type="radio"
@@ -956,13 +992,13 @@ export function Complaintview(params) {
                     id="franchisee"
                     name="engineer_type"
                     value="Franchisee"
-                    checked={complaintview.engineer_type === "Franchisee"}
-                    onChange={handleModelChange}
+                    onChange={(e) => handleengchange(e.target.value)}
                   />
                   <label className="form-check-label" htmlFor="franchisee" style={{ fontSize: "14px" }}>
                     Franchisee
                   </label>
                 </div>
+
               </div>
 
               <h4 className="pname" style={{ fontSize: "14px" }}>Engineer</h4>
@@ -1002,15 +1038,36 @@ export function Complaintview(params) {
 
               {/* Display added engineers */}
               <div className="mt-3">
-                <h5>Added Engineers:</h5>
-                <ul className="list-group">
-                  {addedEngineers.map((eng) => (
-                    <li key={eng.id} className="list-group-item">
-                      {eng.title}
-                    </li>
-                  ))}
-                </ul>
+                <h4 className="pname" style={{ fontSize: "14px" }}>Added Engineers:</h4>
+                <table className="table table-bordered" style={{ fontSize: "12px" }}>
+                  <thead>
+                    <tr>
+                      <th>User</th>
+                      <th>User Type</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {addedEngineers.map((eng) => (
+                      <tr key={eng.id}>
+                        <td>{eng.title}</td>
+                        <td>{eng.userType || "N/A"}</td> {/* Display user type or "N/A" */}
+                        <td>
+                          <button
+                            className="btn btn-sm btn-danger"
+                            style={{ padding: "0.2rem 0.5rem" }}
+                            onClick={() => handleRemoveEngineer(eng.id)}
+                          >
+                            ✖
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
+
+
 
 
 
