@@ -387,14 +387,13 @@ const Customerlocation = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestcustomerlocation/${id}`);
+      const response = await axios.get(`${Base_Url}/requestcustomerlocation/${id}`,{
+        headers: {
+           Authorization: token, // Send token in headers
+         }, 
+       });
       setFormData(response.data);
       console.log("Form Data", setFormData);
-      fetchRegions(response.data.country_id);
-      fetchGeoStates(response.data.region_id);
-      fetchGeoCities(response.data.geostate_id);
-      fetchDistrict(response.data.geocity_id);
-      fetchPincodedrop(response.data.district_id);
       setIsEdit(true);
     } catch (error) {
       console.error("Error editing Customer Location:", error);

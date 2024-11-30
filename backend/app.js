@@ -3828,7 +3828,7 @@ app.get("/getcustomerlocation", authenticateToken, async (req, res) => {
 });
 
 // API to fetch a specific Customer Location by ID
-app.get("/requestcustomerlocation/:id", async (req, res) => {
+app.get("/requestcustomerlocation/:id", authenticateToken,async (req, res) => {
   const { id } = req.params;
 
 
@@ -3838,22 +3838,7 @@ app.get("/requestcustomerlocation/:id", async (req, res) => {
     const pool = await poolPromise;
 
     // Construct the SQL query (no parameter binding)
-    const sql = `SELECT
-                  ccl.*,
-                  c.title as country_title,
-                  r.title as region_title,
-                  gs.title as geostate_title,
-                  gc.title as geocity_title,
-                  a.title as district_title,
-                  p.pincode as pincode_title
-                FROM awt_customerlocation as ccl,
-                 awt_country as c ,
-                 awt_region as r ,
-                 awt_geostate as gs,
-                 awt_geocity as gc,
-                 awt_district as a ,
-                 awt_pincode as p 
-                WHERE ccl.deleted = 0 AND ccl.id = ${id}`;
+    const sql = `SELECT * FROM awt_customerlocation WHERE id = '${id}' AND deleted = 0`;
 
     // Execute the query
     const result = await pool.request().query(sql);
