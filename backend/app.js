@@ -4622,9 +4622,7 @@ app.get("/getchildfranchisepopulate/:childid", authenticateToken, async (req, re
 
     // SQL query to fetch data from the master list, customize based on your needs
     const sql = `
-     SELECT m.*,p.title as parentfranchisetitle,c.title as country_name, r.title as region_name, s. title as state_name, d.title as district_name,ct. title city_name from  awt_childfranchisemaster as m,
-awt_country as c,awt_region as r,awt_geostate as s,awt_district as d,awt_geocity as ct,awt_franchisemaster as p WHERE m.country_id = c.id AND m.region_id = r.id AND m.geostate_id = s.id 
-AND m.area_id = d.id AND m.geocity_id = ct.id AND m.pfranchise_id = p.licarecode AND m.deleted = 0 and m.id = ${childid}
+     Select * from awt_childfranchisemaster where deleted = 0 and id = ${childid}
     `;
     // Execute the SQL query
     const result = await pool.request().query(sql);
@@ -4889,6 +4887,7 @@ app.post("/postchildfranchise", authenticateToken, async (req, res) => {
       .input('last_working_date', sql.DateTime, last_working_date)
       .input('contract_activation_date', sql.DateTime, contract_activation_date)
       .input('contract_expiration_date', sql.DateTime, contract_expiration_date)
+      .input('with_liebherr', sql.DateTime, with_liebherr)
       .query(`
         INSERT INTO awt_childfranchisemaster 
         (title, pfranchise_id, licare_code, partner_name, contact_person, email, mobile_no, password, address, 
@@ -4897,7 +4896,7 @@ app.post("/postchildfranchise", authenticateToken, async (req, res) => {
         VALUES 
         (@title, @pfranchise_id, @licare_code, @partner_name, @contact_person, @email, @mobile_no, @password, 
          @address, @country_id, @region_id, @state, @area, @city, @pincode_id, @website, @gst_number, @pan_number, 
-         @bank_name, @bank_account_number, @bank_ifsc_code, @bank_address,${with_liebherr} , @last_working_date, 
+         @bank_name, @bank_account_number, @bank_ifsc_code, @bank_address,@with_liebherr , @last_working_date, 
          @contract_activation_date, @contract_expiration_date,${created_by})
       `);
     return res.json({

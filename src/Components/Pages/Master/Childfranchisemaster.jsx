@@ -21,11 +21,6 @@ const Childfranchisemaster = () => {
   const [duplicateError, setDuplicateError] = useState("");
   const [isEdit, setIsEdit] = useState(false);
 
-  // const [filteredUsers, setFilteredUsers] = useState([]);
-  // const [currentPage, setCurrentPage] = useState(0);
-  // const [itemsPerPage, setItemsPerPage] = useState(10);
-  // const [searchTerm, setSearchTerm] = useState("");
-
   const [countries, setCountries] = useState([]);
   const [regions, setRegions] = useState([]);
   const [state, setState] = useState([])
@@ -64,139 +59,62 @@ const Childfranchisemaster = () => {
     with_liebherr: "",
   });
 
-  // const fetchchildfranchisepopulate = async (childid) => {
-  //   try {
-
-  //     const response = await axios.get(`${Base_Url}/getchildfranchisepopulate/${childid}`);
-  //     setFormData({
-  //       ...response.data[0],
-  //       // Rename keys to match your formData structure
-  //       pfranchise_id: response.data[0].pfranchise_id,
-  //       title: response.data[0].title,
-  //       contact_person: response.data[0].contact_person,
-  //       email: response.data[0].email,
-  //       mobile_no: response.data[0].mobile_no,
-  //       password: response.data[0].password,
-  //       country_id: response.data[0].country_id,
-  //       region_id: response.data[0].region_id,
-  //       state: response.data[0].geostate_id,
-  //       area: response.data[0].area_id,
-  //       city: response.data[0].geocity_id,
-  //       pincode_id: response.data[0].pincode_id,
-  //       address: response.data[0].address,
-  //       licare_code: response.data[0].licare_code,
-  //       partner_name: response.data[0].partner_name,
-  //       website: response.data[0].webste,
-  //       gst_number: response.data[0].gstno,
-  //       pan_number: response.data[0].panno,
-  //       bank_name: response.data[0].bankname,
-  //       bank_account_number: response.data[0].bankacc,
-  //       bank_ifsc_code: response.data[0].bankifsc,
-  //       bank_address: response.data[0].bankaddress,
-  //       last_working_date: response.data[0].lastworkinddate,
-  //       contract_activation_date: response.data[0].contractacti,
-  //       contract_expiration_date: response.data[0].contractexpir,
-  //       with_liebherr: response.data[0].withliebher
-  //     });
-
-  //     setIsEdit(true);
-
-  //     if (response.data[0].country_id) {
-  //       fetchregion(response.data[0].country_id);
-  //     }
-  //     if (response.data[0].region_id) {
-  //       fetchState(response.data[0].region_id);
-  //     }
-  //     if (response.data[0].geostate_id) {
-  //       fetchdistricts(response.data[0].geostate_id);
-  //     }
-  //     if (response.data[0].area_id) {
-  //       fetchCity(response.data[0].area_id);
-  //     }
-  //     if (response.data[0].geocity_id) {
-  //       fetchpincode(response.data[0].geocity_id);
-  //     }
-
-  //   } catch (error) {
-  //     console.error("Error fetching Parentfranchise:", error);
-  //   }
-  // };
-
-  // End Fetch Child Franchise Deatils for populate
-
   const fetchchildfranchisepopulate = async (childid) => {
     try {
+
       const response = await axios.get(`${Base_Url}/getchildfranchisepopulate/${childid}`,{
         headers: {
           Authorization: token,
         },
-      }
-
-);
-      const data = response.data[0];
-
-      // Update locations state with the names from API
-      setlocations({
-        country: data.country_name || '',
-        region: data.region_name || '',
-        state: data.state_name || '',
-        district: data.district_name || '',
-        city: data.city_name || ''
       });
-
       setFormData({
         ...response.data[0],
-        pfranchise_id: data.pfranchise_id,
-        title: data.title,
-        contact_person: data.contact_person,
-        email: data.email,
-        mobile_no: data.mobile_no,
-        password: data.password,
-        country_id: data.country_id,
-        region_id: data.region_id,
-        state: data.geostate_id,
-        area: data.area_id,
-        city: data.geocity_id,
-        pincode_id: data.pincode_id,
-        address: data.address,
-        licare_code: data.licare_code,
-        partner_name: data.partner_name,
-        website: data.webste,
-        gst_number: data.gstno,
-        pan_number: data.panno,
-        bank_name: data.bankname,
-        bank_account_number: data.bankacc,
-        bank_ifsc_code: data.bankifsc,
-        bank_address: data.bankaddress,
-        last_working_date: data.lastworkinddate,
-        contract_activation_date: data.contractacti,
-        contract_expiration_date: data.contractexpir,
-        with_liebherr: data.withliebher
+        // Rename keys to match your formData structure
+        pfranchise_id: response.data[0].pfranchise_id,
+        title: response.data[0].title,
+        contact_person: response.data[0].contact_person,
+        email: response.data[0].email,
+        mobile_no: response.data[0].mobile_no,
+        password: response.data[0].password,
+        country_id: response.data[0].country_id,
+        region_id: response.data[0].region_id,
+        state: response.data[0].geostate_id,
+        area: response.data[0].area_id,
+        city: response.data[0].geocity_id,
+        pincode_id: response.data[0].pincode_id,
+        address: response.data[0].address,
+        licare_code: response.data[0].licare_code,
+        partner_name: response.data[0].partner_name,
+        website: response.data[0].webste,
+        gst_number: response.data[0].gstno,
+        pan_number: response.data[0].panno,
+        bank_name: response.data[0].bankname,
+        bank_account_number: response.data[0].bankacc,
+        bank_ifsc_code: response.data[0].bankifsc,
+        bank_address: response.data[0].bankaddress,
+        last_working_date: response.data[0].lastworkinddate,
+        contract_activation_date: response.data[0].contractacti,
+        contract_expiration_date: response.data[0].contractexpir,
+        with_liebherr: response.data[0].withliebher
       });
 
+      setlocations({
+        country: response.data[0].country_id,
+        region: response.data[0].region_id,
+        state: response.data[0].geostate_id,
+        district: response.data[0].area_id,
+        city: response.data[0].geocity_id
+      });
       setIsEdit(true);
-
-      // Fetch dependent dropdowns data
-      if (data.country_id) {
-        fetchregion(data.country_id);
-      }
-      if (data.region_id) {
-        fetchState(data.region_id);
-      }
-      if (data.geostate_id) {
-        fetchdistricts(data.geostate_id);
-      }
-      if (data.area_id) {
-        fetchCity(data.area_id);
-      }
-      if (data.geocity_id) {
-        fetchpincode(data.geocity_id);
-      }
 
     } catch (error) {
       console.error("Error fetching Parentfranchise:", error);
     }
   };
+
+  // End Fetch Child Franchise Deatils for populate
+
+
 
 
   const fetchParentfranchise = async () => {
@@ -231,101 +149,9 @@ const Childfranchisemaster = () => {
 
   //This is for State Dropdown
 
-  async function getState(params) {
-    axios.get(`${Base_Url}/getstate`)
-      .then((res) => {
-        if (res.data) {
-
-          setState(res.data)
-
-        }
-      })
-  }
-
-
-  const fetchcountries = async () => {
-    try {
-      const response = await axios.get(`${Base_Url}/getcountries`,{
-        headers: {
-          Authorization: token,
-        },
-      });
-      setCountries(response.data);
-    } catch (error) {
-      console.error("Error fetching disctricts:", error);
-    }
-  };
-
-  //region
-  const fetchregion = async (country_id) => {
-    try {
-      const response = await axios.get(`${Base_Url}/getregionscity/${country_id}`,{
-        headers: {
-          Authorization: token,
-        },
-      });
-      setRegions(response.data);
-    } catch (error) {
-      console.error("Error fetching disctricts:", error);
-    }
-  };
-
-  //geostate
-  const fetchState = async (region_id) => {
-    try {
-      const response = await axios.get(`${Base_Url}/getgeostatescity/${region_id}`,{
-        headers: {
-          Authorization: token,
-        },
-      });
-      setState(response.data);
-    } catch (error) {
-      console.error("Error fetching disctricts:", error);
-    }
-  };
-
-  const fetchdistricts = async (geostateID) => {
-    try {
-      const response = await axios.get(`${Base_Url}/getdistrictcity/${geostateID}`,{
-        headers: {
-          Authorization: token,
-        },
-      }
-);
-      setdistricts(response.data);
-    } catch (error) {
-      console.error("Error fetching disctricts:", error);
-    }
-  };
-
-  const fetchCity = async (area_id) => {
-    try {
-      const response = await axios.get(`${Base_Url}/getgeocities_p/${area_id}`,{
-        headers: {
-          Authorization: token,
-        },
-      });
-      setCity(response.data);
-    } catch (error) {
-      console.error("Error fetching City:", error);
-    }
-  };
-
-  const fetchpincode = async (cityid) => {
-    try {
-      const response = await axios.get(`${Base_Url}/getpincodebyid/${cityid}`,{
-        headers: {
-          Authorization: token,
-        },
-      });
-      setPincode(response.data);
-    } catch (error) {
-      console.error("Error fetching City:", error);
-    }
-  };
 
   useEffect(() => {
-    fetchcountries();
+
     fetchUsers();
     fetchParentfranchise();
 
@@ -336,31 +162,24 @@ const Childfranchisemaster = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prevState => ({
-      ...prevState,
-      [name]: value
-    }));
+    
+    // Special handling for date fields to ensure current date is used
+    if (['with_liebherr', 'contract_activation_date', 'contract_expiration_date', 'last_working_date'].includes(name)) {
+      setFormData(prevState => ({
+        ...prevState,
+        [name]: value ? new Date(value).toISOString().split('T')[0] : ''
+      }));
+    } else {
+      setFormData(prevState => ({
+        ...prevState,
+        [name]: value
+      }));
+    }
 
-    // Handle dependent dropdowns
     switch (name) {
-      case "country_id":
-        fetchregion(value);
+      case "pincode_id":
+        fetchlocations(value);
         break;
-      case "region_id":
-        fetchState(value);
-        break;
-      case "state":
-        fetchdistricts(value);
-        break;
-      case "area":
-        fetchCity(value);
-        break;
-      case "city":
-        fetchpincode(value);
-        break;
-        case "pincode_id":
-          fetchlocations(value);
-          break;
       default:
         break;
     }

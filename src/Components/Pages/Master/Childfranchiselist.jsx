@@ -154,7 +154,7 @@ export function ChildFranchiselist(params) {
                             className="btn btn-primary"
                             onClick={() => navigate("/Childfranchisemaster")}
                         >
-                            Add Master Franchise
+                            Add Child Master Franchise
                         </button>
                         </div>
                             <table className="table">
