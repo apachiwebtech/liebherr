@@ -1534,11 +1534,11 @@ app.get("/getproductlist", authenticateToken, async (req, res) => {
 });
 // Product list end
 //customer list start
+//customer list start
 app.get("/getcustomerlist", authenticateToken, async (req, res) => {
   try {
-
-    // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
+
     const {
       customer_fname,
       customer_id,
@@ -1546,18 +1546,15 @@ app.get("/getcustomerlist", authenticateToken, async (req, res) => {
       customer_lname,
       mobileno,
       email,
-
-
-
+      page = 1, // Default to page 1 if not provided
+      pageSize = 10, // Default to 10 items per page if not provided
     } = req.query;
 
-    let sql = `
-    SELECT c.* FROM awt_customer as c  WHERE c.deleted = 0
- `;
+    let sql = `SELECT c.* FROM awt_customer as c WHERE c.deleted = 0`;
 
+    // Dynamically add filters based on query parameters
     if (customer_fname) {
       sql += ` AND c.customer_fname LIKE '%${customer_fname}%'`;
-
     }
 
     if (customer_lname) {
@@ -1575,17 +1572,41 @@ app.get("/getcustomerlist", authenticateToken, async (req, res) => {
     if (customer_type) {
       sql += ` AND c.customer_type LIKE '%${customer_type}%'`;
     }
+
     if (customer_id) {
       sql += ` AND c.customer_id LIKE '%${customer_id}%'`;
     }
 
-    console.log('SQL Query:', sql); // Debug log
+    // Pagination logic: Calculate offset based on the page number
+    const offset = (page - 1) * pageSize;
+
+    // Add pagination to the SQL query (OFFSET and FETCH NEXT)
+    sql += ` ORDER BY c.customer_id OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+
+    // Get the customer data
     const result = await pool.request().query(sql);
 
-    return res.json(result.recordset);
+    // Get the total count of records for pagination
+    let countSql = `SELECT COUNT(*) as totalCount FROM awt_customer WHERE deleted = 0`;
+    if (customer_fname) countSql += ` AND customer_fname LIKE '%${customer_fname}%'`;
+    if (customer_lname) countSql += ` AND customer_lname LIKE '%${customer_lname}%'`;
+    if (mobileno) countSql += ` AND mobileno LIKE '%${mobileno}%'`;
+    if (email) countSql += ` AND email LIKE '%${email}%'`;
+    if (customer_type) countSql += ` AND customer_type LIKE '%${customer_type}%'`;
+    if (customer_id) countSql += ` AND customer_id LIKE '%${customer_id}%'`;
+
+    const countResult = await pool.request().query(countSql);
+    const totalCount = countResult.recordset[0].totalCount;
+
+    return res.json({
+      data: result.recordset,
+      totalCount: totalCount,
+      page,
+      pageSize,
+    });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: "An error occurred while fetching the complaint list" });
+    return res.status(500).json({ message: "An error occurred while fetching the customer list" });
   }
 });
 
@@ -3077,7 +3098,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
   let {
     complaint_date, customer_name, contact_person, email, mobile, address,
     state, city, area, pincode, mode_of_contact, ticket_type, cust_type,
-    warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks, ticket_id
+    warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks, ticket_id,classification,priority
   } = req.body;
 
 
@@ -3200,13 +3221,13 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
           ticket_no, ticket_date, customer_name, customer_mobile, customer_email, address, 
           state, city, area, pincode, customer_id, ModelNumber, ticket_type, call_type, 
           call_status, warranty_status, invoice_date, call_charges, mode_of_contact, 
-          contact_person, assigned_to, created_date, created_by, engineer_id, purchase_date, serial_no, child_service_partner, sevice_partner, specification
+          contact_person, assigned_to, created_date, created_by, engineer_id, purchase_date, serial_no, child_service_partner, sevice_partner, specification ,customer_class,call_priority
         ) 
         VALUES (
           @ticket_no, @complaint_date, @customer_name, @mobile, @email, @address, 
           @state, @city, @area, @pincode, @customer_id, @model, @ticket_type, @cust_type, 
           'Pending', @warranty_status, @invoice_date, @call_charge, @mode_of_contact, 
-          @contact_person, 1, @formattedDate, @created_by, 1, @purchase_date, @serial, @child_service_partner, @master_service_partner, @specification
+          @contact_person, 1, @formattedDate, @created_by, 1, @purchase_date, @serial, @child_service_partner, @master_service_partner, @specification ,@classification , @priority
         )
       `;
     } else {
@@ -3241,7 +3262,9 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
           serial_no = @serial,
           child_service_partner = @child_service_partner,
           sevice_partner = @master_service_partner,
-          specification = @specification
+          specification = @specification,
+          customer_class = @classification,
+          call_priority = @priority
         WHERE
           id = @ticket_id
       `;
@@ -3280,6 +3303,8 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
       .input('master_service_partner', master_service_partner)
       .input('child_service_partner', child_service_partner)
       .input('specification', specification)
+      .input('classification', classification)
+      .input('priority', priority)
       .query(complaintSQL);
 
     //Remark insert query
@@ -6817,7 +6842,7 @@ app.post("/updateProduct", authenticateToken,
 //Complaint view Insert TicketFormData start
 
 app.post("/ticketFormData", authenticateToken, async (req, res) => {
-  const { ticket_no, serial_no, ModelNumber, engineerdata, call_status, updated_by } = req.body;
+  const { ticket_no, serial_no, ModelNumber, engineerdata, call_status,sub_call_status, updated_by } = req.body;
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
 
@@ -6828,7 +6853,7 @@ app.post("/ticketFormData", authenticateToken, async (req, res) => {
 
     const updateSql = `
       UPDATE complaint_ticket
-      SET engineer_code = '${engineer_code}',call_status = '${call_status}' , updated_by = '${updated_by}', updated_date = '${formattedDate}' WHERE ticket_no = '${ticket_no}'`;
+      SET engineer_code = '${engineer_code}',call_status = '${call_status}' , updated_by = '${updated_by}', updated_date = '${formattedDate}' , sub_call_status  = '${sub_call_status}' WHERE ticket_no = '${ticket_no}'`;
 
     await pool.request().query(updateSql);
 
@@ -7682,4 +7707,58 @@ app.post("/getcomplaintticket", authenticateToken,
 
 //Register Page Complaint Duplicate End
 
+app.get("/getcallstatus", authenticateToken,
+  async (req, res) => {
+
+
+    try {
+      const pool = await poolPromise;
+      // Modified SQL query using parameterized query
+      const sql = "select id, Callstatus from call_status where deleted = 0";
+
+      const result = await pool.request().query(sql);
+
+      return res.json(result.recordset);
+    } catch (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ error: "Database error occurred", details: err.message });
+    }
+  });
+
+app.post("/getsubcallstatus", authenticateToken,
+  async (req, res) => {
+   const {Status_Id} = req.body; 
+
+    try {
+      const pool = await poolPromise;
+      // Modified SQL query using parameterized query
+      const sql = `select id, SubCallstatus from sub_call_status where deleted = 0 and Callstatus_Id = ${Status_Id}`;
+
+      const result = await pool.request().query(sql);
+
+      return res.json(result.recordset);
+    } catch (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ error: "Database error occurred", details: err.message });
+    }
+  });
+
+app.get("/getsubcallstatusdata", authenticateToken,
+  async (req, res) => {
+
+
+
+    try {
+      const pool = await poolPromise;
+      // Modified SQL query using parameterized query
+      const sql = `select id, SubCallstatus from sub_call_status where deleted = 0 `;
+
+      const result = await pool.request().query(sql);
+
+      return res.json(result.recordset);
+    } catch (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ error: "Database error occurred", details: err.message });
+    }
+  });
 

@@ -24,7 +24,8 @@ export function Complaintview(params) {
     invoice_date: '',
     serial_no: '',
     call_status: '',
-    engineer_id: ''
+    engineer_id: '',
+    sub_call_status: ''
   });
 
 
@@ -40,19 +41,18 @@ export function Complaintview(params) {
   const [errorMessage, setErrorMessage] = useState("");
   const [engtype, setEngType] = useState("");
   const [addedEngineers, setAddedEngineers] = useState([]);
-
   const [files2, setFiles2] = useState([]); // New state for Attachment 2 files
   const fileInputRef = useRef(); // Ref for Attachment 1 input
   const fileInputRef2 = useRef(); // Create a ref for the file input
-
   const [attachments2, setAttachments2] = useState([]); // New state for Attachment 2 list
   const [jsondata, setjsondata] = useState([]);
   const [isModal2Open, setIsModal2Open] = useState(false); // New modal state
   const [currentAttachment2, setCurrentAttachment2] = useState(""); // Current attachment 2 for modal
-
   const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
   const [currentAttachment, setCurrentAttachment] = useState(""); // Current attachment for modal
-
+  const [callstatus, setCallstatus] = useState([]); // Current attachment for modal
+  const [subcallstatus, setsubCallstatus] = useState([]); // Current attachment for modal
+  const [callstatusid, setCallstatusid] = useState(""); // Current attachment for modal
   const created_by = localStorage.getItem("userId"); // Get user ID from localStorage
   const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
 
@@ -105,6 +105,69 @@ export function Complaintview(params) {
 
   }
 
+  async function getcallstatus(params) {
+
+
+    try {
+      const res = await axios.get(`${Base_Url}/getcallstatus`, {
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      });
+
+
+      if (res.data) {
+        setCallstatus(res.data)
+      }
+
+
+    } catch (error) {
+      console.error("Error fetching engineers:", error);
+      setEngineer([]); // Set empty array on error
+    }
+
+
+  }
+
+  const getsubcallstatus = async (value) => {
+    if (value !== undefined ) {
+      try {
+        const res = await axios.post(
+          `${Base_Url}/getsubcallstatus`,
+          { Status_Id: value },
+          {
+            headers: {
+              Authorization: token, // Send token in headers
+            },
+          }
+        );
+  
+        if (res.data) {
+          setsubCallstatus(res.data); // Set sub-call statuses from POST response
+        }
+      } catch (error) {
+        console.error("Error fetching sub-call statuses via POST:", error);
+        setsubCallstatus([]); // Set empty array on error
+      }
+    } else {
+      try {
+        const res = await axios.get(`${Base_Url}/getsubcallstatusdata`, {
+          headers: {
+            Authorization: token, // Send token in headers
+          },
+        });
+  
+        if (res.data) {
+          setsubCallstatus(res.data); // Set sub-call statuses from GET response
+        }
+      } catch (error) {
+        console.error("Error fetching sub-call statuses via GET:", error);
+        setsubCallstatus([]); // Set empty array on error
+      }
+    }
+  };
+  
+
   const AddEngineer = () => {
     const selectedEngineer = engineer.find(
       (eng) => eng.id === parseInt(complaintview.engineer_id)
@@ -136,13 +199,17 @@ export function Complaintview(params) {
         },
       }
       );
+
+      
       setRemarks(response.data.remarks);
       setAttachments(response.data.attachments);
+
     } catch (error) {
       console.error("Error fetching ticket details:", error);
     }
   };
-  //  console.log(remarks , "$$$$")
+
+
   const fetchComplaintview = async (complaintid) => {
     try {
       const response = await axios.get(
@@ -154,6 +221,7 @@ export function Complaintview(params) {
       );
       console.log(response.data);
       setComplaintview(response.data);
+      setCallstatusid(response.data.call_status)
       if (response.data.serial_no != "") {
         setsserial_no(response.data.serial_no);
 
@@ -262,7 +330,8 @@ export function Complaintview(params) {
       serial_no: complaintview.serial_no,
       ModelNumber: complaintview.ModelNumber,
       engineer_id: complaintview.engineer_id,
-      call_status: complaintview.call_status,
+      call_status: callstatusid,
+      sub_call_status: complaintview.sub_call_status,
       updated_by: 1,
       ticket_no: complaintview.ticket_no,
       engineerdata: addedEngineers.map((item) => item.employee_code)
@@ -422,6 +491,9 @@ export function Complaintview(params) {
     }
     getProduct();
 
+  
+
+
 
   }, [complaintid, complaintview.ticket_no, complaintview.customer_mobile]);
 
@@ -432,7 +504,15 @@ export function Complaintview(params) {
     } else {
       setEngineer([])
     }
+
+    
   }, [engtype])
+
+  useEffect(() =>{
+    getcallstatus()
+
+    getsubcallstatus()
+  },[])
 
   const handleAttachmentClick = (attachment) => {
     console.log("Attachment clicked:", attachment);
@@ -944,28 +1024,41 @@ export function Complaintview(params) {
             <div className="card-body">
               <h4 className="pname" style={{ fontSize: "14px" }}>Call Status</h4>
               <div className="mb-3">
-                <select name="call_status" className="form-control" style={{ fontSize: "14px" }} onChange={handleModelChange}>
-                  <option value="" >Select Status</option>
-                  <option value="Quotation">Quotation</option>
-                  <option value="Closed">Closed</option>
-                  <option value="Cancelled">Cancelled</option>
-                  <option value="Duplicates">Duplicates</option>
-                  <option value="Spares">Spares</option>
-                  <option value="In Process">In Process</option>
-                  <option value="DOA">DOA</option>
+                <select
+                  name="call_status"
+                  className="form-control"
+                  style={{ fontSize: "14px" }}
+                  value={complaintview.call_status}
+                  onChange={(e) => {
+                    const selectedname = e.target.value; // Get the id
+                    const selectedid = callstatus.find(item => item.Callstatus == selectedname)?.id; // Find the corresponding Callstatus value
+                    getsubcallstatus(selectedid); // Send the id to fetch sub-call statuses
+                    console.log('Selected Callstatus:', selectedid); // Log or use the Callstatus value
+                    setCallstatusid(selectedname)
+                    handleModelChange(e)
+                  }}
+                >
+                  <option value="">Select Status</option>
+                  {callstatus.map((item) => (
+                    <option key={item.id} value={item.Callstatus}>
+                      {item.Callstatus}
+                    </option>
+                  ))}
                 </select>
+
               </div>
               <h4 className="pname" style={{ fontSize: "14px" }}>Sub Call Status</h4>
               <div className="mb-3">
-                <select name="call_status" className="form-control" style={{ fontSize: "14px" }} onChange={handleModelChange}>
+                <select name="sub_call_status" value={complaintview.sub_call_status} className="form-control" style={{ fontSize: "14px" }} onChange={handleModelChange}>
                   <option value="" >Select Status</option>
-                  <option value="Quotation">Quotation</option>
-                  <option value="Closed">Closed</option>
-                  <option value="Cancelled">Cancelled</option>
-                  <option value="Duplicates">Duplicates</option>
-                  <option value="Spares">Spares</option>
-                  <option value="In Process">In Process</option>
-                  <option value="DOA">DOA</option>
+                  {subcallstatus.map((item) => {
+                    return (
+
+                      <option value={item.SubCallstatus}>{item.SubCallstatus}</option>
+                    )
+                  })}
+
+
                 </select>
               </div>
 

@@ -92,7 +92,8 @@ export function Registercomplaint(params) {
         dealer_info: "",
         salutation: "",
         mdealer_info: "",
-
+        classification :"",
+        Priority :""
     })
 
     //This is for State Dropdown
@@ -255,8 +256,8 @@ export function Registercomplaint(params) {
                         msp: res.data[0].franchisee,
                         csp: res.data[0].childPartner,
                         mdealer_info: res.data[0].sales_partner,
-
-
+                        classification : res.data[0].customer_class,
+                        Priority : res.data[0].call_priority
                     })
                 }
             })
@@ -399,6 +400,8 @@ export function Registercomplaint(params) {
             additional_remarks: value.additional_remarks,
             specification: value.specification,
             created_by: value.created_by,
+            classification :value.classification,
+            priority:value.Priority,
             ticket_id: ticketid
         };
 
@@ -454,6 +457,8 @@ export function Registercomplaint(params) {
             additional_remarks: value.additional_remarks,
             specification: value.specification,
             created_by: value.created_by,
+            classification : value.classification,
+            priority:value.Priority,
             ticket_no: Comp_id
         };
 
@@ -1077,6 +1082,27 @@ export function Registercomplaint(params) {
                                                 <option value="">Select</option>
                                                 <option value="Yes">Yes</option>
                                                 <option value="No">No</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div className="col-md-4">
+                                        <div className="mb-3">
+                                            <label className="form-label">Customer Classification</label>
+                                            <select className="form-control" onChange={onHandleChange} value={value.classification} name="classification">
+                                                <option value="">Select</option>
+                                                <option value="CONSUMER">Consumer</option>
+                                                <option value="IMPORT">Import</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div className="col-md-4">
+                                        <div className="mb-3">
+                                            <label className="form-label">Priority</label>
+                                            <select className="form-control" onChange={onHandleChange} value={value.Priority} name="Priority">
+                                                <option value="">Select</option>
+                                                <option value="REGULER">Reguler</option>
+                                                <option value="HIGH">High</option>
                                             </select>
                                         </div>
                                     </div>
