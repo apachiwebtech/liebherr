@@ -4,6 +4,35 @@ import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
 import Endcustomertabs from './Endcustomertabs';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'datatables.net-bs4/css/dataTables.bootstrap4.min.css';
+import $ from 'jquery';
+import 'datatables.net';
+import 'datatables.net-bs4';
+
+// DataTables Responsive Extension (JS and CSS for Bootstrap 4)
+import 'datatables.net-responsive';
+import 'datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css';
+
+// DataTables Fixed Columns Extension
+import 'datatables.net-fixedcolumns';
+import 'datatables.net-fixedcolumns-bs4/css/fixedColumns.bootstrap4.min.css';
+
+// DataTables Fixed Header Extension
+import 'datatables.net-fixedheader';
+
+// DataTables Buttons Extension
+import 'datatables.net-buttons';
+import 'datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css';
+import 'datatables.net-buttons/js/buttons.html5.min.js';
+
+
+
+// DataTables KeyTable Extension
+import 'datatables.net-keytable';
+
+// DataTables Select Extension
+import 'datatables.net-select';
 
 
 
@@ -191,14 +220,37 @@ export function Customerlist(params) {
     };
 
     useEffect(() => {
-        const $ = window.$; // Access jQuery
-        $(document).ready(function () {
-            $('#myTable').DataTable();
-        });
-        return () => {
-            $('#myTable').DataTable().destroy();
-        };
-    }, []);
+        if (Customerdata.length > 0) {
+            // Initialize DataTable after data is fetched
+            const table = $('#example').DataTable({
+                destroy: true, // Destroy any existing DataTable instance before reinitializing
+                paging: true,
+                searching: true,
+                ordering: true,
+                info: true,
+                lengthChange: false,
+                autoWidth: false,
+                responsive: true,
+                fixedHeader: true,
+                fixedColumns: {
+                    left: 5,
+                },
+                keys: true,
+                select: true,
+                dom: '<"d-flex justify-content-between"<"table-title"><"search-box"f>>t<"d-flex justify-content-between"ip>',
+                language: {
+                  search: '', // Remove the "Search:" label
+                  searchPlaceholder: 'Search...', // Add placeholder text
+                },
+
+            });
+
+            // Cleanup: Destroy DataTable instance before reinitializing when Productdata changes
+            return () => {
+                table.destroy();
+            };
+        }
+    }, [Customerdata]);
 
     const navigate = useNavigate()
 
@@ -278,7 +330,7 @@ export function Customerlist(params) {
                                                 onChange={handleFilterChange}
                                             />
                                         </div>
-                                    </div> */}
+                                    </div>
 
                                 <div className="col-md-2">
                                     <div className="form-group">
@@ -360,8 +412,8 @@ export function Customerlist(params) {
                                 <thead>
                                     <tr>
                                         <th width="3%">#</th>
-                                        <th width="7%">Customer Name</th>
-                                        {/* <th width="8%">Customer Last Name</th> */}
+                                        <th width="7%">Customer First Name</th>
+                                        <th width="8%">Customer Last Name</th>
                                         <th width="10%">Customer Type</th>
                                         <th width="10%">Cutomer Mobile Number</th>
                                         <th width="15%">Customer Classification</th>
@@ -380,7 +432,7 @@ export function Customerlist(params) {
                                             <tr key={item.id}>
                                                 <td >{index + 1}</td>
                                                 <td >{item.customer_fname}</td>
-                                                {/* <td >{item.customer_lname}</td> */}
+                                                <td >{item.customer_lname}</td>
                                                 <td >{item.customer_type}</td>
                                                 <td >{item.mobileno}</td>
                                                 <td >{item.customer_classification}</td>

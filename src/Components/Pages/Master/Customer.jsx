@@ -126,7 +126,7 @@ const Customer = () => {
 
      if (!formData.customer_id?.trim()) {
       newErrors.customer_id = "Customer_id Field is required.";
-    } 
+    }
 
     // if (!formData.alt_mobileno) {
     //   newErrors.alt_mobileno = "Alternate Mobile Number Field is required.";
@@ -172,7 +172,7 @@ const Customer = () => {
             },
           })
             .then(response => {
-              setFormData({
+              setFormData({ 
                 customer_fname: '',
                 // customer_lname: '',
                 customer_type: '',
