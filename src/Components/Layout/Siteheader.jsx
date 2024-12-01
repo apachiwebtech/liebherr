@@ -66,7 +66,7 @@ export function Siteheader(params) {
                 <li>
                   <Link className="dropdown-item" to="/Customerlist">End Customer Master</Link></li>
                 <li>
-                  <Link className="dropdown-item" to="/channelpartnertabs">Channel Partner Master</Link></li>
+                  <Link className="dropdown-item" to="/channelpartner">Channel Partner Master</Link></li>
                 <li>
                   <Link className="dropdown-item" to="/MasterFranchise">Franchise Master</Link></li>
                 <li>
@@ -147,3 +147,4 @@ export function Siteheader(params) {
   )
 }
 
+  

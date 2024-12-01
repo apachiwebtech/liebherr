@@ -3605,7 +3605,6 @@ app.get("/requestcustomer", async (req, res) => {
 app.post("/postcustomer", authenticateToken, async (req, res) => {
   const {
     customer_fname,
-    customer_lname,
     customer_type,
     customer_classification,
     mobileno,
@@ -3642,7 +3641,6 @@ app.post("/postcustomer", authenticateToken, async (req, res) => {
     const insertSql = `
       INSERT INTO awt_customer (
         customer_fname,
-        customer_lname,
         customer_type,
         customer_classification,
         mobileno,
@@ -3654,7 +3652,6 @@ app.post("/postcustomer", authenticateToken, async (req, res) => {
         customer_id
       ) VALUES (
         @customer_fname,
-        @customer_lname,
         @customer_type,
         @customer_classification,
         @mobileno,
@@ -3670,7 +3667,6 @@ app.post("/postcustomer", authenticateToken, async (req, res) => {
     // Execute the insert query
     await pool.request()
       .input('customer_fname', customer_fname)
-      .input('customer_lname', customer_lname)
       .input('customer_type', customer_type)
       .input('customer_classification', customer_classification)
       .input('mobileno', mobileno)
@@ -3698,7 +3694,7 @@ app.post("/postcustomer", authenticateToken, async (req, res) => {
 // customer put 
 
 app.put("/putcustomer", authenticateToken, async (req, res) => {
-  const { id, customer_fname, customer_lname, customer_type, customer_classification, mobileno, alt_mobileno, dateofbirth, anniversary_date, email, salutation, customer_id, created_by } = req.body;
+  const { id, customer_fname, customer_type, customer_classification, mobileno, alt_mobileno, dateofbirth, anniversary_date, email, salutation, customer_id, created_by } = req.body;
 
 
   try {
@@ -3734,7 +3730,6 @@ app.put("/putcustomer", authenticateToken, async (req, res) => {
        customer_fname = @customer_fname,
        email = @email,
        mobileno = @mobileno,
-       customer_lname = @customer_lname,
        customer_type = @customer_type,
        customer_classification = @customer_classification,
        alt_mobileno = @alt_mobileno,
@@ -3749,7 +3744,6 @@ app.put("/putcustomer", authenticateToken, async (req, res) => {
 
     await pool.request()
       .input('customer_fname', customer_fname)
-      .input('customer_lname', customer_lname)
       .input('customer_type', customer_type)
       .input('customer_classification', customer_classification)
       .input('email', email)

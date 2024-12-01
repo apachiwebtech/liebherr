@@ -223,7 +223,7 @@ export function Customerlist(params) {
 
                                     <div className="col-md-2">
                                         <div className="form-group">
-                                            <label>Customer First Name</label>
+                                            <label>Customer Name</label>
                                             <input
                                                 type="text"
                                                 className="form-control"
@@ -234,7 +234,7 @@ export function Customerlist(params) {
                                             />
                                         </div>
                                     </div>
-                                    <div className="col-md-2">
+                                    {/* <div className="col-md-2">
                                         <div className="form-group">
                                             <label>Customer Last Name</label>
                                             <input
@@ -246,7 +246,7 @@ export function Customerlist(params) {
                                                 onChange={handleFilterChange}
                                             />
                                         </div>
-                                    </div>
+                                    </div> */}
 
                                     <div className="col-md-2">
                                         <div className="form-group">
@@ -328,8 +328,8 @@ export function Customerlist(params) {
                                 <thead>
                                     <tr>
                                         <th width="3%">#</th>
-                                        <th width="7%">Customer First Name</th>
-                                        <th width="8%">Customer Last Name</th>
+                                        <th width="7%">Customer Name</th>
+                                        {/* <th width="8%">Customer Last Name</th> */}
                                         <th width="10%">Customer Type</th>
                                         <th width="10%">Cutomer Mobile Number</th>
                                         <th width="15%">Customer Classification</th>
@@ -348,7 +348,7 @@ export function Customerlist(params) {
                                             <tr key={item.id}>
                                                 <td >{index + 1}</td>
                                                 <td >{item.customer_fname}</td>
-                                                <td >{item.customer_lname}</td>
+                                                {/* <td >{item.customer_lname}</td> */}
                                                 <td >{item.customer_type}</td>
                                                 <td >{item.mobileno}</td>
                                                 <td >{item.customer_classification}</td>

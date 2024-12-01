@@ -1,20 +1,17 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import Channelpartner from "./Channelpartner";
+import { Link } from 'react-router-dom';
 
 function Channelpartnertabs() {
   const [activeTab, setActiveTab] = useState("Channelpartner");
 
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case "Channelpartner":
-        return <Channelpartner />;
+  useEffect(() => {
 
-      default:
-        return <Channelpartner />;
-    }
-  };
+    setActiveTab(window.location.pathname);
+
+  }, [window.location.pathname]);
 
   return (
     <>
@@ -64,7 +61,7 @@ function Channelpartnertabs() {
                 }}
               >
                 <ul className="nav nav-tabs ">
-                  <li className="nav-item">
+                <Link to={`/channelpartner`}> <li className="nav-item">
                     <button
                       className={`nav-link ${
                         activeTab === "Channelpartner" ? "active" : " onClick={() => setActiveTab('Channelpartner')}"
@@ -73,7 +70,7 @@ function Channelpartnertabs() {
                     >
                       CHANNEL PARTNER
                     </button>
-                  </li>
+                  </li></Link>
                 </ul>
               </div>
             </div>
@@ -83,7 +80,9 @@ function Channelpartnertabs() {
               className="col-12 col-custom"
               style={{ paddingLeft: "12px", paddingRight: "12px" }}
             >
-              <div className="tab-content">{renderTabContent()}</div>
+              <div className="tab-content">
+                {/* {renderTabContent()} */}
+                </div>
             </div>
           </div>
         </div>

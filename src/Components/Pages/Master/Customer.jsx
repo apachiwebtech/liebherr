@@ -19,7 +19,7 @@ const Customer = () => {
 
   const [formData, setFormData] = useState({
     customer_fname: '',
-    customer_lname: '',
+    // customer_lname: '',
     customer_type: '',
     customer_classification: '',
     mobileno: '',
@@ -57,7 +57,7 @@ const Customer = () => {
         ...response.data[0],
         // Rename keys to match your formData structure
         customer_fname: response.data[0].customer_fname,
-        customer_lname: response.data[0].customer_lname,
+        // customer_lname: response.data[0].customer_lname,
         email: response.data[0].email,
         customer_type: response.data[0].customer_type,
         customer_classification: response.data[0].customer_classification,
@@ -108,9 +108,9 @@ const Customer = () => {
      }
 
 
-     if (!formData.customer_lname?.trim()) {
-       newErrors.customer_lname = "Customer Last Name Field is required.";
-     }
+    //  if (!formData.customer_lname?.trim()) {
+    //    newErrors.customer_lname = "Customer Last Name Field is required.";
+    //  }
 
     if (!formData.customer_type || formData.customer_type === 'selected') {
       newErrors.customer_type = "Customer Type Dropdown is required.";
@@ -174,7 +174,7 @@ const Customer = () => {
             .then(response => {
               setFormData({
                 customer_fname: '',
-                customer_lname: '',
+                // customer_lname: '',
                 customer_type: '',
                 customer_classification: '',
                 mobileno: '',
@@ -204,7 +204,7 @@ const Customer = () => {
             .then(response => {
               setFormData({
                 customer_fname: '',
-                customer_lname: '',
+                // customer_lname: '',
                 customer_type: '',
                 customer_classification: '',
                 mobileno: '',
@@ -241,7 +241,7 @@ const Customer = () => {
       });
       setFormData({
         customer_fname: '',
-        customer_lname: '',
+        // customer_lname: '',
         customer_type: '',
         customer_classification: '',
         mobileno: '',
@@ -309,14 +309,14 @@ const Customer = () => {
                           )}
                       </div>
                       <div className="col-md-3 mb-3">
-                        <label htmlFor="Customerfname" className="form-label">Customer First Name</label>
+                        <label htmlFor="Customerfname" className="form-label">Customer  Name</label>
                         <input
                           type="text"
                           className="form-control"
                           id="Customerfname"
                           aria-describedby="Customerfname"
                           name="customer_fname"
-                          placeholder='Enter Customer First Name'
+                          placeholder='Enter Customer Name'
                           value={formData.customer_fname}
                           onChange={handleChange}
                         />
@@ -324,7 +324,7 @@ const Customer = () => {
                           <small className="text-danger">{errors.customer_fname}</small>
                         )}
                       </div>
-                      <div className="col-md-3 mb-3">
+                      {/* <div className="col-md-3 mb-3">
                         <label htmlFor="Customerlname" className="form-label">Customer Last Name</label>
                         <input
                           type="text"
@@ -339,7 +339,7 @@ const Customer = () => {
                         {errors.customer_lname && (
                           <small className="text-danger">{errors.customer_lname}</small>
                         )}
-                      </div>
+                      </div> */}
                       <div className="col-md-3 mb-3">
                         <label htmlFor="Customerid" className="form-label">Customer ID</label>
                         <input
@@ -356,13 +356,29 @@ const Customer = () => {
                           <small className="text-danger">{errors.customer_id}</small>
                         )}
                       </div>
+                      <div className="col-md-3 mb-3">
+                        <label htmlFor="emailid" className="form-label">Email ID</label>
+                        <input
+                          type="email"
+                          className="form-control"
+                          id="emailid"
+                          aria-describedby="emailid"
+                          name="email"
+                          placeholder='Enter Customer Email'
+                          value={formData.email}
+                          onChange={handleChange}
+                        />
+                        {errors.email && (
+                          <small className="text-danger">{errors.email}</small>
+                        )}
+                      </div>
                      
                       <div className="col-md-2 mb-3">
                         <label htmlFor="cclassification" className="form-label">Customer Classification</label>
                         <select id="cclassification" name="customer_classification" className="form-select" aria-label=".form-select-lg example" value={formData.customer_classification} onChange={handleChange} >
                           <option value="selected">Select Customer Classification</option>
                           <option value="Import">Import</option>
-                          <option value="India">India</option>
+                          <option value="Consumer">Consumer</option>
                         </select>
                         {errors.customer_classification && (
                           <small className="text-danger">{errors.customer_classification}</small>
@@ -446,22 +462,7 @@ const Customer = () => {
                           <small className="text-danger">{errors.anniversary_date}</small>
                         )}
                       </div>
-                      <div className="col-md-3 mb-3">
-                        <label htmlFor="emailid" className="form-label">Email ID</label>
-                        <input
-                          type="email"
-                          className="form-control"
-                          id="emailid"
-                          aria-describedby="emailid"
-                          name="email"
-                          placeholder='Enter Customer Email'
-                          value={formData.email}
-                          onChange={handleChange}
-                        />
-                        {errors.email && (
-                          <small className="text-danger">{errors.email}</small>
-                        )}
-                      </div>
+                      
                       <div className="col-md-12 text-right">
                         <button type="submit" className="btn btn-liebherr">{isEdit ? "Update" : "Submit"}</button>
                       </div>
