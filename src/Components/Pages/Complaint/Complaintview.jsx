@@ -219,9 +219,10 @@ export function Complaintview(params) {
         },
       }
       );
-      console.log(response.data);
+      
       setComplaintview(response.data);
       setCallstatusid(response.data.call_status)
+      getupdateengineer(response.data.engineer_id)
       if (response.data.serial_no != "") {
         setsserial_no(response.data.serial_no);
 
@@ -230,6 +231,18 @@ export function Complaintview(params) {
       console.error("Error fetching ticket view:", error);
     }
   };
+
+  async function getupdateengineer (id) {
+   axios.post(`${Base_Url}/getupdateengineer` , {eng_id : id} ,{
+    headers: {
+      Authorization: token,
+    },
+  })
+   .then((res) =>{
+    console.log(res)
+    setAddedEngineers(res.data)
+   })
+  }
 
   const fetchComplaintDuplicate = async () => {
     try {
@@ -334,7 +347,7 @@ export function Complaintview(params) {
       sub_call_status: complaintview.sub_call_status,
       updated_by: 1,
       ticket_no: complaintview.ticket_no,
-      engineerdata: addedEngineers.map((item) => item.employee_code)
+      engineerdata: addedEngineers.map((item) => item.id)
     };
 
     axios.post(`${Base_Url}/ticketFormData`, data, {
@@ -612,6 +625,8 @@ export function Complaintview(params) {
               <p style={{ fontSize: "14px" }}>Ticket Type: {complaintview.ticket_type}</p>
               <p style={{ fontSize: "14px" }}>Call Type: {complaintview.call_type}</p>
               <p style={{ fontSize: "14px" }}>Warranty Status: {complaintview.warranty_status}</p>
+              <p style={{ fontSize: "14px" }}>Customer Classification: {complaintview.customer_class}</p>
+              <p style={{ fontSize: "14px" }}>Call Priority: {complaintview.call_priority}</p>
 
               <ul className="nav nav-tabs" id="myTab" role="tablist">
                 <li className="nav-item">
@@ -1097,7 +1112,7 @@ export function Complaintview(params) {
               <h4 className="pname" style={{ fontSize: "14px" }}>Engineer</h4>
 
               <div className="row">
-                <div className="col-lg-10">
+                <div className="col-lg-9">
                   <select
                     className="form-select dropdown-select"
                     name="engineer_id"
@@ -1119,7 +1134,7 @@ export function Complaintview(params) {
                   </select>
                 </div>
 
-                <div className="col-lg-2">
+                <div className="col-lg-3">
                   <button
                     className="btn btn-primary btn-sm"
                     onClick={AddEngineer}

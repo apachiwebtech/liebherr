@@ -6845,15 +6845,18 @@ app.post("/ticketFormData", authenticateToken, async (req, res) => {
   const { ticket_no, serial_no, ModelNumber, engineerdata, call_status,sub_call_status, updated_by } = req.body;
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
+  
+  let engineer_id;
 
-  const engineer_code = engineerdata.join(',')
+  engineer_id = engineerdata.join(','); // Join the engineer IDs into a comma-separated string
+
 
   try {
     const pool = await poolPromise;
 
     const updateSql = `
       UPDATE complaint_ticket
-      SET engineer_code = '${engineer_code}',call_status = '${call_status}' , updated_by = '${updated_by}', updated_date = '${formattedDate}' , sub_call_status  = '${sub_call_status}' WHERE ticket_no = '${ticket_no}'`;
+      SET engineer_id = '${engineer_id}',call_status = '${call_status}' , updated_by = '${updated_by}', updated_date = '${formattedDate}' , sub_call_status  = '${sub_call_status}' WHERE ticket_no = '${ticket_no}'`;
 
     await pool.request().query(updateSql);
 
@@ -7752,6 +7755,33 @@ app.get("/getsubcallstatusdata", authenticateToken,
       const pool = await poolPromise;
       // Modified SQL query using parameterized query
       const sql = `select id, SubCallstatus from sub_call_status where deleted = 0 `;
+
+      const result = await pool.request().query(sql);
+
+      return res.json(result.recordset);
+    } catch (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ error: "Database error occurred", details: err.message });
+    }
+  });
+
+  app.post("/getupdateengineer", authenticateToken,
+  async (req, res) => {
+
+    const {eng_id} = req.body;
+ 
+    try {
+      const pool = await poolPromise;
+      // Modified SQL query using parameterized query
+      const sql = `
+    SELECT * 
+    FROM awt_engineermaster 
+    WHERE deleted = 0 
+      AND id IN (
+          SELECT value 
+          FROM STRING_SPLIT('${eng_id}', ',')
+      )
+`;
 
       const result = await pool.request().query(sql);
 
