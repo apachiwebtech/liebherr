@@ -186,10 +186,10 @@ export function ChildFranchiselist(params) {
                                                 <td >{item.mobile_no}</td>
                                                 <td >{item.licare_code}</td>
                                                 <td >{item.partner_name}</td>
-                                                <td >{item.country_name}</td>
-                                                <td >{item.region_name}</td>
-                                                <td >{item.state_name}</td>
-                                                <td >{item.district_name}</td>
+                                                <td >{item.country_id}</td>
+                                                <td >{item.region_id}</td>
+                                                <td >{item.geostate_id}</td>
+                                                <td >{item.area_id}</td>
 
                                                 <td >
                                                 <Link to={`/Childfranchisemaster/${item.id}`}><button
