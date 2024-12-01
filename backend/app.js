@@ -4583,20 +4583,20 @@ app.get("/getchildFranchiseDetails", authenticateToken, async (req, res) => {
 
     // SQL query to fetch data from the master list, customize based on your needs
     const sql = `
-    SELECT m.*,
-    p.title as parentfranchisetitle,
-    c.title as country_name, 
-    r.title as region_name, 
-    s.title as state_name, 
-    d.title as district_name,
-    ct.title as city_name 
-FROM awt_childfranchisemaster as m
-INNER JOIN awt_country as c ON m.country_id = c.id
-INNER JOIN awt_region as r ON m.region_id = r.id
-INNER JOIN awt_geostate as s ON m.geostate_id = s.id
-INNER JOIN awt_district as d ON m.area_id = d.id
-INNER JOIN awt_geocity as ct ON TRY_CAST(m.geocity_id AS INT) = ct.id  -- Safer casting
-INNER JOIN awt_franchisemaster as p ON m.pfranchise_id = p.licarecode
+ SELECT m.*, 
+       p.title AS parentfranchisetitle, 
+       c.title AS country_name, 
+       r.title AS region_name, 
+       s.title AS state_name, 
+       d.title AS district_name, 
+       ct.title AS city_name 
+FROM awt_childfranchisemaster m
+LEFT JOIN awt_country c ON m.country_id = CAST(c.id AS VARCHAR)
+LEFT JOIN awt_region r ON m.region_id = CAST(r.id AS VARCHAR)
+LEFT JOIN awt_geostate s ON m.geostate_id = CAST(s.id AS VARCHAR)
+LEFT JOIN awt_district d ON m.area_id = CAST(d.id AS VARCHAR)
+LEFT JOIN awt_geocity ct ON m.geocity_id = CAST(ct.id AS VARCHAR)
+LEFT JOIN awt_franchisemaster p ON m.pfranchise_id = CAST(p.licarecode AS VARCHAR)
 WHERE m.deleted = 0
     `;
     // Execute the SQL query
@@ -7354,7 +7354,7 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
 
 // CSP complaint list
 
-app.get("/getcomplainlistcsp", authenticateToken, async (req, res) => {
+app.get("/getcomplainlistcsp", async (req, res) => {
   const { licare_code } = req.query;
 
 
@@ -7493,7 +7493,7 @@ app.get("/getcomplainlistcsp", authenticateToken, async (req, res) => {
 
 //MSP complaint list
 
-app.get("/getcomplainlistmsp", authenticateToken, async (req, res) => {
+app.get("/getcomplainlistmsp", async (req, res) => {
   const { licare_code } = req.query;
 
 
