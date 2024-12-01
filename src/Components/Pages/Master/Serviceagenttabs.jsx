@@ -1,20 +1,17 @@
-import React, { useState } from "react";
+import React, { useEffect,useState } from "react";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import Serviceagent from "./Serviceagent";
+import { Link } from 'react-router-dom';
 
 function Serviceagenttabs() {
   const [activeTab, setActiveTab] = useState("Serviceagent");
 
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case "Serviceagent":
-        return <Serviceagent />;
+  useEffect(() => {
 
-      default:
-        return <Serviceagent />;
-    }
-  };
+    setActiveTab(window.location.pathname);
+
+  }, [window.location.pathname]);
 
   return (
     <>
@@ -64,7 +61,8 @@ function Serviceagenttabs() {
                 }}
               >
                 <ul className="nav nav-tabs ">
-                  <li className="nav-item">
+                <Link to={`/serviceagent`}><li className="nav-item">
+                  
                     <button
                       className={`nav-link ${
                         activeTab === "Serviceagent" ? "active" : "onClick={() => setActiveTab('Serviceagent')}"
@@ -73,7 +71,7 @@ function Serviceagenttabs() {
                     >
                       SERVICE AGENT
                     </button>
-                  </li>
+                  </li></Link>
                 </ul>
               </div>
             </div>
@@ -83,7 +81,9 @@ function Serviceagenttabs() {
               className="col-12 col-custom"
               style={{ paddingLeft: "12px", paddingRight: "12px" }}
             >
-              <div className="tab-content">{renderTabContent()}</div>
+              <div className="tab-content">
+                {/* {renderTabContent()} */}
+                </div>
             </div>
           </div>
         </div>

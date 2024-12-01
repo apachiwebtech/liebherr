@@ -70,20 +70,20 @@ export function Siteheader(params) {
                 <li>
                   <Link className="dropdown-item" to="/MasterFranchise">Franchise Master</Link></li>
                 <li>
-                  <Link className="dropdown-item" to="/serviceagenttabs">Service Agent Master</Link></li>
+                  <Link className="dropdown-item" to="/serviceagent">Service Agent Master</Link></li>
                 <li>
-                  <Link className="dropdown-item" to="/callstatuscodetabs">Call Status Code Master</Link></li>
+                  <Link className="dropdown-item" to="/callstatus">Call Status Code Master</Link></li>
                 <li>
                   <Link className="dropdown-item" to="/lhiusertabs">LHI User Master</Link></li>
                 <li>
                   <Link className="dropdown-item" to="/servicecontract">Service Contract Registration</Link></li>
                 <li>
 
-                  <Link className="dropdown-item" to="/serviceproducttabs">Service Product Master</Link></li>
+                  <Link className="dropdown-item" to="/serviceproduct">Service Product Master</Link></li>
                 <li>
                   <Link className="dropdown-item" to="/DefectGroup">Fault Code</Link></li>
                 <li>
-                  <Link className="dropdown-item" to="/ratecardtabs">Rate card Matrix</Link></li>
+                  <Link className="dropdown-item" to="/ratecard">Rate card Matrix</Link></li>
                 <li>
                   <Link className="dropdown-item" to="/productspare">Product & Spare mapping master</Link></li>
               </ul>

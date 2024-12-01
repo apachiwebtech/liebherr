@@ -1,20 +1,18 @@
-import React, { useState } from "react";
+import React, { useEffect,useState } from "react";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import Ratecard from "./Ratecard";
+import { Link } from 'react-router-dom';
 
 function Ratecardtabs() {
   const [activeTab, setActiveTab] = useState("Ratecard");
 
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case "Ratecard":
-        return <Ratecard />;
+ 
+  useEffect(() => {
 
-      default:
-        return <Ratecard />;
-    }
-  };
+    setActiveTab(window.location.pathname);
+
+  }, [window.location.pathname]);
 
   return (
     <>
@@ -64,7 +62,7 @@ function Ratecardtabs() {
                 }}
               >
                 <ul className="nav nav-tabs ">
-                  <li className="nav-item">
+                <Link to={`/serviceagent`}> <li className="nav-item">
                     <button
                       className={`nav-link ${
                         activeTab === "Ratecard" ? "active" : "onClick={() => setActiveTab('Ratecard')}"
@@ -73,7 +71,7 @@ function Ratecardtabs() {
                     >
                       RATE CARD MATRIX
                     </button>
-                  </li>
+                  </li></Link>
                 </ul>
               </div>
             </div>
@@ -83,7 +81,9 @@ function Ratecardtabs() {
               className="col-12 col-custom"
               style={{ paddingLeft: "12px", paddingRight: "12px" }}
             >
-              <div className="tab-content">{renderTabContent()}</div>
+              <div className="tab-content">
+                {/* {renderTabContent()} */}
+                </div>
             </div>
           </div>
         </div>

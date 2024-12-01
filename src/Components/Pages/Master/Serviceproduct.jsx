@@ -176,7 +176,7 @@ const Serviceproduct = () => {
 
   return (
     <div className="tab-content">
-      <Serviceproducttabs/>
+      <Serviceproducttabs />
     <div className="row mp0">
       <div className="col-12">
         <div className="card mb-3 tab_box">

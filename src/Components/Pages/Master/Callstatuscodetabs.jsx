@@ -1,20 +1,18 @@
-import React, { useState } from "react";
+import React, { useEffect,useState } from "react";
+
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import Callstatus from "./Callstatus";
+import { Link } from 'react-router-dom';
 
 function Callstatuscodetabs() {
   const [activeTab, setActiveTab] = useState("Callstatus");
 
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case "Callstatus":
-        return <Callstatus />;
+  useEffect(() => {
 
-      default:
-        return <Callstatus />;
-    }
-  };
+    setActiveTab(window.location.pathname);
+
+  }, [window.location.pathname]);
 
   return (
     <>
@@ -64,7 +62,7 @@ function Callstatuscodetabs() {
                 }}
               >
                 <ul className="nav nav-tabs ">
-                  <li className="nav-item">
+                <Link to={`/callstatus`}> <li className="nav-item">
                     <button
                       className={`nav-link ${
                         activeTab === "Callstatus" ? "active" : "onClick={() => setActiveTab('Callstatus')}"
@@ -73,7 +71,7 @@ function Callstatuscodetabs() {
                     >
                       CALL STATUS CODE
                     </button>
-                  </li>
+                  </li></Link>
                 </ul>
               </div>
             </div>
@@ -83,7 +81,9 @@ function Callstatuscodetabs() {
               className="col-12 col-custom"
               style={{ paddingLeft: "12px", paddingRight: "12px" }}
             >
-              <div className="tab-content">{renderTabContent()}</div>
+              <div className="tab-content">
+                {/* {renderTabContent()} */}
+                </div>
             </div>
           </div>
         </div>
