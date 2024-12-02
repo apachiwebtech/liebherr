@@ -709,9 +709,9 @@ const Customerlocation = () => {
                         )}
                       </div> */}
 
-                      {/* <div className="col-md-4 mb-3">
+                      <div className="col-md-4 mb-3">
                       <label htmlFor="ccnumber" className="form-label">
-                        Customer Contact Number
+                         Contact Person Mobile Number
                       </label>
                       <input
                         type="text"
@@ -720,12 +720,12 @@ const Customerlocation = () => {
                         name="ccnumber"
                         value={formData.ccnumber}
                          onChange={handleChange}
-                        aria-describedby="cpnumber"
+                        aria-describedby="ccnumber"
                       />
                         {duplicateError && (
                       <small className="text-danger">{duplicateError}</small>
                     )}
-                    </div> */}
+                    </div>
 
                       <div className="col-md-12 text-right">
                         <button type="submit" className="btn btn-liebherr">
