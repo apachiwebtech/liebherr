@@ -3,10 +3,13 @@ import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
 import Endcustomertabs from "./Endcustomertabs";
+import { useParams } from "react-router-dom";
 
 const Customerlocation = () => {
   const [countries, setCountries] = useState([]);
-
+  const{customer_id} = useParams()
+  console.log(customer_id);
+  
   const token = localStorage.getItem("token"); 
   const [regions, setRegions] = useState([]);
   const [geoStates, setGeoStates] = useState([]);
@@ -164,7 +167,8 @@ const Customerlocation = () => {
 
   const fetchCustomerlocation = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getcustomerlocation`,{
+
+      const response = await axios.get(`${Base_Url}/getcustomerlocation/${customer_id}`,{
         headers: {
           Authorization: token,
         },
@@ -174,6 +178,7 @@ const Customerlocation = () => {
       setFilteredAreas(response.data);
     } catch (error) {
       console.error("Error fetching areas:", error);
+
     }
   };
 
@@ -289,11 +294,14 @@ const Customerlocation = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name === "pincode_id") {
-      fetchlocations(value);
+     if(value.length === 6){
+      fetchlocations(value);     
+     }
       setFormData(prevState => ({
         ...prevState,
         pincode_id: value,
       }));
+      
     } else {
       setFormData(prevState => ({
         ...prevState,

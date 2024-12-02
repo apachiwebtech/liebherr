@@ -3835,29 +3835,32 @@ app.get("/getpincodedrop/:area_id", authenticateToken, async (req, res) => {
     return res.status(500).json({ error: "Database error occurred" });
   }
 });
-
+  
 // API to fetch all Customer Location
-app.get("/getcustomerlocation", authenticateToken, async (req, res) => {
-  const { id } = req.params;
+app.get("/getcustomerlocation/:customer_id", authenticateToken, async (req, res) => {
+  const { customer_id } = req.params;
   try {
-    // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
 
-    // Construct the SQL query (no parameter binding)
+    // Use parameterized query to avoid SQL injection and ensure valid input
     const sql = `
-       SELECT * FROM awt_customerlocation Where deleted = 0
-      `;
+      SELECT * FROM awt_customerlocation WHERE customer_id = @customer_id AND Deleted = 0;
+    `;
 
-    // Execute the query
-    const result = await pool.request().query(sql);
+    console.log(customer_id , "$$")
 
-    // Return the result
+    const result = await pool
+      .request()
+      .input("customer_id",  customer_id)  // Binding the parameter
+      .query(sql);
+
     return res.json(result.recordset);
   } catch (err) {
     console.error("Database error:", err);
     return res.status(500).json({ error: "Database error occurred" });
   }
 });
+
 
 // API to fetch a specific Customer Location by ID
 app.get("/requestcustomerlocation/:id", authenticateToken,async (req, res) => {
