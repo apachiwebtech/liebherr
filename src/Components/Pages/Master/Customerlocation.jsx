@@ -42,7 +42,7 @@ const Customerlocation = () => {
     ccperson: "",
     ccnumber: "",
     address_type: "",
-    customer_id: "",
+    customer_id: customer_id,
   });
 
   // const fetchCustomermobile = async () => {
@@ -201,7 +201,11 @@ const Customerlocation = () => {
     fetchCustomerlocation();
     fetchCustomermobile();
     fetchcustomerid();
-  }, []);
+    setFormData(prev => ({
+      ...prev,
+      customer_id: customer_id
+    }));
+  }, [customer_id]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -220,6 +224,7 @@ const Customerlocation = () => {
       if (confirmSubmission) {
             const payload = {
           ...formData,
+          customer_id: customer_id,
           country_id: formData.country_id,
           region_id: formData.region_id,
           geostate_id: formData.geostate_id,
@@ -245,6 +250,7 @@ const Customerlocation = () => {
                 address: "",
                 ccperson: "",
                 ccnumber: "",
+                customer_id: customer_id,
               });
               setSuccessMessage('Customer Updated Successfully!');
               setTimeout(() => setSuccessMessage(''), 3000);
@@ -274,6 +280,7 @@ const Customerlocation = () => {
                 ccperson: "",
                 ccnumber: "",
                 address_type: "",
+                customer_id: customer_id,
               });
               setSuccessMessage('Customer Updated Successfully!');
               setTimeout(() => setSuccessMessage(''), 3000);
@@ -386,7 +393,7 @@ const Customerlocation = () => {
 
   const deleted = async (id) => {
     try {
-      await axios.post(`${Base_Url}/deletepincode`, { id },{
+      await axios.post(`${Base_Url}/deletecustomerlocation`, { id },{
         headers: {
           Authorization: token,
         },
@@ -771,7 +778,7 @@ const Customerlocation = () => {
                           #
                         </th>
                         <th scope="col">Contact Person</th>
-                        <th scope="col" width='23%'>Contact Person No</th>
+                        <th scope="col" width='23%'>Customer ID</th>
                         <th scope="col" width='25%'>Address</th>
                         <th
                           scope="col"
@@ -797,7 +804,7 @@ const Customerlocation = () => {
                           </td>
                           
                           <td>{item.ccperson}</td>
-                          <td>{item.ccnumber}</td>
+                          <td>{item.customer_id}</td>
                           <td>{item.address}</td>
                           <td className="text-center">
                             <button
