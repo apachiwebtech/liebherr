@@ -190,15 +190,7 @@ export function Customerlist(params) {
         setIsOpen((prev) => ({ ...prev, [rowId]: !prev[rowId] }));
     };
 
-    useEffect(() => {
-        const $ = window.$; // Access jQuery
-        $(document).ready(function () {
-            $('#myTable').DataTable();
-        });
-        return () => {
-            $('#myTable').DataTable().destroy();
-        };
-    }, []);
+
 
     const navigate = useNavigate()
 
@@ -278,7 +270,7 @@ export function Customerlist(params) {
                                                 onChange={handleFilterChange}
                                             />
                                         </div>
-                                    </div> */}
+                                    </div>
 
                                 <div className="col-md-2">
                                     <div className="form-group">
@@ -376,10 +368,14 @@ export function Customerlist(params) {
                                 <tbody>
 
                                     {Customerdata.map((item, index) => {
+<<<<<<< HEAD
                                 
+=======
+                                        const displayIndex = (currentPage - 1) * pageSize + index + 1; 
+>>>>>>> ee92ca1a67d1dbbb1b4769df849f0ee103af7dec
                                         return (
                                             <tr key={item.id}>
-                                                <td >{index + 1}</td>
+                                                <td >{displayIndex}</td>
                                                 <td >{item.customer_fname}</td>
                                                 {/* <td >{item.customer_lname}</td> */}
                                                 <td >{item.customer_type}</td>

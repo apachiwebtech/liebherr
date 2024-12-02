@@ -7,11 +7,9 @@ import Logo from '../../images/Liebherr-logo-768x432.png'
 
 export function Siteheader(params) {
 
-  const [activeLink, setActiveLink] = useState('');
 
-  const handleLinkClick = (link) => {
-    setActiveLink(activeLink === link ? '' : link); // Toggle active link
-  };
+
+
 
   const navigate = useNavigate();
   const redirect = () => {
@@ -40,20 +38,20 @@ export function Siteheader(params) {
           <ul className="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0 ml-5">
 
             <li>
-              <Link className={`nav-link px-2 link-secondary site ${activeLink === 'dashboard' ? 'bg-primary text-white' : ''}`}
+              <Link className={`nav-link px-2 link-secondary site `}
                 to="/"
-                onClick={() => handleLinkClick('dashboard')}>
+        >
                 Dashboard
               </Link></li>
 
             <li className="nav-item dropdown">
-              <Link className={`nav-link dropdown-toggle site ${activeLink === 'master' ? 'bg-primary text-white' : ''}`}
+              <Link className={`nav-link dropdown-toggle site `}
                 to="#"
                 id="navbarDropdown"
                 role="button"
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
-                onClick={() => handleLinkClick('master')}>
+                >
                 Master
               </Link>
 
@@ -89,24 +87,24 @@ export function Siteheader(params) {
               </ul>
             </li>
             <li className="nav-item dropdown">
-              <Link className={`nav-link site ${activeLink === 'tickets' ? 'bg-primary text-white' : ''}`}
+              <Link className={`nav-link site `}
                 to={`/complaintlist`}
                 id="navbarDropdown"
                 role="button"
                 aria-expanded="false"
-                onClick={() => handleLinkClick('tickets')}>
+               >
                 Tickets
               </Link>
 
             </li>
             <li className="nav-item dropdown">
-              <Link className={`nav-link dropdown-toggle site ${activeLink === 'reports' ? 'bg-primary text-white' : ''}`}
+              <Link className={`nav-link dropdown-toggle site `}
                 to="#"
                 id="navbarDropdown"
                 role="button"
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
-                onClick={() => handleLinkClick('reports')}>
+        >
                 Reports
               </Link>
               <ul className="dropdown-menu site" aria-labelledby="navbarDropdown">

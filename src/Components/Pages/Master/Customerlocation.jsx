@@ -3,10 +3,13 @@ import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
 import Endcustomertabs from "./Endcustomertabs";
+import { useParams } from "react-router-dom";
 
 const Customerlocation = () => {
   const [countries, setCountries] = useState([]);
-
+  const{customer_id} = useParams()
+  console.log(customer_id);
+  
   const token = localStorage.getItem("token"); 
   const [regions, setRegions] = useState([]);
   const [geoStates, setGeoStates] = useState([]);
@@ -39,7 +42,7 @@ const Customerlocation = () => {
     ccperson: "",
     ccnumber: "",
     address_type: "",
-    customer_id: "",
+    customer_id: customer_id,
   });
 
   // const fetchCustomermobile = async () => {
@@ -164,7 +167,8 @@ const Customerlocation = () => {
 
   const fetchCustomerlocation = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getcustomerlocation`,{
+
+      const response = await axios.get(`${Base_Url}/getcustomerlocation/${customer_id}`,{
         headers: {
           Authorization: token,
         },
@@ -174,6 +178,7 @@ const Customerlocation = () => {
       setFilteredAreas(response.data);
     } catch (error) {
       console.error("Error fetching areas:", error);
+
     }
   };
 
@@ -196,7 +201,11 @@ const Customerlocation = () => {
     fetchCustomerlocation();
     fetchCustomermobile();
     fetchcustomerid();
-  }, []);
+    setFormData(prev => ({
+      ...prev,
+      customer_id: customer_id
+    }));
+  }, [customer_id]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -215,6 +224,7 @@ const Customerlocation = () => {
       if (confirmSubmission) {
             const payload = {
           ...formData,
+          customer_id: customer_id,
           country_id: formData.country_id,
           region_id: formData.region_id,
           geostate_id: formData.geostate_id,
@@ -240,6 +250,7 @@ const Customerlocation = () => {
                 address: "",
                 ccperson: "",
                 ccnumber: "",
+                customer_id: customer_id,
               });
               setSuccessMessage('Customer Updated Successfully!');
               setTimeout(() => setSuccessMessage(''), 3000);
@@ -269,6 +280,7 @@ const Customerlocation = () => {
                 ccperson: "",
                 ccnumber: "",
                 address_type: "",
+                customer_id: customer_id,
               });
               setSuccessMessage('Customer Updated Successfully!');
               setTimeout(() => setSuccessMessage(''), 3000);
@@ -289,11 +301,14 @@ const Customerlocation = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name === "pincode_id") {
-      fetchlocations(value);
+     if(value.length === 6){
+      fetchlocations(value);     
+     }
       setFormData(prevState => ({
         ...prevState,
         pincode_id: value,
       }));
+      
     } else {
       setFormData(prevState => ({
         ...prevState,
@@ -378,7 +393,7 @@ const Customerlocation = () => {
 
   const deleted = async (id) => {
     try {
-      await axios.post(`${Base_Url}/deletepincode`, { id },{
+      await axios.post(`${Base_Url}/deletecustomerlocation`, { id },{
         headers: {
           Authorization: token,
         },
@@ -763,7 +778,7 @@ const Customerlocation = () => {
                           #
                         </th>
                         <th scope="col">Contact Person</th>
-                        <th scope="col" width='23%'>Contact Person No</th>
+                        <th scope="col" width='23%'>Customer ID</th>
                         <th scope="col" width='25%'>Address</th>
                         <th
                           scope="col"
@@ -789,7 +804,7 @@ const Customerlocation = () => {
                           </td>
                           
                           <td>{item.ccperson}</td>
-                          <td>{item.ccnumber}</td>
+                          <td>{item.customer_id}</td>
                           <td>{item.address}</td>
                           <td className="text-center">
                             <button

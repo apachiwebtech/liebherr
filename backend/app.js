@@ -973,18 +973,18 @@ app.get("/getcountries", authenticateToken,
       return res.status(500).json(err);
     }
   });
-app.get("/getcustomerid", authenticateToken, async (req,res) => {
+app.get("/getcustomerid", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise
     const sql = "SELECT customer_id FROM awt_customer WHERE deleted = 0";
     const result = await pool.request().query(sql);
     return res.json(result.recordset);
-    } catch (err) {
-      console.error(err);
-      return res.status(500).json(err);
-      }
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json(err);
+  }
 
-      
+
 }
 );
 
@@ -3098,7 +3098,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
   let {
     complaint_date, customer_name, contact_person, email, mobile, address,
     state, city, area, pincode, mode_of_contact, ticket_type, cust_type,
-    warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks, ticket_id,classification,priority
+    warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks, ticket_id, classification, priority
   } = req.body;
 
 
@@ -3835,23 +3835,25 @@ app.get("/getpincodedrop/:area_id", authenticateToken, async (req, res) => {
     return res.status(500).json({ error: "Database error occurred" });
   }
 });
-
+  
 // API to fetch all Customer Location
-app.get("/getcustomerlocation", authenticateToken, async (req, res) => {
-  const { id } = req.params;
+app.get("/getcustomerlocation/:customer_id", authenticateToken, async (req, res) => {
+  const { customer_id } = req.params;
   try {
-    // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
 
-    // Construct the SQL query (no parameter binding)
+    // Use parameterized query to avoid SQL injection and ensure valid input
     const sql = `
-       SELECT * FROM awt_customerlocation Where deleted = 0
-      `;
+      SELECT * FROM awt_customerlocation WHERE customer_id = @customer_id AND Deleted = 0;
+    `;
 
-    // Execute the query
-    const result = await pool.request().query(sql);
+    console.log(customer_id , "$$")
 
-    // Return the result
+    const result = await pool
+      .request()
+      .input("customer_id",  customer_id)  // Binding the parameter
+      .query(sql);
+
     return res.json(result.recordset);
   } catch (err) {
     console.error("Database error:", err);
@@ -3859,8 +3861,9 @@ app.get("/getcustomerlocation", authenticateToken, async (req, res) => {
   }
 });
 
+
 // API to fetch a specific Customer Location by ID
-app.get("/requestcustomerlocation/:id", authenticateToken,async (req, res) => {
+app.get("/requestcustomerlocation/:id", authenticateToken, async (req, res) => {
   const { id } = req.params;
 
 
@@ -3889,13 +3892,52 @@ app.get("/requestcustomerlocation/:id", authenticateToken,async (req, res) => {
   }
 });
 
-// Insert new Customer Location with duplicate check
-app.post("/postcustomerlocation", authenticateToken, async (req, res) => {
-  const { country_id, region_id, geostate_id, geocity_id, area_id, pincode_id, address, ccperson, ccnumber, address_type } = req.body;
+// delete customer location 
+app.post("/deletecustomerlocation", authenticateToken, async (req, res) => {
+  const { id } = req.body;
 
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
+
+    // Create the SQL query with string interpolation (no parameter binding)
+    const sql = `UPDATE awt_customerlocation SET deleted = 1 WHERE id = '${id}'`;
+
+    // Execute the query
+    const result = await pool.request().query(sql);
+
+    // Check if any rows were affected
+    if (result.rowsAffected[0] > 0) {
+      return res.json({ message: "Customer deleted successfully" });
+    } else {
+      return res.status(404).json({ message: "Customer not found" });
+    }
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred" });
+  }
+});
+
+// Insert new Customer Location with duplicate check
+app.post("/postcustomerlocation", authenticateToken, async (req, res) => {
+  const {customer_id, country_id, region_id, geostate_id, geocity_id, area_id, pincode_id, address, ccperson, ccnumber, address_type } = req.body;
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    const checkCustomerSql = `
+    SELECT customer_id FROM awt_customer 
+    WHERE customer_id = '${customer_id}' AND deleted = 0
+  `;
+
+  const customerResult = await pool.request().query(checkCustomerSql);
+
+  if (customerResult.recordset.length === 0) {
+    return res.status(404).json({
+      message: "Customer not found in awt_customer table!"
+    });
+  }
 
     // Check for duplicates
     const checkDuplicateSql = `SELECT * FROM awt_customerlocation WHERE ccperson = '${ccperson}' AND deleted = 0`;
@@ -3906,8 +3948,8 @@ app.post("/postcustomerlocation", authenticateToken, async (req, res) => {
         message: "Duplicate entry, Customer with same number already exists!",
       });
     } else {
-      const insertSql = `INSERT INTO awt_customerlocation (country_id, region_id, geostate_id, geocity_id, district_id, pincode_id, address, ccperson, ccnumber, address_type)
-                         VALUES ('${country_id}', '${region_id}', '${geostate_id}', '${geocity_id}', '${area_id}', '${pincode_id}', '${address}', '${ccperson}', '${ccnumber}', '${address_type}')`;
+      const insertSql = `INSERT INTO awt_customerlocation (customer_id ,country_id, region_id, geostate_id, geocity_id, district_id, pincode_id, address, ccperson, ccnumber, address_type,deleted)
+                         VALUES ('${customer_id}','${country_id}', '${region_id}', '${geostate_id}', '${geocity_id}', '${area_id}', '${pincode_id}', '${address}', '${ccperson}', '${ccnumber}', '${address_type}',0)`;
 
       await pool.request().query(insertSql);
 
@@ -3930,7 +3972,7 @@ app.put("/putcustomerlocation", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
 
     // Check for duplicates
-    const checkDuplicateSql = `SELECT * FROM awt_customerlocation WHERE ccnumber = '${ccnumber}' AND id != '${id}' AND deleted = 0`;
+    const checkDuplicateSql = `SELECT * FROM awt_customerlocation WHERE ccperson = '${ccperson}' AND id != '${id}' AND deleted = 0`;
     const duplicateResult = await pool.request().query(checkDuplicateSql);
 
     if (duplicateResult.recordset.length > 0) {
@@ -3938,7 +3980,7 @@ app.put("/putcustomerlocation", authenticateToken, async (req, res) => {
         message: "Duplicate entry, Customer with same number already exists!",
       });
     } else {
-      const updateSql = `UPDATE awt_customerlocation SET country_id = '${country_id}', region_id = '${region_id}', geostate_id = '${geostate_id}', geocity_id = '${geocity_id}', district_id = '${area_id}', pincode_id = '${pincode_id}', address = '${address}', ccperson = '${ccperson}', ccnumber = '${ccnumber}', address_type = '${address_type}' WHERE id = '${id}'`;
+      const updateSql = `UPDATE awt_customerlocation SET country_id = '${country_id}', region_id = '${region_id}', geostate_id = '${geostate_id}', geocity_id = '${geocity_id}', district_id = '${area_id}', pincode_id = '${pincode_id}', address = '${address}', ccperson = '${ccperson}', ccnumber = '${ccnumber}', address_type = '${address_type}',deleted = 0 WHERE id = '${id}'`;
 
       await pool.request().query(updateSql);
 
@@ -6865,18 +6907,21 @@ app.post("/updateProduct", authenticateToken,
 //Complaint view Insert TicketFormData start
 
 app.post("/ticketFormData", authenticateToken, async (req, res) => {
-  const { ticket_no, serial_no, ModelNumber, engineerdata, call_status,sub_call_status, updated_by } = req.body;
+  const { ticket_no, serial_no, ModelNumber, engineerdata, call_status, sub_call_status, updated_by } = req.body;
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
 
-  const engineer_code = engineerdata.join(',')
+  let engineer_id;
+
+  engineer_id = engineerdata.join(','); // Join the engineer IDs into a comma-separated string
+
 
   try {
     const pool = await poolPromise;
 
     const updateSql = `
       UPDATE complaint_ticket
-      SET engineer_code = '${engineer_code}',call_status = '${call_status}' , updated_by = '${updated_by}', updated_date = '${formattedDate}' , sub_call_status  = '${sub_call_status}' WHERE ticket_no = '${ticket_no}'`;
+      SET engineer_id = '${engineer_id}',call_status = '${call_status}' , updated_by = '${updated_by}', updated_date = '${formattedDate}' , sub_call_status  = '${sub_call_status}' WHERE ticket_no = '${ticket_no}'`;
 
     await pool.request().query(updateSql);
 
@@ -7078,191 +7123,6 @@ app.get('/getheaddata', async (req, res) => {
   }
 });
 
-app.get('/getcomplaint', async (req, res) => {
-  try {
-    const pool = await poolPromise;
-
-    const en_id = req.query.en_id;
-
-    const result = await pool.request()
-      .query(`SELECT * FROM complaint_ticket WHERE engineer_id = '${en_id}' ORDER BY id DESC`);
-
-    if (result.recordset.length > 0) {
-      res.status(200).json({ data: result.recordset });
-    } else {
-      res.status(200).json({ message: 'No records found' });
-    }
-
-  } catch (error) {
-    console.error('Database Query Error:', error);
-    res.status(500).json({ message: 'An error occurred during the database query' });
-  }
-});
-
-app.get('/SymptomCode', async (req, res) => {
-  try {
-    const pool = await poolPromise;
-
-    const result = await pool.request()
-      .query(`select * from symptom_code where deleted = 0`);
-
-    if (result.recordset.length > 0) {
-      res.status(200).json({ data: result.recordset });
-    } else {
-      res.status(200).json({ message: 'No records found' });
-    }
-
-  } catch (error) {
-    console.error('Database Query Error:', error);
-    res.status(500).json({ message: 'An error occurred during the database query' });
-  }
-});
-app.get('/CauseCode', async (req, res) => {
-  try {
-    const pool = await poolPromise;
-
-    const result = await pool.request()
-      .query(`select * from cause_code where deleted = 0`);
-
-    if (result.recordset.length > 0) {
-      res.status(200).json({ data: result.recordset });
-    } else {
-      res.status(200).json({ message: 'No records found' });
-    }
-
-  } catch (error) {
-    console.error('Database Query Error:', error);
-    res.status(500).json({ message: 'An error occurred during the database query' });
-  }
-});
-app.get('/ActionCode', async (req, res) => {
-  try {
-    const pool = await poolPromise;
-
-    const result = await pool.request()
-      .query(`select * from action_code where deleted = 0`);
-
-    if (result.recordset.length > 0) {
-      res.status(200).json({ data: result.recordset });
-    } else {
-      res.status(200).json({ message: 'No records found' });
-    }
-
-  } catch (error) {
-    console.error('Database Query Error:', error);
-    res.status(500).json({ message: 'An error occurred during the database query' });
-  }
-});
-app.get('/CallType', async (req, res) => {
-  try {
-    const pool = await poolPromise;
-
-    const result = await pool.request()
-      .query(`select * from calltype where deleted = 0`);
-
-    if (result.recordset.length > 0) {
-      res.status(200).json({ data: result.recordset });
-    } else {
-      res.status(200).json({ message: 'No records found' });
-    }
-
-  } catch (error) {
-    console.error('Database Query Error:', error);
-    res.status(500).json({ message: 'An error occurred during the database query' });
-  }
-});
-app.get('/CallStatus', async (req, res) => {
-  try {
-    const pool = await poolPromise;
-
-    const result = await pool.request()
-      .query(`select * from call_status where deleted = 0`);
-
-    if (result.recordset.length > 0) {
-      res.status(200).json({ data: result.recordset });
-    } else {
-      res.status(200).json({ message: 'No records found' });
-    }
-
-  } catch (error) {
-    console.error('Database Query Error:', error);
-    res.status(500).json({ message: 'An error occurred during the database query' });
-  }
-});
-
-
-app.get('/getcomplaintdetailsdata', async (req, res) => {
-  try {
-    const pool = await poolPromise;
-
-    const id = req.query.cid;
-
-    const result = await pool.request()
-      .query(`SELECT * FROM complaint_ticket WHERE id = '${id}'`);
-
-    if (result.recordset.length > 0) {
-      res.status(200).json({ data: result.recordset });
-    } else {
-      res.status(200).json({ message: 'No records found' });
-    }
-
-  } catch (error) {
-    console.error('Database Query Error:', error);
-    res.status(500).json({ message: 'An error occurred during the database query' });
-  }
-});
-
-
-app.get('/getremark', async (req, res) => {
-  try {
-    const pool = await poolPromise;
-
-    const id = req.query.cid;
-
-    const result = await pool.request()
-      .query(`SELECT * FROM awt_complaintremark WHERE ticket_no = '${id}'`);
-
-    if (result.recordset.length > 0) {
-      res.status(200).json({ data: result.recordset });
-    } else {
-      res.status(200).json({ Message: 'No records found' });
-    }
-
-  } catch (error) {
-    console.error('Database Query Error:', error);
-    res.status(500).json({ message: 'An error occurred during the database query' });
-  }
-});
-
-// .input('call_remark', sql.VarChar, call_remark)
-app.post('/updatecomplaint', authenticateToken, async (req, res) => {
-  const { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode, com_id, warranty_status } = req.body;
-
-  try {
-    const pool = await poolPromise;
-    const result = await pool.request()
-      .input('actioncode', sql.VarChar, actioncode)
-      .input('symptomcode', sql.VarChar, symptomcode)
-      .input('causecode', sql.VarChar, causecode)
-      .input('service_charges', sql.VarChar, service_charges)
-      .input('call_status', sql.VarChar, call_status)
-      .input('call_type', sql.VarChar, call_type)
-      .input('other_charge', sql.VarChar, other_charge)
-      .input('warranty_status', sql.VarChar, warranty_status)
-      .input('com_id', sql.VarChar, com_id)
-      .query('UPDATE complaint_ticket SET warranty_status = @warranty_status, symptom_code = @symptomcode, cause_code = @causecode, action_code = @actioncode, service_charges = @service_charges, call_status = @call_status, call_type = @call_type, other_charges = @other_charge WHERE id = @com_id');
-
-    // Check if any rows were updated
-    if (result.rowsAffected[0] > 0) {
-      res.status(200).json({ message: 'Update successful' });
-    } else {
-      res.status(400).json({ message: 'Failed to update: No rows affected' });
-    }
-  } catch (error) {
-    console.error('Database Query Error:', error);
-    res.status(500).json({ message: 'An error occurred during the update' });
-  }
-});
 
 //Start Complaint List
 // Complaint List API with filters
@@ -7280,121 +7140,143 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
       ticketno,
       status,
       customerID,
-
+      page = 1,
+      pageSize = 10,
       csp,
       msp,
       mode_of_contact,
       customer_class,
     } = req.query;
 
-    console.log('Received status:', status); // Debug log
+    const offset = (page - 1) * pageSize;
+
+
 
     let sql = `
-        SELECT c.*, e.title as assigned_name, 
-        DATEDIFF(day, (c.ticket_date), GETDATE()) AS ageingdays 
+        SELECT c.* ,
+               DATEDIFF(DAY, c.ticket_date, GETDATE()) AS ageingdays
+        FROM complaint_ticket AS c WHERE c.deleted = 0`;
+
+    const countSql = `
+        SELECT COUNT(*) AS totalCount
         FROM complaint_ticket AS c
-        JOIN awt_engineermaster AS e ON c.engineer_id = e.id
-        WHERE c.deleted = 0
-    `;
+        WHERE c.deleted = 0`;
 
-    let nots = 'NOT';
+    let params = []; // Change to let to allow mutation
 
-
-
+    // // Filtering conditions
     if (fromDate && toDate) {
-      sql += ` AND CAST(c.ticket_date AS DATE) >= CAST('${fromDate}' AS DATE)
-                AND CAST(c.ticket_date AS DATE) <= CAST('${toDate}' AS DATE)`;
-      nots = ''
+      sql +=  `AND CAST(c.ticket_date AS DATE) BETWEEN @fromDate AND @toDate`;
+      params.push({ name: "fromDate", value: fromDate }, { name: "toDate", value: toDate });
     }
 
     if (customerName) {
-      sql += ` AND c.customer_name LIKE '%${customerName}%'`;
-      nots = ''
+      sql += ` AND c.customer_name LIKE @customerName`;
+      params.push({ name: "customerName", value: `%${customerName}%` });
     }
 
     if (customerEmail) {
-      sql += ` AND c.customer_email LIKE '%${customerEmail}%'`;
-      nots = ''
+      sql += ` AND c.customer_email LIKE @customerEmail`;
+      params.push({ name: "customerEmail", value: `%${customerEmail}%` });
     }
 
     if (customerMobile) {
-      sql += ` AND c.customer_mobile LIKE '%${customerMobile}%'`;
-      nots = ''
+      sql += ` AND c.customer_mobile LIKE @customerMobile`;
+      params.push({ name: "customerMobile", value: `%${customerMobile}%` });
     }
 
     if (serialNo) {
-      sql += ` AND c.serial_no LIKE '%${serialNo}%'`;
-      nots = ''
+      sql += ` AND c.serial_no LIKE @serialNo`;
+      params.push({ name: "serialNo", value: `%${serialNo}%` });
     }
 
     if (productCode) {
-      sql += ` AND c.ModelNumber LIKE '%${productCode}%'`;
-      nots = ''
+      sql += ` AND c.ModelNumber LIKE @productCode`;
+      params.push({ name: "productCode", value: `%${productCode}%` });
     }
-
     if (ticketno) {
-      sql += ` AND c.ticket_no LIKE '%${ticketno}%'`;
-      nots = ''
+      sql += ` AND c.ticket_no LIKE @ticketno`;
+      params.push({ name: "ticketno", value: `%${ticketno}%` });
     }
+    
+
     if (customerID) {
-      sql += ` AND c.customer_id LIKE '%${customerID}%'`;
-      nots = ''
+      sql += ` AND c.customer_id LIKE @customerID`;
+   
+      params.push({ name: "customerID", value: `%${customerID}%` });
     }
-    //csp msp call_type and customer_class
 
     if (csp) {
-      sql += ` AND c.csp LIKE '%${csp}%'`;
-      nots = ''
+      sql += ` AND c.csp LIKE @csp`;
+ 
+      params.push({ name: "csp", value: `%${csp}%` });
     }
 
     if (msp) {
-      sql += ` AND c.msp LIKE '%${msp}%'`;
-      nots = ''
+      sql += ` AND c.msp LIKE @msp`;
+
+      params.push({ name: "msp", value: `%${msp}%` });
     }
 
     if (mode_of_contact) {
-      sql += ` AND c.mode_of_contact LIKE '%${mode_of_contact}%'`;
-      nots = ''
+      sql += ` AND c.mode_of_contact LIKE @mode_of_contact`;
+  
+      params.push({ name: "mode_of_contact", value: `%${mode_of_contact}%` });
     }
 
     if (customer_class) {
-      sql += ` AND c.customer_class LIKE '%${customer_class}%'`;
-      nots = ''
+      sql += ` AND c.customer_class LIKE @customer_class`;
+      params.push({ name: "customer_class", value: `%${customer_class}%` });
     }
 
+    // if (status) {
+    //   sql += ` AND c.call_status = @status`;
+    //   params.push({ name: "status", value: status });
+    // }
 
+       // If no status is provided, exclude 'Closed' and 'Cancelled'
+       if (status) {
+        sql += ` AND c.call_status = @status`;
+        params.push({ name: "status", value: status });
+      } else {
+        sql += ` AND c.call_status != 'Closed' AND c.call_status != 'Cancelled'`;
+      }
 
-    // Modified status filtering logic
-    if (status === 'Closed' || status === 'Cancelled') {
-      sql += ` AND c.call_status = '${status}'`;
-    } else if (status === '') {
-      // sql += ` AND c.call_status  IN ('Closed', 'Cancelled')`;
-      sql += ``;
-    } else if (status) {
-      sql += ` AND c.call_status = '${status}'`;
-    } else {
-      // sql += ` AND c.call_status ${nots} IN ('Closed', 'Cancelled')`;
-      sql += ``;
-    }
+    // Pagination
+    sql += ` ORDER BY c.ticket_date DESC OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY`;
+    params.push(
+      { name: "offset", value: offset },
+      { name: "pageSize", value: parseInt(pageSize) }
+    );
 
-    if (status == undefined) {
-      sql += ``
-    }
+    console.log(sql, "$$$$");
 
+    // Execute queries
+    const request = pool.request();
+    params.forEach((param) => request.input(param.name, param.value));
+    const result = await request.query(sql);
 
-    sql += " ORDER BY c.id DESC";
+    const countRequest = pool.request();
+    params.forEach((param) => countRequest.input(param.name, param.value));
+    const countResult = await countRequest.query(countSql);
 
+    const totalCount = countResult.recordset[0].totalCount;
 
-
-    console.log('SQL Query:', sql); // Debug log
-    const result = await pool.request().query(sql);
-
-    return res.json(result.recordset);
+    return res.json({
+      data: result.recordset,
+      totalCount,
+      page: parseInt(page),
+      pageSize: parseInt(pageSize),
+    });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "An error occurred while fetching the complaint list" });
+    console.error("Error fetching complaint list:", err.message);
+    return res.status(500).json({
+      message: "An error occurred while fetching the complaint list",
+    });
   }
 });
+
+
 
 
 // CSP complaint list
@@ -7750,7 +7632,7 @@ app.get("/getcallstatus", authenticateToken,
 
 app.post("/getsubcallstatus", authenticateToken,
   async (req, res) => {
-   const {Status_Id} = req.body; 
+    const { Status_Id } = req.body;
 
     try {
       const pool = await poolPromise;
@@ -7775,6 +7657,33 @@ app.get("/getsubcallstatusdata", authenticateToken,
       const pool = await poolPromise;
       // Modified SQL query using parameterized query
       const sql = `select id, SubCallstatus from sub_call_status where deleted = 0 `;
+
+      const result = await pool.request().query(sql);
+
+      return res.json(result.recordset);
+    } catch (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ error: "Database error occurred", details: err.message });
+    }
+  });
+
+app.post("/getupdateengineer", authenticateToken,
+  async (req, res) => {
+
+    const { eng_id } = req.body;
+
+    try {
+      const pool = await poolPromise;
+      // Modified SQL query using parameterized query
+      const sql = `
+    SELECT * 
+    FROM awt_engineermaster 
+    WHERE deleted = 0 
+      AND engineer_id IN (
+          SELECT value 
+          FROM STRING_SPLIT('${eng_id}', ',')
+      )
+`;
 
       const result = await pool.request().query(sql);
 

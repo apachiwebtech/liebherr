@@ -83,6 +83,7 @@ import { Servicecontractlist } from './Components/Pages/Master/Servicecontractli
 import { Base_Url } from './Components/Utils/Base_Url';
 import axios from 'axios';
 import DataTable from './Components/Pages/Complaint/Compdatatablebackup';
+import HeaderMsp from './Components/Layout/HeaderMsp';
 
 
 
@@ -562,7 +563,7 @@ function CSPAPP() {
 
   );
 }
-
+  
 function MSPAPP() {
 
   const navigate = useNavigate()
@@ -572,7 +573,7 @@ function MSPAPP() {
   }, [navigate])
   return (
     <>
-      <Loginheader />
+      <HeaderMsp />
       <Outlet />
       <Sitefooter />
     </>

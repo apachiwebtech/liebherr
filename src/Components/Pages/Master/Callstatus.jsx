@@ -196,10 +196,7 @@ const Callstatus = () => {
                       value={formData.Callstatus}
                       onChange={handleChange}
                       placeholder="Enter Call Status Code "
-                      pattern="[0-9]*" // This pattern ensures only numbers are allowed
-                      onInput={(e) => {
-                        e.target.value = e.target.value.replace(/[^0-9]/g, ""); // Remove any non-numeric characters
-                      }}
+                     
                     />
                     {errors.Callstatus && (
                       <small className="text-danger">{errors.Callstatus}</small>
