@@ -7088,6 +7088,8 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
 
     const offset = (page - 1) * pageSize;
 
+
+
     let sql = `
         SELECT c.* ,
                DATEDIFF(DAY, c.ticket_date, GETDATE()) AS ageingdays
@@ -7098,87 +7100,77 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
         FROM complaint_ticket AS c
         WHERE c.deleted = 0`;
 
-    const params = []; // Array to hold query parameters
+    let params = []; // Change to let to allow mutation
 
-    // Filtering conditions
+    // // Filtering conditions
     if (fromDate && toDate) {
-      sql += ` AND CAST(c.ticket_date AS DATE) BETWEEN @fromDate AND @toDate`;
-      countSql += ` AND CAST(c.ticket_date AS DATE) BETWEEN @fromDate AND @toDate`;
+      sql +=  `AND CAST(c.ticket_date AS DATE) BETWEEN @fromDate AND @toDate`;
       params.push({ name: "fromDate", value: fromDate }, { name: "toDate", value: toDate });
     }
 
     if (customerName) {
       sql += ` AND c.customer_name LIKE @customerName`;
-      countSql += ` AND c.customer_name LIKE @customerName`;
       params.push({ name: "customerName", value: `%${customerName}%` });
     }
 
     if (customerEmail) {
       sql += ` AND c.customer_email LIKE @customerEmail`;
-      countSql += ` AND c.customer_email LIKE @customerEmail`;
       params.push({ name: "customerEmail", value: `%${customerEmail}%` });
     }
 
     if (customerMobile) {
       sql += ` AND c.customer_mobile LIKE @customerMobile`;
-      countSql += ` AND c.customer_mobile LIKE @customerMobile`;
       params.push({ name: "customerMobile", value: `%${customerMobile}%` });
     }
 
     if (serialNo) {
       sql += ` AND c.serial_no LIKE @serialNo`;
-      countSql += ` AND c.serial_no LIKE @serialNo`;
       params.push({ name: "serialNo", value: `%${serialNo}%` });
     }
 
     if (productCode) {
       sql += ` AND c.ModelNumber LIKE @productCode`;
-      countSql += ` AND c.ModelNumber LIKE @productCode`;
       params.push({ name: "productCode", value: `%${productCode}%` });
     }
-
     if (ticketno) {
       sql += ` AND c.ticket_no LIKE @ticketno`;
-      countSql += ` AND c.ticket_no LIKE @ticketno`;
       params.push({ name: "ticketno", value: `%${ticketno}%` });
     }
+    
 
     if (customerID) {
       sql += ` AND c.customer_id LIKE @customerID`;
-      countSql += ` AND c.customer_id LIKE @customerID`;
+   
       params.push({ name: "customerID", value: `%${customerID}%` });
     }
 
     if (csp) {
       sql += ` AND c.csp LIKE @csp`;
-      countSql += ` AND c.csp LIKE @csp`;
+ 
       params.push({ name: "csp", value: `%${csp}%` });
     }
 
     if (msp) {
       sql += ` AND c.msp LIKE @msp`;
-      countSql += ` AND c.msp LIKE @msp`;
+
       params.push({ name: "msp", value: `%${msp}%` });
     }
 
     if (mode_of_contact) {
       sql += ` AND c.mode_of_contact LIKE @mode_of_contact`;
-      countSql += ` AND c.mode_of_contact LIKE @mode_of_contact`;
+  
       params.push({ name: "mode_of_contact", value: `%${mode_of_contact}%` });
     }
 
     if (customer_class) {
       sql += ` AND c.customer_class LIKE @customer_class`;
-      countSql += ` AND c.customer_class LIKE @customer_class`;
       params.push({ name: "customer_class", value: `%${customer_class}%` });
     }
 
     if (status) {
       sql += ` AND c.call_status = @status`;
-      countSql += ` AND c.call_status = @status`;
       params.push({ name: "status", value: status });
     }
-
 
     // Pagination
     sql += ` ORDER BY c.ticket_date DESC OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY`;
@@ -7187,9 +7179,7 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
       { name: "pageSize", value: parseInt(pageSize) }
     );
 
-
-
-    console.log(sql, "$$$$")
+    console.log(sql, "$$$$");
 
     // Execute queries
     const request = pool.request();
@@ -7215,6 +7205,7 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
     });
   }
 });
+
 
 
 
@@ -7618,7 +7609,7 @@ app.post("/getupdateengineer", authenticateToken,
     SELECT * 
     FROM awt_engineermaster 
     WHERE deleted = 0 
-      AND id IN (
+      AND engineer_id IN (
           SELECT value 
           FROM STRING_SPLIT('${eng_id}', ',')
       )
