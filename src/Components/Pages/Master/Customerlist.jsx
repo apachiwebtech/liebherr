@@ -203,9 +203,9 @@ export function Customerlist(params) {
 
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
 
-                            <div className='p-1 text-right'>
+                            {/* <div className='p-1 text-right'>
                                 <Link to={`/Customer`}><button className='btn btn-primary'>Add Customer</button></Link>
-                            </div>
+                            </div> */}
                             <div className="row mb-3">
 
                                 <div className="col-md-2">
@@ -271,6 +271,7 @@ export function Customerlist(params) {
                                             />
                                         </div>
                                     </div>
+                                    */}
 
                                 <div className="col-md-2">
                                     <div className="form-group">
@@ -352,15 +353,16 @@ export function Customerlist(params) {
                                 <thead>
                                     <tr>
                                         <th width="3%">#</th>
-                                        <th width="7%">Customer Name</th>
+                                        <th width="10%">Customer ID</th>
+                                        <th width="7%">Name</th>
                                         {/* <th width="8%">Customer Last Name</th> */}
                                         <th width="10%">Customer Type</th>
-                                        <th width="10%">Cutomer Mobile Number</th>
+                                        <th width="10%">Mobile Number</th>
                                         <th width="15%">Customer Classification</th>
                                         <th width="20%">Customer Email</th>
-                                        <th width="10%">Customer ID</th>
+                                        
                                         <th width="15%">Add Location</th>
-                                        <th width="10%">Add Unique Product</th>
+                                        <th width="10%">Add Product</th>
                                         <th width="5%">Edit</th>
                                         <th width="5%">Delete</th>
                                     </tr>
@@ -368,21 +370,18 @@ export function Customerlist(params) {
                                 <tbody>
 
                                     {Customerdata.map((item, index) => {
-<<<<<<< HEAD
-                                
-=======
                                         const displayIndex = (currentPage - 1) * pageSize + index + 1; 
->>>>>>> ee92ca1a67d1dbbb1b4769df849f0ee103af7dec
                                         return (
                                             <tr key={item.id}>
                                                 <td >{displayIndex}</td>
+                                                <td >{item.customer_id}</td>
                                                 <td >{item.customer_fname}</td>
                                                 {/* <td >{item.customer_lname}</td> */}
                                                 <td >{item.customer_type}</td>
                                                 <td >{item.mobileno}</td>
                                                 <td >{item.customer_classification}</td>
                                                 <td >{item.email}</td>
-                                                <td >{item.customer_id}</td>
+                                                
                                                 <td>
                                                     <Link to={`/Customerlocation/${item.customer_id}`}>
                                                         <button style={{ backgroundColor: '#0D6EFD', color: "white" }} className='btn'
