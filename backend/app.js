@@ -7270,12 +7270,12 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
     console.log('Received status:', status); // Debug log
 
     let sql = `
-        SELECT c.*, e.title as assigned_name, 
-        DATEDIFF(day, (c.ticket_date), GETDATE()) AS ageingdays 
-        FROM complaint_ticket AS c
-        JOIN awt_engineermaster AS e ON c.engineer_id = e.id
-        WHERE c.deleted = 0
-    `;
+        SELECT c.*, e.title AS assigned_name,
+       DATEDIFF(DAY, c.ticket_date, GETDATE()) AS ageingdays
+FROM complaint_ticket AS c
+CROSS APPLY STRING_SPLIT(c.engineer_id, ',') AS split_engineer_id
+JOIN awt_engineermaster AS e ON CAST(split_engineer_id.value AS INT) = e.id
+WHERE c.deleted = 0`;
 
     let nots = 'NOT';
 
