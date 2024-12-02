@@ -6,10 +6,13 @@ import { Base_Url } from "../../Utils/Base_Url";
 import Endcustomertabs from "./Endcustomertabs";
 
 const Uniqueproduct = () => {
-  const { id } = useParams();
+  const { customer_id } = useParams();
+
   const [errors, setErrors] = useState({});
   //   const [Customerlocation, setCustomerlocation] = useState({});
   const [product, setProduct] = useState([]);
+  const [Model, setModel] = useState([]);
+  const [CustomerAddress, setCustomerAddress] = useState([]);
   const [isEdit, setIsEdit] = useState(false);
   const [duplicateError, setDuplicateError] = useState("");
   const token = localStorage.getItem("token"); // Get token from localStorage
@@ -19,6 +22,7 @@ const Uniqueproduct = () => {
     location: "",
     date: "",
     serialnumber: "",
+    CustomerID: customer_id,
   });
 
   // Format date function
@@ -41,19 +45,28 @@ const Uniqueproduct = () => {
     return `${year}-${month}-${day}`; // This format works with the date input
   };
 
-  const fetchCustomerlocationById = async () => {
-
+  const fetchCustomerlocationById = async (customer_id) => {
     try {
-      const response = await axios.post(`${Base_Url}/your-api-endpoint`, { id }, {
+      const response = await axios.get(`${Base_Url}/fetchcustomerlocationByCustomerid/${customer_id}`, {
         headers: {
           Authorization: token,
         },
       });
-      console.log(response.data); 
+  
+      if (Array.isArray(response.data)) {
+        setCustomerAddress(response.data); // Handle as array
+      } else if (response.data && typeof response.data === 'object') {
+        setCustomerAddress([response.data]); // Wrap single object in an array
+      } else {
+        console.error('Unexpected data format:', response.data);
+      }
+
+      console.log(response.data)
     } catch (error) {
-      console.error("Error fetching product by ID:", error);
+      console.error("Error fetching customer location by ID:", error);
     }
   };
+  
 
   const fecthProduct = async () => {
     try {
@@ -69,11 +82,28 @@ const Uniqueproduct = () => {
     }
   };
 
+  const fetchModelno = async () => {
+    try {
+      const response = await axios.get(`${Base_Url}/product_master`,{
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      });
+      console.log(response.data);
+      setModel(response.data);
+    } catch (error) {
+      console.error("Error fetching product:", error);
+    }
+  };
+
   useEffect(() => {
     fecthProduct();
-    fetchCustomerlocationById();
-    // fetchCustomerlocation();
-  }, [id]);
+    fetchModelno();
+ if (customer_id !== 0) {
+      fetchCustomerlocationById(customer_id);
+    }
+
+  }, [customer_id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -225,44 +255,81 @@ const Uniqueproduct = () => {
               <div className="col-4">
                 <form onSubmit={handleSubmit}>
                   <div className="row">
-                  <div className="col-md-6 mb-3">
-                      <label htmlFor="snumber" className="form-label">
-                        Serial Number
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        id="snumber"
-                        name="serialnumber"
-                        value={formData.serialnumber}
-                        onChange={handleChange}
-                        aria-describedby="snumber"
-                      />
-                       {errors.serialnumber && (
-                        <small className="text-danger">{errors.serialnumber}</small>
+                  <div className="col-md-12 mb-3">
+                          <label htmlFor="country" className="form-label pb-0 dropdown-label">
+                            Customer Address
+                          </label>
+                          <select
+                            className="form-select dropdown-select"
+                            name="location"
+                            value={formData.customer_address}
+                            onChange={handleChange}
+                          >
+                            <option value="">Select Customer Address</option>
+                            {CustomerAddress.length > 0 ? (
+                              CustomerAddress.map((cust_add, index) => (
+                                <option key={index} value={cust_add.address}>
+                                  {cust_add.address}
+                                </option>
+                              ))
+                            ) : (
+                              <option value="" disabled>No addresses available</option>
+                            )}
+                          </select>
+                          {errors.location && (
+                        <small className="text-danger">{errors.location}</small>
                       )}
-                      {duplicateError && (
-                      <small className="text-danger">{duplicateError}</small>
-                    )}
-                    </div>
-                    <div className="col-md-6 mb-3">
-                      <label htmlFor="pname" className="form-label">
-                        Model No
-                      </label>
-                      <input
-                        type="text"
-                        name="product"
-                        value={formData.product}  
-                        onChange={handleChange}
-                        className="form-control"
-                        id="pname"
-                        aria-describedby="pname"
-                        placeholder=""
-                      />
-                      {errors.product && (
-                        <small className="text-danger">{errors.product}</small>
-                      )}
-                    </div>
+                        </div>
+
+                        <div className="col-md-12 mb-3">
+                            <label htmlFor="pname" className="form-label">
+                              Product
+                            </label>
+                                <select 
+                                  className="form-control" 
+                                  onChange={handleChange} 
+                                  value={formData.product || ''}
+                                  name="product"
+                                >
+                                  <option value="">Select</option>
+                                  {Model && Model.length > 0 ? (
+                                    Model.map((item, index) => (
+                                      <option key={index} value={item.item_description}>
+                                        {item.item_description}
+                                      </option>
+                                    ))
+                                  ) : (
+                                    <option value="" disabled>No products available</option>
+                                  )}
+                                </select>
+                            {errors.product && (
+                              <small className="text-danger">{errors.product}</small>
+                            )}
+                      </div>
+
+
+                        <div className="col-md-6 mb-3">
+                            <label htmlFor="snumber" className="form-label">
+                              Serial Number
+                            </label>
+                            <input
+                              type="text"
+                              className="form-control"
+                              id="snumber"
+                              name="serialnumber"
+                              value={formData.serialnumber}
+                              onChange={handleChange}
+                              aria-describedby="snumber"
+                            />
+                            {errors.serialnumber && (
+                              <small className="text-danger">{errors.serialnumber}</small>
+                            )}
+                            {duplicateError && (
+                            <small className="text-danger">{duplicateError}</small>
+                          )}
+                          </div>
+                    
+
                     <div className="col-md-6 mb-3">
                       <label htmlFor="pdate" className="form-label">
                         Purchase Date
@@ -281,7 +348,7 @@ const Uniqueproduct = () => {
                       )}
                     </div>
                     
-                    <div className="col-md-6 mb-3">
+                    {/* <div className="col-md-6 mb-3">
                       <label htmlFor="locationc" className="form-label">
                         Location
                       </label>
@@ -297,7 +364,8 @@ const Uniqueproduct = () => {
                        {errors.location && (
                         <small className="text-danger">{errors.location}</small>
                       )}
-                    </div>
+                    </div> */}
+
                     <div className="col-md-12 text-right">
                       <button
                         className="btn btn-liebherr"

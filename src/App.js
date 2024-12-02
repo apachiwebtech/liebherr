@@ -245,7 +245,7 @@ const Router = createBrowserRouter([
         element: <Customer />
       },
       {
-        path: "/uniqueproduct/:id",
+        path: "/uniqueproduct/:customer_id",
         element: <Uniqueproduct />
       },
       {

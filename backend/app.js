@@ -2669,7 +2669,7 @@ app.post("/deletesitedefect", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
     const sql = `
-      UPDATE awt_typeofdefect
+      UPDATE awt_site_defect
       SET deleted = 1, updated_date = GETDATE()
       WHERE id = ${id}
     `;
@@ -4013,23 +4013,23 @@ app.get("/requestproductunique/:id", authenticateToken, async (req, res) => {
   }
 });
 app.post("/postproductunique", authenticateToken, async (req, res) => {
-  const { product, location, date, serialnumber } = req.body;
+  const { product, location, date, serialnumber, CustomerID } = req.body;
 
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
 
     // Check for duplicates customer_ id will be add
-    const checkDuplicateSql = `SELECT * FROM awt_uniqueproductmaster WHERE serial_no = '${serialnumber}'AND deleted = 0`;
+    const checkDuplicateSql = `SELECT * FROM awt_uniqueproductmaster WHERE CustomerID = '${CustomerID}'AND address = '${location}'AND ModelNumber = '${product}'AND deleted = 0`;
     const duplicateResult = await pool.request().query(checkDuplicateSql);
 
     if (duplicateResult.recordset.length > 0) {
       return res.status(409).json({
-        message: "Product with same serial number already exists!",
+        message: "Product with same customer Id and Location already exists!",
       });
     } else {
       // Insert new product
-      const insertSql = `INSERT INTO awt_uniqueproductmaster (product, location, date, serial_no)
+      const insertSql = `INSERT INTO awt_uniqueproductmaster (ModelNumber, address, date, serial_no)
                         VALUES ('${product}', '${location}', '${date}', '${serialnumber}')`;
       await pool.request().query(insertSql);
 
@@ -4054,7 +4054,7 @@ app.put("/putproductunique", authenticateToken, async (req, res) => {
 
     if (duplicateResult.recordset.length > 0) {
       return res.status(409).json({
-        message: "Product with same serial number already exists!",
+        message: "Product with same customer Id and Location already exists!",
       });
     } else {
       // Update the product if no duplicates are found
@@ -4087,6 +4087,29 @@ app.post("/deleteproductunique", authenticateToken, async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "Error deleting product" });
+  }
+});
+
+app.get('/fetchcustomerlocationByCustomerid/:customer_id', authenticateToken, async (req, res) => {
+  const { customer_id } = req.params; 
+
+  console.log(customer_id, "customer_id")
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    const sql = `SELECT * FROM awt_customerlocation WHERE customer_id = '${customer_id}' AND deleted = 0`;
+console.log(sql)
+    const result = await pool.request().query(sql);
+
+    if (result.recordset.length > 0) {
+      res.json(result.recordset[0]);
+    } else {
+      res.status(404).json({ message: "Data not found" });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Database error", error: err });
   }
 });
 //Unique Product Master Linked to Location End

@@ -376,6 +376,7 @@ export function Customerlist(params) {
                                 <tbody>
 
                                     {Customerdata.map((item, index) => {
+                                
                                         return (
                                             <tr key={item.id}>
                                                 <td >{index + 1}</td>
@@ -396,7 +397,7 @@ export function Customerlist(params) {
                                                     </Link>
                                                 </td>
                                                 <td>
-                                                    <Link to={`/uniqueproduct/${item.customer_id}`}>
+                                                 <Link to={`/uniqueproduct/${item.customer_id}`}>
                                                         <button style={{ backgroundColor: '#0D6EFD', color: 'white' }} className='btn'
                                                             onClick={() => {
                                                                 navigate(`/uniqueproduct/${item.customer_id}`)
