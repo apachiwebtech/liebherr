@@ -104,7 +104,7 @@ export function Complaintlist(params) {
             );
             // Filter out 'Closed' and 'Cancelled' status complaints by default
             const filteredComplaints = response.data.data.filter(complaint =>
-                ![].includes(complaint.call_status)
+                !['Cancelled'].includes(complaint.call_status)
             );
 
             console.log(filteredComplaints)

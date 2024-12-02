@@ -7167,10 +7167,18 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
       params.push({ name: "customer_class", value: `%${customer_class}%` });
     }
 
-    if (status) {
-      sql += ` AND c.call_status = @status`;
-      params.push({ name: "status", value: status });
-    }
+    // if (status) {
+    //   sql += ` AND c.call_status = @status`;
+    //   params.push({ name: "status", value: status });
+    // }
+
+       // If no status is provided, exclude 'Closed' and 'Cancelled'
+       if (status) {
+        sql += ` AND c.call_status = @status`;
+        params.push({ name: "status", value: status });
+      } else {
+        sql += ` AND c.call_status != 'Closed' AND c.call_status != 'Cancelled'`;
+      }
 
     // Pagination
     sql += ` ORDER BY c.ticket_date DESC OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY`;

@@ -347,7 +347,7 @@ export function Complaintview(params) {
       sub_call_status: complaintview.sub_call_status,
       updated_by: 1,
       ticket_no: complaintview.ticket_no,
-      engineerdata: addedEngineers.map((item) => item.id)
+      engineerdata: addedEngineers.map((item) => item.engineer_id)
     };
 
     axios.post(`${Base_Url}/ticketFormData`, data, {
