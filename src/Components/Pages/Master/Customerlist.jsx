@@ -368,9 +368,10 @@ export function Customerlist(params) {
                                 <tbody>
 
                                     {Customerdata.map((item, index) => {
+                                        const displayIndex = (currentPage - 1) * pageSize + index + 1; 
                                         return (
                                             <tr key={item.id}>
-                                                <td >{index + 1}</td>
+                                                <td >{displayIndex}</td>
                                                 <td >{item.customer_fname}</td>
                                                 {/* <td >{item.customer_lname}</td> */}
                                                 <td >{item.customer_type}</td>

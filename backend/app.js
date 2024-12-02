@@ -973,18 +973,18 @@ app.get("/getcountries", authenticateToken,
       return res.status(500).json(err);
     }
   });
-app.get("/getcustomerid", authenticateToken, async (req,res) => {
+app.get("/getcustomerid", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise
     const sql = "SELECT customer_id FROM awt_customer WHERE deleted = 0";
     const result = await pool.request().query(sql);
     return res.json(result.recordset);
-    } catch (err) {
-      console.error(err);
-      return res.status(500).json(err);
-      }
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json(err);
+  }
 
-      
+
 }
 );
 
@@ -3098,7 +3098,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
   let {
     complaint_date, customer_name, contact_person, email, mobile, address,
     state, city, area, pincode, mode_of_contact, ticket_type, cust_type,
-    warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks, ticket_id,classification,priority
+    warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks, ticket_id, classification, priority
   } = req.body;
 
 
@@ -3863,7 +3863,7 @@ app.get("/getcustomerlocation/:customer_id", authenticateToken, async (req, res)
 
 
 // API to fetch a specific Customer Location by ID
-app.get("/requestcustomerlocation/:id", authenticateToken,async (req, res) => {
+app.get("/requestcustomerlocation/:id", authenticateToken, async (req, res) => {
   const { id } = req.params;
 
 
@@ -6845,10 +6845,10 @@ app.post("/updateProduct", authenticateToken,
 //Complaint view Insert TicketFormData start
 
 app.post("/ticketFormData", authenticateToken, async (req, res) => {
-  const { ticket_no, serial_no, ModelNumber, engineerdata, call_status,sub_call_status, updated_by } = req.body;
+  const { ticket_no, serial_no, ModelNumber, engineerdata, call_status, sub_call_status, updated_by } = req.body;
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
-  
+
   let engineer_id;
 
   engineer_id = engineerdata.join(','); // Join the engineer IDs into a comma-separated string
@@ -7061,191 +7061,6 @@ app.get('/getheaddata', async (req, res) => {
   }
 });
 
-app.get('/getcomplaint', async (req, res) => {
-  try {
-    const pool = await poolPromise;
-
-    const en_id = req.query.en_id;
-
-    const result = await pool.request()
-      .query(`SELECT * FROM complaint_ticket WHERE engineer_id = '${en_id}' ORDER BY id DESC`);
-
-    if (result.recordset.length > 0) {
-      res.status(200).json({ data: result.recordset });
-    } else {
-      res.status(200).json({ message: 'No records found' });
-    }
-
-  } catch (error) {
-    console.error('Database Query Error:', error);
-    res.status(500).json({ message: 'An error occurred during the database query' });
-  }
-});
-
-app.get('/SymptomCode', async (req, res) => {
-  try {
-    const pool = await poolPromise;
-
-    const result = await pool.request()
-      .query(`select * from symptom_code where deleted = 0`);
-
-    if (result.recordset.length > 0) {
-      res.status(200).json({ data: result.recordset });
-    } else {
-      res.status(200).json({ message: 'No records found' });
-    }
-
-  } catch (error) {
-    console.error('Database Query Error:', error);
-    res.status(500).json({ message: 'An error occurred during the database query' });
-  }
-});
-app.get('/CauseCode', async (req, res) => {
-  try {
-    const pool = await poolPromise;
-
-    const result = await pool.request()
-      .query(`select * from cause_code where deleted = 0`);
-
-    if (result.recordset.length > 0) {
-      res.status(200).json({ data: result.recordset });
-    } else {
-      res.status(200).json({ message: 'No records found' });
-    }
-
-  } catch (error) {
-    console.error('Database Query Error:', error);
-    res.status(500).json({ message: 'An error occurred during the database query' });
-  }
-});
-app.get('/ActionCode', async (req, res) => {
-  try {
-    const pool = await poolPromise;
-
-    const result = await pool.request()
-      .query(`select * from action_code where deleted = 0`);
-
-    if (result.recordset.length > 0) {
-      res.status(200).json({ data: result.recordset });
-    } else {
-      res.status(200).json({ message: 'No records found' });
-    }
-
-  } catch (error) {
-    console.error('Database Query Error:', error);
-    res.status(500).json({ message: 'An error occurred during the database query' });
-  }
-});
-app.get('/CallType', async (req, res) => {
-  try {
-    const pool = await poolPromise;
-
-    const result = await pool.request()
-      .query(`select * from calltype where deleted = 0`);
-
-    if (result.recordset.length > 0) {
-      res.status(200).json({ data: result.recordset });
-    } else {
-      res.status(200).json({ message: 'No records found' });
-    }
-
-  } catch (error) {
-    console.error('Database Query Error:', error);
-    res.status(500).json({ message: 'An error occurred during the database query' });
-  }
-});
-app.get('/CallStatus', async (req, res) => {
-  try {
-    const pool = await poolPromise;
-
-    const result = await pool.request()
-      .query(`select * from call_status where deleted = 0`);
-
-    if (result.recordset.length > 0) {
-      res.status(200).json({ data: result.recordset });
-    } else {
-      res.status(200).json({ message: 'No records found' });
-    }
-
-  } catch (error) {
-    console.error('Database Query Error:', error);
-    res.status(500).json({ message: 'An error occurred during the database query' });
-  }
-});
-
-
-app.get('/getcomplaintdetailsdata', async (req, res) => {
-  try {
-    const pool = await poolPromise;
-
-    const id = req.query.cid;
-
-    const result = await pool.request()
-      .query(`SELECT * FROM complaint_ticket WHERE id = '${id}'`);
-
-    if (result.recordset.length > 0) {
-      res.status(200).json({ data: result.recordset });
-    } else {
-      res.status(200).json({ message: 'No records found' });
-    }
-
-  } catch (error) {
-    console.error('Database Query Error:', error);
-    res.status(500).json({ message: 'An error occurred during the database query' });
-  }
-});
-
-
-app.get('/getremark', async (req, res) => {
-  try {
-    const pool = await poolPromise;
-
-    const id = req.query.cid;
-
-    const result = await pool.request()
-      .query(`SELECT * FROM awt_complaintremark WHERE ticket_no = '${id}'`);
-
-    if (result.recordset.length > 0) {
-      res.status(200).json({ data: result.recordset });
-    } else {
-      res.status(200).json({ Message: 'No records found' });
-    }
-
-  } catch (error) {
-    console.error('Database Query Error:', error);
-    res.status(500).json({ message: 'An error occurred during the database query' });
-  }
-});
-
-// .input('call_remark', sql.VarChar, call_remark)
-app.post('/updatecomplaint', authenticateToken, async (req, res) => {
-  const { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode, com_id, warranty_status } = req.body;
-
-  try {
-    const pool = await poolPromise;
-    const result = await pool.request()
-      .input('actioncode', sql.VarChar, actioncode)
-      .input('symptomcode', sql.VarChar, symptomcode)
-      .input('causecode', sql.VarChar, causecode)
-      .input('service_charges', sql.VarChar, service_charges)
-      .input('call_status', sql.VarChar, call_status)
-      .input('call_type', sql.VarChar, call_type)
-      .input('other_charge', sql.VarChar, other_charge)
-      .input('warranty_status', sql.VarChar, warranty_status)
-      .input('com_id', sql.VarChar, com_id)
-      .query('UPDATE complaint_ticket SET warranty_status = @warranty_status, symptom_code = @symptomcode, cause_code = @causecode, action_code = @actioncode, service_charges = @service_charges, call_status = @call_status, call_type = @call_type, other_charges = @other_charge WHERE id = @com_id');
-
-    // Check if any rows were updated
-    if (result.rowsAffected[0] > 0) {
-      res.status(200).json({ message: 'Update successful' });
-    } else {
-      res.status(400).json({ message: 'Failed to update: No rows affected' });
-    }
-  } catch (error) {
-    console.error('Database Query Error:', error);
-    res.status(500).json({ message: 'An error occurred during the update' });
-  }
-});
 
 //Start Complaint List
 // Complaint List API with filters
@@ -7263,121 +7078,144 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
       ticketno,
       status,
       customerID,
-
+      page = 1,
+      pageSize = 10,
       csp,
       msp,
       mode_of_contact,
       customer_class,
     } = req.query;
 
-    console.log('Received status:', status); // Debug log
+    const offset = (page - 1) * pageSize;
 
     let sql = `
-        SELECT c.*, e.title AS assigned_name,
-       DATEDIFF(DAY, c.ticket_date, GETDATE()) AS ageingdays
-FROM complaint_ticket AS c
-CROSS APPLY STRING_SPLIT(c.engineer_id, ',') AS split_engineer_id
-JOIN awt_engineermaster AS e ON CAST(split_engineer_id.value AS INT) = e.id
-WHERE c.deleted = 0`;
+        SELECT c.* ,
+               DATEDIFF(DAY, c.ticket_date, GETDATE()) AS ageingdays
+        FROM complaint_ticket AS c WHERE c.deleted = 0`;
 
-    let nots = 'NOT';
+    const countSql = `
+        SELECT COUNT(*) AS totalCount
+        FROM complaint_ticket AS c
+        WHERE c.deleted = 0`;
 
+    const params = []; // Array to hold query parameters
 
-
+    // Filtering conditions
     if (fromDate && toDate) {
-      sql += ` AND CAST(c.ticket_date AS DATE) >= CAST('${fromDate}' AS DATE)
-                AND CAST(c.ticket_date AS DATE) <= CAST('${toDate}' AS DATE)`;
-      nots = ''
+      sql += ` AND CAST(c.ticket_date AS DATE) BETWEEN @fromDate AND @toDate`;
+      countSql += ` AND CAST(c.ticket_date AS DATE) BETWEEN @fromDate AND @toDate`;
+      params.push({ name: "fromDate", value: fromDate }, { name: "toDate", value: toDate });
     }
 
     if (customerName) {
-      sql += ` AND c.customer_name LIKE '%${customerName}%'`;
-      nots = ''
+      sql += ` AND c.customer_name LIKE @customerName`;
+      countSql += ` AND c.customer_name LIKE @customerName`;
+      params.push({ name: "customerName", value: `%${customerName}%` });
     }
 
     if (customerEmail) {
-      sql += ` AND c.customer_email LIKE '%${customerEmail}%'`;
-      nots = ''
+      sql += ` AND c.customer_email LIKE @customerEmail`;
+      countSql += ` AND c.customer_email LIKE @customerEmail`;
+      params.push({ name: "customerEmail", value: `%${customerEmail}%` });
     }
 
     if (customerMobile) {
-      sql += ` AND c.customer_mobile LIKE '%${customerMobile}%'`;
-      nots = ''
+      sql += ` AND c.customer_mobile LIKE @customerMobile`;
+      countSql += ` AND c.customer_mobile LIKE @customerMobile`;
+      params.push({ name: "customerMobile", value: `%${customerMobile}%` });
     }
 
     if (serialNo) {
-      sql += ` AND c.serial_no LIKE '%${serialNo}%'`;
-      nots = ''
+      sql += ` AND c.serial_no LIKE @serialNo`;
+      countSql += ` AND c.serial_no LIKE @serialNo`;
+      params.push({ name: "serialNo", value: `%${serialNo}%` });
     }
 
     if (productCode) {
-      sql += ` AND c.ModelNumber LIKE '%${productCode}%'`;
-      nots = ''
+      sql += ` AND c.ModelNumber LIKE @productCode`;
+      countSql += ` AND c.ModelNumber LIKE @productCode`;
+      params.push({ name: "productCode", value: `%${productCode}%` });
     }
 
     if (ticketno) {
-      sql += ` AND c.ticket_no LIKE '%${ticketno}%'`;
-      nots = ''
+      sql += ` AND c.ticket_no LIKE @ticketno`;
+      countSql += ` AND c.ticket_no LIKE @ticketno`;
+      params.push({ name: "ticketno", value: `%${ticketno}%` });
     }
+
     if (customerID) {
-      sql += ` AND c.customer_id LIKE '%${customerID}%'`;
-      nots = ''
+      sql += ` AND c.customer_id LIKE @customerID`;
+      countSql += ` AND c.customer_id LIKE @customerID`;
+      params.push({ name: "customerID", value: `%${customerID}%` });
     }
-    //csp msp call_type and customer_class
 
     if (csp) {
-      sql += ` AND c.csp LIKE '%${csp}%'`;
-      nots = ''
+      sql += ` AND c.csp LIKE @csp`;
+      countSql += ` AND c.csp LIKE @csp`;
+      params.push({ name: "csp", value: `%${csp}%` });
     }
 
     if (msp) {
-      sql += ` AND c.msp LIKE '%${msp}%'`;
-      nots = ''
+      sql += ` AND c.msp LIKE @msp`;
+      countSql += ` AND c.msp LIKE @msp`;
+      params.push({ name: "msp", value: `%${msp}%` });
     }
 
     if (mode_of_contact) {
-      sql += ` AND c.mode_of_contact LIKE '%${mode_of_contact}%'`;
-      nots = ''
+      sql += ` AND c.mode_of_contact LIKE @mode_of_contact`;
+      countSql += ` AND c.mode_of_contact LIKE @mode_of_contact`;
+      params.push({ name: "mode_of_contact", value: `%${mode_of_contact}%` });
     }
 
     if (customer_class) {
-      sql += ` AND c.customer_class LIKE '%${customer_class}%'`;
-      nots = ''
+      sql += ` AND c.customer_class LIKE @customer_class`;
+      countSql += ` AND c.customer_class LIKE @customer_class`;
+      params.push({ name: "customer_class", value: `%${customer_class}%` });
+    }
+
+    if (status) {
+      sql += ` AND c.call_status = @status`;
+      countSql += ` AND c.call_status = @status`;
+      params.push({ name: "status", value: status });
     }
 
 
-
-    // Modified status filtering logic
-    if (status === 'Closed' || status === 'Cancelled') {
-      sql += ` AND c.call_status = '${status}'`;
-    } else if (status === '') {
-      // sql += ` AND c.call_status  IN ('Closed', 'Cancelled')`;
-      sql += ``;
-    } else if (status) {
-      sql += ` AND c.call_status = '${status}'`;
-    } else {
-      // sql += ` AND c.call_status ${nots} IN ('Closed', 'Cancelled')`;
-      sql += ``;
-    }
-
-    if (status == undefined) {
-      sql += ``
-    }
-
-
-    sql += " ORDER BY c.id DESC";
+    // Pagination
+    sql += ` ORDER BY c.ticket_date DESC OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY`;
+    params.push(
+      { name: "offset", value: offset },
+      { name: "pageSize", value: parseInt(pageSize) }
+    );
 
 
 
-    console.log('SQL Query:', sql); // Debug log
-    const result = await pool.request().query(sql);
+    console.log(sql, "$$$$")
 
-    return res.json(result.recordset);
+    // Execute queries
+    const request = pool.request();
+    params.forEach((param) => request.input(param.name, param.value));
+    const result = await request.query(sql);
+
+    const countRequest = pool.request();
+    params.forEach((param) => countRequest.input(param.name, param.value));
+    const countResult = await countRequest.query(countSql);
+
+    const totalCount = countResult.recordset[0].totalCount;
+
+    return res.json({
+      data: result.recordset,
+      totalCount,
+      page: parseInt(page),
+      pageSize: parseInt(pageSize),
+    });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "An error occurred while fetching the complaint list" });
+    console.error("Error fetching complaint list:", err.message);
+    return res.status(500).json({
+      message: "An error occurred while fetching the complaint list",
+    });
   }
 });
+
 
 
 // CSP complaint list
@@ -7733,7 +7571,7 @@ app.get("/getcallstatus", authenticateToken,
 
 app.post("/getsubcallstatus", authenticateToken,
   async (req, res) => {
-   const {Status_Id} = req.body; 
+    const { Status_Id } = req.body;
 
     try {
       const pool = await poolPromise;
@@ -7768,11 +7606,11 @@ app.get("/getsubcallstatusdata", authenticateToken,
     }
   });
 
-  app.post("/getupdateengineer", authenticateToken,
+app.post("/getupdateengineer", authenticateToken,
   async (req, res) => {
 
-    const {eng_id} = req.body;
- 
+    const { eng_id } = req.body;
+
     try {
       const pool = await poolPromise;
       // Modified SQL query using parameterized query
