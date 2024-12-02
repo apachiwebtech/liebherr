@@ -3892,13 +3892,52 @@ app.get("/requestcustomerlocation/:id", authenticateToken, async (req, res) => {
   }
 });
 
-// Insert new Customer Location with duplicate check
-app.post("/postcustomerlocation", authenticateToken, async (req, res) => {
-  const { country_id, region_id, geostate_id, geocity_id, area_id, pincode_id, address, ccperson, ccnumber, address_type } = req.body;
+// delete customer location 
+app.post("/deletecustomerlocation", authenticateToken, async (req, res) => {
+  const { id } = req.body;
 
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
+
+    // Create the SQL query with string interpolation (no parameter binding)
+    const sql = `UPDATE awt_customerlocation SET deleted = 1 WHERE id = '${id}'`;
+
+    // Execute the query
+    const result = await pool.request().query(sql);
+
+    // Check if any rows were affected
+    if (result.rowsAffected[0] > 0) {
+      return res.json({ message: "Customer deleted successfully" });
+    } else {
+      return res.status(404).json({ message: "Customer not found" });
+    }
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred" });
+  }
+});
+
+// Insert new Customer Location with duplicate check
+app.post("/postcustomerlocation", authenticateToken, async (req, res) => {
+  const {customer_id, country_id, region_id, geostate_id, geocity_id, area_id, pincode_id, address, ccperson, ccnumber, address_type } = req.body;
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    const checkCustomerSql = `
+    SELECT customer_id FROM awt_customer 
+    WHERE customer_id = '${customer_id}' AND deleted = 0
+  `;
+
+  const customerResult = await pool.request().query(checkCustomerSql);
+
+  if (customerResult.recordset.length === 0) {
+    return res.status(404).json({
+      message: "Customer not found in awt_customer table!"
+    });
+  }
 
     // Check for duplicates
     const checkDuplicateSql = `SELECT * FROM awt_customerlocation WHERE ccperson = '${ccperson}' AND deleted = 0`;
@@ -3909,8 +3948,8 @@ app.post("/postcustomerlocation", authenticateToken, async (req, res) => {
         message: "Duplicate entry, Customer with same number already exists!",
       });
     } else {
-      const insertSql = `INSERT INTO awt_customerlocation (country_id, region_id, geostate_id, geocity_id, district_id, pincode_id, address, ccperson, ccnumber, address_type)
-                         VALUES ('${country_id}', '${region_id}', '${geostate_id}', '${geocity_id}', '${area_id}', '${pincode_id}', '${address}', '${ccperson}', '${ccnumber}', '${address_type}')`;
+      const insertSql = `INSERT INTO awt_customerlocation (customer_id ,country_id, region_id, geostate_id, geocity_id, district_id, pincode_id, address, ccperson, ccnumber, address_type,deleted)
+                         VALUES ('${customer_id}','${country_id}', '${region_id}', '${geostate_id}', '${geocity_id}', '${area_id}', '${pincode_id}', '${address}', '${ccperson}', '${ccnumber}', '${address_type}',0)`;
 
       await pool.request().query(insertSql);
 
@@ -3933,7 +3972,7 @@ app.put("/putcustomerlocation", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
 
     // Check for duplicates
-    const checkDuplicateSql = `SELECT * FROM awt_customerlocation WHERE ccnumber = '${ccnumber}' AND id != '${id}' AND deleted = 0`;
+    const checkDuplicateSql = `SELECT * FROM awt_customerlocation WHERE ccperson = '${ccperson}' AND id != '${id}' AND deleted = 0`;
     const duplicateResult = await pool.request().query(checkDuplicateSql);
 
     if (duplicateResult.recordset.length > 0) {
@@ -3941,7 +3980,7 @@ app.put("/putcustomerlocation", authenticateToken, async (req, res) => {
         message: "Duplicate entry, Customer with same number already exists!",
       });
     } else {
-      const updateSql = `UPDATE awt_customerlocation SET country_id = '${country_id}', region_id = '${region_id}', geostate_id = '${geostate_id}', geocity_id = '${geocity_id}', district_id = '${area_id}', pincode_id = '${pincode_id}', address = '${address}', ccperson = '${ccperson}', ccnumber = '${ccnumber}', address_type = '${address_type}' WHERE id = '${id}'`;
+      const updateSql = `UPDATE awt_customerlocation SET country_id = '${country_id}', region_id = '${region_id}', geostate_id = '${geostate_id}', geocity_id = '${geocity_id}', district_id = '${area_id}', pincode_id = '${pincode_id}', address = '${address}', ccperson = '${ccperson}', ccnumber = '${ccnumber}', address_type = '${address_type}',deleted = 0 WHERE id = '${id}'`;
 
       await pool.request().query(updateSql);
 
