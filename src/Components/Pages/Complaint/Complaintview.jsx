@@ -9,7 +9,7 @@ import { FaEye } from "react-icons/fa";
 
 export function Complaintview(params) {
   const token = localStorage.getItem("token");
-
+  const [addedSpareParts, setAddedSpareParts] = useState([]);
   const { complaintid } = useParams();
   const [complaintview, setComplaintview] = useState({
     ticket_no: '',
@@ -25,7 +25,10 @@ export function Complaintview(params) {
     serial_no: '',
     call_status: '',
     engineer_id: '',
-    sub_call_status: ''
+    sub_call_status: '',
+    defect_type: '',
+    site_defect: "",
+    spare_part_id: ""
   });
 
 
@@ -33,6 +36,7 @@ export function Complaintview(params) {
   const [sserial_no, setsserial_no] = useState([]);
   const [product, setProduct] = useState([]);
   const [engineer, setEngineer] = useState([]); // Initialize as empty array
+  const [spare, setSpare] = useState([]); // Initialize as empty array
   const [note, setNote] = useState(""); // Input field value
   const [files, setFiles] = useState([]); // Store selected files
   const [remarks, setRemarks] = useState([]);
@@ -40,6 +44,8 @@ export function Complaintview(params) {
   const [attachments, setAttachments] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [engtype, setEngType] = useState("");
+  const [groupstatusid, setgroupstatusid] = useState("");
+  const [groupdefect, setGroupDefect] = useState([]);
   const [addedEngineers, setAddedEngineers] = useState([]);
   const [files2, setFiles2] = useState([]); // New state for Attachment 2 files
   const fileInputRef = useRef(); // Ref for Attachment 1 input
@@ -57,6 +63,8 @@ export function Complaintview(params) {
   const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
   const [selectedSpareParts, setSelectedSpareParts] = useState([]);
   const [spareParts, setSpareParts] = useState([]);
+  const [GroupDefectsite, setGroupDefectsite] = useState([]);
+  const [GroupDefecttype, setGroupDefecttype] = useState([]);
 
   const [TicketUpdateSuccess, setTicketUpdateSuccess] = useState({
     message: '',
@@ -103,6 +111,189 @@ export function Complaintview(params) {
       console.error("Error fetching engineers:", error);
       setEngineer([]); // Set empty array on error
     }
+
+
+  }
+  async function getSpare(params) {
+
+
+    try {
+      const res = await axios.get(`${Base_Url}/getSpareParts`, {
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      });
+
+
+
+      if (res.data) {
+        setSpare(res.data);
+      } else {
+        console.error("Expected array from API but got:", typeof res.data);
+        setSpare([]); // Set empty array as fallback
+      }
+
+
+
+
+
+    } catch (error) {
+      console.error("Error fetching engineers:", error);
+      setEngineer([]); // Set empty array on error
+    }
+
+
+  }
+
+  async function getgroupdefect(params) {
+
+
+    try {
+      const res = await axios.get(`${Base_Url}/getcom`, {
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      });
+
+
+
+      if (res.data) {
+        setGroupDefect(res.data);
+      } else {
+        console.error("Expected array from API but got:", typeof res.data);
+        setGroupDefect([]); // Set empty array as fallback
+      }
+
+
+
+
+
+    } catch (error) {
+      console.error("Error fetching engineers:", error);
+      setGroupDefect([]); // Set empty array on error
+    }
+
+
+  }
+  async function getdefecttype(params) {
+
+
+    if (params) {
+
+
+      try {
+        const res = await axios.post(`${Base_Url}/getDefectCodewisetype`, { defect_code: params }, {
+          headers: {
+            Authorization: token, // Send token in headers
+          },
+        });
+
+
+
+        if (res.data) {
+          setGroupDefecttype(res.data);
+        } else {
+          console.error("Expected array from API but got:", typeof res.data);
+          setGroupDefecttype([]); // Set empty array as fallback
+        }
+
+
+
+
+
+      } catch (error) {
+        console.error("Error fetching engineers:", error);
+        setGroupDefecttype([]); // Set empty array on error
+      }
+
+    } else {
+
+      try {
+        const res = await axios.get(`${Base_Url}/gettypeofdefect`, {
+          headers: {
+            Authorization: token, // Send token in headers
+          },
+        });
+
+
+
+        if (res.data) {
+          setGroupDefecttype(res.data);
+        } else {
+          console.error("Expected array from API but got:", typeof res.data);
+          setGroupDefecttype([]); // Set empty array as fallback
+        }
+
+
+
+
+
+      } catch (error) {
+        console.error("Error fetching engineers:", error);
+        setGroupDefecttype([]); // Set empty array on error
+      }
+    }
+
+
+
+  }
+  async function getsitecode(params) {
+
+
+    if (params) {
+
+      try {
+        const res = await axios.post(`${Base_Url}/getDefectCodewisesite`, { defect_code: params }, {
+          headers: {
+            Authorization: token, // Send token in headers
+          },
+        });
+
+
+
+        if (res.data) {
+          setGroupDefectsite(res.data);
+        } else {
+          console.error("Expected array from API but got:", typeof res.data);
+          setGroupDefectsite([]); // Set empty array as fallback
+        }
+
+
+
+
+
+      } catch (error) {
+        console.error("Error fetching engineers:", error);
+        setGroupDefectsite([]); // Set empty array on error
+      }
+    } else {
+
+      try {
+        const res = await axios.get(`${Base_Url}/getsitedefect`, {
+          headers: {
+            Authorization: token, // Send token in headers
+          },
+        });
+
+
+
+        if (res.data) {
+          setGroupDefectsite(res.data);
+        } else {
+          console.error("Expected array from API but got:", typeof res.data);
+          setGroupDefectsite([]); // Set empty array as fallback
+        }
+
+
+
+
+
+      } catch (error) {
+        console.error("Error fetching engineers:", error);
+        setGroupDefectsite([]); // Set empty array on error
+      }
+    }
+
 
 
   }
@@ -184,34 +375,22 @@ export function Complaintview(params) {
 
   };
 
-  const AddSparePart = () => {
-    if (!complaintview.spare_part_id) {
-      alert("Please select a spare part before adding.");
-      return;
-    }
-
-    // Assuming `selectedSpareParts` is a state holding the list of added spare parts
-    if (
-      selectedSpareParts.some(
-        (part) => part.id === complaintview.spare_part_id
-      )
-    ) {
-      alert("This spare part is already added.");
-      return;
-    }
-
-    const selectedPart = spareParts.find(
-      (part) => part.id === complaintview.spare_part_id
+  const handleAddSparePart = () => {
+    const selectedSparePart = spare.find(
+      (part) => part.id === parseInt(complaintview.spare_part_id)
     );
 
-    if (selectedPart) {
-      setSelectedSpareParts((prevParts) => [...prevParts, selectedPart]);
-      alert(`${selectedPart.name} has been added.`);
+    if (selectedSparePart && !addedSpareParts.some((part) => part.id === selectedSparePart.id)) {
+      setAddedSpareParts([...addedSpareParts, selectedSparePart]);
+      setComplaintview({ ...complaintview, spare_part_id: '' });
     } else {
-      alert("An error occurred while adding the spare part.");
+      alert("Spare part already added or not selected.");
     }
   };
 
+  const handleRemoveSparePart = (id) => {
+    setAddedSpareParts(addedSpareParts.filter((part) => part.id !== id));
+  };
 
   const handleRemoveEngineer = (id) => {
     const updatedEngineers = addedEngineers.filter((eng) => eng.id !== id);
@@ -254,6 +433,7 @@ export function Complaintview(params) {
       setComplaintview(response.data);
       setCallstatusid(response.data.call_status)
       getupdateengineer(response.data.engineer_id)
+      getupdatespare(response.data.spare_part_id)
       if (response.data.serial_no != "") {
         setsserial_no(response.data.serial_no);
 
@@ -272,6 +452,17 @@ export function Complaintview(params) {
       .then((res) => {
         console.log(res)
         setAddedEngineers(res.data)
+      })
+  }
+  async function getupdatespare(id) {
+    axios.post(`${Base_Url}/getupdatespare`, { spare_id: id }, {
+      headers: {
+        Authorization: token,
+      },
+    })
+      .then((res) => {
+        console.log(res)
+        setAddedSpareParts(res.data)
       })
   }
 
@@ -378,7 +569,11 @@ export function Complaintview(params) {
       sub_call_status: complaintview.sub_call_status,
       updated_by: 1,
       ticket_no: complaintview.ticket_no,
-      engineerdata: addedEngineers.map((item) => item.engineer_id)
+      group_code: groupstatusid,
+      site_defect: complaintview.site_defect,
+      defect_type: complaintview.defect_type,
+      engineerdata: addedEngineers.map((item) => item.engineer_id),
+      sparedata: addedSpareParts.map((item) => item.id)
     };
 
     axios.post(`${Base_Url}/ticketFormData`, data, {
@@ -554,8 +749,11 @@ export function Complaintview(params) {
 
   useEffect(() => {
     getcallstatus()
-
+    getSpare()
     getsubcallstatus()
+    getgroupdefect()
+    getdefecttype()
+    getsitecode()
   }, [])
 
   const handleAttachmentClick = (attachment) => {
@@ -839,6 +1037,7 @@ export function Complaintview(params) {
                             name="note"
                             className="form-control"
                             placeholder="Type comment..."
+                            disabled={complaintview.call_status == 'Closed' ? true : false}
                             value={note}
                             onChange={(e) => setNote(e.target.value)}
                           />
@@ -861,6 +1060,7 @@ export function Complaintview(params) {
                             multiple
                             accept="image/*,video/*,audio/*,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,.eml"
                             onChange={handleFileChange}
+                            disabled={complaintview.call_status == 'Closed' ? true : false}
                             ref={fileInputRef2} // Attach the ref to the input
                           />
                         </div>
@@ -877,6 +1077,7 @@ export function Complaintview(params) {
                             className="btn btn-primary"
                             style={{ fontSize: "14px" }}
                             onClick={handleSubmit}
+                            disabled={complaintview.call_status == 'Closed' ? true : false}
                           >
                             Upload Remark
                           </button>
@@ -1073,6 +1274,7 @@ export function Complaintview(params) {
                 <select
                   name="call_status"
                   className="form-control"
+                  disabled={complaintview.call_status == 'Closed' ? true : false}
                   style={{ fontSize: "14px" }}
                   value={complaintview.call_status}
                   onChange={(e) => {
@@ -1095,7 +1297,7 @@ export function Complaintview(params) {
               </div>
               <h4 className="pname" style={{ fontSize: "14px" }}>Sub Call Status</h4>
               <div className="mb-3">
-                <select name="sub_call_status" value={complaintview.sub_call_status} className="form-control" style={{ fontSize: "14px" }} onChange={handleModelChange}>
+                <select name="sub_call_status" value={complaintview.sub_call_status} disabled={complaintview.call_status == 'Closed' ? true : false} className="form-control" style={{ fontSize: "14px" }} onChange={handleModelChange}>
                   <option value="" >Select Status</option>
                   {subcallstatus.map((item) => {
                     return (
@@ -1114,6 +1316,7 @@ export function Complaintview(params) {
                   <input
                     type="radio"
                     className="form-check-input"
+                    disabled={complaintview.call_status == 'Closed' ? true : false}
                     id="lhi"
                     name="engineer_type"
                     value="LHI"
@@ -1127,6 +1330,7 @@ export function Complaintview(params) {
                 <div className="form-check">
                   <input
                     type="radio"
+                    disabled={complaintview.call_status == 'Closed' ? true : false}
                     className="form-check-input"
                     id="franchisee"
                     name="engineer_type"
@@ -1148,6 +1352,7 @@ export function Complaintview(params) {
                     className="form-select dropdown-select"
                     name="engineer_id"
                     value={complaintview.engineer_id}
+                    disabled={complaintview.call_status == 'Closed' ? true : false}
                     onChange={handleModelChange}
                   >
                     <option value="">Select Engineer</option>
@@ -1168,6 +1373,7 @@ export function Complaintview(params) {
                 <div className="col-lg-3">
                   <button
                     className="btn btn-primary btn-sm"
+                    disabled={complaintview.call_status == 'Closed' ? true : false}
                     onClick={AddEngineer}
                   >
                     Add
@@ -1195,6 +1401,7 @@ export function Complaintview(params) {
                           <button
                             className="btn btn-sm btn-danger"
                             style={{ padding: "0.2rem 0.5rem" }}
+                            disabled={complaintview.call_status == 'Closed' ? true : false}
                             onClick={() => handleRemoveEngineer(eng.id)}
                           >
                             ✖
@@ -1204,6 +1411,138 @@ export function Complaintview(params) {
                     ))}
                   </tbody>
                 </table>
+              </div>
+
+              <div className="mt-3">
+                <h4 className="pname" style={{ fontSize: "14px" }}>Defect Group Code:</h4>
+                <select
+                  name="group_code"
+                  className="form-control"
+                  disabled={complaintview.call_status == 'Closed' ? true : false}
+                  style={{ fontSize: "14px" }}
+                  value={complaintview.group_code}
+                  onChange={(e) => {
+                    const selectedcode = e.target.value; // Get the id
+                    // const selectedid = groupdefect.find(item => item.Callstatus == selectedname)?.id; // Find the corresponding Callstatus value
+                    getdefecttype(selectedcode); // Send the id to fetch sub-call statuses
+                    getsitecode(selectedcode); // Send the id to fetch sub-call statuses
+                    setgroupstatusid(selectedcode)
+                    handleModelChange(e)
+                  }}
+                >
+                  <option value="">Select Status</option>
+                  {groupdefect.map((item) => (
+                    <option key={item.id} value={item.defectgroupcode}>
+                      {item.defectgrouptitle}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="mt-3">
+                <h4 className="pname" style={{ fontSize: "14px" }}>Type of Defect Code:</h4>
+                <select
+                  name="defect_type"
+                  className="form-control"
+                  disabled={complaintview.call_status == 'Closed' ? true : false}
+                  style={{ fontSize: "14px" }}
+                  value={complaintview.defect_type}
+                  onChange={handleModelChange}
+                >
+                  <option value="">Select </option>
+                  {GroupDefecttype.map((item) => (
+                    <option key={item.id} value={item.defect_code}>
+                      {item.defect_title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="mt-3">
+                <h4 className="pname" style={{ fontSize: "14px" }}>Site Defect Code:</h4>
+                <select
+                  name="site_defect"
+                  className="form-control"
+                  disabled={complaintview.call_status == 'Closed' ? true : false}
+                  style={{ fontSize: "14px" }}
+                  value={complaintview.site_defect}
+                  onChange={handleModelChange}
+                >
+                  <option value="">Select </option>
+                  {GroupDefectsite.map((item) => (
+                    <option key={item.id} value={item.dsite_code}>
+                      {item.dsite_title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="mt-3">
+                <h4 className="pname" style={{ fontSize: "14px" }}>Spare Parts:</h4>
+                <div className="row">
+                  <div className="col-lg-9">
+                    <select
+                      className="form-select dropdown-select"
+                      name="spare_part_id"
+                      value={complaintview.spare_part_id}
+                      disabled={complaintview.call_status === "Closed"}
+                      onChange={handleModelChange}
+                    >
+                      <option value="">Select Spare Part</option>
+                      {Array.isArray(spare) && spare.length > 0 ? (
+                        spare.map((part) => (
+                          <option key={part.id} value={part.id}>
+                            {part.title}
+                          </option>
+                        ))
+                      ) : (
+                        <option value="" disabled>
+                          No spare parts available
+                        </option>
+                      )}
+                    </select>
+                  </div>
+
+                  <div className="col-lg-3">
+                    <button
+                      className="btn btn-primary btn-sm"
+                      disabled={complaintview.call_status === "Closed"}
+                      onClick={handleAddSparePart}
+                    >
+                      Add
+                    </button>
+                  </div>
+                </div>
+
+                {/* Display added spare parts */}
+                <div className="mt-3">
+                  <h4 className="pname" style={{ fontSize: "14px" }}>Added Spare Parts:</h4>
+                  <table className="table table-bordered" style={{ fontSize: "12px" }}>
+                    <thead>
+                      <tr>
+                        <th>Spare Part</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {addedSpareParts.map((part) => (
+                        <tr key={part.id}>
+                          <td>{part.title}</td>
+                          <td>
+                            <button
+                              className="btn btn-sm btn-danger"
+                              style={{ padding: "0.2rem 0.5rem" }}
+                              disabled={complaintview.call_status === "Closed"}
+                              onClick={() => handleRemoveSparePart(part.id)}
+                            >
+                              ✖
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
 
 
@@ -1217,6 +1556,7 @@ export function Complaintview(params) {
                   className="btn btn-primary"
                   style={{ fontSize: "14px" }}
                   onClick={handleSubmitTicketFormData}
+                  disabled={complaintview.call_status == 'Closed' ? true : false}
                 >
                   Submit
                 </button>
@@ -1256,39 +1596,7 @@ export function Complaintview(params) {
             </div>
           </div> */}
 
-          <div className="row">
-            <div className="col-lg-9">
-              
-              <select
-                className="form-select dropdown-select"
-                name="spare_part_id"
-                value={complaintview.spare_part_id}
-                onChange={handleModelChange}
-              >
-                <option value="">Select Spare Part</option>
-                {Array.isArray(spareParts) && spareParts.length > 0 ? (
-                  spareParts.map((part) => (
-                    <option key={part.id} value={part.id}>
-                      {part.name}
-                    </option>
-                  ))
-                ) : (
-                  <option value="" disabled>
-                    No spare parts available
-                  </option>
-                )}
-              </select>
-            </div>
 
-            <div className="col-lg-3">
-              <button
-                className="btn btn-primary btn-sm"
-                onClick={AddSparePart}
-              >
-                Add
-              </button>
-            </div>
-          </div>
 
           <div>
             <h5>Added Spare Parts</h5>
@@ -1312,6 +1620,7 @@ export function Complaintview(params) {
                   multiple
                   accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,.eml"
                   onChange={handleFile2Change}
+                  disabled={complaintview.call_status == 'Closed' ? true : false}
                   ref={fileInputRef} // Attach the ref to the input
                 />
               </div>
@@ -1320,6 +1629,7 @@ export function Complaintview(params) {
                   type="button"
                   className="btn btn-primary"
                   onClick={handleAttachment2Submit}
+                  disabled={complaintview.call_status == 'Closed' ? true : false}
                   style={{ fontSize: "14px" }}
                 >
                   Upload

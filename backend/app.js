@@ -2802,8 +2802,8 @@ app.get("/getComplaintDetails/:ticket_no", async (req, res) => {
       WHERE ticket_no = ${"'" + ticket_no + "'"}
     `;
 
-    console.log(remarkQuery,"%%%")
-    console.log(attachmentQuery,"SSS")
+    console.log(remarkQuery, "%%%")
+    console.log(attachmentQuery, "SSS")
 
 
     // Execute attachment query
@@ -3838,7 +3838,7 @@ app.get("/getpincodedrop/:area_id", authenticateToken, async (req, res) => {
     return res.status(500).json({ error: "Database error occurred" });
   }
 });
-  
+
 // API to fetch all Customer Location
 app.get("/getcustomerlocation/:customer_id", authenticateToken, async (req, res) => {
   const { customer_id } = req.params;
@@ -3850,11 +3850,11 @@ app.get("/getcustomerlocation/:customer_id", authenticateToken, async (req, res)
       SELECT * FROM awt_customerlocation WHERE customer_id = @customer_id AND Deleted = 0;
     `;
 
-    console.log(customer_id , "$$")
+    console.log(customer_id, "$$")
 
     const result = await pool
       .request()
-      .input("customer_id",  customer_id)  // Binding the parameter
+      .input("customer_id", customer_id)  // Binding the parameter
       .query(sql);
 
     return res.json(result.recordset);
@@ -3923,7 +3923,7 @@ app.post("/deletecustomerlocation", authenticateToken, async (req, res) => {
 
 // Insert new Customer Location with duplicate check
 app.post("/postcustomerlocation", authenticateToken, async (req, res) => {
-  const {customer_id, country_id, region_id, geostate_id, geocity_id, area_id, pincode_id, address, ccperson, ccnumber, address_type } = req.body;
+  const { customer_id, country_id, region_id, geostate_id, geocity_id, area_id, pincode_id, address, ccperson, ccnumber, address_type } = req.body;
 
   try {
     // Use the poolPromise to get the connection pool
@@ -3934,13 +3934,13 @@ app.post("/postcustomerlocation", authenticateToken, async (req, res) => {
     WHERE customer_id = '${customer_id}' AND deleted = 0
   `;
 
-  const customerResult = await pool.request().query(checkCustomerSql);
+    const customerResult = await pool.request().query(checkCustomerSql);
 
-  // if (customerResult.recordset.length === 0) {
-  //   return res.status(404).json({
-  //     message: "Customer not found in awt_customer table!"
-  //   });
-  // }
+    // if (customerResult.recordset.length === 0) {
+    //   return res.status(404).json({
+    //     message: "Customer not found in awt_customer table!"
+    //   });
+    // }
 
     // Check for duplicates
     const checkDuplicateSql = `SELECT * FROM awt_customerlocation WHERE ccperson = '${ccperson}' AND address = '${address}' AND deleted = 0`;
@@ -4018,12 +4018,12 @@ app.post("/deletepincode", async (req, res) => {
 
 //Unique Product Master Linked to Location Start
 app.get("/getproductunique/:customer_id", authenticateToken, async (req, res) => {
-  const { customer_id } = req.params; 
+  const { customer_id } = req.params;
   try {
     const pool = await poolPromise;
     const sql = `SELECT * FROM awt_uniqueproductmaster WHERE CustomerID = '${customer_id}' AND deleted = 0`;
     const result = await pool.request().query(sql);
-    console.log("Sql",sql)
+    console.log("Sql", sql)
     return res.json(result.recordset);
   } catch (err) {
     console.error(err);
@@ -4057,7 +4057,7 @@ app.get("/requestproductunique/:id", authenticateToken, async (req, res) => {
 });
 
 app.post("/postproductunique", authenticateToken, async (req, res) => {
-  const { product, location, date, serialnumber, CustomerID ,CustomerName} = req.body;
+  const { product, location, date, serialnumber, CustomerID, CustomerName } = req.body;
   try {
 
     const pool = await poolPromise;
@@ -4129,7 +4129,7 @@ app.post("/deleteproductunique", authenticateToken, async (req, res) => {
 });
 
 app.get('/fetchcustomerlocationByCustomerid/:customer_id', authenticateToken, async (req, res) => {
-  const { customer_id } = req.params; 
+  const { customer_id } = req.params;
 
   console.log(customer_id, "customer_id")
   try {
@@ -4137,7 +4137,7 @@ app.get('/fetchcustomerlocationByCustomerid/:customer_id', authenticateToken, as
     const pool = await poolPromise;
 
     const sql = `SELECT cl.*,c.customer_fname as customername from awt_customerlocation cl LEFT JOIN awt_customer c on c.customer_id = cl.customer_id WHERE cl.customer_id = '${customer_id}' AND cl.deleted = 0`;
-console.log(sql)
+    console.log(sql)
     const result = await pool.request().query(sql);
 
     if (result.recordset.length > 0) {
@@ -6903,7 +6903,7 @@ app.post("/updateProduct", authenticateToken,
 //Complaint view Insert TicketFormData start
 
 app.post("/ticketFormData", authenticateToken, async (req, res) => {
-  const { ticket_no, serial_no, ModelNumber, engineerdata, call_status, sub_call_status, updated_by } = req.body;
+  const { ticket_no, serial_no, ModelNumber, engineerdata, call_status, sub_call_status, updated_by, group_code, site_defect, defect_type, sparedata } = req.body;
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
 
@@ -6911,13 +6911,18 @@ app.post("/ticketFormData", authenticateToken, async (req, res) => {
 
   engineer_id = engineerdata.join(','); // Join the engineer IDs into a comma-separated string
 
+  let spare_id;
+
+  spare_id = sparedata.join(',')
+
 
   try {
     const pool = await poolPromise;
 
     const updateSql = `
       UPDATE complaint_ticket
-      SET engineer_id = '${engineer_id}',call_status = '${call_status}' , updated_by = '${updated_by}', updated_date = '${formattedDate}' , sub_call_status  = '${sub_call_status}' WHERE ticket_no = '${ticket_no}'`;
+      SET engineer_id = '${engineer_id}',call_status = '${call_status}' , updated_by = '${updated_by}', updated_date = '${formattedDate}' , sub_call_status  = '${sub_call_status}' ,group_code = '${group_code}' , defect_type = '${defect_type}'
+       , site_defect = '${site_defect}' , spare_part_id = '${spare_id}'  WHERE ticket_no = '${ticket_no}'`;
 
     await pool.request().query(updateSql);
 
@@ -7162,7 +7167,7 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
 
     // // Filtering conditions
     if (fromDate && toDate) {
-      sql +=  `AND CAST(c.ticket_date AS DATE) BETWEEN @fromDate AND @toDate`;
+      sql += `AND CAST(c.ticket_date AS DATE) BETWEEN @fromDate AND @toDate`;
       params.push({ name: "fromDate", value: fromDate }, { name: "toDate", value: toDate });
     }
 
@@ -7194,17 +7199,17 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
       sql += ` AND c.ticket_no LIKE @ticketno`;
       params.push({ name: "ticketno", value: `%${ticketno}%` });
     }
-    
+
 
     if (customerID) {
       sql += ` AND c.customer_id LIKE @customerID`;
-   
+
       params.push({ name: "customerID", value: `%${customerID}%` });
     }
 
     if (csp) {
       sql += ` AND c.csp LIKE @csp`;
- 
+
       params.push({ name: "csp", value: `%${csp}%` });
     }
 
@@ -7216,7 +7221,7 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
 
     if (mode_of_contact) {
       sql += ` AND c.mode_of_contact LIKE @mode_of_contact`;
-  
+
       params.push({ name: "mode_of_contact", value: `%${mode_of_contact}%` });
     }
 
@@ -7230,13 +7235,13 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
     //   params.push({ name: "status", value: status });
     // }
 
-       // If no status is provided, exclude 'Closed' and 'Cancelled'
-       if (status) {
-        sql += ` AND c.call_status = @status`;
-        params.push({ name: "status", value: status });
-      } else {
-        sql += ` AND c.call_status != 'Closed' AND c.call_status != 'Cancelled'`;
-      }
+    // If no status is provided, exclude 'Closed' and 'Cancelled'
+    if (status) {
+      sql += ` AND c.call_status = @status`;
+      params.push({ name: "status", value: status });
+    } else {
+      sql += ` AND c.call_status != 'Closed' AND c.call_status != 'Cancelled'`;
+    }
 
     // Pagination
     sql += ` ORDER BY c.ticket_date DESC OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY`;
@@ -7316,7 +7321,7 @@ app.get("/getcomplainlistcsp", async (req, res) => {
 
     let nots = 'NOT';
 
-    console.log("CSp Query",sql);
+    console.log("CSp Query", sql);
 
 
     if (fromDate && toDate) {
@@ -7690,6 +7695,59 @@ app.post("/getupdateengineer", authenticateToken,
       return res.status(500).json({ error: "Database error occurred", details: err.message });
     }
   });
+app.post("/getupdateengineer", authenticateToken,
+  async (req, res) => {
+
+    const { eng_id } = req.body;
+
+    try {
+      const pool = await poolPromise;
+      // Modified SQL query using parameterized query 
+      const sql = `
+    SELECT * 
+    FROM awt_engineermaster 
+    WHERE deleted = 0 
+      AND engineer_id IN (
+          SELECT value 
+          FROM STRING_SPLIT('${eng_id}', ',')
+      )
+`;
+
+      const result = await pool.request().query(sql);
+
+      return res.json(result.recordset);
+    } catch (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ error: "Database error occurred", details: err.message });
+    }
+  });
+
+app.post("/getupdatespare", authenticateToken,
+  async (req, res) => {
+
+    const { spare_id } = req.body;
+
+    try {
+      const pool = await poolPromise;
+      // Modified SQL query using parameterized query 
+      const sql = `
+    SELECT * 
+    FROM Spare_parts 
+    WHERE deleted = 0 
+      AND id IN (
+          SELECT value 
+          FROM STRING_SPLIT('${spare_id}', ',')
+      )
+`;
+
+      const result = await pool.request().query(sql);
+
+      return res.json(result.recordset);
+    } catch (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ error: "Database error occurred", details: err.message });
+    }
+  });
 
 // register complaint page search customer address from end customer location
 app.get("/getEndCustomerAddresses/:customerEndId", async (req, res) => {
@@ -7704,7 +7762,7 @@ app.get("/getEndCustomerAddresses/:customerEndId", async (req, res) => {
 
     // Execute the SQL query
 
-    console.log("Get Customer Address",sql)
+    console.log("Get Customer Address", sql)
     const result = await pool.request().query(sql);
 
     return res.json(result.recordset
@@ -7714,3 +7772,60 @@ app.get("/getEndCustomerAddresses/:customerEndId", async (req, res) => {
     return res.status(500).json({ message: "Error fetching  Multiple End customer location" });
   }
 });
+
+app.get("/getSpareParts", authenticateToken,
+  async (req, res) => {
+
+
+
+    try {
+      const pool = await poolPromise;
+      // Modified SQL query using parameterized query
+      const sql = `select id , ModelNumber ,title from Spare_parts where deleted = 0 `;
+
+      const result = await pool.request().query(sql);
+
+      return res.json(result.recordset);
+    } catch (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ error: "Database error occurred", details: err.message });
+    }
+  });
+
+
+app.post("/getDefectCodewisetype", authenticateToken,
+  async (req, res) => {
+
+    const { defect_code } = req.body;
+
+    try {
+      const pool = await poolPromise;
+      // Modified SQL query using parameterized query
+      const sql = `SELECT * FROM awt_typeofdefect  where groupdefect_code = ${defect_code}`;
+
+      const result = await pool.request().query(sql);
+
+      return res.json(result.recordset);
+    } catch (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ error: "Database error occurred", details: err.message });
+    }
+  });
+app.post("/getDefectCodewisesite", authenticateToken,
+  async (req, res) => {
+
+    const { defect_code } = req.body;
+
+    try {
+      const pool = await poolPromise;
+      // Modified SQL query using parameterized query
+      const sql = `SELECT * FROM awt_site_defect  where defectgroupcode = ${defect_code}`;
+
+      const result = await pool.request().query(sql);
+
+      return res.json(result.recordset);
+    } catch (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ error: "Database error occurred", details: err.message });
+    }
+  });
