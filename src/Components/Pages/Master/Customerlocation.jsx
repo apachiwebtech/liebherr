@@ -385,6 +385,10 @@ const Customerlocation = () => {
       newErrors.address_type = "Address type is required";
     }
 
+    if (!formData.ccnumber) {
+      newErrors.ccnumber = "Contact Person Number is required";
+    }
+
     return newErrors;
   };
 
@@ -453,7 +457,7 @@ const Customerlocation = () => {
                     <div className="row">
                       <div className="col-md-12 mb-3">
                         <label htmlFor="exampleFormControlTextarea1">
-                          Address
+                          Address<span className="text-danger">*</span>
                         </label>
                         <textarea
                           className="form-control"
@@ -612,7 +616,7 @@ const Customerlocation = () => {
                       {/* Pincode Dropdown */}
                       <div className="col-md-4 mb-3">
                         <label htmlFor="area" className="form-label">
-                          Pincode
+                          Pincode<span className="text-danger">*</span>
                         </label>
 
               
@@ -642,7 +646,7 @@ const Customerlocation = () => {
 
                       <div className="col-md-4 mb-3">
                         <label htmlFor="addtype" className="form-label">
-                          Address Type
+                          Address Type<span className="text-danger">*</span>
                         </label>
                         <select
                           id="addtype"
@@ -662,7 +666,7 @@ const Customerlocation = () => {
                       </div>
                       <div className="col-md-4 mb-3">
                         <label htmlFor="ccperson" className="form-label">
-                          Customer Contact Person
+                          Customer Contact Person<span className="text-danger">*</span>
                         </label>
                         <input
                           type="text"
@@ -711,7 +715,7 @@ const Customerlocation = () => {
 
                       <div className="col-md-4 mb-3">
                       <label htmlFor="ccnumber" className="form-label">
-                         Contact Person Mobile Number
+                         Contact Person Mobile Number<span className="text-danger">*</span>
                       </label>
                       <input
                         type="text"

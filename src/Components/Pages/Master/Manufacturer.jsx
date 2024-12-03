@@ -170,7 +170,7 @@ const Manufacturer = () => {
                 <div className="col-6">
                   <form onSubmit={handleSubmit} style={{ width: "50%" }} className="text-left">
                     <div className="mb-3">
-                      <label htmlFor="ManufacturerInput" className="input-field"> Manufacturer</label>
+                      <label htmlFor="ManufacturerInput" className="input-field"> Manufacturer<span className="text-danger">*</span></label>
                       <input
                         type="text"
                         className="form-control"

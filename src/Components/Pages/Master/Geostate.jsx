@@ -215,7 +215,7 @@ const Geostate = () => {
                 <form onSubmit={handleSubmit} style={{ width: "50%" }} className="text-left">
                   {/* Country Dropdown */}
                   <div className="form-group">
-                    <label htmlFor="country" className="form-label pb-0 dropdown-label">Country</label>
+                    <label htmlFor="country" className="form-label pb-0 dropdown-label">Country<span className="text-danger">*</span></label>
                     <select className='form-select dropdown-select' name='country_id' value={formData.country_id} onChange={handleChange}>
                       <option value="">Select Country</option>
                       {countries.map((country) => (
@@ -227,7 +227,7 @@ const Geostate = () => {
 
                   {/* Region Dropdown */}
                   <div className="form-group">
-                    <label htmlFor="region" className="form-label pb-0 dropdown-label">Region</label>
+                    <label htmlFor="region" className="form-label pb-0 dropdown-label">Region<span className="text-danger">*</span></label>
                     <select className='form-select dropdown-select' name='region_id' value={formData.region_id} onChange={handleChange}>
                       <option value="">Select Region</option>
                       {regions.map((region) => (
@@ -239,7 +239,7 @@ const Geostate = () => {
 
                   {/* Region Input */}
                   <div className="form-group">
-                    <label htmlFor="geoStateInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>Geo State</label>
+                    <label htmlFor="geoStateInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>Geo State<span className="text-danger">*</span></label>
                     <input
                       type="text"
                       className="form-control"

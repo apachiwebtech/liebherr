@@ -244,7 +244,7 @@ const Location = () => {
                 >
                   <div className="mb-3">
                     <label htmlFor="countryInput" className="input-field">
-                      Country
+                    Country <span className="text-danger">*</span>
                     </label>
                     <input
                       type="text"

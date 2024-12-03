@@ -196,7 +196,7 @@ const ProductType = () => {
                   >
                     <div className="mb-3">
                       <label htmlFor="ProductTypeInput" className="input-field">
-                        ProductType
+                        ProductType<span className="text-danger">*</span>
                       </label>
                       <input
                         type="text"

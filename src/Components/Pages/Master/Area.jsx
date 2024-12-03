@@ -281,7 +281,7 @@ const Area = () => {
                         htmlFor="country"
                         className="form-label pb-0 dropdown-label"
                       >
-                        Country
+                        Country<span className="text-danger">*</span>
                       </label>
                       <select
                         className="form-select dropdown-select"
@@ -307,7 +307,7 @@ const Area = () => {
                         htmlFor="region"
                         className="form-label pb-0 dropdown-label"
                       >
-                        Region
+                        Region<span className="text-danger">*</span>
                       </label>
                       <select
                         className="form-select dropdown-select"
@@ -333,7 +333,7 @@ const Area = () => {
                         htmlFor="geostate_id"
                         className="form-label pb-0 dropdown-label"
                       >
-                        Geo State
+                        Geo State<span className="text-danger">*</span>
                       </label>
                       <select
                         className="form-select dropdown-select"
@@ -384,7 +384,7 @@ const Area = () => {
                     {/* Title Input */}
                     <div className="form-group">
                       <label htmlFor="areaInput" className="input-field">
-                        District
+                        District<span className="text-danger">*</span>
                       </label>
                       <input
                         type="text"

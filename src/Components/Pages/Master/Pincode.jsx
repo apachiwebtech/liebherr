@@ -278,7 +278,7 @@ const Pincode = () => {
   const renderDropdown = (name, options, label) => (
     <div className="form-group">
       <label htmlFor={name} className="form-label pb-0 dropdown-label">
-        {label}
+        {label}<span className="text-danger">*</span>
       </label>
 
       <select
@@ -323,7 +323,7 @@ const Pincode = () => {
 
                     <div className="mb-3">
                       <label htmlFor="pincodeInput" className="input-field">
-                        Pincode
+                        Pincode<span className="text-danger">*</span>
                       </label>
                       <input
                         type="text"

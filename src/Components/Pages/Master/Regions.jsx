@@ -177,7 +177,7 @@ const Location = () => {
                       htmlFor="country"
                       className="form-label pb-0 dropdown-label"
                     >
-                      Country
+                      Country<span className="text-danger">*</span>
                     </label>
                     <select
                       className="form-select dropdown-select"
@@ -202,7 +202,7 @@ const Location = () => {
                       className="input-field"
                       style={{ marginBottom: "15px", fontSize: "18px" }}
                     >
-                       Region
+                       Region<span className="text-danger">*</span>
                     </label>
                     <input
                       type="text"

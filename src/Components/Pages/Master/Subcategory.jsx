@@ -202,7 +202,7 @@ const Subcategory = () => {
                         htmlFor="category"
                         className="form-label pb-0 dropdown-label"
                       >
-                        Category
+                        Category<span className="text-danger">*</span>
                       </label>
                       <select
                         className="form-select dropdown-select"
@@ -231,7 +231,7 @@ const Subcategory = () => {
                         className="input-field"
                         style={{ marginBottom: "15px", fontSize: "18px" }}
                       >
-                        Sub category
+                        Sub category<span className="text-danger">*</span>
                       </label>
                       <input
                         type="text"

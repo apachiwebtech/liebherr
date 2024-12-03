@@ -196,7 +196,7 @@ const ProductLine = () => {
                   >
                     <div className="mb-3">
                       <label htmlFor="PlineCodeInput" className="input-field">
-                        Product Line Code
+                        Product Line Code<span className="text-danger">*</span>
                       </label>
                       <input
                         type="text"
@@ -215,7 +215,7 @@ const ProductLine = () => {
 
                     <div className="mb-3">
                       <label htmlFor="ProductLineInput" className="input-field">
-                        Product Line
+                        Product Line<span className="text-danger">*</span>
                       </label>
                       <input
                         type="text"

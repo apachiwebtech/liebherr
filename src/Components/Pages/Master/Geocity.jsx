@@ -275,7 +275,7 @@ const Geocity = () => {
                       htmlFor="country"
                       className="form-label pb-0 dropdown-label"
                     >
-                      Country
+                      Country<span className="text-danger">*</span>
                     </label>
                     <select
                       className="form-select dropdown-select"
@@ -301,7 +301,7 @@ const Geocity = () => {
                       htmlFor="region"
                       className="form-label pb-0 dropdown-label"
                     >
-                      Region
+                      Region<span className="text-danger">*</span>
                     </label>
                     <select
                       className="form-select dropdown-select"
@@ -327,7 +327,7 @@ const Geocity = () => {
                       htmlFor="geostate_id"
                       className="form-label pb-0 dropdown-label"
                     >
-                      Geo State
+                      Geo State<span className="text-danger">*</span>
                     </label>
                     <select
                       className="form-select dropdown-select"
@@ -354,7 +354,7 @@ const Geocity = () => {
                       htmlFor="district"
                       className="form-label pb-0 dropdown-label"
                     >
-                      District
+                      District<span className="text-danger">*</span>
                     </label>
                     <select
                       className="form-select dropdown-select"
@@ -379,7 +379,7 @@ const Geocity = () => {
                   {/* Region Input */}
                   <div className="form-group">
                     <label htmlFor="geoStateInput" className="input-field">
-                       Geo City
+                       Geo City<span className="text-danger">*</span>
                     </label>
                     <input
                       type="text"

@@ -309,7 +309,7 @@ const Customer = () => {
                           )}
                       </div>
                       <div className="col-md-3 mb-3">
-                        <label htmlFor="Customerfname" className="form-label">Customer  Name</label>
+                        <label htmlFor="Customerfname" className="form-label">Customer  Name<span className="text-danger">*</span></label>
                         <input
                           type="text"
                           className="form-control"
@@ -341,7 +341,7 @@ const Customer = () => {
                         )}
                       </div> */}
                       <div className="col-md-3 mb-3">
-                        <label htmlFor="Customerid" className="form-label">Customer ID</label>
+                        <label htmlFor="Customerid" className="form-label">Customer ID<span className="text-danger">*</span></label>
                         <input
                           type="text"
                           className="form-control"
@@ -374,7 +374,7 @@ const Customer = () => {
                       </div>
                      
                       <div className="col-md-2 mb-3">
-                        <label htmlFor="cclassification" className="form-label">Customer Classification</label>
+                        <label htmlFor="cclassification" className="form-label">Customer Classification<span className="text-danger">*</span></label>
                         <select id="cclassification" name="customer_classification" className="form-select" aria-label=".form-select-lg example" value={formData.customer_classification} onChange={handleChange} >
                           <option value="selected">Select Customer Classification</option>
                           <option value="Import">Import</option>
@@ -385,7 +385,7 @@ const Customer = () => {
                         )}
                       </div>
                       <div className="col-md-3 mb-3">
-                        <label htmlFor="custype" className="form-label">Customer Type</label>
+                        <label htmlFor="custype" className="form-label">Customer Type<span className="text-danger">*</span></label>
                         <select id="custype" className="form-select" aria-label=".form-select-lg example" name="customer_type" value={formData.customer_type} onChange={handleChange} >
                           <option value="selected">Select Customer Type</option>
                           <option value="EndCustomer">EndCustomer</option>
@@ -401,7 +401,7 @@ const Customer = () => {
                       </div>
                       
                       <div className="col-md-3 mb-3">
-                        <label htmlFor="mobilenumber" className="form-label">Mobile No. <input type="checkbox" />Whatsapp </label>
+                        <label htmlFor="mobilenumber" className="form-label">Mobile No.<span className="text-danger">*</span> <input type="checkbox" />Whatsapp </label>
                         <input
                           type="text"
                           className="form-control"
