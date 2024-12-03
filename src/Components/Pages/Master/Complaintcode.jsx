@@ -73,10 +73,7 @@ const ComplaintCode = () => {
       // Check if the defectgroupcode is empty
       newErrors.defectgroupcode = "Defect Group Code Field is required."; // Set error message if defectgroupcode is empty
     }
-    if (!formData.description.trim()) {
-
-      newErrors.description = "Description Field is required."; 
-    }
+ 
     if (!formData.defectgrouptitle.trim()) {
 
       newErrors.defectgrouptitle = "Defect Group Title Field is required."; 
@@ -274,12 +271,6 @@ const ComplaintCode = () => {
                       onChange={handleChange}
                       placeholder="Enter Description "
                       />
-                  
-                    {errors.description && (
-                      <small className="text-danger">
-                        {errors.description}
-                      </small>
-                    )}
   
                   </div>
                   <div className="text-right">

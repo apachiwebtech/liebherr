@@ -86,7 +86,7 @@ const ReasonCode = () => {
             newErrors.groupdefect_code = "Defect Group Code Field is required."; // Set error message if reasoncode is empty
         }
         if (!formData.defect_code.trim()) { // Check if the reasoncode is empty
-            newErrors.defect_code = "Defect Code Field is required."; // Set error message if reasoncode is empty
+            newErrors.defect_code = "Defect Type Code Field is required."; // Set error message if reasoncode is empty
         }
         return newErrors; // Return the error object
     };
