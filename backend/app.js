@@ -2173,7 +2173,7 @@ app.get("/getcom", authenticateToken, async (req, res) => {
 
     const sql = `
       SELECT * FROM awt_defectgroup
-      WHERE deleted = 0
+      WHERE deleted = 0 order by id DESc
     `;
 
     // Execute the query
@@ -2384,7 +2384,7 @@ app.get("/gettypeofdefect", authenticateToken, async (req, res) => {
         td.*, dg.defectgrouptitle as grouptitle
       FROM awt_typeofdefect td
       LEFT JOIN awt_defectgroup dg ON td.groupdefect_code = dg.defectgroupcode
-      WHERE td.deleted = 0
+      WHERE td.deleted = 0 ORDER by id desc
     `;
     const result = await pool.request().query(sql);
     return res.json(result.recordset);
@@ -2536,7 +2536,7 @@ app.get("/getsitedefect", authenticateToken, async (req, res) => {
     td.*, dg.defectgrouptitle as grouptitle
   FROM awt_site_defect td
   LEFT JOIN awt_defectgroup dg ON td.defectgroupcode = dg.defectgroupcode
-  WHERE td.deleted = 0
+  WHERE td.deleted = 0 order by td.id DESC
     `;
     const result = await pool.request().query(sql);
     return res.json(result.recordset);
@@ -7691,3 +7691,26 @@ app.post("/getupdateengineer", authenticateToken,
     }
   });
 
+// register complaint page search customer address from end customer location
+app.get("/getEndCustomerAddresses/:customerEndId", async (req, res) => {
+  const { customerEndId } = req.params;
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    // Directly inject the `id` into the query string
+    const sql = `SELECT * FROM awt_customerlocation WHERE customer_id =  '${customerEndId}' AND deleted = 0`;
+
+    // Execute the SQL query
+
+    console.log("Get Customer Address",sql)
+    const result = await pool.request().query(sql);
+
+    return res.json(result.recordset
+    );
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Error fetching  Multiple End customer location" });
+  }
+});

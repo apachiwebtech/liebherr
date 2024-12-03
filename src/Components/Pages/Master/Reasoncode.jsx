@@ -159,6 +159,7 @@ const ReasonCode = () => {
                             }
                         });
                 }
+                setIsEdit(false);
             }
         } catch (error) {
             console.error('Error during form submission:', error);

@@ -97,6 +97,7 @@ const ComplaintCode = () => {
       const confirmSubmission = window.confirm(
         "Do you want to submit the data?"
       );
+     
       if (confirmSubmission) {
         if (isEdit) {
           // For update, include 'updated_by'
@@ -153,6 +154,8 @@ const ComplaintCode = () => {
               }
             });
         }
+        setIsEdit(false);
+
       }
     } catch (error) {
       console.error("Error during form submission:", error);

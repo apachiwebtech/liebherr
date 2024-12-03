@@ -163,6 +163,7 @@ const ActionCode = () => {
                          }
                      });
              }
+             setIsEdit(false);
          }
      } catch (error) {
          console.error('Error during form submission:', error);

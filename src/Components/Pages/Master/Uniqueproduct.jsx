@@ -276,105 +276,106 @@ const Uniqueproduct = () => {
               <div className="col-4">
                 <form onSubmit={handleSubmit}>
                   <div className="row">
-                  <div className="col-md-12 mb-3">
-                          <label htmlFor="country" className="form-label pb-0 dropdown-label">
-                            Customer Address
-                          </label>
-                          <select
-                            className="form-select dropdown-select"
-                            name="location"
-                            value={formData.customer_address}
-                            onChange={(e) => handleChange(e)}
-                          >
-                            <option value="">Select Customer Address</option>
-                            {CustomerAddress.length > 0 ? (
-                              CustomerAddress.map((cust_add, index) => (
-                                <option
-                                  key={index}
-                                  value={cust_add.address}
-                                  data-customername={cust_add.customername}
-                                >
-                                  {cust_add.address}
-                                </option>
-                              ))
-                            ) : (
-                              <option value="" disabled>
-                                No addresses available
-                              </option>
-                            )}
-                          </select>
 
-                          {errors.location && (
-                        <small className="text-danger">{errors.location}</small>
-                      )}
-                        </div>
-
-                        <div className="col-md-12 mb-3">
-                            <label htmlFor="pname" className="form-label">
-                              Product
-                            </label>
-                                <select 
-                                  className="form-control" 
-                                  onChange={handleChange} 
-                                  value={formData.product || ''}
-                                  name="product"
-                                >
-                                  <option value="">Select</option>
-                                  {Model && Model.length > 0 ? (
-                                    Model.map((item, index) => (
-                                      <option key={index} value={item.item_description}>
-                                        {item.item_description}
-                                      </option>
-                                    ))
-                                  ) : (
-                                    <option value="" disabled>No products available</option>
-                                  )}
-                                </select>
-                            {errors.product && (
-                              <small className="text-danger">{errors.product}</small>
-                            )}
-                      </div>
-
-
-                        <div className="col-md-6 mb-3">
-                            <label htmlFor="snumber" className="form-label">
-                              Serial Number
-                            </label>
-                            <input
-                              type="text"
-                              className="form-control"
-                              id="snumber"
-                              name="serialnumber"
-                              value={formData.serialnumber}
-                              onChange={handleChange}
-                              aria-describedby="snumber"
-                            />
-                            {errors.serialnumber && (
-                              <small className="text-danger">{errors.serialnumber}</small>
-                            )}
-                            {duplicateError && (
-                            <small className="text-danger">{duplicateError}</small>
-                          )}
-                          </div>
+                            <div className="col-md-6 mb-3">
+                                      <label htmlFor="snumber" className="form-label">
+                                        Serial Number
+                                      </label>
+                                      <input
+                                        type="text"
+                                        className="form-control"
+                                        id="snumber"
+                                        name="serialnumber"
+                                        value={formData.serialnumber}
+                                        onChange={handleChange}
+                                        aria-describedby="snumber"
+                                      />
+                                      {errors.serialnumber && (
+                                        <small className="text-danger">{errors.serialnumber}</small>
+                                      )}
+                                      {duplicateError && (
+                                      <small className="text-danger">{duplicateError}</small>
+                                    )}
+                                  </div>
                     
 
-                    <div className="col-md-6 mb-3">
-                      <label htmlFor="pdate" className="form-label">
-                        Purchase Date
-                      </label>
-                      <input
-                        type="date"
-                        name="date"
-                        className="form-control"
-                        id="pdate"
-                        value={formData.date}
-                        onChange={handleChange}
-                        aria-describedby="pdate"
-                      />
-                      {errors.date && (
-                        <small className="text-danger">{errors.date}</small>
-                      )}
-                    </div>
+                                  <div className="col-md-6 mb-3">
+                                      <label htmlFor="pdate" className="form-label">
+                                        Purchase Date
+                                      </label>
+                                      <input
+                                        type="date"
+                                        name="date"
+                                        className="form-control"
+                                        id="pdate"
+                                        value={formData.date}
+                                        onChange={handleChange}
+                                        aria-describedby="pdate"
+                                      />
+                                      {errors.date && (
+                                        <small className="text-danger">{errors.date}</small>
+                                      )}
+                                  </div>
+
+                                    <div className="col-md-12 mb-3">
+                                        <label htmlFor="pname" className="form-label">
+                                          Product
+                                        </label>
+                                            <select 
+                                              className="form-control" 
+                                              onChange={handleChange} 
+                                              value={formData.product || ''}
+                                              name="product"
+                                            >
+                                              <option value="">Select</option>
+                                              {Model && Model.length > 0 ? (
+                                                Model.map((item, index) => (
+                                                  <option key={index} value={item.item_description}>
+                                                    {item.item_description}
+                                                  </option>
+                                                ))
+                                              ) : (
+                                                <option value="" disabled>No products available</option>
+                                              )}
+                                            </select>
+                                        {errors.product && (
+                                          <small className="text-danger">{errors.product}</small>
+                                        )}
+                                  </div>
+
+                                <div className="col-md-12 mb-3">
+                                        <label htmlFor="country" className="form-label pb-0 dropdown-label">
+                                          Customer Address
+                                        </label>
+                                          <select
+                                            className="form-select dropdown-select"
+                                            name="location"
+                                            value={formData.customer_address}
+                                            onChange={(e) => handleChange(e)}
+                                          >
+                                            <option value="">Select Customer Address</option>
+                                            {CustomerAddress.length > 0 ? (
+                                              CustomerAddress.map((cust_add, index) => (
+                                                <option
+                                                  key={index}
+                                                  value={cust_add.address}
+                                                  data-customername={cust_add.customername}
+                                                >
+                                                  {cust_add.address}
+                                                </option>
+                                              ))
+                                            ) : (
+                                              <option value="" disabled>
+                                                No addresses available
+                                              </option>
+                                            )}
+                                          </select>
+
+                                          {errors.location && (
+                                        <small className="text-danger">{errors.location}</small>
+                                      )}
+                                </div>
+
                     
                     {/* <div className="col-md-6 mb-3">
                       <label htmlFor="locationc" className="form-label">
