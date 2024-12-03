@@ -23,7 +23,9 @@ const Uniqueproduct = () => {
     date: "",
     serialnumber: "",
     CustomerID: customer_id,
+    CustomerName: "",
   });
+
 
   // Format date function
   const formatDate = (dateString) => {
@@ -68,9 +70,9 @@ const Uniqueproduct = () => {
   };
   
 
-  const fecthProduct = async () => {
+  const fecthProduct = async (customer_id) => {
     try {
-      const response = await axios.get(`${Base_Url}/getproductunique`,{
+      const response = await axios.get(`${Base_Url}/getproductunique/${customer_id}`,{
         headers: {
           Authorization: token, // Send token in headers
         },
@@ -97,18 +99,37 @@ const Uniqueproduct = () => {
   };
 
   useEffect(() => {
-    fecthProduct();
-    fetchModelno();
- if (customer_id !== 0) {
+ 
+    if (customer_id) {
+      fecthProduct(customer_id);
       fetchCustomerlocationById(customer_id);
     }
-
+    fetchModelno();
   }, [customer_id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    
+    // Check if e.target.options exists before accessing it
+    if (e.target.options) {
+      const selectedOption = e.target.options[e.target.selectedIndex];
+      const customername = selectedOption ? selectedOption.getAttribute("data-customername") : '';
+    
+      setFormData({
+        ...formData,
+        [name]: value,
+        ...(customername ? { CustomerName: customername } : {})
+      });
+    } else {
+      // For input elements without options
+      setFormData({
+        ...formData,
+        [name]: value
+      });
+    }
   };
+  
+  
 
   // Step 2: Add form validation function
   const validateForm = () => {
@@ -164,7 +185,7 @@ const Uniqueproduct = () => {
                         date: "",
                         serialnumber: "",
                       });
-                      fecthProduct();
+                      fecthProduct(customer_id);
                     })
                     .catch((error) => {
                       if (error.response && error.response.status === 409) {
@@ -188,7 +209,7 @@ const Uniqueproduct = () => {
                         date: "",
                         serialnumber: "",
                       });
-                      fecthProduct();
+                      fecthProduct(customer_id);
                     })
                     .catch((error) => {
                       if (error.response && error.response.status === 409) {
@@ -211,7 +232,7 @@ const Uniqueproduct = () => {
           Authorization: token, // Send token in headers
         },
       });
-      fecthProduct();
+      fecthProduct(customer_id);
     } catch (error) {
       console.error("Error deleting user:", error);
     }
@@ -263,19 +284,26 @@ const Uniqueproduct = () => {
                             className="form-select dropdown-select"
                             name="location"
                             value={formData.customer_address}
-                            onChange={handleChange}
+                            onChange={(e) => handleChange(e)}
                           >
                             <option value="">Select Customer Address</option>
                             {CustomerAddress.length > 0 ? (
                               CustomerAddress.map((cust_add, index) => (
-                                <option key={index} value={cust_add.address}>
+                                <option
+                                  key={index}
+                                  value={cust_add.address}
+                                  data-customername={cust_add.customername}
+                                >
                                   {cust_add.address}
                                 </option>
                               ))
                             ) : (
-                              <option value="" disabled>No addresses available</option>
+                              <option value="" disabled>
+                                No addresses available
+                              </option>
                             )}
                           </select>
+
                           {errors.location && (
                         <small className="text-danger">{errors.location}</small>
                       )}
@@ -412,10 +440,10 @@ const Uniqueproduct = () => {
                     {product.map((item, index) => (
                       <tr key={item.id}>
                         <th scope="row">{index + 1}</th>
-                        <td>{formatDate(item.date)}</td>
-                        <td>{item.product}</td>
-                        <td>{item.serialnumber}</td>
-                        <td>{item.location}</td>
+                        <td>{formatDate(item.purchase_date)}</td>
+                        <td>{item.ModelNumber}</td>
+                        <td>{item.serial_no}</td>
+                        <td>{item.address}</td>
                         <td className="text-center">
                           <button
                             className="btn btn-link text-primary"

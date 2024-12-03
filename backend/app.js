@@ -4014,23 +4014,21 @@ app.post("/deletepincode", async (req, res) => {
 });
 
 //Unique Product Master Linked to Location Start
-app.get("/getproductunique", authenticateToken, async (req, res) => {
+app.get("/getproductunique/:customer_id", authenticateToken, async (req, res) => {
+  const { customer_id } = req.params; 
   try {
-    // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
-
-    // SQL query to fetch data from the database
-    const sql = "SELECT * FROM awt_uniqueproductmaster WHERE deleted = 0";
-
-    // Execute the SQL query
+    const sql = `SELECT * FROM awt_uniqueproductmaster WHERE CustomerID = '${customer_id}' AND deleted = 0`;
     const result = await pool.request().query(sql);
-
+    console.log("Sql",sql)
     return res.json(result.recordset);
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'An error occurred while fetching data' });
   }
 });
+
+
 app.get("/requestproductunique/:id", authenticateToken, async (req, res) => {
   const { id } = req.params;
 
@@ -4054,27 +4052,22 @@ app.get("/requestproductunique/:id", authenticateToken, async (req, res) => {
     return res.status(500).json({ error: 'An error occurred while fetching data' });
   }
 });
+
 app.post("/postproductunique", authenticateToken, async (req, res) => {
-  const { product, location, date, serialnumber, CustomerID } = req.body;
-
+  const { product, location, date, serialnumber, CustomerID ,CustomerName} = req.body;
   try {
-    // Use the poolPromise to get the connection pool
-    const pool = await poolPromise;
 
-    // Check for duplicates customer_ id will be add
+    const pool = await poolPromise;
     const checkDuplicateSql = `SELECT * FROM awt_uniqueproductmaster WHERE CustomerID = '${CustomerID}'AND address = '${location}'AND ModelNumber = '${product}'AND deleted = 0`;
     const duplicateResult = await pool.request().query(checkDuplicateSql);
-
     if (duplicateResult.recordset.length > 0) {
       return res.status(409).json({
         message: "Product with same customer Id and Location already exists!",
       });
     } else {
-      // Insert new product
-      const insertSql = `INSERT INTO awt_uniqueproductmaster (ModelNumber, address, date, serial_no)
-                        VALUES ('${product}', '${location}', '${date}', '${serialnumber}')`;
+      const insertSql = `INSERT INTO awt_uniqueproductmaster (ModelNumber, address, purchase_date, serial_no,CustomerName,CustomerID)
+                        VALUES ('${product}', '${location}', '${date}', '${serialnumber}', '${CustomerName}', '${CustomerID}')`;
       await pool.request().query(insertSql);
-
       return res.json({ message: "Product added successfully!" });
     }
   } catch (err) {
@@ -4140,7 +4133,7 @@ app.get('/fetchcustomerlocationByCustomerid/:customer_id', authenticateToken, as
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
 
-    const sql = `SELECT * FROM awt_customerlocation WHERE customer_id = '${customer_id}' AND deleted = 0`;
+    const sql = `SELECT cl.*,c.customer_fname as customername from awt_customerlocation cl LEFT JOIN awt_customer c on c.customer_id = cl.customer_id WHERE cl.customer_id = '${customer_id}' AND cl.deleted = 0`;
 console.log(sql)
     const result = await pool.request().query(sql);
 
@@ -7320,6 +7313,7 @@ app.get("/getcomplainlistcsp", async (req, res) => {
 
     let nots = 'NOT';
 
+    console.log("CSp Query",sql);
 
 
     if (fromDate && toDate) {
