@@ -7,7 +7,7 @@ import { FaEye } from "react-icons/fa";
 
 export function Registercomplaint(params) {
 
-
+    const [addresses, setAddresses] = useState([]);
     const [hideticket, setHideticket] = useState(false)
     const [serachval, setSearch] = useState('')
     const [searchdata, setSearchData] = useState([])
@@ -84,6 +84,7 @@ export function Registercomplaint(params) {
         master_service_partner: "",
         child_service_partner: "",
         customer_id: "",
+        customerEndId: "",
         additional_remarks: "",
         specification: "",
         msp: "",
@@ -111,6 +112,29 @@ export function Registercomplaint(params) {
 
                 }
             })
+    }
+
+// fetch address from end customerlocation
+
+    async function fetchAddresses(customerEndId) {
+        try {
+            const response = await axios.get(`${Base_Url}/getEndCustomerAddresses/${customerEndId}`, {
+                headers: {
+                    Authorization: token, // Send token in headers if required
+                },
+            });
+
+        if (response.data.address) {
+            setAddresses(response.data);
+        } 
+
+        else if (Array.isArray(response.data)) {
+            setAddresses(response.data);
+        }
+       
+        } catch (error) {
+            console.error("Error fetching addresses:", error);
+        }
     }
 
     //This is for product
@@ -312,7 +336,7 @@ export function Registercomplaint(params) {
             .then((res) => {
                 console.log(res.data.information)
                 if (res.data.information && res.data.information.length > 0) {
-
+                     const customerInfo = res.data.information[0];
                     // console.log(res.data,"Search Data")
                     // console.log(res.data[0],"Hide Ticket")
                     setDuplicateCustomerNumber(res.data.information[0].customer_mobile);
@@ -333,6 +357,8 @@ export function Registercomplaint(params) {
                         customer_id: res.data.information[0].id,
                         custo_id: res.data.information[0].customer_id,
 
+                        customerEndId: customerInfo.customer_id,
+
 
 
                         // alt_mobile: "",
@@ -352,7 +378,8 @@ export function Registercomplaint(params) {
                         // child_service_partner: res.data[0].child_service_partner || ""
 
                     })
-
+                        // Fetch addresses of end customer from customer location
+                        fetchAddresses(customerInfo.customer_id);
 
                 } else {
                     // If no results found, clear previous data
@@ -708,11 +735,45 @@ export function Registercomplaint(params) {
                                     <h4 className="pname">{searchdata.customer_name}</h4>
                                 </div>
                             </div>
-                            <p>{searchdata.address}</p>
+
+                              {/* Display addresses here */}
+                            {/* <p style={{fontSize: '12px'}}>{searchdata.address}</p> */}
+                            <div className="row">
+                                <div className="col-md-12">
+                           
+                                        {addresses && addresses.length > 0 ? (
+                                            // Check if it's an array or a single object
+                                            Array.isArray(addresses) ? (
+                                                addresses.map((addressItem, index) => (
+                                                    <p 
+                                                        key={addressItem.id || index} 
+                                                        style={{ 
+                                                            fontSize: '12px', 
+                                        
+                                                        }}
+                                                    >
+                                                        {addressItem.address}
+                                                    </p>
+                                                ))
+                                            ) : (
+                                                <p 
+                                                    key="single-address" 
+                                                    style={{ 
+                                                        fontSize: '12px', 
+                                                    }}
+                                                >
+                                                    {addresses.address}
+                                                </p>
+                                            )
+                                        ) : (
+                                            <p style={{ fontSize: '12px' }}>No Address Available</p>
+                                        )}
+                                    </div>       
+                                    </div>
 
 
                             <div className="row mb-3">
-                                <div className="col-md-5">
+                                <div className="col-md-12">
                                     <p><strong>Mobile :</strong> {searchdata.customer_mobile}</p>
                                 </div>
                             </div>
@@ -767,11 +828,11 @@ export function Registercomplaint(params) {
                                                         <span style={{ fontSize: "14px" }}><button
                                                             className='btn'
                                                             onClick={() => navigate(`/complaintview/${item.id}`)}
-                                                            title="View"
+                                                            title="View Info"
                                                             style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
                                                         >
                                                             <FaEye />
-                                                        </button>view Info</span>
+                                                        </button></span>
                                                     </td>
                                                 </tr>
                                             ))}

@@ -3936,14 +3936,14 @@ app.post("/postcustomerlocation", authenticateToken, async (req, res) => {
 
   const customerResult = await pool.request().query(checkCustomerSql);
 
-  if (customerResult.recordset.length === 0) {
-    return res.status(404).json({
-      message: "Customer not found in awt_customer table!"
-    });
-  }
+  // if (customerResult.recordset.length === 0) {
+  //   return res.status(404).json({
+  //     message: "Customer not found in awt_customer table!"
+  //   });
+  // }
 
     // Check for duplicates
-    const checkDuplicateSql = `SELECT * FROM awt_customerlocation WHERE ccperson = '${ccperson}' AND deleted = 0`;
+    const checkDuplicateSql = `SELECT * FROM awt_customerlocation WHERE ccperson = '${ccperson}' AND address = '${address}' AND deleted = 0`;
     const duplicateResult = await pool.request().query(checkDuplicateSql);
 
     if (duplicateResult.recordset.length > 0) {
@@ -7671,7 +7671,7 @@ app.post("/getupdateengineer", authenticateToken,
 
     try {
       const pool = await poolPromise;
-      // Modified SQL query using parameterized query
+      // Modified SQL query using parameterized query 
       const sql = `
     SELECT * 
     FROM awt_engineermaster 

@@ -6,7 +6,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { FaEye } from "react-icons/fa";
 
 export function Registercomplaint(params) {
-
+    const [customerEndId, setCustomerEndId] = useState('');
     const [addresses, setAddresses] = useState([]);
     const [hideticket, setHideticket] = useState(false)
     const [serachval, setSearch] = useState('')
@@ -96,6 +96,88 @@ export function Registercomplaint(params) {
         classification :"",
         Priority :""
     })
+
+    // Add this state to manage the popup visibility and selected address
+const [isPopupOpen, setIsPopupOpen] = useState(false);
+const [selectedAddress, setSelectedAddress] = useState('');
+const [newAddress, setNewAddress] = useState('');
+
+    // Sample existing addresses (you can fetch this from your API)
+const existingAddresses = [
+    "Address 1",
+    "Address 2",
+    "Address 3",
+];
+
+// Function to handle the address change
+const handleAddressChange = (e) => {
+    const { value } = e.target;
+    setValue(prevState => ({
+        ...prevState,
+        address: value
+    }));
+};
+
+// Function to open the popup
+const openPopup = () => {
+    setIsPopupOpen(true);
+};
+
+// Function to close the popup
+const closePopup = () => {
+    setIsPopupOpen(false);
+};
+
+// Function to handle the address selection from dropdown
+const handleExistingAddressChange = (e) => {
+    const selected = e.target.value;
+    setSelectedAddress(selected);
+    setValue(prevState => ({
+        ...prevState,
+        address: selected // Set the selected address to the input field
+    }));
+};
+
+const handleNewAddressSubmit = async (event) => {
+    event.preventDefault(); // Prevent the default form submission behavior
+    try {
+        // Prepare the payload with the new address and additional fields
+        const payload = {
+            address: newAddress,
+            pincode_id: value.pincode || '',
+            ccperson: value.contact_person || '', // Extract contact person from form data
+            ccnumber: value.mobile || '', // Extract mobile from form data
+            customer_id: customerEndId || '', // Use customerEndId or send empty if not available
+        };
+
+        const response = await axios.post(`${Base_Url}/postcustomerlocation`, payload, {
+            headers: {
+                Authorization: token, 
+            },
+        });
+
+        if (response.data.success) {
+            console.log("New Address Submitted:", newAddress);
+
+            // Optimistically update the addresses state
+            setAddresses(prevAddresses => [
+                ...prevAddresses,
+                { address: newAddress, id: response.data.newAddressId } // Assuming response contains the ID of the new address
+            ]);
+
+            // Reset the new address input
+            setNewAddress('');
+            setPincode('');
+            closePopup();
+        } else {
+            console.error("Error submitting new address:", response.data.message);
+        }
+    } catch (error) {
+        console.error("Error submitting new address:", error);
+    }
+    fetchAddresses(customerEndId); 
+};
+
 
     //This is for State Dropdown
 
@@ -380,6 +462,7 @@ export function Registercomplaint(params) {
                     })
                         // Fetch addresses of end customer from customer location
                         fetchAddresses(customerInfo.customer_id);
+                        setCustomerEndId(customerInfo.customer_id);
 
                 } else {
                     // If no results found, clear previous data
@@ -669,6 +752,7 @@ export function Registercomplaint(params) {
 
 
     return (
+    
         < div className="p-3">
             <div className="row ">
                 <div className="complbread">
@@ -981,13 +1065,118 @@ export function Registercomplaint(params) {
                                             <input type="text" className="form-control" value={value.alt_mobile} name="alt_mobile" onChange={onHandleChange} placeholder="Enter Mobile" />
                                         </div>
                                     </div>
-                                    <div className="col-md-12">
+
+                                    {/* <div className="col-md-12">
                                         <div className="mb-3">
                                             <label htmlFor="exampleFormControlInput1" className="form-label">Address</label>
                                             <textarea className="form-control" value={value.address} name="address" onChange={onHandleChange} placeholder="Enter Address">Customer Address</textarea>
                                         </div>
-                                    </div>
+                                    </div> */}
+ <>
+ <style>
+    {`
+        .popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
 
+        .popup-content {
+            background: rgb(240, 240, 240);
+            padding: 20px;
+            border-radius: 10px;
+            width: 600px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        h3 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #007bff;
+            text-align: center;
+        }
+
+        select, textarea {
+            width: 100%;
+            height: 45px;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid black; /* Changed border color to black */
+            border-radius: 5px;
+            background: white;
+            color: #555;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    `}
+</style>
+
+      <div className="col-md-12">
+    <div className="mb-3">
+        <label htmlFor="exampleFormControlInput1" className="form-label">Address</label>
+        <textarea
+            className="form-control"
+            value={value.address}
+            name="address"
+            onChange={handleAddressChange}
+            placeholder="Enter Address"
+        ></textarea>
+        <button onClick={openPopup} type="button" className="btn btn-secondary mt-2">Add Address</button>
+    </div>
+</div>
+
+        {isPopupOpen && (
+            <div className="popup">
+                <div className="popup-content">
+                    <h3>Change Address</h3>
+                <select id="existingAddress" onChange={handleExistingAddressChange} value={selectedAddress}>
+                    <option value="">Select Existing Address</option>
+                    {addresses.map((addressItem) => (
+                        <option key={addressItem.id} value={addressItem.address}>
+                            {addressItem.address}
+                        </option>
+                    ))}
+                </select>
+
+                    <h3>Add New Address</h3>
+                    <textarea
+                        className="form-control"
+                        value={newAddress}
+                        onChange={(e) => {
+                            setNewAddress(e.target.value); // Update new address in state
+                            setValue(prevState => ({
+                                ...prevState,
+                                address: e.target.value // Also update the main address field
+                            }));
+                        }}
+                        placeholder="Enter New Address"
+                    />
+                    <button onClick={handleNewAddressSubmit} className="btn btn-primary mt-2" type="button">Add</button>
+                    <button onClick={closePopup} className="btn btn-secondary mt-2" type="button" style={{ marginLeft: '10px' }}>Close</button>
+                </div>
+            </div>
+        )}
+    </>
 
                                     {!duplicate ? <>
                                         <div className="col-md-3">
