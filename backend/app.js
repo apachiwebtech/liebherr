@@ -2790,7 +2790,7 @@ app.get("/getComplaintDetails/:ticket_no", async (req, res) => {
     const pool = await poolPromise;
 
     // Direct SQL query without parameter binding for remarks
-    const remarkQuery = `SELECT ac.*, lu.Lhiuser FROM awt_complaintremark as ac LEFT JOIN lhi_user as lu ON lu.id = ac.created_by WHERE ac.ticket_no = ${"'" + ticket_no + "'"} order by id DESC`;
+    const remarkQuery = `SELECT ac.*, lu.title FROM awt_complaintremark as ac LEFT JOIN awt_engineermaster as lu ON lu.engineer_id = ac.created_by WHERE ac.ticket_no = ${"'" + ticket_no + "'"} order by id DESC`;
 
     // Execute remark query
     const remarksResult = await pool.request().query(remarkQuery);
@@ -2801,6 +2801,9 @@ app.get("/getComplaintDetails/:ticket_no", async (req, res) => {
       SELECT * FROM awt_complaintattachment
       WHERE ticket_no = ${"'" + ticket_no + "'"}
     `;
+
+    console.log(remarkQuery,"%%%")
+    console.log(attachmentQuery,"SSS")
 
 
     // Execute attachment query
@@ -7304,10 +7307,10 @@ app.get("/getcomplainlistcsp", async (req, res) => {
     console.log('Received status:', status); // Debug log
 
     let sql = `
-        SELECT c.*, e.title as assigned_name, 
+        SELECT c.*, 
         DATEDIFF(day, (c.ticket_date), GETDATE()) AS ageingdays 
         FROM complaint_ticket AS c
-        JOIN awt_engineermaster AS e ON c.engineer_id = e.id
+       
         WHERE c.deleted = 0 AND c.csp = '${licare_code}'
     `;
 

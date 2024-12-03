@@ -55,6 +55,8 @@ export function Complaintview(params) {
   const [callstatusid, setCallstatusid] = useState(""); // Current attachment for modal
   const created_by = localStorage.getItem("userId"); // Get user ID from localStorage
   const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
+  const [selectedSpareParts, setSelectedSpareParts] = useState([]);
+  const [spareParts, setSpareParts] = useState([]);
 
   const [TicketUpdateSuccess, setTicketUpdateSuccess] = useState({
     message: '',
@@ -130,7 +132,7 @@ export function Complaintview(params) {
   }
 
   const getsubcallstatus = async (value) => {
-    if (value !== undefined ) {
+    if (value !== undefined) {
       try {
         const res = await axios.post(
           `${Base_Url}/getsubcallstatus`,
@@ -141,7 +143,7 @@ export function Complaintview(params) {
             },
           }
         );
-  
+
         if (res.data) {
           setsubCallstatus(res.data); // Set sub-call statuses from POST response
         }
@@ -156,7 +158,7 @@ export function Complaintview(params) {
             Authorization: token, // Send token in headers
           },
         });
-  
+
         if (res.data) {
           setsubCallstatus(res.data); // Set sub-call statuses from GET response
         }
@@ -166,7 +168,7 @@ export function Complaintview(params) {
       }
     }
   };
-  
+
 
   const AddEngineer = () => {
     const selectedEngineer = engineer.find(
@@ -181,6 +183,35 @@ export function Complaintview(params) {
     }
 
   };
+
+  const AddSparePart = () => {
+    if (!complaintview.spare_part_id) {
+      alert("Please select a spare part before adding.");
+      return;
+    }
+
+    // Assuming `selectedSpareParts` is a state holding the list of added spare parts
+    if (
+      selectedSpareParts.some(
+        (part) => part.id === complaintview.spare_part_id
+      )
+    ) {
+      alert("This spare part is already added.");
+      return;
+    }
+
+    const selectedPart = spareParts.find(
+      (part) => part.id === complaintview.spare_part_id
+    );
+
+    if (selectedPart) {
+      setSelectedSpareParts((prevParts) => [...prevParts, selectedPart]);
+      alert(`${selectedPart.name} has been added.`);
+    } else {
+      alert("An error occurred while adding the spare part.");
+    }
+  };
+
 
   const handleRemoveEngineer = (id) => {
     const updatedEngineers = addedEngineers.filter((eng) => eng.id !== id);
@@ -200,7 +231,7 @@ export function Complaintview(params) {
       }
       );
 
-      
+
       setRemarks(response.data.remarks);
       setAttachments(response.data.attachments);
 
@@ -219,7 +250,7 @@ export function Complaintview(params) {
         },
       }
       );
-      
+
       setComplaintview(response.data);
       setCallstatusid(response.data.call_status)
       getupdateengineer(response.data.engineer_id)
@@ -232,16 +263,16 @@ export function Complaintview(params) {
     }
   };
 
-  async function getupdateengineer (id) {
-   axios.post(`${Base_Url}/getupdateengineer` , {eng_id : id} ,{
-    headers: {
-      Authorization: token,
-    },
-  })
-   .then((res) =>{
-    console.log(res)
-    setAddedEngineers(res.data)
-   })
+  async function getupdateengineer(id) {
+    axios.post(`${Base_Url}/getupdateengineer`, { eng_id: id }, {
+      headers: {
+        Authorization: token,
+      },
+    })
+      .then((res) => {
+        console.log(res)
+        setAddedEngineers(res.data)
+      })
   }
 
   const fetchComplaintDuplicate = async () => {
@@ -504,7 +535,7 @@ export function Complaintview(params) {
     }
     getProduct();
 
-  
+
 
 
 
@@ -518,14 +549,14 @@ export function Complaintview(params) {
       setEngineer([])
     }
 
-    
+
   }, [engtype])
 
-  useEffect(() =>{
+  useEffect(() => {
     getcallstatus()
 
     getsubcallstatus()
-  },[])
+  }, [])
 
   const handleAttachmentClick = (attachment) => {
     console.log("Attachment clicked:", attachment);
@@ -890,7 +921,7 @@ export function Complaintview(params) {
                         <div style={{ flex: "0 0 20%", textAlign: "right" }}>
 
                           <h3 className="mainheade important-margin" style={{ fontSize: "12px", margin: 0 }}>
-                            By: {remark.Lhiuser}
+                            By: {remark.title}
                           </h3>
 
                           <h3 className="mainheade" style={{ fontSize: "12px", margin: 0 }}>
@@ -1225,11 +1256,50 @@ export function Complaintview(params) {
             </div>
           </div> */}
 
-          <div className="card mb-3" id="engineerInfocs">
-            <div className="card-body">
+          <div className="row">
+            <div className="col-lg-9">
+              
+              <select
+                className="form-select dropdown-select"
+                name="spare_part_id"
+                value={complaintview.spare_part_id}
+                onChange={handleModelChange}
+              >
+                <option value="">Select Spare Part</option>
+                {Array.isArray(spareParts) && spareParts.length > 0 ? (
+                  spareParts.map((part) => (
+                    <option key={part.id} value={part.id}>
+                      {part.name}
+                    </option>
+                  ))
+                ) : (
+                  <option value="" disabled>
+                    No spare parts available
+                  </option>
+                )}
+              </select>
+            </div>
 
+            <div className="col-lg-3">
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={AddSparePart}
+              >
+                Add
+              </button>
             </div>
           </div>
+
+          <div>
+            <h5>Added Spare Parts</h5>
+            <ul>
+              {selectedSpareParts.map((part) => (
+                <li key={part.id}>{part.name}</li>
+              ))}
+            </ul>
+          </div>
+
+
 
           {/* // */}
           <div className="card" id="attachmentInfocs">

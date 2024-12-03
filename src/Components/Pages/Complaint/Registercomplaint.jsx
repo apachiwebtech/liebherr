@@ -120,8 +120,9 @@ export function Registercomplaint(params) {
         axios.get(`${Base_Url}/product_master`)
             .then((res) => {
                 if (res.data) {
-
+               
                     setProduct(res.data)
+                    console.log(res.data , "RRR")
                 }
             })
 
@@ -317,7 +318,7 @@ export function Registercomplaint(params) {
                     setDuplicateCustomerNumber(res.data.information[0].customer_mobile);
                     setSearchData(res.data.information[0])
                     setProductCustomer(res.data.product)
-
+                    setDuplicate(res.data.information);
                     console.log(searchdata, "EEE")
 
                     setHideticket(true)
@@ -589,7 +590,7 @@ export function Registercomplaint(params) {
 
                 setLocation(response.data[0]);
             }
-            setDuplicate(response.data);
+            // setDuplicate(response.data);
         } catch (error) {
             console.error("Error fetching ticket details:", error);
         }
