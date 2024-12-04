@@ -98,6 +98,17 @@ export function Siteheader(params) {
 
             </li>
             <li className="nav-item dropdown">
+              <Link className={`nav-link site `}
+                to={`/quotationlist`}
+                id="navbarDropdown"
+                role="button"
+                aria-expanded="false"
+               >
+                Quotations
+              </Link>
+
+            </li>
+            <li className="nav-item dropdown">
               <Link className={`nav-link dropdown-toggle site `}
                 to="#"
                 id="navbarDropdown"

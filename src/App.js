@@ -84,6 +84,7 @@ import { Base_Url } from './Components/Utils/Base_Url';
 import axios from 'axios';
 import DataTable from './Components/Pages/Complaint/Compdatatablebackup';
 import HeaderMsp from './Components/Layout/HeaderMsp';
+import { Quotationlist } from './Components/Pages/Quotation/Quotationlist';
 
 
 
@@ -481,6 +482,10 @@ const Router = createBrowserRouter([
         path: "/datatable",
         element: <DataTable />
       },
+      {
+        path: "/quotationlist",
+        element: <Quotationlist />
+      }
 
 
 

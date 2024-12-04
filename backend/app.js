@@ -7854,3 +7854,23 @@ app.post("/getDefectCodewisesite", authenticateToken,
       return res.status(500).json({ error: "Database error occurred", details: err.message });
     }
   });
+
+  // Quotation Listing 
+  app.get("/getquotationlist", authenticateToken, async (req, res) => {
+    try {
+      // Use the poolPromise to get the connection pool
+      const pool = await poolPromise;
+  
+      // Directly use the query (no parameter binding)
+      const sql = "SELECT * FROM awt_quotation ORDER BY id ASC";
+  
+      // Execute the query
+      const result = await pool.request().query(sql);
+  
+      // Return the result as JSON
+      return res.json(result.recordset);
+    } catch (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ error: "Database error occurred" });
+    }
+  });
