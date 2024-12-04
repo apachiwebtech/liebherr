@@ -431,9 +431,18 @@ export function Complaintview(params) {
       );
 
       setComplaintview(response.data);
-      setCallstatusid(response.data.call_status)
-      getupdateengineer(response.data.engineer_id)
-      getupdatespare(response.data.spare_part_id)
+      
+      if(response.data.call_status != null){
+        setCallstatusid(response.data.call_status)
+      }
+      if(response.data.engineer_id != null){
+        getupdateengineer(response.data.engineer_id)
+      }
+
+      if(response.data.spare_part_id != null){
+
+        getupdatespare(response.data.spare_part_id)
+      }
       if (response.data.serial_no != "") {
         setsserial_no(response.data.serial_no);
 
