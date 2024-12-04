@@ -351,7 +351,7 @@ const EngineerMaster = () => {
                   <form onSubmit={handleSubmit} className="col-12">
                     <div className='row'>
                       <div className="col-md-3">
-                        <label htmlFor="Master  Franchise" className="form-label pb-0 dropdown-label">Master Franchise</label>
+                        <label htmlFor="Master  Franchise" className="form-label pb-0 dropdown-label">Master Franchise<span className="text-danger">*</span></label>
                         <select className='form-select dropdown-select' name='mfranchise_id' value={formData.mfranchise_id} onChange={handleChange} >
                           <option value="">Select Master Franchise</option>
                           {Parentfranchise.map((pf) => (
@@ -361,7 +361,7 @@ const EngineerMaster = () => {
                         {errors.mfranchise_id && <small className="text-danger">{errors.mfranchise_id}</small>} {/* Show error for Child Franchise selection */}
                       </div>
                       <div className="col-md-3">
-                        <label htmlFor="Child Franchise" className="form-label pb-0 dropdown-label">Child Franchise</label>
+                        <label htmlFor="Child Franchise" className="form-label pb-0 dropdown-label">Child Franchise<span className="text-danger">*</span></label>
                         <select className='form-select dropdown-select' name='cfranchise_id' value={formData.cfranchise_id} onChange={handleChange} >
                           <option value="">Select Child Franchise</option>
                           {Childfranchise.map((pf) => (
@@ -372,7 +372,7 @@ const EngineerMaster = () => {
                       </div>
                       {/* Step 2.2: Engineer Master Input */}
                       <div className="col-md-3">
-                        <label htmlFor="EngineerNameInput" className="input-field" style={{ marginBottom: '15style={{ mapx', fontSize: '18px' }}> Engineer Name</label>
+                        <label htmlFor="EngineerNameInput" className="input-field" style={{ marginBottom: '15style={{ mapx', fontSize: '18px' }}> Engineer Name<span className="text-danger">*</span></label>
                         <input
                           type="text"
                           className="form-control"
@@ -389,7 +389,7 @@ const EngineerMaster = () => {
                       <div className="col-md-3">
                         <label htmlFor="passwordInput" className="in
                         
-                        put-field" style={{ marginBottom: '15style={{ mapx', fontSize: '18px' }}>Engineer Password</label>
+                        put-field" style={{ marginBottom: '15style={{ mapx', fontSize: '18px' }}>Engineer Password<span className="text-danger">*</span></label>
                         <input
                           type="password"
                           className="form-control"
@@ -403,7 +403,7 @@ const EngineerMaster = () => {
                         {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
                       </div>
                       <div className="col-md-3">
-                        <label htmlFor="employeeCodeInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>Employee Code</label>
+                        <label htmlFor="employeeCodeInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>Employee Code<span className="text-danger">*</span></label>
                         <input
                           type="text"  // Changed to "text" for Employee Code
                           className="form-control"
@@ -418,7 +418,7 @@ const EngineerMaster = () => {
                       </div>
 
                       <div className="col-md-3">
-                        <label htmlFor="emailInput" className="input-field" style={{ marginBottom: '15style={{ mapx', fontSize: '18px' }}>Engineer Email</label>
+                        <label htmlFor="emailInput" className="input-field" style={{ marginBottom: '15style={{ mapx', fontSize: '18px' }}>Engineer Email<span className="text-danger">*</span></label>
                         <input
                           type="email"
                           className="form-control"
@@ -452,7 +452,7 @@ const EngineerMaster = () => {
                           className="input-field"
                           style={{ marginBottom: '15px', fontSize: '18px' }}
                         >
-                          Engineer Mobile No
+                          Engineer Mobile No<span className="text-danger">*</span>
                         </label>
                         <input
                           type="text"

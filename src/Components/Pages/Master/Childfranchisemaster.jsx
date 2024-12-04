@@ -413,7 +413,7 @@ const Childfranchisemaster = () => {
                       className="input-field"
                       style={{ marginBottom: "15px", fontSize: "18px" }}
                     >
-                      Child Franchise Master
+                      Child Franchise Master<span className="text-danger">*</span>
                     </label>
                     <input
                       type="text"
@@ -431,7 +431,7 @@ const Childfranchisemaster = () => {
                   </div>
 
                   <div className="col-md-3">
-                    <label className="input-field">Child Licare Code</label>
+                    <label className="input-field">Child Licare Code<span className="text-danger">*</span></label>
                     <input
                       type="text"
                       className="form-control"
@@ -444,7 +444,7 @@ const Childfranchisemaster = () => {
                   </div>
 
                   <div className="col-md-3">
-                    <label className="input-field"> Child Franchise Master(Contact Person)</label>
+                    <label className="input-field"> Child Franchise Master(Contact Person)<span className="text-danger">*</span></label>
                     <input
                       type="text"
                       className="form-control"
@@ -457,7 +457,7 @@ const Childfranchisemaster = () => {
                   </div>
 
                   <div className="col-md-3">
-                    <label className="input-field">Child Franchise Master (Email)</label>
+                    <label className="input-field">Child Franchise Master (Email)<span className="text-danger">*</span></label>
                     <input
                       type="email"
                       className="form-control"
@@ -470,7 +470,7 @@ const Childfranchisemaster = () => {
                   </div>
 
                   <div className="col-md-3">
-                    <label className="input-field">Child Franchise Master (Mobile Number)</label>
+                    <label className="input-field">Child Franchise Master (Mobile Number)<span className="text-danger">*</span></label>
                     <input
                       type="tel"
                       className="form-control"
@@ -485,7 +485,7 @@ const Childfranchisemaster = () => {
                   </div>
 
                   <div className="col-md-3">
-                    <label className="input-field">Child Partner Name</label>
+                    <label className="input-field">Child Partner Name<span className="text-danger">*</span></label>
                     <input
                       type="text"
                       className="form-control"
@@ -498,7 +498,7 @@ const Childfranchisemaster = () => {
                   </div>
 
                   <div className="col-md-3">
-                    <label className="input-field">Child Franchise Master (Password)</label>
+                    <label className="input-field">Child Franchise Master (Password)<span className="text-danger">*</span></label>
                     <input
                       type="password"
                       className="form-control"
@@ -583,7 +583,7 @@ const Childfranchisemaster = () => {
 
                   <div className="col-md-3">
                     <label htmlFor="area" className="input-field">
-                      Pincode
+                      Pincode<span className="text-danger">*</span>
                     </label>
 
                     <input type="text" className="form-control" value={formData.pincode_id} name="pincode_id" onChange={handleChange} placeholder="" />
@@ -685,7 +685,7 @@ const Childfranchisemaster = () => {
                   </div>
 
                   <div className="col-md-3">
-                    <label className="input-field">With Liebherr</label>
+                    <label className="input-field">With Liebherr<span className="text-danger">*</span></label>
                     <input
                       type="date"
                       className="form-control"
@@ -743,7 +743,7 @@ const Childfranchisemaster = () => {
                   </div>
 
                   <div className="col-md-6">
-                    <label className="input-field">Address</label>
+                    <label className="input-field">Address<span className="text-danger">*</span></label>
                     <textarea
                       className="form-control"
                       name="address"

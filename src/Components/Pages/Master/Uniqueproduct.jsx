@@ -279,7 +279,7 @@ const Uniqueproduct = () => {
 
                             <div className="col-md-6 mb-3">
                                       <label htmlFor="snumber" className="form-label">
-                                        Serial Number
+                                        Serial Number<span className="text-danger">*</span>
                                       </label>
                                       <input
                                         type="text"
@@ -301,7 +301,7 @@ const Uniqueproduct = () => {
 
                                   <div className="col-md-6 mb-3">
                                       <label htmlFor="pdate" className="form-label">
-                                        Purchase Date
+                                        Purchase Date<span className="text-danger">*</span>
                                       </label>
                                       <input
                                         type="date"
@@ -319,7 +319,7 @@ const Uniqueproduct = () => {
 
                                     <div className="col-md-12 mb-3">
                                         <label htmlFor="pname" className="form-label">
-                                          Product
+                                          Product<span className="text-danger">*</span>
                                         </label>
                                             <select 
                                               className="form-control" 
@@ -345,7 +345,7 @@ const Uniqueproduct = () => {
 
                                 <div className="col-md-12 mb-3">
                                         <label htmlFor="country" className="form-label pb-0 dropdown-label">
-                                          Customer Address
+                                          Customer Address<span className="text-danger">*</span>
                                         </label>
                                           <select
                                             className="form-select dropdown-select"

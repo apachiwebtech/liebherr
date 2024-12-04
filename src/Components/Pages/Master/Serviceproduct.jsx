@@ -196,7 +196,7 @@ const Serviceproduct = () => {
                       htmlFor="ServiceproductInput"
                       className="input-field"
                     >
-                      Service Product
+                      Service Product<span className="text-danger">*</span>
                     </label>
                     <input
                       type="text"

@@ -214,7 +214,7 @@ const ComplaintCode = () => {
                 >
                   <div className="mb-3">
                     <label htmlFor="ComplaintcodeInput" className="input-field">
-                      Defect Group Code
+                      Defect Group Code<span className="text-danger">*</span>
                     </label>
                     <input
                       type="text"
@@ -242,7 +242,7 @@ const ComplaintCode = () => {
 
                   <div className="mb-3">
                     <label htmlFor="ComplaintcodeInput" className="input-field">
-                      Defect Group Title
+                      Defect Group Title<span className="text-danger">*</span>
                     </label>
                     <input
                         type="text"

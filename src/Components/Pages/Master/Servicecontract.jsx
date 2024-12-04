@@ -279,12 +279,34 @@ const Servicecontract = () => {
                   onSubmit={handleSubmit}
                 >
                   <div className="row">
+                  <div className="col-3 mb-3">
+                      <label
+                        htmlFor="CustomernameInput"
+                        className="input-field"
+                      >
+                        Serial Number<span className="text-danger">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="serialNumber"
+                        id="ServiceproductInput"
+                        value={formData.serialNumber}
+                        onChange={handleChange}
+                        placeholder="Enter Serial Number "
+                      />
+                      {errors.serialNumber && (
+                        <small className="text-danger">
+                          {errors.serialNumber}
+                        </small>
+                      )}
+                    </div>
                     <div className="col-3 mb-3">
                       <label
                         htmlFor="CustomernameInput"
                         className="input-field"
                       >
-                        Customer Name
+                        Customer Name<span className="text-danger">*</span>
                       </label>
                       <input
                         type="text"
@@ -306,7 +328,7 @@ const Servicecontract = () => {
                         htmlFor="CustomerMobileInput"
                         className="input-field"
                       >
-                       Customer Mobile No <input type="checkbox" />Whatsapp
+                       Customer Mobile No<span className="text-danger">*</span> <input type="checkbox" />Whatsapp
                       </label>
                       <input
                         type="tel"
@@ -330,7 +352,7 @@ const Servicecontract = () => {
                         htmlFor="CustomernameInput"
                         className="input-field"
                       >
-                        Contract Number
+                        Contract Number<span className="text-danger">*</span>
                       </label>
                       <input
                         type="text"
@@ -351,9 +373,12 @@ const Servicecontract = () => {
                       )}{" "}
                       {/* Show duplicate error */}
                     </div>
-                    <div className="col-3 mb-3">
+                    
+                  </div>
+                  <div className="row">
+                  <div className="col-3 mb-3">
                       <label htmlFor="contracttypeInput" className="input-field">
-                        Contract Type
+                        Contract Type<span className="text-danger">*</span>
                       </label>
                       <select
                         className="form-select"
@@ -371,15 +396,13 @@ const Servicecontract = () => {
                         <small className="text-danger">{errors.contractType}</small>
                       )}
                     </div>
-                  </div>
-                  <div className="row">
 
                     <div className="col-3 mb-3">
                       <label
                         htmlFor="CustomernameInput"
                         className="input-field"
                       >
-                        Product Name
+                        Product Name<span className="text-danger">*</span>
                       </label>
                       <input
                         type="text"
@@ -400,28 +423,7 @@ const Servicecontract = () => {
                       )}{" "}
                       {/* Show duplicate error */}
                     </div>
-                    <div className="col-3 mb-3">
-                      <label
-                        htmlFor="CustomernameInput"
-                        className="input-field"
-                      >
-                        Serial Number
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        name="serialNumber"
-                        id="ServiceproductInput"
-                        value={formData.serialNumber}
-                        onChange={handleChange}
-                        placeholder="Enter Serial Number "
-                      />
-                      {errors.serialNumber && (
-                        <small className="text-danger">
-                          {errors.serialNumber}
-                        </small>
-                      )}
-                    </div>
+                    
                     <div className="col -3 mb-3">
                       <label htmlFor="StartDateInput" className="input-field">
                         Start Date

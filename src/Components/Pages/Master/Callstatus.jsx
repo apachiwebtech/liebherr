@@ -186,7 +186,7 @@ const Callstatus = () => {
                 >
                   <div className="mb-3">
                     <label htmlFor="CallstatusInput" className="input-field">
-                       Call Status Code
+                       Call Status Code<span className="text-danger">*</span>
                     </label>
                     <input
                       type="text"

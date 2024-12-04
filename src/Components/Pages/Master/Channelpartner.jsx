@@ -194,7 +194,7 @@ const Channelpartner = () => {
                       htmlFor="ChannelpartnerInput"
                       className="input-field"
                     >
-                      Channel Partner
+                      Channel Partner <span className="text-danger">*</span>
                     </label>
                     <input
                       type="text"

@@ -512,7 +512,7 @@ const MasterFranchise = (params) => {
                         htmlFor="MasterFranchiseInput"
                         className="input-field"
                       >
-                        Franchise Master
+                        Franchise Master<span className="text-danger">*</span>
                       </label>
                       <input
                         type="text"
@@ -533,7 +533,7 @@ const MasterFranchise = (params) => {
                     </div>
                     <div className="col-3">
                       <label htmlFor="LicareInput" className="input-field">
-                        Licare Code
+                        Licare Code<span className="text-danger">*</span>
                       </label>
                       <input
                         type="text"
@@ -558,7 +558,7 @@ const MasterFranchise = (params) => {
                         htmlFor="MasterFranchiseInput"
                         className="input-field"
                       >
-                        Franchise Master(Contact Person)
+                        Franchise Master(Contact Person)<span className="text-danger">*</span>
                       </label>
                       <input
                         type="text"
@@ -582,7 +582,7 @@ const MasterFranchise = (params) => {
                         htmlFor="MasterFranchiseInput"
                         className="input-field"
                       >
-                        Franchise Master (Email)
+                        Franchise Master (Email)<span className="text-danger">*</span>
                       </label>
                       <input
                         type="email" // Changed type to 'email'
@@ -606,7 +606,7 @@ const MasterFranchise = (params) => {
                         htmlFor="MasterFranchiseInput"
                         className="input-field"
                       >
-                        Franchise Master (Mobile Number)
+                        Franchise Master (Mobile Number)<span className="text-danger">*</span>
                       </label>
                       <input
                         type="tel" // Changed type to 'tel' for mobile number input
@@ -629,7 +629,7 @@ const MasterFranchise = (params) => {
                     </div>
                     <div className="col-3">
                       <label htmlFor="PartnerNameInput" className="input-field">
-                        Partner Name
+                        Partner Name<span className="text-danger">*</span>
                       </label>
                       <input
                         type="text"
@@ -654,7 +654,7 @@ const MasterFranchise = (params) => {
                         htmlFor="PassInput"
                         className="input-field"
                       >
-                        Franchise Master (Password)
+                        Franchise Master (Password)<span className="text-danger">*</span>
                       </label>
                       <input
                         type="password" // Changed type to 'password' for secure text input
@@ -675,7 +675,7 @@ const MasterFranchise = (params) => {
                     </div>
                     <div className="col-md-3">
                       <label htmlFor="country" className="input-field">
-                        Country
+                        Country<span className="text-danger">*</span>
                       </label>
                       <select
                         id="country"
@@ -700,7 +700,7 @@ const MasterFranchise = (params) => {
                     </div>
                     <div className="col-md-3 mb-3">
                       <label htmlFor="region" className="input-field">
-                        Region
+                        Region<span className="text-danger">*</span>
                       </label>
                       <select
                         id="region"
@@ -727,7 +727,7 @@ const MasterFranchise = (params) => {
                     {/* Geo State Dropdown */}
                     <div className="col-md-3">
                       <label htmlFor="geostate" className="input-field">
-                        Geo State
+                        Geo State<span className="text-danger">*</span>
                       </label>
                       <select className="form-select" value={formData.state} name="state" onChange={handleChange}>
                         <option value="">Select State</option>
@@ -748,7 +748,7 @@ const MasterFranchise = (params) => {
                     {/* Geo District Dropdown **/}
                     <div className="col-md-3">
                       <label htmlFor="area" className="input-field">
-                        District
+                        District<span className="text-danger">*</span>
                       </label>
 
                       <select className="form-select" onChange={handleChange} name="area" value={formData.area}>
@@ -767,7 +767,7 @@ const MasterFranchise = (params) => {
                     {/* Geo City Dropdown */}
                     <div className="col-md-3">
                       <label htmlFor="geocity" className="input-field">
-                        Geo City
+                        Geo City<span className="text-danger">*</span>
                       </label>
                       <select className="form-select" value={formData.city} name="city" onChange={handleChange}>
                         <option value="">Select City</option>
@@ -788,7 +788,7 @@ const MasterFranchise = (params) => {
                     {/* Pincode Dropdown */}
                     <div className="col-md-3">
                       <label htmlFor="area" className="input-field">
-                        Pincode
+                        Pincode<span className="text-danger">*</span>
                       </label>
                       <select
                         id="pincode"
@@ -938,7 +938,7 @@ const MasterFranchise = (params) => {
                     </div>
                     <div className="col-3">
                       <label htmlFor="WithLiebherrInput" className="input-field">
-                        With Liebherr
+                        With Liebherr<span className="text-danger">*</span>
                       </label>
                       <input
                         type="date"
@@ -1051,7 +1051,7 @@ const MasterFranchise = (params) => {
                         htmlFor="MasterFranchiseInput"
                         className="input-field"
                       >
-                        Address
+                        Address<span className="text-danger">*</span>
                       </label>
                       <textarea
                         className="form-control"

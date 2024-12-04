@@ -223,7 +223,7 @@ const ReasonCode = () => {
                                                 htmlFor="groupdefect_code"
                                                 className="form-label pb-0 dropdown-label"
                                             >
-                                                Defect Group Code
+                                                Defect Group Code<span className="text-danger">*</span>
                                             </label>
                                             <select
                                                 className="form-select dropdown-select"
@@ -244,7 +244,7 @@ const ReasonCode = () => {
                                     </div>
 
                                     <div className="mb-3">
-                                        <label htmlFor="defect_code" className="input-field" >Defect Type Code</label>
+                                        <label htmlFor="defect_code" className="input-field" >Defect Type Code<span className="text-danger">*</span></label>
                                         <input
                                             type="text"
                                             className="form-control"

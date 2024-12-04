@@ -251,7 +251,7 @@ const Lhiuser = () => {
 
                     <div className="mb-3">
                       <label htmlFor="LhiuserInput" className="input-field">
-                        FullName
+                        FullName<span className="text-danger">*</span>
                       </label>
                       <input
                         type="text"
@@ -275,7 +275,7 @@ const Lhiuser = () => {
                   <div className="col-4">
                     <div className="mb-3">
                       <label htmlFor="UsercodeInput" className="input-field">
-                        User Code
+                        User Code<span className="text-danger">*</span>
                       </label>
                       <input
                         type="text"
@@ -299,7 +299,7 @@ const Lhiuser = () => {
                   <div className="col-4">
                     <div className="mb-3">
                       <label htmlFor="PassInput" className="input-field">
-                        Password
+                        Password<span className="text-danger">*</span>
                       </label>
                       <input
                         type="password"
@@ -325,7 +325,7 @@ const Lhiuser = () => {
                   <div className="col-4">
                     <div className="mb-3">
                       <label htmlFor="MobileInput" className="input-field">
-                        Mobile Number
+                        Mobile Number<span className="text-danger">*</span>
                       </label>
                       <input
                         type="tel"
@@ -347,7 +347,7 @@ const Lhiuser = () => {
                   <div className="col-4">
                     <div className="mb-3">
                       <label htmlFor="EmailInput" className="input-field">
-                        Email Address
+                        Email Address<span className="text-danger">*</span>
                       </label>
                       <input
                         type="email"
