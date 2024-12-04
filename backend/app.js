@@ -62,7 +62,7 @@ const upload = multer({ storage: storage });
 //
 const dbConfig = {
   user: "sa",
-  password: "8$E5r6p8%8KH#F6V",
+  password: "   ",
   server: "103.101.58.207",
   database: "licare",
   options: {
@@ -90,7 +90,7 @@ app.listen(8081, () => {
 
 app.post("/loginuser", async (req, res) => {
 
-
+  const { Lhiuser, password } = req.body;
 
   try {
     // Use the poolPromise to get the connection pool
