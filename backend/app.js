@@ -14,7 +14,7 @@ const jwt = require("jsonwebtoken");
 
 // Secret key for JWT
 const JWT_SECRET = "Lh!_Login_123"; // Replace with a strong, secret key
-
+const API_KEY = "a8f2b3c4-d5e6-7f8g-h9i0-12345jklmn67";
 
 app.use(cors({ origin: "*" }));
 app.use(express.json());
@@ -91,9 +91,6 @@ app.listen(8081, () => {
 app.post("/loginuser", async (req, res) => {
 
 
-  const { Lhiuser, password } = req.body;
-
-  console.log(Lhiuser);
 
   try {
     // Use the poolPromise to get the connection pool
@@ -130,6 +127,34 @@ app.post("/loginuser", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Database error", error: err });
+  }
+});
+
+app.post("/lhilogin", async (req, res) => {
+
+  const apiKey = req.header('x-api-key');
+
+  
+  if (apiKey !== API_KEY) {
+    return res.status(403).json({ error: 'Forbidden: Invalid API key' });
+  }
+
+  try {
+      const { lhiemail } = req.body;
+
+      // Validate the provided email (this is just a placeholder; replace with your actual validation logic)
+      if (!lhiemail || !lhiemail.includes("@")) {
+          return res.status(400).json({ error: "Invalid email provided" });
+      }
+
+      // Generate JWT token
+      const token = jwt.sign({ email: lhiemail }, JWT_SECRET, { expiresIn: '1h' });
+
+      // Respond with the token
+      res.status(200).json({ token });
+  } catch (error) {
+      console.error("Error during login:", error);
+      res.status(500).json({ error: "An error occurred during login" });
   }
 });
 
