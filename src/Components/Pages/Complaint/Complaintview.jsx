@@ -1674,6 +1674,11 @@ export function Complaintview(params) {
                   Submit
                 </button>
               </div>
+              {TicketUpdateSuccess.visible && (
+            <div style={successMessageStyle}>
+              {TicketUpdateSuccess.message}
+            </div>
+          )}
 
             </div>
           </div>
