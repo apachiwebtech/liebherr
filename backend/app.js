@@ -62,7 +62,7 @@ const upload = multer({ storage: storage });
 //
 const dbConfig = {
   user: "sa",
-  password: "   ",
+  password: "8$E5r6p8%8KH#F6V",
   server: "103.101.58.207",
   database: "licare",
   options: {
@@ -134,27 +134,27 @@ app.post("/lhilogin", async (req, res) => {
 
   const apiKey = req.header('x-api-key');
 
-  
+
   if (apiKey !== API_KEY) {
     return res.status(403).json({ error: 'Forbidden: Invalid API key' });
   }
 
   try {
-      const { lhiemail } = req.body;
+    const { lhiemail } = req.body;
 
-      // Validate the provided email (this is just a placeholder; replace with your actual validation logic)
-      if (!lhiemail || !lhiemail.includes("@")) {
-          return res.status(400).json({ error: "Invalid email provided" });
-      }
+    // Validate the provided email (this is just a placeholder; replace with your actual validation logic)
+    if (!lhiemail || !lhiemail.includes("@")) {
+      return res.status(400).json({ error: "Invalid email provided" });
+    }
 
-      // Generate JWT token
-      const token = jwt.sign({ email: lhiemail }, JWT_SECRET, { expiresIn: '1h' });
+    // Generate JWT token
+    const token = jwt.sign({ email: lhiemail }, JWT_SECRET, { expiresIn: '1h' });
 
-      // Respond with the token
-      res.status(200).json({ token });
+    // Respond with the token
+    res.status(200).json({ token });
   } catch (error) {
-      console.error("Error during login:", error);
-      res.status(500).json({ error: "An error occurred during login" });
+    console.error("Error during login:", error);
+    res.status(500).json({ error: "An error occurred during login" });
   }
 });
 
@@ -7747,23 +7747,17 @@ app.post("/getupdateengineer", authenticateToken,
     }
   });
 
-app.post("/getupdatespare", authenticateToken,
+app.post("/getupdatesparelist", authenticateToken,
   async (req, res) => {
 
-    const { spare_id } = req.body;
+    const { ticket_no } = req.body;
 
     try {
       const pool = await poolPromise;
       // Modified SQL query using parameterized query 
       const sql = `
-    SELECT * 
-    FROM Spare_parts 
-    WHERE deleted = 0 
-      AND id IN (
-          SELECT value 
-          FROM STRING_SPLIT('${spare_id}', ',')
-      )
-`;
+    SELECT * FROM awt_quotation 
+    WHERE deleted = 0 and ticketId = '${ticket_no}'`;
 
       const result = await pool.request().query(sql);
 
@@ -7855,22 +7849,175 @@ app.post("/getDefectCodewisesite", authenticateToken,
     }
   });
 
-  // Quotation Listing 
-  app.get("/getquotationlist", authenticateToken, async (req, res) => {
-    try {
-      // Use the poolPromise to get the connection pool
-      const pool = await poolPromise;
-  
-      // Directly use the query (no parameter binding)
-      const sql = "SELECT * FROM awt_quotation ORDER BY id ASC";
-  
-      // Execute the query
-      const result = await pool.request().query(sql);
-  
-      // Return the result as JSON
-      return res.json(result.recordset);
-    } catch (err) {
-      console.error("Database error:", err);
-      return res.status(500).json({ error: "Database error occurred" });
+// Quotation Listing 
+app.get("/getquotationlist", authenticateToken, async (req, res) => {
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    // Directly use the query (no parameter binding)
+    const sql = "SELECT * FROM awt_quotation ORDER BY id ASC";
+
+    // Execute the query
+    const result = await pool.request().query(sql);
+
+    // Return the result as JSON
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred" });
+  }
+});
+
+
+app.post(`/add_quotation`, async (req, res) => {
+  let { finaldata } = req.body;
+
+  const ModelNumber = finaldata.ModelNumber;
+  const customer_id = finaldata.customer_id;
+  const ticket_no = finaldata.ticket_no;
+  const Customername = finaldata.Customername;
+  const city = finaldata.city;
+  const state = finaldata.state;
+  const Engineer = finaldata.Engineer;
+
+  const pool = await poolPromise;
+
+  const newdata = finaldata.data
+
+  let engineer_id;
+
+  engineer_id = Engineer.join(',');
+
+
+
+  try {
+    // Get the latest quotation number
+    const getcount = `SELECT TOP 1 id FROM awt_quotation ORDER BY id DESC`;
+    const countResult = await pool.request().query(getcount);
+    const latestQuotation = countResult.recordset[0]?.id || 0;
+
+    const newcount = latestQuotation + 1
+
+    const quotationcode = 'Q' + newcount.toString().padStart(4, "0")
+
+
+
+    // Iterate over the items in `newdata`
+    for (const item of newdata) {
+      const { id, title, quantity, price } = item;
+
+      console.log(id, title, quantity, price)
+
+      // // Validate fields
+      // if (!id || !title || !quantity || !price) {
+      //   return res.status(400).json({ message: "Invalid item format in finaldata" });
+      // }
+
+      const date = new Date();
+
+      // Insert query
+      const query = `
+          INSERT INTO awt_quotation 
+          (ticketId, ticketdate, quotationNumber, CustomerName, state, city, assignedEngineer, status, customerId, ModelNumber, spareId, title, quantity, price, created_date, created_by) 
+          VALUES 
+          (@ticket_no, @date, @quotationNumber, @CustomerName, @state, @city, @assignedEngineer, @status, @customer_id, @ModelNumber, @id, @title, @quantity, @price, @created_date, @created_by)
+        `;
+
+      await pool.request()
+        .input('ticket_no', sql.NVarChar, ticket_no)
+        .input('date', sql.NVarChar, date.toISOString()) // Format date properly
+        .input('quotationNumber', sql.NVarChar, quotationcode)
+        .input('CustomerName', sql.NVarChar, Customername) // Replace with actual value
+        .input('state', sql.NVarChar, state) // Replace with actual value
+        .input('city', sql.NVarChar, city) // Replace with actual value
+        .input('assignedEngineer', sql.NVarChar, engineer_id) // Replace with actual value
+        .input('status', sql.NVarChar, 'Pending') // Replace with actual value
+        .input('customer_id', sql.NVarChar, customer_id)
+        .input('ModelNumber', sql.NVarChar, ModelNumber)
+        .input('id', sql.Int, id)
+        .input('title', sql.NVarChar, title)
+        .input('quantity', sql.Int, quantity)
+        .input('price', sql.Decimal, price)
+        .input('created_date', sql.NVarChar, date.toISOString())
+        .input('created_by', sql.NVarChar, '1') // Replace with actual user
+        .query(query);
     }
-  });
+
+    res.status(200).json({ message: "Quotation added successfully" });
+
+  } catch (error) {
+    console.error("Error inserting data:", error);
+    res.status(500).json({ message: "Error inserting data", error });
+  }
+});
+
+app.post('/removesparepart', async (req, res) => {
+  const { spare_id } = req.body; // Ensure spare_id is passed in the request body
+  const pool = await poolPromise;
+
+  try {
+    // Use parameterized query to prevent SQL Injection
+    const query = `UPDATE awt_quotation SET deleted = 1 WHERE id = @spare_id`;
+
+
+
+    await pool.request()
+      .input('spare_id', sql.Int, spare_id) // Parameterize spare_id
+      .query(query);
+
+    res.status(200).json({ message: "Spare part updated successfully" });
+  } catch (error) {
+    console.error("Error updating data:", error);
+    res.status(500).json({ message: "Error updating data", error });
+  }
+});
+
+app.post('/updatequotation', async (req, res) => {
+
+  const { quantity , price , status , qid } = req.body; // Ensure spare_id is passed in the request body
+  const pool = await poolPromise;
+
+  try {
+    // Use parameterized query to prevent SQL Injection
+    const query = `UPDATE awt_quotation SET quantity = @quantity ,price = @price , status = @status  WHERE id = @qid`;
+
+
+
+    await pool.request()
+      .input('qid', sql.Int, qid) // Parameterize spare_id
+      .input('quantity', sql.VarChar, quantity) // Parameterize spare_id
+      .input('price', sql.VarChar, price) // Parameterize spare_id
+      .input('status', sql.VarChar, status) // Parameterize spare_id
+      .query(query);
+
+    res.status(200).json({ message: "Spare part updated successfully" });
+  } catch (error) {
+    console.error("Error updating data:", error);
+    res.status(500).json({ message: "Error updating data", error });
+  }
+});
+
+app.post('/getquotedetails', async (req, res) => {
+  const { quotaion_id } = req.body; // Ensure spare_id is passed in the request body
+  const pool = await poolPromise;
+
+  try {
+    // Use parameterized query to prevent SQL Injection
+    const query = `select * from  awt_quotation  WHERE id = @quote_id`;
+
+
+
+     const result = await pool.request()
+      .input('quote_id', sql.Int, quotaion_id) // Parameterize spare_id
+      .query(query);
+
+
+
+      return res.json(result.recordset);
+  } catch (error) {
+    console.error("Error updating data:", error);
+    res.status(500).json({ message: "Error updating data", error });
+  }
+});
+

@@ -85,6 +85,7 @@ import axios from 'axios';
 import DataTable from './Components/Pages/Complaint/Compdatatablebackup';
 import HeaderMsp from './Components/Layout/HeaderMsp';
 import { Quotationlist } from './Components/Pages/Quotation/Quotationlist';
+import QuotationEdit from './Components/Pages/Quotation/QuotationEdit';
 
 
 
@@ -485,6 +486,10 @@ const Router = createBrowserRouter([
       {
         path: "/quotationlist",
         element: <Quotationlist />
+      },
+      {
+        path: "/quotation/:qid",
+        element: <QuotationEdit />
       }
 
 

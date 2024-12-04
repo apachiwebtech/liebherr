@@ -149,15 +149,16 @@ export function Quotationlist(params) {
                                 <thead>
                                     <tr>
                                         <th width="3%">#</th>
-                                        <th width="7%">Ticket ID</th>
-                                        <th width="8%">Customer ID</th>
-                                        <th width="20%">Spare ID</th>
+                                        <th width="7%">Quotation Number</th>
+                                        <th width="20%">Engineer</th>
+                                        <th width="10%">Customer Name</th>
+                                        <th width="8%">Spare ID</th>
                                         <th width="15%">ModelNumber</th>
-                                        <th width="20%">Title</th>
+                                        <th width="10%">Spare Name</th>
                                         <th width="10%">Quantity</th>
                                         <th width="15%">Price</th>
+                                        <th width="10%">Status</th>
                                         <th width="10%">Edit</th>
-                                        <th width="10%">Delete</th>
                                         
                                     </tr>
                                 </thead>
@@ -165,35 +166,29 @@ export function Quotationlist(params) {
                                     {Quotationdata.map((item, index) => (
                                         <tr key={item.id}>
                                             <td>{index + 1}</td>
-                                            <td>{item.ticketId}</td>
-                                            <td>{item.customerId}</td>
+                                            <td>{item.quotationNumber}</td>
+                                            <td>{item.assignedEngineer}</td>
+                                            <td>{item.CustomerName}</td>
                                             <td>{item.spareId}</td>
                                             <td>{item.ModelNumber}</td>
                                             <td>{item.title}</td>
                                             <td>{item.quantity}</td>
                                             <td>{item.price}</td>
                                             
+                                            <td style={{ padding: '0px', textAlign: 'center' }}>
+                                              {item.status}
+                                            </td>
                                             <td>
-                                                <Link to={`/addproduct/${item.id}`}>
+                                                <Link to={`/quotation/${item.id}`}>
                                                     <button
                                                         className='btn'
-                                                        onClick={() => edit(item.id)}
+                                                        // onClick={() => edit(item.id)}
                                                         title="Edit"
                                                         style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
                                                     >
                                                         <FaPencilAlt />
                                                     </button>
                                                 </Link>
-                                            </td>
-                                            <td style={{ padding: '0px', textAlign: 'center' }}>
-                                                <button
-                                                    className='btn'
-                                                    onClick={() => deleted(item.id)}
-                                                    title="Delete"
-                                                    style={{ backgroundColor: 'transparent', border: 'none', color: 'red', fontSize: '20px' }}
-                                                >
-                                                    <FaTrash />
-                                                </button>
                                             </td>
                                         </tr>
                                     ))}
