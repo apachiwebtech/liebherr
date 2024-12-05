@@ -7801,7 +7801,7 @@ app.get("/getSpareParts/:model", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
     // Parameterized query
     const sql = `
-      SELECT id, ModelNumber, title, ItemDescription
+      SELECT id, ModelNumber, title,ProductCode, ItemDescription
       FROM Spare_parts
       WHERE deleted = 0 AND ModelNumber = @model
     `;
@@ -7912,10 +7912,10 @@ app.post(`/add_quotation`, async (req, res) => {
 
     // Iterate over the items in `newdata`
     for (const item of newdata) {
-      const { id, title, quantity, price } = item;
+      const { id, title, ItemDescription, price ,product_code} = item;
       const date = new Date();
       
-      const addspare = `insert into awt_uniquespare (ticketId , spareId , title ,quantity) values('${ticket_no}','${id}' ,'${title}','${quantity}')`;
+      const addspare = `insert into awt_uniquespare (ticketId , spareId , article_code ,article_description , price) values('${ticket_no}','${product_code}' ,'${title}','${ItemDescription}' , '${price}')`;
 
 
       await pool.request().query(addspare)
@@ -7930,9 +7930,9 @@ app.post(`/add_quotation`, async (req, res) => {
       // Insert query
       const query = `
           INSERT INTO awt_quotation 
-          (ticketId, ticketdate, quotationNumber, CustomerName, state, city, assignedEngineer, status, customerId, ModelNumber, spareId, title, quantity, price, created_date, created_by) 
+          (ticketId, ticketdate, quotationNumber, CustomerName, state, city, assignedEngineer, status, customerId, ModelNumber, spareId, title,  price, created_date, created_by) 
           VALUES 
-          (@ticket_no, @date, @quotationNumber, @CustomerName, @state, @city, @assignedEngineer, @status, @customer_id, @ModelNumber, @id, @title, @quantity, @price, @created_date, @created_by)
+          (@ticket_no, @date, @quotationNumber, @CustomerName, @state, @city, @assignedEngineer, @status, @customer_id, @ModelNumber, @id, @title,  @price, @created_date, @created_by)
         `;
 
       await pool.request()
@@ -7948,7 +7948,6 @@ app.post(`/add_quotation`, async (req, res) => {
         .input('ModelNumber', sql.NVarChar, ModelNumber)
         .input('id', sql.Int, id)
         .input('title', sql.NVarChar, title)
-        .input('quantity', sql.Int, quantity)
         .input('price', sql.Decimal, price)
         .input('created_date', sql.NVarChar, date.toISOString())
         .input('created_by', sql.NVarChar, '1') // Replace with actual user

@@ -420,7 +420,8 @@ export function Complaintview(params) {
     };
 
     setAddedSpareParts([...addedSpareParts, newPart]);
-    setComplaintview({ ...complaintview, spare_part_id: "" });
+
+    console.log(addedSpareParts, "$$$")
     setQuantity(""); // Reset quantity input
   };
 
@@ -431,7 +432,8 @@ export function Complaintview(params) {
     let combinedSpareParts = addedSpareParts.map((item) => ({
       id: item.id,
       title: item.title,
-      quantity: item.quantity,
+      ItemDescription: item.ItemDescription,
+      product_code: item.Product,
       price: "100"
     }));
 
@@ -950,7 +952,7 @@ export function Complaintview(params) {
         <div className="col-3">
           <div id="customerInfo" className="card">
             <div className="card-body">
-            <p style={{ fontSize: "14px" }}>
+              <p style={{ fontSize: "14px" }}>
                 <b>Customer Id</b> : {complaintview.customer_id}
               </p>
               <div className="row">
@@ -1804,7 +1806,7 @@ export function Complaintview(params) {
                       {Array.isArray(spare) && spare.length > 0 ? (
                         spare.map((part) => (
                           <option key={part.id} value={part.id}>
-                            {part.title + '('+ part.ItemDescription + ')'}
+                            {part.title + '(' + part.ItemDescription + ')'}
                           </option>
                         ))
                       ) : (
@@ -1851,22 +1853,28 @@ export function Complaintview(params) {
                       </tr>
                     </thead>
                     <tbody>
-                      {addedSpareParts.map((part) => (
-                        <tr key={part.id}>
-                          <td>{part.article_code} - {part.article_description}</td>
-                          <td>1</td>
-                          <td>
-                            <button
-                              className="btn btn-sm btn-danger"
-                              style={{ padding: "0.2rem 0.5rem" }}
-                              disabled={closestatus === "Closed"}
-                              onClick={() => handleRemoveSparePart(part.id)}
-                            >
-                              ✖
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
+                      {addedSpareParts.map((part) => {
+                        // Log each part
+                        console.log("Spare Part Details:", part);
+
+                        return (
+                          <tr key={part.id}>
+                            <td>{part.article_code} - {part.article_description}</td>
+                            <td>1</td>
+                            <td>
+                              <button
+                                className="btn btn-sm btn-danger"
+                                style={{ padding: "0.2rem 0.5rem" }}
+                                disabled={closestatus === "Closed"}
+                                onClick={() => handleRemoveSparePart(part.id)}
+                              >
+                                ✖
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+
                     </tbody>
                   </table>
                 </div>
@@ -1886,7 +1894,7 @@ export function Complaintview(params) {
             </div>
           </div>
 
-          {quotation.length > 0 &&    <div className="card mb-3">
+          {quotation.length > 0 && <div className="card mb-3">
             <div className="card-body">
               <div className="mt-3">
                 {/* Display added spare parts */}
@@ -1917,8 +1925,8 @@ export function Complaintview(params) {
 
               </div>
             </div>
-          </div> }
-       
+          </div>}
+
 
 
           {TicketUpdateSuccess.visible && (
