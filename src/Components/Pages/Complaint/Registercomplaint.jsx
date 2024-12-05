@@ -1128,12 +1128,31 @@ const handleNewAddressSubmit = async (event) => {
         button:hover {
             background-color: #0056b3;
         }
+
+        .addressbtn {
+            background: none;
+            color: #222;
+            border: none;
+            padding: 0;
+            font-size: 13px;
+            margin-top: 5px !important;
+            text-align: right;
+            position: absolute;
+            right: 20px;
+        }
+
+        .addressbtn:hover {
+            color:blue;
+            background:none;
+
+        }
     `}
 </style>
 
       <div className="col-md-12">
     <div className="mb-3">
-        <label htmlFor="exampleFormControlInput1" className="form-label">Address</label>
+        <label htmlFor="exampleFormControlInput1" className="form-label">Address </label> 
+        <button onClick={openPopup} type="button" className="addressbtn">Add Address</button>
         <textarea
             className="form-control"
             value={value.address}
@@ -1141,7 +1160,7 @@ const handleNewAddressSubmit = async (event) => {
             onChange={handleAddressChange}
             placeholder="Enter Address"
         ></textarea>
-        <button onClick={openPopup} type="button" className="btn btn-secondary mt-2">Add Address</button>
+        
     </div>
 </div>
 
@@ -1352,7 +1371,7 @@ const handleNewAddressSubmit = async (event) => {
                                             <label className="form-label">Priority</label>
                                             <select className="form-control" onChange={onHandleChange} value={value.Priority} name="Priority">
                                                 <option value="">Select</option>
-                                                <option value="REGULER">Reguler</option>
+                                                <option value="REGULAR">Regular</option>
                                                 <option value="HIGH">High</option>
                                             </select>
                                         </div>
