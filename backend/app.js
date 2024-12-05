@@ -7906,15 +7906,19 @@ app.post(`/add_quotation`, async (req, res) => {
     // Iterate over the items in `newdata`
     for (const item of newdata) {
       const { id, title, quantity, price } = item;
+      const date = new Date();
+      
+      const addspare = `insert into awt_uniquespare (ticketId , spareId , title ,quantity) values('${ticket_no}','${id}' ,'${title}','${quantity}')`;
 
-      console.log(id, title, quantity, price)
+
+      await pool.request().query(addspare)
+    
 
       // // Validate fields
       // if (!id || !title || !quantity || !price) {
       //   return res.status(400).json({ message: "Invalid item format in finaldata" });
       // }
 
-      const date = new Date();
 
       // Insert query
       const query = `
@@ -7958,7 +7962,7 @@ app.post('/removesparepart', async (req, res) => {
 
   try {
     // Use parameterized query to prevent SQL Injection
-    const query = `UPDATE awt_quotation SET deleted = 1 WHERE id = @spare_id`;
+    const query = `UPDATE awt_uniquespare SET deleted = 1 WHERE id = @spare_id`;
 
 
 
@@ -8021,3 +8025,25 @@ app.post('/getquotedetails', async (req, res) => {
   }
 });
 
+
+
+app.post("/getuniquespare", authenticateToken, async (req, res) => {
+
+  const {ticket_id} = req.body
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    // Directly use the query (no parameter binding)
+    const sql = `SELECT * FROM awt_uniquespare where ticketId = '${ticket_id}' and deleted = 0`;
+
+    // Execute the query
+    const result = await pool.request().query(sql);
+
+    // Return the result as JSON
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred" });
+  }
+});

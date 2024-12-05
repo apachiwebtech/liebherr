@@ -468,7 +468,7 @@ const GenerateQuotation = () => {
       .then((res) =>{
         console.log(res.data)
         // setAddedSpareParts(addedSpareParts.filter((part) => part.id !== id));
-        getupdatespare()
+         getsparelist(complaintview.ticket_no)
       })
     }
 
@@ -527,6 +527,7 @@ const GenerateQuotation = () => {
 
    
       getupdatespare(response.data.ticket_no)
+      getsparelist(response.data.ticket_no)
 
       if (response.data.serial_no != "") {
         setsserial_no(response.data.serial_no);
@@ -558,6 +559,18 @@ const GenerateQuotation = () => {
       .then((res) => {
         console.log(res)
         setQuotation(res.data)
+      })
+  }
+  async function getsparelist(id) {
+
+    axios.post(`${Base_Url}/getuniquespare`, { ticket_id: id}, {
+      headers: {
+        Authorization: token,
+      },
+    })
+      .then((res) => {
+        console.log(res)
+        setAddedSpareParts(res.data)
       })
   }
 
