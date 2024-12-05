@@ -14,6 +14,7 @@ export function Complaintview(params) {
   const { complaintid } = useParams();
   const [quantity, setQuantity] = useState("");
   const [closestatus, setCloseStatus] = useState("");
+  const [spareid, setspareid] = useState("");
   const [complaintview, setComplaintview] = useState({
     ticket_no: '',
     customer_name: '',
@@ -381,23 +382,18 @@ export function Complaintview(params) {
 
   };
 
-  // const handleAddSparePart = () => {
-  //   const selectedSparePart = spare.find(
-  //     (part) => part.id === parseInt(complaintview.spare_part_id)
-  //   );
 
-  //   if (selectedSparePart && !addedSpareParts.some((part) => part.id === selectedSparePart.id)) {
-  //     setAddedSpareParts([...addedSpareParts, selectedSparePart]);
-  //     setComplaintview({ ...complaintview, spare_part_id: '' });
-  //   } else {
-  //     alert("Spare part already added or not selected.");
-  //   }
-  // };
+
+
+  const handlesparechange = (value) =>{
+     setspareid(value)
+  }
 
   const handleAddSparePart = () => {
     const selectedSparePart = spare.find(
-      (part) => part.id === parseInt(complaintview.spare_part_id)
+      (part) => part.id === parseInt(spareid)
     );
+
 
     if (!selectedSparePart) {
       alert("Please select a spare part.");
@@ -409,31 +405,35 @@ export function Complaintview(params) {
       return;
     }
 
-    if (addedSpareParts.some((part) => part.id === selectedSparePart.id)) {
-      alert("Spare part already added.");
-      return;
-    }
+
+
+ 
 
     const newPart = {
       ...selectedSparePart,
-      quantity: parseInt(quantity), // Add quantity field
+      // quantity: parseInt(quantity), // Add quantity field
     };
 
-    setAddedSpareParts([...addedSpareParts, newPart]);
+    console.log(newPart, "Newpart")
 
-    console.log(addedSpareParts, "$$$")
+    setAddedSpareParts([newPart]);
+
+
     setQuantity(""); // Reset quantity input
   };
 
   const GenerateQuotation = () => {
 
 
+
+
+
     // Collect all spare part IDs
     let combinedSpareParts = addedSpareParts.map((item) => ({
       id: item.id,
-      title: item.title,
-      ItemDescription: item.ItemDescription,
-      product_code: item.Product,
+      title: item.article_code,
+      ItemDescription: item.article_description,
+      product_code: item.spareId,
       price: "100"
     }));
 
@@ -452,7 +452,8 @@ export function Complaintview(params) {
       .then((response) => {
         console.log("Quotation added successfully:", response.data);
         alert("Quotation generated")
-        getupdatespare(complaintview.ticket_no)
+        window.location.reload()
+
       })
       .catch((error) => {
         console.error("Error adding quotation:", error);
@@ -1014,7 +1015,6 @@ export function Complaintview(params) {
                   <table className="table table-striped">
                     <tbody>
                       {duplicate
-                        .filter((_, index) => index !== 0) // Exclude 0th index
                         .map((item, index) => (
                           <tr key={index}>
                             <td>
@@ -1071,14 +1071,14 @@ export function Complaintview(params) {
 
           </div>
           <br></br>
-          <div>
+          {/* <div>
             <h5>Added Spare Parts</h5>
             <ul>
               {selectedSpareParts.map((part) => (
                 <li key={part.id}>{part.name}</li>
               ))}
             </ul>
-          </div>
+          </div> */}
 
           {/* // */}
           <div className="card" id="attachmentInfocs">
@@ -1091,7 +1091,7 @@ export function Complaintview(params) {
                   multiple
                   accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,.eml"
                   onChange={handleFile2Change}
-                  disabled={closestatus == 'Closed' ? true : false}
+                  disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
                   ref={fileInputRef} // Attach the ref to the input
                 />
               </div>
@@ -1100,7 +1100,7 @@ export function Complaintview(params) {
                   type="button"
                   className="btn btn-primary"
                   onClick={handleAttachment2Submit}
-                  disabled={closestatus == 'Closed' ? true : false}
+                  disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
                   style={{ fontSize: "14px" }}
                 >
                   Upload
@@ -1329,7 +1329,7 @@ export function Complaintview(params) {
                             name="note"
                             className="form-control"
                             placeholder="Type comment..."
-                            disabled={closestatus == 'Closed' ? true : false}
+                            disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
                             value={note}
                             onChange={(e) => setNote(e.target.value)}
                           />
@@ -1352,7 +1352,7 @@ export function Complaintview(params) {
                             multiple
                             accept="image/*,video/*,audio/*,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,.eml"
                             onChange={handleFileChange}
-                            disabled={closestatus == 'Closed' ? true : false}
+                            disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
                             ref={fileInputRef2} // Attach the ref to the input
                           />
                         </div>
@@ -1369,7 +1369,7 @@ export function Complaintview(params) {
                             className="btn btn-primary"
                             style={{ fontSize: "14px" }}
                             onClick={handleSubmit}
-                            disabled={closestatus == 'Closed' ? true : false}
+                            disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
                           >
                             Upload Remark
                           </button>
@@ -1566,7 +1566,7 @@ export function Complaintview(params) {
                 <select
                   name="call_status"
                   className="form-control"
-                  disabled={closestatus == 'Closed' ? true : false}
+                  disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
                   style={{ fontSize: "14px" }}
                   value={complaintview.call_status}
                   onChange={(e) => {
@@ -1589,7 +1589,7 @@ export function Complaintview(params) {
               </div>
               <h4 className="pname" style={{ fontSize: "14px" }}>Sub Call Status</h4>
               <div className="mb-3">
-                <select name="sub_call_status" value={complaintview.sub_call_status} disabled={closestatus == 'Closed' ? true : false} className="form-control" style={{ fontSize: "14px" }} onChange={handleModelChange}>
+                <select name="sub_call_status" value={complaintview.sub_call_status} disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false} className="form-control" style={{ fontSize: "14px" }} onChange={handleModelChange}>
                   <option value="" >Select Status</option>
                   {subcallstatus.map((item) => {
                     return (
@@ -1608,7 +1608,7 @@ export function Complaintview(params) {
                   <input
                     type="radio"
                     className="form-check-input"
-                    disabled={closestatus == 'Closed' ? true : false}
+                    disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
                     id="lhi"
                     name="engineer_type"
                     value="LHI"
@@ -1622,7 +1622,7 @@ export function Complaintview(params) {
                 <div className="form-check">
                   <input
                     type="radio"
-                    disabled={closestatus == 'Closed' ? true : false}
+                    disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
                     className="form-check-input"
                     id="franchisee"
                     name="engineer_type"
@@ -1644,7 +1644,7 @@ export function Complaintview(params) {
                     className="form-select dropdown-select"
                     name="engineer_id"
                     value={complaintview.engineer_id}
-                    disabled={closestatus == 'Closed' ? true : false}
+                    disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
                     onChange={handleModelChange}
                   >
                     <option value="">Select Engineer</option>
@@ -1665,7 +1665,7 @@ export function Complaintview(params) {
                 <div className="col-lg-3">
                   <button
                     className="btn btn-primary btn-sm"
-                    disabled={closestatus == 'Closed' ? true : false}
+                    disabled={closestatus == 'Closed' || closestatus == 'Cancelled'? true : false}
                     onClick={AddEngineer}
                   >
                     Add
@@ -1693,7 +1693,7 @@ export function Complaintview(params) {
                           <button
                             className="btn btn-sm btn-danger"
                             style={{ padding: "0.2rem 0.5rem" }}
-                            disabled={closestatus == 'Closed' ? true : false}
+                            disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
                             onClick={() => handleRemoveEngineer(eng.id)}
                           >
                             ✖
@@ -1710,7 +1710,7 @@ export function Complaintview(params) {
                 <select
                   name="group_code"
                   className="form-control"
-                  disabled={closestatus == 'Closed' ? true : false}
+                  disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
                   style={{ fontSize: "14px" }}
                   value={complaintview.group_code}
                   onChange={(e) => {
@@ -1736,7 +1736,7 @@ export function Complaintview(params) {
                 <select
                   name="defect_type"
                   className="form-control"
-                  disabled={closestatus == 'Closed' ? true : false}
+                  disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
                   style={{ fontSize: "14px" }}
                   value={complaintview.defect_type}
                   onChange={handleModelChange}
@@ -1755,7 +1755,7 @@ export function Complaintview(params) {
                 <select
                   name="site_defect"
                   className="form-control"
-                  disabled={closestatus == 'Closed' ? true : false}
+                  disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
                   style={{ fontSize: "14px" }}
                   value={complaintview.site_defect}
                   onChange={handleModelChange}
@@ -1775,7 +1775,7 @@ export function Complaintview(params) {
                   className="btn btn-primary"
                   style={{ fontSize: "14px", marginTop: '5px' }}
                   onClick={handleSubmitTicketFormData}
-                  disabled={closestatus == 'Closed' ? true : false}
+                  disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
                 >
                   Submit
                 </button>
@@ -1791,22 +1791,24 @@ export function Complaintview(params) {
 
           <div className="card mb-3">
             <div className="card-body">
+
               <div className="mt-3">
                 <h4 className="pname" style={{ fontSize: "14px" }}>Spare Parts:</h4>
+
                 <div className="row align-items-center">
                   <div className="col-lg-6">
                     <select
                       className="form-select dropdown-select m-0"
                       name="spare_part_id"
-                      value={complaintview.spare_part_id}
-                      disabled={closestatus === "Closed"}
-                      onChange={handleModelChange}
+                      value={spareid}
+                      disabled={closestatus === "Closed" || closestatus == 'Cancelled'}
+                      onChange={(e) =>handlesparechange(e.target.value)}
                     >
                       <option value="">Select Spare Part</option>
                       {Array.isArray(spare) && spare.length > 0 ? (
                         spare.map((part) => (
                           <option key={part.id} value={part.id}>
-                            {part.title + '(' + part.ItemDescription + ')'}
+                            {part.article_code + '(' + part.article_description + ')'}
                           </option>
                         ))
                       ) : (
@@ -1825,7 +1827,7 @@ export function Complaintview(params) {
                       placeholder="Qty"
                       value={quantity}
                       onChange={(e) => setQuantity(e.target.value)}
-                      disabled={closestatus === "Closed"}
+                      disabled={closestatus === "Closed" || closestatus == 'Cancelled'}
                       min="1"
                     />
                   </div>
@@ -1833,7 +1835,7 @@ export function Complaintview(params) {
                   <div className="col-lg-3">
                     <button
                       className="btn btn-primary btn-sm"
-                      disabled={closestatus === "Closed" || !quantity}
+                      disabled={closestatus === "Closed" || !quantity || closestatus == 'Cancelled'}
                       onClick={handleAddSparePart}
                     >
                       Add
@@ -1854,8 +1856,8 @@ export function Complaintview(params) {
                     </thead>
                     <tbody>
                       {addedSpareParts.map((part) => {
-                        // Log each part
-                        console.log("Spare Part Details:", part);
+
+
 
                         return (
                           <tr key={part.id}>
@@ -1865,7 +1867,7 @@ export function Complaintview(params) {
                               <button
                                 className="btn btn-sm btn-danger"
                                 style={{ padding: "0.2rem 0.5rem" }}
-                                disabled={closestatus === "Closed"}
+                                disabled={closestatus === "Closed" || closestatus == 'Cancelled'}
                                 onClick={() => handleRemoveSparePart(part.id)}
                               >
                                 ✖
@@ -1885,7 +1887,7 @@ export function Complaintview(params) {
                     className="btn btn-primary"
                     style={{ fontSize: "14px" }}
                     onClick={GenerateQuotation}
-                    disabled={closestatus === "Closed"}
+                    disabled={closestatus === "Closed" || closestatus == 'Cancelled'}
                   >
                     Generate Quotation
                   </button>

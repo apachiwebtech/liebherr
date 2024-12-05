@@ -7801,7 +7801,7 @@ app.get("/getSpareParts/:model", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
     // Parameterized query
     const sql = `
-      SELECT id, ModelNumber, title,ProductCode, ItemDescription
+      SELECT id, ModelNumber, title as article_code ,ProductCode as spareId, ItemDescription as article_description
       FROM Spare_parts
       WHERE deleted = 0 AND ModelNumber = @model
     `;
