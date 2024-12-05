@@ -7792,24 +7792,31 @@ app.get("/getEndCustomerAddresses/:customerEndId", async (req, res) => {
   }
 });
 
-app.get("/getSpareParts", authenticateToken,
-  async (req, res) => {
+app.get("/getSpareParts/:model", authenticateToken, async (req, res) => {
+  const { model } = req.params;
 
+  console.log(model, "EEE"); // Model number like CNPef 4516-20 136 HL-AUSTRALI EEE
 
+  try {
+    const pool = await poolPromise;
+    // Parameterized query
+    const sql = `
+      SELECT id, ModelNumber, title, ItemDescription
+      FROM Spare_parts
+      WHERE deleted = 0 AND ModelNumber = @model
+    `;
 
-    try {
-      const pool = await poolPromise;
-      // Modified SQL query using parameterized query
-      const sql = `select id , ModelNumber ,title from Spare_parts where deleted = 0 `;
+    const result = await pool.request()
+      .input("model",  model) // Specify the data type for the parameter
+      .query(sql);
 
-      const result = await pool.request().query(sql);
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred", details: err.message });
+  }
+});
 
-      return res.json(result.recordset);
-    } catch (err) {
-      console.error("Database error:", err);
-      return res.status(500).json({ error: "Database error occurred", details: err.message });
-    }
-  });
 
 
 app.post("/getDefectCodewisetype", authenticateToken,

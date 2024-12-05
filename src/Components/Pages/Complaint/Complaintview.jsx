@@ -33,8 +33,8 @@ export function Complaintview(params) {
     site_defect: "",
     spare_part_id: "",
     quantity: "",
-    state : "",
-    city : ""
+    state: "",
+    city: ""
   });
 
 
@@ -124,7 +124,7 @@ export function Complaintview(params) {
 
 
     try {
-      const res = await axios.get(`${Base_Url}/getSpareParts`, {
+      const res = await axios.get(`${Base_Url}/getSpareParts/${params}`, {
         headers: {
           Authorization: token, // Send token in headers
         },
@@ -424,38 +424,38 @@ export function Complaintview(params) {
     setQuantity(""); // Reset quantity input
   };
 
-const GenerateQuotation = () => {
+  const GenerateQuotation = () => {
 
 
-  // Collect all spare part IDs
-  let combinedSpareParts = addedSpareParts.map((item) => ({
-    id: item.id,
-    title: item.title,
-    quantity : item.quantity,
-    price : "100"
-  }));
+    // Collect all spare part IDs
+    let combinedSpareParts = addedSpareParts.map((item) => ({
+      id: item.id,
+      title: item.title,
+      quantity: item.quantity,
+      price: "100"
+    }));
 
-  
 
-  // Combine spare parts, ticket number, and model number into a single array
-  const finaldata = { data :combinedSpareParts,ticket_no : complaintview.ticket_no,ModelNumber : complaintview.ModelNumber , customer_id : complaintview.customer_id , Customername : complaintview.customer_name ,state : complaintview.state , city : complaintview.city , Engineer : addedEngineers.map((item) => item.engineer_id) || complaintview.engineer_id};
 
-  // Prepare the data object
-  const data = {
-    finaldata: finaldata,
+    // Combine spare parts, ticket number, and model number into a single array
+    const finaldata = { data: combinedSpareParts, ticket_no: complaintview.ticket_no, ModelNumber: complaintview.ModelNumber, customer_id: complaintview.customer_id, Customername: complaintview.customer_name, state: complaintview.state, city: complaintview.city, Engineer: addedEngineers.map((item) => item.engineer_id) || complaintview.engineer_id };
+
+    // Prepare the data object
+    const data = {
+      finaldata: finaldata,
+    };
+
+    // Send the POST request
+    axios.post(`${Base_Url}/add_quotation`, data)
+      .then((response) => {
+        console.log("Quotation added successfully:", response.data);
+        alert("Quotation generated")
+        getupdatespare(complaintview.ticket_no)
+      })
+      .catch((error) => {
+        console.error("Error adding quotation:", error);
+      });
   };
-
-  // Send the POST request
-  axios.post(`${Base_Url}/add_quotation`, data)
-    .then((response) => {
-      console.log("Quotation added successfully:", response.data);
-      alert("Quotation generated")
-      getupdatespare(complaintview.ticket_no)
-    })
-    .catch((error) => {
-      console.error("Error adding quotation:", error);
-    });
-};
 
 
 
@@ -463,13 +463,13 @@ const GenerateQuotation = () => {
 
     const confirm = window.confirm("Are you sure?")
 
-    if(confirm) {
-      axios.post(`${Base_Url}/removesparepart` , { spare_id:id})
-      .then((res) =>{
-        console.log(res.data)
-        // setAddedSpareParts(addedSpareParts.filter((part) => part.id !== id));
-         getsparelist(complaintview.ticket_no)
-      })
+    if (confirm) {
+      axios.post(`${Base_Url}/removesparepart`, { spare_id: id })
+        .then((res) => {
+          console.log(res.data)
+          // setAddedSpareParts(addedSpareParts.filter((part) => part.id !== id));
+          getsparelist(complaintview.ticket_no)
+        })
     }
 
 
@@ -525,9 +525,12 @@ const GenerateQuotation = () => {
         getupdateengineer(response.data.engineer_id)
       }
 
-   
+
+
+
       getupdatespare(response.data.ticket_no)
       getsparelist(response.data.ticket_no)
+      getSpare(response.data.ModelNumber)
 
       if (response.data.serial_no != "") {
         setsserial_no(response.data.serial_no);
@@ -551,7 +554,7 @@ const GenerateQuotation = () => {
   }
   async function getupdatespare(id) {
 
-    axios.post(`${Base_Url}/getupdatesparelist`, { ticket_no: id}, {
+    axios.post(`${Base_Url}/getupdatesparelist`, { ticket_no: id }, {
       headers: {
         Authorization: token,
       },
@@ -563,7 +566,7 @@ const GenerateQuotation = () => {
   }
   async function getsparelist(id) {
 
-    axios.post(`${Base_Url}/getuniquespare`, { ticket_id: id}, {
+    axios.post(`${Base_Url}/getuniquespare`, { ticket_id: id }, {
       headers: {
         Authorization: token,
       },
@@ -856,7 +859,7 @@ const GenerateQuotation = () => {
 
   useEffect(() => {
     getcallstatus()
-    getSpare()
+
     getsubcallstatus()
     getgroupdefect()
     getdefecttype()
@@ -947,6 +950,9 @@ const GenerateQuotation = () => {
         <div className="col-3">
           <div id="customerInfo" className="card">
             <div className="card-body">
+            <p style={{ fontSize: "14px" }}>
+                <b>Customer Id</b> : {complaintview.customer_id}
+              </p>
               <div className="row">
                 <div className="col-md-12">
                   <h4 className="pname" style={{ fontSize: "14px" }}>{complaintview.customer_name}</h4>
@@ -1798,7 +1804,7 @@ const GenerateQuotation = () => {
                       {Array.isArray(spare) && spare.length > 0 ? (
                         spare.map((part) => (
                           <option key={part.id} value={part.id}>
-                            {part.title}
+                            {part.title + '('+ part.ItemDescription + ')'}
                           </option>
                         ))
                       ) : (
@@ -1847,8 +1853,8 @@ const GenerateQuotation = () => {
                     <tbody>
                       {addedSpareParts.map((part) => (
                         <tr key={part.id}>
-                          <td>{part.title}</td>
-                          <td>{part.quantity}</td>
+                          <td>{part.article_code} - {part.article_description}</td>
+                          <td>1</td>
                           <td>
                             <button
                               className="btn btn-sm btn-danger"
@@ -1879,10 +1885,11 @@ const GenerateQuotation = () => {
               </div>
             </div>
           </div>
-          <div className="card mb-3">
+
+          {quotation.length > 0 &&    <div className="card mb-3">
             <div className="card-body">
               <div className="mt-3">
-                       {/* Display added spare parts */}
+                {/* Display added spare parts */}
                 <div className="mt-3">
                   <h4 className="pname" style={{ fontSize: "14px" }}>Quotation List:</h4>
                   <table className="table table-bordered" style={{ fontSize: "12px" }}>
@@ -1899,7 +1906,7 @@ const GenerateQuotation = () => {
                           <td>{part.quotationNumber}</td>
                           <td>{part.assignedEngineer}</td>
                           <td>
-                              {part.status}
+                            {part.status}
                           </td>
                         </tr>
                       ))}
@@ -1907,10 +1914,11 @@ const GenerateQuotation = () => {
                   </table>
                 </div>
 
-               
+
               </div>
             </div>
-          </div>
+          </div> }
+       
 
 
           {TicketUpdateSuccess.visible && (
