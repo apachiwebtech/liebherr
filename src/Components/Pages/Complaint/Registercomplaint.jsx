@@ -147,7 +147,7 @@ const handleNewAddressSubmit = async (event) => {
             pincode_id: value.pincode || '',
             ccperson: value.contact_person || '', // Extract contact person from form data
             ccnumber: value.mobile || '', // Extract mobile from form data
-            customer_id: customerEndId || '', // Use customerEndId or send empty if not available
+            customer_id: customerEndId , // Use customerEndId or send empty if not available
         };
 
         const response = await axios.post(`${Base_Url}/postcustomerlocation`, payload, {
@@ -1026,12 +1026,12 @@ const handleNewAddressSubmit = async (event) => {
                                             <label className="form-label">Salutation</label>
                                             <select className="form-control" onChange={onHandleChange} value={value.salutation} name="salutation">
                                                 <option value="">Salutation</option>
-                                                <option value="1">Mr</option>
-                                                <option value="2">Mrs</option>
-                                                <option value="3">Miss</option>
-                                                <option value="4">M.</option>
-                                                <option value="5">Lhi</option>
-                                                <option value="6">Dl</option>
+                                                <option value="Mr">Mr</option>
+                                                <option value="Mrs">Mrs</option>
+                                                <option value="Miss">Miss</option>
+                                                <option value="M.">M.</option>
+                                                <option value="Lhi">Lhi</option>
+                                                <option value="Dl">Dl</option>
                                             </select>
                                         </div>
                                     </div>

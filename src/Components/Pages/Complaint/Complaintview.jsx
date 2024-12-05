@@ -10,7 +10,10 @@ import { FaEye } from "react-icons/fa";
 export function Complaintview(params) {
   const token = localStorage.getItem("token");
   const [addedSpareParts, setAddedSpareParts] = useState([]);
+  const [quotation, setQuotation] = useState([]);
   const { complaintid } = useParams();
+  const [quantity, setQuantity] = useState("");
+  const [closestatus, setCloseStatus] = useState("");
   const [complaintview, setComplaintview] = useState({
     ticket_no: '',
     customer_name: '',
@@ -28,7 +31,10 @@ export function Complaintview(params) {
     sub_call_status: '',
     defect_type: '',
     site_defect: "",
-    spare_part_id: ""
+    spare_part_id: "",
+    quantity: "",
+    state : "",
+    city : ""
   });
 
 
@@ -375,21 +381,99 @@ export function Complaintview(params) {
 
   };
 
+  // const handleAddSparePart = () => {
+  //   const selectedSparePart = spare.find(
+  //     (part) => part.id === parseInt(complaintview.spare_part_id)
+  //   );
+
+  //   if (selectedSparePart && !addedSpareParts.some((part) => part.id === selectedSparePart.id)) {
+  //     setAddedSpareParts([...addedSpareParts, selectedSparePart]);
+  //     setComplaintview({ ...complaintview, spare_part_id: '' });
+  //   } else {
+  //     alert("Spare part already added or not selected.");
+  //   }
+  // };
+
   const handleAddSparePart = () => {
     const selectedSparePart = spare.find(
       (part) => part.id === parseInt(complaintview.spare_part_id)
     );
 
-    if (selectedSparePart && !addedSpareParts.some((part) => part.id === selectedSparePart.id)) {
-      setAddedSpareParts([...addedSpareParts, selectedSparePart]);
-      setComplaintview({ ...complaintview, spare_part_id: '' });
-    } else {
-      alert("Spare part already added or not selected.");
+    if (!selectedSparePart) {
+      alert("Please select a spare part.");
+      return;
     }
+
+    if (!quantity || quantity <= 0) {
+      alert("Please enter a valid quantity.");
+      return;
+    }
+
+    if (addedSpareParts.some((part) => part.id === selectedSparePart.id)) {
+      alert("Spare part already added.");
+      return;
+    }
+
+    const newPart = {
+      ...selectedSparePart,
+      quantity: parseInt(quantity), // Add quantity field
+    };
+
+    setAddedSpareParts([...addedSpareParts, newPart]);
+    setComplaintview({ ...complaintview, spare_part_id: "" });
+    setQuantity(""); // Reset quantity input
   };
 
+const GenerateQuotation = () => {
+
+
+  // Collect all spare part IDs
+  let combinedSpareParts = addedSpareParts.map((item) => ({
+    id: item.id,
+    title: item.title,
+    quantity : item.quantity,
+    price : "100"
+  }));
+
+  
+
+  // Combine spare parts, ticket number, and model number into a single array
+  const finaldata = { data :combinedSpareParts,ticket_no : complaintview.ticket_no,ModelNumber : complaintview.ModelNumber , customer_id : complaintview.customer_id , Customername : complaintview.customer_name ,state : complaintview.state , city : complaintview.city , Engineer : addedEngineers.map((item) => item.engineer_id) || complaintview.engineer_id};
+
+  // Prepare the data object
+  const data = {
+    finaldata: finaldata,
+  };
+
+  // Send the POST request
+  axios.post(`${Base_Url}/add_quotation`, data)
+    .then((response) => {
+      console.log("Quotation added successfully:", response.data);
+      alert("Quotation generated")
+      getupdatespare(complaintview.ticket_no)
+    })
+    .catch((error) => {
+      console.error("Error adding quotation:", error);
+    });
+};
+
+
+
   const handleRemoveSparePart = (id) => {
-    setAddedSpareParts(addedSpareParts.filter((part) => part.id !== id));
+
+    const confirm = window.confirm("Are you sure?")
+
+    if(confirm) {
+      axios.post(`${Base_Url}/removesparepart` , { spare_id:id})
+      .then((res) =>{
+        console.log(res.data)
+        // setAddedSpareParts(addedSpareParts.filter((part) => part.id !== id));
+        getupdatespare()
+      })
+    }
+
+
+
   };
 
   const handleRemoveEngineer = (id) => {
@@ -431,18 +515,19 @@ export function Complaintview(params) {
       );
 
       setComplaintview(response.data);
-      
-      if(response.data.call_status != null){
+
+      setCloseStatus(response.data.call_status)
+
+      if (response.data.call_status != null) {
         setCallstatusid(response.data.call_status)
       }
-      if(response.data.engineer_id != null){
+      if (response.data.engineer_id != null) {
         getupdateengineer(response.data.engineer_id)
       }
 
-      if(response.data.spare_part_id != null){
+   
+      getupdatespare(response.data.ticket_no)
 
-        getupdatespare(response.data.spare_part_id)
-      }
       if (response.data.serial_no != "") {
         setsserial_no(response.data.serial_no);
 
@@ -464,14 +549,15 @@ export function Complaintview(params) {
       })
   }
   async function getupdatespare(id) {
-    axios.post(`${Base_Url}/getupdatespare`, { spare_id: id }, {
+
+    axios.post(`${Base_Url}/getupdatesparelist`, { ticket_no: id}, {
       headers: {
         Authorization: token,
       },
     })
       .then((res) => {
         console.log(res)
-        setAddedSpareParts(res.data)
+        setQuotation(res.data)
       })
   }
 
@@ -582,7 +668,6 @@ export function Complaintview(params) {
       site_defect: complaintview.site_defect,
       defect_type: complaintview.defect_type,
       engineerdata: addedEngineers.map((item) => item.engineer_id),
-      sparedata: addedSpareParts.map((item) => item.id)
     };
 
     axios.post(`${Base_Url}/ticketFormData`, data, {
@@ -938,6 +1023,7 @@ export function Complaintview(params) {
 
                 </div>
 
+
                 <div
                   className="tab-pane"
                   id="profile"
@@ -957,8 +1043,184 @@ export function Complaintview(params) {
                     </table> */}
                 </div>
               </div>
+
+            </div>
+
+
+
+          </div>
+          <br></br>
+          <div>
+            <h5>Added Spare Parts</h5>
+            <ul>
+              {selectedSpareParts.map((part) => (
+                <li key={part.id}>{part.name}</li>
+              ))}
+            </ul>
+          </div>
+
+          {/* // */}
+          <div className="card" id="attachmentInfocs">
+            <div className="card-body">
+              <h4 className="pname" style={{ fontSize: "14px" }}>Attachment 2</h4>
+              <div className="mb-3">
+                <input
+                  type="file"
+                  className="form-control"
+                  multiple
+                  accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,.eml"
+                  onChange={handleFile2Change}
+                  disabled={closestatus == 'Closed' ? true : false}
+                  ref={fileInputRef} // Attach the ref to the input
+                />
+              </div>
+              <div className="d-flex justify-content-end mb-3">
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handleAttachment2Submit}
+                  disabled={closestatus == 'Closed' ? true : false}
+                  style={{ fontSize: "14px" }}
+                >
+                  Upload
+                </button>
+              </div>
+
+              <div id="allattachme">
+                {attachments2.length > 0 ? (
+                  <div className="card mb-3">
+                    <div className="card-body">
+                      <h5 className="card-title" style={{ fontSize: "16px", fontWeight: "bold" }}>Uploaded Attachments</h5>
+
+                      {attachments2.map((attachment, index) => {
+                        // Ensure attachment data is an array
+                        const attachmentArray = Array.isArray(attachment.attachment)
+                          ? attachment.attachment
+                          : attachment.attachment.split(','); // Assuming comma-separated string
+
+                        return (
+                          <div
+                            key={index}
+                            className="d-flex justify-content-between align-items-start mb-3"
+                            style={{ borderBottom: "1px solid #e0e0e0", paddingBottom: "10px" }}
+                          >
+                            <div style={{ flex: "1" }}>
+                              <h6 style={{ fontSize: "12px", margin: "0 0 5px 0" }}>By: {attachment.Lhiuser}</h6>
+                              <h6 style={{ fontSize: "12px", margin: "0 0 5px 0" }}>Date: {formatDate(attachment.created_date)}</h6>
+
+                              {/* Display each attachment item with format "File1.extension [filename.extension]" */}
+                              {attachmentArray.map((item, idx) => {
+                                const fileExtension = item.split('.').pop(); // Extract file extension
+                                const fileName = item.trim();
+
+                                return (
+                                  <span
+                                    key={idx}
+                                    style={{
+                                      color: "#007bff",
+                                      cursor: "pointer",
+                                      fontWeight: "500",
+                                      display: "block",
+                                      marginBottom: "3px",
+                                    }}
+                                    onClick={() => handleAttachment2Click(fileName)}
+                                  >
+                                    {`File${idx + 1}.${fileExtension}`}
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })}
+
+
+                    </div>
+                  </div>
+
+                ) : (
+                  <p style={{ fontSize: "14px" }}>No attachments available</p>
+                )}
+              </div>
             </div>
           </div>
+
+          {/* New Modal for Attachment 2 Preview */}
+          {isModal2Open && (
+            <div className="modal">
+              <div className="modal-content">
+                <span className="close" onClick={() => setIsModal2Open(false)}>
+                  &times;
+                </span>
+                {currentAttachment2.toLowerCase().endsWith(".jpg") ||
+                  currentAttachment2.toLowerCase().endsWith(".jpeg") ||
+                  currentAttachment2.toLowerCase().endsWith(".png") ? (
+                  <img
+                    src={`${Base_Url}/uploads/${currentAttachment2}`}
+                    alt="attachment"
+                    style={{ width: "100%" }}
+                  />
+                ) : currentAttachment2.toLowerCase().endsWith(".mp4") ||
+                  currentAttachment2.toLowerCase().endsWith(".mov") ||
+                  currentAttachment2.toLowerCase().endsWith(".avi") ? (
+                  <video controls style={{ width: "100%" }}>
+                    <source
+                      src={`${Base_Url}/uploads/${currentAttachment2}`}
+                      type="video/mp4"
+                    />
+                    Your browser does not support the video tag.
+                  </video>
+                ) : currentAttachment2.toLowerCase().endsWith(".mp3") ||
+                  currentAttachment2.toLowerCase().endsWith(".wav") ? (
+                  <audio controls>
+                    <source
+                      src={`${Base_Url}/uploads/${currentAttachment2}`}
+                      type="audio/mpeg"
+                    />
+                    Your browser does not support the audio tag.
+                  </audio>
+                ) : currentAttachment2.toLowerCase().endsWith(".pdf") ? (
+                  <iframe
+                    src={`${Base_Url}/uploads/${currentAttachment2}`}
+                    style={{ width: "100%", height: "500px" }}
+                    title="PDF Document"
+                  >
+                    Your browser does not support PDFs.{" "}
+                    <a href={`${Base_Url}/uploads/${currentAttachment2}`}>
+                      Download the PDF
+                    </a>
+                  </iframe>
+                ) : currentAttachment2.toLowerCase().endsWith(".doc") ||
+                  currentAttachment2.toLowerCase().endsWith(".docx") || currentAttachment2.toLowerCase().endsWith(".eml") ? (
+                  <iframe
+                    src={`https://docs.google.com/gview?url=${Base_Url}/uploads/${currentAttachment2}&embedded=true`}
+                    style={{ width: "100%", height: "500px" }}
+                    title="Word Document"
+                  >
+                    Your browser does not support Word documents.{" "}
+                    <a href={`${Base_Url}/uploads/${currentAttachment2}`}>
+                      Download the Word document
+                    </a>
+                  </iframe>
+                ) : currentAttachment2.toLowerCase().endsWith(".xls") ||
+                  currentAttachment2.toLowerCase().endsWith(".xlsx") ? (
+                  <iframe
+                    src={`https://docs.google.com/gview?url=${Base_Url}/uploads/${currentAttachment2}&embedded=true`}
+                    style={{ width: "100%", height: "500px" }}
+                    title="Excel Document"
+                  >
+                    Your browser does not support Excel documents.{" "}
+                    <a href={`${Base_Url}/uploads/${currentAttachment2}`}>
+                      Download the Excel document
+                    </a>
+                  </iframe>
+                ) : (
+                  <p style={{ fontSize: "14px" }}>Unsupported file type.</p>
+                )}
+              </div>
+            </div>
+          )}
+
         </div>
 
         {/* Suraj  Start*/}
@@ -1046,7 +1308,7 @@ export function Complaintview(params) {
                             name="note"
                             className="form-control"
                             placeholder="Type comment..."
-                            disabled={complaintview.call_status == 'Closed' ? true : false}
+                            disabled={closestatus == 'Closed' ? true : false}
                             value={note}
                             onChange={(e) => setNote(e.target.value)}
                           />
@@ -1069,7 +1331,7 @@ export function Complaintview(params) {
                             multiple
                             accept="image/*,video/*,audio/*,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,.eml"
                             onChange={handleFileChange}
-                            disabled={complaintview.call_status == 'Closed' ? true : false}
+                            disabled={closestatus == 'Closed' ? true : false}
                             ref={fileInputRef2} // Attach the ref to the input
                           />
                         </div>
@@ -1086,7 +1348,7 @@ export function Complaintview(params) {
                             className="btn btn-primary"
                             style={{ fontSize: "14px" }}
                             onClick={handleSubmit}
-                            disabled={complaintview.call_status == 'Closed' ? true : false}
+                            disabled={closestatus == 'Closed' ? true : false}
                           >
                             Upload Remark
                           </button>
@@ -1283,7 +1545,7 @@ export function Complaintview(params) {
                 <select
                   name="call_status"
                   className="form-control"
-                  disabled={complaintview.call_status == 'Closed' ? true : false}
+                  disabled={closestatus == 'Closed' ? true : false}
                   style={{ fontSize: "14px" }}
                   value={complaintview.call_status}
                   onChange={(e) => {
@@ -1306,7 +1568,7 @@ export function Complaintview(params) {
               </div>
               <h4 className="pname" style={{ fontSize: "14px" }}>Sub Call Status</h4>
               <div className="mb-3">
-                <select name="sub_call_status" value={complaintview.sub_call_status} disabled={complaintview.call_status == 'Closed' ? true : false} className="form-control" style={{ fontSize: "14px" }} onChange={handleModelChange}>
+                <select name="sub_call_status" value={complaintview.sub_call_status} disabled={closestatus == 'Closed' ? true : false} className="form-control" style={{ fontSize: "14px" }} onChange={handleModelChange}>
                   <option value="" >Select Status</option>
                   {subcallstatus.map((item) => {
                     return (
@@ -1325,7 +1587,7 @@ export function Complaintview(params) {
                   <input
                     type="radio"
                     className="form-check-input"
-                    disabled={complaintview.call_status == 'Closed' ? true : false}
+                    disabled={closestatus == 'Closed' ? true : false}
                     id="lhi"
                     name="engineer_type"
                     value="LHI"
@@ -1339,7 +1601,7 @@ export function Complaintview(params) {
                 <div className="form-check">
                   <input
                     type="radio"
-                    disabled={complaintview.call_status == 'Closed' ? true : false}
+                    disabled={closestatus == 'Closed' ? true : false}
                     className="form-check-input"
                     id="franchisee"
                     name="engineer_type"
@@ -1361,7 +1623,7 @@ export function Complaintview(params) {
                     className="form-select dropdown-select"
                     name="engineer_id"
                     value={complaintview.engineer_id}
-                    disabled={complaintview.call_status == 'Closed' ? true : false}
+                    disabled={closestatus == 'Closed' ? true : false}
                     onChange={handleModelChange}
                   >
                     <option value="">Select Engineer</option>
@@ -1382,7 +1644,7 @@ export function Complaintview(params) {
                 <div className="col-lg-3">
                   <button
                     className="btn btn-primary btn-sm"
-                    disabled={complaintview.call_status == 'Closed' ? true : false}
+                    disabled={closestatus == 'Closed' ? true : false}
                     onClick={AddEngineer}
                   >
                     Add
@@ -1410,7 +1672,7 @@ export function Complaintview(params) {
                           <button
                             className="btn btn-sm btn-danger"
                             style={{ padding: "0.2rem 0.5rem" }}
-                            disabled={complaintview.call_status == 'Closed' ? true : false}
+                            disabled={closestatus == 'Closed' ? true : false}
                             onClick={() => handleRemoveEngineer(eng.id)}
                           >
                             ✖
@@ -1427,7 +1689,7 @@ export function Complaintview(params) {
                 <select
                   name="group_code"
                   className="form-control"
-                  disabled={complaintview.call_status == 'Closed' ? true : false}
+                  disabled={closestatus == 'Closed' ? true : false}
                   style={{ fontSize: "14px" }}
                   value={complaintview.group_code}
                   onChange={(e) => {
@@ -1453,7 +1715,7 @@ export function Complaintview(params) {
                 <select
                   name="defect_type"
                   className="form-control"
-                  disabled={complaintview.call_status == 'Closed' ? true : false}
+                  disabled={closestatus == 'Closed' ? true : false}
                   style={{ fontSize: "14px" }}
                   value={complaintview.defect_type}
                   onChange={handleModelChange}
@@ -1472,7 +1734,7 @@ export function Complaintview(params) {
                 <select
                   name="site_defect"
                   className="form-control"
-                  disabled={complaintview.call_status == 'Closed' ? true : false}
+                  disabled={closestatus == 'Closed' ? true : false}
                   style={{ fontSize: "14px" }}
                   value={complaintview.site_defect}
                   onChange={handleModelChange}
@@ -1486,15 +1748,37 @@ export function Complaintview(params) {
                 </select>
               </div>
 
+              <div className="d-flex justify-content-end py-2">
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  style={{ fontSize: "14px", marginTop: '5px' }}
+                  onClick={handleSubmitTicketFormData}
+                  disabled={closestatus == 'Closed' ? true : false}
+                >
+                  Submit
+                </button>
+              </div>
+              {TicketUpdateSuccess.visible && (
+                <div style={successMessageStyle}>
+                  {TicketUpdateSuccess.message}
+                </div>
+              )}
+
+            </div>
+          </div>
+
+          <div className="card mb-3">
+            <div className="card-body">
               <div className="mt-3">
                 <h4 className="pname" style={{ fontSize: "14px" }}>Spare Parts:</h4>
-                <div className="row">
-                  <div className="col-lg-9">
+                <div className="row align-items-center">
+                  <div className="col-lg-6">
                     <select
-                      className="form-select dropdown-select"
+                      className="form-select dropdown-select m-0"
                       name="spare_part_id"
                       value={complaintview.spare_part_id}
-                      disabled={complaintview.call_status === "Closed"}
+                      disabled={closestatus === "Closed"}
                       onChange={handleModelChange}
                     >
                       <option value="">Select Spare Part</option>
@@ -1513,9 +1797,22 @@ export function Complaintview(params) {
                   </div>
 
                   <div className="col-lg-3">
+                    <input
+                      type="number"
+                      className="form-control"
+                      name="quantity"
+                      placeholder="Qty"
+                      value={quantity}
+                      onChange={(e) => setQuantity(e.target.value)}
+                      disabled={closestatus === "Closed"}
+                      min="1"
+                    />
+                  </div>
+
+                  <div className="col-lg-3">
                     <button
                       className="btn btn-primary btn-sm"
-                      disabled={complaintview.call_status === "Closed"}
+                      disabled={closestatus === "Closed" || !quantity}
                       onClick={handleAddSparePart}
                     >
                       Add
@@ -1530,6 +1827,7 @@ export function Complaintview(params) {
                     <thead>
                       <tr>
                         <th>Spare Part</th>
+                        <th>Quantity</th>
                         <th>Action</th>
                       </tr>
                     </thead>
@@ -1537,11 +1835,12 @@ export function Complaintview(params) {
                       {addedSpareParts.map((part) => (
                         <tr key={part.id}>
                           <td>{part.title}</td>
+                          <td>{part.quantity}</td>
                           <td>
                             <button
                               className="btn btn-sm btn-danger"
                               style={{ padding: "0.2rem 0.5rem" }}
-                              disabled={complaintview.call_status === "Closed"}
+                              disabled={closestatus === "Closed"}
                               onClick={() => handleRemoveSparePart(part.id)}
                             >
                               ✖
@@ -1552,32 +1851,62 @@ export function Complaintview(params) {
                     </tbody>
                   </table>
                 </div>
-              </div>
 
-
-
-
-
-
-              <div className="d-flex justify-content-end py-2">
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  style={{ fontSize: "14px" }}
-                  onClick={handleSubmitTicketFormData}
-                  disabled={complaintview.call_status == 'Closed' ? true : false}
-                >
-                  Submit
-                </button>
-              </div>
-
-              {TicketUpdateSuccess.visible && (
-                <div style={successMessageStyle}>
-                  {TicketUpdateSuccess.message}
+                <div className="d-flex justify-content-end py-2">
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    style={{ fontSize: "14px" }}
+                    onClick={GenerateQuotation}
+                    disabled={closestatus === "Closed"}
+                  >
+                    Generate Quotation
+                  </button>
                 </div>
-              )}
+              </div>
             </div>
           </div>
+          <div className="card mb-3">
+            <div className="card-body">
+              <div className="mt-3">
+                       {/* Display added spare parts */}
+                <div className="mt-3">
+                  <h4 className="pname" style={{ fontSize: "14px" }}>Quotation List:</h4>
+                  <table className="table table-bordered" style={{ fontSize: "12px" }}>
+                    <thead>
+                      <tr>
+                        <th>Q.No</th>
+                        <th>Engineer</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {quotation.map((part) => (
+                        <tr key={part.id}>
+                          <td>{part.quotationNumber}</td>
+                          <td>{part.assignedEngineer}</td>
+                          <td>
+                              {part.status}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+               
+              </div>
+            </div>
+          </div>
+
+
+          {TicketUpdateSuccess.visible && (
+            <div style={successMessageStyle}>
+              {TicketUpdateSuccess.message}
+            </div>
+          )}
+
+
 
           {/* <div className="card mb-3" id="productInfocs">
             <div className="card-body">
@@ -1606,179 +1935,6 @@ export function Complaintview(params) {
           </div> */}
 
 
-
-          <div>
-            <h5>Added Spare Parts</h5>
-            <ul>
-              {selectedSpareParts.map((part) => (
-                <li key={part.id}>{part.name}</li>
-              ))}
-            </ul>
-          </div>
-
-
-
-          {/* // */}
-          <div className="card" id="attachmentInfocs">
-            <div className="card-body">
-              <h4 className="pname" style={{ fontSize: "14px" }}>Attachment 2</h4>
-              <div className="mb-3">
-                <input
-                  type="file"
-                  className="form-control"
-                  multiple
-                  accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,.eml"
-                  onChange={handleFile2Change}
-                  disabled={complaintview.call_status == 'Closed' ? true : false}
-                  ref={fileInputRef} // Attach the ref to the input
-                />
-              </div>
-              <div className="d-flex justify-content-end mb-3">
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={handleAttachment2Submit}
-                  disabled={complaintview.call_status == 'Closed' ? true : false}
-                  style={{ fontSize: "14px" }}
-                >
-                  Upload
-                </button>
-              </div>
-
-              <div id="allattachme">
-                {attachments2.length > 0 ? (
-                  <div className="card mb-3">
-                    <div className="card-body">
-                      <h5 className="card-title" style={{ fontSize: "16px", fontWeight: "bold" }}>Uploaded Attachments</h5>
-
-                      {attachments2.map((attachment, index) => {
-                        // Ensure attachment data is an array
-                        const attachmentArray = Array.isArray(attachment.attachment)
-                          ? attachment.attachment
-                          : attachment.attachment.split(','); // Assuming comma-separated string
-
-                        return (
-                          <div
-                            key={index}
-                            className="d-flex justify-content-between align-items-start mb-3"
-                            style={{ borderBottom: "1px solid #e0e0e0", paddingBottom: "10px" }}
-                          >
-                            <div style={{ flex: "1" }}>
-                              <h6 style={{ fontSize: "12px", margin: "0 0 5px 0" }}>By: {attachment.Lhiuser}</h6>
-                              <h6 style={{ fontSize: "12px", margin: "0 0 5px 0" }}>Date: {formatDate(attachment.created_date)}</h6>
-
-                              {/* Display each attachment item with format "File1.extension [filename.extension]" */}
-                              {attachmentArray.map((item, idx) => {
-                                const fileExtension = item.split('.').pop(); // Extract file extension
-                                const fileName = item.trim();
-
-                                return (
-                                  <span
-                                    key={idx}
-                                    style={{
-                                      color: "#007bff",
-                                      cursor: "pointer",
-                                      fontWeight: "500",
-                                      display: "block",
-                                      marginBottom: "3px",
-                                    }}
-                                    onClick={() => handleAttachment2Click(fileName)}
-                                  >
-                                    {`File${idx + 1}.${fileExtension}`}
-                                  </span>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        );
-                      })}
-
-
-                    </div>
-                  </div>
-
-                ) : (
-                  <p style={{ fontSize: "14px" }}>No attachments available</p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* New Modal for Attachment 2 Preview */}
-          {isModal2Open && (
-            <div className="modal">
-              <div className="modal-content">
-                <span className="close" onClick={() => setIsModal2Open(false)}>
-                  &times;
-                </span>
-                {currentAttachment2.toLowerCase().endsWith(".jpg") ||
-                  currentAttachment2.toLowerCase().endsWith(".jpeg") ||
-                  currentAttachment2.toLowerCase().endsWith(".png") ? (
-                  <img
-                    src={`${Base_Url}/uploads/${currentAttachment2}`}
-                    alt="attachment"
-                    style={{ width: "100%" }}
-                  />
-                ) : currentAttachment2.toLowerCase().endsWith(".mp4") ||
-                  currentAttachment2.toLowerCase().endsWith(".mov") ||
-                  currentAttachment2.toLowerCase().endsWith(".avi") ? (
-                  <video controls style={{ width: "100%" }}>
-                    <source
-                      src={`${Base_Url}/uploads/${currentAttachment2}`}
-                      type="video/mp4"
-                    />
-                    Your browser does not support the video tag.
-                  </video>
-                ) : currentAttachment2.toLowerCase().endsWith(".mp3") ||
-                  currentAttachment2.toLowerCase().endsWith(".wav") ? (
-                  <audio controls>
-                    <source
-                      src={`${Base_Url}/uploads/${currentAttachment2}`}
-                      type="audio/mpeg"
-                    />
-                    Your browser does not support the audio tag.
-                  </audio>
-                ) : currentAttachment2.toLowerCase().endsWith(".pdf") ? (
-                  <iframe
-                    src={`${Base_Url}/uploads/${currentAttachment2}`}
-                    style={{ width: "100%", height: "500px" }}
-                    title="PDF Document"
-                  >
-                    Your browser does not support PDFs.{" "}
-                    <a href={`${Base_Url}/uploads/${currentAttachment2}`}>
-                      Download the PDF
-                    </a>
-                  </iframe>
-                ) : currentAttachment2.toLowerCase().endsWith(".doc") ||
-                  currentAttachment2.toLowerCase().endsWith(".docx") || currentAttachment2.toLowerCase().endsWith(".eml") ? (
-                  <iframe
-                    src={`https://docs.google.com/gview?url=${Base_Url}/uploads/${currentAttachment2}&embedded=true`}
-                    style={{ width: "100%", height: "500px" }}
-                    title="Word Document"
-                  >
-                    Your browser does not support Word documents.{" "}
-                    <a href={`${Base_Url}/uploads/${currentAttachment2}`}>
-                      Download the Word document
-                    </a>
-                  </iframe>
-                ) : currentAttachment2.toLowerCase().endsWith(".xls") ||
-                  currentAttachment2.toLowerCase().endsWith(".xlsx") ? (
-                  <iframe
-                    src={`https://docs.google.com/gview?url=${Base_Url}/uploads/${currentAttachment2}&embedded=true`}
-                    style={{ width: "100%", height: "500px" }}
-                    title="Excel Document"
-                  >
-                    Your browser does not support Excel documents.{" "}
-                    <a href={`${Base_Url}/uploads/${currentAttachment2}`}>
-                      Download the Excel document
-                    </a>
-                  </iframe>
-                ) : (
-                  <p style={{ fontSize: "14px" }}>Unsupported file type.</p>
-                )}
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
