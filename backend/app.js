@@ -4202,19 +4202,55 @@ app.get("/getengineer", authenticateToken, async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
+    const {
+      
+      page = 1,
+      pageSize = 10,
+  
+    } = req.query;
+
+    const offset = (page - 1) * pageSize;
 
     // SQL query to fetch data from the database with an INNER JOIN
-    const sql = `
+    let sql = `
       SELECT r.*, c.title as childfranchise_title
       FROM awt_engineermaster r
-      INNER JOIN awt_childfranchisemaster c ON r.cfranchise_id = c.id
+      INNER JOIN awt_childfranchisemaster c ON r.cfranchise_id = c.licare_code
       WHERE r.deleted = 0
     `;
 
-    // Execute the SQL query
-    const result = await pool.request().query(sql);
+    const countSql = `
+    SELECT COUNT(*) AS totalCount
+    FROM awt_engineermaster AS t
+    WHERE t.deleted = 0`;
 
-    return res.json(result.recordset);
+    let params = [];
+
+    sql += ` ORDER BY t.engineer_id DESC OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY`;
+    params.push(
+      { name: "offset", value: offset },
+      { name: "pageSize", value: parseInt(pageSize) }
+    );
+
+    console.log(sql, "$$$$");
+
+    // Execute the SQL query
+    const request = pool.request();
+    params.forEach((param) => request.input(param.name, param.value));
+    const result = await request.query(sql);
+
+    const countRequest = pool.request();
+    params.forEach((param) => countRequest.input(param.name, param.value));
+    const countResult = await countRequest.query(countSql);
+
+    const totalCount = countResult.recordset[0].totalCount;
+
+    return res.json({
+      data: result.recordset,
+      totalCount,
+      page: parseInt(page),
+      pageSize: parseInt(pageSize),
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'An error occurred while fetching data' });
@@ -7269,7 +7305,7 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
     }
 
     // Pagination
-    sql += ` ORDER BY c.ticket_date DESC OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY`;
+    sql += `ORDER BY c.ticket_date DESC OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY`;
     params.push(
       { name: "offset", value: offset },
       { name: "pageSize", value: parseInt(pageSize) }

@@ -44,7 +44,7 @@ export function Complaintlist(params) {
     const [pageSize, setPageSize] = useState(10);
     const [totalCount, setTotalCount] = useState(0);
 
-    
+
     const totalPages = Math.ceil(totalCount / pageSize);
 
     const handlePageChange = (page) => {
@@ -576,112 +576,112 @@ export function Complaintlist(params) {
 
                         <div className="gridbox">
 
-                        <table className="table">
-    <thead>
-        <tr>
-            <th>#</th>
-            <th>Ticket No.</th>
-            <th>Ticket Date</th>
-            <th>Customer Name</th>
-            <th>Model No</th>
-            <th>Serial No</th>
-            <th>Age</th>
-            <th>Assigned Users</th>
-            <th>Status</th>
-            <th>Edit</th>
-            <th>View</th>
-        </tr>
-    </thead>
-    <tbody>
-        {filteredData.map((item, index) => {
-            const displayIndex = (currentPage - 1) * pageSize + index + 1;  // Adjusted index for pagination
-            return (
-                <tr key={item.id}>
-                    <td>{displayIndex}</td>  {/* Use displayIndex for correct pagination */}
-                    <td>{item.ticket_no}</td>
-                    <td>{formatDate(item.ticket_date)}</td>
-                    <td>{item.customer_name}</td>
-                    <td>{item.ModelNumber}</td>
-                    <td>{item.serial_no}</td>
-                    <td>{item.ageingdays}</td>
-                    <td>{item.assigned_to}</td>
-                    <td>{item.call_status}</td>
-                    <td>
-                        <button
-                            className='btn'
-                            onClick={() => navigate(`/registercomaplaint/${item.ticket_no}`)}
-                            disabled={isActionDisabled(item.call_status)}
-                            title={isActionDisabled(item.call_status) ? "Cannot edit closed or cancelled ticket" : "Edit"}
-                            style={{
-                                backgroundColor: 'transparent',
-                                border: 'none',
-                                color: isActionDisabled(item.call_status) ? 'gray' : 'blue',
-                                fontSize: '20px',
-                                cursor: isActionDisabled(item.call_status) ? 'not-allowed' : 'pointer'
-                            }}
-                        >
-                            <FaPencilAlt />
-                        </button>
-                    </td>
-                    <td>
-                        <button
-                            className='btn'
-                            onClick={() => navigate(`/complaintview/${item.id}`)}
-                            title="View"
-                            style={{
-                                backgroundColor: 'transparent',
-                                border: 'none',
-                                color: 'blue',
-                                fontSize: '20px',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            <FaEye />
-                        </button>
-                    </td>
-                </tr>
-            );
-        })}
-    </tbody>
-</table>
+                            <table className="table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Ticket No.</th>
+                                        <th>Ticket Date</th>
+                                        <th>Customer Name</th>
+                                        <th>Model No</th>
+                                        <th>Serial No</th>
+                                        <th>Age</th>
+                                        <th>Assigned Users</th>
+                                        <th>Status</th>
+                                        <th>Edit</th>
+                                        <th>View</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredData.map((item, index) => {
+                                        const displayIndex = (currentPage - 1) * pageSize + index + 1;  // Adjusted index for pagination
+                                        return (
+                                            <tr key={item.id}>
+                                                <td>{displayIndex}</td>  {/* Use displayIndex for correct pagination */}
+                                                <td>{item.ticket_no}</td>
+                                                <td>{formatDate(item.ticket_date)}</td>
+                                                <td>{item.customer_name}</td>
+                                                <td>{item.ModelNumber}</td>
+                                                <td>{item.serial_no}</td>
+                                                <td>{item.ageingdays}</td>
+                                                <td>{item.assigned_to}</td>
+                                                <td>{item.call_status}</td>
+                                                <td>
+                                                    <button
+                                                        className='btn'
+                                                        onClick={() => navigate(`/registercomaplaint/${item.ticket_no}`)}
+                                                        disabled={isActionDisabled(item.call_status)}
+                                                        title={isActionDisabled(item.call_status) ? "Cannot edit closed or cancelled ticket" : "Edit"}
+                                                        style={{
+                                                            backgroundColor: 'transparent',
+                                                            border: 'none',
+                                                            color: isActionDisabled(item.call_status) ? 'gray' : 'blue',
+                                                            fontSize: '20px',
+                                                            cursor: isActionDisabled(item.call_status) ? 'not-allowed' : 'pointer'
+                                                        }}
+                                                    >
+                                                        <FaPencilAlt />
+                                                    </button>
+                                                </td>
+                                                <td>
+                                                    <button
+                                                        className='btn'
+                                                        onClick={() => navigate(`/complaintview/${item.id}`)}
+                                                        title="View"
+                                                        style={{
+                                                            backgroundColor: 'transparent',
+                                                            border: 'none',
+                                                            color: 'blue',
+                                                            fontSize: '20px',
+                                                            cursor: 'pointer'
+                                                        }}
+                                                    >
+                                                        <FaEye />
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
 
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-    <button
-        onClick={() => handlePageChange(currentPage - 1)}
-        disabled={currentPage <= 1}
-        style={{
-            padding: '8px 15px',
-            fontSize: '16px',
-            cursor: currentPage <= 1 ? 'not-allowed' : 'pointer',
-            backgroundColor: currentPage <= 1 ? '#ccc' : '#007bff',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '5px',
-            transition: 'background-color 0.3s',
-        }}
-    >
-        Previous
-    </button>
-    <span style={{ fontSize: '16px', fontWeight: 'bold' }}>
-        Page {currentPage} of {totalPages}
-    </span>
-    <button
-        onClick={() => handlePageChange(currentPage + 1)}
-        disabled={currentPage >= totalPages}
-        style={{
-            padding: '8px 15px',
-            fontSize: '16px',
-            cursor: currentPage >= totalPages ? 'not-allowed' : 'pointer',
-            backgroundColor: currentPage >= totalPages ? '#ccc' : '#007bff',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '5px',
-            transition: 'background-color 0.3s',
-        }}
-    >
-        Next
-    </button>
-</div>
+                                <button
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    disabled={currentPage <= 1}
+                                    style={{
+                                        padding: '8px 15px',
+                                        fontSize: '16px',
+                                        cursor: currentPage <= 1 ? 'not-allowed' : 'pointer',
+                                        backgroundColor: currentPage <= 1 ? '#ccc' : '#007bff',
+                                        color: '#fff',
+                                        border: 'none',
+                                        borderRadius: '5px',
+                                        transition: 'background-color 0.3s',
+                                    }}
+                                >
+                                    Previous
+                                </button>
+                                <span style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                                    Page {currentPage} of {totalPages}
+                                </span>
+                                <button
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    disabled={currentPage >= totalPages}
+                                    style={{
+                                        padding: '8px 15px',
+                                        fontSize: '16px',
+                                        cursor: currentPage >= totalPages ? 'not-allowed' : 'pointer',
+                                        backgroundColor: currentPage >= totalPages ? '#ccc' : '#007bff',
+                                        color: '#fff',
+                                        border: 'none',
+                                        borderRadius: '5px',
+                                        transition: 'background-color 0.3s',
+                                    }}
+                                >
+                                    Next
+                                </button>
+                            </div>
 
                         </div>
                     </div>

@@ -7,8 +7,22 @@ import Franchisemaster from './Franchisemaster';
 
 export function Engineerlist(params) {
     const [Engineerdata, setEngineerdata] = useState([]);
-    const token = localStorage.getItem("token"); 
+    const token = localStorage.getItem("token");
     const [isEdit, setIsEdit] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [totalCount, setTotalCount] = useState(0);
+
+    const totalPages = Math.ceil(totalCount / pageSize);
+
+    const handlePageChange = (page) => {
+
+        setCurrentPage(page);
+        fetchEngineerlist(page); // Fetch data for the new page
+    };
+    
+
+
     const [formData, setFormData] = useState({
         title: '',
         email: '',
@@ -29,15 +43,21 @@ export function Engineerlist(params) {
         return date.toLocaleDateString('en-GB', options).replace(/\//g, '-'); // Convert to 'DD-MM-YYYY' format
     };
 
-    const fetchEngineerlist = async () => {
+    const fetchEngineerlist = async (page) => {
         try {
-            const response = await axios.get(`${Base_Url}/getengineer`,{
+            const response = await axios.get(`${Base_Url}/getengineer`, {
                 headers: {
-                  Authorization: token,
+                    Authorization: token,
                 },
-              }
-        );
+                params: {
+                    // You can add any additional filter parameters here if needed
+                    page: page, // current page number
+                    pageSize: pageSize, // page size
+                },
+            }
+            );
             setEngineerdata(response.data);
+            setTotalCount(response.data.totalCount);
         } catch (error) {
             console.error('Error fetching Engineerdata:', error);
             setEngineerdata([]);
@@ -45,30 +65,30 @@ export function Engineerlist(params) {
     };
     const handleChangestatus = (e) => {
         try {
-          const dataId = e.target.getAttribute('data-id');
-    
-          const response = axios.post(`${Base_Url}/updatestatus`, { dataId: dataId },{
-            headers: {
-              Authorization: token,
-            },
-          }
-    );
-    
+            const dataId = e.target.getAttribute('data-id');
+
+            const response = axios.post(`${Base_Url}/updatestatus`, { dataId: dataId }, {
+                headers: {
+                    Authorization: token,
+                },
+            }
+            );
+
         } catch (error) {
-          console.error("Error editing user:", error);
+            console.error("Error editing user:", error);
         }
-    
-      };
+
+    };
 
 
     const deleted = async (id) => {
         try {
-            const response = await axios.post(`${Base_Url}/deleteengineer`, { id },{
+            const response = await axios.post(`${Base_Url}/deleteengineer`, { id }, {
                 headers: {
-                  Authorization: token,
+                    Authorization: token,
                 },
-              }
-        );
+            }
+            );
             setFormData({
                 title: '',
                 email: '',
@@ -91,12 +111,12 @@ export function Engineerlist(params) {
 
     const edit = async (id) => {
         try {
-            const response = await axios.get(`${Base_Url}/requestengineer/${id}`,{
+            const response = await axios.get(`${Base_Url}/requestengineer/${id}`, {
                 headers: {
-                  Authorization: token,
+                    Authorization: token,
                 },
-              }
-        );
+            }
+            );
             setFormData(response.data)
             setIsEdit(true);
             console.log(response.data);
@@ -202,6 +222,45 @@ export function Engineerlist(params) {
 
                                 </tbody>
                             </table>
+
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                                <button
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    disabled={currentPage <= 1}
+                                    style={{
+                                        padding: '8px 15px',
+                                        fontSize: '16px',
+                                        cursor: currentPage <= 1 ? 'not-allowed' : 'pointer',
+                                        backgroundColor: currentPage <= 1 ? '#ccc' : '#007bff',
+                                        color: '#fff',
+                                        border: 'none',
+                                        borderRadius: '5px',
+                                        transition: 'background-color 0.3s',
+                                    }}
+                                >
+                                    Previous
+                                </button>
+                                <span style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                                    Page {currentPage} of {totalPages}
+                                </span>
+                                <button
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    disabled={currentPage >= totalPages}
+                                    style={{
+                                        padding: '8px 15px',
+                                        fontSize: '16px',
+                                        cursor: currentPage >= totalPages ? 'not-allowed' : 'pointer',
+                                        backgroundColor: currentPage >= totalPages ? '#ccc' : '#007bff',
+                                        color: '#fff',
+                                        border: 'none',
+                                        borderRadius: '5px',
+                                        transition: 'background-color 0.3s',
+                                    }}
+                                >
+                                    Next
+                                </button>
+                            </div>
+
                         </div>
                     </div>
                 </div>
