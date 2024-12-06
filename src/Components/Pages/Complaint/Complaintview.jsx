@@ -385,8 +385,8 @@ export function Complaintview(params) {
 
 
 
-  const handlesparechange = (value) =>{
-     setspareid(value)
+  const handlesparechange = (value) => {
+    setspareid(value)
   }
 
   const handleAddSparePart = () => {
@@ -407,7 +407,7 @@ export function Complaintview(params) {
 
 
 
- 
+
 
     const newPart = {
       ...selectedSparePart,
@@ -968,10 +968,12 @@ export function Complaintview(params) {
               <p style={{ fontSize: "14px" }}>M : {complaintview.customer_mobile}</p>
 
               <p style={{ fontSize: "14px" }}>Ticket Type: {complaintview.ticket_type}</p>
-              <p style={{ fontSize: "14px" }}>Call Type: {complaintview.call_type}</p>
-              <p style={{ fontSize: "14px" }}>Warranty Status: {complaintview.warranty_status}</p>
+              {/* <p style={{ fontSize: "14px" }}>Call Type: {complaintview.call_type}</p>
+              <p style={{ fontSize: "14px" }}>Warranty Status: {complaintview.warranty_status}</p> */}
               <p style={{ fontSize: "14px" }}>Customer Classification: {complaintview.customer_class}</p>
-              <p style={{ fontSize: "14px" }}>Call Priority: {complaintview.call_priority}</p>
+              {complaintview.call_priority && (
+                <p style={{ fontSize: "14px" }}>Call Priority: {complaintview.call_priority}</p>
+              )}
 
               <ul className="nav nav-tabs" id="myTab" role="tablist">
                 <li className="nav-item">
@@ -1033,7 +1035,7 @@ export function Complaintview(params) {
                                 >
                                   <FaEye />
                                 </button>
-                                View Info
+
                               </span>
                             </td>
                           </tr>
@@ -1306,12 +1308,12 @@ export function Complaintview(params) {
                   <p style={{ fontSize: "14px" }}>{complaintview.warranty_status}</p>
                 </div>
 
-                <div className="col-md-12">
+                {/* <div className="col-md-12">
                   <h3 className="mainheade" style={{ fontSize: "14px" }}>
                     Ticket{" "}
                     <span style={{ fontSize: "14px" }} id="compaintno1">: {complaintview.ticket_no}</span>
                   </h3>
-                </div>
+                </div> */}
               </div>
 
               <div className="row d-flex justify-content-center">
@@ -1387,10 +1389,8 @@ export function Complaintview(params) {
             <div className="row">
               <div className="col-md-12">
                 <h3 className="mainheade" style={{ fontSize: "14px" }}>
-                  Remark Record Of{" "}
-                  <span id="compaintno1" style={{ fontSize: "14px" }}>
-                    : {complaintview.ticket_no} Ticket Number
-                  </span>
+                  Remarks :
+
                 </h3>
               </div>
             </div>
@@ -1665,7 +1665,7 @@ export function Complaintview(params) {
                 <div className="col-lg-3">
                   <button
                     className="btn btn-primary btn-sm"
-                    disabled={closestatus == 'Closed' || closestatus == 'Cancelled'? true : false}
+                    disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
                     onClick={AddEngineer}
                   >
                     Add
@@ -1802,7 +1802,7 @@ export function Complaintview(params) {
                       name="spare_part_id"
                       value={spareid}
                       disabled={closestatus === "Closed" || closestatus == 'Cancelled'}
-                      onChange={(e) =>handlesparechange(e.target.value)}
+                      onChange={(e) => handlesparechange(e.target.value)}
                     >
                       <option value="">Select Spare Part</option>
                       {Array.isArray(spare) && spare.length > 0 ? (

@@ -101,15 +101,16 @@ const Router = createBrowserRouter([
     element: <Login />,
 
   },
+  {
+    path: "/msp/msplogin",
+    element: <MSP_Login />,
+  },
 
   {
-    path: "/msp",
+    path: "/msp/ticketlistmsp",
     element: <MSPAPP />,
     children: [
-      {
-        path: "/msp/msplogin",
-        element: <MSP_Login />,
-      },
+      
       {
         path: "/msp/ticketlistmsp",
         element: <Ticketlistmsp />,
@@ -118,14 +119,15 @@ const Router = createBrowserRouter([
     ]
   },
   {
-    path: "/csp",
+    path: "/csp/csplogin",
+    element: <CSP_Login />,
+
+  },
+  {
+    path: "/csp/ticketlist",
     element: <CSPAPP />,
     children: [
-      {
-        path: "/csp/csplogin",
-        element: <CSP_Login />,
-
-      },
+    
       {
         path: "/csp/ticketlist",
         element: <Ticketlistcsp />,

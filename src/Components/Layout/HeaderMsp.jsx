@@ -1,11 +1,20 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link,useNavigate } from "react-router-dom";
 import Logo from '../../images/Liebherr-logo-768x432.png'
 
 
 const HeaderMsp = (params) => {
-    const redirect = () =>{
-        window.location.pathname = '/registercomaplaint'
+  const navigate = useNavigate();
+  
+
+      const clearLocal = async () => {
+        try {
+          localStorage.clear();
+          navigate('msp/Msplogin');
+        }
+        catch (error) {
+          console.error('error signing out', error)
+        }
       }
       return (
     
@@ -18,8 +27,7 @@ const HeaderMsp = (params) => {
     
               <ul className="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0 ml-5">
     
-                <li>
-                  <Link className="nav-link   px-2 link-secondary site" to="/" >Dashboard </Link></li>
+                
     
             
                 <li className="nav-item dropdown">
@@ -43,15 +51,12 @@ const HeaderMsp = (params) => {
                   <img src="https://github.com/mdo.png" alt="mdo" width="32" height="32" className="rounded-circle" />
                 </a>
                 <ul className="dropdown-menu text-small" aria-labelledby="dropdownUser1">
-                  <li className="dropdown-item" role="button">
-                    <Link className="dropdown-item" to="#">New project...</Link></li>
-                  <li className="dropdown-item" role="button">
-                    <Link className="dropdown-item" to="#">Settings</Link></li>
+                
                   <li className="dropdown-item" role="button">
                     <Link className="dropdown-item" to="#">Profile</Link></li>
                   <li><hr className="dropdown-divider" /></li>
                   <li className="dropdown-item" role="button">
-                    <Link className="dropdown-item" to="/login" tabIndex="0">Sign out</Link></li>
+                    <Link className="dropdown-item"   onClick={clearLocal}tabIndex="0">Sign out</Link></li>
                 </ul>
               </div>
             </div>
