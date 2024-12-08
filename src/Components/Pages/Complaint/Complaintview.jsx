@@ -58,7 +58,6 @@ export function Complaintview(params) {
   const fileInputRef = useRef(); // Ref for Attachment 1 input
   const fileInputRef2 = useRef(); // Create a ref for the file input
   const [attachments2, setAttachments2] = useState([]); // New state for Attachment 2 list
-  const [jsondata, setjsondata] = useState([]);
   const [isModal2Open, setIsModal2Open] = useState(false); // New modal state
   const [currentAttachment2, setCurrentAttachment2] = useState(""); // Current attachment 2 for modal
   const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
@@ -68,8 +67,6 @@ export function Complaintview(params) {
   const [callstatusid, setCallstatusid] = useState(""); // Current attachment for modal
   const created_by = localStorage.getItem("userId"); // Get user ID from localStorage
   const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
-  const [selectedSpareParts, setSelectedSpareParts] = useState([]);
-  const [spareParts, setSpareParts] = useState([]);
   const [GroupDefectsite, setGroupDefectsite] = useState([]);
   const [GroupDefecttype, setGroupDefecttype] = useState([]);
 
@@ -121,6 +118,8 @@ export function Complaintview(params) {
 
 
   }
+
+
   async function getSpare(params) {
 
 
@@ -130,7 +129,6 @@ export function Complaintview(params) {
           Authorization: token, // Send token in headers
         },
       });
-
 
 
       if (res.data) {
@@ -156,13 +154,12 @@ export function Complaintview(params) {
 
 
     try {
-      const res = await axios.get(`${Base_Url}/getcom`, {
+
+      const res = await axios.get(`${Base_Url}/getcom` ,  {
         headers: {
           Authorization: token, // Send token in headers
         },
       });
-
-
 
       if (res.data) {
         setGroupDefect(res.data);
@@ -182,6 +179,7 @@ export function Complaintview(params) {
 
 
   }
+  
   async function getdefecttype(params) {
 
 
@@ -244,6 +242,7 @@ export function Complaintview(params) {
 
 
   }
+
   async function getsitecode(params) {
 
 
@@ -423,9 +422,6 @@ export function Complaintview(params) {
   };
 
   const GenerateQuotation = () => {
-
-
-
 
 
     // Collect all spare part IDs
@@ -1257,6 +1253,24 @@ export function Complaintview(params) {
                                         <p style={{ fontSize: "14px"}}>{complaintview.ModelNumber}</p>
                                     </div> */}
 
+<div className="col-md-2">
+                  <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>
+                    Serial No
+                  </p>
+                  {sserial_no ? (
+                    <p style={{ fontSize: "14px" }}>{complaintview.serial_no}</p>
+                  ) : (
+                    <input
+                      type="text"
+                      name="serial_no"
+                      value={complaintview.serial_no || ''}
+                      placeholder="Enter Serial No"
+                      style={{ fontSize: "14px", width: "100%" }}
+                      onChange={handleModelChange}
+                    />
+                  )}
+                </div>
+
 
                 <div className="col-md-4">
                   <h4 className="pname" style={{ fontSize: "11px" }}>Model</h4>
@@ -1280,30 +1294,14 @@ export function Complaintview(params) {
                 </div>
 
 
-                <div className="col-md-2">
-                  <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>
-                    Serial No
-                  </p>
-                  {sserial_no ? (
-                    <p style={{ fontSize: "14px" }}>{complaintview.serial_no}</p>
-                  ) : (
-                    <input
-                      type="text"
-                      name="serial_no"
-                      value={complaintview.serial_no || ''}
-                      placeholder="Enter Serial No"
-                      style={{ fontSize: "14px", width: "100%" }}
-                      onChange={handleModelChange}
-                    />
-                  )}
-                </div>
+      
 
 
                 <div className="col-md-2">
                   <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Purchase Date</p>
                   <p style={{ fontSize: "14px" }}>{formatDate(complaintview.invoice_date)}</p>
                 </div>
-                <div className="col-md-2">
+                <div className="col-md-4">
                   <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Warranty Status</p>
                   <p style={{ fontSize: "14px" }}>{complaintview.warranty_status}</p>
                 </div>

@@ -19,6 +19,8 @@ const API_KEY = "a8f2b3c4-d5e6-7f8g-h9i0-12345jklmn67";
 app.use(cors({ origin: "*" }));
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+
 const authenticateToken = (req, res, next) => {
 
   const token = req.headers["authorization"];
@@ -35,6 +37,7 @@ const authenticateToken = (req, res, next) => {
     req.user = user; // Attach user info to request
     next();
   });
+
 };
 
 // this is for use routing
@@ -3130,6 +3133,8 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
   } = req.body;
 
 
+  // console.log(req.body, "%%")
+
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
   let t_type;
@@ -3160,28 +3165,44 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
     if (ticket_id == '') {
       // Split customer_name into customer_fname and customer_lname
+
+
       const [customer_fname, ...customer_lnameArr] = customer_name.split(' ');
-      const customer_lname = customer_lnameArr.join(' ');
+      const customer_lname = customer_lnameArr.join(' '); 
 
-      // Insert into awt_customer
-      const customerSQL = `
-    INSERT INTO awt_customer (customer_fname, customer_lname, email, mobileno, alt_mobileno, created_date, created_by)
-    OUTPUT INSERTED.id
-    VALUES (@customer_fname, @customer_lname, @email, @mobile, @alt_mobile, @formattedDate, @created_by)`;
-      // Debugging log
 
-      const customerResult = await pool.request()
-        .input('customer_fname', customer_fname)
-        .input('customer_lname', customer_lname)
-        .input('email', email)
-        .input('mobile', mobile)
-        .input('alt_mobile', alt_mobile)
-        .input('formattedDate', formattedDate)
-        .input('created_by', created_by)
-        .query(customerSQL);
+      const getcustcount = `select top 1 id from awt_customer where customer_id is not null order by id desc`
 
-      const insertedCustomerId = customerResult.recordset[0].id;
-      console.log("Inserted Customer ID:", insertedCustomerId);
+      const getcustresult = await pool.request().query(getcustcount)
+
+      const custcount = getcustresult.recordset[0].id;
+
+      const newcustid = 'A' + custcount.toString().padStart(7 , "0")
+
+
+
+
+
+        // Insert into awt_customer
+        const customerSQL = `INSERT INTO awt_customer ( customer_id,customer_fname, customer_lname, email, mobileno, alt_mobileno, created_date, created_by)OUTPUT INSERTED.id VALUES ( @customer_id,@customer_fname, @customer_lname, @email, @mobile, @alt_mobile, @formattedDate, @created_by)`;
+        // Debugging log
+
+        const customerResult = await pool.request()
+          .input('customer_fname', customer_fname)
+          .input('customer_id', newcustid)
+          .input('customer_lname', customer_lname)
+          .input('email', email)
+          .input('mobile', mobile)
+          .input('alt_mobile', alt_mobile)
+          .input('formattedDate', formattedDate)
+          .input('created_by', created_by)
+          .query(customerSQL);
+
+        const insertedCustomerId = customerResult.recordset[0].id;
+
+  
+
+
     }
 
 
@@ -3198,7 +3219,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
         @formattedDate, @created_by, @customer_name, @mobile, @address
       )`;
 
-    console.log("Executing customer location SQL:", customerLocationSQL);  // Debugging log
+
 
     await pool.request()
       .input('customer_id', cust_id)
@@ -3222,7 +3243,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
         @customer_id, @model, @serial,  @pincode, @formattedDate, @created_by
       )`;
 
-    console.log("Executing product SQL:", productSQL);  // Debugging log
+
 
     await pool.request()
       .input('customer_id', cust_id)
@@ -3249,13 +3270,13 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
           ticket_no, ticket_date, customer_name, customer_mobile, customer_email, address, 
           state, city, area, pincode, customer_id, ModelNumber, ticket_type, call_type, 
           call_status, warranty_status, invoice_date, call_charges, mode_of_contact, 
-          contact_person, assigned_to, created_date, created_by, engineer_id, purchase_date, serial_no, child_service_partner, sevice_partner, specification ,customer_class,call_priority
+          contact_person,  created_date, created_by,  purchase_date, serial_no, child_service_partner, sevice_partner, specification ,customer_class,call_priority
         ) 
         VALUES (
           @ticket_no, @complaint_date, @customer_name, @mobile, @email, @address, 
           @state, @city, @area, @pincode, @customer_id, @model, @ticket_type, @cust_type, 
           'Pending', @warranty_status, @invoice_date, @call_charge, @mode_of_contact, 
-          @contact_person, 1, @formattedDate, @created_by, 1, @purchase_date, @serial, @child_service_partner, @master_service_partner, @specification ,@classification , @priority
+          @contact_person,  @formattedDate, @created_by,  @purchase_date, @serial, @child_service_partner, @master_service_partner, @specification ,@classification , @priority
         )
       `;
     } else {
@@ -3282,10 +3303,8 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
           call_charges = @call_charge,
           mode_of_contact = @mode_of_contact,
           contact_person = @contact_person,
-          assigned_to = 1,
           created_date = @formattedDate,
           created_by = @created_by,
-          engineer_id = 1,
           purchase_date = @purchase_date,
           serial_no = @serial,
           child_service_partner = @child_service_partner,
@@ -3303,7 +3322,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
     // console.log("Executing complaint SQL:", complaintSQL); 
 
-    await pool.request()
+    const resutlt =  await pool.request()
       .input('ticket_no', ticket_no)
       .input('ticket_id', ticket_id)
       .input('complaint_date', complaint_date)
@@ -3335,6 +3354,8 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
       .input('priority', priority)
       .query(complaintSQL);
 
+
+      console.log(resutlt)
     //Remark insert query
     const reamrks = `
     INSERT INTO awt_complaintremark (
@@ -4203,10 +4224,10 @@ app.get("/getengineer", authenticateToken, async (req, res) => {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
     const {
-      
+
       page = 1,
       pageSize = 10,
-  
+
     } = req.query;
 
     const offset = (page - 1) * pageSize;
@@ -6964,7 +6985,7 @@ app.post("/updateProduct", authenticateToken,
 //Complaint view Insert TicketFormData start
 
 app.post("/ticketFormData", authenticateToken, async (req, res) => {
-  const { ticket_no, serial_no, ModelNumber, engineerdata, call_status, sub_call_status, updated_by, group_code, site_defect, defect_type, sparedata } = req.body;
+  const { ticket_no, serial_no, ModelNumber, engineerdata, call_status, sub_call_status, updated_by, group_code, site_defect, defect_type } = req.body;
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
 
@@ -6972,9 +6993,7 @@ app.post("/ticketFormData", authenticateToken, async (req, res) => {
 
   engineer_id = engineerdata.join(','); // Join the engineer IDs into a comma-separated string
 
-  let spare_id;
 
-  spare_id = sparedata.join(',')
 
 
   try {
@@ -6983,7 +7002,7 @@ app.post("/ticketFormData", authenticateToken, async (req, res) => {
     const updateSql = `
       UPDATE complaint_ticket
       SET engineer_id = '${engineer_id}',call_status = '${call_status}' , updated_by = '${updated_by}', updated_date = '${formattedDate}' , sub_call_status  = '${sub_call_status}' ,group_code = '${group_code}' , defect_type = '${defect_type}'
-       , site_defect = '${site_defect}' , spare_part_id = '${spare_id}'  WHERE ticket_no = '${ticket_no}'`;
+       , site_defect = '${site_defect}'    WHERE ticket_no = '${ticket_no}'`;
 
     await pool.request().query(updateSql);
 
@@ -7123,69 +7142,6 @@ app.post("/updatestatus", authenticateToken, async (req, res) => {
 
 
 
-
-// Bahvehsh dubey
-
-
-app.post('/login', async (req, res) => {
-  const { username, password } = req.body;
-
-  if (!username || !password) {
-    return res.status(400).json({ message: 'Username and password are required.' });
-  }
-
-  try {
-    const pool = await poolPromise;
-
-
-
-    const result = await pool.request()
-      .input('username', sql.VarChar, username)
-      .input('password', sql.VarChar, password) // Adjust if password is hashed
-      .query('SELECT * FROM awt_engineermaster WHERE mobile_no = @username AND password = @password');
-
-    // console.log('SELECT * FROM awt_engineermaster WHERE email = @username AND password = @password')
-    if (result.recordset.length > 0) {
-      res.status(200).json(result.recordset[0]);
-    } else {
-      res.status(400).json({ message: 'Invalid username or password' });
-      console.log(res)
-    }
-  } catch (error) {
-    console.error('Database Query Error:', error);
-    res.status(500).json({ message: 'An error occurred during login' });
-  }
-});
-
-app.get('/getheaddata', async (req, res) => {
-  try {
-    const pool = await poolPromise;
-
-    const en_id = req.query.en_id;
-
-    const result = await pool.request()
-      .query(`SELECT * FROM complaint_ticket WHERE engineer_id = '${en_id}' ORDER BY id DESC`);
-
-    const result1 = await pool.request()
-      .query(`SELECT * FROM complaint_ticket where engineer_id = '${en_id}' and call_status in ('Closed', 'Cancelled') order by id DESC `);
-
-    const totalTickets = result.recordset.length || 0;
-    const cancleled = result1.recordset.length || 0;
-    const pendingTickets = Math.max(totalTickets - cancleled, 0);
-
-    res.status(200).json({
-      totalTickets,
-      cancleled,
-      pendingTickets
-    });
-
-  } catch (error) {
-    console.error('Database Query Error:', error);
-    res.status(500).json({ message: 'An error occurred during the database query' });
-  }
-});
-
-
 //Start Complaint List
 // Complaint List API with filters
 app.get("/getcomplainlist", authenticateToken, async (req, res) => {
@@ -7311,7 +7267,7 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
       { name: "pageSize", value: parseInt(pageSize) }
     );
 
-    console.log(sql, "$$$$");
+    // console.log(sql, "$$$$");
 
     // Execute queries
     const request = pool.request();
@@ -7865,7 +7821,7 @@ app.get("/getSpareParts/:model", authenticateToken, async (req, res) => {
     `;
 
     const result = await pool.request()
-      .input("model",  model) // Specify the data type for the parameter
+      .input("model", model) // Specify the data type for the parameter
       .query(sql);
 
     return res.json(result.recordset);
@@ -7895,6 +7851,7 @@ app.post("/getDefectCodewisetype", authenticateToken,
       return res.status(500).json({ error: "Database error occurred", details: err.message });
     }
   });
+
 app.post("/getDefectCodewisesite", authenticateToken,
   async (req, res) => {
 
@@ -7970,14 +7927,14 @@ app.post(`/add_quotation`, async (req, res) => {
 
     // Iterate over the items in `newdata`
     for (const item of newdata) {
-      const { id, title, ItemDescription, price ,product_code} = item;
+      const { id, title, ItemDescription, price, product_code } = item;
       const date = new Date();
-      
+
       const addspare = `insert into awt_uniquespare (ticketId , spareId , article_code ,article_description , price) values('${ticket_no}','${product_code}' ,'${title}','${ItemDescription}' , '${price}')`;
 
 
       await pool.request().query(addspare)
-    
+
 
       // // Validate fields
       // if (!id || !title || !quantity || !price) {
@@ -8043,7 +8000,7 @@ app.post('/removesparepart', async (req, res) => {
 
 app.post('/updatequotation', async (req, res) => {
 
-  const { quantity , price , status , qid } = req.body; // Ensure spare_id is passed in the request body
+  const { quantity, price, status, qid } = req.body; // Ensure spare_id is passed in the request body
   const pool = await poolPromise;
 
   try {
@@ -8076,13 +8033,13 @@ app.post('/getquotedetails', async (req, res) => {
 
 
 
-     const result = await pool.request()
+    const result = await pool.request()
       .input('quote_id', sql.Int, quotaion_id) // Parameterize spare_id
       .query(query);
 
 
 
-      return res.json(result.recordset);
+    return res.json(result.recordset);
   } catch (error) {
     console.error("Error updating data:", error);
     res.status(500).json({ message: "Error updating data", error });
@@ -8093,7 +8050,7 @@ app.post('/getquotedetails', async (req, res) => {
 
 app.post("/getuniquespare", authenticateToken, async (req, res) => {
 
-  const {ticket_id} = req.body
+  const { ticket_id } = req.body
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;

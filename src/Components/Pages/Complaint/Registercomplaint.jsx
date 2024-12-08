@@ -56,13 +56,13 @@ export function Registercomplaint(params) {
         const month = String(date.getMonth() + 1).padStart(2, "0");
         const year = date.getFullYear();
 
-        return `${day}-${month}-${year}`;
+        return `${year}-${month}-${day}`;
     };
 
     //setting the values
 
     const [value, setValue] = useState({
-        complaint_date: "",
+        complaint_date: "" ,
         customer_name: "",
         contact_person: "",
         email: "",
@@ -97,7 +97,6 @@ export function Registercomplaint(params) {
         classification :"",
         Priority :""
     })
-
     // Add this state to manage the popup visibility and selected address
 const [isPopupOpen, setIsPopupOpen] = useState(false);
 const [selectedAddress, setSelectedAddress] = useState('');
@@ -338,7 +337,7 @@ const handleNewAddressSubmit = async (event) => {
                     setTicketNo(res.data[0].ticket_no)
 
                     setValue({
-                        complaint_date: res.data[0].ticket_date,
+                        complaint_date: res.data[0].ticket_date ,
                         contact_person: res.data[0].customer_mobile,
                         customer_name: res.data[0].customer_name,
                         email: res.data[0].customer_email,
@@ -575,11 +574,11 @@ const handleNewAddressSubmit = async (event) => {
         };
 
 
-        axios.post(`${Base_Url}/update_complaint`, {
+        axios.post(`${Base_Url}/update_complaint`, data, {
             headers: {
                 Authorization: token, // Send token in headers
             },
-        }, data)
+        })
             .then((res) => {
                 if (res.data) {
                     notify();
@@ -671,6 +670,10 @@ const handleNewAddressSubmit = async (event) => {
         }
     };
 
+
+     console.log(value.customer_name)
+
+
     const fetchlocations = async (pincode) => {
         try {
             const response = await axios.get(
@@ -683,7 +686,15 @@ const handleNewAddressSubmit = async (event) => {
 
             if (response.data && response.data[0]) {
 
-                setlocations({ region: response.data[0].region, state: response.data[0].state, district: response.data[0].district, city: response.data[0].city, franchiseem: response.data[0].franchiseem, childfranchiseem: response.data[0].childfranchiseem })
+                setlocations({ franchiseem: response.data[0].franchiseem, childfranchiseem: response.data[0].childfranchiseem })
+
+                setValue({
+                    ...value,
+                    state : response.data[0].region,
+                    city : response.data[0].city,
+                    area : response.data[0].district,
+
+                })
 
             }
 
@@ -705,7 +716,11 @@ const handleNewAddressSubmit = async (event) => {
 
             if (response.data && response.data[0]) {
 
-                setserial({ ModelNumber: response.data[0].ModelNumber, purchase_date: response.data[0].purchase_date })
+                // setserial({ ModelNumber: response.data[0].ModelNumber, purchase_date: response.data[0].purchase_date })
+                setValue({
+                  model : response.data[0].ModelNumber,
+                  purchase_date : formatDate(response.data[0].purchase_date)
+                })
 
             }
 
@@ -774,6 +789,7 @@ const handleNewAddressSubmit = async (event) => {
                 console.log(err)
             })
     }
+
 
 
 
@@ -996,7 +1012,7 @@ const handleNewAddressSubmit = async (event) => {
                                         {searchdata.length == 0 && !Comp_id || ModelNumber == null ? 
                                             
                                             <div className="">
-                                                <input className="form-control" onChange={onHandleChange} value={serials.ModelNumber} name="model"></input>
+                                                <input className="form-control" onChange={onHandleChange} value={value.model} name="model"></input>
                                             </div> : 
                                             <div>{ModelNumber}</div>
                                         }
@@ -1011,7 +1027,7 @@ const handleNewAddressSubmit = async (event) => {
                                                     type="date"
                                                     name="purchase_date"
                                                     onChange={onHandleChange}
-                                                    value={serials.purchase_date}
+                                                    value={value.purchase_date}
                                                     className="form-control"
                                                 />
                                             </div> : <div>{value.purchase_date}</div>}
@@ -1042,7 +1058,7 @@ const handleNewAddressSubmit = async (event) => {
                                     <div className="col-md-3">
                                         <div className="mb-3">
                                             <label className="form-label">Ticket Date</label>
-                                            <input type="date" name="complaint_date" onChange={onHandleChange} value={Comp_id ? value.complaint_date : date} className="form-control" />
+                                            <input type="date" name="complaint_date" onChange={onHandleChange} value={value.complaint_date } className="form-control" />
                                         </div>
                                     </div>
                                     <div className="col-md-2">
@@ -1286,25 +1302,25 @@ const handleNewAddressSubmit = async (event) => {
                                         <div className="col-md-3">
                                             <div className="mb-3">
                                                 <label htmlFor="exampleFormControlInput1" className="form-label">Pincode</label>
-                                                <input type="text" className="form-control" value={location.pincode} name="pincode" onChange={onHandleChange} placeholder="" />
+                                                <input type="text" className="form-control" value={value.pincode} name="pincode" onChange={onHandleChange} placeholder="" />
                                             </div>
                                         </div>
                                         <div className="col-md-3">
                                             <div className="mb-3">
                                                 <label htmlFor="exampleFormControlInput1" className="form-label">State</label>
-                                                <input type="text" className="form-control" value={Comp_id ? value.state : locations.state} name="state" onChange={onHandleChange} placeholder="" disabled />
+                                                <input type="text" className="form-control" value={ value.state} name="state" onChange={onHandleChange} placeholder="" disabled />
                                             </div>
                                         </div>
                                         <div className="col-md-3">
                                             <div className="mb-3">
                                                 <label htmlFor="exampleFormControlInput1" className="form-label">District</label>
-                                                <input type="text" className="form-control" value={Comp_id ? value.area : locations.district} name="area" onChange={onHandleChange} placeholder="" disabled />
+                                                <input type="text" className="form-control" value={ value.area } name="area" onChange={onHandleChange} placeholder="" disabled />
                                             </div>
                                         </div>
                                         <div className="col-md-3">
                                             <div className="mb-3">
                                                 <label htmlFor="exampleFormControlInput1" className="form-label">City</label>
-                                                <input type="text" className="form-control" value={Comp_id ? value.city : locations.city} name="city" onChange={onHandleChange} placeholder="" disabled />
+                                                <input type="text" className="form-control" value={value.city } name="city" onChange={onHandleChange} placeholder="" disabled />
                                             </div>
                                         </div>
 
