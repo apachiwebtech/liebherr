@@ -36,6 +36,7 @@ export function Registercomplaint(params) {
     const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
     const [attachments2, setAttachments2] = useState([]);
     const [locations, setlocations] = useState([])
+    const [serials, setserial] = useState([])
     const [currentAttachment2, setCurrentAttachment2] = useState(""); // Current attachment 2 for modal
     const [isModal2Open, setIsModal2Open] = useState(false); 
 
@@ -661,6 +662,10 @@ const handleNewAddressSubmit = async (event) => {
             fetchlocations(inputValue);
         }
 
+        if (name === "serial") {
+            fetchserial(inputValue);
+        }
+
         if (name === "complaint_date") {
             setDate(e.target.value);
         }
@@ -685,6 +690,28 @@ const handleNewAddressSubmit = async (event) => {
 
         } catch (error) {
             console.error("Error fetching ticket details:", error);
+        }
+    };
+
+    const fetchserial = async (serial) => {
+        try {
+            const response = await axios.get(
+                `${Base_Url}/getserial/${serial}`, {
+                headers: {
+                    Authorization: token, // Send token in headers
+                },
+            }
+            );
+
+            if (response.data && response.data[0]) {
+
+                setserial({ ModelNumber: response.data[0].ModelNumber, purchase_date: response.data[0].purchase_date })
+
+            }
+
+
+        } catch (error) {
+            console.error("Error fetching serial details:", error);
         }
     };
 
@@ -946,23 +973,8 @@ const handleNewAddressSubmit = async (event) => {
                         <div className="card" id="formInfo">
                             <div className="card-body">
                                 <div className="row">
-                                    <div className="col-md-4">
-                                        <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Model</p>
-
-                                        {searchdata.length == 0 && !Comp_id || ModelNumber == null ? <div className="">
-                                            <select className="form-control" onChange={onHandleChange} value={value.model} name="model">
-                                                <option value="">Select</option>
-                                                {product.map((item) => {
-                                                    return (
-                                                        <option value={item.item_description}>{item.item_description}</option>
-
-                                                    )
-                                                })}
-                                            </select>
-                                        </div> : <div>{ModelNumber}</div>}
-
-                                    </div>
-                                    <div className="col-md-2">
+                                    
+                                    <div className="col-md-3">
                                         <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Serial No</p>
 
                                         {searchdata.length == 0 && !Comp_id || value.serial == null ?
@@ -977,7 +989,19 @@ const handleNewAddressSubmit = async (event) => {
                                                 />
                                             </div> : <div>{value.serial}</div>}
 
-                                    </div>                                       {/* Add Purchase Date field */}
+                                    </div>  
+                                    <div className="col-md-3"> 
+                                        <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Model</p>
+
+                                        {searchdata.length == 0 && !Comp_id || ModelNumber == null ? 
+                                            
+                                            <div className="">
+                                                <input className="form-control" onChange={onHandleChange} value={serials.ModelNumber} name="model"></input>
+                                            </div> : 
+                                            <div>{ModelNumber}</div>
+                                        }
+                                    </div>                                     
+                                    {/* Add Purchase Date field */}
                                     <div className="col-md-3">
                                         <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Purchase Date</p>
 
@@ -987,7 +1011,7 @@ const handleNewAddressSubmit = async (event) => {
                                                     type="date"
                                                     name="purchase_date"
                                                     onChange={onHandleChange}
-                                                    value={value.purchase_date}
+                                                    value={serials.purchase_date}
                                                     className="form-control"
                                                 />
                                             </div> : <div>{value.purchase_date}</div>}
@@ -1335,13 +1359,14 @@ const handleNewAddressSubmit = async (event) => {
                                                 <option value="OUT OF WARRANTY">No</option>
                                             </select>
                                         </div>
-                                    </div> */}
+                                    </div> 
                                     <div className="col-md-4">
                                         <div className="mb-3">
                                             <label className="form-label">Invoice Date</label>
                                             <input type="date" className="form-control" onChange={onHandleChange} value={value.invoice_date} name="invoice_date" placeholder="" />
                                         </div>
-                                    </div>
+                                    </div>*/}
+                                    <input type="hidden" onChange={onHandleChange} value={value.invoice_date} name="invoice_date"></input>
 
 
 
