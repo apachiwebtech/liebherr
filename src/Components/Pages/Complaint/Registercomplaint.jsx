@@ -530,9 +530,9 @@ const handleNewAddressSubmit = async (event) => {
             .then((res) => {
                 if (res.data) {
                     notify();
-                    setTimeout(() => {
-                        navigate('/complaintlist');
-                    }, 500);
+                    // setTimeout(() => {
+                    //     navigate('/complaintlist');
+                    // }, 500);
                 }
             })
             .catch(error => {
@@ -1504,7 +1504,7 @@ const handleNewAddressSubmit = async (event) => {
 
                             <div className="card" id="attachmentInfocs">
                                 <div className="card-body">
-                                    <h4 className="pname" style={{ fontSize: "14px" }}>Attachment 2</h4>
+                                    <h4 className="pname" style={{ fontSize: "14px" }}>Attachment</h4>
                                     <div className="mb-3">
                                         <input
                                             type="file"

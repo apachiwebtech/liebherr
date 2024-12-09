@@ -3256,12 +3256,29 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
       .input('formattedDate', formattedDate)
       .query(productSQL);
 
-    const checkResult = await pool.request().query(`
-      SELECT COUNT(*) AS count FROM complaint_ticket WHERE deleted = 0`);
+      const checkResult = await pool.request()
+      .input('ticketType', sql.NVarChar, t_type)  // Define the parameter
+      .query(`
+        SELECT Top 1 ticket_no
+        FROM complaint_ticket
+        WHERE ticket_no LIKE '%' + @ticketType + '%'
+          AND ticket_date >= CAST(DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0) AS DATE)
+          AND ticket_date < CAST(DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) + 1, 0) AS DATE)
+        ORDER BY ticket_no Desc;
+      `);
 
-    const count = checkResult.recordset[0].count + 1;
+    const count = checkResult.recordset[0] ?  checkResult.recordset[0].ticket_no : 'G0000';
+
+    console.log(count,"Count")
+    
+    // Accessing the last 4 digits from the result
+    const lastFourDigits = count.slice(-4)
+
+
+     const newcount = Number(lastFourDigits) + 1
+
     const formatDate = `${(new Date().getMonth() + 1).toString().padStart(2, '0')}${new Date().getDate().toString().padStart(2, '0')}`;
-    const ticket_no = `${t_type}G${formatDate}-${count.toString().padStart(4, "0")}`;
+    const ticket_no = `${t_type}G${formatDate}-${newcount.toString().padStart(4, "0")}`;
 
     let complaintSQL
 
@@ -3321,8 +3338,6 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
 
 
-    // console.log("Executing complaint SQL:", complaintSQL); 
-
     const resutlt =  await pool.request()
       .input('ticket_no', ticket_no)
       .input('ticket_id', ticket_id)
@@ -3356,7 +3371,6 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
       .query(complaintSQL);
 
 
-      console.log(resutlt)
     //Remark insert query
     const reamrks = `
     INSERT INTO awt_complaintremark (
@@ -3373,6 +3387,26 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
       .input('created_by', created_by) // Use current user ID
       .input('additional_remarks', additional_remarks) // Use current user ID
       .query(reamrks);
+
+
+      //Fault Description *************
+
+
+      const faultreamrks = `
+      INSERT INTO awt_complaintremark (
+          ticket_no, remark, created_date, created_by
+      )
+      VALUES (
+          @ticket_no, @additional_remarks, @formattedDate, @created_by
+      )`;
+  
+  
+      await pool.request()
+        .input('ticket_no', ticket_no) // Use existing ticket_no from earlier query
+        .input('formattedDate', formattedDate) // Use current timestamp
+        .input('created_by', created_by) // Use current user ID
+        .input('additional_remarks', specification) // Use current user ID
+        .query(faultreamrks);
 
     return res.json({ message: 'Complaint added successfully!', ticket_no, cust_id });
   } catch (err) {
@@ -6986,13 +7020,17 @@ app.post("/updateProduct", authenticateToken,
 //Complaint view Insert TicketFormData start
 
 app.post("/ticketFormData", authenticateToken, async (req, res) => {
-  const { ticket_no, serial_no, ModelNumber, engineerdata, call_status, sub_call_status, updated_by, group_code, site_defect, defect_type } = req.body;
+  const { ticket_no, serial_no, ModelNumber, engineerdata, call_status, sub_call_status, updated_by, group_code, site_defect, defect_type ,engineername } = req.body;
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
 
   let engineer_id;
 
   engineer_id = engineerdata.join(','); // Join the engineer IDs into a comma-separated string
+
+  let engineer_name;
+
+  engineer_name = engineername.join(','); 
 
 
 
@@ -7003,7 +7041,7 @@ app.post("/ticketFormData", authenticateToken, async (req, res) => {
     const updateSql = `
       UPDATE complaint_ticket
       SET engineer_id = '${engineer_id}',call_status = '${call_status}' , updated_by = '${updated_by}', updated_date = '${formattedDate}' , sub_call_status  = '${sub_call_status}' ,group_code = '${group_code}' , defect_type = '${defect_type}'
-       , site_defect = '${site_defect}'    WHERE ticket_no = '${ticket_no}'`;
+       , site_defect = '${site_defect}' ,assigned_to = '${engineer_name}'   WHERE ticket_no = '${ticket_no}'`;
 
     await pool.request().query(updateSql);
 
@@ -7143,8 +7181,8 @@ app.post("/updatestatus", authenticateToken, async (req, res) => {
 
 
 
-//Start Complaint List
-// Complaint List API with filters
+
+
 app.get("/getcomplainlist", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
@@ -7262,13 +7300,12 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
     }
 
     // Pagination
-    sql += `ORDER BY c.ticket_date DESC OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY`;
+    sql += ` ORDER BY c.ticket_date DESC OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY`;
     params.push(
       { name: "offset", value: offset },
       { name: "pageSize", value: parseInt(pageSize) }
     );
 
-    // console.log(sql, "$$$$");
 
     // Execute queries
     const request = pool.request();

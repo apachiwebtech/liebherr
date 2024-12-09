@@ -683,6 +683,7 @@ export function Complaintview(params) {
       site_defect: complaintview.site_defect,
       defect_type: complaintview.defect_type,
       engineerdata: addedEngineers.map((item) => item.engineer_id),
+      engineername: addedEngineers.map((item) => item.title),
     };
 
     axios.post(`${Base_Url}/ticketFormData`, data, {
