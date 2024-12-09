@@ -7021,6 +7021,8 @@ app.post("/updateProduct", authenticateToken,
 
 app.post("/ticketFormData", authenticateToken, async (req, res) => {
   const { ticket_no, serial_no, ModelNumber, engineerdata, call_status, sub_call_status, updated_by, group_code, site_defect, defect_type ,engineername } = req.body;
+
+
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
 
@@ -7033,10 +7035,30 @@ app.post("/ticketFormData", authenticateToken, async (req, res) => {
   engineer_name = engineername.join(','); 
 
 
+  const concatremark = `Call Status: ${call_status} , Engineer Name : ${engineer_name} , Sub Call Stutus : ${sub_call_status} ,Group Code : ${group_code} , Site Defect : ${site_defect} , Defect Type : ${defect_type} `
+
+
 
 
   try {
     const pool = await poolPromise;
+
+    const reamrks = `
+    INSERT INTO awt_complaintremark (
+        ticket_no, remark, created_date, created_by
+    )
+    VALUES (
+        @ticket_no, @additional_remarks, @formattedDate, @created_by
+    )`;
+
+
+    await pool.request()
+    .input('ticket_no', ticket_no) // Use existing ticket_no from earlier query
+    .input('formattedDate', formattedDate) // Use current timestamp
+    .input('created_by', updated_by) // Use current user ID
+    .input('additional_remarks', concatremark) // Use current user ID
+    .query(reamrks);
+
 
     const updateSql = `
       UPDATE complaint_ticket
