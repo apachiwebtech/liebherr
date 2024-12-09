@@ -26,6 +26,7 @@ export function Complaintview(params) {
     warranty_status: '',
     ModelNumber: '',
     invoice_date: '',
+    purchase_date:'',
     serial_no: '',
     call_status: '',
     engineer_id: '',
@@ -1300,7 +1301,7 @@ export function Complaintview(params) {
 
                 <div className="col-md-2">
                   <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Purchase Date</p>
-                  <p style={{ fontSize: "14px" }}>{formatDate(complaintview.invoice_date)}</p>
+                  <p style={{ fontSize: "14px" }}>{formatDate(complaintview.purchase_date)}</p>
                 </div>
                 <div className="col-md-4">
                   <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Warranty Status</p>
