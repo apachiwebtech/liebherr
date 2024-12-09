@@ -95,7 +95,8 @@ export function Registercomplaint(params) {
         salutation: "",
         mdealer_info: "",
         classification :"",
-        Priority :""
+        Priority :"",
+        callType:"",
     })
     // Add this state to manage the popup visibility and selected address
 const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -364,7 +365,8 @@ const handleNewAddressSubmit = async (event) => {
                         csp: res.data[0].childPartner,
                         mdealer_info: res.data[0].sales_partner,
                         classification : res.data[0].customer_class,
-                        Priority : res.data[0].call_priority
+                        Priority : res.data[0].call_priority,
+                        callType :res.data[0].callType
                     })
                 }
             })
@@ -513,6 +515,7 @@ const handleNewAddressSubmit = async (event) => {
             created_by: value.created_by,
             classification :value.classification,
             priority:value.Priority,
+            callType:value.callType,
             ticket_id: ticketid
         };
 
@@ -570,6 +573,7 @@ const handleNewAddressSubmit = async (event) => {
             created_by: value.created_by,
             classification : value.classification,
             priority:value.Priority,
+            callType:value.callType,
             ticket_no: Comp_id
         };
 
@@ -1414,6 +1418,16 @@ const handleNewAddressSubmit = async (event) => {
                                                 <option value="">Select</option>
                                                 <option value="REGULAR">Regular</option>
                                                 <option value="HIGH">High</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div className="col-md-4">
+                                        <div className="mb-3">
+                                            <label className="form-label">Call Type</label>
+                                            <select className="form-control" onChange={onHandleChange} value={value.callType} name="callType">
+                                                <option value="">Select</option>
+                                                <option value="Sales">Sales</option>
+                                                <option value="Service">Service</option>
                                             </select>
                                         </div>
                                     </div>

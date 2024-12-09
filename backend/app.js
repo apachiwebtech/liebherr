@@ -3129,7 +3129,8 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
   let {
     complaint_date, customer_name, contact_person, email, mobile, address,
     state, city, area, pincode, mode_of_contact, ticket_type, cust_type,
-    warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks, ticket_id, classification, priority
+    warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks
+    , ticket_id, classification, priority,callType  
   } = req.body;
 
 
@@ -7457,6 +7458,7 @@ app.get("/getcomplainlistmsp", async (req, res) => {
       productCode,
       customerMobile,
       ticketno,
+
       status,
       customerID,
 
@@ -7471,7 +7473,7 @@ app.get("/getcomplainlistmsp", async (req, res) => {
         SELECT c.*, e.title as assigned_name, 
         DATEDIFF(day, (c.ticket_date), GETDATE()) AS ageingdays 
         FROM complaint_ticket AS c
-        JOIN awt_engineermaster AS e ON c.engineer_id = e.id
+        JOIN awt_engineermaster AS e ON c.engineer_id = e.engineer_id
         WHERE c.deleted = 0 AND c.msp = '${licare_code}'
     `;
 
