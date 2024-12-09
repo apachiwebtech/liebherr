@@ -9,6 +9,7 @@ export function Registercomplaint(params) {
     const [customerEndId, setCustomerEndId] = useState('');
     const [addresses, setAddresses] = useState([]);
     const [hideticket, setHideticket] = useState(false)
+    const [errors, setErrors] = useState({})
     const [serachval, setSearch] = useState('')
     const [searchdata, setSearchData] = useState([])
     const [ProductCustomer, setProductCustomer] = useState([])
@@ -38,7 +39,10 @@ export function Registercomplaint(params) {
     const [locations, setlocations] = useState([])
     const [serials, setserial] = useState([])
     const [currentAttachment2, setCurrentAttachment2] = useState(""); // Current attachment 2 for modal
-    const [isModal2Open, setIsModal2Open] = useState(false); 
+    const [isModal2Open, setIsModal2Open] = useState(false);
+
+
+
 
     const getTodayDate = () => {
         const today = new Date();
@@ -95,99 +99,191 @@ export function Registercomplaint(params) {
         dealer_info: "",
         salutation: "",
         mdealer_info: "",
-        classification :"",
-        Priority :"",
-        callType:"",
+        classification: "",
+        Priority: "REGULAR",
+        callType: "",
     })
+
+    //Validation
+
+    const validateForm = () => {
+        let isValid = true;
+        const newErrors = { ...errors };
+
+        // if (!value.complaint_date) {
+        //     isValid = false;
+        //     newErrors.complaint_date = "Date is required";
+        // }
+        if (!value.customer_name) {
+            isValid = false;
+            newErrors.customer_name = "Name is required";
+        }
+        if (!value.serial) {
+            isValid = false;
+            newErrors.serial = "Serial No is required";
+        }
+        if (!value.model) {
+            isValid = false;
+            newErrors.model = "Model is required";
+        }
+        if (!value.purchase_date) {
+            isValid = false;
+            newErrors.purchase_date = "Date is required";
+        }
+        if (!value.warrenty_status) {
+            isValid = false;
+            newErrors.warrenty_status = "Status is required";
+        }
+        if (!value.salutation) {
+            isValid = false;
+            newErrors.salutation = "Salutation is required";
+        }
+        if (!value.contact_person) {
+            isValid = false;
+            newErrors.contact_person = "Contact Person is required";
+        }
+        if (!value.mobile) {
+            isValid = false;
+            newErrors.mobile = "Mobile is required";
+        }
+        if (!value.address) {
+            isValid = false;
+            newErrors.address = "Address is required";
+        }
+        if (!value.pincode) {
+            isValid = false;
+            newErrors.pincode = "Pincode is required";
+        }
+        if (!value.mode_of_contact) {
+            isValid = false;
+            newErrors.mode_of_contact = "This is required";
+        }
+        if (!value.ticket_type) {
+            isValid = false;
+            newErrors.ticket_type = "Ticket is required";
+        }
+        if (!value.cust_type) {
+            isValid = false;
+            newErrors.cust_type = "Type is required";
+        }
+        if (!value.call_charge) {
+            isValid = false;
+            newErrors.call_charge = "Charge is required";
+        }
+        if (!value.classification) {
+            isValid = false;
+            newErrors.classification = "Classification is required";
+        }
+        // if (!value.Priority) {
+        //     isValid = false;
+        //     newErrors.Priority = "Priority is required";
+        // }
+        if (!value.specification) {
+            isValid = false;
+            newErrors.specification = "Specification is required";
+        }
+
+
+
+
+
+        setErrors(newErrors);
+        setTimeout(() => {
+            setErrors("")
+        }, 5000);
+        return isValid;
+
+
+    }
     // Add this state to manage the popup visibility and selected address
-const [isPopupOpen, setIsPopupOpen] = useState(false);
-const [selectedAddress, setSelectedAddress] = useState('');
-const [newAddress, setNewAddress] = useState('');
+    const [isPopupOpen, setIsPopupOpen] = useState(false);
+    const [selectedAddress, setSelectedAddress] = useState('');
+    const [newAddress, setNewAddress] = useState('');
 
     // Sample existing addresses (you can fetch this from your API)
-const existingAddresses = [
-    "Address 1",
-    "Address 2",
-    "Address 3",
-];
+    const existingAddresses = [
+        "Address 1",
+        "Address 2",
+        "Address 3",
+    ];
 
-// Function to handle the address change
-const handleAddressChange = (e) => {
-    const { value } = e.target;
-    setValue(prevState => ({
-        ...prevState,
-        address: value
-    }));
-};
+    // Function to handle the address change
+    const handleAddressChange = (e) => {
+        const { value } = e.target;
+        setValue(prevState => ({
+            ...prevState,
+            address: value
+        }));
+    };
 
-useEffect(() => {
-    // Get current date in the format YYYY-MM-DD
-    const currentDate = new Date().toISOString().split('T')[0];
-    setValue((prevValue) => ({
-        ...prevValue,
-        complaint_date: currentDate
-    }));
-}, []);
+    useEffect(() => {
+        // Get current date in the format YYYY-MM-DD
+        const currentDate = new Date().toISOString().split('T')[0];
+        setValue((prevValue) => ({
+            ...prevValue,
+            complaint_date: currentDate
+        }));
+    }, []);
 
-// Function to open the popup
-const openPopup = () => {
-    setIsPopupOpen(true);
-};
+    // Function to open the popup
+    const openPopup = () => {
+        setIsPopupOpen(true);
+    };
 
-// Function to close the popup
-const closePopup = () => {
-    setIsPopupOpen(false);
-};
+    // Function to close the popup
+    const closePopup = () => {
+        setIsPopupOpen(false);
+    };
 
-// Function to handle the address selection from dropdown
-const handleExistingAddressChange = (e) => {
-    const selected = e.target.value;
-    setSelectedAddress(selected);
-    setValue(prevState => ({
-        ...prevState,
-        address: selected // Set the selected address to the input field
-    }));
-};
+    // Function to handle the address selection from dropdown
+    const handleExistingAddressChange = (e) => {
+        const selected = e.target.value;
+        setSelectedAddress(selected);
+        setValue(prevState => ({
+            ...prevState,
+            address: selected // Set the selected address to the input field
+        }));
+    };
 
-const handleNewAddressSubmit = async (event) => {
-    event.preventDefault(); // Prevent the default form submission behavior
-    try {
-        // Prepare the payload with the new address and additional fields
-        const payload = {
-            address: newAddress,
-            pincode_id: value.pincode || '',
-            ccperson: value.contact_person || '', // Extract contact person from form data
-            ccnumber: value.mobile || '', // Extract mobile from form data
-            customer_id: customerEndId , // Use customerEndId or send empty if not available
-        };
+    const handleNewAddressSubmit = async (event) => {
+        event.preventDefault(); // Prevent the default form submission behavior
+        try {
+            // Prepare the payload with the new address and additional fields
+            const payload = {
+                address: newAddress,
+                pincode_id: value.pincode || '',
+                ccperson: value.contact_person || '', // Extract contact person from form data
+                ccnumber: value.mobile || '', // Extract mobile from form data
+                customer_id: customerEndId, // Use customerEndId or send empty if not available
+            };
 
-        const response = await axios.post(`${Base_Url}/postcustomerlocation`, payload, {
-            headers: {
-                Authorization: token, 
-            },
-        });
+            const response = await axios.post(`${Base_Url}/postcustomerlocation`, payload, {
+                headers: {
+                    Authorization: token,
+                },
+            });
 
-        if (response.data.success) {
-            console.log("New Address Submitted:", newAddress);
+            if (response.data.success) {
+                console.log("New Address Submitted:", newAddress);
 
-            // Optimistically update the addresses state
-            setAddresses(prevAddresses => [
-                ...prevAddresses,
-                { address: newAddress, id: response.data.newAddressId } // Assuming response contains the ID of the new address
-            ]);
+                // Optimistically update the addresses state
+                setAddresses(prevAddresses => [
+                    ...prevAddresses,
+                    { address: newAddress, id: response.data.newAddressId } // Assuming response contains the ID of the new address
+                ]);
 
-            // Reset the new address input
-            setNewAddress('');
-            setPincode('');
-            closePopup();
-        } else {
-            console.error("Error submitting new address:", response.data.message);
+                // Reset the new address input
+                setNewAddress('');
+                setPincode('');
+                closePopup();
+            } else {
+                console.error("Error submitting new address:", response.data.message);
+            }
+        } catch (error) {
+            console.error("Error submitting new address:", error);
         }
-    } catch (error) {
-        console.error("Error submitting new address:", error);
-    }
-    fetchAddresses(customerEndId); 
-};
+        fetchAddresses(customerEndId);
+    };
 
 
     //This is for State Dropdown
@@ -207,7 +303,7 @@ const handleNewAddressSubmit = async (event) => {
             })
     }
 
-// fetch address from end customerlocation
+    // fetch address from end customerlocation
 
     async function fetchAddresses(customerEndId) {
         try {
@@ -217,14 +313,14 @@ const handleNewAddressSubmit = async (event) => {
                 },
             });
 
-        if (response.data.address) {
-            setAddresses(response.data);
-        } 
+            if (response.data.address) {
+                setAddresses(response.data);
+            }
 
-        else if (Array.isArray(response.data)) {
-            setAddresses(response.data);
-        }
-       
+            else if (Array.isArray(response.data)) {
+                setAddresses(response.data);
+            }
+
         } catch (error) {
             console.error("Error fetching addresses:", error);
         }
@@ -237,9 +333,9 @@ const handleNewAddressSubmit = async (event) => {
         axios.get(`${Base_Url}/product_master`)
             .then((res) => {
                 if (res.data) {
-               
+
                     setProduct(res.data)
-                    console.log(res.data , "RRR")
+                    console.log(res.data, "RRR")
                 }
             })
 
@@ -348,7 +444,7 @@ const handleNewAddressSubmit = async (event) => {
                     setTicketNo(res.data[0].ticket_no)
 
                     setValue({
-                        complaint_date: res.data[0].ticket_date  || currentDate,
+                        complaint_date: res.data[0].ticket_date || currentDate,
                         contact_person: res.data[0].customer_mobile,
                         customer_name: res.data[0].customer_name,
                         email: res.data[0].customer_email,
@@ -374,9 +470,9 @@ const handleNewAddressSubmit = async (event) => {
                         msp: res.data[0].franchisee,
                         csp: res.data[0].childPartner,
                         mdealer_info: res.data[0].sales_partner,
-                        classification : res.data[0].customer_class,
-                        Priority : res.data[0].call_priority,
-                        callType :res.data[0].callType
+                        classification: res.data[0].customer_class,
+                        Priority: res.data[0].call_priority,
+                        callType: res.data[0].callType
                     })
                 }
             })
@@ -430,7 +526,7 @@ const handleNewAddressSubmit = async (event) => {
             .then((res) => {
                 console.log(res.data.information)
                 if (res.data.information && res.data.information.length > 0) {
-                     const customerInfo = res.data.information[0];
+                    const customerInfo = res.data.information[0];
                     // console.log(res.data,"Search Data")
                     // console.log(res.data[0],"Hide Ticket")
                     setDuplicateCustomerNumber(res.data.information[0].customer_mobile);
@@ -472,9 +568,9 @@ const handleNewAddressSubmit = async (event) => {
                         // child_service_partner: res.data[0].child_service_partner || ""
 
                     })
-                        // Fetch addresses of end customer from customer location
-                        fetchAddresses(customerInfo.customer_id);
-                        setCustomerEndId(customerInfo.customer_id);
+                    // Fetch addresses of end customer from customer location
+                    fetchAddresses(customerInfo.customer_id);
+                    setCustomerEndId(customerInfo.customer_id);
 
                 } else {
                     // If no results found, clear previous data
@@ -495,74 +591,79 @@ const handleNewAddressSubmit = async (event) => {
 
     const handlesubmit = (e) => {
 
-
-     const confirm = window.confirm("Are you sure?")
-
-     if(confirm){
         e.preventDefault()
 
-        const data = {
-            complaint_date: value.complaint_date || currentDate,
-            customer_name: value.customer_name,
-            contact_person: value.contact_person,
-            email: value.email,
-            mobile: value.mobile,
-            alt_mobile: value.alt_mobile,
-            address: value.address,
-            state: value.state,
-            city: value.city,
-            area: value.area,
-            pincode: value.pincode,
-            mode_of_contact: value.mode_of_contact,
-            ticket_type: value.ticket_type,
-            cust_type: value.cust_type,
-            warrenty_status: value.warrenty_status,
-            invoice_date: value.invoice_date,
-            call_charge: value.call_charge,
-            cust_id: searchdata.id || value.customer_id || "", // Fix customer ID handling
-            model: value.model,
-            serial: value.serial,
-            purchase_date: value.purchase_date,
-            master_service_partner: value.master_service_partner,
-            child_service_partner: value.child_service_partner,
-            additional_remarks: value.additional_remarks,
-            specification: value.specification,
-            created_by: value.created_by,
-            classification :value.classification,
-            priority:value.Priority,
-            callType:value.callType,
-            ticket_id: ticketid
-        };
+        const confirm = window.confirm("Are you sure?")
 
-        console.log("Submitting data:", data);
+        if (confirm) {
 
-        axios.post(`${Base_Url}/add_complaintt`, data, {
-            headers: {
-                Authorization: token, // Send token in headers
-            },
-        }
-        )
-            .then((res) => {
-                if (res.data) {
-                    notify();
-                    setTimeout(() => {
-                        navigate('/complaintlist');
-                    }, 500);
+            if (validateForm()) {
+
+                const data = {
+                    complaint_date: value.complaint_date || currentDate,
+                    customer_name: value.customer_name,
+                    contact_person: value.contact_person,
+                    email: value.email,
+                    mobile: value.mobile,
+                    alt_mobile: value.alt_mobile,
+                    address: value.address,
+                    state: value.state,
+                    city: value.city,
+                    area: value.area,
+                    pincode: value.pincode,
+                    mode_of_contact: value.mode_of_contact,
+                    ticket_type: value.ticket_type,
+                    cust_type: value.cust_type,
+                    warrenty_status: value.warrenty_status,
+                    invoice_date: value.invoice_date,
+                    call_charge: value.call_charge,
+                    cust_id: searchdata.id || value.customer_id || "", // Fix customer ID handling
+                    model: value.model,
+                    serial: value.serial,
+                    purchase_date: value.purchase_date,
+                    master_service_partner: value.master_service_partner,
+                    child_service_partner: value.child_service_partner,
+                    additional_remarks: value.additional_remarks,
+                    specification: value.specification,
+                    created_by: value.created_by,
+                    classification: value.classification,
+                    priority: value.Priority,
+                    callType: value.callType,
+                    ticket_id: ticketid
+                };
+
+                console.log("Submitting data:", data);
+
+                axios.post(`${Base_Url}/add_complaintt`, data, {
+                    headers: {
+                        Authorization: token, // Send token in headers
+                    },
                 }
-            })
-            .catch(error => {
-                console.error("Error submitting form:", error);
-                toast.error('Error submitting data');
-            });
-     }
-       
+                )
+                    .then((res) => {
+                        if (res.data) {
+                            notify();
+                            setTimeout(() => {
+                                navigate('/complaintlist');
+                            }, 500);
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error submitting form:", error);
+                        toast.error('Error submitting data');
+                    });
+
+            }
+
+        }
+
     }
 
     const updatecomplaint = () => {
 
 
         const data = {
-            complaint_date: value.complaint_date ,
+            complaint_date: value.complaint_date,
             customer_name: value.customer_name,
             contact_person: value.contact_person,
             email: value.email,
@@ -588,9 +689,9 @@ const handleNewAddressSubmit = async (event) => {
             additional_remarks: value.additional_remarks,
             specification: value.specification,
             created_by: value.created_by,
-            classification : value.classification,
-            priority:value.Priority,
-            callType:value.callType,
+            classification: value.classification,
+            priority: value.Priority,
+            callType: value.callType,
             ticket_no: Comp_id
         };
 
@@ -692,7 +793,7 @@ const handleNewAddressSubmit = async (event) => {
     };
 
 
-     console.log(value.serial ,"%%")
+    console.log(value.serial, "%%")
 
 
     const fetchlocations = async (pincode) => {
@@ -711,10 +812,10 @@ const handleNewAddressSubmit = async (event) => {
 
                 setValue({
                     ...value,
-                    state : response.data[0].state,
-                    city : response.data[0].city,
-                    area : response.data[0].district,
-                    pincode : response.data[0].pincode
+                    state: response.data[0].state,
+                    city: response.data[0].city,
+                    area: response.data[0].district,
+                    pincode: response.data[0].pincode
                 })
 
             }
@@ -739,8 +840,8 @@ const handleNewAddressSubmit = async (event) => {
 
                 // setserial({ ModelNumber: response.data[0].ModelNumber, purchase_date: response.data[0].purchase_date })
                 setValue({
-                  model : response.data[0].ModelNumber,
-                  serial : response.data[0].serial_no
+                    model: response.data[0].ModelNumber,
+                    serial: response.data[0].serial_no
                 })
 
             }
@@ -816,7 +917,7 @@ const handleNewAddressSubmit = async (event) => {
 
 
     return (
-    
+
         < div className="p-3">
             <div className="row ">
                 <div className="complbread">
@@ -884,40 +985,40 @@ const handleNewAddressSubmit = async (event) => {
                                 </div>
                             </div>
 
-                              {/* Display addresses here */}
+                            {/* Display addresses here */}
                             {/* <p style={{fontSize: '12px'}}>{searchdata.address}</p> */}
                             <div className="row">
                                 <div className="col-md-12">
-                           
-                                        {addresses && addresses.length > 0 ? (
-                                            // Check if it's an array or a single object
-                                            Array.isArray(addresses) ? (
-                                                addresses.map((addressItem, index) => (
-                                                    <p 
-                                                        key={addressItem.id || index} 
-                                                        style={{ 
-                                                            fontSize: '12px', 
-                                        
-                                                        }}
-                                                    >
-                                                        {addressItem.address}
-                                                    </p>
-                                                ))
-                                            ) : (
-                                                <p 
-                                                    key="single-address" 
-                                                    style={{ 
-                                                        fontSize: '12px', 
+
+                                    {addresses && addresses.length > 0 ? (
+                                        // Check if it's an array or a single object
+                                        Array.isArray(addresses) ? (
+                                            addresses.map((addressItem, index) => (
+                                                <p
+                                                    key={addressItem.id || index}
+                                                    style={{
+                                                        fontSize: '12px',
+
                                                     }}
                                                 >
-                                                    {addresses.address}
+                                                    {addressItem.address}
                                                 </p>
-                                            )
+                                            ))
                                         ) : (
-                                            <p style={{ fontSize: '12px' }}>No Address Available</p>
-                                        )}
-                                    </div>       
-                                    </div>
+                                            <p
+                                                key="single-address"
+                                                style={{
+                                                    fontSize: '12px',
+                                                }}
+                                            >
+                                                {addresses.address}
+                                            </p>
+                                        )
+                                    ) : (
+                                        <p style={{ fontSize: '12px' }}>No Address Available</p>
+                                    )}
+                                </div>
+                            </div>
 
 
                             <div className="row mb-3">
@@ -1010,7 +1111,7 @@ const handleNewAddressSubmit = async (event) => {
                         <div className="card" id="formInfo">
                             <div className="card-body">
                                 <div className="row">
-                                    
+
                                     <div className="col-md-3">
                                         <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Serial No</p>
 
@@ -1023,21 +1124,24 @@ const handleNewAddressSubmit = async (event) => {
                                                     onChange={onHandleChange}
                                                     className="form-control"
                                                     placeholder="Enter.."
+                                                    
                                                 />
+                                                {errors.serial &&<span style={{fontSize :"12px"}} className="text-danger">{errors.serial}</span>}
                                             </div> : <div>{value.serial}</div>}
 
-                                    </div>  
-                                    <div className="col-md-3"> 
+                                    </div>
+                                    <div className="col-md-3">
                                         <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Model</p>
 
-                                        {searchdata.length == 0 && !Comp_id || ModelNumber == null ? 
-                                            
+                                        {searchdata.length == 0 && !Comp_id || ModelNumber == null ?
+
                                             <div className="">
                                                 <input className="form-control" onChange={onHandleChange} value={value.model} name="model"></input>
-                                            </div> : 
+                                                {errors.model && <span style={{fontSize :"12px"}} className="text-danger">{errors.model}</span> }
+                                            </div> :
                                             <div>{ModelNumber}</div>
                                         }
-                                    </div>                                     
+                                    </div>
                                     {/* Add Purchase Date field */}
                                     <div className="col-md-3">
                                         <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Purchase Date</p>
@@ -1051,6 +1155,7 @@ const handleNewAddressSubmit = async (event) => {
                                                     value={value.purchase_date}
                                                     className="form-control"
                                                 />
+                                                     {errors.purchase_date && <span style={{fontSize :"12px"}} className="text-danger">{errors.purchase_date}</span> }
                                             </div> : <div>{value.purchase_date}</div>}
                                     </div>
 
@@ -1064,6 +1169,7 @@ const handleNewAddressSubmit = async (event) => {
                                                 <option value="OUT OF WARRANTY">OUT OF WARRANTY</option>
                                                 <option value="NA">NA</option>
                                             </select>
+                                            {errors.warrenty_status && <span style={{fontSize :"12px"}} className="text-danger">{errors.warrenty_status}</span> }
                                         </div>
                                     </div>
                                 </div>
@@ -1079,7 +1185,8 @@ const handleNewAddressSubmit = async (event) => {
                                     <div className="col-md-3">
                                         <div className="mb-3">
                                             <label className="form-label">Ticket Date</label>
-                                            <input type="date" name="complaint_date" onChange={onHandleChange} value={value.complaint_date } className="form-control" />
+                                            <input type="date" name="complaint_date" onChange={onHandleChange} value={value.complaint_date} className="form-control" />
+                                            {errors.complaint_date && <span style={{fontSize :"12px"}} className="text-danger">{errors.complaint_date}</span> }
                                         </div>
                                     </div>
                                     <div className="col-md-2">
@@ -1094,30 +1201,35 @@ const handleNewAddressSubmit = async (event) => {
                                                 <option value="Lhi">Lhi</option>
                                                 <option value="Dl">Dl</option>
                                             </select>
+                                            {errors.salutation && <span style={{fontSize :"12px"}} className="text-danger">{errors.salutation}</span> }
                                         </div>
                                     </div>
                                     <div className="col-md-3">
                                         <div className="mb-3">
                                             <label htmlFor="exampleFormControlInput1" className="form-label">Customer Name</label>
                                             <input type="text" name="customer_name" onChange={onHandleChange} value={value.customer_name} className="form-control" placeholder="Enter Customer Name" />
+                                            {errors.customer_name && <span style={{fontSize :"12px"}} className="text-danger">{errors.customer_name}</span> }
                                         </div>
                                     </div>
                                     <div className="col-md-4">
                                         <div className="mb-3">
                                             <label htmlFor="exampleFormControlInput1" className="form-label">Contact Person</label>
                                             <input type="text" className="form-control" name="contact_person" value={value.contact_person} onChange={onHandleChange} placeholder="Enter Contact Person Name" />
+                                            {errors.contact_person && <span style={{fontSize :"12px"}} className="text-danger">{errors.contact_person}</span> }
                                         </div>
                                     </div>
                                     <div className="col-md-4">
                                         <div className="mb-3">
                                             <label htmlFor="exampleFormControlInput1" className="form-label">Email Id</label>
                                             <input type="email" value={value.email} name="email" onChange={onHandleChange} className="form-control" placeholder="Enter Email Id" />
+                                            {errors.email && <span style={{fontSize :"12px"}} className="text-danger">{errors.email}</span> }
                                         </div>
                                     </div>
                                     <div className="col-md-4">
                                         <div className="mb-3">
                                             <label htmlFor="exampleFormControlInput1" className="form-label">Mobile No. <input type="checkbox" />Whatsapp</label>
                                             <input type="text" value={value.mobile} name="mobile" onChange={onHandleChange} className="form-control" placeholder="Enter Mobile" />
+                                            {errors.mobile && <span style={{fontSize :"12px"}} className="text-danger">{errors.mobile}</span> }
                                         </div>
                                     </div>
                                     <div className="col-md-4">
@@ -1133,9 +1245,9 @@ const handleNewAddressSubmit = async (event) => {
                                             <textarea className="form-control" value={value.address} name="address" onChange={onHandleChange} placeholder="Enter Address">Customer Address</textarea>
                                         </div>
                                     </div> */}
- <>
- <style>
-    {`
+                                    <>
+                                        <style>
+                                            {`
         .popup {
             position: fixed;
             top: 0;
@@ -1208,55 +1320,56 @@ const handleNewAddressSubmit = async (event) => {
 
         }
     `}
-</style>
+                                        </style>
 
-      <div className="col-md-12">
-    <div className="mb-3">
-        <label htmlFor="exampleFormControlInput1" className="form-label">Address </label> 
-        <button onClick={openPopup} type="button" className="addressbtn">Add Address</button>
-        <textarea
-            className="form-control"
-            value={value.address}
-            name="address"
-            onChange={handleAddressChange}
-            placeholder="Enter Address"
-        ></textarea>
-        
-    </div>
-</div>
+                                        <div className="col-md-12">
+                                            <div className="mb-3">
+                                                <label htmlFor="exampleFormControlInput1" className="form-label">Address </label>
+                                                <button onClick={openPopup} type="button" className="addressbtn">Add Address</button>
+                                                <textarea
+                                                    className="form-control"
+                                                    value={value.address}
+                                                    name="address"
+                                                    onChange={handleAddressChange}
+                                                    placeholder="Enter Address"
+                                                ></textarea>
+                                                            {errors.address && <span style={{fontSize :"12px"}} className="text-danger">{errors.address}</span> }
 
-        {isPopupOpen && (
-            <div className="popup">
-                <div className="popup-content">
-                    <h3>Change Address</h3>
-                <select id="existingAddress" onChange={handleExistingAddressChange} value={selectedAddress}>
-                    <option value="">Select Existing Address</option>
-                    {addresses.map((addressItem) => (
-                        <option key={addressItem.id} value={addressItem.address}>
-                            {addressItem.address}
-                        </option>
-                    ))}
-                </select>
+                                            </div>
+                                        </div>
 
-                    <h3>Add New Address</h3>
-                    <textarea
-                        className="form-control"
-                        value={newAddress}
-                        onChange={(e) => {
-                            setNewAddress(e.target.value); // Update new address in state
-                            setValue(prevState => ({
-                                ...prevState,
-                                address: e.target.value // Also update the main address field
-                            }));
-                        }}
-                        placeholder="Enter New Address"
-                    />
-                    <button onClick={handleNewAddressSubmit} className="btn btn-primary mt-2" type="button">Add</button>
-                    <button onClick={closePopup} className="btn btn-secondary mt-2" type="button" style={{ marginLeft: '10px' }}>Close</button>
-                </div>
-            </div>
-        )}
-    </>
+                                        {isPopupOpen && (
+                                            <div className="popup">
+                                                <div className="popup-content">
+                                                    <h3>Change Address</h3>
+                                                    <select id="existingAddress" onChange={handleExistingAddressChange} value={selectedAddress}>
+                                                        <option value="">Select Existing Address</option>
+                                                        {addresses.map((addressItem) => (
+                                                            <option key={addressItem.id} value={addressItem.address}>
+                                                                {addressItem.address}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+
+                                                    <h3>Add New Address</h3>
+                                                    <textarea
+                                                        className="form-control"
+                                                        value={newAddress}
+                                                        onChange={(e) => {
+                                                            setNewAddress(e.target.value); // Update new address in state
+                                                            setValue(prevState => ({
+                                                                ...prevState,
+                                                                address: e.target.value // Also update the main address field
+                                                            }));
+                                                        }}
+                                                        placeholder="Enter New Address"
+                                                    />
+                                                    <button onClick={handleNewAddressSubmit} className="btn btn-primary mt-2" type="button">Add</button>
+                                                    <button onClick={closePopup} className="btn btn-secondary mt-2" type="button" style={{ marginLeft: '10px' }}>Close</button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </>
 
                                     {!duplicate ? <>
                                         <div className="col-md-3">
@@ -1270,6 +1383,7 @@ const handleNewAddressSubmit = async (event) => {
                                                         );
                                                     })}
                                                 </select>
+                                                {errors.pincode && <span style={{fontSize :"12px"}} className="text-danger">{errors.pincode}</span> }
                                             </div>
                                         </div>
 
@@ -1285,6 +1399,7 @@ const handleNewAddressSubmit = async (event) => {
                                                         )
                                                     })}
                                                 </select>
+                                                {errors.state && <span style={{fontSize :"12px"}} className="text-danger">{errors.state}</span> }
                                             </div>
                                         </div>
 
@@ -1300,6 +1415,7 @@ const handleNewAddressSubmit = async (event) => {
                                                         );
                                                     })}
                                                 </select>
+                                                {errors.area && <span style={{fontSize :"12px"}} className="text-danger">{errors.area}</span> }
                                             </div>
                                         </div>
 
@@ -1315,6 +1431,7 @@ const handleNewAddressSubmit = async (event) => {
                                                         );
                                                     })}
                                                 </select>
+                                                {errors.city && <span style={{fontSize :"12px"}} className="text-danger">{errors.city}</span> }
                                             </div>
                                         </div>
 
@@ -1324,24 +1441,28 @@ const handleNewAddressSubmit = async (event) => {
                                             <div className="mb-3">
                                                 <label htmlFor="exampleFormControlInput1" className="form-label">Pincode</label>
                                                 <input type="text" className="form-control" value={value.pincode} name="pincode" onChange={onHandleChange} placeholder="" />
+                                                {errors.pincode && <span style={{fontSize :"12px"}} className="text-danger">{errors.pincode}</span> }
                                             </div>
                                         </div>
                                         <div className="col-md-3">
                                             <div className="mb-3">
                                                 <label htmlFor="exampleFormControlInput1" className="form-label">State</label>
-                                                <input type="text" className="form-control" value={ value.state} name="state" onChange={onHandleChange} placeholder="" disabled />
+                                                <input type="text" className="form-control" value={value.state} name="state" onChange={onHandleChange} placeholder="" disabled />
+                                                {errors.state && <span style={{fontSize :"12px"}} className="text-danger">{errors.state}</span> }
                                             </div>
                                         </div>
                                         <div className="col-md-3">
                                             <div className="mb-3">
                                                 <label htmlFor="exampleFormControlInput1" className="form-label">District</label>
-                                                <input type="text" className="form-control" value={ value.area } name="area" onChange={onHandleChange} placeholder="" disabled />
+                                                <input type="text" className="form-control" value={value.area} name="area" onChange={onHandleChange} placeholder="" disabled />
+                                                {errors.area && <span style={{fontSize :"12px"}} className="text-danger">{errors.area}</span> }
                                             </div>
                                         </div>
                                         <div className="col-md-3">
                                             <div className="mb-3">
                                                 <label htmlFor="exampleFormControlInput1" className="form-label">City</label>
-                                                <input type="text" className="form-control" value={value.city } name="city" onChange={onHandleChange} placeholder="" disabled />
+                                                <input type="text" className="form-control" value={value.city} name="city" onChange={onHandleChange} placeholder="" disabled />
+                                                {errors.city && <span style={{fontSize :"12px"}} className="text-danger">{errors.city}</span> }
                                             </div>
                                         </div>
 
@@ -1361,6 +1482,7 @@ const handleNewAddressSubmit = async (event) => {
                                                 <option value="Email">Email</option>
                                                 <option value="In Person">In Person</option>
                                             </select>
+                                            {errors.mode_of_contact && <span style={{fontSize :"12px"}} className="text-danger">{errors.mode_of_contact}</span> }
                                         </div>
                                     </div>
                                     <div className="col-md-4">
@@ -1375,8 +1497,10 @@ const handleNewAddressSubmit = async (event) => {
                                                 <option value="Maintenance">Maintenance</option>
                                                 <option value="Demo">Demo</option>
                                             </select>
+                                            {errors.ticket_type && <span style={{fontSize :"12px"}} className="text-danger">{errors.ticket_type}</span> }
                                         </div>
                                     </div>
+
                                     <div className="col-md-4">
                                         <div className="mb-3">
                                             <label className="form-label">Customer Type</label>
@@ -1385,6 +1509,7 @@ const handleNewAddressSubmit = async (event) => {
                                                 <option value="END CUSTOMER">END CUSTOMER</option>
                                                 <option value="DISPLAY/EVENT">DISPLAY / EVENTS</option>
                                             </select>
+                                            {errors.cust_type && <span style={{fontSize :"12px"}} className="text-danger">{errors.cust_type}</span> }
                                         </div>
                                     </div>
                                     {/* <div className="col-md-4">
@@ -1415,6 +1540,7 @@ const handleNewAddressSubmit = async (event) => {
                                                 <option value="Yes">Yes</option>
                                                 <option value="No">No</option>
                                             </select>
+                                            {errors.call_charge && <span style={{fontSize :"12px"}} className="text-danger">{errors.call_charge}</span> }
                                         </div>
                                     </div>
 
@@ -1426,6 +1552,7 @@ const handleNewAddressSubmit = async (event) => {
                                                 <option value="CONSUMER">Consumer</option>
                                                 <option value="IMPORT">Import</option>
                                             </select>
+                                            {errors.classification && <span style={{fontSize :"12px"}} className="text-danger">{errors.classification}</span> }
                                         </div>
                                     </div>
                                     <div className="col-md-4">
@@ -1436,18 +1563,10 @@ const handleNewAddressSubmit = async (event) => {
                                                 <option value="REGULAR">Regular</option>
                                                 <option value="HIGH">High</option>
                                             </select>
+                                            {errors.Priority && <span style={{fontSize :"12px"}} className="text-danger">{errors.Priority}</span> }
                                         </div>
                                     </div>
-                                    <div className="col-md-4">
-                                        <div className="mb-3">
-                                            <label className="form-label">Call Type</label>
-                                            <select className="form-control" onChange={onHandleChange} value={value.callType} name="callType">
-                                                <option value="">Select</option>
-                                                <option value="Sales">Sales</option>
-                                                <option value="Service">Service</option>
-                                            </select>
-                                        </div>
-                                    </div>
+
 
 
                                     <div className="col-md-12">
@@ -1478,12 +1597,21 @@ const handleNewAddressSubmit = async (event) => {
                                 <div className="card-body">
                                     <div className="row">
                                         <div className="col-md-12">
-                                            <h4 className="pname">Dealer : {value.mdealer_info}</h4>
+                                            <h4 className="pname">Primary Dealer : {value.mdealer_info}</h4>
                                         </div>
                                     </div>
 
                                     <div className="mb-3">
-                                        <input type="text" className="form-control" name="sub_dealer" value={value.dealer_info} onChange={onHandleChange} placeholder="Enter Sub Dealer Name" />
+                                        <input type="text" className="form-control" name="sub_dealer" value={value.dealer_info} onChange={onHandleChange} placeholder="Primary Dealer" />
+                                    </div>
+                                    <div className="row">
+                                        <div className="col-md-12">
+                                            <h4 className="pname">Secondary Dealer : {value.mdealer_info}</h4>
+                                        </div>
+                                    </div>
+
+                                    <div className="mb-3">
+                                        <input type="text" className="form-control" name="sub_dealer" value={value.dealer_info} onChange={onHandleChange} placeholder="Secondary Dealer" />
                                     </div>
                                 </div>
                             </div>
@@ -1500,6 +1628,7 @@ const handleNewAddressSubmit = async (event) => {
                                             onChange={onHandleChange}
                                             placeholder="Enter Fault Description..."
                                         ></textarea>
+                                                {errors.specification && <span style={{fontSize :"12px"}} className="text-danger">{errors.specification}</span> }
                                     </div>
                                 </div>
                             </div>
@@ -1543,11 +1672,11 @@ const handleNewAddressSubmit = async (event) => {
                                         </button>
                                     </div>
 
-                                
+
                                 </div>
                             </div>
 
-                           
+
                         </>
 
                     </div>

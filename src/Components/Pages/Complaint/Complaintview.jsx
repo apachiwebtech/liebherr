@@ -414,9 +414,23 @@ export function Complaintview(params) {
       // quantity: parseInt(quantity), // Add quantity field
     };
 
-    console.log(newPart, "Newpart")
 
     setAddedSpareParts([newPart]);
+
+
+
+    const finaldata = {data: newPart , ticket_no: complaintview.ticket_no}
+
+    const data = {
+      finaldata: finaldata,
+    };
+
+    axios.post(`${Base_Url}/add_uniqsparepart` , data)
+    .then((res) =>{
+     
+      getsparelist(complaintview.ticket_no)
+
+    })
 
 
     setQuantity(""); // Reset quantity input
@@ -1630,7 +1644,7 @@ export function Complaintview(params) {
                     onChange={(e) => handleengchange(e.target.value)}
                   />
                   <label className="form-check-label" htmlFor="franchisee" style={{ fontSize: "14px" }}>
-                    Franchisee
+                  Service Partner
                   </label>
                 </div>
 
@@ -1705,6 +1719,7 @@ export function Complaintview(params) {
                 </table>
               </div>
 
+            {complaintview.call_status == 'Closed' && <>
               <div className="mt-3">
                 <h4 className="pname" style={{ fontSize: "14px" }}>Defect Group Code:</h4>
                 <select
@@ -1730,7 +1745,6 @@ export function Complaintview(params) {
                   ))}
                 </select>
               </div>
-
               <div className="mt-3">
                 <h4 className="pname" style={{ fontSize: "14px" }}>Type of Defect Code:</h4>
                 <select
@@ -1749,7 +1763,6 @@ export function Complaintview(params) {
                   ))}
                 </select>
               </div>
-
               <div className="mt-3">
                 <h4 className="pname" style={{ fontSize: "14px" }}>Site Defect Code:</h4>
                 <select
@@ -1768,6 +1781,11 @@ export function Complaintview(params) {
                   ))}
                 </select>
               </div>
+            </>}  
+
+             
+
+           
 
               <div className="d-flex justify-content-end py-2">
                 <button
@@ -1789,7 +1807,7 @@ export function Complaintview(params) {
             </div>
           </div>
 
-          <div className="card mb-3">
+      {complaintview.sub_call_status == 'Spare' || spare.length > 0 &&    <div className="card mb-3">
             <div className="card-body">
 
               <div className="mt-3">
@@ -1894,7 +1912,8 @@ export function Complaintview(params) {
                 </div>
               </div>
             </div>
-          </div>
+          </div>}    
+   
 
           {quotation.length > 0 && <div className="card mb-3">
             <div className="card-body">

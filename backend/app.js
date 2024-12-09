@@ -3130,7 +3130,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
     complaint_date, customer_name, contact_person, email, mobile, address,
     state, city, area, pincode, mode_of_contact, ticket_type, cust_type,
     warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks
-    , ticket_id, classification, priority,callType  
+    , ticket_id, classification, priority, callType
   } = req.body;
 
 
@@ -3169,7 +3169,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
 
       const [customer_fname, ...customer_lnameArr] = customer_name.split(' ');
-      const customer_lname = customer_lnameArr.join(' '); 
+      const customer_lname = customer_lnameArr.join(' ');
 
 
       const getcustcount = `select top 1 id from awt_customer where customer_id is not null order by id desc`
@@ -3178,30 +3178,30 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
       const custcount = getcustresult.recordset[0].id;
 
-      const newcustid = 'A' + custcount.toString().padStart(7 , "0")
+      const newcustid = 'A' + custcount.toString().padStart(7, "0")
 
 
 
 
 
-        // Insert into awt_customer
-        const customerSQL = `INSERT INTO awt_customer ( customer_id,customer_fname, customer_lname, email, mobileno, alt_mobileno, created_date, created_by)OUTPUT INSERTED.id VALUES ( @customer_id,@customer_fname, @customer_lname, @email, @mobile, @alt_mobile, @formattedDate, @created_by)`;
-        // Debugging log
+      // Insert into awt_customer
+      const customerSQL = `INSERT INTO awt_customer ( customer_id,customer_fname, customer_lname, email, mobileno, alt_mobileno, created_date, created_by)OUTPUT INSERTED.id VALUES ( @customer_id,@customer_fname, @customer_lname, @email, @mobile, @alt_mobile, @formattedDate, @created_by)`;
+      // Debugging log
 
-        const customerResult = await pool.request()
-          .input('customer_fname', customer_fname)
-          .input('customer_id', newcustid)
-          .input('customer_lname', customer_lname)
-          .input('email', email)
-          .input('mobile', mobile)
-          .input('alt_mobile', alt_mobile)
-          .input('formattedDate', formattedDate)
-          .input('created_by', created_by)
-          .query(customerSQL);
+      const customerResult = await pool.request()
+        .input('customer_fname', customer_fname)
+        .input('customer_id', newcustid)
+        .input('customer_lname', customer_lname)
+        .input('email', email)
+        .input('mobile', mobile)
+        .input('alt_mobile', alt_mobile)
+        .input('formattedDate', formattedDate)
+        .input('created_by', created_by)
+        .query(customerSQL);
 
-        const insertedCustomerId = customerResult.recordset[0].id;
+      const insertedCustomerId = customerResult.recordset[0].id;
 
-  
+
 
 
     }
@@ -3256,7 +3256,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
       .input('formattedDate', formattedDate)
       .query(productSQL);
 
-      const checkResult = await pool.request()
+    const checkResult = await pool.request()
       .input('ticketType', sql.NVarChar, t_type)  // Define the parameter
       .query(`
         SELECT Top 1 ticket_no
@@ -3267,15 +3267,15 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
         ORDER BY ticket_no Desc;
       `);
 
-    const count = checkResult.recordset[0] ?  checkResult.recordset[0].ticket_no : 'G0000';
+    const count = checkResult.recordset[0] ? checkResult.recordset[0].ticket_no : 'G0000';
 
-    console.log(count,"Count")
-    
+    console.log(count, "Count")
+
     // Accessing the last 4 digits from the result
     const lastFourDigits = count.slice(-4)
 
 
-     const newcount = Number(lastFourDigits) + 1
+    const newcount = Number(lastFourDigits) + 1
 
     const formatDate = `${(new Date().getMonth() + 1).toString().padStart(2, '0')}${new Date().getDate().toString().padStart(2, '0')}`;
     const ticket_no = `${t_type}G${formatDate}-${newcount.toString().padStart(4, "0")}`;
@@ -3293,7 +3293,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
         VALUES (
           @ticket_no, @complaint_date, @customer_name, @mobile, @email, @address, 
           @state, @city, @area, @pincode, @customer_id, @model, @ticket_type, @cust_type, 
-          'Pending', @warranty_status, @invoice_date, @call_charge, @mode_of_contact, 
+          'Open', @warranty_status, @invoice_date, @call_charge, @mode_of_contact, 
           @contact_person,  @formattedDate, @created_by,  @purchase_date, @serial, @child_service_partner, @master_service_partner, @specification ,@classification , @priority
         )
       `;
@@ -3315,7 +3315,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
           ModelNumber = @model,
           ticket_type = @ticket_type,
           call_type = @cust_type,
-          call_status = 'Pending',
+          call_status = 'Open',
           warranty_status = @warranty_status,
           invoice_date = @invoice_date,
           call_charges = @call_charge,
@@ -3338,7 +3338,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
 
 
-    const resutlt =  await pool.request()
+    const resutlt = await pool.request()
       .input('ticket_no', ticket_no)
       .input('ticket_id', ticket_id)
       .input('complaint_date', complaint_date)
@@ -3389,24 +3389,24 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
       .query(reamrks);
 
 
-      //Fault Description *************
+    //Fault Description *************
 
 
-      const faultreamrks = `
+    const faultreamrks = `
       INSERT INTO awt_complaintremark (
           ticket_no, remark, created_date, created_by
       )
       VALUES (
           @ticket_no, @additional_remarks, @formattedDate, @created_by
       )`;
-  
-  
-      await pool.request()
-        .input('ticket_no', ticket_no) // Use existing ticket_no from earlier query
-        .input('formattedDate', formattedDate) // Use current timestamp
-        .input('created_by', created_by) // Use current user ID
-        .input('additional_remarks', specification) // Use current user ID
-        .query(faultreamrks);
+
+
+    await pool.request()
+      .input('ticket_no', ticket_no) // Use existing ticket_no from earlier query
+      .input('formattedDate', formattedDate) // Use current timestamp
+      .input('created_by', created_by) // Use current user ID
+      .input('additional_remarks', specification) // Use current user ID
+      .query(faultreamrks);
 
     return res.json({ message: 'Complaint added successfully!', ticket_no, cust_id });
   } catch (err) {
@@ -7020,7 +7020,7 @@ app.post("/updateProduct", authenticateToken,
 //Complaint view Insert TicketFormData start
 
 app.post("/ticketFormData", authenticateToken, async (req, res) => {
-  const { ticket_no, serial_no, ModelNumber, engineerdata, call_status, sub_call_status, updated_by, group_code, site_defect, defect_type ,engineername } = req.body;
+  const { ticket_no, serial_no, ModelNumber, engineerdata, call_status, sub_call_status, updated_by, group_code, site_defect, defect_type, engineername } = req.body;
 
 
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
@@ -7032,7 +7032,7 @@ app.post("/ticketFormData", authenticateToken, async (req, res) => {
 
   let engineer_name;
 
-  engineer_name = engineername.join(','); 
+  engineer_name = engineername.join(',');
 
 
   const concatremark = `Call Status: ${call_status} , Engineer Name : ${engineer_name} , Sub Call Stutus : ${sub_call_status} ,Group Code : ${group_code} , Site Defect : ${site_defect} , Defect Type : ${defect_type} `
@@ -7053,11 +7053,11 @@ app.post("/ticketFormData", authenticateToken, async (req, res) => {
 
 
     await pool.request()
-    .input('ticket_no', ticket_no) // Use existing ticket_no from earlier query
-    .input('formattedDate', formattedDate) // Use current timestamp
-    .input('created_by', updated_by) // Use current user ID
-    .input('additional_remarks', concatremark) // Use current user ID
-    .query(reamrks);
+      .input('ticket_no', ticket_no) // Use existing ticket_no from earlier query
+      .input('formattedDate', formattedDate) // Use current timestamp
+      .input('created_by', updated_by) // Use current user ID
+      .input('additional_remarks', concatremark) // Use current user ID
+      .query(reamrks);
 
 
     const updateSql = `
@@ -7953,6 +7953,44 @@ app.get("/getquotationlist", authenticateToken, async (req, res) => {
 });
 
 
+app.post('/add_uniqsparepart', async (req, res) => {
+  try {
+    const { finaldata } = req.body;
+
+    const pool = await poolPromise;
+    const newdata = finaldata.data;
+    const ticket_no = finaldata.ticket_no;
+
+    // Destructure values from `newdata`
+    const { article_code, article_description, price, spareId } = newdata;
+
+
+
+
+    const poolRequest = pool.request(); // Ensure `pool` is initialized correctly.
+
+    const addspare = `
+      INSERT INTO awt_uniquespare (ticketId, spareId, article_code, article_description, price) 
+      VALUES (@ticket_no, @product_code, @title, @ItemDescription, '100')
+    `;
+
+    await poolRequest
+      .input('ticket_no', sql.VarChar, ticket_no)
+      .input('product_code', sql.VarChar, spareId)
+      .input('title', sql.VarChar, article_code)
+      .input('ItemDescription', sql.VarChar, article_description)
+      .input('price', sql.VarChar, price)
+      .query(addspare);
+
+    res.status(200).send({ message: 'Spare part added successfully!' });
+  } catch (error) {
+    console.error('Error inserting spare part:', error);
+    res.status(500).send({ error: 'Internal server error' });
+  }
+});
+
+
+
 app.post(`/add_quotation`, async (req, res) => {
   let { finaldata } = req.body;
 
@@ -7963,10 +8001,9 @@ app.post(`/add_quotation`, async (req, res) => {
   const city = finaldata.city;
   const state = finaldata.state;
   const Engineer = finaldata.Engineer;
-
+  const date = new Date();
   const pool = await poolPromise;
 
-  const newdata = finaldata.data
 
   let engineer_id;
 
@@ -7975,60 +8012,66 @@ app.post(`/add_quotation`, async (req, res) => {
 
 
   try {
+
     // Get the latest quotation number
     const getcount = `SELECT TOP 1 id FROM awt_quotation ORDER BY id DESC`;
     const countResult = await pool.request().query(getcount);
+
     const latestQuotation = countResult.recordset[0]?.id || 0;
 
     const newcount = latestQuotation + 1
 
     const quotationcode = 'Q' + newcount.toString().padStart(4, "0")
 
+    console.log(quotationcode)
 
 
-    // Iterate over the items in `newdata`
-    for (const item of newdata) {
-      const { id, title, ItemDescription, price, product_code } = item;
-      const date = new Date();
+    const query = `
+    INSERT INTO awt_quotation 
+    (ticketId, ticketdate, quotationNumber, CustomerName, state, city, assignedEngineer, status, customerId, ModelNumber,  created_date, created_by) 
+    VALUES 
+    (@ticket_no, @date, @quotationNumber, @CustomerName, @state, @city, @assignedEngineer, @status, @customer_id, @ModelNumber,  @created_date, @created_by)
+  `;
 
-      const addspare = `insert into awt_uniquespare (ticketId , spareId , article_code ,article_description , price) values('${ticket_no}','${product_code}' ,'${title}','${ItemDescription}' , '${price}')`;
+   const result =  await pool.request()
+      .input('ticket_no', sql.NVarChar, ticket_no)
+      .input('date', sql.NVarChar, date.toISOString()) // Format date properly
+      .input('quotationNumber', sql.NVarChar, quotationcode)
+      .input('CustomerName', sql.NVarChar, Customername) // Replace with actual value
+      .input('state', sql.NVarChar, state) // Replace with actual value
+      .input('city', sql.NVarChar, city) // Replace with actual value
+      .input('assignedEngineer', sql.NVarChar, engineer_id) // Replace with actual value
+      .input('status', sql.NVarChar, 'Pending') // Replace with actual value
+      .input('customer_id', sql.NVarChar, customer_id)
+      .input('ModelNumber', sql.NVarChar, ModelNumber)
+      .input('created_date', sql.NVarChar, date.toISOString())
+      .input('created_by', sql.NVarChar, '1') // Replace with actual user
+      .query(query);
+
+      console.log(result.recordset);
 
 
-      await pool.request().query(addspare)
+
+    // // Iterate over the items in `newdata`
+    // for (const item of newdata) {
+    //   const { id, title, ItemDescription, price, product_code } = item;
+    //   const date = new Date();
+
+    //   const addspare = `insert into awt_uniquespare (ticketId , spareId , article_code ,article_description , price) values('${ticket_no}','${product_code}' ,'${title}','${ItemDescription}' , '${price}')`;
 
 
-      // // Validate fields
-      // if (!id || !title || !quantity || !price) {
-      //   return res.status(400).json({ message: "Invalid item format in finaldata" });
-      // }
+    //   await pool.request().query(addspare)
 
 
-      // Insert query
-      const query = `
-          INSERT INTO awt_quotation 
-          (ticketId, ticketdate, quotationNumber, CustomerName, state, city, assignedEngineer, status, customerId, ModelNumber, spareId, title,  price, created_date, created_by) 
-          VALUES 
-          (@ticket_no, @date, @quotationNumber, @CustomerName, @state, @city, @assignedEngineer, @status, @customer_id, @ModelNumber, @id, @title,  @price, @created_date, @created_by)
-        `;
+    //   // // Validate fields
+    //   // if (!id || !title || !quantity || !price) {
+    //   //   return res.status(400).json({ message: "Invalid item format in finaldata" });
+    //   // }
 
-      await pool.request()
-        .input('ticket_no', sql.NVarChar, ticket_no)
-        .input('date', sql.NVarChar, date.toISOString()) // Format date properly
-        .input('quotationNumber', sql.NVarChar, quotationcode)
-        .input('CustomerName', sql.NVarChar, Customername) // Replace with actual value
-        .input('state', sql.NVarChar, state) // Replace with actual value
-        .input('city', sql.NVarChar, city) // Replace with actual value
-        .input('assignedEngineer', sql.NVarChar, engineer_id) // Replace with actual value
-        .input('status', sql.NVarChar, 'Pending') // Replace with actual value
-        .input('customer_id', sql.NVarChar, customer_id)
-        .input('ModelNumber', sql.NVarChar, ModelNumber)
-        .input('id', sql.Int, id)
-        .input('title', sql.NVarChar, title)
-        .input('price', sql.Decimal, price)
-        .input('created_date', sql.NVarChar, date.toISOString())
-        .input('created_by', sql.NVarChar, '1') // Replace with actual user
-        .query(query);
-    }
+
+    //   // Insert query
+
+    // }
 
     res.status(200).json({ message: "Quotation added successfully" });
 
