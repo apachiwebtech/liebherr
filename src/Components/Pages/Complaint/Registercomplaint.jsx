@@ -484,6 +484,11 @@ const handleNewAddressSubmit = async (event) => {
 
 
     const handlesubmit = (e) => {
+
+
+     const confirm = window.confirm("Are you sure?")
+
+     if(confirm){
         e.preventDefault()
 
         const data = {
@@ -530,15 +535,17 @@ const handleNewAddressSubmit = async (event) => {
             .then((res) => {
                 if (res.data) {
                     notify();
-                    // setTimeout(() => {
-                    //     navigate('/complaintlist');
-                    // }, 500);
+                    setTimeout(() => {
+                        navigate('/complaintlist');
+                    }, 500);
                 }
             })
             .catch(error => {
                 console.error("Error submitting form:", error);
                 toast.error('Error submitting data');
             });
+     }
+       
     }
 
     const updatecomplaint = () => {
@@ -675,7 +682,7 @@ const handleNewAddressSubmit = async (event) => {
     };
 
 
-     console.log(value.customer_name)
+     console.log(value.serial ,"%%")
 
 
     const fetchlocations = async (pincode) => {
@@ -694,10 +701,10 @@ const handleNewAddressSubmit = async (event) => {
 
                 setValue({
                     ...value,
-                    state : response.data[0].region,
+                    state : response.data[0].state,
                     city : response.data[0].city,
                     area : response.data[0].district,
-
+                    pincode : response.data[0].pincode
                 })
 
             }
@@ -723,7 +730,8 @@ const handleNewAddressSubmit = async (event) => {
                 // setserial({ ModelNumber: response.data[0].ModelNumber, purchase_date: response.data[0].purchase_date })
                 setValue({
                   model : response.data[0].ModelNumber,
-                  purchase_date : formatDate(response.data[0].purchase_date)
+                  purchase_date : formatDate(response.data[0].purchase_date),
+                  serial : response.data[0].serial_no
                 })
 
             }

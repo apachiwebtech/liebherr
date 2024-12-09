@@ -7623,7 +7623,7 @@ app.get("/getmultiplelocation/:pincode", authenticateToken, async (req, res) => 
 
     const pool = await poolPromise;
 
-    const sql = `SELECT cn.title as country, p.region_name as region, p.geostate_name as state, p.area_name as district, p.geocity_name as city, o.owner, f.title as franchiseem, fm.title as childfranchiseem FROM awt_pincode as p 
+    const sql = `SELECT cn.title as country, p.region_name as region, p.geostate_name as state, p.area_name as district, p.geocity_name as city, o.owner, f.title as franchiseem, fm.title as childfranchiseem ,p.pincode  FROM awt_pincode as p 
     LEFT JOIN awt_region as r on p.region_id = r.id 
     LEFT JOIN awt_country as cn on p.country_id = cn.id
     LEFT JOIN awt_geostate as s on p.geostate_id = s.id 
