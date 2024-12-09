@@ -60,9 +60,10 @@ export function Registercomplaint(params) {
     };
 
     //setting the values
+    const currentDate = new Date().toISOString().split('T')[0];
 
     const [value, setValue] = useState({
-        complaint_date: "" ,
+        complaint_date: "" || currentDate,
         customer_name: "",
         contact_person: "",
         email: "",
@@ -118,6 +119,15 @@ const handleAddressChange = (e) => {
         address: value
     }));
 };
+
+useEffect(() => {
+    // Get current date in the format YYYY-MM-DD
+    const currentDate = new Date().toISOString().split('T')[0];
+    setValue((prevValue) => ({
+        ...prevValue,
+        complaint_date: currentDate
+    }));
+}, []);
 
 // Function to open the popup
 const openPopup = () => {
@@ -338,7 +348,7 @@ const handleNewAddressSubmit = async (event) => {
                     setTicketNo(res.data[0].ticket_no)
 
                     setValue({
-                        complaint_date: res.data[0].ticket_date ,
+                        complaint_date: res.data[0].ticket_date  || currentDate,
                         contact_person: res.data[0].customer_mobile,
                         customer_name: res.data[0].customer_name,
                         email: res.data[0].customer_email,
@@ -492,7 +502,7 @@ const handleNewAddressSubmit = async (event) => {
         e.preventDefault()
 
         const data = {
-            complaint_date: value.complaint_date,
+            complaint_date: value.complaint_date || currentDate,
             customer_name: value.customer_name,
             contact_person: value.contact_person,
             email: value.email,
@@ -552,7 +562,7 @@ const handleNewAddressSubmit = async (event) => {
 
 
         const data = {
-            complaint_date: value.complaint_date,
+            complaint_date: value.complaint_date ,
             customer_name: value.customer_name,
             contact_person: value.contact_person,
             email: value.email,
@@ -730,7 +740,6 @@ const handleNewAddressSubmit = async (event) => {
                 // setserial({ ModelNumber: response.data[0].ModelNumber, purchase_date: response.data[0].purchase_date })
                 setValue({
                   model : response.data[0].ModelNumber,
-                  purchase_date : formatDate(response.data[0].purchase_date),
                   serial : response.data[0].serial_no
                 })
 
