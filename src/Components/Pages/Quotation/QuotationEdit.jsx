@@ -103,7 +103,7 @@ const QuotationEdit = () => {
                                                 </li>
                                                 <li class="py-1">
                                                     <span class="lable">Ticket ID:</span>
-                                                    &nbsp; <span class="value"><b>₹{value.ticketId}</b></span>
+                                                    &nbsp; <span class="value"><b>{value.ticketId}</b></span>
                                                 </li>
                                                 <li class="py-1">
                                                     <span class="lable">Spare Name:</span>
