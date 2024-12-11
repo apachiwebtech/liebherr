@@ -238,7 +238,7 @@ const QuotationEdit = () => {
                                                         <th>Model Number</th>
                                                         <th>Quantity</th>
                                                         <th>Price</th>
-                                                        <th>Edit</th>
+                                                        
                                                     </tr>
                                                 </thead>
                                                 <tbody><tr >
@@ -248,19 +248,7 @@ const QuotationEdit = () => {
                                                     <td>10</td>
                                                     <td>1000</td>
 
-                                                    <td>
-                                                        <button
-                                                            className='btn'
-                                                            style={{
-                                                                backgroundColor: 'transparent',
-                                                                border: 'none',
-                                                                fontSize: '20px',
-                                                                color: 'blue'
-                                                            }}
-                                                        >
-                                                            <FaPencilAlt />
-                                                        </button>
-                                                    </td>
+                                                   
                                                 </tr>
                                                     <tr >
                                                         {/* <td>{displayIndex}</td>  Use displayIndex for correct pagination */}
@@ -270,20 +258,7 @@ const QuotationEdit = () => {
                                                         <td>20</td>
                                                         <td>2000</td>
 
-                                                        <td>
-                                                            <button
-                                                                className='btn'
-                                                                // onClick={() => navigate(`/registercomaplaint/${item.ticket_no}`)}
-                                                                style={{
-                                                                    backgroundColor: 'transparent',
-                                                                    border: 'none',
-                                                                    fontSize: '20px',
-                                                                    color: 'blue'
-                                                                }}
-                                                            >
-                                                                <FaPencilAlt />
-                                                            </button>
-                                                        </td>
+                                                            
                                                     </tr>
                                                 </tbody>
                                             </table>
