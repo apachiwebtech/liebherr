@@ -47,7 +47,7 @@ function MasterFranchiseTabs() {
       <div className="container-fluid p-0">
         {/* Top Header */}
         <div className="text-left headings">
-          <span style={{paddingLeft:"20px",color:'#FFFFFF'}}>FRANCHISE MASTER</span>
+          <span style={{paddingLeft:"20px",color:'#FFFFFF'}}>SERVICE PARTNER MASTER</span>
         </div>
 
         {/* Nav Tabs */}
@@ -61,7 +61,7 @@ function MasterFranchiseTabs() {
                     className={`nav-link ${activeTab === '/MasterFranchise' ? 'active' : ' onClick={() => setActiveTab("MasterFranchise")}'}`}
                    
                   >
-                   FRANCHISE MASTER
+                  MASTER SERVICE PARTNER 
                   </button>
                 </li></Link>
 
@@ -70,7 +70,7 @@ function MasterFranchiseTabs() {
                     className={`nav-link ${activeTab === '/Franchisemasterlist' ? 'active' : ' onClick={() => setActiveTab("Franchisemasterlist")}'}`}
                    
                   >
-                   FRANCHISE MASTER LIST
+                  MASTER SERVICE PARTNER  LIST
                   </button>
                 </li></Link>
                 
@@ -79,7 +79,7 @@ function MasterFranchiseTabs() {
                     className={`nav-link ${activeTab === '/Childfranchisemaster' ? 'active' : 'onClick={() => setActiveTab("Childfranchisemaster")}'}`}
                     
                   >
-                   CHILD FRANCHISE MASTER
+                   CHILD SERVICE PARTNER MASTER
                   </button>
                 </li></Link>
 
@@ -88,7 +88,7 @@ function MasterFranchiseTabs() {
                     className={`nav-link ${activeTab === '/Childfranchiselist' ? 'active' : ' onClick={() => setActiveTab("Childfranchiselist")}'}`}
                    
                   >
-                  CHILD FRANCHISE MASTER LIST
+                  CHILD SERVICE PARTNER MASTER LIST
                   </button>
                 </li></Link>
 

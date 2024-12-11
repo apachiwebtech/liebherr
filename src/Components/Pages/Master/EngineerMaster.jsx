@@ -351,9 +351,9 @@ const EngineerMaster = () => {
                   <form onSubmit={handleSubmit} className="col-12">
                     <div className='row'>
                       <div className="col-md-3">
-                        <label htmlFor="Master  Franchise" className="form-label pb-0 dropdown-label">Master Franchise<span className="text-danger">*</span></label>
+                        <label htmlFor="Master  Franchise" className="form-label pb-0 dropdown-label">Master Service Partner<span className="text-danger">*</span></label>
                         <select className='form-select dropdown-select' name='mfranchise_id' value={formData.mfranchise_id} onChange={handleChange} >
-                          <option value="">Select Master Franchise</option>
+                          <option value="">Select Master Service Partner</option>
                           {Parentfranchise.map((pf) => (
                             <option key={pf.id} value={pf.licarecode}>{pf.title}</option>
                           ))}
@@ -361,9 +361,9 @@ const EngineerMaster = () => {
                         {errors.mfranchise_id && <small className="text-danger">{errors.mfranchise_id}</small>} {/* Show error for Child Franchise selection */}
                       </div>
                       <div className="col-md-3">
-                        <label htmlFor="Child Franchise" className="form-label pb-0 dropdown-label">Child Franchise<span className="text-danger">*</span></label>
+                        <label htmlFor="Child Franchise" className="form-label pb-0 dropdown-label">Child Service Partner<span className="text-danger">*</span></label>
                         <select className='form-select dropdown-select' name='cfranchise_id' value={formData.cfranchise_id} onChange={handleChange} >
-                          <option value="">Select Child Franchise</option>
+                          <option value="">Select Child Service Partner</option>
                           {Childfranchise.map((pf) => (
                             <option key={pf.id} value={pf.licare_code}>{pf.title}</option>
                           ))}
@@ -387,9 +387,7 @@ const EngineerMaster = () => {
                       </div>
 
                       <div className="col-md-3">
-                        <label htmlFor="passwordInput" className="in
-                        
-                        put-field" style={{ marginBottom: '15style={{ mapx', fontSize: '18px' }}>Engineer Password<span className="text-danger">*</span></label>
+                        <label htmlFor="passwordInput" className="input-field" style={{ marginBottom: '15style={{ mapx', fontSize: '18px' }}>Engineer Password<span className="text-danger">*</span></label>
                         <input
                           type="password"
                           className="form-control"
@@ -432,15 +430,15 @@ const EngineerMaster = () => {
 
                       </div>
                       <div className="col-md-3">
-                        <label htmlFor="pemailInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>Personal Email ID</label>
+                        <label htmlFor="pemailInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>PAN CARD/AADHAAR CARD</label>
                         <input
-                          type="email"  // Changed to "email" for Personal Email ID
+                          type="text"  // Changed to "email" for Personal Email ID
                           className="form-control"
                           name="personal_email"
                           id="pemailInput"
                           value={formData.personal_email}  // Updated value to match "email"
                           onChange={handleChange}
-                          placeholder="Enter Personal Email ID"
+                          placeholder="Enter PAN OR AADHAAR Number"
                         />
                         {errors.personal_email && <small className="text-danger">{errors.personal_email}</small>}
                         {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}

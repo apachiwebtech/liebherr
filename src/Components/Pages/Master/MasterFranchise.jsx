@@ -512,7 +512,7 @@ const MasterFranchise = (params) => {
                         htmlFor="MasterFranchiseInput"
                         className="input-field"
                       >
-                        Franchise Master<span className="text-danger">*</span>
+                        Master Service Partner  <span className="text-danger">*</span>
                       </label>
                       <input
                         type="text"
@@ -521,7 +521,7 @@ const MasterFranchise = (params) => {
                         id="MasterFranchiseInput"
                         value={formData.title}
                         onChange={handleChange}
-                        placeholder="Enter Franchise Master"
+                        placeholder="Enter Master Service Partner"
                       />
                       {errors.title && (
                         <small className="text-danger">{errors.title}</small>
@@ -558,7 +558,7 @@ const MasterFranchise = (params) => {
                         htmlFor="MasterFranchiseInput"
                         className="input-field"
                       >
-                        Franchise Master(Contact Person)<span className="text-danger">*</span>
+                        Master Service Partner(Contact Person)<span className="text-danger">*</span>
                       </label>
                       <input
                         type="text"
@@ -582,7 +582,7 @@ const MasterFranchise = (params) => {
                         htmlFor="MasterFranchiseInput"
                         className="input-field"
                       >
-                        Franchise Master (Email)<span className="text-danger">*</span>
+                        Master Service Partner (Email)<span className="text-danger">*</span>
                       </label>
                       <input
                         type="email" // Changed type to 'email'
@@ -591,7 +591,7 @@ const MasterFranchise = (params) => {
                         id="MasterFranchiseInput"
                         value={formData.email}
                         onChange={handleChange}
-                        placeholder="Enter Franchise Master Email"
+                        placeholder="Enter  Email"
                       />
                       {errors.email && (
                         <small className="text-danger">{errors.email}</small>
@@ -606,7 +606,7 @@ const MasterFranchise = (params) => {
                         htmlFor="MasterFranchiseInput"
                         className="input-field"
                       >
-                        Franchise Master (Mobile Number)<span className="text-danger">*</span>
+                        Master Service Partner (Mobile Number)<span className="text-danger">*</span>
                       </label>
                       <input
                         type="tel" // Changed type to 'tel' for mobile number input
@@ -615,7 +615,7 @@ const MasterFranchise = (params) => {
                         id="MasterFranchiseInput"
                         value={formData.mobile_no}
                         onChange={handleChange}
-                        placeholder="Enter Franchise Master Mobile Number"
+                        placeholder="Enter  Mobile Number"
                         pattern="[0-9]{10}"
                         maxLength="15"
                       />
@@ -654,7 +654,7 @@ const MasterFranchise = (params) => {
                         htmlFor="PassInput"
                         className="input-field"
                       >
-                        Franchise Master (Password)<span className="text-danger">*</span>
+                        Master Service Partner (Password)<span className="text-danger">*</span>
                       </label>
                       <input
                         type="password" // Changed type to 'password' for secure text input
@@ -663,7 +663,7 @@ const MasterFranchise = (params) => {
                         id="MasterFranchiseInput"
                         value={formData.password}
                         onChange={handleChange}
-                        placeholder="Enter Franchise Master Password"
+                        placeholder="Enter Password"
                       />
                       {errors.password && (
                         <small className="text-danger">{errors.password}</small>

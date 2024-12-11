@@ -1635,14 +1635,14 @@ export function Registercomplaint(params) {
 
                             <div className="card mb-3" id="engineerInfo">
                                 <div className="card-body">
-                                    <h4 className="pname">Remarks</h4>
+                                    <h4 className="pname">Additional Info</h4>
                                     <div className="mb-3">
                                         <textarea
                                             className="form-control"
                                             name="additional_remarks"
                                             value={value.additional_remarks}
                                             onChange={onHandleChange}
-                                            placeholder="Enter remarks..."
+                                            placeholder="Enter additional info..."
                                         ></textarea>
                                     </div>
                                 </div>

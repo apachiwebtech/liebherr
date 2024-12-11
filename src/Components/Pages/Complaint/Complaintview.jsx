@@ -896,6 +896,17 @@ export function Complaintview(params) {
     return `${day}-${month}-${year}`;
   };
 
+  const formatDate1 = (dateString) => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2,"0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    const hour = date.getHours();
+    const min = date.getMinutes();
+
+    return `${day}-${month}-${year} ${hour}:${min}`;
+  }
+
   const successMessageStyle = {
     padding: '10px 15px',
     marginTop: '10px',
@@ -1432,7 +1443,7 @@ export function Complaintview(params) {
                           </h3>
 
                           <h3 className="mainheade" style={{ fontSize: "12px", margin: 0 }}>
-                            Date: {formatDate(remark.created_date)}
+                            Date: {formatDate1(remark.created_date)}
                           </h3>
                         </div>
                       </div>
@@ -1826,7 +1837,7 @@ export function Complaintview(params) {
                       {Array.isArray(spare) && spare.length > 0 ? (
                         spare.map((part) => (
                           <option key={part.id} value={part.id}>
-                            {part.article_code + '(' + part.article_description + ')'}
+                            {part.article_code + '-' + part.article_description }
                           </option>
                         ))
                       ) : (
