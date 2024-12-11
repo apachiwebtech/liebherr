@@ -14,7 +14,7 @@ const QuotationEdit = () => {
 
     const [value, setValue] = useState({
         ticketId: '',
-        ticketDate: '',
+        ticketdate: '',
         quotationNumber: '',
         CustomerName: '',
         state: '',
@@ -67,6 +67,15 @@ const QuotationEdit = () => {
 
     }
 
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const year = date.getFullYear();
+    
+        return `${day}-${month}-${year}`;
+      };
+
 
     return (
         <div className="tab-content">
@@ -116,8 +125,8 @@ const QuotationEdit = () => {
                                                     &nbsp;<span class="value"><b>{value.ticketId}</b></span>
                                                 </li>
                                                 <li class="py-1" style={{ flex: "1 1 33.33%", padding: "10px" }}>
-                                                    <span class="lable">Spare Name:</span>
-                                                    &nbsp;<span class="value"><b>{value.title}</b></span>
+                                                    <span class="lable">Ticket Date:</span>
+                                                    &nbsp;<span class="value"><b>{formatDate(value.ticketdate)}</b></span>
                                                 </li>
                                                 <li class="py-1" style={{ flex: "1 1 33.33%", padding: "10px" }}>
                                                     <span class="lable">Model Number:</span>
