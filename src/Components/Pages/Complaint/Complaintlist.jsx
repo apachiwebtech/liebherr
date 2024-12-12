@@ -76,7 +76,7 @@ export function Complaintlist(params) {
         msp: '',
         mode_of_contact: '',
         customer_class: '',
-
+        upcoming :''
 
     });
 
@@ -174,6 +174,7 @@ export function Complaintlist(params) {
             msp: '',
             mode_of_contact: '',
             customer_class: '',
+            upcoming:''
         });
         fetchComplaintlist(); // Reset to original data
     };
@@ -505,6 +506,21 @@ export function Complaintlist(params) {
                                     <option value=""> SELECT</option>
                                     <option value="Import">Import</option>
                                     <option value="India">India</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div className="col-md-2">
+                            <div className="form-group">
+                                <label>Upcoming tickets</label>
+                                <select
+                                    className="form-control"
+                                    name="upcoming"
+                                    value={searchFilters.upcoming}
+                                    onChange={handleFilterChange}
+                                >
+                                    <option value=""> SELECT</option>
+                                    <option value="upcoming">Yes</option>
+                                    <option value="current">no</option>
                                 </select>
                             </div>
                         </div>

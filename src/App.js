@@ -537,6 +537,15 @@ function App() {
     }
   };
 
+  React.useEffect(() =>{
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'token') {
+          window.location.reload()
+      }
+  });
+  
+  },[])
+
   React.useEffect(() => {
     fetchProtectedData()
 

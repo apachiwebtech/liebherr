@@ -542,21 +542,21 @@ export function Registercomplaint(params) {
         }
     }
 
-    useEffect(() => {
+    // useEffect(() => {
 
-        if (DuplicateCustomerNumber) {
-            fetchComplaintDuplicate(DuplicateCustomerNumber);
-        }
-        //getState()
-        getProduct()
-        // getMasterPartner()
-        if (Comp_id) {
+    //     if (DuplicateCustomerNumber) {
+    //         fetchComplaintDuplicate(DuplicateCustomerNumber);
+    //     }
+    //     //getState()
+    //     getProduct()
+    //     // getMasterPartner()
+    //     if (Comp_id) {
 
-            getCompticket()
+    //         getCompticket()
 
-        }
-        // getChildPartner()
-    }, [DuplicateCustomerNumber])
+    //     }
+    //     // getChildPartner()
+    // }, [DuplicateCustomerNumber])
 
 
 
@@ -903,21 +903,21 @@ export function Registercomplaint(params) {
 
 
 
-    const fetchComplaintDuplicate = async () => {
-        try {
-            const response = await axios.get(
-                `${Base_Url}/getComplaintDuplicateRegisterPage/${DuplicateCustomerNumber}`
-            );
+    // const fetchComplaintDuplicate = async () => {
+    //     try {
+    //         const response = await axios.get(
+    //             `${Base_Url}/getComplaintDuplicateRegisterPage/${DuplicateCustomerNumber}`
+    //         );
 
-            if (response.data && response.data[0]) {
+    //         if (response.data && response.data[0]) {
 
-                setLocation(response.data[0]);
-            }
-            // setDuplicate(response.data);
-        } catch (error) {
-            console.error("Error fetching ticket details:", error);
-        }
-    };
+    //             setLocation(response.data[0]);
+    //         }
+    //         // setDuplicate(response.data);
+    //     } catch (error) {
+    //         console.error("Error fetching ticket details:", error);
+    //     }
+    // };
 
     const addnewticket = (product_id) => {
         setForm(true)

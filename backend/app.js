@@ -112,7 +112,7 @@ app.post("/loginuser", async (req, res) => {
       const token = jwt.sign(
         { id: user.id, Lhiuser: user.Lhiuser }, // Payload
         JWT_SECRET, // Secret key
-        { expiresIn: "1h" } // Token validity
+        { expiresIn: "8h" } // Token validity
       );
 
       res.json({
@@ -7232,10 +7232,13 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
       msp,
       mode_of_contact,
       customer_class,
-      Priority
+      Priority,
+      upcoming = 'current'
     } = req.query;
 
     const offset = (page - 1) * pageSize;
+
+    const currentDate = new Date().toISOString().split('T')[0]
 
     let sql = `
         SELECT c.*,
@@ -7318,21 +7321,49 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
       sql += ` AND c.call_status != 'Closed' AND c.call_status != 'Cancelled'`;
     }
 
-    // Sorting by call_priority and ticket_date for additional ordering
-    sql += `
-        ORDER BY 
-          CASE 
-            WHEN c.call_priority = 'High' THEN 1
-            WHEN c.call_priority = 'Regular' THEN 2
-            ELSE 3 
-          END,
-          c.ticket_date DESC
-        OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY`;
+    if(upcoming == 'current'){
+      sql += ` AND ticket_date <= @currentdate`;
+      params.push({ name: "currentdate", value: currentDate });
 
-    params.push(
-      { name: "offset", value: offset },
-      { name: "pageSize", value: parseInt(pageSize) }
-    );
+
+    }else {
+      sql += ` AND ticket_date > @currentdate`;
+      params.push({ name: "currentdate", value: currentDate });
+      
+    }
+
+    // Sorting by call_priority and ticket_date for additional ordering
+
+    if(upcoming == 'current'){
+      sql += `
+      ORDER BY 
+        CASE 
+          WHEN c.call_priority = 'High' THEN 1
+          WHEN c.call_priority = 'Regular' THEN 2
+          ELSE 3 
+        END,
+        c.ticket_date DESC
+      OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY`;
+
+      params.push(
+        { name: "offset", value: offset },
+        { name: "pageSize", value: parseInt(pageSize) }
+      );
+  
+    }else{
+      sql += `
+      ORDER BY 
+        CASE 
+          WHEN c.call_priority = 'High' THEN 1
+          WHEN c.call_priority = 'Regular' THEN 2
+          ELSE 3 
+        END,
+        c.ticket_date DESC`;
+
+    }
+   
+
+  
 
     // Execute queries
     const request = pool.request();
