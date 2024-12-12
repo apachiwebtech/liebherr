@@ -7205,6 +7205,8 @@ app.post("/updatestatus", authenticateToken, async (req, res) => {
 
 
 
+
+
 app.get("/getcomplainlist", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
@@ -7225,27 +7227,27 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
       msp,
       mode_of_contact,
       customer_class,
+      Priority
     } = req.query;
 
     const offset = (page - 1) * pageSize;
 
-
-
     let sql = `
-        SELECT c.* ,
+        SELECT c.*,
                DATEDIFF(DAY, c.ticket_date, GETDATE()) AS ageingdays
-        FROM complaint_ticket AS c WHERE c.deleted = 0`;
+        FROM complaint_ticket AS c 
+        WHERE c.deleted = 0`;
 
     const countSql = `
         SELECT COUNT(*) AS totalCount
         FROM complaint_ticket AS c
         WHERE c.deleted = 0`;
 
-    let params = []; // Change to let to allow mutation
+    let params = [];
 
-    // // Filtering conditions
+    // Filtering conditions
     if (fromDate && toDate) {
-      sql += `AND CAST(c.ticket_date AS DATE) BETWEEN @fromDate AND @toDate`;
+      sql += ` AND CAST(c.ticket_date AS DATE) BETWEEN @fromDate AND @toDate`;
       params.push({ name: "fromDate", value: fromDate }, { name: "toDate", value: toDate });
     }
 
@@ -7273,33 +7275,29 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
       sql += ` AND c.ModelNumber LIKE @productCode`;
       params.push({ name: "productCode", value: `%${productCode}%` });
     }
+
     if (ticketno) {
       sql += ` AND c.ticket_no LIKE @ticketno`;
       params.push({ name: "ticketno", value: `%${ticketno}%` });
     }
 
-
     if (customerID) {
       sql += ` AND c.customer_id LIKE @customerID`;
-
       params.push({ name: "customerID", value: `%${customerID}%` });
     }
 
     if (csp) {
       sql += ` AND c.csp LIKE @csp`;
-
       params.push({ name: "csp", value: `%${csp}%` });
     }
 
     if (msp) {
       sql += ` AND c.msp LIKE @msp`;
-
       params.push({ name: "msp", value: `%${msp}%` });
     }
 
     if (mode_of_contact) {
       sql += ` AND c.mode_of_contact LIKE @mode_of_contact`;
-
       params.push({ name: "mode_of_contact", value: `%${mode_of_contact}%` });
     }
 
@@ -7308,12 +7306,6 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
       params.push({ name: "customer_class", value: `%${customer_class}%` });
     }
 
-    // if (status) {
-    //   sql += ` AND c.call_status = @status`;
-    //   params.push({ name: "status", value: status });
-    // }
-
-    // If no status is provided, exclude 'Closed' and 'Cancelled'
     if (status) {
       sql += ` AND c.call_status = @status`;
       params.push({ name: "status", value: status });
@@ -7321,13 +7313,21 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
       sql += ` AND c.call_status != 'Closed' AND c.call_status != 'Cancelled'`;
     }
 
-    // Pagination
-    sql += ` ORDER BY c.ticket_date DESC OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY`;
+    // Sorting by call_priority and ticket_date for additional ordering
+    sql += `
+        ORDER BY 
+          CASE 
+            WHEN c.call_priority = 'High' THEN 1
+            WHEN c.call_priority = 'Regular' THEN 2
+            ELSE 3 
+          END,
+          c.ticket_date DESC
+        OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY`;
+
     params.push(
       { name: "offset", value: offset },
       { name: "pageSize", value: parseInt(pageSize) }
     );
-
 
     // Execute queries
     const request = pool.request();
@@ -7357,6 +7357,7 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
 
 
 
+
 // CSP complaint list
 
 // CSP complaint list
@@ -7379,7 +7380,6 @@ app.get("/getcomplainlistcsp", async (req, res) => {
       ticketno,
       status,
       customerID,
-
       csp,
       msp,
       mode_of_contact,

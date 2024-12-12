@@ -59,6 +59,7 @@ export function Complaintlist(params) {
         password: '',
         email: '',
         mobile_no: '',
+        Priority: '',
     });
     const [searchFilters, setSearchFilters] = useState({
         fromDate: '',
@@ -71,7 +72,6 @@ export function Complaintlist(params) {
         ticketno: '',
         status: '',
         customerID: '',
-
         csp: '',
         msp: '',
         mode_of_contact: '',
@@ -247,6 +247,8 @@ export function Complaintlist(params) {
             };
         }
     }, [filteredData]);
+
+  
 
 
 
@@ -578,7 +580,7 @@ export function Complaintlist(params) {
 
                             <table className="table">
                                 <thead>
-                                    <tr>
+                                    <tr >
                                         <th>#</th>
                                         <th>Ticket No.</th>
                                         <th>Ticket Date</th>
@@ -588,6 +590,7 @@ export function Complaintlist(params) {
                                         <th>Age</th>
                                         <th>Assigned Users</th>
                                         <th>Status</th>
+                                        <th>Call Priority</th>
                                         <th>Edit</th>
                                         <th>View</th>
                                     </tr>
@@ -595,18 +598,23 @@ export function Complaintlist(params) {
                                 <tbody>
                                     {filteredData.map((item, index) => {
                                         const displayIndex = (currentPage - 1) * pageSize + index + 1;  // Adjusted index for pagination
+                                        const rowStyle = {
+                                            backgroundColor: item.call_priority == "HIGH" ? "#d4edda" : item.call_priority == "REGULAR" ? "#transparent" : "transparent",
+                                        };
+                                        console.log("Style:", rowStyle); // Add this line
                                         return (
-                                            <tr key={item.id}>
-                                                <td>{displayIndex}</td>  {/* Use displayIndex for correct pagination */}
-                                                <td>{item.ticket_no}</td>
-                                                <td>{formatDate(item.ticket_date)}</td>
-                                                <td>{item.customer_name}</td>
-                                                <td>{item.ModelNumber}</td>
-                                                <td>{item.serial_no}</td>
-                                                <td>{item.ageingdays}</td>
-                                                <td>{item.assigned_to}</td>
-                                                <td>{item.call_status}</td>
-                                                <td>
+                                            <tr key={item.id} >
+                                                <td style={rowStyle}>{displayIndex}</td>  {/* Use displayIndex for correct pagination */}
+                                                <td style={rowStyle}>{item.ticket_no}</td>
+                                                <td style={rowStyle}>{formatDate(item.ticket_date)}</td>
+                                                <td style={rowStyle}>{item.customer_name}</td>
+                                                <td style={rowStyle}>{item.ModelNumber}</td>
+                                                <td style={rowStyle}>{item.serial_no}</td>
+                                                <td style={rowStyle}>{item.ageingdays}</td>
+                                                <td style={rowStyle}>{item.assigned_to}</td>
+                                                <td style={rowStyle}>{item.call_status}</td>
+                                                <td style={rowStyle}>{item.call_priority}</td>
+                                                <td style={rowStyle}>
                                                     <button
                                                         className='btn'
                                                         onClick={() => navigate(`/registercomaplaint/${item.ticket_no}`)}
@@ -623,7 +631,7 @@ export function Complaintlist(params) {
                                                         <FaPencilAlt />
                                                     </button>
                                                 </td>
-                                                <td>
+                                                <td style={rowStyle}>
                                                     <button
                                                         className='btn'
                                                         onClick={() => navigate(`/complaintview/${item.id}`)}
