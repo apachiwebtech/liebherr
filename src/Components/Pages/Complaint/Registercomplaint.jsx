@@ -542,21 +542,21 @@ export function Registercomplaint(params) {
         }
     }
 
-    // useEffect(() => {
+    useEffect(() => {
 
-    //     if (DuplicateCustomerNumber) {
-    //         fetchComplaintDuplicate(DuplicateCustomerNumber);
-    //     }
-    //     //getState()
-    //     getProduct()
-    //     // getMasterPartner()
-    //     if (Comp_id) {
+        // if (DuplicateCustomerNumber) {
+        //     fetchComplaintDuplicate(DuplicateCustomerNumber);
+        // }
+        //getState()
+        getProduct()
+        // getMasterPartner()
+        if (Comp_id) {
 
-    //         getCompticket()
+            getCompticket()
 
-    //     }
-    //     // getChildPartner()
-    // }, [DuplicateCustomerNumber])
+        }
+        // getChildPartner()
+    }, [DuplicateCustomerNumber])
 
 
 
