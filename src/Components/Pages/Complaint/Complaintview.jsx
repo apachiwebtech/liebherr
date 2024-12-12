@@ -1108,7 +1108,7 @@ export function Complaintview(params) {
           {/* // */}
           <div className="card" id="attachmentInfocs">
             <div className="card-body">
-              <h4 className="pname" style={{ fontSize: "14px" }}>Attachment 2</h4>
+              <h4 className="pname" style={{ fontSize: "14px" }}>Attachment</h4>
               <div className="mb-3">
                 <input
                   type="file"
@@ -1730,7 +1730,7 @@ export function Complaintview(params) {
                 </table>
               </div>
 
-            {complaintview.call_status == 'Closed' && <>
+            {(complaintview.call_status == 'Closed' || complaintview.group_code != null) &&  <>
               <div className="mt-3">
                 <h4 className="pname" style={{ fontSize: "14px" }}>Defect Group Code:</h4>
                 <select
@@ -1818,7 +1818,7 @@ export function Complaintview(params) {
             </div>
           </div>
 
-      {complaintview.sub_call_status == 'Spare' || spare.length > 0 &&    <div className="card mb-3">
+      {(complaintview.sub_call_status == 'Spare' || spare.length > 0 ) &&    <div className="card mb-3">
             <div className="card-body">
 
               <div className="mt-3">
