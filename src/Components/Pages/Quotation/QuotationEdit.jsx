@@ -112,7 +112,7 @@ const QuotationEdit = () => {
                                                 <li class="py-1" style={{ flex: "1 1 33.33%", padding: "10px" }}>
                                                     <span class="lable">Quotation No:</span>
                                                     &nbsp;<span class="value"><b>{value.quotationNumber}</b></span>
-                                                </li>
+                                                </li> 
                                                 <li class="py-1" style={{ flex: "1 1 33.33%", padding: "10px" }}>
                                                     <span class="lable">Customer Name:</span>
                                                     &nbsp;<span class="value"><b>{value.CustomerName}</b></span>
