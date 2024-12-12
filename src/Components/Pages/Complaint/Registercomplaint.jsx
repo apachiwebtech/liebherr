@@ -40,7 +40,7 @@ export function Registercomplaint(params) {
     const [serials, setserial] = useState([])
     const [currentAttachment2, setCurrentAttachment2] = useState(""); // Current attachment 2 for modal
     const [isModal2Open, setIsModal2Open] = useState(false);
-
+    const [dateafteryear, setdateafteryear] = useState('')
 
 
 
@@ -62,6 +62,8 @@ export function Registercomplaint(params) {
 
         return `${year}-${month}-${day}`;
     };
+
+
 
     //setting the values
     const currentDate = new Date().toISOString().split('T')[0];
@@ -103,6 +105,44 @@ export function Registercomplaint(params) {
         Priority: "REGULAR",
         callType: "",
     })
+
+    const getDateAfterOneYear = (value) => {
+        try {
+            // Ensure value is in a recognized format
+            const purchase_date = new Date(value);
+
+            if (isNaN(purchase_date)) {
+                throw new Error("Invalid date format");
+            }
+
+            // Add one year to the date
+            purchase_date.setFullYear(purchase_date.getFullYear() + 1);
+
+            // Format the date as YYYY-MM-DD
+            const lastDate = purchase_date.toISOString().split('T')[0];
+
+            console.log(lastDate, "purchase")
+            console.log(currentDate, "current")
+
+            if (lastDate < currentDate) {
+                setValue({
+                    warrenty_status: "OUT OF WARRANTY"
+                })
+            } else {
+                setValue({
+                    warrenty_status: "WARRANTY"
+                })
+            }
+
+        } catch (error) {
+            console.error("Error processing date:", error.message);
+            return null; // Return null for invalid dates
+        }
+    };
+
+
+
+
 
     //Validation
 
@@ -264,7 +304,7 @@ export function Registercomplaint(params) {
             });
 
             if (response.data.success) {
-                console.log("New Address Submitted:", newAddress);
+
 
                 // Optimistically update the addresses state
                 setAddresses(prevAddresses => [
@@ -335,7 +375,7 @@ export function Registercomplaint(params) {
                 if (res.data) {
 
                     setProduct(res.data)
-                    console.log(res.data, "RRR")
+
                 }
             })
 
@@ -524,7 +564,7 @@ export function Registercomplaint(params) {
 
         axios.post(`${Base_Url}/getticketendcustomer`, { searchparam: serachval })
             .then((res) => {
-                console.log(res.data.information)
+
                 if (res.data.information && res.data.information.length > 0) {
                     const customerInfo = res.data.information[0];
                     // console.log(res.data,"Search Data")
@@ -533,7 +573,7 @@ export function Registercomplaint(params) {
                     setSearchData(res.data.information[0])
                     setProductCustomer(res.data.product)
                     setDuplicate(res.data.information);
-                    console.log(searchdata, "EEE")
+
 
                     setHideticket(true)
                     // setTicket(res.data)
@@ -632,7 +672,7 @@ export function Registercomplaint(params) {
                     ticket_id: ticketid
                 };
 
-                console.log("Submitting data:", data);
+
 
                 axios.post(`${Base_Url}/add_complaintt`, data, {
                     headers: {
@@ -790,10 +830,14 @@ export function Registercomplaint(params) {
         if (name === "complaint_date") {
             setDate(e.target.value);
         }
+
+        if (name == 'purchase_date') {
+            getDateAfterOneYear()
+        }
     };
 
 
-    console.log(value.serial, "%%")
+
 
 
     const fetchlocations = async (pincode) => {
@@ -1124,9 +1168,9 @@ export function Registercomplaint(params) {
                                                     onChange={onHandleChange}
                                                     className="form-control"
                                                     placeholder="Enter.."
-                                                    
+
                                                 />
-                                                {errors.serial &&<span style={{fontSize :"12px"}} className="text-danger">{errors.serial}</span>}
+                                                {errors.serial && <span style={{ fontSize: "12px" }} className="text-danger">{errors.serial}</span>}
                                             </div> : <div>{value.serial}</div>}
 
                                     </div>
@@ -1137,7 +1181,7 @@ export function Registercomplaint(params) {
 
                                             <div className="">
                                                 <input className="form-control" onChange={onHandleChange} value={value.model} name="model"></input>
-                                                {errors.model && <span style={{fontSize :"12px"}} className="text-danger">{errors.model}</span> }
+                                                {errors.model && <span style={{ fontSize: "12px" }} className="text-danger">{errors.model}</span>}
                                             </div> :
                                             <div>{ModelNumber}</div>
                                         }
@@ -1151,11 +1195,14 @@ export function Registercomplaint(params) {
                                                 <input
                                                     type="date"
                                                     name="purchase_date"
-                                                    onChange={onHandleChange}
+                                                    onChange={(e) => {
+                                                        onHandleChange(e)
+                                                        getDateAfterOneYear(e.target.value)
+                                                    }}
                                                     value={value.purchase_date}
                                                     className="form-control"
                                                 />
-                                                     {errors.purchase_date && <span style={{fontSize :"12px"}} className="text-danger">{errors.purchase_date}</span> }
+                                                {errors.purchase_date && <span style={{ fontSize: "12px" }} className="text-danger">{errors.purchase_date}</span>}
                                             </div> : <div>{value.purchase_date}</div>}
                                     </div>
 
@@ -1169,7 +1216,7 @@ export function Registercomplaint(params) {
                                                 <option value="OUT OF WARRANTY">OUT OF WARRANTY</option>
                                                 <option value="NA">NA</option>
                                             </select>
-                                            {errors.warrenty_status && <span style={{fontSize :"12px"}} className="text-danger">{errors.warrenty_status}</span> }
+                                            {errors.warrenty_status && <span style={{ fontSize: "12px" }} className="text-danger">{errors.warrenty_status}</span>}
                                         </div>
                                     </div>
                                 </div>
@@ -1186,7 +1233,7 @@ export function Registercomplaint(params) {
                                         <div className="mb-3">
                                             <label className="form-label">Ticket Date</label>
                                             <input type="date" name="complaint_date" onChange={onHandleChange} value={value.complaint_date} className="form-control" />
-                                            {errors.complaint_date && <span style={{fontSize :"12px"}} className="text-danger">{errors.complaint_date}</span> }
+                                            {errors.complaint_date && <span style={{ fontSize: "12px" }} className="text-danger">{errors.complaint_date}</span>}
                                         </div>
                                     </div>
                                     <div className="col-md-2">
@@ -1201,35 +1248,35 @@ export function Registercomplaint(params) {
                                                 <option value="Lhi">Lhi</option>
                                                 <option value="Dl">Dl</option>
                                             </select>
-                                            {errors.salutation && <span style={{fontSize :"12px"}} className="text-danger">{errors.salutation}</span> }
+                                            {errors.salutation && <span style={{ fontSize: "12px" }} className="text-danger">{errors.salutation}</span>}
                                         </div>
                                     </div>
                                     <div className="col-md-3">
                                         <div className="mb-3">
                                             <label htmlFor="exampleFormControlInput1" className="form-label">Customer Name</label>
                                             <input type="text" name="customer_name" onChange={onHandleChange} value={value.customer_name} className="form-control" placeholder="Enter Customer Name" />
-                                            {errors.customer_name && <span style={{fontSize :"12px"}} className="text-danger">{errors.customer_name}</span> }
+                                            {errors.customer_name && <span style={{ fontSize: "12px" }} className="text-danger">{errors.customer_name}</span>}
                                         </div>
                                     </div>
                                     <div className="col-md-4">
                                         <div className="mb-3">
                                             <label htmlFor="exampleFormControlInput1" className="form-label">Contact Person</label>
                                             <input type="text" className="form-control" name="contact_person" value={value.contact_person} onChange={onHandleChange} placeholder="Enter Contact Person Name" />
-                                            {errors.contact_person && <span style={{fontSize :"12px"}} className="text-danger">{errors.contact_person}</span> }
+                                            {errors.contact_person && <span style={{ fontSize: "12px" }} className="text-danger">{errors.contact_person}</span>}
                                         </div>
                                     </div>
                                     <div className="col-md-4">
                                         <div className="mb-3">
                                             <label htmlFor="exampleFormControlInput1" className="form-label">Email Id</label>
                                             <input type="email" value={value.email} name="email" onChange={onHandleChange} className="form-control" placeholder="Enter Email Id" />
-                                            {errors.email && <span style={{fontSize :"12px"}} className="text-danger">{errors.email}</span> }
+                                            {errors.email && <span style={{ fontSize: "12px" }} className="text-danger">{errors.email}</span>}
                                         </div>
                                     </div>
                                     <div className="col-md-4">
                                         <div className="mb-3">
                                             <label htmlFor="exampleFormControlInput1" className="form-label">Mobile No. <input type="checkbox" />Whatsapp</label>
                                             <input type="text" value={value.mobile} name="mobile" onChange={onHandleChange} className="form-control" placeholder="Enter Mobile" />
-                                            {errors.mobile && <span style={{fontSize :"12px"}} className="text-danger">{errors.mobile}</span> }
+                                            {errors.mobile && <span style={{ fontSize: "12px" }} className="text-danger">{errors.mobile}</span>}
                                         </div>
                                     </div>
                                     <div className="col-md-4">
@@ -1333,7 +1380,7 @@ export function Registercomplaint(params) {
                                                     onChange={handleAddressChange}
                                                     placeholder="Enter Address"
                                                 ></textarea>
-                                                            {errors.address && <span style={{fontSize :"12px"}} className="text-danger">{errors.address}</span> }
+                                                {errors.address && <span style={{ fontSize: "12px" }} className="text-danger">{errors.address}</span>}
 
                                             </div>
                                         </div>
@@ -1383,7 +1430,7 @@ export function Registercomplaint(params) {
                                                         );
                                                     })}
                                                 </select>
-                                                {errors.pincode && <span style={{fontSize :"12px"}} className="text-danger">{errors.pincode}</span> }
+                                                {errors.pincode && <span style={{ fontSize: "12px" }} className="text-danger">{errors.pincode}</span>}
                                             </div>
                                         </div>
 
@@ -1399,7 +1446,7 @@ export function Registercomplaint(params) {
                                                         )
                                                     })}
                                                 </select>
-                                                {errors.state && <span style={{fontSize :"12px"}} className="text-danger">{errors.state}</span> }
+                                                {errors.state && <span style={{ fontSize: "12px" }} className="text-danger">{errors.state}</span>}
                                             </div>
                                         </div>
 
@@ -1415,7 +1462,7 @@ export function Registercomplaint(params) {
                                                         );
                                                     })}
                                                 </select>
-                                                {errors.area && <span style={{fontSize :"12px"}} className="text-danger">{errors.area}</span> }
+                                                {errors.area && <span style={{ fontSize: "12px" }} className="text-danger">{errors.area}</span>}
                                             </div>
                                         </div>
 
@@ -1431,7 +1478,7 @@ export function Registercomplaint(params) {
                                                         );
                                                     })}
                                                 </select>
-                                                {errors.city && <span style={{fontSize :"12px"}} className="text-danger">{errors.city}</span> }
+                                                {errors.city && <span style={{ fontSize: "12px" }} className="text-danger">{errors.city}</span>}
                                             </div>
                                         </div>
 
@@ -1441,28 +1488,28 @@ export function Registercomplaint(params) {
                                             <div className="mb-3">
                                                 <label htmlFor="exampleFormControlInput1" className="form-label">Pincode</label>
                                                 <input type="text" className="form-control" value={value.pincode} name="pincode" onChange={onHandleChange} placeholder="" />
-                                                {errors.pincode && <span style={{fontSize :"12px"}} className="text-danger">{errors.pincode}</span> }
+                                                {errors.pincode && <span style={{ fontSize: "12px" }} className="text-danger">{errors.pincode}</span>}
                                             </div>
                                         </div>
                                         <div className="col-md-3">
                                             <div className="mb-3">
                                                 <label htmlFor="exampleFormControlInput1" className="form-label">State</label>
                                                 <input type="text" className="form-control" value={value.state} name="state" onChange={onHandleChange} placeholder="" disabled />
-                                                {errors.state && <span style={{fontSize :"12px"}} className="text-danger">{errors.state}</span> }
+                                                {errors.state && <span style={{ fontSize: "12px" }} className="text-danger">{errors.state}</span>}
                                             </div>
                                         </div>
                                         <div className="col-md-3">
                                             <div className="mb-3">
                                                 <label htmlFor="exampleFormControlInput1" className="form-label">District</label>
                                                 <input type="text" className="form-control" value={value.area} name="area" onChange={onHandleChange} placeholder="" disabled />
-                                                {errors.area && <span style={{fontSize :"12px"}} className="text-danger">{errors.area}</span> }
+                                                {errors.area && <span style={{ fontSize: "12px" }} className="text-danger">{errors.area}</span>}
                                             </div>
                                         </div>
                                         <div className="col-md-3">
                                             <div className="mb-3">
                                                 <label htmlFor="exampleFormControlInput1" className="form-label">City</label>
                                                 <input type="text" className="form-control" value={value.city} name="city" onChange={onHandleChange} placeholder="" disabled />
-                                                {errors.city && <span style={{fontSize :"12px"}} className="text-danger">{errors.city}</span> }
+                                                {errors.city && <span style={{ fontSize: "12px" }} className="text-danger">{errors.city}</span>}
                                             </div>
                                         </div>
 
@@ -1482,7 +1529,7 @@ export function Registercomplaint(params) {
                                                 <option value="Email">Email</option>
                                                 <option value="In Person">In Person</option>
                                             </select>
-                                            {errors.mode_of_contact && <span style={{fontSize :"12px"}} className="text-danger">{errors.mode_of_contact}</span> }
+                                            {errors.mode_of_contact && <span style={{ fontSize: "12px" }} className="text-danger">{errors.mode_of_contact}</span>}
                                         </div>
                                     </div>
                                     <div className="col-md-4">
@@ -1497,7 +1544,7 @@ export function Registercomplaint(params) {
                                                 <option value="Maintenance">Maintenance</option>
                                                 <option value="Demo">Demo</option>
                                             </select>
-                                            {errors.ticket_type && <span style={{fontSize :"12px"}} className="text-danger">{errors.ticket_type}</span> }
+                                            {errors.ticket_type && <span style={{ fontSize: "12px" }} className="text-danger">{errors.ticket_type}</span>}
                                         </div>
                                     </div>
 
@@ -1509,7 +1556,7 @@ export function Registercomplaint(params) {
                                                 <option value="END CUSTOMER">END CUSTOMER</option>
                                                 <option value="DISPLAY/EVENT">DISPLAY / EVENTS</option>
                                             </select>
-                                            {errors.cust_type && <span style={{fontSize :"12px"}} className="text-danger">{errors.cust_type}</span> }
+                                            {errors.cust_type && <span style={{ fontSize: "12px" }} className="text-danger">{errors.cust_type}</span>}
                                         </div>
                                     </div>
                                     {/* <div className="col-md-4">
@@ -1540,7 +1587,7 @@ export function Registercomplaint(params) {
                                                 <option value="Yes">Yes</option>
                                                 <option value="No">No</option>
                                             </select>
-                                            {errors.call_charge && <span style={{fontSize :"12px"}} className="text-danger">{errors.call_charge}</span> }
+                                            {errors.call_charge && <span style={{ fontSize: "12px" }} className="text-danger">{errors.call_charge}</span>}
                                         </div>
                                     </div>
 
@@ -1552,7 +1599,7 @@ export function Registercomplaint(params) {
                                                 <option value="CONSUMER">Consumer</option>
                                                 <option value="IMPORT">Import</option>
                                             </select>
-                                            {errors.classification && <span style={{fontSize :"12px"}} className="text-danger">{errors.classification}</span> }
+                                            {errors.classification && <span style={{ fontSize: "12px" }} className="text-danger">{errors.classification}</span>}
                                         </div>
                                     </div>
                                     <div className="col-md-4">
@@ -1563,7 +1610,7 @@ export function Registercomplaint(params) {
                                                 <option value="REGULAR">Regular</option>
                                                 <option value="HIGH">High</option>
                                             </select>
-                                            {errors.Priority && <span style={{fontSize :"12px"}} className="text-danger">{errors.Priority}</span> }
+                                            {errors.Priority && <span style={{ fontSize: "12px" }} className="text-danger">{errors.Priority}</span>}
                                         </div>
                                     </div>
 
@@ -1628,7 +1675,7 @@ export function Registercomplaint(params) {
                                             onChange={onHandleChange}
                                             placeholder="Enter Fault Description..."
                                         ></textarea>
-                                                {errors.specification && <span style={{fontSize :"12px"}} className="text-danger">{errors.specification}</span> }
+                                        {errors.specification && <span style={{ fontSize: "12px" }} className="text-danger">{errors.specification}</span>}
                                     </div>
                                 </div>
                             </div>

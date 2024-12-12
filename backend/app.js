@@ -7676,7 +7676,7 @@ app.get("/getserial/:serial", authenticateToken, async (req, res) => {
 
     const pool = await poolPromise;
 
-    const sql = `SELECT * from awt_serial_list where serial_no = @serial`
+    const sql = `SELECT * from awt_serial_list where serial_no = @serial `
 
     const result = await pool.request()
       .input('serial', serial)

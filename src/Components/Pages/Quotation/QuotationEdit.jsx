@@ -1,9 +1,6 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
-import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
-
 import { useNavigate, useParams } from 'react-router-dom';
 
 

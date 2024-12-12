@@ -26,7 +26,7 @@ export function Complaintview(params) {
     warranty_status: '',
     ModelNumber: '',
     invoice_date: '',
-    purchase_date:'',
+    purchase_date: '',
     serial_no: '',
     call_status: '',
     engineer_id: '',
@@ -156,7 +156,7 @@ export function Complaintview(params) {
 
     try {
 
-      const res = await axios.get(`${Base_Url}/getcom` ,  {
+      const res = await axios.get(`${Base_Url}/getcom`, {
         headers: {
           Authorization: token, // Send token in headers
         },
@@ -180,7 +180,7 @@ export function Complaintview(params) {
 
 
   }
-  
+
   async function getdefecttype(params) {
 
 
@@ -419,18 +419,18 @@ export function Complaintview(params) {
 
 
 
-    const finaldata = {data: newPart , ticket_no: complaintview.ticket_no}
+    const finaldata = { data: newPart, ticket_no: complaintview.ticket_no }
 
     const data = {
       finaldata: finaldata,
     };
 
-    axios.post(`${Base_Url}/add_uniqsparepart` , data)
-    .then((res) =>{
-     
-      getsparelist(complaintview.ticket_no)
+    axios.post(`${Base_Url}/add_uniqsparepart`, data)
+      .then((res) => {
 
-    })
+        getsparelist(complaintview.ticket_no)
+
+      })
 
 
     setQuantity(""); // Reset quantity input
@@ -898,7 +898,7 @@ export function Complaintview(params) {
 
   const formatDate1 = (dateString) => {
     const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2,"0");
+    const day = String(date.getDate()).padStart(2, "0");
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const year = date.getFullYear();
     const hour = date.getHours();
@@ -1280,7 +1280,7 @@ export function Complaintview(params) {
                                         <p style={{ fontSize: "14px"}}>{complaintview.ModelNumber}</p>
                                     </div> */}
 
-<div className="col-md-2">
+                <div className="col-md-2">
                   <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>
                     Serial No
                   </p>
@@ -1321,7 +1321,7 @@ export function Complaintview(params) {
                 </div>
 
 
-      
+
 
 
                 <div className="col-md-2">
@@ -1655,7 +1655,7 @@ export function Complaintview(params) {
                     onChange={(e) => handleengchange(e.target.value)}
                   />
                   <label className="form-check-label" htmlFor="franchisee" style={{ fontSize: "14px" }}>
-                  Service Partner
+                    Service Partner
                   </label>
                 </div>
 
@@ -1730,73 +1730,73 @@ export function Complaintview(params) {
                 </table>
               </div>
 
-            {(complaintview.call_status == 'Closed' || complaintview.group_code != null) &&  <>
-              <div className="mt-3">
-                <h4 className="pname" style={{ fontSize: "14px" }}>Defect Group Code:</h4>
-                <select
-                  name="group_code"
-                  className="form-control"
-                  disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
-                  style={{ fontSize: "14px" }}
-                  value={complaintview.group_code}
-                  onChange={(e) => {
-                    const selectedcode = e.target.value; // Get the id
-                    // const selectedid = groupdefect.find(item => item.Callstatus == selectedname)?.id; // Find the corresponding Callstatus value
-                    getdefecttype(selectedcode); // Send the id to fetch sub-call statuses
-                    getsitecode(selectedcode); // Send the id to fetch sub-call statuses
-                    setgroupstatusid(selectedcode)
-                    handleModelChange(e)
-                  }}
-                >
-                  <option value="">Select Status</option>
-                  {groupdefect.map((item) => (
-                    <option key={item.id} value={item.defectgroupcode}>
-                      {item.defectgrouptitle}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="mt-3">
-                <h4 className="pname" style={{ fontSize: "14px" }}>Type of Defect Code:</h4>
-                <select
-                  name="defect_type"
-                  className="form-control"
-                  disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
-                  style={{ fontSize: "14px" }}
-                  value={complaintview.defect_type}
-                  onChange={handleModelChange}
-                >
-                  <option value="">Select </option>
-                  {GroupDefecttype.map((item) => (
-                    <option key={item.id} value={item.defect_code}>
-                      {item.defect_title}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="mt-3">
-                <h4 className="pname" style={{ fontSize: "14px" }}>Site Defect Code:</h4>
-                <select
-                  name="site_defect"
-                  className="form-control"
-                  disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
-                  style={{ fontSize: "14px" }}
-                  value={complaintview.site_defect}
-                  onChange={handleModelChange}
-                >
-                  <option value="">Select </option>
-                  {GroupDefectsite.map((item) => (
-                    <option key={item.id} value={item.dsite_code}>
-                      {item.dsite_title}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </>}  
+              {(complaintview.call_status == 'Closed' || complaintview.group_code != null) && <>
+                <div className="mt-3">
+                  <h4 className="pname" style={{ fontSize: "14px" }}>Defect Group Code:</h4>
+                  <select
+                    name="group_code"
+                    className="form-control"
+                    disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
+                    style={{ fontSize: "14px" }}
+                    value={complaintview.group_code}
+                    onChange={(e) => {
+                      const selectedcode = e.target.value; // Get the id
+                      // const selectedid = groupdefect.find(item => item.Callstatus == selectedname)?.id; // Find the corresponding Callstatus value
+                      getdefecttype(selectedcode); // Send the id to fetch sub-call statuses
+                      getsitecode(selectedcode); // Send the id to fetch sub-call statuses
+                      setgroupstatusid(selectedcode)
+                      handleModelChange(e)
+                    }}
+                  >
+                    <option value="">Select Status</option>
+                    {groupdefect.map((item) => (
+                      <option key={item.id} value={item.defectgroupcode}>
+                        {item.defectgrouptitle}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="mt-3">
+                  <h4 className="pname" style={{ fontSize: "14px" }}>Type of Defect Code:</h4>
+                  <select
+                    name="defect_type"
+                    className="form-control"
+                    disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
+                    style={{ fontSize: "14px" }}
+                    value={complaintview.defect_type}
+                    onChange={handleModelChange}
+                  >
+                    <option value="">Select </option>
+                    {GroupDefecttype.map((item) => (
+                      <option key={item.id} value={item.defect_code}>
+                        {item.defect_title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="mt-3">
+                  <h4 className="pname" style={{ fontSize: "14px" }}>Site Defect Code:</h4>
+                  <select
+                    name="site_defect"
+                    className="form-control"
+                    disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
+                    style={{ fontSize: "14px" }}
+                    value={complaintview.site_defect}
+                    onChange={handleModelChange}
+                  >
+                    <option value="">Select </option>
+                    {GroupDefectsite.map((item) => (
+                      <option key={item.id} value={item.dsite_code}>
+                        {item.dsite_title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </>}
 
-             
 
-           
+
+
 
               <div className="d-flex justify-content-end py-2">
                 <button
@@ -1818,7 +1818,7 @@ export function Complaintview(params) {
             </div>
           </div>
 
-      {(complaintview.sub_call_status == 'Spare' || spare.length > 0 ) &&    <div className="card mb-3">
+          {(complaintview.call_status == 'Spares' || addedSpareParts.length > 0) && <div className="card mb-3">
             <div className="card-body">
 
               <div className="mt-3">
@@ -1837,7 +1837,7 @@ export function Complaintview(params) {
                       {Array.isArray(spare) && spare.length > 0 ? (
                         spare.map((part) => (
                           <option key={part.id} value={part.id}>
-                            {part.article_code + '-' + part.article_description }
+                            {part.article_code + '-' + part.article_description}
                           </option>
                         ))
                       ) : (
@@ -1923,8 +1923,8 @@ export function Complaintview(params) {
                 </div>
               </div>
             </div>
-          </div>}    
-   
+          </div>}
+
 
           {quotation.length > 0 && <div className="card mb-3">
             <div className="card-body">
