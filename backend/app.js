@@ -3178,7 +3178,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
       const custcount = getcustresult.recordset[0].id;
 
-      const newcustid = 'A' + custcount.toString().padStart(7, "0")
+      const newcustid = 'B' + custcount.toString().padStart(7, "0")
 
 
 
@@ -3351,7 +3351,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
       .input('city', city)
       .input('area', area)
       .input('pincode', pincode)
-      .input('customer_id', cust_id)
+      .input('customer_id', ticket_id == '' ? newcustid : cust_id)
       .input('model', model)
       .input('ticket_type', ticket_type)
       .input('cust_type', cust_type)
@@ -3369,6 +3369,8 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
       .input('classification', classification)
       .input('priority', priority)
       .query(complaintSQL);
+
+      console.log(resutlt,priority , "$$$$")
 
 
     //Remark insert query
@@ -3421,7 +3423,7 @@ app.post("/update_complaint", authenticateToken,
     let {
       complaint_date, customer_name, contact_person, email, mobile, address,
       state, city, area, pincode, mode_of_contact, ticket_type, cust_type,
-      warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks, ticket_no
+      warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks, ticket_no , classification, priority
     } = req.body;
 
     const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
@@ -3462,15 +3464,16 @@ app.post("/update_complaint", authenticateToken,
     serial_no = @serial,
     child_service_partner = @child_service_partner,
     sevice_partner = @master_service_partner,
-    specification = @specification
+    specification = @specification,
+    customer_class = @classification,
+    call_priority = @priority
   WHERE
     ticket_no = @ticket_no
 `;
 
-      console.log(complaintSQL, "$$")
-      console.log(warrenty_status, "$$")
 
-      console.log("Executing complaint SQL:", complaintSQL);  // Debugging log
+
+// Debugging log
 
       await pool.request()
         .input('ticket_no', ticket_no)
@@ -3499,6 +3502,8 @@ app.post("/update_complaint", authenticateToken,
         .input('master_service_partner', master_service_partner)
         .input('child_service_partner', child_service_partner)
         .input('specification', specification)
+        .input('classification', classification)
+        .input('priority', priority)
         .query(complaintSQL);
 
       //Remark insert query

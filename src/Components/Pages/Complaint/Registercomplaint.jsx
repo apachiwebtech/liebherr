@@ -154,63 +154,64 @@ export function Registercomplaint(params) {
         //     isValid = false;
         //     newErrors.complaint_date = "Date is required";
         // }
-        if (!value.customer_name) {
+        if (!value.customer_name && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
             isValid = false;
             newErrors.customer_name = "Name is required";
         }
-        if (!value.serial) {
+        
+        if (!value.serial && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
             isValid = false;
             newErrors.serial = "Serial No is required";
         }
-        if (!value.model) {
+        if (!value.model && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk' ) {
             isValid = false;
             newErrors.model = "Model is required";
         }
-        if (!value.purchase_date) {
+        if (!value.purchase_date && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
             isValid = false;
             newErrors.purchase_date = "Date is required";
         }
-        if (!value.warrenty_status) {
+        if (!value.warrenty_status && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
             isValid = false;
             newErrors.warrenty_status = "Status is required";
         }
-        if (!value.salutation) {
+        if (!value.salutation && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
             isValid = false;
             newErrors.salutation = "Salutation is required";
         }
-        if (!value.contact_person) {
+        if (!value.contact_person && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
             isValid = false;
             newErrors.contact_person = "Contact Person is required";
         }
-        if (!value.mobile) {
+        if (!value.mobile && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
             isValid = false;
             newErrors.mobile = "Mobile is required";
         }
-        if (!value.address) {
+        if (!value.address && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
             isValid = false;
             newErrors.address = "Address is required";
         }
-        if (!value.pincode) {
+        if (!value.pincode && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
             isValid = false;
             newErrors.pincode = "Pincode is required";
         }
-        if (!value.mode_of_contact) {
+        if (!value.mode_of_contact && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
             isValid = false;
             newErrors.mode_of_contact = "This is required";
         }
-        if (!value.ticket_type) {
+        if (!value.ticket_type && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
             isValid = false;
             newErrors.ticket_type = "Ticket is required";
         }
-        if (!value.cust_type) {
+        if (!value.cust_type && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
             isValid = false;
             newErrors.cust_type = "Type is required";
         }
-        if (!value.call_charge) {
+        if (!value.call_charge && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
             isValid = false;
             newErrors.call_charge = "Charge is required";
         }
-        if (!value.classification) {
+        if (!value.classification && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
             isValid = false;
             newErrors.classification = "Classification is required";
         }
@@ -218,9 +219,13 @@ export function Registercomplaint(params) {
         //     isValid = false;
         //     newErrors.Priority = "Priority is required";
         // }
-        if (!value.specification) {
+        if (!value.specification && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
             isValid = false;
             newErrors.specification = "Specification is required";
+        }
+        if (!value.additional_remarks) {
+            isValid = false;
+            newErrors.additional_remarks = "Specification is required";
         }
 
 
@@ -1157,7 +1162,7 @@ export function Registercomplaint(params) {
                                 <div className="row">
 
                                     <div className="col-md-3">
-                                        <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Serial No</p>
+                                        <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Serial No<span className="text-danger">*</span></p>
 
                                         {searchdata.length == 0 && !Comp_id || value.serial == null ?
                                             <div className="mb-3">
@@ -1175,7 +1180,7 @@ export function Registercomplaint(params) {
 
                                     </div>
                                     <div className="col-md-3">
-                                        <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Model</p>
+                                        <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Model<span className="text-danger">*</span></p>
 
                                         {searchdata.length == 0 && !Comp_id || ModelNumber == null ?
 
@@ -1188,7 +1193,7 @@ export function Registercomplaint(params) {
                                     </div>
                                     {/* Add Purchase Date field */}
                                     <div className="col-md-3">
-                                        <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Purchase Date</p>
+                                        <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Purchase Date<span className="text-danger">*</span></p>
 
                                         {searchdata.length == 0 && !Comp_id || value.purchase_date == null ?
                                             <div className="mb-3">
@@ -1208,7 +1213,7 @@ export function Registercomplaint(params) {
 
                                     {/* Add Warranty Status field */}
                                     <div className="col-md-3">
-                                        <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Warranty Status</p>
+                                        <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Warranty Status<span className="text-danger">*</span></p>
                                         <div className="mb-3">
                                             <select className="form-control" onChange={onHandleChange} value={value.warrenty_status} name="warrenty_status">
                                                 <option value="">Select Option</option>
@@ -1231,14 +1236,14 @@ export function Registercomplaint(params) {
 
                                     <div className="col-md-3">
                                         <div className="mb-3">
-                                            <label className="form-label">Ticket Date</label>
+                                            <label className="form-label">Ticket Date<span className="text-danger">*</span></label>
                                             <input type="date" name="complaint_date" onChange={onHandleChange} value={value.complaint_date} className="form-control" />
                                             {errors.complaint_date && <span style={{ fontSize: "12px" }} className="text-danger">{errors.complaint_date}</span>}
                                         </div>
                                     </div>
                                     <div className="col-md-2">
                                         <div className="mb-3">
-                                            <label className="form-label">Salutation</label>
+                                            <label className="form-label">Salutation<span className="text-danger">*</span></label>
                                             <select className="form-control" onChange={onHandleChange} value={value.salutation} name="salutation">
                                                 <option value="">Salutation</option>
                                                 <option value="Mr">Mr</option>
@@ -1253,14 +1258,14 @@ export function Registercomplaint(params) {
                                     </div>
                                     <div className="col-md-3">
                                         <div className="mb-3">
-                                            <label htmlFor="exampleFormControlInput1" className="form-label">Customer Name</label>
+                                            <label htmlFor="exampleFormControlInput1" className="form-label">Customer Name<span className="text-danger">*</span></label>
                                             <input type="text" name="customer_name" onChange={onHandleChange} value={value.customer_name} className="form-control" placeholder="Enter Customer Name" />
                                             {errors.customer_name && <span style={{ fontSize: "12px" }} className="text-danger">{errors.customer_name}</span>}
                                         </div>
                                     </div>
                                     <div className="col-md-4">
                                         <div className="mb-3">
-                                            <label htmlFor="exampleFormControlInput1" className="form-label">Contact Person</label>
+                                            <label htmlFor="exampleFormControlInput1" className="form-label">Contact Person<span className="text-danger">*</span></label>
                                             <input type="text" className="form-control" name="contact_person" value={value.contact_person} onChange={onHandleChange} placeholder="Enter Contact Person Name" />
                                             {errors.contact_person && <span style={{ fontSize: "12px" }} className="text-danger">{errors.contact_person}</span>}
                                         </div>
@@ -1269,12 +1274,12 @@ export function Registercomplaint(params) {
                                         <div className="mb-3">
                                             <label htmlFor="exampleFormControlInput1" className="form-label">Email Id</label>
                                             <input type="email" value={value.email} name="email" onChange={onHandleChange} className="form-control" placeholder="Enter Email Id" />
-                                            {errors.email && <span style={{ fontSize: "12px" }} className="text-danger">{errors.email}</span>}
+                                          
                                         </div>
                                     </div>
                                     <div className="col-md-4">
                                         <div className="mb-3">
-                                            <label htmlFor="exampleFormControlInput1" className="form-label">Mobile No. <input type="checkbox" />Whatsapp</label>
+                                            <label htmlFor="exampleFormControlInput1" className="form-label">Mobile No. <span className="text-danger">*</span><input type="checkbox" />Whatsapp</label>
                                             <input type="text" value={value.mobile} name="mobile" onChange={onHandleChange} className="form-control" placeholder="Enter Mobile" />
                                             {errors.mobile && <span style={{ fontSize: "12px" }} className="text-danger">{errors.mobile}</span>}
                                         </div>
@@ -1371,7 +1376,7 @@ export function Registercomplaint(params) {
 
                                         <div className="col-md-12">
                                             <div className="mb-3">
-                                                <label htmlFor="exampleFormControlInput1" className="form-label">Address </label>
+                                                <label htmlFor="exampleFormControlInput1" className="form-label">Address <span className="text-danger">*</span></label>
                                                 <button onClick={openPopup} type="button" className="addressbtn">Add Address</button>
                                                 <textarea
                                                     className="form-control"
@@ -1421,7 +1426,7 @@ export function Registercomplaint(params) {
                                     {!duplicate ? <>
                                         <div className="col-md-3">
                                             <div className="mb-3">
-                                                <label className="form-label">Pincode</label>
+                                                <label className="form-label">Pincode<span className="text-danger">*</span></label>
                                                 <select className="form-control" value={value.pincode} name="pincode" onChange={onHandleChange}>
                                                     <option value="">Select Pincode</option>
                                                     {pincode.map((item) => {
@@ -1486,7 +1491,7 @@ export function Registercomplaint(params) {
 
                                         <div className="col-md-3">
                                             <div className="mb-3">
-                                                <label htmlFor="exampleFormControlInput1" className="form-label">Pincode</label>
+                                                <label htmlFor="exampleFormControlInput1" className="form-label">Pincode <span className="text-danger">*</span></label>
                                                 <input type="text" className="form-control" value={value.pincode} name="pincode" onChange={onHandleChange} placeholder="" />
                                                 {errors.pincode && <span style={{ fontSize: "12px" }} className="text-danger">{errors.pincode}</span>}
                                             </div>
@@ -1521,7 +1526,7 @@ export function Registercomplaint(params) {
 
                                     <div className="col-md-4">
                                         <div className="mb-3">
-                                            <label className="form-label">Mode of Contact</label>
+                                            <label className="form-label">Mode of Contact<span className="text-danger">*</span></label>
                                             <select className="form-control" onChange={onHandleChange} value={value.mode_of_contact} name="mode_of_contact">
                                                 <option value="">Select</option>
                                                 <option value="Call">Call</option>
@@ -1534,7 +1539,7 @@ export function Registercomplaint(params) {
                                     </div>
                                     <div className="col-md-4">
                                         <div className="mb-3">
-                                            <label className="form-label">Ticket Type</label>
+                                            <label className="form-label">Ticket Type<span className="text-danger">*</span></label>
                                             <select className="form-control" onChange={onHandleChange} value={value.ticket_type} name="ticket_type">
                                                 <option value="">Select</option>
                                                 <option value="Installation">Installation</option>
@@ -1550,7 +1555,7 @@ export function Registercomplaint(params) {
 
                                     <div className="col-md-4">
                                         <div className="mb-3">
-                                            <label className="form-label">Customer Type</label>
+                                            <label className="form-label">Customer Type<span className="text-danger">*</span></label>
                                             <select className="form-control" onChange={onHandleChange} value={value.cust_type} name="cust_type">
                                                 <option value="">Select </option>
                                                 <option value="END CUSTOMER">END CUSTOMER</option>
@@ -1581,7 +1586,7 @@ export function Registercomplaint(params) {
 
                                     <div className="col-md-4">
                                         <div className="mb-3">
-                                            <label className="form-label">Call Chargeable</label>
+                                            <label className="form-label">Call Chargeable<span className="text-danger">*</span></label>
                                             <select className="form-control" onChange={onHandleChange} value={value.call_charge} name="call_charge">
                                                 <option value="">Select</option>
                                                 <option value="Yes">Yes</option>
@@ -1593,7 +1598,7 @@ export function Registercomplaint(params) {
 
                                     <div className="col-md-4">
                                         <div className="mb-3">
-                                            <label className="form-label">Customer Classification</label>
+                                            <label className="form-label">Customer Classification<span className="text-danger">*</span></label>
                                             <select className="form-control" onChange={onHandleChange} value={value.classification} name="classification">
                                                 <option value="">Select</option>
                                                 <option value="CONSUMER">Consumer</option>
@@ -1604,7 +1609,7 @@ export function Registercomplaint(params) {
                                     </div>
                                     <div className="col-md-4">
                                         <div className="mb-3">
-                                            <label className="form-label">Priority</label>
+                                            <label className="form-label">Priority<span className="text-danger">*</span></label>
                                             <select className="form-control" onChange={onHandleChange} value={value.Priority} name="Priority">
                                                 <option value="">Select</option>
                                                 <option value="REGULAR">Regular</option>
@@ -1644,16 +1649,16 @@ export function Registercomplaint(params) {
                                 <div className="card-body">
                                     <div className="row">
                                         <div className="col-md-12">
-                                            <h4 className="pname">Primary Dealer : {value.mdealer_info}</h4>
+                                            <h4 className="pname">Primary Dealer : </h4>
                                         </div>
                                     </div>
 
                                     <div className="mb-3">
-                                        <input type="text" className="form-control" name="sub_dealer" value={value.dealer_info} onChange={onHandleChange} placeholder="Primary Dealer" />
+                                        <input type="text" className="form-control" name="sub_dealer" value={value.mdealer_info} onChange={onHandleChange} placeholder="Primary Dealer" />
                                     </div>
                                     <div className="row">
                                         <div className="col-md-12">
-                                            <h4 className="pname">Secondary Dealer : {value.mdealer_info}</h4>
+                                            <h4 className="pname">Secondary Dealer : </h4>
                                         </div>
                                     </div>
 
@@ -1691,6 +1696,7 @@ export function Registercomplaint(params) {
                                             onChange={onHandleChange}
                                             placeholder="Enter additional info..."
                                         ></textarea>
+                                         {errors.additional_remarks && <span style={{ fontSize: "12px" }} className="text-danger">{errors.additional_remarks}</span>}
                                     </div>
                                 </div>
                             </div>
