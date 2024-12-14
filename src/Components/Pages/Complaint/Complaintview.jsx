@@ -9,6 +9,7 @@ import { FaEye } from "react-icons/fa";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { array } from "js-md5";
+import { FaDownload } from "react-icons/fa6";
 
 export function Complaintview(params) {
   const token = localStorage.getItem("token");
@@ -930,34 +931,35 @@ export function Complaintview(params) {
   //Attachments Download
 
 
-  const downloadZip = (files) => {
+  const downloadZip = async (fileNames) => {
     const zip = new JSZip();
-    const folder = zip.folder("attachments"); // Create a folder inside the ZIP
-
-    // Add all files to the ZIP
-    const promises = files.map((file) => {
-      const trimmedFileName = file.trim(); // Ensure file name is trimmed
-      const fileName = trimmedFileName.split("/").pop(); // Extract file name from URL
-
-      // Fetch file data and add to ZIP
-      return fetch(trimmedFileName)
-        .then((response) => {
-          if (response.ok) return response.blob();
-          throw new Error(`Failed to fetch file: ${fileName}`);
-        })
-        .then((blob) => {
-          folder.file(fileName, blob); // Add the blob to the ZIP
-        });
-    });
-
-    // Once all files are added, generate and trigger the ZIP download
-    Promise.all(promises)
-      .then(() => {
-        zip.generateAsync({ type: "blob" }).then((content) => {
-          saveAs(content, "attachments.zip"); // Save the ZIP file
-        });
-      })
-      .catch((error) => console.error("Error while creating ZIP:", error));
+  
+    try {
+      // Loop through all file names and fetch their content
+      const fileFetchPromises = fileNames.map(async (fileName) => {
+        const trimmedFileName = fileName.trim(); // Trim any whitespace
+        const fileUrl = `${Base_Url}/uploads/${trimmedFileName}`; // Construct the full URL
+  
+        // Fetch the file from the server
+        const response = await fetch(fileUrl);
+  
+        if (!response.ok) {
+          throw new Error(`Failed to fetch ${trimmedFileName}`);
+        }
+  
+        const blob = await response.blob(); // Get file content as a blob
+        zip.file(trimmedFileName, blob); // Add the file to the zip archive
+      });
+  
+      // Wait for all files to be fetched and added to the zip
+      await Promise.all(fileFetchPromises);
+  
+      // Generate the zip file and trigger download
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      saveAs(zipBlob, 'attachments.zip'); // Save as "attachments.zip"
+    } catch (error) {
+      console.error('Error generating zip:', error);
+    }
   };
 
 
@@ -997,14 +999,43 @@ export function Complaintview(params) {
       .catch((error) => console.error("Error while creating ZIP:", error));
   };
 
+  const downloadFile = (fileName) => {
+    const fileUrl = `${Base_Url}/uploads/${fileName}`; // Construct the file URL
+    fetch(fileUrl)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('File download failed');
+        }
+        return response.blob(); // Convert response to a blob
+      })
+      .then((blob) => {
+        // Create a temporary download link
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = fileName; // Set the file name
+        document.body.appendChild(a);
+        a.click(); // Trigger the download
+        window.URL.revokeObjectURL(url); // Clean up the URL object
+        a.remove(); // Remove the temporary link from DOM
+      })
+      .catch((error) => {
+        console.error('Error downloading the file:', error);
+      });
+  };
+  
+
 
 
 
   let allAttachments = [];
   attachments.forEach(item => {
     const fileNames = item.attachment.split(',');
-    allAttachments = allAttachments.concat(fileNames);
+    const filewithurl = `${Base_Url}/uploads/${fileNames}`
+    allAttachments = allAttachments.concat(filewithurl);
   });
+
 
 
   return (
@@ -1244,19 +1275,34 @@ export function Complaintview(params) {
                                 const fileName = item.trim();
 
                                 return (
-                                  <span
-                                    key={idx}
-                                    style={{
-                                      color: "#007bff",
-                                      cursor: "pointer",
-                                      fontWeight: "500",
-                                      display: "block",
-                                      marginBottom: "3px",
-                                    }}
-                                    onClick={() => handleAttachment2Click(fileName)}
-                                  >
-                                    {`File${idx + 1}.${fileExtension}`}
-                                  </span>
+                                  <div className="d-flex align-items-center">
+                                    <span
+                                      key={idx}
+                                      style={{
+                                        color: "#007bff",
+                                        cursor: "pointer",
+                                        fontWeight: "500",
+                                        display: "block",
+                                        marginBottom: "3px",
+                                      }}
+                                      onClick={() => handleAttachment2Click(fileName)}
+                                    >
+                                      {`File${idx + 1}.${fileExtension}`}
+                                    </span>
+
+                                    <a
+                                      href={`${Base_Url}/uploads/${fileName}`} // Replace this with the file's URL or path
+                                      download// Set the download attribute to trigger the 
+                                      style={{
+                                        marginLeft: "10px",
+                                        textDecoration: "none",
+                                      }}
+                                    >
+                                      <FaDownload className="text-dark" />
+
+
+                                    </a>
+                                  </div>
                                 );
                               })}
                             </div>
@@ -1427,10 +1473,17 @@ export function Complaintview(params) {
 
               <div className="row d-flex justify-content-center">
                 <div className="col-md-12 col-lg-12">
+
                   <div
                     className="card shadow-0 border"
                     style={{ backgroundColor: "#f0f2f5" }}
                   >
+                    <span
+                      onClick={() => downloadAllZip(allAttachments)} // Pass file list to ZIP function
+                      className=" float-right download-btn "
+                    >
+                      Download All as ZIP <FaDownload style={{color:"black"}} />
+                    </span>
                     <form onSubmit={handleSubmit}>
                       <div className="card-body p-4">
                         <div className="form-outline mb-2">
@@ -1497,23 +1550,17 @@ export function Complaintview(params) {
           <div className="mt-3" id="remarksSection">
             <div className="row">
               <div className="col-md-12">
-                <div className="d-flex">
+                <div className="">
                   <h3 className="mainheade" style={{ fontSize: "14px" }}>
                     Remarks :
 
                   </h3>
-                  <button
-                    onClick={() => downloadAllZip(allAttachments)} // Pass file list to ZIP function
-                    className="btn btn-primary"
-                  >
-                    Download All as ZIP
-                  </button>
+
                 </div>
 
               </div>
             </div>
 
-            {/* Listing remarks */}
             {/* Listing remarks */}
             <div className="remarks-attachments">
               {remarks.length > 0 ? (
@@ -1545,60 +1592,83 @@ export function Complaintview(params) {
 
 
                       {attachments.filter((att) => att.remark_id == remark.id).length > 0 && (
-                        <div className="attachments mt-2">
-                          <h3 className="mainheade" style={{ fontSize: "14px" }}>Attachments</h3>
+  <div className="attachments mt-2">
+    <h3 className="mainheade" style={{ fontSize: "14px" }}>Attachments</h3>
 
-                          {attachments
-                            .filter((att) => att.remark_id === remark.id)
-                            .map((attachment, index) => {
-                              // Split the attachment string into an array by commas
-                              const fileNames = attachment.attachment.split(','); // Assuming attachment.attachment is a comma-separated string
+    {attachments
+      .filter((att) => att.remark_id === remark.id)
+      .map((attachment, index) => {
+        const fileNames = attachment.attachment.split(','); // Split the attachment string into an array
 
-                              return fileNames.map((fileName, fileIndex) => {
-                                // Trim whitespace from file name
-                                const trimmedFileName = fileName.trim();
+        return (
+          <div key={attachment.id} className="attachment-group d-flex">
+               {/* Display the Download Zip button only once for the attachment group */}
+               <button
+              onClick={() => downloadZip(fileNames)}
+              style={{
+                marginLeft: "10px",
+                backgroundColor: "#007bff",
+                color: "white",
+                border: "none",
+                padding: "5px 10px",
+                cursor: "pointer",
+                margin:"0px 5px",
+              
+              }}
+              className="btn-sm"
+            >
+              Download Zip
+            </button>
 
-                                // Determine the file extension
-                                const fileExtension = trimmedFileName.split('.').pop();
+            {fileNames.map((fileName, fileIndex) => {
+              const trimmedFileName = fileName.trim();
+              const fileExtension = trimmedFileName.split('.').pop();
+              const newFileName = `File${index * fileNames.length + fileIndex + 1}.${fileExtension}`;
 
-                                // Create a new file name like file1.mp3, file2.mp4, etc.
-                                const newFileName = `file${index * fileNames.length + fileIndex + 1}.${fileExtension}`;
+              return (
+                <div
+                  key={`${attachment.attachment}-${fileIndex}`} // Unique key for each file
+                  className="attachment"
+                  style={{
+                    display: "block", // Display attachments in new lines
+                    marginTop: "5px",
+                    marginRight:"8px"
+                  }}
+                >
+                  <span
+                    style={{
+                      color: "blue",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => {
+                      setCurrentAttachment(trimmedFileName); // Set current attachment for modal view
+                      setIsModalOpen(true); // Open the modal
+                    }}
+                  >
+                    {newFileName} {/* Display the new file name */}
+                  </span>
+                  <a
+                    href={`${Base_Url}/uploads/${trimmedFileName}`}
+                    download={trimmedFileName}
+                    style={{
+                      marginLeft: "10px",
+                      textDecoration: "none",
+                    }}
+                    >
+                    <FaDownload className="text-dark" />
+                  </a>
+                    <span>,</span>
+                </div>
+              );
+            })}
 
-                                return (
-                                  <div
-                                    key={`${attachment.id}-${fileIndex}`} // Unique key for each file
-                                    className="attachment"
-                                    style={{
-                                      display: "block", // Display attachments in new lines
-                                      marginTop: "5px",
-                                    }}
-                                  >
-                                    <span
-                                      style={{
-                                        color: "blue",
-                                        cursor: "pointer",
-                                      }}
-                                    >
-                                      {newFileName} {/* Display the new file name */}
-                                    </span>
-                                    <a
-                                      href={trimmedFileName} // Replace this with the file's URL or path
-                                      download={newFileName} // Set the download attribute to trigger the download
-                                      style={{
-                                        marginLeft: "10px",
-                                        textDecoration: "none",
-                                      }}
-                                    >
-                                      <button onClick={() => downloadZip(fileNames)}>Download</button>
+         
+          </div>
+        );
+      })}
+  </div>
+)}
 
-
-                                    </a>
-                                  </div>
-                                );
-                              });
-                            })}
-                        </div>
-                      )}
                     </div>
                   </div>
                 ))

@@ -1,2 +1,8 @@
-
+.download-btn{
+    position: absolute;
+    left: 10px;
+    bottom: 1px;
+    cursor: pointer;
+    color: blue;
+}
 
