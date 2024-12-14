@@ -1291,8 +1291,7 @@ export function Complaintview(params) {
                                     </span>
 
                                     <a
-                                      href={`${Base_Url}/uploads/${fileName}`} // Replace this with the file's URL or path
-                                      download// Set the download attribute to trigger the 
+                                      onClick={() =>downloadFile(fileName)}
                                       style={{
                                         marginLeft: "10px",
                                         textDecoration: "none",
@@ -1648,8 +1647,7 @@ export function Complaintview(params) {
                     {newFileName} {/* Display the new file name */}
                   </span>
                   <a
-                    href={`${Base_Url}/uploads/${trimmedFileName}`}
-                    download={trimmedFileName}
+                    onClick={() =>downloadFile(trimmedFileName)}
                     style={{
                       marginLeft: "10px",
                       textDecoration: "none",
