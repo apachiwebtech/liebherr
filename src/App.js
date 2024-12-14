@@ -552,7 +552,7 @@ function App() {
     const timer = setTimeout(() => {
       alert("Session Timeout")
       window.location.reload();
-    }, 3600 * 1000); // 1 hour in milliseconds
+    }, 3600 * 8000); // 1 hour in milliseconds
 
     return () => clearTimeout(timer); // Cleanup the timer on unmount
   }, [navigate])

@@ -6,6 +6,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Base_Url } from "../../Utils/Base_Url";
 import { FaEye } from "react-icons/fa";
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
+import { array } from "js-md5";
 
 export function Complaintview(params) {
   const token = localStorage.getItem("token");
@@ -923,6 +926,87 @@ export function Complaintview(params) {
 
   const navigate = useNavigate();
 
+
+  //Attachments Download
+
+
+  const downloadZip = (files) => {
+    const zip = new JSZip();
+    const folder = zip.folder("attachments"); // Create a folder inside the ZIP
+
+    // Add all files to the ZIP
+    const promises = files.map((file) => {
+      const trimmedFileName = file.trim(); // Ensure file name is trimmed
+      const fileName = trimmedFileName.split("/").pop(); // Extract file name from URL
+
+      // Fetch file data and add to ZIP
+      return fetch(trimmedFileName)
+        .then((response) => {
+          if (response.ok) return response.blob();
+          throw new Error(`Failed to fetch file: ${fileName}`);
+        })
+        .then((blob) => {
+          folder.file(fileName, blob); // Add the blob to the ZIP
+        });
+    });
+
+    // Once all files are added, generate and trigger the ZIP download
+    Promise.all(promises)
+      .then(() => {
+        zip.generateAsync({ type: "blob" }).then((content) => {
+          saveAs(content, "attachments.zip"); // Save the ZIP file
+        });
+      })
+      .catch((error) => console.error("Error while creating ZIP:", error));
+  };
+
+
+  const downloadAllZip = (allAttachments) => {
+    const zip = new JSZip();
+    const folder = zip.folder("attachments"); // Create a folder inside the ZIP
+
+    // Extract all files from all attachments
+    const allFiles = allAttachments.flatMap((attachment) =>
+      attachment.split(",").map((file) => file.trim())
+    );
+
+
+
+    // Add all files to the ZIP
+    const promises = allFiles.map((file, index) => {
+      const fileName = file.split("/").pop(); // Extract file name from URL
+
+      // Fetch file data and add to ZIP
+      return fetch(file)
+        .then((response) => {
+          if (response.ok) return response.blob();
+          throw new Error(`Failed to fetch file: ${fileName}`);
+        })
+        .then((blob) => {
+          folder.file(`file${index + 1}_${fileName}`, blob); // Add file with new name to the ZIP
+        });
+    });
+
+    // Once all files are added, generate and trigger the ZIP download
+    Promise.all(promises)
+      .then(() => {
+        zip.generateAsync({ type: "blob" }).then((content) => {
+          saveAs(content, "all_attachments.zip"); // Save the ZIP file
+        });
+      })
+      .catch((error) => console.error("Error while creating ZIP:", error));
+  };
+
+
+
+
+  let allAttachments = [];
+  attachments.forEach(item => {
+    const fileNames = item.attachment.split(',');
+    allAttachments = allAttachments.concat(fileNames);
+  });
+
+
   return (
     <div className="p-3">
       <style>
@@ -1413,10 +1497,19 @@ export function Complaintview(params) {
           <div className="mt-3" id="remarksSection">
             <div className="row">
               <div className="col-md-12">
-                <h3 className="mainheade" style={{ fontSize: "14px" }}>
-                  Remarks :
+                <div className="d-flex">
+                  <h3 className="mainheade" style={{ fontSize: "14px" }}>
+                    Remarks :
 
-                </h3>
+                  </h3>
+                  <button
+                    onClick={() => downloadAllZip(allAttachments)} // Pass file list to ZIP function
+                    className="btn btn-primary"
+                  >
+                    Download All as ZIP
+                  </button>
+                </div>
+
               </div>
             </div>
 
@@ -1454,6 +1547,7 @@ export function Complaintview(params) {
                       {attachments.filter((att) => att.remark_id == remark.id).length > 0 && (
                         <div className="attachments mt-2">
                           <h3 className="mainheade" style={{ fontSize: "14px" }}>Attachments</h3>
+
                           {attachments
                             .filter((att) => att.remark_id === remark.id)
                             .map((attachment, index) => {
@@ -1484,15 +1578,25 @@ export function Complaintview(params) {
                                         color: "blue",
                                         cursor: "pointer",
                                       }}
-                                      onClick={() => handleAttachmentClick(trimmedFileName)} // Handle click for each file
                                     >
                                       {newFileName} {/* Display the new file name */}
                                     </span>
+                                    <a
+                                      href={trimmedFileName} // Replace this with the file's URL or path
+                                      download={newFileName} // Set the download attribute to trigger the download
+                                      style={{
+                                        marginLeft: "10px",
+                                        textDecoration: "none",
+                                      }}
+                                    >
+                                      <button onClick={() => downloadZip(fileNames)}>Download</button>
+
+
+                                    </a>
                                   </div>
                                 );
                               });
                             })}
-
                         </div>
                       )}
                     </div>
