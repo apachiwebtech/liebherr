@@ -10,6 +10,8 @@ import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { array } from "js-md5";
 import { FaDownload } from "react-icons/fa6";
+import { Chip } from "@mui/material";
+
 
 export function Complaintview(params) {
   const token = localStorage.getItem("token");
@@ -19,6 +21,8 @@ export function Complaintview(params) {
   const [quantity, setQuantity] = useState("");
   const [closestatus, setCloseStatus] = useState("");
   const [spareid, setspareid] = useState("");
+  const [ticketTab, setTicketTab] = useState(JSON.parse(localStorage.getItem('tabticket')) || []);
+
   const [complaintview, setComplaintview] = useState({
     ticket_no: '',
     customer_name: '',
@@ -465,7 +469,7 @@ export function Complaintview(params) {
     // Send the POST request
     axios.post(`${Base_Url}/add_quotation`, data)
       .then((response) => {
-        console.log("Quotation added successfully:", response.data);
+
         alert("Quotation generated")
         window.location.reload()
 
@@ -484,7 +488,7 @@ export function Complaintview(params) {
     if (confirm) {
       axios.post(`${Base_Url}/removesparepart`, { spare_id: id })
         .then((res) => {
-          console.log(res.data)
+
           // setAddedSpareParts(addedSpareParts.filter((part) => part.id !== id));
           getsparelist(complaintview.ticket_no)
         })
@@ -566,7 +570,7 @@ export function Complaintview(params) {
       },
     })
       .then((res) => {
-        console.log(res)
+
         setAddedEngineers(res.data)
       })
   }
@@ -578,7 +582,7 @@ export function Complaintview(params) {
       },
     })
       .then((res) => {
-        console.log(res)
+
         setQuotation(res.data)
       })
   }
@@ -590,7 +594,7 @@ export function Complaintview(params) {
       },
     })
       .then((res) => {
-        console.log(res)
+
         setAddedSpareParts(res.data)
       })
   }
@@ -711,7 +715,7 @@ export function Complaintview(params) {
       },
     })
       .then(response => {
-        console.log("Server response:", response.data);
+
         setComplaintview({
           ...complaintview,
           serial_no: '',
@@ -886,7 +890,7 @@ export function Complaintview(params) {
   }, [])
 
   const handleAttachmentClick = (attachment) => {
-    console.log("Attachment clicked:", attachment);
+
     setCurrentAttachment(attachment);
     setIsModalOpen(true);
   };
@@ -933,27 +937,27 @@ export function Complaintview(params) {
 
   const downloadZip = async (fileNames) => {
     const zip = new JSZip();
-  
+
     try {
       // Loop through all file names and fetch their content
       const fileFetchPromises = fileNames.map(async (fileName) => {
         const trimmedFileName = fileName.trim(); // Trim any whitespace
         const fileUrl = `${Base_Url}/uploads/${trimmedFileName}`; // Construct the full URL
-  
+
         // Fetch the file from the server
         const response = await fetch(fileUrl);
-  
+
         if (!response.ok) {
           throw new Error(`Failed to fetch ${trimmedFileName}`);
         }
-  
+
         const blob = await response.blob(); // Get file content as a blob
         zip.file(trimmedFileName, blob); // Add the file to the zip archive
       });
-  
+
       // Wait for all files to be fetched and added to the zip
       await Promise.all(fileFetchPromises);
-  
+
       // Generate the zip file and trigger download
       const zipBlob = await zip.generateAsync({ type: 'blob' });
       saveAs(zipBlob, 'attachments.zip'); // Save as "attachments.zip"
@@ -1024,7 +1028,7 @@ export function Complaintview(params) {
         console.error('Error downloading the file:', error);
       });
   };
-  
+
 
 
 
@@ -1035,6 +1039,26 @@ export function Complaintview(params) {
     const filewithurl = `${Base_Url}/uploads/${fileNames}`
     allAttachments = allAttachments.concat(filewithurl);
   });
+
+
+  // This is for Ticket Tab
+
+
+  const handleDeleteTab = (ticket_id) => {
+    // Retrieve the current ticket array from localStorage
+    const updatedTickets = JSON.parse(localStorage.getItem('tabticket')) || [];
+  
+    // Remove the ticket from the array using filter
+    const newTicketList = updatedTickets.filter(ticket => ticket.ticket_id !== ticket_id);
+  
+    // Save the updated ticket array back to localStorage
+    localStorage.setItem('tabticket', JSON.stringify(newTicketList));
+  
+    // Optionally, you can trigger a re-render by updating your component's state
+    // For example, if you store ticketTab in a state, call setState here
+    setTicketTab(newTicketList);  // if using React state for ticketTab
+  };
+  
 
 
 
@@ -1081,7 +1105,18 @@ export function Complaintview(params) {
               </label>
             </div>
             <div className="col-md-9 text-right pt-2">
-              {/* Buttons can be added here if needed */}x``
+              {ticketTab.map((item) => {
+                return (
+                  <Chip
+                    label={item.ticket_no}
+                    variant="outlined"
+                    onClick={() => navigate(`/complaintview/${item.ticket_id}`)}
+                    onDelete={() => handleDeleteTab(item.ticket_id)}
+                    className="mx-2"
+                  />
+                )
+              })}
+
             </div>
           </div>
         </div>
@@ -1291,7 +1326,7 @@ export function Complaintview(params) {
                                     </span>
 
                                     <a
-                                      onClick={() =>downloadFile(fileName)}
+                                      onClick={() => downloadFile(fileName)}
                                       style={{
                                         marginLeft: "10px",
                                         textDecoration: "none",
@@ -1481,7 +1516,7 @@ export function Complaintview(params) {
                       onClick={() => downloadAllZip(allAttachments)} // Pass file list to ZIP function
                       className=" float-right download-btn "
                     >
-                      Download All as ZIP <FaDownload style={{color:"black"}} />
+                      Download All as ZIP <FaDownload style={{ color: "black" }} />
                     </span>
                     <form onSubmit={handleSubmit}>
                       <div className="card-body p-4">
@@ -1591,81 +1626,81 @@ export function Complaintview(params) {
 
 
                       {attachments.filter((att) => att.remark_id == remark.id).length > 0 && (
-  <div className="attachments mt-2">
-    <h3 className="mainheade" style={{ fontSize: "14px" }}>Attachments</h3>
+                        <div className="attachments mt-2">
+                          <h3 className="mainheade" style={{ fontSize: "14px" }}>Attachments</h3>
 
-    {attachments
-      .filter((att) => att.remark_id === remark.id)
-      .map((attachment, index) => {
-        const fileNames = attachment.attachment.split(','); // Split the attachment string into an array
+                          {attachments
+                            .filter((att) => att.remark_id === remark.id)
+                            .map((attachment, index) => {
+                              const fileNames = attachment.attachment.split(','); // Split the attachment string into an array
 
-        return (
-          <div key={attachment.id} className="attachment-group d-flex">
-               {/* Display the Download Zip button only once for the attachment group */}
-               <button
-              onClick={() => downloadZip(fileNames)}
-              style={{
-                marginLeft: "10px",
-                backgroundColor: "#007bff",
-                color: "white",
-                border: "none",
-                padding: "5px 10px",
-                cursor: "pointer",
-                margin:"0px 5px",
-              
-              }}
-              className="btn-sm"
-            >
-              Download Zip
-            </button>
+                              return (
+                                <div key={attachment.id} className="attachment-group d-flex">
+                                  {/* Display the Download Zip button only once for the attachment group */}
+                                  <button
+                                    onClick={() => downloadZip(fileNames)}
+                                    style={{
+                                      marginLeft: "10px",
+                                      backgroundColor: "#007bff",
+                                      color: "white",
+                                      border: "none",
+                                      padding: "5px 10px",
+                                      cursor: "pointer",
+                                      margin: "0px 5px",
 
-            {fileNames.map((fileName, fileIndex) => {
-              const trimmedFileName = fileName.trim();
-              const fileExtension = trimmedFileName.split('.').pop();
-              const newFileName = `File${index * fileNames.length + fileIndex + 1}.${fileExtension}`;
+                                    }}
+                                    className="btn-sm"
+                                  >
+                                    Download Zip
+                                  </button>
 
-              return (
-                <div
-                  key={`${attachment.attachment}-${fileIndex}`} // Unique key for each file
-                  className="attachment"
-                  style={{
-                    display: "block", // Display attachments in new lines
-                    marginTop: "5px",
-                    marginRight:"8px"
-                  }}
-                >
-                  <span
-                    style={{
-                      color: "blue",
-                      cursor: "pointer",
-                    }}
-                    onClick={() => {
-                      setCurrentAttachment(trimmedFileName); // Set current attachment for modal view
-                      setIsModalOpen(true); // Open the modal
-                    }}
-                  >
-                    {newFileName} {/* Display the new file name */}
-                  </span>
-                  <a
-                    onClick={() =>downloadFile(trimmedFileName)}
-                    style={{
-                      marginLeft: "10px",
-                      textDecoration: "none",
-                    }}
-                    >
-                    <FaDownload className="text-dark" />
-                  </a>
-                    <span>,</span>
-                </div>
-              );
-            })}
+                                  {fileNames.map((fileName, fileIndex) => {
+                                    const trimmedFileName = fileName.trim();
+                                    const fileExtension = trimmedFileName.split('.').pop();
+                                    const newFileName = `File${index * fileNames.length + fileIndex + 1}.${fileExtension}`;
 
-         
-          </div>
-        );
-      })}
-  </div>
-)}
+                                    return (
+                                      <div
+                                        key={`${attachment.attachment}-${fileIndex}`} // Unique key for each file
+                                        className="attachment"
+                                        style={{
+                                          display: "block", // Display attachments in new lines
+                                          marginTop: "5px",
+                                          marginRight: "8px"
+                                        }}
+                                      >
+                                        <span
+                                          style={{
+                                            color: "blue",
+                                            cursor: "pointer",
+                                          }}
+                                          onClick={() => {
+                                            setCurrentAttachment(trimmedFileName); // Set current attachment for modal view
+                                            setIsModalOpen(true); // Open the modal
+                                          }}
+                                        >
+                                          {newFileName} {/* Display the new file name */}
+                                        </span>
+                                        <a
+                                          onClick={() => downloadFile(trimmedFileName)}
+                                          style={{
+                                            marginLeft: "10px",
+                                            textDecoration: "none",
+                                          }}
+                                        >
+                                          <FaDownload className="text-dark" />
+                                        </a>
+                                        <span>,</span>
+                                      </div>
+                                    );
+                                  })}
+
+
+                                </div>
+                              );
+                            })}
+                        </div>
+                      )}
 
                     </div>
                   </div>
@@ -1770,7 +1805,7 @@ export function Complaintview(params) {
                     const selectedname = e.target.value; // Get the id
                     const selectedid = callstatus.find(item => item.Callstatus == selectedname)?.id; // Find the corresponding Callstatus value
                     getsubcallstatus(selectedid); // Send the id to fetch sub-call statuses
-                    console.log('Selected Callstatus:', selectedid); // Log or use the Callstatus value
+                    // Log or use the Callstatus value
                     setCallstatusid(selectedname)
                     handleModelChange(e)
                   }}

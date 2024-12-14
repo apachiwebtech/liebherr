@@ -249,6 +249,25 @@ export function Complaintlist(params) {
         }
     }, [filteredData]);
 
+
+    // This is for tab section 
+
+
+    const addInTab = (ticket_no,ticket_id) => {
+        // Retrieve the existing array of ticket numbers, or initialize as an empty array
+        const prevTickets = JSON.parse(localStorage.getItem('tabticket')) || [];
+        
+        // Add the current ticket number to the array
+        prevTickets.push({
+            ticket_id :ticket_id,
+            ticket_no : ticket_no
+        });
+    
+        // Store the updated array back in localStorage
+        localStorage.setItem('tabticket', JSON.stringify(prevTickets));
+    }
+    
+
   
 
 
@@ -650,7 +669,9 @@ export function Complaintlist(params) {
                                                 <td style={rowStyle}>
                                                     <button
                                                         className='btn'
-                                                        onClick={() => navigate(`/complaintview/${item.id}`)}
+                                                        onClick={() =>{ navigate(`/complaintview/${item.id}`)
+                                                      addInTab(item.ticket_no, item.id)
+                                                    }}
                                                         title="View"
                                                         style={{
                                                             backgroundColor: 'transparent',
@@ -660,7 +681,7 @@ export function Complaintlist(params) {
                                                             cursor: 'pointer'
                                                         }}
                                                     >
-                                                        <FaEye />
+                                                        <FaEye  />
                                                     </button>
                                                 </td>
                                             </tr>
