@@ -112,7 +112,7 @@ app.post("/loginuser", async (req, res) => {
       const token = jwt.sign(
         { id: user.id, Lhiuser: user.Lhiuser }, // Payload
         JWT_SECRET, // Secret key
-        { expiresIn: "8h" } // Token validity
+        { expiresIn: "1h" } // Token validity
       );
 
       res.json({
@@ -3178,7 +3178,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
       const custcount = getcustresult.recordset[0].id;
 
-      const newcustid = 'B' + custcount.toString().padStart(7, "0")
+      const newcustid = 'A' + custcount.toString().padStart(7, "0")
 
 
 
@@ -3351,7 +3351,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
       .input('city', city)
       .input('area', area)
       .input('pincode', pincode)
-      .input('customer_id', ticket_id == '' ? newcustid : cust_id)
+      .input('customer_id', cust_id)
       .input('model', model)
       .input('ticket_type', ticket_type)
       .input('cust_type', cust_type)
@@ -3369,8 +3369,6 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
       .input('classification', classification)
       .input('priority', priority)
       .query(complaintSQL);
-
-      console.log(resutlt,priority , "$$$$")
 
 
     //Remark insert query
@@ -3423,7 +3421,7 @@ app.post("/update_complaint", authenticateToken,
     let {
       complaint_date, customer_name, contact_person, email, mobile, address,
       state, city, area, pincode, mode_of_contact, ticket_type, cust_type,
-      warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks, ticket_no , classification, priority
+      warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks, ticket_no
     } = req.body;
 
     const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
@@ -3464,16 +3462,15 @@ app.post("/update_complaint", authenticateToken,
     serial_no = @serial,
     child_service_partner = @child_service_partner,
     sevice_partner = @master_service_partner,
-    specification = @specification,
-    customer_class = @classification,
-    call_priority = @priority
+    specification = @specification
   WHERE
     ticket_no = @ticket_no
 `;
 
+      console.log(complaintSQL, "$$")
+      console.log(warrenty_status, "$$")
 
-
-// Debugging log
+      console.log("Executing complaint SQL:", complaintSQL);  // Debugging log
 
       await pool.request()
         .input('ticket_no', ticket_no)
@@ -3502,8 +3499,6 @@ app.post("/update_complaint", authenticateToken,
         .input('master_service_partner', master_service_partner)
         .input('child_service_partner', child_service_partner)
         .input('specification', specification)
-        .input('classification', classification)
-        .input('priority', priority)
         .query(complaintSQL);
 
       //Remark insert query
@@ -7232,13 +7227,10 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
       msp,
       mode_of_contact,
       customer_class,
-      Priority,
-      upcoming = 'current'
+      Priority
     } = req.query;
 
     const offset = (page - 1) * pageSize;
-
-    const currentDate = new Date().toISOString().split('T')[0]
 
     let sql = `
         SELECT c.*,
@@ -7321,49 +7313,21 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
       sql += ` AND c.call_status != 'Closed' AND c.call_status != 'Cancelled'`;
     }
 
-    if(upcoming == 'current'){
-      sql += ` AND ticket_date <= @currentdate`;
-      params.push({ name: "currentdate", value: currentDate });
-
-
-    }else {
-      sql += ` AND ticket_date > @currentdate`;
-      params.push({ name: "currentdate", value: currentDate });
-      
-    }
-
     // Sorting by call_priority and ticket_date for additional ordering
+    sql += `
+        ORDER BY 
+          CASE 
+            WHEN c.call_priority = 'High' THEN 1
+            WHEN c.call_priority = 'Regular' THEN 2
+            ELSE 3 
+          END,
+          c.ticket_date DESC
+        OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY`;
 
-    if(upcoming == 'current'){
-      sql += `
-      ORDER BY 
-        CASE 
-          WHEN c.call_priority = 'High' THEN 1
-          WHEN c.call_priority = 'Regular' THEN 2
-          ELSE 3 
-        END,
-        c.ticket_date DESC
-      OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY`;
-
-      params.push(
-        { name: "offset", value: offset },
-        { name: "pageSize", value: parseInt(pageSize) }
-      );
-  
-    }else{
-      sql += `
-      ORDER BY 
-        CASE 
-          WHEN c.call_priority = 'High' THEN 1
-          WHEN c.call_priority = 'Regular' THEN 2
-          ELSE 3 
-        END,
-        c.ticket_date DESC`;
-
-    }
-   
-
-  
+    params.push(
+      { name: "offset", value: offset },
+      { name: "pageSize", value: parseInt(pageSize) }
+    );
 
     // Execute queries
     const request = pool.request();
@@ -7712,7 +7676,7 @@ app.get("/getserial/:serial", authenticateToken, async (req, res) => {
 
     const pool = await poolPromise;
 
-    const sql = `SELECT * from awt_serial_list where serial_no = @serial `
+    const sql = `SELECT * from awt_serial_list where serial_no = @serial`
 
     const result = await pool.request()
       .input('serial', serial)
@@ -8169,7 +8133,18 @@ app.post('/getquotedetails', async (req, res) => {
 
   try {
     // Use parameterized query to prevent SQL Injection
-    const query = `select * from  awt_quotation  WHERE id = @quote_id`;
+    const query = `SELECT 
+    q.*, -- Select all columns from awt_quotation
+    c.email,c.mobileno,c.customer_id, -- Select all columns from awt_customer
+    cl.address-- Select all columns from awt_customerlocation
+FROM 
+    awt_quotation q
+JOIN 
+    awt_customer c ON q.customer_id = c.customer_id
+JOIN 
+    awt_customerlocation cl ON c.customer_id = cl.customer_id
+WHERE 
+    q.id = @quote_id;`;
 
 
 

@@ -18,19 +18,25 @@ const QuotationEdit = () => {
         city: '',
         assignedEngineer: '',
         status: '',
-        customerId: '',
+        customer_id: '',
         ModelNumber: '',
         title: '',
         quantity: '',
-        price: ''
+        price: '',
+        address: '',
+        mobileno: '',
+        email: '',
     })
 
-    async function getquotedetails(params) {
-        axios.post(`${Base_Url}/getquotedetails`, { quotaion_id: qid })
-            .then((res) => {
-                setValue(res.data[0])
-            })
-    }
+    async function getquotedetails() {
+        try {
+            const res = await axios.post(`${Base_Url}/getquotedetails`, { quotaion_id: qid });
+            setValue(res.data[0]);
+          
+        } catch (error) {
+            console.error('Error fetching quote details:', error);
+        }
+    } 
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -133,6 +139,19 @@ const QuotationEdit = () => {
                                                     <span class="lable">Engineer Name:</span>
                                                     &nbsp;<span class="value"><b>{value.assignedEngineer}</b></span>
                                                 </li>
+                                                <li class="py-1" style={{ flex: "1 1 33.33%", padding: "10px" }}>
+                                                    <span class="lable">Customer Address:</span>
+                                                    &nbsp;<span class="value"><b>{value.address}</b></span>
+                                                </li>
+                                                <li class="py-1" style={{ flex: "1 1 33.33%", padding: "10px" }}>
+                                                    <span class="lable">Mobile Number:</span>
+                                                    &nbsp;<span class="value"><b>{value.mobileno}</b></span>
+                                                </li>
+                                                <li class="py-1" style={{ flex: "1 1 33.33%", padding: "10px" }}>
+                                                    <span class="lable">Email:</span>
+                                                    &nbsp;<span class="value"><b>{value.email}</b></span>
+                                                </li>
+                                                
                                             </ul>
                                         </div>
 
@@ -145,93 +164,6 @@ const QuotationEdit = () => {
 
                                 <div className='row'>
 
-                                    <div className="col-lg-4">
-                                        <div class="card " style={{ backgroundColor: "#F5F5DC" }}>
-                                            <div className="col-12">
-                                                <form onSubmit={handleupdatedata}>
-                                                    <m4 style={{paddingLeft: 15,}} ><b>Update Quotation</b></m4>
-                                                    <div className="form-group col-lg-8" style={{ paddingLeft: 15,paddingTop:15 }}>
-                                                        <label
-                                                            htmlFor="regionInput"
-                                                            className="input-field"
-                                                            style={{ marginBottom: "15px", fontSize: "18px", marginLeft: "5px" }}
-                                                        >
-                                                            Quantity
-                                                        </label>
-                                                        <input
-                                                            type="text"
-                                                            className="form-control"
-                                                            name="quantity"
-                                                            id="mrp"
-                                                            value={value.quantity}
-                                                            placeholder="Enter .."
-                                                            onChange={handleChange}
-
-                                                        />
-
-
-                                                    </div>
-                                                    <div className="form-group col-lg-8" style={{ paddingLeft: 15 }}>
-                                                        <label
-                                                            htmlFor="regionInput"
-                                                            className="input-field"
-                                                            style={{ marginBottom: "15px", fontSize: "18px" }}
-                                                        >
-                                                            Price
-                                                        </label>
-                                                        <input
-                                                            type="text"
-                                                            className="form-control"
-                                                            name="price"
-                                                            id="mrp"
-                                                            value={value.price}
-                                                            placeholder="Enter .."
-                                                            onChange={handleChange}
-
-                                                        />
-
-
-                                                    </div>
-                                                    <div className="form-group col-lg-8" style={{ paddingLeft: 15 }}>
-                                                        <label
-                                                            htmlFor="category"
-                                                            className="form-label pb-0 dropdown-label"
-                                                        >
-                                                            Status
-                                                        </label>
-                                                        <select
-                                                            className="form-select dropdown-select"
-                                                            name="status"
-                                                            value={value.status}
-                                                            onChange={handleChange}
-                                                        >
-                                                            <option value="">Select Status</option>
-                                                            <option value="Approve">Approve</option>
-                                                            <option value="Pending">Pending</option>
-
-
-
-                                                        </select>
-
-
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <button
-                                                            className="btn btn-liebherr"
-                                                            type="submit"
-                                                            style={{ marginTop: "6px", marginRight: "5px" }}
-                                                        >
-                                                            Submit
-                                                        </button>
-
-                                                    </div>
-
-                                                </form>
-
-                                            </div>
-
-                                        </div>
-                                    </div>
                                     <div className="col-lg-4" style={{ flex: "1 1 auto", }}>
                                         {/* Search Filters */}
                                         <div className="gridbox">
