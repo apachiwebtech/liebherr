@@ -8139,9 +8139,9 @@ app.post('/getquotedetails', async (req, res) => {
     cl.address-- Select all columns from awt_customerlocation
 FROM 
     awt_quotation q
-JOIN 
+LEFT JOIN 
     awt_customer c ON q.customer_id = c.customer_id
-JOIN 
+LEFT JOIN 
     awt_customerlocation cl ON c.customer_id = cl.customer_id
 WHERE 
     q.id = @quote_id;`;
