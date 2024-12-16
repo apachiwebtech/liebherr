@@ -86,7 +86,7 @@ const Ratecard = () => {
         if (isEdit) {
           // For update, include 'updated_by'
           await axios
-            .put(`${Base_Url}/putratedata`, {
+            .post(`${Base_Url}/putratedata`, {
               ...formData,
               updated_by: updatedBy,
             },{

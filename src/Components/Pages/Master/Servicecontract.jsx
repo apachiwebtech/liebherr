@@ -146,7 +146,7 @@ const Servicecontract = () => {
         if (isEdit) {
           // For update, include 'updated_by'
           await axios
-            .put(`${Base_Url}/putservicecontract`, {
+            .post(`${Base_Url}/putservicecontract`, {
               ...formData,
               updated_by: updatedBy,
             },{

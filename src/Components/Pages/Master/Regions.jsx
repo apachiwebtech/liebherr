@@ -101,7 +101,7 @@ const Location = () => {
       if (confirmSubmission) {
         if (isEdit) {
           await axios
-            .put(`${Base_Url}/putregion`, { ...formData })
+            .post(`${Base_Url}/putregion`, { ...formData })
             .then((response) => {
               setFormData({ title: "", country_id: "" });
               fetchUsers();

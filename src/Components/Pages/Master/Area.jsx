@@ -118,7 +118,7 @@ const Area = () => {
       if (confirmSubmission) {
         if (isEdit) {
           await axios
-            .put(`${Base_Url}/putarea`, { ...formData },{
+            .post(`${Base_Url}/putarea`, { ...formData },{
               headers: {
                   Authorization: token, // Send token in headers
                   }, 

@@ -116,7 +116,7 @@ const Geocity = () => {
       if (confirmSubmission) {
         if (isEdit) {
           await axios
-            .put(`${Base_Url}/putgeocity`, { ...formData },{
+            .post(`${Base_Url}/putgeocity`, { ...formData },{
               headers: {
                 Authorization: token,
               },

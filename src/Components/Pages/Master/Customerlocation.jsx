@@ -234,7 +234,7 @@ const Customerlocation = () => {
         };
         if (isEdit) {
           await axios
-            .put(`${Base_Url}/putcustomerlocation`, { ...formData },{
+            .post(`${Base_Url}/putcustomerlocation`, { ...formData },{
               headers: {
                 Authorization: token,
               },

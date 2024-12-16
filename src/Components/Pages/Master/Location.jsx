@@ -113,7 +113,7 @@ const Location = () => {
         if (isEdit) {
           // For update, include duplicate check
           await axios
-            .put(`${Base_Url}/putdata`, { ...formData },{
+            .post(`${Base_Url}/putdata`, { ...formData },{
               headers: {
                  Authorization: token, // Send token in headers
                }, 

@@ -86,7 +86,7 @@ const ProductType = () => {
         if (isEdit) {
           // For update, include 'updated_by'
           await axios
-            .put(`${Base_Url}/putproducttypedata`, {
+            .post(`${Base_Url}/putproducttypedata`, {
               ...formData,
               updated_by: updatedBy,
             },{

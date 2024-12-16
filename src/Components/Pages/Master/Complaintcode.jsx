@@ -102,7 +102,7 @@ const ComplaintCode = () => {
         if (isEdit) {
           // For update, include 'updated_by'
           await axios
-            .put(`${Base_Url}/putcomdata`, {
+            .post(`${Base_Url}/putcomdata`, {
               ...formData,
               updated_by: updated_by,
             },{

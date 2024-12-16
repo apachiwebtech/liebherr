@@ -276,7 +276,7 @@ const Childfranchisemaster = () => {
         };
         if (isEdit) {
           await axios
-            .put(`${Base_Url}/putchildfranchise`, { ...hashedFormData, created_by }, {
+            .post(`${Base_Url}/putchildfranchise`, { ...hashedFormData, created_by }, {
               headers: {
                 Authorization: token,
               },

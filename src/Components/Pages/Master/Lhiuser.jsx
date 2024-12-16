@@ -127,7 +127,7 @@ const Lhiuser = () => {
           if (isEdit) {
             // For update, include 'updated_by'
             await axios
-              .put(`${Base_Url}/putlhidata`, {
+              .post(`${Base_Url}/putlhidata`, {
                 ...formData,
                 updated_by: updatedBy,
               },

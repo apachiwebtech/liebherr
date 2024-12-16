@@ -82,7 +82,7 @@ const Manufacturer = () => {
       if (confirmSubmission) {
         if (isEdit) {
           // For update, include 'updated_by'
-          await axios.put(`${Base_Url}/putmanufacturer`, { ...formData, updated_by: updatedBy },{
+          await axios.post(`${Base_Url}/putmanufacturer`, { ...formData, updated_by: updatedBy },{
             headers: {
                Authorization: token, // Send token in headers
              }, 

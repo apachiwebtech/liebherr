@@ -106,7 +106,7 @@ const Subcategory = () => {
         if (isEdit) {
           // For update, include duplicate check
           await axios
-            .put(`${Base_Url}/putsubcategory`, { ...formData },{
+            .post(`${Base_Url}/putsubcategory`, { ...formData },{
               headers: {
                 Authorization: token, // Send token in headers
               },

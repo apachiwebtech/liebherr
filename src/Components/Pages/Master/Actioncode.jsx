@@ -111,7 +111,7 @@ const ActionCode = () => {
          if (confirmSubmission) {
              if (isEdit) {
                  // For update, include 'updated_by'
-                 await axios.put(`${Base_Url}/putsitedefect`, {
+                 await axios.post(`${Base_Url}/putsitedefect`, {
                      id: formData.id,  // Explicitly pass the ID
                      groupdefectcode: formData.groupdefectcode,
                      dsite_code: formData.dsite_code,

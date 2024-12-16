@@ -87,7 +87,7 @@ const Serviceproduct = () => {
         if (isEdit) {
           // For update, include 'updated_by'
           await axios
-            .put(`${Base_Url}/putprodata`, {
+            .post(`${Base_Url}/putprodata`, {
               ...formData,
               updated_by: updatedBy,
             },{

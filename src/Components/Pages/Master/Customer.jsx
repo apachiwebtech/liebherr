@@ -166,7 +166,7 @@ const Customer = () => {
       if (confirmSubmission) {
         if (isEdit) {
           // For update, include duplicate check
-          await axios.put(`${Base_Url}/putcustomer`, { ...formData },{
+          await axios.post(`${Base_Url}/putcustomer`, { ...formData },{
             headers: {
               Authorization: token,
             },

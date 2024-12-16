@@ -220,7 +220,7 @@ const EngineerMaster = () => {
         };
         if (isEdit) {
           // For update, include duplicate check
-          await axios.put(`${Base_Url}/putengineer`, { ...hashedFormData, created_by }
+          await axios.post(`${Base_Url}/putengineer`, { ...hashedFormData, created_by }
             , {
               headers: {
                 Authorization: token,

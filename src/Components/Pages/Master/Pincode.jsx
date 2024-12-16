@@ -158,7 +158,7 @@ const Pincode = () => {
         const url = isEdit
           ? `${Base_Url}/putpincode`
           : `${Base_Url}/postpincode`;
-        const method = isEdit ? axios.put : axios.post;
+        const method = isEdit ? axios.post : axios.post;
         await method(url, formData,{
           headers: {
              Authorization: token, // Send token in headers

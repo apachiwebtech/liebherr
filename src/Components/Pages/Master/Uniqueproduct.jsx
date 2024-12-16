@@ -172,7 +172,7 @@ const Uniqueproduct = () => {
                 if (isEdit) {
                   // For update, include duplicate check
                   await axios
-                    .put(`${Base_Url}/putproductunique`, { ...formData },{
+                    .post(`${Base_Url}/putproductunique`, { ...formData },{
                       headers: {
                         Authorization: token, // Send token in headers
                       },

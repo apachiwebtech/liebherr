@@ -84,7 +84,7 @@ const ProductLine = () => {
       if (confirmSubmission) {
         if (isEdit) {
           await axios
-            .put(`${Base_Url}/putproductlinedata`, {
+            .post(`${Base_Url}/putproductlinedata`, {
               ...formData,
               updated_by: updatedBy,
             }, {

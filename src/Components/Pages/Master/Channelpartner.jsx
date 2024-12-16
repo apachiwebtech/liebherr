@@ -87,7 +87,7 @@ const Channelpartner = () => {
         if (isEdit) {
           // For update, include 'updated_by'
           await axios
-            .put(`${Base_Url}/putcdata`, { ...formData, updated_by: updatedBy },{
+            .post(`${Base_Url}/putcdata`, { ...formData, updated_by: updatedBy },{
               headers: {
                 Authorization: token,
               },

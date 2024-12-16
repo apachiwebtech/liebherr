@@ -347,7 +347,7 @@ const MasterFranchise = (params) => {
         if (isEdit) {
           // For update, include duplicate check
           await axios
-            .put(`${Base_Url}/putfranchisedata`, { ...hashedFormData, created_by },{
+            .post(`${Base_Url}/putfranchisedata`, { ...hashedFormData, created_by },{
               headers: {
                  Authorization: token, // Send token in headers
                }, 

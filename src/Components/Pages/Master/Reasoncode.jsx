@@ -109,7 +109,7 @@ const ReasonCode = () => {
             if (confirmSubmission) {
                 if (isEdit) {
                     // For update, include 'updated_by'
-                    await axios.put(`${Base_Url}/putdatatypeofdefect`, {
+                    await axios.post(`${Base_Url}/putdatatypeofdefect`, {
                         id: formData.id,  // Explicitly pass the ID
                         groupdefect_code: formData.groupdefect_code,
                         defect_code: formData.defect_code,

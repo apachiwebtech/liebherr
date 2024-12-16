@@ -86,7 +86,7 @@ const Material = () => {
         if (isEdit) {
           // For update, include 'updated_by'
           await axios
-            .put(`${Base_Url}/putmatdata`, {
+            .post(`${Base_Url}/putmatdata`, {
               ...formData,
               updated_by: updatedBy,
             },{

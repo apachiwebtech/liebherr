@@ -120,7 +120,7 @@ const Geostate = () => {
       const confirmSubmission = window.confirm("Do you want to submit the data?");
       if (confirmSubmission) {
         if (isEdit) {
-          await axios.put(`${Base_Url}/putgeostate`, { ...formData },{
+          await axios.post(`${Base_Url}/putgeostate`, { ...formData },{
             headers: {
               Authorization: token,
             },

@@ -134,7 +134,7 @@ app.post("/postdata", (req, res) => {
 });
 
 // Update existing user with duplicate check
-app.put("/putdata", (req, res) => {
+app.post("/putdata", (req, res) => {
   const { title, id } = req.body;
 
   // Step 1: Check if the same title exists for another record (other than the current one) and is not soft-deleted
@@ -253,7 +253,7 @@ app.post("/postregion", (req, res) => {
 });
 
 // Update existing region with duplicate check
-app.put("/putregion", (req, res) => {
+app.post("/putregion", (req, res) => {
   const { title, id, country_id } = req.body;
 
   // Step 1: Check if the same title exists for another record (other than the current one) and is not soft-deleted
@@ -397,7 +397,7 @@ app.post("/postgeostate", (req, res) => {
 });
 
 // Update existing geostate with duplicate check
-app.put("/putgeostate", (req, res) => {
+app.post("/putgeostate", (req, res) => {
   const { title, id, country_id, region_id } = req.body;
 
   // Check if the same title exists for another record
@@ -562,7 +562,7 @@ app.post("/postgeocity", (req, res) => {
 });
 
 // Update existing geocity with duplicate check
-app.put("/putgeocity", (req, res) => {
+app.post("/putgeocity", (req, res) => {
   const { title, id, country_id, region_id, geostate_id } = req.body;
 
   // Check for duplicates
@@ -745,7 +745,7 @@ app.post("/postarea", (req, res) => {
 });
 
 // Update existing area with duplicate check
-app.put("/putarea", (req, res) => {
+app.post("/putarea", (req, res) => {
   const { title, id, country_id, region_id, geostate_id, geocity_id } =
     req.body;
 
@@ -949,7 +949,7 @@ app.post("/postpincode", (req, res) => {
 });
 
 // Update existing pincode with duplicate check (considering country_id)
-app.put("/putpincode", (req, res) => {
+app.post("/putpincode", (req, res) => {
   const {
     pincode,
     id,
@@ -1079,7 +1079,7 @@ app.get("/requestdatacat/:id", (req, res) => {
 });
 
 // update for category
-app.put("/putcatdata", (req, res) => {
+app.post("/putcatdata", (req, res) => {
   const { title, id } = req.body;
 
   // Step 1: Check if the same title exists for another record (other than the current one) and is not soft-deleted
@@ -1201,7 +1201,7 @@ app.post("/postsubcategory", (req, res) => {
 });
 
 // update for subcategory
-app.put("/putsubcategory", (req, res) => {
+app.post("/putsubcategory", (req, res) => {
   const { title, id, category_id } = req.body;
 
   // Step 1: Check if the same title exists for another record (other than the current one) and is not soft-deleted
@@ -1338,7 +1338,7 @@ app.get("/requestcdata/:id", (req, res) => {
 });
 
 // update for Channelpartner
-app.put("/putcdata", (req, res) => {
+app.post("/putcdata", (req, res) => {
   const { Channelpartner, id } = req.body;
 
   // Step 1: Check if the same channelpartner exists for another record (other than the current one) and is not soft-deleted
@@ -1495,7 +1495,7 @@ app.get("/requestdatacom/:id", (req, res) => {
 });
 
 // update for complaintcode
-app.put("/putcomdata", (req, res) => {
+app.post("/putcomdata", (req, res) => {
   const { id, complaintcode, updated_by } = req.body;
 
   // Step 1: Check if the updated complaintcode already exists and is not soft-deleted
@@ -1648,7 +1648,7 @@ app.get("/requestdatareason/:id", (req, res) => {
 });
 
 // Update reason code
-app.put("/putreasondata", (req, res) => {
+app.post("/putreasondata", (req, res) => {
   const { id, reasoncode, updated_by } = req.body;
 
   // Step 1: Check if the updated reasoncode already exists and is not soft-deleted
@@ -1793,7 +1793,7 @@ app.get("/requestdataaction/:id", (req, res) => {
 });
 
 // update for actioncode
-app.put("/putactiondata", (req, res) => {
+app.post("/putactiondata", (req, res) => {
   const { id, actioncode, updated_by } = req.body;
 
   const checkDuplicateSql = `SELECT * FROM action_code WHERE actioncode = ? AND deleted = 0 AND id != ?`;
@@ -1950,7 +1950,7 @@ app.get("/requestsdata/:id", (req, res) => {
 });
 
 // Update for serviceagent
-app.put("/putsdata", (req, res) => {
+app.post("/putsdata", (req, res) => {
   const { id, serviceagent, updated_by } = req.body;
 
   // Step 1: Check if the updated serviceagent already exists and is not soft-deleted
@@ -2073,7 +2073,7 @@ app.get("/requestcalldata/:id", (req, res) => {
 });
 
 // Update for Callstatus
-app.put("/putcalldata", (req, res) => {
+app.post("/putcalldata", (req, res) => {
   const { Callstatus, id } = req.body;
 
   // Step 1: Check if the same Callstatus exists for another record (other than the current one) and is not soft-deleted
@@ -2196,7 +2196,7 @@ app.get("/requestlhidata/:id", (req, res) => {
 });
 
 // update for Lhiuser
-app.put("/putlhidata", (req, res) => {
+app.post("/putlhidata", (req, res) => {
   const { Lhiuser, id } = req.body;
 
   // Step 1: Check if the same Lhiuser exists for another record (other than the current one) and is not soft-deleted
@@ -2317,7 +2317,7 @@ app.get("/requestprodata/:id", (req, res) => {
 });
 
 // update for Serviceproduct
-app.put("/putprodata", (req, res) => {
+app.post("/putprodata", (req, res) => {
   const { Serviceproduct, id } = req.body;
 
   const checkDuplicateSql = `SELECT * FROM service_product WHERE Serviceproduct = ? AND id != ? AND deleted = 0`;
@@ -2431,7 +2431,7 @@ app.get("/requestratedata/:id", (req, res) => {
 });
 
 // update for Ratecard
-app.put("/putratedata", (req, res) => {
+app.post("/putratedata", (req, res) => {
   const { Ratecard, id } = req.body;
 
   const checkDuplicateSql = `SELECT * FROM rate_card WHERE Ratecard = ? AND id != ? AND deleted = 0`;
@@ -2584,7 +2584,7 @@ app.get("/requestmanufacturer/:id", (req, res) => {
 });
 
 // Update for Manufacturer
-app.put("/putmanufacturer", (req, res) => {
+app.post("/putmanufacturer", (req, res) => {
   const { id, Manufacturer, updated_by } = req.body;
 
   const checkDuplicateSql =
@@ -2729,7 +2729,7 @@ app.get("/requestdatamat/:id", (req, res) => {
 });
 
 // Update for material
-app.put("/putmatdata", (req, res) => {
+app.post("/putmatdata", (req, res) => {
   const { id, Material, updated_by } = req.body;
 
   const checkDuplicateSql =
@@ -2875,7 +2875,7 @@ app.get("/requestdatamat/:id", (req, res) => {
 });
 
 // Update for material
-app.put("/putmatdata", (req, res) => {
+app.post("/putmatdata", (req, res) => {
   const { id, Material, updated_by } = req.body;
 
   const checkDuplicateSql =
@@ -3037,7 +3037,7 @@ app.get("/requestdataproductline/:id", (req, res) => {
 });
 
 // Update for product line
-app.put("/putproductlinedata", (req, res) => {
+app.post("/putproductlinedata", (req, res) => {
   const { id, product_line, pline_code, updated_by } = req.body;
   const checkDuplicateSql =
     "SELECT * FROM product_line WHERE product_line = ? AND deleted = 0 AND id != ?";
@@ -3190,7 +3190,7 @@ app.get("/requestdataproducttype/:id", (req, res) => {
 });
 
 // Update for Product Type
-app.put("/putproducttypedata", (req, res) => {
+app.post("/putproducttypedata", (req, res) => {
   const { id, product_type, updated_by } = req.body;
 
   const checkDuplicateSql = `SELECT * FROM product_type WHERE product_type = ? AND deleted = 0 AND id != ?`;
@@ -3303,7 +3303,7 @@ app.post("/postfranchisedata", (req, res) => {
   });
 });
 
-app.put("/putfranchisedata", (req, res) => {
+app.post("/putfranchisedata", (req, res) => {
   const { title, id } = req.body;
 
   const checkDuplicateSql = `SELECT * FROM awt_franchisemaster WHERE title = ? AND id != ? AND deleted = 0`;
@@ -3431,7 +3431,7 @@ app.post("/postchildfranchise", (req, res) => {
   });
 });
 
-app.put("/putchildfranchise", (req, res) => {
+app.post("/putchildfranchise", (req, res) => {
   const { title, id, pfranchise_id } = req.body;
 
   const checkDuplicateSql = `SELECT * FROM awt_childfranchisemaster WHERE title = ? AND id != ? AND deleted = 0`;
@@ -3566,7 +3566,7 @@ app.post("/postengineer", (req, res) => {
   });
 });
 
-app.put("/putengineer", (req, res) => {
+app.post("/putengineer", (req, res) => {
   const { title, id, cfranchise_id, password, email, mobile_no } = req.body;
 
   const checkDuplicateSql = `SELECT * FROM awt_engineermaster WHERE mobile_no = ?  AND email = ? AND id != ? AND deleted = 0`;
@@ -3917,7 +3917,7 @@ app.post("/postproductunique", (req, res) => {
   });
 });
 
-app.put("/putproductunique", (req, res) => {
+app.post("/putproductunique", (req, res) => {
   const { product, id, location, date, serialnumber } = req.body;
 
   const checkDuplicateSql = `SELECT * FROM awt_uniqueproductmaster WHERE serialnumber = ? AND id != ? AND deleted = 0`;
@@ -4060,7 +4060,7 @@ app.post("/postcustomerlocation", (req, res) => {
 });
 
 // Update existing Customer Location with duplicate check 
-app.put("/putcustomerlocation", (req, res) => {
+app.post("/putcustomerlocation", (req, res) => {
   const {
     country_id, region_id, geostate_id, geocity_id, area_id, pincode_id,address,ccperson,ccnumber,address_type,id
   } = req.body;

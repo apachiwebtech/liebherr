@@ -87,7 +87,7 @@ const Serviceagent = () => {
         if (isEdit) {
           // For update, include 'updated_by'
           await axios
-            .put(`${Base_Url}/putsdata`, { ...formData, updated_by: updatedBy },{
+            .post(`${Base_Url}/putsdata`, { ...formData, updated_by: updatedBy },{
               headers: {
                   Authorization: token, // Send token in headers
                   }, 

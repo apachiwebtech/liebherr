@@ -338,7 +338,7 @@ app.post("/postdata", authenticateToken, async (req, res) => {
 
 
 // Update existing user with duplicate check
-app.put("/putdata", authenticateToken, async (req, res) => {
+app.post("/putdata", authenticateToken, async (req, res) => {
   const { title, id } = req.body;
 
   try {
@@ -494,7 +494,7 @@ app.post("/postregion", async (req, res) => {
 
 
 // Update existing region with duplicate check
-app.put("/putregion", async (req, res) => {
+app.post("/putregion", async (req, res) => {
   const { title, id, country_id } = req.body;
 
   try {
@@ -667,7 +667,7 @@ app.post("/postgeostate", authenticateToken, async (req, res) => {
 
 
 // Update existing geostate with duplicate check
-app.put("/putgeostate", authenticateToken, async (req, res) => {
+app.post("/putgeostate", authenticateToken, async (req, res) => {
   const { title, id, country_id, region_id } = req.body;
 
   try {
@@ -934,7 +934,7 @@ app.post("/postgeocity", authenticateToken, async (req, res) => {
 
 
 // Update existing geocity with duplicate check
-app.put("/putgeocity", authenticateToken,
+app.post("/putgeocity", authenticateToken,
   async (req, res) => {
     const { title, id, country_id, region_id, geostate_id, district } = req.body;
 
@@ -1190,7 +1190,7 @@ app.post("/postarea", authenticateToken, async (req, res) => {
 });
 
 // Update existing area with duplicate check
-app.put("/putarea", authenticateToken, async (req, res) => {
+app.post("/putarea", authenticateToken, async (req, res) => {
   const { title, id, country_id, region_id, geostate_id } = req.body;
 
   try {
@@ -1463,7 +1463,7 @@ app.post("/postpincode", async (req, res) => {
 });
 
 // Update existing pincode with duplicate check (considering country_id)
-app.put("/putpincode", async (req, res) => {
+app.post("/putpincode", async (req, res) => {
   const {
     pincode,
     id,
@@ -1770,7 +1770,7 @@ app.get("/requestdatacat/:id", authenticateToken, async (req, res) => {
 });
 
 // update for category
-app.put("/putcatdata", authenticateToken, async (req, res) => {
+app.post("/putcatdata", authenticateToken, async (req, res) => {
   const { title, id } = req.body;
 
   try {
@@ -1943,7 +1943,7 @@ app.post("/postsubcategory", authenticateToken, async (req, res) => {
 });
 
 // update for subcategory
-app.put("/putsubcategory", authenticateToken, async (req, res) => {
+app.post("/putsubcategory", authenticateToken, async (req, res) => {
   try {
     const { title, id, category_id } = req.body;
 
@@ -2132,7 +2132,7 @@ app.get("/requestcdata/:id", authenticateToken, async (req, res) => {
 
 
 // update for Channel_partner
-app.put("/putcdata", authenticateToken, async (req, res) => {
+app.post("/putcdata", authenticateToken, async (req, res) => {
   try {
     const { Channel_partner, id } = req.body;
 
@@ -2315,7 +2315,7 @@ app.get("/requestdatacom/:id", authenticateToken, async (req, res) => {
 });
 
 // update for Defect Group Code
-app.put("/putcomdata", authenticateToken, async (req, res) => {
+app.post("/putcomdata", authenticateToken, async (req, res) => {
   try {
     const { id, defectgroupcode, defectgrouptitle, description, updated_by } = req.body;
     const pool = await poolPromise;
@@ -2494,7 +2494,7 @@ app.get("/requestdatatypeofdefect/:id", authenticateToken, async (req, res) => {
 });
 
 // Update Type Of Defect Code
-app.put("/putdatatypeofdefect", authenticateToken, async (req, res) => {
+app.post("/putdatatypeofdefect", authenticateToken, async (req, res) => {
   const { id, defect_code, groupdefect_code, defect_title, description, updated_by } = req.body;
   try {
     const pool = await poolPromise;
@@ -2647,7 +2647,7 @@ app.get("/requestsitedefect/:id", authenticateToken, async (req, res) => {
 });
 
 // Update Type Of Defect Code
-app.put("/putsitedefect", authenticateToken, async (req, res) => {
+app.post("/putsitedefect", authenticateToken, async (req, res) => {
   const { id, dsite_code, groupdefectcode, dsite_title, description, updated_by } = req.body;
 
   try {
@@ -3802,7 +3802,7 @@ app.post("/postcustomer", authenticateToken, async (req, res) => {
 
 // customer put 
 
-app.put("/putcustomer", authenticateToken, async (req, res) => {
+app.post("/putcustomer", authenticateToken, async (req, res) => {
   const { id, customer_fname, customer_type, customer_classification, mobileno, alt_mobileno, dateofbirth, anniversary_date, email, salutation, customer_id, created_by } = req.body;
 
 
@@ -4046,7 +4046,7 @@ app.post("/postcustomerlocation", authenticateToken, async (req, res) => {
 });
 
 // Update existing Customer Location with duplicate check
-app.put("/putcustomerlocation", authenticateToken, async (req, res) => {
+app.post("/putcustomerlocation", authenticateToken, async (req, res) => {
   const {
     country_id, region_id, geostate_id, geocity_id, area_id, pincode_id, address, ccperson, ccnumber, address_type, id
   } = req.body;
@@ -4160,7 +4160,7 @@ app.post("/postproductunique", authenticateToken, async (req, res) => {
   }
 });
 
-app.put("/putproductunique", authenticateToken, async (req, res) => {
+app.post("/putproductunique", authenticateToken, async (req, res) => {
   const { product, id, location, date, serialnumber } = req.body;
 
   try {
@@ -4376,7 +4376,7 @@ app.post("/postengineer",
       return res.status(500).json({ error: "An error occurred while adding the engineer" });
     }
   });
-app.put("/putengineer", authenticateToken, async (req, res) => {
+app.post("/putengineer", authenticateToken, async (req, res) => {
   const { title, mfranchise_id, cfranchise_id, password, email, mobile_no, personal_email, employee_code, personal_mobile, dob, blood_group, academic_qualification, joining_date, passport_picture, resume, photo_proof, address_proof, permanent_address, current_address, id } = req.body;
 
   try {
@@ -4612,7 +4612,7 @@ app.post("/postfranchisedata", authenticateToken, async (req, res) => {
 
 
 
-app.put("/putfranchisedata", authenticateToken, async (req, res) => {
+app.post("/putfranchisedata", authenticateToken, async (req, res) => {
   const { title, id, contact_person, email, mobile_no, password, address, country_id, region_id, state, area, city, pincode_id,
     website, gst_no, panno, bank_name, bank_acc, bank_ifsc, bank_address, withliebher, lastworkindate, contract_acti, contract_expir, licarecode
     , partner_name, created_by
@@ -5113,7 +5113,7 @@ app.post("/postchildfranchise", authenticateToken, async (req, res) => {
 
 
 // Update Child Master Page
-app.put("/putchildfranchise", authenticateToken, async (req, res) => {
+app.post("/putchildfranchise", authenticateToken, async (req, res) => {
   const {
     title, id, pfranchise_id, licare_code, partner_name, contact_person,
     email, mobile_no, password, address, country_id, region_id, state,
@@ -5335,7 +5335,7 @@ app.get("/requestdataproducttype/:id", authenticateToken, async (req, res) => {
   }
 });
 // Update for Product Type
-app.put("/putproducttypedata", authenticateToken, async (req, res) => {
+app.post("/putproducttypedata", authenticateToken, async (req, res) => {
   const { id, product_type, updated_by } = req.body;
 
   try {
@@ -5463,7 +5463,7 @@ app.get("/requestdataproductline/:id", authenticateToken, async (req, res) => {
   }
 });
 // Update for product line
-app.put("/putproductlinedata", authenticateToken, async (req, res) => {
+app.post("/putproductlinedata", authenticateToken, async (req, res) => {
   const { id, product_line, pline_code, updated_by } = req.body;
 
   try {
@@ -5594,7 +5594,7 @@ app.get("/requestdatamat/:id", authenticateToken, async (req, res) => {
   }
 });
 // Update for material
-app.put("/putmatdata", authenticateToken, async (req, res) => {
+app.post("/putmatdata", authenticateToken, async (req, res) => {
   const { id, Material, updated_by } = req.body;
 
   try {
@@ -5734,7 +5734,7 @@ app.get("/requestmanufacturer/:id", authenticateToken, async (req, res) => {
 });
 
 // Update for Manufacturer
-app.put("/putmanufacturer", authenticateToken, async (req, res) => {
+app.post("/putmanufacturer", authenticateToken, async (req, res) => {
   const { id, Manufacturer, updated_by } = req.body;
 
   try {
@@ -5852,7 +5852,7 @@ app.get("/requestratedata/:id", authenticateToken, async (req, res) => {
   }
 });
 // update for Ratecard
-app.put("/putratedata", authenticateToken, async (req, res) => {
+app.post("/putratedata", authenticateToken, async (req, res) => {
   const { Ratecard, id } = req.body;
 
   try {
@@ -5969,7 +5969,7 @@ app.get("/requestprodata/:id", authenticateToken, async (req, res) => {
   }
 });
 // update for Serviceproduct
-app.put("/putprodata", authenticateToken, async (req, res) => {
+app.post("/putprodata", authenticateToken, async (req, res) => {
   const { Serviceproduct, id } = req.body;
 
   try {
@@ -6091,7 +6091,7 @@ app.get("/requestservicecontract/:id", async (req, res) => {
 //update for service contract
 
 
-app.put("/putservicecontract", authenticateToken, async (req, res) => {
+app.post("/putservicecontract", authenticateToken, async (req, res) => {
   const { id, customerName, customerMobile, contractNumber, contractType, productName, serialNumber, startDate, endDate, created_by } = req.body;
 
 
@@ -6376,7 +6376,7 @@ app.get("/requestlhidata/:id", authenticateToken, async (req, res) => {
   }
 });
 // update for Lhiuser
-app.put("/putlhidata", authenticateToken, async (req, res) => {
+app.post("/putlhidata", authenticateToken, async (req, res) => {
   const {
     Lhiuser, id, updated_by, mobile_no, Usercode, password, status, email, remarks
   } = req.body;
@@ -6518,7 +6518,7 @@ app.get("/requestcalldata/:id",
     }
   });
 // Update for Callstatus
-app.put("/putcalldata", async (req, res) => {
+app.post("/putcalldata", async (req, res) => {
   const { Callstatus, id } = req.body;
 
   const checkDuplicateSql = `SELECT * FROM call_status WHERE Callstatus = '${Callstatus}' AND id != '${id}' AND deleted = 0`;
@@ -6649,7 +6649,7 @@ app.get("/requestsdata/:id", authenticateToken, async (req, res) => {
 });
 
 // Update for serviceagent
-app.put("/putsdata", authenticateToken, async (req, res) => {
+app.post("/putsdata", authenticateToken, async (req, res) => {
   const { id, serviceagent, updated_by } = req.body;
 
   try {

@@ -86,7 +86,7 @@ const Category = () => {
         if (isEdit) {
           // For update, include 'updated_by'
           await axios
-            .put(`${Base_Url}/putcatdata`, {
+            .post(`${Base_Url}/putcatdata`, {
               ...formData,
               updated_by: updatedBy,
             },{

@@ -87,7 +87,7 @@ const Callstatus = () => {
         if (isEdit) {
           // For update, include 'updated_by'
           await axios
-            .put(`${Base_Url}/putcalldata`, {
+            .post(`${Base_Url}/putcalldata`, {
               ...formData,
               updated_by: updatedBy,
             })
