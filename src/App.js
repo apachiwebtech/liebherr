@@ -86,6 +86,7 @@ import DataTable from './Components/Pages/Complaint/Compdatatablebackup';
 import HeaderMsp from './Components/Layout/HeaderMsp';
 import { Quotationlist } from './Components/Pages/Quotation/Quotationlist';
 import QuotationEdit from './Components/Pages/Quotation/QuotationEdit';
+import USerLogin from './Components/Authenticate/USerLogin';
 
 
 
@@ -99,6 +100,11 @@ const Router = createBrowserRouter([
   {
     path: "/login",
     element: <Login />,
+
+  },
+  {
+    path: "/userlogin",
+    element: <USerLogin />,
 
   },
   {
