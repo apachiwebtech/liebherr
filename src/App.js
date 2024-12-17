@@ -122,7 +122,7 @@ const Router = createBrowserRouter([
     path: "/msp/ticketlistmsp",
     element: <MSPAPP />,
     children: [
-      
+
       {
         path: "/msp/ticketlistmsp",
         element: <Ticketlistmsp />,
@@ -139,7 +139,7 @@ const Router = createBrowserRouter([
     path: "/csp/ticketlist",
     element: <CSPAPP />,
     children: [
-    
+
       {
         path: "/csp/ticketlist",
         element: <Ticketlistcsp />,
@@ -555,7 +555,7 @@ function App() {
           window.location.reload()
       }
   });
-  
+
   },[])
 
   React.useEffect(() => {
@@ -596,7 +596,7 @@ function CSPAPP() {
 
   );
 }
-  
+
 function MSPAPP() {
 
   const navigate = useNavigate()

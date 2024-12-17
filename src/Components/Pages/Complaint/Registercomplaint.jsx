@@ -13,6 +13,7 @@ export function Registercomplaint(params) {
   const [serachval, setSearch] = useState('')
   const [searchdata, setSearchData] = useState([])
   const [ProductCustomer, setProductCustomer] = useState([])
+  const [warranty_status_data, setWarranty_status_data] = useState([])
   const [DuplicateCustomerNumber, setDuplicateCustomerNumber] = useState([])
   const [hasSearched, setHasSearched] = useState(false)
   const [form, setForm] = useState(false)
@@ -21,7 +22,7 @@ export function Registercomplaint(params) {
   const [city, setCity] = useState([])
   const [pincode, setPincode] = useState([])
   const [product, setProduct] = useState([])
-  const [MasterPartner, setMasterPartner] = useState([])
+  const [purchase_data, setpurchase_data] = useState([])
   const [ChildPartner, setChildPartner] = useState([])
   const [ModelNumber, setModelNumber] = useState([])
   const [duplicate, setDuplicate] = useState([]);
@@ -40,7 +41,7 @@ export function Registercomplaint(params) {
   const [serials, setserial] = useState([])
   const [currentAttachment2, setCurrentAttachment2] = useState(""); // Current attachment 2 for modal
   const [isModal2Open, setIsModal2Open] = useState(false);
-  const [dateafteryear, setdateafteryear] = useState('')
+  const [add_new_ticketdata, setadd_new_ticketdata] = useState('')
 
 
 
@@ -121,26 +122,27 @@ export function Registercomplaint(params) {
       purchase_date.setFullYear(purchase_date.getFullYear() + 1);
 
       // Format the date as YYYY-MM-DD
-      const lastDate = purchase_date.toISOString().split('T')[0];
+      const lastDate = purchase_date;
+      // const lastDate = purchase_date.toISOString().split('T')[0];
 
 
 
       if (lastDate < currentDate) {
-        setValue({
-          ...value ,
-          warrenty_status: "OUT OF WARRANTY"
-        })
+                setWarranty_status_data("OUT OF WARRANTY")
         setSearchData({
-        invoice_date :value
+          ...searchdata,
+          invoice_date: value
         })
 
+      setpurchase_data(value)
+
       } else {
-        setValue({
-          ...value ,
-          warrenty_status: "WARRANTY"
-        })
+        setpurchase_data(value)
+
+        setWarranty_status_data("WARRANTY")
         setSearchData({
-        invoice_date :value
+          ...searchdata,
+          invoice_date: value
         })
       }
 
@@ -178,11 +180,11 @@ export function Registercomplaint(params) {
       isValid = false;
       newErrors.model = "Model is required";
     }
-    if (!value.purchase_date && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
+    if (!purchase_data && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
       isValid = false;
       newErrors.purchase_date = "Date is required";
     }
-    if (!value.warrenty_status && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
+    if (!warranty_status_data && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
       isValid = false;
       newErrors.warrenty_status = "Status is required";
     }
@@ -198,7 +200,7 @@ export function Registercomplaint(params) {
       isValid = false;
       newErrors.mobile = "Mobile is required";
     }
-    if (!value.address && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
+    if (!newAddress && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
       isValid = false;
       newErrors.address = "Address is required";
     }
@@ -218,10 +220,7 @@ export function Registercomplaint(params) {
       isValid = false;
       newErrors.cust_type = "Type is required";
     }
-    if (!value.call_charge && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
-      isValid = false;
-      newErrors.call_charge = "Charge is required";
-    }
+
     if (!value.classification && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
       isValid = false;
       newErrors.classification = "Classification is required";
@@ -235,22 +234,12 @@ export function Registercomplaint(params) {
       newErrors.specification = "Specification is required";
     }
 
-    if (!value.additional_remarks) {
-      isValid = false;
-      newErrors.additional_remarks = "Specification is required";
-    }
-
-
-
-
 
     setErrors(newErrors);
     setTimeout(() => {
       setErrors("")
     }, 5000);
     return isValid;
-
-
   }
   // Add this state to manage the popup visibility and selected address
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -271,6 +260,9 @@ export function Registercomplaint(params) {
       ...prevState,
       address: value
     }));
+    setNewAddress(value);
+    console.log(addresses);
+
   };
 
   useEffect(() => {
@@ -499,8 +491,9 @@ export function Registercomplaint(params) {
           setModelNumber(res.data[0].ModelNumber)
           setLocation(res.data[0])
           setTicketNo(res.data[0].ticket_no)
-
+          getDateAfterOneYear(res.data[0].purchase_date)
           setValue({
+            ...value,
             complaint_date: res.data[0].ticket_date || currentDate,
             contact_person: res.data[0].customer_mobile,
             customer_name: res.data[0].customer_name,
@@ -529,7 +522,8 @@ export function Registercomplaint(params) {
             mdealer_info: res.data[0].sales_partner,
             classification: res.data[0].customer_class,
             Priority: res.data[0].call_priority,
-            callType: res.data[0].callType
+            callType: res.data[0].callType,
+            specification : res.data[0].specification
           })
         }
       })
@@ -590,10 +584,11 @@ export function Registercomplaint(params) {
           setSearchData(res.data.information[0])
           setProductCustomer(res.data.product)
           setDuplicate(res.data.information);
-
+          setNewAddress(res.data.information[0].address)
           setHideticket(true)
           // setTicket(res.data)
           setValue({
+            ...value,
             customer_name: res.data.information[0].customer_name,
             email: res.data.information[0].email,
             mobile: res.data.information[0].mobileno,
@@ -601,10 +596,10 @@ export function Registercomplaint(params) {
             customer_id: res.data.information[0].id,
             custo_id: res.data.information[0].customer_id,
             customerEndId: customerInfo.customer_id,
-            pincode:res.data.information[0].pincode,
-            state :res.data.information[0].state,
-            city :res.data.information[0].city,
-            area :res.data.information[0].area
+            pincode: res.data.information[0].pincode,
+            state: res.data.information[0].state,
+            city: res.data.information[0].city,
+            area: res.data.information[0].area
 
           })
           // Fetch addresses of end customer from customer
@@ -633,46 +628,47 @@ export function Registercomplaint(params) {
   const handlesubmit = (e) => {
 
     e.preventDefault()
+    console.log(value);
 
     const confirm = window.confirm("Are you sure?")
 
     if (confirm) {
 
+      const data = {
+        complaint_date: value.complaint_date || currentDate,
+        customer_name: value.customer_name,
+        contact_person: value.contact_person,
+        email: value.email,
+        mobile: value.mobile,
+        alt_mobile: value.alt_mobile,
+        address: newAddress,
+        state: value.state,
+        city: value.city,
+        area: value.area,
+        pincode: value.pincode,
+        mode_of_contact: value.mode_of_contact,
+        ticket_type: value.ticket_type,
+        cust_type: value.cust_type,
+        warrenty_status: value.warrenty_status,
+        invoice_date: value.invoice_date,
+        call_charge: value.call_charge,
+        cust_id: searchdata.id || value.customer_id || "", // Fix customer ID handling
+        model: value.model,
+        serial: value.serial,
+        purchase_date: purchase_data,
+        master_service_partner: value.master_service_partner,
+        child_service_partner: value.child_service_partner,
+        additional_remarks: value.additional_remarks,
+        specification: value.specification,
+        created_by: value.created_by,
+        classification: value.classification,
+        priority: value.Priority,
+        callType: value.callType,
+        ticket_id: ticketid
+      };
+      console.log(data)
+
       if (validateForm()) {
-
-        const data = {
-          complaint_date: value.complaint_date || currentDate,
-          customer_name: value.customer_name,
-          contact_person: value.contact_person,
-          email: value.email,
-          mobile: value.mobile,
-          alt_mobile: value.alt_mobile,
-          address: value.address,
-          state: value.state,
-          city: value.city,
-          area: value.area,
-          pincode: value.pincode,
-          mode_of_contact: value.mode_of_contact,
-          ticket_type: value.ticket_type,
-          cust_type: value.cust_type,
-          warrenty_status: value.warrenty_status,
-          invoice_date: value.invoice_date,
-          call_charge: value.call_charge,
-          cust_id: searchdata.id || value.customer_id || "", // Fix customer ID handling
-          model: value.model,
-          serial: value.serial,
-          purchase_date: value.purchase_date,
-          master_service_partner: value.master_service_partner,
-          child_service_partner: value.child_service_partner,
-          additional_remarks: value.additional_remarks,
-          specification: value.specification,
-          created_by: value.created_by,
-          classification: value.classification,
-          priority: value.Priority,
-          callType: value.callType,
-          ticket_id: ticketid
-        };
-
 
 
         axios.post(`${Base_Url}/add_complaintt`, data, {
@@ -799,6 +795,7 @@ export function Registercomplaint(params) {
   // Fix the onHandleChange function
   const onHandleChange = (e) => {
     const { name, value: inputValue } = e.target;
+console.log(name ,'name',value ,'value');
 
     setValue(prevState => ({
       ...prevState,
@@ -842,38 +839,38 @@ export function Registercomplaint(params) {
 
 
   const fetchlocations = async (pincode) => {
-    if (pincode.length == 6 ) {
+    if (pincode.length == 6) {
 
 
-    try {
+      try {
 
-      const response = await axios.get(
-        `${Base_Url}/getmultiplelocation/${pincode}`, {
-        headers: {
-          Authorization: token, // Send token in headers
-        },
+        const response = await axios.get(
+          `${Base_Url}/getmultiplelocation/${pincode}`, {
+          headers: {
+            Authorization: token, // Send token in headers
+          },
+        }
+        );
+
+        if (response.data && response.data[0]) {
+
+          setlocations({ franchiseem: response.data[0].franchiseem, childfranchiseem: response.data[0].childfranchiseem })
+
+          setValue({
+            ...value,
+            state: response.data[0].state,
+            city: response.data[0].city,
+            area: response.data[0].district,
+            pincode: response.data[0].pincode
+          })
+
+        }
+
+
+      } catch (error) {
+        console.error("Error fetching ticket details:", error);
       }
-      );
-
-      if (response.data && response.data[0]) {
-
-        setlocations({ franchiseem: response.data[0].franchiseem, childfranchiseem: response.data[0].childfranchiseem })
-
-        setValue({
-          ...value,
-          state: response.data[0].state,
-          city: response.data[0].city,
-          area: response.data[0].district,
-          pincode: response.data[0].pincode
-        })
-
-      }
-
-
-    } catch (error) {
-      console.error("Error fetching ticket details:", error);
     }
-  }
   };
 
   const fetchserial = async (serial) => {
@@ -890,11 +887,12 @@ export function Registercomplaint(params) {
 
         // setserial({ ModelNumber: response.data[0].ModelNumber, purchase_date: response.data[0].purchase_date })
         setValue({
+          ...value,
           model: response.data[0].ModelNumber,
           serial: response.data[0].serial_no
         })
 
-      }else{
+      } else {
         setValue({
           model: ''
         })
@@ -928,7 +926,7 @@ export function Registercomplaint(params) {
   const addnewticket = (product_id) => {
     setForm(true)
     const data = {
-      customerId : searchdata.customer_id,
+      customerId: searchdata.customer_id,
       customer_name: searchdata.customer_name,
       contact_person: searchdata.contact_person,
       email: searchdata.email,
@@ -950,25 +948,27 @@ export function Registercomplaint(params) {
     )
       .then((res) => {
         setTicketid(res.data.id)
-
+        setadd_new_ticketdata(res.data.rowdata[0])
         setModelNumber(res.data.rowdata[0].ModelNumber)
-
-        setValue({
-          model: res.data.rowdata[0].ModelNumber,
-          customer_name: res.data.rowdata[0].customer_name,
-          state: res.data.rowdata[0].state,
-          city: res.data.rowdata[0].city,
-          area: res.data.rowdata[0].area,
-          pincode: res.data.rowdata[0].pincode,
-          serial: res.data.rowdata[0].serial_no
-        })
         getDateAfterOneYear(res.data.rowdata[0].invoice_date)
-
       }).catch((err) => {
         console.log(err)
       })
   }
 
+useEffect(() => {
+  setValue({
+    model: add_new_ticketdata.ModelNumber,
+    customer_name: add_new_ticketdata.customer_name,
+    state: add_new_ticketdata.state,
+    city: add_new_ticketdata.city,
+    area: add_new_ticketdata.area,
+    pincode: add_new_ticketdata.pincode,
+    serial: add_new_ticketdata.serial_no
+  })
+
+
+}, [add_new_ticketdata])
 
 
 
@@ -1085,34 +1085,34 @@ export function Registercomplaint(params) {
                 </div>
               </div>
 
-              {!form && ProductCustomer? (
+              {!form && ProductCustomer ? (
                 <>
-              <ul className="nav nav-tabs" id="myTab2" role="tablist">
-                <li className="nav-item">
-                  <a className="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Products</a>
+                  <ul className="nav nav-tabs" id="myTab2" role="tablist">
+                    <li className="nav-item">
+                      <a className="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Products</a>
 
-                </li>
-              </ul>
+                    </li>
+                  </ul>
 
-                <div className="tab-content mb-3">
-                  <div className="tab-pane active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-                    <table className="table table-striped">
-                      <tbody>
+                  <div className="tab-content mb-3">
+                    <div className="tab-pane active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                      <table className="table table-striped">
+                        <tbody>
 
-                        {!form && ProductCustomer.map((item, index) => (
-                          <tr key={index}>
-                            <td><div>{item.ModelNumber}</div></td>
-                            <td>
-                              <div className="text-right pb-2">
-                                <button onClick={() => addnewticket(item.ModelNumber)} className="btn btn-sm btn-primary generateTicket">New Ticket</button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                          {!form && ProductCustomer.map((item, index) => (
+                            <tr key={index}>
+                              <td><div>{item.ModelNumber}</div></td>
+                              <td>
+                                <div className="text-right pb-2">
+                                  <button onClick={() => addnewticket(item.ModelNumber)} className="btn btn-sm btn-primary generateTicket">New Ticket</button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                </div>
                 </>
               ) : null}
 
@@ -1195,7 +1195,7 @@ export function Registercomplaint(params) {
                   <div className="col-md-3">
                     <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Model<span className="text-danger">*</span></p>
 
-                    {searchdata.length == 0 && !Comp_id  ?
+                    {searchdata.length == 0 && !Comp_id ?
 
                       <div className="">
                         <input className="form-control" onChange={onHandleChange} value={value.model} name="model"></input>
@@ -1228,7 +1228,7 @@ export function Registercomplaint(params) {
                   <div className="col-md-3">
                     <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Warranty Status<span className="text-danger">*</span></p>
                     <div className="mb-3">
-                      <select className="form-control" onChange={onHandleChange} value={value.warrenty_status} name="warrenty_status">
+                      <select className="form-control" onChange={onHandleChange} value={warranty_status_data} name="warrenty_status">
                         <option value="">Select Option</option>
                         <option value="WARRANTY">IN WARRANTY</option>
                         <option value="OUT OF WARRANTY">OUT OF WARRANTY</option>
@@ -1415,17 +1415,13 @@ export function Registercomplaint(params) {
                               </option>
                             ))}
                           </select>
-
                           <h3>Add New Address</h3>
                           <textarea
                             className="form-control"
                             value={newAddress}
                             onChange={(e) => {
                               setNewAddress(e.target.value); // Update new address in state
-                              setValue(prevState => ({
-                                ...prevState,
-                                address: e.target.value // Also update the main address field
-                              }));
+                              onhashchange(e);
                             }}
                             placeholder="Enter New Address"
                           />
