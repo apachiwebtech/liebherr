@@ -2,6 +2,8 @@ import React from 'react';
 import { AuthProvider as OidcProvider, useAuth } from 'react-oidc-context';
 
 const AuthProvider = ({ children }) => {
+
+
   const oidcConfig = {
     authority: 'https://loginst.liebherr.com', // Replace with your authority URL
     client_id: 'c20df6f1-377b-4c6e-a2fb-44352fb8344f',                  // Replace with your client ID

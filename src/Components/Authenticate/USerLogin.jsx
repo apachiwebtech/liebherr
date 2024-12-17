@@ -1,48 +1,27 @@
-// authService.js
-import { UserManager } from "oidc-client-ts";
-import { oidcConfig } from "./OidcConfig";
-import React, { useEffect, useState } from "react";
-
-const userManager = new UserManager(oidcConfig);
-
-export const login = () => userManager.signinRedirect();
-export const logout = () => userManager.signoutRedirect();
-export const getUser = () => userManager.getUser();
-export const handleCallback = () => userManager.signinRedirectCallback();
+import React from 'react';
+import { useAuth } from 'react-oidc-context';
 
 const USerLogin = () => {
-    const [user, setUser] = useState(null);
-  
-    useEffect(() => {
-      // Handle callback after login
-      if (window.location.pathname === "/callback") {
-        handleCallback().then(() => {
-          window.location = "/";
-        });
-      } else {
-        // Check if user is logged in
-        getUser().then((user) => {
-          if (user) {
-            setUser(user.profile);
-          }
-        });
-      }
-    }, []);
-  
+  const auth = useAuth();
+
+  if (auth.isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (auth.error) {
+    return <div>Error: {auth.error.message}</div>;
+  }
+
+  if (auth.isAuthenticated) {
     return (
       <div>
-        <h1>React OpenID Connect</h1>
-        {user ? (
-          <div>
-            <p>Welcome, {user.name}</p>
-            <p>Email: {user.email}</p>
-            <button onClick={logout}>Logout</button>
-          </div>
-        ) : (
-          <button onClick={login}>Login</button>
-        )}
+        <h1>Welcome, {auth.user?.profile.name || 'User'}!</h1>
+        <button onClick={() => auth.signout()}>Logout</button>
       </div>
     );
-  };
-  
-  export default USerLogin;
+  }
+
+  return <button onClick={() => auth.signinRedirect()}>Login</button>;
+};
+
+export default USerLogin;

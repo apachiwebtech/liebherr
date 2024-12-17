@@ -86,7 +86,7 @@ import DataTable from './Components/Pages/Complaint/Compdatatablebackup';
 import HeaderMsp from './Components/Layout/HeaderMsp';
 import { Quotationlist } from './Components/Pages/Quotation/Quotationlist';
 import QuotationEdit from './Components/Pages/Quotation/QuotationEdit';
-import USerLogin from './Components/Authenticate/USerLogin';
+import Dash from './Components/Authenticate/Dash';
 
 
 
@@ -103,8 +103,8 @@ const Router = createBrowserRouter([
 
   },
   {
-    path: "/userlogin",
-    element: <USerLogin />,
+    path: "/dash",
+    element: <Dash />,
 
   },
   {
