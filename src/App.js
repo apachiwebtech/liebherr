@@ -87,6 +87,7 @@ import HeaderMsp from './Components/Layout/HeaderMsp';
 import { Quotationlist } from './Components/Pages/Quotation/Quotationlist';
 import QuotationEdit from './Components/Pages/Quotation/QuotationEdit';
 import Dash from './Components/Authenticate/Dash';
+import Authenticate from './Components/Authenticate/Authenticate';
 
 
 
@@ -100,6 +101,11 @@ const Router = createBrowserRouter([
   {
     path: "/login",
     element: <Login />,
+
+  },
+  {
+    path: "/Authenticate",
+    element: <Authenticate />,
 
   },
   {
