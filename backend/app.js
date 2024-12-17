@@ -112,7 +112,7 @@ app.post("/loginuser", async (req, res) => {
       const token = jwt.sign(
         { id: user.id, Lhiuser: user.Lhiuser }, // Payload
         JWT_SECRET, // Secret key
-        { expiresIn: "1h" } // Token validity
+        { expiresIn: "8h" } // Token validity
       );
 
       res.json({
@@ -338,7 +338,7 @@ app.post("/postdata", authenticateToken, async (req, res) => {
 
 
 // Update existing user with duplicate check
-app.post("/putdata", authenticateToken, async (req, res) => {
+app.put("/putdata", authenticateToken, async (req, res) => {
   const { title, id } = req.body;
 
   try {
@@ -494,7 +494,7 @@ app.post("/postregion", async (req, res) => {
 
 
 // Update existing region with duplicate check
-app.post("/putregion", async (req, res) => {
+app.put("/putregion", async (req, res) => {
   const { title, id, country_id } = req.body;
 
   try {
@@ -667,7 +667,7 @@ app.post("/postgeostate", authenticateToken, async (req, res) => {
 
 
 // Update existing geostate with duplicate check
-app.post("/putgeostate", authenticateToken, async (req, res) => {
+app.put("/putgeostate", authenticateToken, async (req, res) => {
   const { title, id, country_id, region_id } = req.body;
 
   try {
@@ -934,7 +934,7 @@ app.post("/postgeocity", authenticateToken, async (req, res) => {
 
 
 // Update existing geocity with duplicate check
-app.post("/putgeocity", authenticateToken,
+app.put("/putgeocity", authenticateToken,
   async (req, res) => {
     const { title, id, country_id, region_id, geostate_id, district } = req.body;
 
@@ -1190,7 +1190,7 @@ app.post("/postarea", authenticateToken, async (req, res) => {
 });
 
 // Update existing area with duplicate check
-app.post("/putarea", authenticateToken, async (req, res) => {
+app.put("/putarea", authenticateToken, async (req, res) => {
   const { title, id, country_id, region_id, geostate_id } = req.body;
 
   try {
@@ -1463,7 +1463,7 @@ app.post("/postpincode", async (req, res) => {
 });
 
 // Update existing pincode with duplicate check (considering country_id)
-app.post("/putpincode", async (req, res) => {
+app.put("/putpincode", async (req, res) => {
   const {
     pincode,
     id,
@@ -1770,7 +1770,7 @@ app.get("/requestdatacat/:id", authenticateToken, async (req, res) => {
 });
 
 // update for category
-app.post("/putcatdata", authenticateToken, async (req, res) => {
+app.put("/putcatdata", authenticateToken, async (req, res) => {
   const { title, id } = req.body;
 
   try {
@@ -1943,7 +1943,7 @@ app.post("/postsubcategory", authenticateToken, async (req, res) => {
 });
 
 // update for subcategory
-app.post("/putsubcategory", authenticateToken, async (req, res) => {
+app.put("/putsubcategory", authenticateToken, async (req, res) => {
   try {
     const { title, id, category_id } = req.body;
 
@@ -2132,7 +2132,7 @@ app.get("/requestcdata/:id", authenticateToken, async (req, res) => {
 
 
 // update for Channel_partner
-app.post("/putcdata", authenticateToken, async (req, res) => {
+app.put("/putcdata", authenticateToken, async (req, res) => {
   try {
     const { Channel_partner, id } = req.body;
 
@@ -2315,7 +2315,7 @@ app.get("/requestdatacom/:id", authenticateToken, async (req, res) => {
 });
 
 // update for Defect Group Code
-app.post("/putcomdata", authenticateToken, async (req, res) => {
+app.put("/putcomdata", authenticateToken, async (req, res) => {
   try {
     const { id, defectgroupcode, defectgrouptitle, description, updated_by } = req.body;
     const pool = await poolPromise;
@@ -2494,7 +2494,7 @@ app.get("/requestdatatypeofdefect/:id", authenticateToken, async (req, res) => {
 });
 
 // Update Type Of Defect Code
-app.post("/putdatatypeofdefect", authenticateToken, async (req, res) => {
+app.put("/putdatatypeofdefect", authenticateToken, async (req, res) => {
   const { id, defect_code, groupdefect_code, defect_title, description, updated_by } = req.body;
   try {
     const pool = await poolPromise;
@@ -2647,7 +2647,7 @@ app.get("/requestsitedefect/:id", authenticateToken, async (req, res) => {
 });
 
 // Update Type Of Defect Code
-app.post("/putsitedefect", authenticateToken, async (req, res) => {
+app.put("/putsitedefect", authenticateToken, async (req, res) => {
   const { id, dsite_code, groupdefectcode, dsite_title, description, updated_by } = req.body;
 
   try {
@@ -3178,7 +3178,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
       const custcount = getcustresult.recordset[0].id;
 
-      const newcustid = 'A' + custcount.toString().padStart(7, "0")
+      const newcustid = 'B' + custcount.toString().padStart(7, "0")
 
 
 
@@ -3351,7 +3351,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
       .input('city', city)
       .input('area', area)
       .input('pincode', pincode)
-      .input('customer_id', cust_id)
+      .input('customer_id', ticket_id == '' ? newcustid : cust_id)
       .input('model', model)
       .input('ticket_type', ticket_type)
       .input('cust_type', cust_type)
@@ -3369,6 +3369,8 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
       .input('classification', classification)
       .input('priority', priority)
       .query(complaintSQL);
+
+      console.log(resutlt,priority , "$$$$")
 
 
     //Remark insert query
@@ -3421,7 +3423,7 @@ app.post("/update_complaint", authenticateToken,
     let {
       complaint_date, customer_name, contact_person, email, mobile, address,
       state, city, area, pincode, mode_of_contact, ticket_type, cust_type,
-      warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks, ticket_no
+      warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks, ticket_no , classification, priority
     } = req.body;
 
     const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
@@ -3462,15 +3464,16 @@ app.post("/update_complaint", authenticateToken,
     serial_no = @serial,
     child_service_partner = @child_service_partner,
     sevice_partner = @master_service_partner,
-    specification = @specification
+    specification = @specification,
+    customer_class = @classification,
+    call_priority = @priority
   WHERE
     ticket_no = @ticket_no
 `;
 
-      console.log(complaintSQL, "$$")
-      console.log(warrenty_status, "$$")
 
-      console.log("Executing complaint SQL:", complaintSQL);  // Debugging log
+
+// Debugging log
 
       await pool.request()
         .input('ticket_no', ticket_no)
@@ -3499,6 +3502,8 @@ app.post("/update_complaint", authenticateToken,
         .input('master_service_partner', master_service_partner)
         .input('child_service_partner', child_service_partner)
         .input('specification', specification)
+        .input('classification', classification)
+        .input('priority', priority)
         .query(complaintSQL);
 
       //Remark insert query
@@ -3802,7 +3807,7 @@ app.post("/postcustomer", authenticateToken, async (req, res) => {
 
 // customer put 
 
-app.post("/putcustomer", authenticateToken, async (req, res) => {
+app.put("/putcustomer", authenticateToken, async (req, res) => {
   const { id, customer_fname, customer_type, customer_classification, mobileno, alt_mobileno, dateofbirth, anniversary_date, email, salutation, customer_id, created_by } = req.body;
 
 
@@ -4046,7 +4051,7 @@ app.post("/postcustomerlocation", authenticateToken, async (req, res) => {
 });
 
 // Update existing Customer Location with duplicate check
-app.post("/putcustomerlocation", authenticateToken, async (req, res) => {
+app.put("/putcustomerlocation", authenticateToken, async (req, res) => {
   const {
     country_id, region_id, geostate_id, geocity_id, area_id, pincode_id, address, ccperson, ccnumber, address_type, id
   } = req.body;
@@ -4160,7 +4165,7 @@ app.post("/postproductunique", authenticateToken, async (req, res) => {
   }
 });
 
-app.post("/putproductunique", authenticateToken, async (req, res) => {
+app.put("/putproductunique", authenticateToken, async (req, res) => {
   const { product, id, location, date, serialnumber } = req.body;
 
   try {
@@ -4376,7 +4381,7 @@ app.post("/postengineer",
       return res.status(500).json({ error: "An error occurred while adding the engineer" });
     }
   });
-app.post("/putengineer", authenticateToken, async (req, res) => {
+app.put("/putengineer", authenticateToken, async (req, res) => {
   const { title, mfranchise_id, cfranchise_id, password, email, mobile_no, personal_email, employee_code, personal_mobile, dob, blood_group, academic_qualification, joining_date, passport_picture, resume, photo_proof, address_proof, permanent_address, current_address, id } = req.body;
 
   try {
@@ -4612,7 +4617,7 @@ app.post("/postfranchisedata", authenticateToken, async (req, res) => {
 
 
 
-app.post("/putfranchisedata", authenticateToken, async (req, res) => {
+app.put("/putfranchisedata", authenticateToken, async (req, res) => {
   const { title, id, contact_person, email, mobile_no, password, address, country_id, region_id, state, area, city, pincode_id,
     website, gst_no, panno, bank_name, bank_acc, bank_ifsc, bank_address, withliebher, lastworkindate, contract_acti, contract_expir, licarecode
     , partner_name, created_by
@@ -5113,7 +5118,7 @@ app.post("/postchildfranchise", authenticateToken, async (req, res) => {
 
 
 // Update Child Master Page
-app.post("/putchildfranchise", authenticateToken, async (req, res) => {
+app.put("/putchildfranchise", authenticateToken, async (req, res) => {
   const {
     title, id, pfranchise_id, licare_code, partner_name, contact_person,
     email, mobile_no, password, address, country_id, region_id, state,
@@ -5335,7 +5340,7 @@ app.get("/requestdataproducttype/:id", authenticateToken, async (req, res) => {
   }
 });
 // Update for Product Type
-app.post("/putproducttypedata", authenticateToken, async (req, res) => {
+app.put("/putproducttypedata", authenticateToken, async (req, res) => {
   const { id, product_type, updated_by } = req.body;
 
   try {
@@ -5463,7 +5468,7 @@ app.get("/requestdataproductline/:id", authenticateToken, async (req, res) => {
   }
 });
 // Update for product line
-app.post("/putproductlinedata", authenticateToken, async (req, res) => {
+app.put("/putproductlinedata", authenticateToken, async (req, res) => {
   const { id, product_line, pline_code, updated_by } = req.body;
 
   try {
@@ -5594,7 +5599,7 @@ app.get("/requestdatamat/:id", authenticateToken, async (req, res) => {
   }
 });
 // Update for material
-app.post("/putmatdata", authenticateToken, async (req, res) => {
+app.put("/putmatdata", authenticateToken, async (req, res) => {
   const { id, Material, updated_by } = req.body;
 
   try {
@@ -5734,7 +5739,7 @@ app.get("/requestmanufacturer/:id", authenticateToken, async (req, res) => {
 });
 
 // Update for Manufacturer
-app.post("/putmanufacturer", authenticateToken, async (req, res) => {
+app.put("/putmanufacturer", authenticateToken, async (req, res) => {
   const { id, Manufacturer, updated_by } = req.body;
 
   try {
@@ -5852,7 +5857,7 @@ app.get("/requestratedata/:id", authenticateToken, async (req, res) => {
   }
 });
 // update for Ratecard
-app.post("/putratedata", authenticateToken, async (req, res) => {
+app.put("/putratedata", authenticateToken, async (req, res) => {
   const { Ratecard, id } = req.body;
 
   try {
@@ -5969,7 +5974,7 @@ app.get("/requestprodata/:id", authenticateToken, async (req, res) => {
   }
 });
 // update for Serviceproduct
-app.post("/putprodata", authenticateToken, async (req, res) => {
+app.put("/putprodata", authenticateToken, async (req, res) => {
   const { Serviceproduct, id } = req.body;
 
   try {
@@ -6091,7 +6096,7 @@ app.get("/requestservicecontract/:id", async (req, res) => {
 //update for service contract
 
 
-app.post("/putservicecontract", authenticateToken, async (req, res) => {
+app.put("/putservicecontract", authenticateToken, async (req, res) => {
   const { id, customerName, customerMobile, contractNumber, contractType, productName, serialNumber, startDate, endDate, created_by } = req.body;
 
 
@@ -6376,7 +6381,7 @@ app.get("/requestlhidata/:id", authenticateToken, async (req, res) => {
   }
 });
 // update for Lhiuser
-app.post("/putlhidata", authenticateToken, async (req, res) => {
+app.put("/putlhidata", authenticateToken, async (req, res) => {
   const {
     Lhiuser, id, updated_by, mobile_no, Usercode, password, status, email, remarks
   } = req.body;
@@ -6518,7 +6523,7 @@ app.get("/requestcalldata/:id",
     }
   });
 // Update for Callstatus
-app.post("/putcalldata", async (req, res) => {
+app.put("/putcalldata", async (req, res) => {
   const { Callstatus, id } = req.body;
 
   const checkDuplicateSql = `SELECT * FROM call_status WHERE Callstatus = '${Callstatus}' AND id != '${id}' AND deleted = 0`;
@@ -6649,7 +6654,7 @@ app.get("/requestsdata/:id", authenticateToken, async (req, res) => {
 });
 
 // Update for serviceagent
-app.post("/putsdata", authenticateToken, async (req, res) => {
+app.put("/putsdata", authenticateToken, async (req, res) => {
   const { id, serviceagent, updated_by } = req.body;
 
   try {
@@ -7227,10 +7232,13 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
       msp,
       mode_of_contact,
       customer_class,
-      Priority
+      Priority,
+      upcoming = 'current'
     } = req.query;
 
     const offset = (page - 1) * pageSize;
+
+    const currentDate = new Date().toISOString().split('T')[0]
 
     let sql = `
         SELECT c.*,
@@ -7313,21 +7321,49 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
       sql += ` AND c.call_status != 'Closed' AND c.call_status != 'Cancelled'`;
     }
 
-    // Sorting by call_priority and ticket_date for additional ordering
-    sql += `
-        ORDER BY 
-          CASE 
-            WHEN c.call_priority = 'High' THEN 1
-            WHEN c.call_priority = 'Regular' THEN 2
-            ELSE 3 
-          END,
-          c.ticket_date DESC
-        OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY`;
+    if(upcoming == 'current'){
+      sql += ` AND ticket_date <= @currentdate`;
+      params.push({ name: "currentdate", value: currentDate });
 
-    params.push(
-      { name: "offset", value: offset },
-      { name: "pageSize", value: parseInt(pageSize) }
-    );
+
+    }else {
+      sql += ` AND ticket_date > @currentdate`;
+      params.push({ name: "currentdate", value: currentDate });
+      
+    }
+
+    // Sorting by call_priority and ticket_date for additional ordering
+
+    if(upcoming == 'current'){
+      sql += `
+      ORDER BY 
+        CASE 
+          WHEN c.call_priority = 'High' THEN 1
+          WHEN c.call_priority = 'Regular' THEN 2
+          ELSE 3 
+        END,
+        c.ticket_date DESC
+      OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY`;
+
+      params.push(
+        { name: "offset", value: offset },
+        { name: "pageSize", value: parseInt(pageSize) }
+      );
+  
+    }else{
+      sql += `
+      ORDER BY 
+        CASE 
+          WHEN c.call_priority = 'High' THEN 1
+          WHEN c.call_priority = 'Regular' THEN 2
+          ELSE 3 
+        END,
+        c.ticket_date DESC`;
+
+    }
+   
+
+  
 
     // Execute queries
     const request = pool.request();
@@ -7676,7 +7712,7 @@ app.get("/getserial/:serial", authenticateToken, async (req, res) => {
 
     const pool = await poolPromise;
 
-    const sql = `SELECT * from awt_serial_list where serial_no = @serial`
+    const sql = `SELECT * from awt_serial_list where serial_no = @serial `
 
     const result = await pool.request()
       .input('serial', serial)
@@ -8133,18 +8169,7 @@ app.post('/getquotedetails', async (req, res) => {
 
   try {
     // Use parameterized query to prevent SQL Injection
-    const query = `SELECT 
-    q.*, -- Select all columns from awt_quotation
-    c.email,c.mobileno,c.customer_id, -- Select all columns from awt_customer
-    cl.address-- Select all columns from awt_customerlocation
-FROM 
-    awt_quotation q
-LEFT JOIN 
-    awt_customer c ON q.customer_id = c.customer_id
-LEFT JOIN 
-    awt_customerlocation cl ON c.customer_id = cl.customer_id
-WHERE 
-    q.id = @quote_id;`;
+    const query = `select * from  awt_quotation  WHERE id = @quote_id`;
 
 
 
