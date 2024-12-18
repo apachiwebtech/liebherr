@@ -10,11 +10,12 @@ import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { array } from "js-md5";
 import { FaDownload } from "react-icons/fa6";
-import { Chip } from "@mui/material";
+import { Autocomplete, Chip, TextField } from "@mui/material";
 
 
 export function Complaintview(params) {
   const token = localStorage.getItem("token");
+  const [activeTicket, setActiveTicket] = useState(null);
   const [addedSpareParts, setAddedSpareParts] = useState([]);
   const [quotation, setQuotation] = useState([]);
   const { complaintid } = useParams();
@@ -22,6 +23,7 @@ export function Complaintview(params) {
   const [closestatus, setCloseStatus] = useState("");
   const [spareid, setspareid] = useState("");
   const [ticketTab, setTicketTab] = useState(JSON.parse(localStorage.getItem('tabticket')) || []);
+
 
   const [complaintview, setComplaintview] = useState({
     ticket_no: '',
@@ -78,7 +80,7 @@ export function Complaintview(params) {
   const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
   const [GroupDefectsite, setGroupDefectsite] = useState([]);
   const [GroupDefecttype, setGroupDefecttype] = useState([]);
-
+  const [inputValue, setInputValue] = useState("");
   const [TicketUpdateSuccess, setTicketUpdateSuccess] = useState({
     message: '',
     visible: false,
@@ -848,6 +850,10 @@ export function Complaintview(params) {
 
 
   useEffect(() => {
+    if (ticketTab.length == 0) {
+      navigate(`/complaintlist`);
+    }
+
     if (complaintid) {
       fetchComplaintview(complaintid);
     }
@@ -863,6 +869,8 @@ export function Complaintview(params) {
     }
     getProduct();
 
+
+    setActiveTicket(complaintid); // Set the active ticket ID
 
 
 
@@ -1045,20 +1053,24 @@ export function Complaintview(params) {
 
 
   const handleDeleteTab = (ticket_id) => {
-    // Retrieve the current ticket array from localStorage
     const updatedTickets = JSON.parse(localStorage.getItem('tabticket')) || [];
-  
-    // Remove the ticket from the array using filter
-    const newTicketList = updatedTickets.filter(ticket => ticket.ticket_id !== ticket_id);
-  
-    // Save the updated ticket array back to localStorage
+    const newTicketList = updatedTickets.filter(
+      (ticket) => ticket.ticket_id !== ticket_id
+    );
     localStorage.setItem('tabticket', JSON.stringify(newTicketList));
-  
-    // Optionally, you can trigger a re-render by updating your component's state
-    // For example, if you store ticketTab in a state, call setState here
-    setTicketTab(newTicketList);  // if using React state for ticketTab
+    if (ticket_id == activeTicket) {
+      if (newTicketList.length > 0) {
+        setActiveTicket(newTicketList[0].ticket_id);
+        navigate(`/complaintview/${newTicketList[0].ticket_id}`);
+      } else {
+        setActiveTicket(null);
+        navigate(`/complaintlist`);
+      }
+    }
+    setTicketTab(newTicketList);
   };
-  
+
+
 
 
 
@@ -1105,17 +1117,17 @@ export function Complaintview(params) {
               </label>
             </div>
             <div className="col-md-9 text-right pt-2">
-              {ticketTab.map((item) => {
-                return (
-                  <Chip
-                    label={item.ticket_no}
-                    variant="outlined"
-                    onClick={() => navigate(`/complaintview/${item.ticket_id}`)}
-                    onDelete={() => handleDeleteTab(item.ticket_id)}
-                    className="mx-2"
-                  />
-                )
-              })}
+              {ticketTab.map((item) => (
+                <Chip
+                  key={item.ticket_id}
+                  label={item.ticket_no}
+                  variant={activeTicket == item.ticket_id ? "filled" : "outlined"}
+                  color={activeTicket == item.ticket_id ? "primary" : "default"}
+                  onDelete={() => handleDeleteTab(item.ticket_id)}
+                  className="mx-2"
+                />
+              ))}
+
 
             </div>
           </div>
@@ -1512,12 +1524,17 @@ export function Complaintview(params) {
                     className="card shadow-0 border"
                     style={{ backgroundColor: "#f0f2f5" }}
                   >
-                    <span
-                      onClick={() => downloadAllZip(allAttachments)} // Pass file list to ZIP function
-                      className=" float-right download-btn "
-                    >
-                      Download All as ZIP <FaDownload style={{ color: "black" }} />
-                    </span>
+                    {allAttachments.length != 0 ? (
+                      <>
+                        <span
+                          onClick={() => downloadAllZip(allAttachments)} // Pass file list to ZIP function
+                          className=" float-right download-btn "
+                        >
+                          Download All as ZIP <FaDownload style={{ color: "black" }} />
+                        </span>
+                      </>
+                    ) : null}
+
                     <form onSubmit={handleSubmit}>
                       <div className="card-body p-4">
                         <div className="form-outline mb-2">
@@ -1872,7 +1889,7 @@ export function Complaintview(params) {
 
               <div className="row">
                 <div className="col-lg-9">
-                  <select
+                  {/* <select
                     className="form-select dropdown-select"
                     name="engineer_id"
                     value={complaintview.engineer_id}
@@ -1891,7 +1908,38 @@ export function Complaintview(params) {
                         No engineers available
                       </option>
                     )}
-                  </select>
+                  </select> */}
+
+<Autocomplete
+  options={engineer}
+  size="small"
+  getOptionLabel={(option) => option.title || ""} // Display engineer title in dropdown
+  value={engineer.find((e) => e.id === complaintview.engineer_id) || null}
+  onChange={(event, newValue) =>
+    handleModelChange({
+      target: {
+        name: "engineer_id",
+        value: newValue?.id || "", // Update with engineer_id, not title
+      },
+    })
+  }
+  inputValue={inputValue}
+  onInputChange={(event, newInputValue) => setInputValue(newInputValue)}
+  renderInput={(params) => <TextField {...params} label="Select Engineer" />}
+
+  // Render option with custom styling (or whatever you want to show in the dropdown)
+  renderOption={(props, option) => (
+    <li {...props} key={option.engineer_id}> {/* Assign unique key using engineer_id */}
+      <span>{option.title}</span> {/* Display title (name) */}
+    </li>
+  )}
+
+  isOptionEqualToValue={(option, value) => option.engineer_id === value.engineer_id} // Use engineer_id to compare values
+  getOptionSelected={(option, value) => option.engineer_id === value.engineer_id} // Ensure option is selected using engineer_id
+/>
+
+
+
                 </div>
 
                 <div className="col-lg-3">
