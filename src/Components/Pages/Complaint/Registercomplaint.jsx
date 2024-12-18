@@ -229,10 +229,7 @@ export function Registercomplaint(params) {
     //     isValid = false;
     //     newErrors.Priority = "Priority is required";
     // }
-    if (!value.specification && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
-      isValid = false;
-      newErrors.specification = "Specification is required";
-    }
+
 
 
     setErrors(newErrors);
@@ -951,6 +948,8 @@ console.log(name ,'name',value ,'value');
         setadd_new_ticketdata(res.data.rowdata[0])
         setModelNumber(res.data.rowdata[0].ModelNumber)
         getDateAfterOneYear(res.data.rowdata[0].invoice_date)
+        console.log(res.data.rowdata[0].invoice_date);
+
       }).catch((err) => {
         console.log(err)
       })
