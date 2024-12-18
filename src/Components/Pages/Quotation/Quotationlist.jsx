@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
- 
+
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'datatables.net-bs4/css/dataTables.bootstrap4.min.css';
 import $ from 'jquery';
@@ -33,9 +33,12 @@ import 'datatables.net-keytable';
 
 // DataTables Select Extension
 import 'datatables.net-select';
+import { SyncLoader } from 'react-spinners';
+import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 
 export function Quotationlist(params) {
-    const [Quotationdata, setQuotationdata] = useState([]);
+  const { loaders, axiosInstance } = useAxiosLoader();
+  const [Quotationdata, setQuotationdata] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
     const token = localStorage.getItem("token");
     const [formData, setFormData] = useState({
@@ -50,7 +53,7 @@ export function Quotationlist(params) {
 
     const fetchQuotationlist = async () => {
         try {
-            const response = await axios.get(`${Base_Url}/getquotationlist`,{
+            const response = await axiosInstance.get(`${Base_Url}/getquotationlist`,{
                 headers: {
                     Authorization: token,
                 },
@@ -64,7 +67,7 @@ export function Quotationlist(params) {
 
     const deleted = async (id) => {
         try {
-            const response = await axios.post(`${Base_Url}/deletequotationlist`, { id }, {
+            const response = await axiosInstance.post(`${Base_Url}/deletequotationlist`, { id }, {
                 headers: {
                     Authorization: token,
                 },
@@ -86,7 +89,7 @@ export function Quotationlist(params) {
 
     const edit = async (id) => {
         try {
-            const response = await axios.get(`${Base_Url}/requestquotationlist/${id}`, {
+            const response = await axiosInstance.get(`${Base_Url}/requestquotationlist/${id}`, {
                 headers: {
                     Authorization: token,
                 },
@@ -139,7 +142,11 @@ export function Quotationlist(params) {
 
     return (
         <div className="tab-content">
-            
+    {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
             <div className="row mp0">
                 <div className="col-md-12 col-12">
                     <div className="card mb-3 tab_box">
@@ -159,7 +166,7 @@ export function Quotationlist(params) {
                                         <th width="15%">Price</th>
                                         <th width="10%">Status</th>
                                         <th width="10%">Edit</th>
-                                        
+
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -174,7 +181,7 @@ export function Quotationlist(params) {
                                             <td>{item.title}</td>
                                             <td>{item.quantity}</td>
                                             <td>{item.price}</td>
-                                            
+
                                             <td style={{ padding: '0px', textAlign: 'center' }}>
                                               {item.status}
                                             </td>
@@ -195,7 +202,7 @@ export function Quotationlist(params) {
                                 </tbody>
                             </table>
                             </div>
-                         
+
                         </div>
                     </div>
                 </div>

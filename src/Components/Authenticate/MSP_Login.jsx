@@ -6,11 +6,14 @@ import md5 from "js-md5";
 import logo from  '../../images/Liebherr-logo-768x432.png'
 import back from '../../images/login.jpeg'
 import { Franchisemasterlist } from "../Pages/Master/Franchisemasterlist";
+import { useAxiosLoader } from "../Layout/UseAxiosLoader";
+import { SyncLoader } from 'react-spinners';
 
 export function MSP_Login() {
     const [Lhiuser, setLhiuser] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
+    const { loaders, axiosInstance } = useAxiosLoader();
 
     // Login submit handler
     const handleSubmit = async (e) => {
@@ -19,13 +22,13 @@ export function MSP_Login() {
         try {
 
             const hashpass = md5(password)
-           
-            const response = await axios.post(`${Base_Url}/loginmsp`, {
+
+            const response = await axiosInstance.post(`${Base_Url}/loginmsp`, {
                 Lhiuser: Lhiuser,
                 password: hashpass,
             });
 
-          
+
             if (response.data) {
                 localStorage.setItem("userId", response.data.id);
                 localStorage.setItem("Lhiuser", response.data.Lhiuser);
@@ -37,7 +40,7 @@ export function MSP_Login() {
                 alert("Invalid username or password");
             }
 
-          
+
         } catch (error) {
             console.error("Login failed:", error);
             alert("Login failed, please check your credentials.");
@@ -46,6 +49,11 @@ export function MSP_Login() {
 
     return (
         <div className="container-fluid">
+              {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
             <div className="row">
                 <div className="col-md-4">
                     <div className="pt-5 p-5 pb-0 mt-5">

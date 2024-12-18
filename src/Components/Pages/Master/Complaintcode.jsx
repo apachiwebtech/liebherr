@@ -5,23 +5,25 @@ import { Base_Url } from "../../Utils/Base_Url";
 import DataTable from 'datatables.net-react';
 import DT from 'datatables.net-dt';
 import Complainttabs from './Complainttabs';
-
+import { SyncLoader } from 'react-spinners';
+import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 DataTable.use(DT);
 
 const ComplaintCode = () => {
-  const token = localStorage.getItem("token"); 
+  const { loaders, axiosInstance } = useAxiosLoader();
+  const token = localStorage.getItem("token");
   // Step 1: Add this state to track errors
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
-  
+
   const [isEdit, setIsEdit] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [duplicateError, setDuplicateError] = useState(""); // State to track duplicate error
-  const created_by = localStorage.getItem("userId");  
-  const updated_by = localStorage.getItem("userId"); 
+  const created_by = localStorage.getItem("userId");
+  const updated_by = localStorage.getItem("userId");
 
 
   const [formData, setFormData] = useState({
@@ -33,7 +35,7 @@ const ComplaintCode = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getcom`,{
+      const response = await axiosInstance.get(`${Base_Url}/getcom`,{
         headers: {
           Authorization: token,
         },
@@ -73,10 +75,10 @@ const ComplaintCode = () => {
       // Check if the defectgroupcode is empty
       newErrors.defectgroupcode = "Defect Group Code Field is required."; // Set error message if defectgroupcode is empty
     }
- 
+
     if (!formData.defectgrouptitle.trim()) {
 
-      newErrors.defectgrouptitle = "Defect Group Title Field is required."; 
+      newErrors.defectgrouptitle = "Defect Group Title Field is required.";
     }
     return newErrors; // Return the error object
   };
@@ -97,7 +99,7 @@ const ComplaintCode = () => {
       const confirmSubmission = window.confirm(
         "Do you want to submit the data?"
       );
-     
+
       if (confirmSubmission) {
         if (isEdit) {
           // For update, include 'updated_by'
@@ -164,7 +166,7 @@ const ComplaintCode = () => {
 
   const deleted = async (id) => {
     try {
-      const response = await axios.post(`${Base_Url}/deletecomdata`, { id },{
+      const response = await axiosInstance.post(`${Base_Url}/deletecomdata`, { id },{
         headers: {
           Authorization: token,
         },
@@ -178,7 +180,7 @@ const ComplaintCode = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestdatacom/${id}`,{
+      const response = await axiosInstance.get(`${Base_Url}/requestdatacom/${id}`,{
         headers: {
           Authorization: token,
         },
@@ -197,6 +199,11 @@ const ComplaintCode = () => {
 
   return (
     <div className="tab-content">
+          {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
     <Complainttabs />
     <div className="row mp0">
       <div className="col-12">
@@ -258,7 +265,7 @@ const ComplaintCode = () => {
                         {errors.defectgrouptitle}
                       </small>
                     )}
-     
+
                   </div>
 
                   <div className="mb-3">
@@ -274,7 +281,7 @@ const ComplaintCode = () => {
                       onChange={handleChange}
                       placeholder="Enter Description "
                       />
-  
+
                   </div>
                   <div className="text-right">
                     <button className="btn btn-liebherr" type="submit">
@@ -333,7 +340,7 @@ const ComplaintCode = () => {
                     { title: 'Complaint Code', data: 'defectgroupcode' },
                     {
                       title: 'Edit', data: null, render: (data, type, row) => (
-                        
+
                         // <button
                         //   className="btn btn-link text-primary"
                         //   onClick={() => edit(row.id)}

@@ -3,10 +3,13 @@ import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
 import LocationTabs from "./LocationTabs";
+import { SyncLoader } from 'react-spinners';
+import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 
 const Geocity = () => {
+  const { loaders, axiosInstance } = useAxiosLoader();
   const [countries, setCountries] = useState([]);
-  const token = localStorage.getItem("token"); 
+  const token = localStorage.getItem("token");
   const [regions, setRegions] = useState([]); // State for regions
   const [geoStates, setGeoStates] = useState([]); // State for geoStates
   const [districts, setdistricts] = useState([]);
@@ -28,7 +31,7 @@ const Geocity = () => {
 
   const fetchCountries = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getcountries`,{
+      const response = await axiosInstance.get(`${Base_Url}/getcountries`,{
         headers: {
           Authorization: token,
         },
@@ -41,7 +44,7 @@ const Geocity = () => {
 
   const fetchRegions = async (countryId) => {
     try {
-      const response = await axios.get(`${Base_Url}/getregionscity/${countryId}`,{
+      const response = await axiosInstance.get(`${Base_Url}/getregionscity/${countryId}`,{
         headers: {
           Authorization: token,
         },
@@ -55,7 +58,7 @@ const Geocity = () => {
 
   const fetchGeoStates = async (regionId) => {
     try {
-      const response = await axios.get(`${Base_Url}/getgeostatescity/${regionId}`,{
+      const response = await axiosInstance.get(`${Base_Url}/getgeostatescity/${regionId}`,{
         headers: {
           Authorization: token,
         },
@@ -68,7 +71,7 @@ const Geocity = () => {
 
   const fetchdistricts= async (geostateID) => {
     try {
-      const response = await axios.get(`${Base_Url}/getdistrictcity/${geostateID}`,{
+      const response = await axiosInstance.get(`${Base_Url}/getdistrictcity/${geostateID}`,{
         headers: {
           Authorization: token,
         },
@@ -81,7 +84,7 @@ const Geocity = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getgeocities`,{
+      const response = await axiosInstance.get(`${Base_Url}/getgeocities`,{
         headers: {
           Authorization: token,
         },
@@ -101,7 +104,7 @@ const Geocity = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validateForm();
-    
+
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
@@ -211,13 +214,13 @@ const Geocity = () => {
       newErrors.district = "District selection is required.";
     }
     return newErrors;
-    
- 
+
+
 };
 
   const deleted = async (id) => {
     try {
-      await axios.post(`${Base_Url}/deletegeocity`, { id },{
+      await axiosInstance.post(`${Base_Url}/deletegeocity`, { id },{
         headers: {
           Authorization: token,
         },
@@ -237,7 +240,7 @@ const Geocity = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestgeocity/${id}`,{
+      const response = await axiosInstance.get(`${Base_Url}/requestgeocity/${id}`,{
         headers: {
           Authorization: token,
         },
@@ -255,6 +258,11 @@ const Geocity = () => {
   return (
     <div className="tab-content">
       <LocationTabs/>
+      {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
     <div className="row mp0">
       <div className="col-12">
         <div className="card mb-3 tab_box">
@@ -472,7 +480,7 @@ const Geocity = () => {
                         ))}
                     </tbody>
                   </table>
-                
+
                 <div className="d-flex justify-content-between">
                   <span className="text-muted">
                     Showing{" "}

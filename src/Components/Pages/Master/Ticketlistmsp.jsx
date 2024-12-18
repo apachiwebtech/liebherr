@@ -3,9 +3,12 @@ import axios from 'axios';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
+import { SyncLoader } from 'react-spinners';
+import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 
 const Ticketlistmsp = (params) => {
-    const [Complaintdata, setComplaintdata] = useState([]);
+  const { loaders, axiosInstance } = useAxiosLoader();
+  const [Complaintdata, setComplaintdata] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
     const token = localStorage.getItem("token"); // Get token from localStorage
@@ -36,7 +39,7 @@ const Ticketlistmsp = (params) => {
         msp: '',
         mode_of_contact: '',
         customer_class: '',
-        
+
     });
 
     const formatDate = (dateString) => {
@@ -47,13 +50,13 @@ const Ticketlistmsp = (params) => {
 
     const fetchComplaintlist = async () => {
         try {
-            const response = await axios.get(`${Base_Url}/getcomplainlistmsp?licare_code=${licare_code}`,{
+            const response = await axiosInstance.get(`${Base_Url}/getcomplainlistmsp?licare_code=${licare_code}`,{
                 headers: {
                     Authorization: token, // Send token in headers
-                    }, 
+                    },
                 });
             // Filter out 'Closed' and 'Cancelled' status complaints by default
-            const filteredComplaints = response.data.filter(complaint => 
+            const filteredComplaints = response.data.filter(complaint =>
                 !['Closed', 'Cancelled'].includes(complaint.call_status)
             );
             setComplaintdata(response.data);
@@ -68,22 +71,22 @@ const Ticketlistmsp = (params) => {
     const fetchFilteredData = async () => {
         try {
             const params = new URLSearchParams();
-            
+
             // Add all filters to params
             Object.entries(searchFilters).forEach(([key, value]) => {
                 if (value) { // Only add if value is not empty
                     params.append(key, value);
                 }
             });
-    
+
             params.append('licare_code', licare_code);
-            
+
             console.log('Sending params:', params.toString()); // Debug log
-            
-            const response = await axios.get(`${Base_Url}/getcomplainlistmsp?${params}`,{
+
+            const response = await axiosInstance.get(`${Base_Url}/getcomplainlistmsp?${params}`,{
                 headers: {
                     Authorization: token, // Send token in headers
-                    }, 
+                    },
                 });
             setFilteredData(response.data);
         } catch (error) {
@@ -126,9 +129,9 @@ const Ticketlistmsp = (params) => {
         fetchComplaintlist(); // Reset to original data
     };
 
-	//  const deleted = async (id) => { 
+	//  const deleted = async (id) => {
     //     try {
-    //         const response = await axios.post(`${Base_Url}/deleteengineer`, { id });
+    //         const response = await axiosInstance.post(`${Base_Url}/deleteengineer`, { id });
     //         setFormData({
     //             title: '',
     //             cfranchise_id: ''
@@ -141,10 +144,10 @@ const Ticketlistmsp = (params) => {
 
     const edit = async (id) => {
         try {
-            const response = await axios.get(`${Base_Url}/requestengineer/${id}`,{
+            const response = await axiosInstance.get(`${Base_Url}/requestengineer/${id}`,{
                 headers: {
                     Authorization: token, // Send token in headers
-                    }, 
+                    },
                 });
             setFormData(response.data)
             setIsEdit(true);
@@ -169,6 +172,11 @@ const Ticketlistmsp = (params) => {
 
     return (
         <div className="row mp0">
+              {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
             <div className="col-md-12 col-12">
                 <div className="card mb-3 tab_box">
                     <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
@@ -239,13 +247,13 @@ const Ticketlistmsp = (params) => {
                                     />
                                 </div>
                             </div>
-                           
-                            
+
+
                         </div>
 
                         {/* second row of filter */}
 
-                       
+
 
                         <div className="row mb-3">
 
@@ -341,7 +349,7 @@ const Ticketlistmsp = (params) => {
                                     />
                                 </div>
                             </div>
-                            
+
                             <div className="col-md-2">
                                 <div className="form-group">
                                     <label>Call Category</label>

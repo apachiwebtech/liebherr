@@ -28,14 +28,16 @@ import 'datatables.net-keytable';
 
 // DataTables Select Extension
 import 'datatables.net-select';
-
+import { SyncLoader } from 'react-spinners';
+import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 const DataTable = () => {
+  const { loaders, axiosInstance } = useAxiosLoader();
   const token = localStorage.getItem("token");
   const [cat, setCat] = useState([]);
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getcat`, {
+      const response = await axiosInstance.get(`${Base_Url}/getcat`, {
         headers: {
           Authorization: token,
         },
@@ -77,6 +79,11 @@ const DataTable = () => {
 
   return (
     <div className="table-responsive">
+          {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
       <table id="example" className="table table-striped table-bordered" style={{ width: '100%' }}>
         <thead>
           <tr>

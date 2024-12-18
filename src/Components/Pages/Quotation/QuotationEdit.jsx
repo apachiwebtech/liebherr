@@ -2,10 +2,11 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Base_Url } from '../../Utils/Base_Url';
 import { useNavigate, useParams } from 'react-router-dom';
-
+import { SyncLoader } from 'react-spinners';
+import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 
 const QuotationEdit = () => {
-
+  const { loaders, axiosInstance } = useAxiosLoader();
     const { qid } = useParams()
     const navigate = useNavigate()
 
@@ -30,13 +31,13 @@ const QuotationEdit = () => {
 
     async function getquotedetails() {
         try {
-            const res = await axios.post(`${Base_Url}/getquotedetails`, { quotaion_id: qid });
+            const res = await axiosInstance.post(`${Base_Url}/getquotedetails`, { quotaion_id: qid });
             setValue(res.data[0]);
-          
+
         } catch (error) {
             console.error('Error fetching quote details:', error);
         }
-    } 
+    }
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -62,7 +63,7 @@ const QuotationEdit = () => {
             qid: qid
         }
 
-        axios.post(`${Base_Url}/updatequotation`, data)
+        axiosInstance.post(`${Base_Url}/updatequotation`, data)
             .then((res) => {
                 alert("Updated Successfully..")
                 navigate('/quotationlist')
@@ -75,14 +76,18 @@ const QuotationEdit = () => {
         const day = String(date.getDate()).padStart(2, "0");
         const month = String(date.getMonth() + 1).padStart(2, "0");
         const year = date.getFullYear();
-    
+
         return `${day}-${month}-${year}`;
       };
 
 
     return (
         <div className="tab-content">
-
+    {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
             <div className="row mp0">
                 <div className="col-12">
                     <div className="card mb-3 tab_box">
@@ -118,7 +123,7 @@ const QuotationEdit = () => {
                                                 <li class="py-1" style={{ flex: "1 1 33.33%", padding: "10px" }}>
                                                     <span class="lable">Quotation No:</span>
                                                     &nbsp;<span class="value"><b>{value.quotationNumber}</b></span>
-                                                </li> 
+                                                </li>
                                                 <li class="py-1" style={{ flex: "1 1 33.33%", padding: "10px" }}>
                                                     <span class="lable">Customer Name:</span>
                                                     &nbsp;<span class="value"><b>{value.CustomerName}</b></span>
@@ -151,7 +156,7 @@ const QuotationEdit = () => {
                                                     <span class="lable">Email:</span>
                                                     &nbsp;<span class="value"><b>{value.email}</b></span>
                                                 </li>
-                                                
+
                                             </ul>
                                         </div>
 
@@ -176,7 +181,7 @@ const QuotationEdit = () => {
                                                         <th>Model Number</th>
                                                         <th>Quantity</th>
                                                         <th>Price</th>
-                                                        
+
                                                     </tr>
                                                 </thead>
                                                 <tbody><tr >
@@ -186,7 +191,7 @@ const QuotationEdit = () => {
                                                     <td>10</td>
                                                     <td>1000</td>
 
-                                                   
+
                                                 </tr>
                                                     <tr >
                                                         {/* <td>{displayIndex}</td>  Use displayIndex for correct pagination */}
@@ -196,7 +201,7 @@ const QuotationEdit = () => {
                                                         <td>20</td>
                                                         <td>2000</td>
 
-                                                            
+
                                                     </tr>
                                                 </tbody>
                                             </table>

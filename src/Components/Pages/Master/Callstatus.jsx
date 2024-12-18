@@ -3,9 +3,12 @@ import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
 import Callstatuscodetabs from "./Callstatuscodetabs";
+import { SyncLoader } from 'react-spinners';
+import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 
 const Callstatus = () => {
   // Step 1: Add this state to track errors
+  const { loaders, axiosInstance } = useAxiosLoader();
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -16,7 +19,7 @@ const Callstatus = () => {
   const [duplicateError, setDuplicateError] = useState(""); // State to track duplicate error
   const createdBy = 1; // Static value for created_by
   const updatedBy = 2; // Static value for updated_by
-  const token = localStorage.getItem("token"); 
+  const token = localStorage.getItem("token");
 
   const [formData, setFormData] = useState({
     Callstatus: "",
@@ -24,7 +27,7 @@ const Callstatus = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getcalldata`,{
+      const response = await axiosInstance.get(`${Base_Url}/getcalldata`,{
         headers: {
           Authorization: token, // Send token in headers
         },
@@ -134,7 +137,7 @@ const Callstatus = () => {
 
   const deleted = async (id) => {
     try {
-      const response = await axios.post(`${Base_Url}/deletecalldata`, { id },{
+      const response = await axiosInstance.post(`${Base_Url}/deletecalldata`, { id },{
         headers: {
           Authorization: token, // Send token in headers
         },
@@ -148,7 +151,7 @@ const Callstatus = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestcalldata/${id}`
+      const response = await axiosInstance.get(`${Base_Url}/requestcalldata/${id}`
 ,{
                 headers: {
                   Authorization: token, // Send token in headers
@@ -159,7 +162,7 @@ const Callstatus = () => {
       setIsEdit(true);
       console.log(response.data);
     } catch (error) {
-      console.error("Error editing user:", error);  
+      console.error("Error editing user:", error);
     }
   };
 
@@ -170,6 +173,11 @@ const Callstatus = () => {
   return (
     <div className="tab-content">
           <Callstatuscodetabs />
+          {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
     <div className="row mp0">
       <div className="col-12">
         <div className="card mb-3 tab_box">
@@ -196,7 +204,7 @@ const Callstatus = () => {
                       value={formData.Callstatus}
                       onChange={handleChange}
                       placeholder="Enter Call Status Code "
-                     
+
                     />
                     {errors.Callstatus && (
                       <small className="text-danger">{errors.Callstatus}</small>

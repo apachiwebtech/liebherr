@@ -3,10 +3,12 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
-
+import { SyncLoader } from 'react-spinners';
+import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 
 export function Products(params) {
-    const [Complaintdata, setComplaintdata] = useState([]);
+  const { loaders, axiosInstance } = useAxiosLoader();
+  const [Complaintdata, setComplaintdata] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
     const token = localStorage.getItem("token"); // Get token from localStorage
     const [formData, setFormData] = useState({
@@ -25,10 +27,10 @@ export function Products(params) {
 
     const fetchComplaintlist = async () => {
         try {
-            const response = await axios.get(`${Base_Url}/getcomplainlist`,{
+            const response = await axiosInstance.get(`${Base_Url}/getcomplainlist`,{
                 headers: {
                     Authorization: token, // Send token in headers
-                    }, 
+                    },
                 });
             setComplaintdata(response.data);
         } catch (error) {
@@ -40,10 +42,10 @@ export function Products(params) {
 
     const deleted = async (id) => {
         try {
-            const response = await axios.post(`${Base_Url}/deleteengineer`, { id },{
+            const response = await axiosInstance.post(`${Base_Url}/deleteengineer`, { id },{
                 headers: {
                     Authorization: token, // Send token in headers
-                    }, 
+                    },
                 });
             setFormData({
                 title: '',
@@ -57,10 +59,10 @@ export function Products(params) {
 
     const edit = async (id) => {
         try {
-            const response = await axios.get(`${Base_Url}/requestengineer/${id}`,{
+            const response = await axiosInstance.get(`${Base_Url}/requestengineer/${id}`,{
                 headers: {
                     Authorization: token, // Send token in headers
-                    }, 
+                    },
                 });
             setFormData(response.data)
             setIsEdit(true);
@@ -92,6 +94,11 @@ export function Products(params) {
 
     return (
         <div className="row mp0" >
+              {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
             <div className="col-md-12 col-12">
                 <div className="card mb-3 tab_box">
                     <div className="card-body " style={{ flex: "1 1 auto", padding: "13px 28px" }}>
@@ -157,7 +164,7 @@ export function Products(params) {
                             </tbody>
                         </table>
                         </div>
-                  
+
                     </div>
                 </div>
             </div>

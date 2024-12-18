@@ -3,10 +3,13 @@ import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
 import Complainttabs from './Complainttabs';
+import { SyncLoader } from 'react-spinners';
+import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 
 const ReasonCode = () => {
     // Step 1: Add this state to track errors
-    const token = localStorage.getItem("token"); 
+    const { loaders, axiosInstance } = useAxiosLoader();
+    const token = localStorage.getItem("token");
     const [errors, setErrors] = useState({});
     const [users, setUsers] = useState([]);
     const [filteredUsers, setFilteredUsers] = useState([]);
@@ -15,9 +18,9 @@ const ReasonCode = () => {
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [searchTerm, setSearchTerm] = useState('');
     const [duplicateError, setDuplicateError] = useState(''); // State to track duplicate error
-    const created_by = localStorage.getItem("userId");  
-    const updated_by = localStorage.getItem("userId"); 
-  
+    const created_by = localStorage.getItem("userId");
+    const updated_by = localStorage.getItem("userId");
+
 
     const [groupdefect_code, setGroupdefect_code] = useState([]);
 
@@ -31,10 +34,10 @@ const ReasonCode = () => {
 
     const fetchGroupDefectCode = async () => {
         try {
-          const response = await axios.get(`${Base_Url}/getgroupdefectcode`,{
+          const response = await axiosInstance.get(`${Base_Url}/getgroupdefectcode`,{
             headers: {
                 Authorization: token, // Send token in headers
-                }, 
+                },
             });
           console.log(response.data);
           setGroupdefect_code(response.data);
@@ -45,10 +48,10 @@ const ReasonCode = () => {
 
     const fetchUsers = async () => {
         try {
-            const response = await axios.get(`${Base_Url}/gettypeofdefect`,{
+            const response = await axiosInstance.get(`${Base_Url}/gettypeofdefect`,{
                 headers: {
                     Authorization: token, // Send token in headers
-                    }, 
+                    },
                 });
             console.log(response.data);
             setUsers(response.data);
@@ -109,7 +112,7 @@ const ReasonCode = () => {
             if (confirmSubmission) {
                 if (isEdit) {
                     // For update, include 'updated_by'
-                    await axios.post(`${Base_Url}/putdatatypeofdefect`, {
+                    await axiosInstance.post(`${Base_Url}/putdatatypeofdefect`, {
                         id: formData.id,  // Explicitly pass the ID
                         groupdefect_code: formData.groupdefect_code,
                         defect_code: formData.defect_code,
@@ -119,7 +122,7 @@ const ReasonCode = () => {
                     },{
                         headers: {
                             Authorization: token, // Send token in headers
-                            }, 
+                            },
                         })
                         .then(response => {
                            // window.location.reload();
@@ -138,10 +141,10 @@ const ReasonCode = () => {
                         });
                 } else {
                     // For insert, include 'created_by'
-                    await axios.post(`${Base_Url}/postdatatypeofdefect`, { ...formData, created_by: created_by },{
+                    await axiosInstance.post(`${Base_Url}/postdatatypeofdefect`, { ...formData, created_by: created_by },{
                         headers: {
                             Authorization: token, // Send token in headers
-                            }, 
+                            },
                         })
                         .then(response => {
                             //window.location.reload();
@@ -169,10 +172,10 @@ const ReasonCode = () => {
 
     const deleted = async (id) => {
         try {
-            const response = await axios.post(`${Base_Url}/deletetypeofdefect`, { id },{
+            const response = await axiosInstance.post(`${Base_Url}/deletetypeofdefect`, { id },{
                 headers: {
                     Authorization: token, // Send token in headers
-                    }, 
+                    },
                 });
             fetchUsers();
         } catch (error) {
@@ -181,10 +184,10 @@ const ReasonCode = () => {
     };
     const edit = async (id) => {
         try {
-            const response = await axios.get(`${Base_Url}/requestdatatypeofdefect/${id}`,{
+            const response = await axiosInstance.get(`${Base_Url}/requestdatatypeofdefect/${id}`,{
                 headers: {
                     Authorization: token, // Send token in headers
-                    }, 
+                    },
                 });
             // Ensure all fields are spread, including potential missing fields
             setFormData({
@@ -200,7 +203,7 @@ const ReasonCode = () => {
             console.error('Error editing user:', error);
         }
     };
-    
+
 
 
     const indexOfLastUser = (currentPage + 1) * itemsPerPage;
@@ -210,6 +213,11 @@ const ReasonCode = () => {
     return (
         <div className="tab-content">
         <Complainttabs />
+        {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
         <div className="row mp0" >
             <div className="col-12">
                 <div className="card mb-3 tab_box">
@@ -217,7 +225,7 @@ const ReasonCode = () => {
                         <div className="row mp0">
                             <div className="col-6">
                                 <form onSubmit={handleSubmit} style={{ width: "50%" }} className="text-left">
-                                    
+
                                 <div className="mb-3">
                                     <label
                                                 htmlFor="groupdefect_code"
@@ -282,7 +290,7 @@ const ReasonCode = () => {
                                                 {errors.defect_title}
                                             </small>
                                             )}
-     
+
                                     </div>
 
                                         <div className="mb-3">
@@ -298,13 +306,13 @@ const ReasonCode = () => {
                                             onChange={handleChange}
                                             placeholder="Enter Description "
                                             />
-                                        
+
                                             {errors.description && (
                                             <small className="text-danger">
                                                 {errors.description}
                                             </small>
                                             )}
-                        
+
                                         </div>
 
 

@@ -3,9 +3,12 @@ import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
 import LocationTabs from './LocationTabs';
+import { SyncLoader } from 'react-spinners';
+import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 
 const Geostate = () => {
-   const token = localStorage.getItem("token"); 
+  const { loaders, axiosInstance } = useAxiosLoader();
+  const token = localStorage.getItem("token");
   const [countries, setCountries] = useState([]);
   const [regions, setRegions] = useState([]); // State for regions
   const [errors, setErrors] = useState({});
@@ -24,7 +27,7 @@ const Geostate = () => {
 
   const fetchCountries = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getcountries`,{
+      const response = await axiosInstance.get(`${Base_Url}/getcountries`,{
         headers: {
           Authorization: token,
         },
@@ -39,7 +42,7 @@ const Geostate = () => {
 
   const fetchRegions = async (countryId) => {
     try {
-      const response = await axios.get(`${Base_Url}/getregionscity/${countryId}`,{
+      const response = await axiosInstance.get(`${Base_Url}/getregionscity/${countryId}`,{
         headers: {
           Authorization: token,
         },
@@ -53,7 +56,7 @@ const Geostate = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getgeostates`,{
+      const response = await axiosInstance.get(`${Base_Url}/getgeostates`,{
         headers: {
           Authorization: token,
         },
@@ -120,7 +123,7 @@ const Geostate = () => {
       const confirmSubmission = window.confirm("Do you want to submit the data?");
       if (confirmSubmission) {
         if (isEdit) {
-          await axios.post(`${Base_Url}/putgeostate`, { ...formData },{
+          await axiosInstance.post(`${Base_Url}/putgeostate`, { ...formData },{
             headers: {
               Authorization: token,
             },
@@ -139,7 +142,7 @@ const Geostate = () => {
               }
             });
         } else {
-          await axios.post(`${Base_Url}/postgeostate`, { ...formData },{
+          await axiosInstance.post(`${Base_Url}/postgeostate`, { ...formData },{
             headers: {
               Authorization: token,
             },
@@ -166,7 +169,7 @@ const Geostate = () => {
 
   const deleted = async (id) => {
     try {
-      await axios.post(`${Base_Url}/deletegeostate`, { id },{
+      await axiosInstance.post(`${Base_Url}/deletegeostate`, { id },{
         headers: {
           Authorization: token,
         },
@@ -184,7 +187,7 @@ const Geostate = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestgeostate/${id}`,{
+      const response = await axiosInstance.get(`${Base_Url}/requestgeostate/${id}`,{
         headers: {
           Authorization: token,
         },
@@ -206,6 +209,11 @@ const Geostate = () => {
   return (
     <div className="tab-content">
       <LocationTabs/>
+      {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
     <div className="row mp0" >
       <div className="col-12">
         <div className="card mb-3 tab_box">

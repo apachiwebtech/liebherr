@@ -4,9 +4,11 @@ import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
 import Franchisemaster from './Franchisemaster';
-
+import { SyncLoader } from 'react-spinners';
+import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 export function Engineerlist(params) {
-    const [Engineerdata, setEngineerdata] = useState([]);
+  const { loaders, axiosInstance } = useAxiosLoader();
+  const [Engineerdata, setEngineerdata] = useState([]);
     const token = localStorage.getItem("token");
     const [isEdit, setIsEdit] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
@@ -20,7 +22,7 @@ export function Engineerlist(params) {
         setCurrentPage(page);
         fetchEngineerlist(page); // Fetch data for the new page
     };
-    
+
 
 
     const [formData, setFormData] = useState({
@@ -45,7 +47,7 @@ export function Engineerlist(params) {
 
     const fetchEngineerlist = async (page) => {
         try {
-            const response = await axios.get(`${Base_Url}/getengineer`, {
+            const response = await axiosInstance.get(`${Base_Url}/getengineer`, {
                 headers: {
                     Authorization: token,
                 },
@@ -67,7 +69,7 @@ export function Engineerlist(params) {
         try {
             const dataId = e.target.getAttribute('data-id');
 
-            const response = axios.post(`${Base_Url}/updatestatus`, { dataId: dataId }, {
+            const response = axiosInstance.post(`${Base_Url}/updatestatus`, { dataId: dataId }, {
                 headers: {
                     Authorization: token,
                 },
@@ -83,7 +85,7 @@ export function Engineerlist(params) {
 
     const deleted = async (id) => {
         try {
-            const response = await axios.post(`${Base_Url}/deleteengineer`, { id }, {
+            const response = await axiosInstance.post(`${Base_Url}/deleteengineer`, { id }, {
                 headers: {
                     Authorization: token,
                 },
@@ -111,7 +113,7 @@ export function Engineerlist(params) {
 
     const edit = async (id) => {
         try {
-            const response = await axios.get(`${Base_Url}/requestengineer/${id}`, {
+            const response = await axiosInstance.get(`${Base_Url}/requestengineer/${id}`, {
                 headers: {
                     Authorization: token,
                 },
@@ -148,6 +150,11 @@ export function Engineerlist(params) {
     return (
         <div className="tab-content">
             <Franchisemaster />
+            {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
             <div className="row mp0" >
                 <div className="col-md-12 col-12">
                     <div className="card mb-3 tab_box">

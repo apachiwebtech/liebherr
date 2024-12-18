@@ -3,9 +3,13 @@ import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
 import ProMaster from "./ProMaster";
+import { SyncLoader } from 'react-spinners';
+import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
+
 
 const Material = () => {
   // Step 1: Add this state to track errors
+  const { loaders, axiosInstance } = useAxiosLoader();
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -24,10 +28,10 @@ const Material = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getmat`,{
+      const response = await axiosInstance.get(`${Base_Url}/getmat`,{
         headers: {
            Authorization: token, // Send token in headers
-         }, 
+         },
        });
       console.log(response.data);
       setUsers(response.data);
@@ -92,7 +96,7 @@ const Material = () => {
             },{
               headers: {
                  Authorization: token, // Send token in headers
-               }, 
+               },
              })
             .then((response) => {
               setFormData({
@@ -114,7 +118,7 @@ const Material = () => {
             },{
               headers: {
                  Authorization: token, // Send token in headers
-               }, 
+               },
              })
             .then((response) => {
               setFormData({
@@ -141,12 +145,12 @@ const Material = () => {
   const deleted = async (id) => {
     console.log(id);
     try {
-      const response = await axios.post(`${Base_Url}/deletematdata`, {
+      const response = await axiosInstance.post(`${Base_Url}/deletematdata`, {
         id: id,
       },{
         headers: {
            Authorization: token, // Send token in headers
-         }, 
+         },
        });
       setFormData({
         Material: "",
@@ -159,10 +163,10 @@ const Material = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestdatamat/${id}`,{
+      const response = await axiosInstance.get(`${Base_Url}/requestdatamat/${id}`,{
         headers: {
            Authorization: token, // Send token in headers
-         }, 
+         },
        });
       setFormData(response.data);
       setIsEdit(true);
@@ -179,6 +183,11 @@ const Material = () => {
   return (
     <div className="tab-content">
       <ProMaster />
+      {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
       <div className="row mp0">
         <div className="col-12">
           <div className="card mb-3 tab_box">
@@ -310,7 +319,7 @@ const Material = () => {
                         disabled={currentPage === 0}
                         className="btn btn-sm btn-primary mr-2"
                       >
-                        &lt; 
+                        &lt;
                       </button>
                       {Array.from(
                         {

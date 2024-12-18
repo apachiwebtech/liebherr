@@ -4,9 +4,11 @@ import toast, { Toaster } from 'react-hot-toast';
 import { Base_Url } from '../../Utils/Base_Url'
 import { useNavigate, useParams } from "react-router-dom";
 import { FaEye } from "react-icons/fa";
+import { SyncLoader } from 'react-spinners';
+import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 
 export function Registercomplaint(params) {
-
+  const { loaders, axiosInstance } = useAxiosLoader();
     const [addresses, setAddresses] = useState([]);
     const [hideticket, setHideticket] = useState(false)
     const [serachval, setSearch] = useState('')
@@ -37,7 +39,7 @@ export function Registercomplaint(params) {
     const [attachments2, setAttachments2] = useState([]);
     const [locations, setlocations] = useState([])
     const [currentAttachment2, setCurrentAttachment2] = useState(""); // Current attachment 2 for modal
-    const [isModal2Open, setIsModal2Open] = useState(false); 
+    const [isModal2Open, setIsModal2Open] = useState(false);
 
     const getTodayDate = () => {
         const today = new Date();
@@ -100,7 +102,7 @@ export function Registercomplaint(params) {
     //This is for State Dropdown
 
     async function getState(params) {
-        axios.get(`${Base_Url}/getstate`, {
+        axiosInstance.get(`${Base_Url}/getstate`, {
             headers: {
                 Authorization: token, // Send token in headers
             },
@@ -118,7 +120,7 @@ export function Registercomplaint(params) {
 
     async function fetchAddresses(customerEndId) {
         try {
-            const response = await axios.get(`${Base_Url}/getEndCustomerAddresses/${customerEndId}`, {
+            const response = await axiosInstance.get(`${Base_Url}/getEndCustomerAddresses/${customerEndId}`, {
                 headers: {
                     Authorization: token, // Send token in headers if required
                 },
@@ -126,12 +128,12 @@ export function Registercomplaint(params) {
 
         if (response.data.address) {
             setAddresses(response.data);
-        } 
+        }
 
         else if (Array.isArray(response.data)) {
             setAddresses(response.data);
         }
-       
+
         } catch (error) {
             console.error("Error fetching addresses:", error);
         }
@@ -141,10 +143,10 @@ export function Registercomplaint(params) {
 
     async function getProduct(params) {
 
-        axios.get(`${Base_Url}/product_master`)
+        axiosInstance.get(`${Base_Url}/product_master`)
             .then((res) => {
                 if (res.data) {
-               
+
                     setProduct(res.data)
                     console.log(res.data , "RRR")
                 }
@@ -167,7 +169,7 @@ export function Registercomplaint(params) {
     // New function to fetch Attachment 2 list
     const fetchAttachment2Details = async () => {
         try {
-            const response = await axios.get(
+            const response = await axiosInstance.get(
                 `${Base_Url}/getAttachment2Details/${Comp_id}`, {
                 headers: {
                     Authorization: token, // Send token in headers
@@ -195,7 +197,7 @@ export function Registercomplaint(params) {
                     formData.append("attachment2", file);
                 });
 
-                await axios.post(`${Base_Url}/uploadAttachment2`, formData, {
+                await axiosInstance.post(`${Base_Url}/uploadAttachment2`, formData, {
                     headers: {
                         "Content-Type": "multipart/form-data",
 
@@ -224,7 +226,7 @@ export function Registercomplaint(params) {
     //Master Service Partner
     /*async function getMasterPartner(params) {
 
-        axios.get(`${Base_Url}/getmasterpartner`)
+        axiosInstance.get(`${Base_Url}/getmasterpartner`)
             .then((res) => {
                 if (res.data) {
 
@@ -240,7 +242,7 @@ export function Registercomplaint(params) {
             comp_no: Comp_id
         }
 
-        axios.post(`${Base_Url}/getcomplaintticket`, data
+        axiosInstance.post(`${Base_Url}/getcomplaintticket`, data
             , {
                 headers: {
                     Authorization: token, // Send token in headers
@@ -294,7 +296,7 @@ export function Registercomplaint(params) {
     // Child Service Partner
     async function getChildPartner(MasterId) {
         try {
-            const res = await axios.get(`${Base_Url}/getchildpartner/${MasterId}`, {
+            const res = await axiosInstance.get(`${Base_Url}/getchildpartner/${MasterId}`, {
                 headers: {
                     Authorization: token, // Send token in headers
                 },
@@ -332,7 +334,7 @@ export function Registercomplaint(params) {
 
         setForm(false)
 
-        axios.post(`${Base_Url}/getticketendcustomer`, { searchparam: serachval })
+        axiosInstance.post(`${Base_Url}/getticketendcustomer`, { searchparam: serachval })
             .then((res) => {
                 console.log(res.data.information)
                 if (res.data.information && res.data.information.length > 0) {
@@ -435,7 +437,7 @@ export function Registercomplaint(params) {
 
         console.log("Submitting data:", data);
 
-        axios.post(`${Base_Url}/add_complaintt`, data, {
+        axiosInstance.post(`${Base_Url}/add_complaintt`, data, {
             headers: {
                 Authorization: token, // Send token in headers
             },
@@ -491,7 +493,7 @@ export function Registercomplaint(params) {
         };
 
 
-        axios.post(`${Base_Url}/update_complaint`, {
+        axiosInstance.post(`${Base_Url}/update_complaint`, {
             headers: {
                 Authorization: token, // Send token in headers
             },
@@ -511,7 +513,7 @@ export function Registercomplaint(params) {
 
     const fetchdistricts = async (geostateID) => {
         try {
-            const response = await axios.get(`${Base_Url}/getdistrictcity/${geostateID}`, {
+            const response = await axiosInstance.get(`${Base_Url}/getdistrictcity/${geostateID}`, {
                 headers: {
                     Authorization: token, // Send token in headers
                 },
@@ -525,7 +527,7 @@ export function Registercomplaint(params) {
 
     const fetchCity = async (area_id) => {
         try {
-            const response = await axios.get(`${Base_Url}/getgeocities_p/${area_id}`, {
+            const response = await axiosInstance.get(`${Base_Url}/getgeocities_p/${area_id}`, {
                 headers: {
                     Authorization: token, // Send token in headers
                 },
@@ -539,7 +541,7 @@ export function Registercomplaint(params) {
 
     const fetchPincodes = async (pin_id) => {
         try {
-            const response = await axios.get(`${Base_Url}/citywise_pincode/${pin_id}`, {
+            const response = await axiosInstance.get(`${Base_Url}/citywise_pincode/${pin_id}`, {
                 headers: {
                     Authorization: token, // Send token in headers
                 },
@@ -585,7 +587,7 @@ export function Registercomplaint(params) {
 
     const fetchlocations = async (pincode) => {
         try {
-            const response = await axios.get(
+            const response = await axiosInstance.get(
                 `${Base_Url}/getmultiplelocation/${pincode}`, {
                 headers: {
                     Authorization: token, // Send token in headers
@@ -609,7 +611,7 @@ export function Registercomplaint(params) {
 
     const fetchComplaintDuplicate = async () => {
         try {
-            const response = await axios.get(
+            const response = await axiosInstance.get(
                 `${Base_Url}/getComplaintDuplicateRegisterPage/${DuplicateCustomerNumber}`
             );
 
@@ -639,7 +641,7 @@ export function Registercomplaint(params) {
             product_id: product_id
         }
 
-        axios.post(`${Base_Url}/add_new_ticket`, data, {
+        axiosInstance.post(`${Base_Url}/add_new_ticket`, data, {
             headers: {
                 Authorization: token, // Send token in headers
             },
@@ -669,7 +671,13 @@ export function Registercomplaint(params) {
 
 
     return (
+
         < div className="p-3">
+          {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
             <div className="row ">
                 <div className="complbread">
                     <div className="row">
@@ -740,26 +748,26 @@ export function Registercomplaint(params) {
                             {/* <p style={{fontSize: '12px'}}>{searchdata.address}</p> */}
                             <div className="row">
                                 <div className="col-md-12">
-                           
+
                                         {addresses && addresses.length > 0 ? (
                                             // Check if it's an array or a single object
                                             Array.isArray(addresses) ? (
                                                 addresses.map((addressItem, index) => (
-                                                    <p 
-                                                        key={addressItem.id || index} 
-                                                        style={{ 
-                                                            fontSize: '12px', 
-                                        
+                                                    <p
+                                                        key={addressItem.id || index}
+                                                        style={{
+                                                            fontSize: '12px',
+
                                                         }}
                                                     >
                                                         {addressItem.address}
                                                     </p>
                                                 ))
                                             ) : (
-                                                <p 
-                                                    key="single-address" 
-                                                    style={{ 
-                                                        fontSize: '12px', 
+                                                <p
+                                                    key="single-address"
+                                                    style={{
+                                                        fontSize: '12px',
                                                     }}
                                                 >
                                                     {addresses.address}
@@ -768,7 +776,7 @@ export function Registercomplaint(params) {
                                         ) : (
                                             <p style={{ fontSize: '12px' }}>No Address Available</p>
                                         )}
-                                    </div>       
+                                    </div>
                                     </div>
 
 
@@ -1263,11 +1271,11 @@ export function Registercomplaint(params) {
                                         </button>
                                     </div>
 
-                                
+
                                 </div>
                             </div>
 
-                           
+
                         </>
 
                     </div>

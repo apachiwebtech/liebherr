@@ -5,7 +5,12 @@ import { Base_Url } from "../../Utils/Base_Url";
 import Franchisemaster from '../Master/Franchisemaster';
 import { useParams } from "react-router-dom";
 import md5 from "js-md5";
+import { SyncLoader } from 'react-spinners';
+import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
+
+
 const Childfranchisemaster = () => {
+  const { loaders, axiosInstance } = useAxiosLoader();
   const { childid } = useParams();
   const token = localStorage.getItem("token");
   const [Parentfranchise, setParentfranchise] = useState([]);
@@ -62,7 +67,7 @@ const Childfranchisemaster = () => {
   const fetchchildfranchisepopulate = async (childid) => {
     try {
 
-      const response = await axios.get(`${Base_Url}/getchildfranchisepopulate/${childid}`, {
+      const response = await axiosInstance.get(`${Base_Url}/getchildfranchisepopulate/${childid}`, {
         headers: {
           Authorization: token,
         },
@@ -119,7 +124,7 @@ const Childfranchisemaster = () => {
 
   const fetchParentfranchise = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getparentfranchise`, {
+      const response = await axiosInstance.get(`${Base_Url}/getparentfranchise`, {
         headers: {
           Authorization: token,
         },
@@ -134,7 +139,7 @@ const Childfranchisemaster = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getchildFranchiseDetails`, {
+      const response = await axiosInstance.get(`${Base_Url}/getchildFranchiseDetails`, {
         headers: {
           Authorization: token,
         },
@@ -187,7 +192,7 @@ const Childfranchisemaster = () => {
 
   const fetchlocations = async (pincode) => {
     try {
-      const response = await axios.get(
+      const response = await axiosInstance.get(
         `${Base_Url}/getmultiplelocation/${pincode}`, {
         headers: {
           Authorization: token,
@@ -322,7 +327,7 @@ const Childfranchisemaster = () => {
             });
         } else {
 
-          await axios.post(`${Base_Url}/postchildfranchise`, { ...hashedFormData, created_by }, {
+          await axiosInstance.post(`${Base_Url}/postchildfranchise`, { ...hashedFormData, created_by }, {
             headers: {
               Authorization: token,
             },
@@ -375,6 +380,11 @@ const Childfranchisemaster = () => {
 
   return (
     <div className="tab-content">
+          {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
       <Franchisemaster />
       <div className="row mp0">
         <div className="col-12">
@@ -584,7 +594,7 @@ const Childfranchisemaster = () => {
                   <div className="col-md-3">
                     <label htmlFor="area" className="input-field">
                       Pincode<span className="text-danger">*</span>
-                      
+
                     </label>
 
                     <input type="text" className="form-control" value={formData.pincode_id} name="pincode_id" onChange={handleChange} placeholder="Enter Pincode" />

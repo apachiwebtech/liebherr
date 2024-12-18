@@ -1,3 +1,4 @@
+import { SyncLoader } from 'react-spinners';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -32,6 +33,7 @@ import 'datatables.net-keytable';
 
 // DataTables Select Extension
 import 'datatables.net-select';
+import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 
 export function Complaintlist(params) {
 
@@ -43,7 +45,7 @@ export function Complaintlist(params) {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
-
+  const { loaders, axiosInstance } = useAxiosLoader();
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
@@ -91,7 +93,7 @@ export function Complaintlist(params) {
 
 
     try {
-      const response = await axios.get(`${Base_Url}/getcomplainlist`, {
+      const response = await axiosInstance.get(`${Base_Url}/getcomplainlist`, {
         headers: {
           Authorization: token, // Send token in headers
         },
@@ -132,7 +134,7 @@ export function Complaintlist(params) {
 
       console.log('Sending params:', params.toString()); // Debug log
 
-      const response = await axios.get(`${Base_Url}/getcomplainlist?${params}`, {
+      const response = await axiosInstance.get(`${Base_Url}/getcomplainlist?${params}`, {
         headers: {
           Authorization: token, // Send token in headers
         },
@@ -181,7 +183,7 @@ export function Complaintlist(params) {
 
   //  const deleted = async (id) => {
   //     try {
-  //         const response = await axios.post(`${Base_Url}/deleteengineer`, { id });
+  //         const response = await axiosInstance.post(`${Base_Url}/deleteengineer`, { id });
   //         setFormData({
   //             title: '',
   //             cfranchise_id: ''
@@ -194,7 +196,7 @@ export function Complaintlist(params) {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestengineer/${id}`, {
+      const response = await axiosInstance.get(`${Base_Url}/requestengineer/${id}`, {
         headers: {
           Authorization: token, // Send token in headers
         },
@@ -276,12 +278,19 @@ export function Complaintlist(params) {
 
 
 
-
-
+// Log loaders state to check if it's updating correctly
+  console.log('Loaders state:', loaders);
 
   return (
+
+
     <div className="row mp0">
 
+      {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
       <div className="searchFilter">
 
         <div className='m-3'>
@@ -643,7 +652,6 @@ export function Complaintlist(params) {
                     const rowStyle = {
                       backgroundColor: item.call_priority == "HIGH" ? "#d4edda" : item.call_priority == "REGULAR" ? "#transparent" : "transparent",
                     };
-                    console.log("Style:", rowStyle); // Add this line
                     return (
                       <tr key={item.id} >
                         <td style={rowStyle}>{displayIndex}</td>  {/* Use displayIndex for correct pagination */}

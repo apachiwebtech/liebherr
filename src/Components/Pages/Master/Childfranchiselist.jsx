@@ -4,10 +4,12 @@ import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
 import Franchisemaster from './Franchisemaster';
-const token = localStorage.getItem("token"); 
-
+import { SyncLoader } from 'react-spinners';
+import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 
 export function ChildFranchiselist(params) {
+  const { loaders, axiosInstance } = useAxiosLoader();
+  const token = localStorage.getItem("token");
     const [Franchisemasterdata, setChildfranchisemasterdata] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
     const [formData, setFormData] = useState({
@@ -47,7 +49,7 @@ export function ChildFranchiselist(params) {
 
     const fetchChildfranchisemasterlist = async () => {
         try {
-            const response = await axios.get(`${Base_Url}/getchildFranchiseDetails`,{
+            const response = await axiosInstance.get(`${Base_Url}/getchildFranchiseDetails`,{
                 headers: {
                   Authorization: token,
                 },
@@ -61,23 +63,23 @@ export function ChildFranchiselist(params) {
     const handleChangestatus = (e) => {
         try {
           const dataId = e.target.getAttribute('data-id');
-    
-          const response = axios.post(`${Base_Url}/updatestatus`, { dataId: dataId },{
+
+          const response = axiosInstance.post(`${Base_Url}/updatestatus`, { dataId: dataId },{
             headers: {
               Authorization: token,
             },
           });
-    
+
         } catch (error) {
           console.error("Error editing user:", error);
         }
-    
+
       };
 
 
     const deleted = async (id) => {
         try {
-            const response = await axios.post(`${Base_Url}/deletemasterlist`, { id });
+            const response = await axiosInstance.post(`${Base_Url}/deletemasterlist`, { id });
             setFormData({
                 title: "",
                 password: "",
@@ -113,7 +115,7 @@ export function ChildFranchiselist(params) {
 
     const edit = async (id) => {
         try {
-            const response = await axios.get(`${Base_Url}/requestengineer/${id}`);
+            const response = await axiosInstance.get(`${Base_Url}/requestengineer/${id}`);
             setFormData(response.data)
             setIsEdit(true);
             console.log(response.data);
@@ -144,6 +146,11 @@ export function ChildFranchiselist(params) {
 
     return (
         <div className="tab-content">
+              {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
             <div className="row mp0" >
                 <div className="col-md-12 col-12">
                     <div className="card mb-3 tab_box">

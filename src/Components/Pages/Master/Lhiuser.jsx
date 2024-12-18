@@ -4,10 +4,12 @@ import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash, FaEye } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
 import { Navigate } from "react-router-dom";
-
+import { SyncLoader } from 'react-spinners';
+import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 
 const Lhiuser = () => {
   // Step 1: Add this state to track errors
+  const { loaders, axiosInstance } = useAxiosLoader();
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -28,7 +30,7 @@ const Lhiuser = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getlhidata`,{
+      const response = await axiosInstance.get(`${Base_Url}/getlhidata`,{
         headers: {
           Authorization: token, // Send token in headers
         },
@@ -151,7 +153,7 @@ const Lhiuser = () => {
             // For insert, include 'created_by'
             await axios
               .post(`${Base_Url}/postlhidata`, {
-                ...formData,      
+                ...formData,
                 created_by: createdBy,
               },
               {
@@ -187,7 +189,7 @@ const Lhiuser = () => {
 
   const deleted = async (id) => {
     try {
-      const response = await axios.post(`${Base_Url}/deletelhidata`, { id });
+      const response = await axiosInstance.post(`${Base_Url}/deletelhidata`, { id });
 
       window.location.reload();
     } catch (error) {
@@ -197,10 +199,10 @@ const Lhiuser = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestlhidata/${id}`,{
+      const response = await axiosInstance.get(`${Base_Url}/requestlhidata/${id}`,{
         headers: {
            Authorization: token, // Send token in headers
-         }, 
+         },
        });
       setFormData(response.data);
       setIsEdit(true);
@@ -214,10 +216,10 @@ const Lhiuser = () => {
     try {
       const dataId = e.target.getAttribute('data-id');
 
-      const response = axios.post(`${Base_Url}/updatestatus`, { dataId: dataId },{
+      const response = axiosInstance.post(`${Base_Url}/updatestatus`, { dataId: dataId },{
         headers: {
            Authorization: token, // Send token in headers
-         }, 
+         },
        });
 
     } catch (error) {
@@ -232,6 +234,11 @@ const Lhiuser = () => {
 
   return (
     <div className="row mp0">
+          {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
       <div className="col-12">
         <div className="card mb-3 tab_box">
           <div
@@ -473,11 +480,11 @@ const Lhiuser = () => {
                         Activation date
                       </th>
 
-                      
+
                       <th style={{ padding: "12px 0px", textAlign: "center" }}>
                         Edit
                       </th>
-                      
+
                     </tr>
                   </thead>
                   <tbody>
@@ -508,7 +515,7 @@ const Lhiuser = () => {
                         </td>
                         <td style={{ padding: "10px" }}>{item.Lhiuser}</td>
 
-                        
+
                         <td style={{ padding: "0px", textAlign: "center" }}>
                           <button
                             className="btn"
@@ -527,7 +534,7 @@ const Lhiuser = () => {
                             <FaPencilAlt />
                           </button>
                         </td>
-                    
+
                       </tr>
                     ))}
                   </tbody>

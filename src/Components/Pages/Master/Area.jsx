@@ -3,11 +3,15 @@ import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
 import LocationTabs from "./LocationTabs";
+import { SyncLoader } from 'react-spinners';
+import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
+
 
 const Area = () => {
+  const { loaders, axiosInstance } = useAxiosLoader();
   const [countries, setCountries] = useState([]);
   const [regions, setRegions] = useState([]);
-  const token = localStorage.getItem("token"); 
+  const token = localStorage.getItem("token");
   const [geoStates, setGeoStates] = useState([]);
   // const [geoCities, setGeoCities] = useState([]);
   const [areas, setAreas] = useState([]);
@@ -29,7 +33,7 @@ const Area = () => {
 
   const fetchCountries = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getcountries`,{
+      const response = await axiosInstance.get(`${Base_Url}/getcountries`, {
         headers: {
           Authorization: token, // Send token in headers
         },
@@ -42,12 +46,12 @@ const Area = () => {
 
   const fetchRegions = async (countryId) => {
     try {
-      const response = await axios.get(`${Base_Url}/getregionscity/${countryId}`
-,{
-                headers: {
-                  Authorization: token, // Send token in headers
-                },
-              });
+      const response = await axiosInstance.get(`${Base_Url}/getregionscity/${countryId}`
+        , {
+          headers: {
+            Authorization: token, // Send token in headers
+          },
+        });
       setRegions(response.data);
     } catch (error) {
       console.error("Error fetching regions:", error);
@@ -56,12 +60,12 @@ const Area = () => {
 
   const fetchGeoStates = async (regionId) => {
     try {
-      const response = await axios.get(`${Base_Url}/getgeostatescity/${regionId}`,{
+      const response = await axiosInstance.get(`${Base_Url}/getgeostatescity/${regionId}`, {
         headers: {
           Authorization: token, // Send token in headers
         },
       }
-);
+      );
       setGeoStates(response.data);
     } catch (error) {
       console.error("Error fetching geo states:", error);
@@ -70,7 +74,7 @@ const Area = () => {
 
   // const fetchGeoCities = async (geostate_id) => {
   //   try {
-  //     const response = await axios.get(
+  //     const response = await axiosInstance.get(
   //       `${Base_Url}/getgeocities_a/${geostate_id}`
   //     );
   //     console.log("Geo Cities:", response.data);
@@ -82,7 +86,7 @@ const Area = () => {
 
   const fetchAreas = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getareas`,{
+      const response = await axiosInstance.get(`${Base_Url}/getareas`, {
         headers: {
           Authorization: token, // Send token in headers
         },
@@ -108,7 +112,7 @@ const Area = () => {
       return;
     }
 
-    
+
     setDuplicateError("");
 
     try {
@@ -118,12 +122,12 @@ const Area = () => {
       if (confirmSubmission) {
         if (isEdit) {
           await axios
-            .post(`${Base_Url}/putarea`, { ...formData },{
+            .post(`${Base_Url}/putarea`, { ...formData }, {
               headers: {
-                  Authorization: token, // Send token in headers
-                  }, 
-              }
-)
+                Authorization: token, // Send token in headers
+              },
+            }
+            )
             .then((response) => {
               setFormData({
                 title: "",
@@ -131,7 +135,7 @@ const Area = () => {
                 region_id: "",
                 geostate_id: "",
                 // geocity_id: "",
-             
+
               });
               fetchAreas();
             })
@@ -142,12 +146,12 @@ const Area = () => {
             });
         } else {
           await axios
-            .post(`${Base_Url}/postarea`, { ...formData },{
+            .post(`${Base_Url}/postarea`, { ...formData }, {
               headers: {
-                  Authorization: token, // Send token in headers
-                  }, 
-              }
-)
+                Authorization: token, // Send token in headers
+              },
+            }
+            )
             .then((response) => {
               setFormData({
                 title: "",
@@ -155,7 +159,7 @@ const Area = () => {
                 region_id: "",
                 geostate_id: "",
                 // geocity_id: "",
-   
+
               });
               fetchAreas();
             })
@@ -220,12 +224,12 @@ const Area = () => {
 
   const deleted = async (id) => {
     try {
-      await axios.post(`${Base_Url}/deletearea`, { id },{
+      await axiosInstance.post(`${Base_Url}/deletearea`, { id }, {
         headers: {
-            Authorization: token, // Send token in headers
-            }, 
-        }
-);
+          Authorization: token, // Send token in headers
+        },
+      }
+      );
       setFormData({
         title: "",
         country_id: "",
@@ -241,12 +245,12 @@ const Area = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestarea/${id}`,{
+      const response = await axiosInstance.get(`${Base_Url}/requestarea/${id}`, {
         headers: {
-            Authorization: token, // Send token in headers
-            }, 
-        }
-);
+          Authorization: token, // Send token in headers
+        },
+      }
+      );
       console.log(response.data);
       setFormData(response.data);
       fetchRegions(response.data.country_id);
@@ -261,6 +265,11 @@ const Area = () => {
   return (
     <div className="tab-content">
       <LocationTabs />
+      {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
       <div className="row mp0">
         <div className="col-12">
           <div className="card mb-3 tab_box">

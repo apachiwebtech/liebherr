@@ -8,7 +8,7 @@ import 'datatables.net-bs4/css/dataTables.bootstrap4.min.css';
 import $ from 'jquery';
 import 'datatables.net';
 import 'datatables.net-bs4';
-
+import { SyncLoader } from 'react-spinners';
 // DataTables Responsive Extension (JS and CSS for Bootstrap 4)
 import 'datatables.net-responsive';
 import 'datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css';
@@ -32,9 +32,12 @@ import 'datatables.net-keytable';
 
 // DataTables Select Extension
 import 'datatables.net-select';
+import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
+
 
 const Location = () => {
   // Step 1: Add this state to track errors
+  const { loaders, axiosInstance } = useAxiosLoader();
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -51,10 +54,10 @@ const Location = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getdata`,{
+      const response = await axiosInstance.get(`${Base_Url}/getdata`,{
         headers: {
            Authorization: token, // Send token in headers
-         }, 
+         },
        });
       console.log(response.data);
       setUsers(response.data);
@@ -116,7 +119,7 @@ const Location = () => {
             .post(`${Base_Url}/putdata`, { ...formData },{
               headers: {
                  Authorization: token, // Send token in headers
-               }, 
+               },
              })
             .then((response) => {
               setFormData({
@@ -135,7 +138,7 @@ const Location = () => {
             .post(`${Base_Url}/postdata`, { ...formData },{
               headers: {
                  Authorization: token, // Send token in headers
-               }, 
+               },
              })
             .then((response) => {
               setFormData({
@@ -157,10 +160,10 @@ const Location = () => {
 
   const deleted = async (id) => {
     try {
-      const response = await axios.post(`${Base_Url}/deletedata`, { id },{
+      const response = await axiosInstance.post(`${Base_Url}/deletedata`, { id },{
         headers: {
            Authorization: token, // Send token in headers
-         }, 
+         },
        });
       setFormData({
         title: "",
@@ -173,10 +176,10 @@ const Location = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestdata/${id}`,{
+      const response = await axiosInstance.get(`${Base_Url}/requestdata/${id}`,{
         headers: {
            Authorization: token, // Send token in headers
-         }, 
+         },
        });
       setFormData(response.data);
       setIsEdit(true);
@@ -186,7 +189,7 @@ const Location = () => {
     }
   };
 
-  
+
 
   const indexOfLastUser = (currentPage + 1) * itemsPerPage;
   const indexOfFirstUser = indexOfLastUser - itemsPerPage;
@@ -228,6 +231,11 @@ const Location = () => {
   return (
     <div className="tab-content">
       <LocationTabs/>
+      {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
     <div className="row mp0">
       <div className="col-12">
         <div className="card mb-3 tab_box">

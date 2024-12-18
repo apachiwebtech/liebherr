@@ -3,9 +3,11 @@ import axios from "axios";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
 import LocationTabs from "./LocationTabs";
-
+import { SyncLoader } from 'react-spinners';
+import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 
 const Pincode = () => {
+  const { loaders, axiosInstance } = useAxiosLoader();
   const [countries, setCountries] = useState([]);
   const [regions, setRegions] = useState([]);
   const [geoStates, setGeoStates] = useState([]);
@@ -36,7 +38,7 @@ const Pincode = () => {
 
   const fetchData = async (url, setStateFunction, errorMessage) => {
     try {
-      const response = await axios.get(url);
+      const response = await axiosInstance.get(url);
       setStateFunction(response.data);
     } catch (error) {
       console.error(errorMessage, error);
@@ -47,12 +49,12 @@ const Pincode = () => {
 
   const fetchCountries = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getcountries`, {
+      const response = await axiosInstance.get(`${Base_Url}/getcountries`, {
         headers: {
           Authorization: token, // Send token in headers
         },
       });
-  
+
       setCountries(response.data); // Update countries with the response data
     } catch (error) {
       console.error("Error fetching countries:", error.message);
@@ -62,12 +64,12 @@ const Pincode = () => {
 
   const fetchRegions = async (countryId) => {
     try {
-      const response = await axios.get(`${Base_Url}/getregionspincode/${countryId}`, {
+      const response = await axiosInstance.get(`${Base_Url}/getregionspincode/${countryId}`, {
         headers: {
           Authorization: token, // Send token in headers
         },
       });
-  
+
       setRegions(response.data); // Update countries with the response data
     } catch (error) {
       console.error("Error fetching Regions:", error.message);
@@ -77,12 +79,12 @@ const Pincode = () => {
 
   const fetchGeoStates = async (regionId) => {
     try {
-      const response = await axios.get(`${Base_Url}/getgeostatespincode/${regionId}`, {
+      const response = await axiosInstance.get(`${Base_Url}/getgeostatespincode/${regionId}`, {
         headers: {
           Authorization: token, // Send token in headers
         },
       });
-  
+
       setGeoStates(response.data); // Update countries with the response data
     } catch (error) {
       console.error("Error fetching geo states:", error.message);
@@ -92,12 +94,12 @@ const Pincode = () => {
 
   const fetchGeoCities = async (area_id) => {
     try {
-      const response = await axios.get(`${Base_Url}/getgeocities_p/${area_id}`, {
+      const response = await axiosInstance.get(`${Base_Url}/getgeocities_p/${area_id}`, {
         headers: {
           Authorization: token, // Send token in headers
         },
       });
-  
+
       setGeoCities(response.data); // Update countries with the response data
     } catch (error) {
       console.error("Error fetching geo cities:", error.message);
@@ -107,12 +109,12 @@ const Pincode = () => {
 
   const fetchAreas = async (geocity_id) => {
     try {
-      const response = await axios.get(`${Base_Url}/getareas/${geocity_id}`, {
+      const response = await axiosInstance.get(`${Base_Url}/getareas/${geocity_id}`, {
         headers: {
           Authorization: token, // Send token in headers
         },
       });
-  
+
       setAreas(response.data); // Update countries with the response data
     } catch (error) {
       console.error("Error fetching areas:", error.message);
@@ -122,7 +124,7 @@ const Pincode = () => {
 
   const fetchPincodes = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getpincodes`,
+      const response = await axiosInstance.get(`${Base_Url}/getpincodes`,
          {
         headers: {
           Authorization: token, // Send token in headers
@@ -131,8 +133,8 @@ const Pincode = () => {
 
       setPincodes(response.data);
       setFilteredPincodes(response.data);
-  
-     
+
+
     } catch (error) {
       console.error("Error fetching pincodes:", error.message);
       // Optionally, handle errors in a user-friendly way, e.g., show a message
@@ -158,11 +160,11 @@ const Pincode = () => {
         const url = isEdit
           ? `${Base_Url}/putpincode`
           : `${Base_Url}/postpincode`;
-        const method = isEdit ? axios.post : axios.post;
+        const method = isEdit ? axiosInstance.post : axiosInstance.post;
         await method(url, formData,{
           headers: {
              Authorization: token, // Send token in headers
-           }, 
+           },
          });
         setFormData({
           title: "",
@@ -199,7 +201,7 @@ const Pincode = () => {
       if (name === "area_id") fetchGeoCities(value);
     }
   };
-  
+
   const handleSearch = (e) => {
     const searchValue = e.target.value.toLowerCase();
     setSearchTerm(searchValue);
@@ -236,10 +238,10 @@ const Pincode = () => {
   const deleted = async (id) => {
     try {
       if (window.confirm("Are you sure you want to delete this pincode?")) {
-        await axios.post(`${Base_Url}/deletepincode`, { id },{
+        await axiosInstance.post(`${Base_Url}/deletepincode`, { id },{
           headers: {
              Authorization: token, // Send token in headers
-           }, 
+           },
          });
         setFormData({
           title: "",
@@ -259,10 +261,10 @@ const Pincode = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestpincode/${id}`,{
+      const response = await axiosInstance.get(`${Base_Url}/requestpincode/${id}`,{
         headers: {
            Authorization: token, // Send token in headers
-         }, 
+         },
        });
       setFormData(response.data);
       fetchRegions(response.data.country_id);
@@ -301,6 +303,11 @@ const Pincode = () => {
   return (
     <div className="tab-content">
       <LocationTabs />
+      {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
       <div className="row mp0">
         <div className="col-12">
           <div className="card mb-3 tab_box">

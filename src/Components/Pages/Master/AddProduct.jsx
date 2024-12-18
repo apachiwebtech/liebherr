@@ -4,15 +4,19 @@ import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
 import { IoArrowBack, IoArrowBackCircle } from "react-icons/io5";
+import { SyncLoader } from 'react-spinners';
+import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
+
 
 export function AddProduct(params) {
-    const [error, setError] = useState({})
+  const { loaders, axiosInstance } = useAxiosLoader();
+  const [error, setError] = useState({})
     const [product_type, setProducttype] = useState([])
     const [product_line, setProductLine] = useState([])
     const [material, setMaterial] = useState([])
     const [facturer, setManufacturer] = useState([])
-    
-   const token = localStorage.getItem("token"); 
+
+   const token = localStorage.getItem("token");
 
     const [itemtype, setItemtype] = useState([])
     const [productclass, setPrductclass] = useState([])
@@ -115,10 +119,10 @@ export function AddProduct(params) {
         return isValid
     }
 
-    // functions 
+    // functions
 
     async function getproducttype() {
-        axios.get(`${Base_Url}/product_type`
+        axiosInstance.get(`${Base_Url}/product_type`
 ,{
                 headers: {
                   Authorization: token, // Send token in headers
@@ -130,7 +134,7 @@ export function AddProduct(params) {
     }
 
     async function getproductline() {
-        axios.get(`${Base_Url}/fetchproductline`,{
+        axiosInstance.get(`${Base_Url}/fetchproductline`,{
             headers: {
               Authorization: token, // Send token in headers
             },
@@ -140,7 +144,7 @@ export function AddProduct(params) {
             })
     }
     async function getmaterial() {
-        axios.get(`${Base_Url}/fetchmaterial`
+        axiosInstance.get(`${Base_Url}/fetchmaterial`
 ,{
                 headers: {
                   Authorization: token, // Send token in headers
@@ -151,7 +155,7 @@ export function AddProduct(params) {
             })
     }
     async function getItemtype() {
-        axios.get(`${Base_Url}/fetchitemtype`,{
+        axiosInstance.get(`${Base_Url}/fetchitemtype`,{
             headers: {
               Authorization: token, // Send token in headers
             },
@@ -161,7 +165,7 @@ export function AddProduct(params) {
             })
     }
     async function getproductclass() {
-        axios.get(`${Base_Url}/fetchproductclass`,{
+        axiosInstance.get(`${Base_Url}/fetchproductclass`,{
             headers: {
               Authorization: token, // Send token in headers
             },
@@ -171,7 +175,7 @@ export function AddProduct(params) {
             })
     }
     async function getmanufacturer() {
-        axios.get(`${Base_Url}/fetchmanufacturer`,{
+        axiosInstance.get(`${Base_Url}/fetchmanufacturer`,{
             headers: {
               Authorization: token, // Send token in headers
             },
@@ -184,7 +188,7 @@ export function AddProduct(params) {
         const data = {
             productid: productid
         }
-        axios.post(`${Base_Url}/getupdateparam`, data,{
+        axiosInstance.post(`${Base_Url}/getupdateparam`, data,{
             headers: {
               Authorization: token, // Send token in headers
             },
@@ -268,11 +272,11 @@ export function AddProduct(params) {
                 mrp: value.mrp || "",
                 service_partner_basic: value.service_partner_basic || "",
                 uid:productid
-                
+
             }
 
             if (productid != ":productid") {
-                axios.post(`${Base_Url}/updateProduct`, data,{
+                axiosInstance.post(`${Base_Url}/updateProduct`, data,{
                     headers: {
                       Authorization: token, // Send token in headers
                     },
@@ -306,7 +310,7 @@ export function AddProduct(params) {
                         })
                     })
             }else{
-                axios.post(`${Base_Url}/addProduct`, data,{
+                axiosInstance.post(`${Base_Url}/addProduct`, data,{
                     headers: {
                       Authorization: token, // Send token in headers
                     },
@@ -341,7 +345,7 @@ export function AddProduct(params) {
                 })
             }
 
-          
+
         }
 
     }
@@ -349,6 +353,11 @@ export function AddProduct(params) {
 
     return (
         <div className="tab-content">
+              {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
             <div className="row mp0" >
                 <div className="col-md-12 col-12">
                     <div className="card col-md-12 tab_box">

@@ -4,12 +4,14 @@ import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash, FaEye } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
 import { Navigate } from "react-router-dom";
-
+import { SyncLoader } from 'react-spinners';
+import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 
 const Engineer = () => {
   // Step 1: Add this state to track errors
+  const { loaders, axiosInstance } = useAxiosLoader();
   const [errors, setErrors] = useState({});
-  const token = localStorage.getItem("token"); 
+  const token = localStorage.getItem("token");
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [isEdit, setIsEdit] = useState(false);
@@ -28,7 +30,7 @@ const Engineer = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getlhidata`,{
+      const response = await axiosInstance.get(`${Base_Url}/getlhidata`,{
         headers: {
           Authorization: token,
         },
@@ -181,7 +183,7 @@ const Engineer = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestlhidata/${id}`,{
+      const response = await axiosInstance.get(`${Base_Url}/requestlhidata/${id}`,{
         headers: {
           Authorization: token,
         },
@@ -198,7 +200,7 @@ const Engineer = () => {
     try {
       const dataId = e.target.getAttribute('data-id');
 
-      const response = axios.post(`${Base_Url}/updatestatus`, { dataId: dataId },{
+      const response = axiosInstance.post(`${Base_Url}/updatestatus`, { dataId: dataId },{
         headers: {
           Authorization: token,
         },
@@ -216,6 +218,11 @@ const Engineer = () => {
 
   return (
     <div className="row mp0">
+          {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
       <div className="col-12">
         <div className="card mb-3 tab_box">
           <div

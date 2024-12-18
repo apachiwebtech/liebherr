@@ -5,10 +5,11 @@ import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
 import Servicecontracttabs from './Servicecontracttabs';
 import Servicecontract from './Servicecontract';
-
+import { SyncLoader } from 'react-spinners';
+import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 
 export function Servicecontractlist(params) {
-
+  const { loaders, axiosInstance } = useAxiosLoader();
     const [Servicecontractdata, setServicecontractdata] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
     const [filteredData, setFilteredData] = useState([]);
@@ -28,7 +29,7 @@ export function Servicecontractlist(params) {
         customerName: '',
         contractNumber: '',
         serialNumber: '',
-        productName:'',      
+        productName:'',
 
     });
 
@@ -40,12 +41,12 @@ export function Servicecontractlist(params) {
 
     const fetchServicecontractlist = async () => {
         try {
-            const response = await axios.get(`${Base_Url}/getservicecontractlist`,{
+            const response = await axiosInstance.get(`${Base_Url}/getservicecontractlist`,{
                 headers: {
                     Authorization: token, // Send token in headers
-                    }, 
+                    },
                 });
-         
+
             setServicecontractdata(response.data);
             setFilteredData(response.data);
         } catch (error) {
@@ -59,10 +60,10 @@ export function Servicecontractlist(params) {
         try {
             const dataId = e.target.getAttribute('data-id');
 
-            const response = axios.post(`${Base_Url}/updatestatus`, { dataId: dataId },{
+            const response = axiosInstance.post(`${Base_Url}/updatestatus`, { dataId: dataId },{
                 headers: {
                     Authorization: token, // Send token in headers
-                    }, 
+                    },
                 });
 
         } catch (error) {
@@ -78,10 +79,10 @@ export function Servicecontractlist(params) {
 
             // Only proceed with deletion if user clicks "OK"
             if (isConfirmed) {
-                const response = await axios.post(`${Base_Url}/deleteservicecontract`, { id },{
+                const response = await axiosInstance.post(`${Base_Url}/deleteservicecontract`, { id },{
                     headers: {
                         Authorization: token, // Send token in headers
-                        }, 
+                        },
                     });
                 window.location.reload();
             }
@@ -92,7 +93,7 @@ export function Servicecontractlist(params) {
 
     const edit = async (id) => {
         try {
-            const response = await axios.get(`${Base_Url}/requestservicecontract/${id}`);
+            const response = await axiosInstance.get(`${Base_Url}/requestservicecontract/${id}`);
             setFormData(response.data)
             setIsEdit(true);
             console.log(response.data);
@@ -100,9 +101,9 @@ export function Servicecontractlist(params) {
             console.error('Error editing user:', error);
         }
     };
-   
 
-    
+
+
     const fetchFilteredData = async () => {
         try {
             const params = new URLSearchParams();
@@ -116,10 +117,10 @@ export function Servicecontractlist(params) {
 
             console.log('Sending params:', params.toString()); // Debug log
 
-            const response = await axios.get(`${Base_Url}/getservicecontractlist?${params}`);
+            const response = await axiosInstance.get(`${Base_Url}/getservicecontractlist?${params}`);
             setServicecontractdata(response.data);
             setFilteredData(response.data);
-            
+
         } catch (error) {
             console.error('Error fetching filtered data:', error);
             setFilteredData([]);
@@ -175,6 +176,11 @@ export function Servicecontractlist(params) {
     return (
         <div className="tab-content">
             <Servicecontracttabs />
+            {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
             <div className="row mp0" >
                 <div className="col-md-12 col-12">
                     <div className="card mb-3 tab_box">

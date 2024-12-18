@@ -4,9 +4,11 @@ import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
 import { Navigate, useParams } from "react-router-dom";
 import Servicecontracttabs from "./Servicecontracttabs";
-
+import { SyncLoader } from 'react-spinners';
+import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 const Servicecontract = () => {
   // Step 1: Add this state to track errors
+  const { loaders, axiosInstance } = useAxiosLoader();
   const { serviceid } = useParams();
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
@@ -35,10 +37,10 @@ const Servicecontract = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getservicecontract`,{
+      const response = await axiosInstance.get(`${Base_Url}/getservicecontract`,{
         headers: {
             Authorization: token, // Send token in headers
-            }, 
+            },
         });
       console.log(response.data);
       setUsers(response.data);
@@ -50,10 +52,10 @@ const Servicecontract = () => {
   const fetchservicecontractpopulate = async (serviceid) => {
 
     try {
-      const response = await axios.get(`${Base_Url}/getservicecontractpopulate/${serviceid}`,{
+      const response = await axiosInstance.get(`${Base_Url}/getservicecontractpopulate/${serviceid}`,{
         headers: {
             Authorization: token, // Send token in headers
-            }, 
+            },
         });
       setFormData({
         ...response.data[0],
@@ -121,7 +123,7 @@ const Servicecontract = () => {
     if (isEmpty(formData.productName)) newErrors.productName = "Product Name is required.";
     if (isEmpty(formData.serialNumber)) newErrors.serialNumber = "Serial Number is required.";
 
-    // Dropdown validations 
+    // Dropdown validations
     if (!formData.contractType) newErrors.contractType = "Contract Type is required.";
     return newErrors; // Return the error object
   };
@@ -152,13 +154,13 @@ const Servicecontract = () => {
             },{
               headers: {
                   Authorization: token, // Send token in headers
-                  }, 
+                  },
               })
             .then((response) => {
               //window.location.reload();
               setSuccessMessage('Customer Updated Successfully!');
               setTimeout(() => setSuccessMessage(''), 3000);
-              
+
               setFormData({
                 customerName: "",
                 customerMobile: "",
@@ -169,8 +171,8 @@ const Servicecontract = () => {
                 startDate: "",
                 endDate: "",
               });
-              
-              
+
+
               fetchUsers();
             })
             .catch((error) => {
@@ -189,7 +191,7 @@ const Servicecontract = () => {
             },{
               headers: {
                   Authorization: token, // Send token in headers
-                  }, 
+                  },
               })
             .then((response) => {
               // window.location.reload();
@@ -226,13 +228,13 @@ const Servicecontract = () => {
     try {
         // Add confirmation dialog
         const isConfirmed = window.confirm("Are you sure you want to delete?");
-        
+
         // Only proceed with deletion if user clicks "OK"
         if (isConfirmed) {
-            const response = await axios.post(`${Base_Url}/deleteservicecontract`, { id },{
+            const response = await axiosInstance.post(`${Base_Url}/deleteservicecontract`, { id },{
               headers: {
                   Authorization: token, // Send token in headers
-                  }, 
+                  },
               });
             window.location.reload();
         }
@@ -243,10 +245,10 @@ const Servicecontract = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestservicecontract/${id}`,{
+      const response = await axiosInstance.get(`${Base_Url}/requestservicecontract/${id}`,{
         headers: {
             Authorization: token, // Send token in headers
-            }, 
+            },
         });
       setFormData(response.data);
       setIsEdit(true);
@@ -263,6 +265,11 @@ const Servicecontract = () => {
   return (
     <div className="tab-content">
       <Servicecontracttabs />
+      {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
       <div className="row mp0">
         <div className="col-12">
           <div className="card mb-3 tab_box">
@@ -373,7 +380,7 @@ const Servicecontract = () => {
                       )}{" "}
                       {/* Show duplicate error */}
                     </div>
-                    
+
                   </div>
                   <div className="row">
                   <div className="col-3 mb-3">
@@ -423,7 +430,7 @@ const Servicecontract = () => {
                       )}{" "}
                       {/* Show duplicate error */}
                     </div>
-                    
+
                     <div className="col -3 mb-3">
                       <label htmlFor="StartDateInput" className="input-field">
                         Start Date
@@ -500,7 +507,7 @@ const Servicecontract = () => {
                   />
                 </div>
 
-                {/* Adjust table padding and spacing 
+                {/* Adjust table padding and spacing
                 <table
                   className="table table-bordered table dt-responsive nowrap w-100 table-css"
                   style={{ marginTop: "20px", tableLayout: "fixed" }}

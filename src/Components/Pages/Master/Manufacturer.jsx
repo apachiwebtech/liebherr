@@ -3,9 +3,12 @@ import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
 import ProMaster from './ProMaster';
+import { SyncLoader } from 'react-spinners';
+import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 
 const Manufacturer = () => {
   // Step 1: Add this state to track errors
+  const { loaders, axiosInstance } = useAxiosLoader();
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -24,10 +27,10 @@ const Manufacturer = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getmanufacturer`,{
+      const response = await axiosInstance.get(`${Base_Url}/getmanufacturer`,{
         headers: {
            Authorization: token, // Send token in headers
-         }, 
+         },
        });
       console.log(response.data);
       setUsers(response.data);
@@ -82,10 +85,10 @@ const Manufacturer = () => {
       if (confirmSubmission) {
         if (isEdit) {
           // For update, include 'updated_by'
-          await axios.post(`${Base_Url}/putmanufacturer`, { ...formData, updated_by: updatedBy },{
+          await axiosInstance.post(`${Base_Url}/putmanufacturer`, { ...formData, updated_by: updatedBy },{
             headers: {
                Authorization: token, // Send token in headers
-             }, 
+             },
            })
             .then(response => {
               setFormData({
@@ -100,10 +103,10 @@ const Manufacturer = () => {
             });
         } else {
           // For insert, include 'created_by'
-          await axios.post(`${Base_Url}/postmanufacturer`, { ...formData, created_by: createdBy },{
+          await axiosInstance.post(`${Base_Url}/postmanufacturer`, { ...formData, created_by: createdBy },{
             headers: {
                Authorization: token, // Send token in headers
-             }, 
+             },
            })
             .then(response => {
               setFormData({
@@ -126,10 +129,10 @@ const Manufacturer = () => {
   const deleted = async (id) => {
     console.log(id)
     try {
-      const response = await axios.post(`${Base_Url}/delmanufacturer`, { id: id },{
+      const response = await axiosInstance.post(`${Base_Url}/delmanufacturer`, { id: id },{
         headers: {
            Authorization: token, // Send token in headers
-         }, 
+         },
        });
       setFormData({
         Manufacturer: ''
@@ -142,10 +145,10 @@ const Manufacturer = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestmanufacturer/${id}`,{
+      const response = await axiosInstance.get(`${Base_Url}/requestmanufacturer/${id}`,{
         headers: {
            Authorization: token, // Send token in headers
-         }, 
+         },
        });
       setFormData(response.data)
       setIsEdit(true);
@@ -162,6 +165,11 @@ const Manufacturer = () => {
   return (
     <div className="tab-content">
       <ProMaster />
+      {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
       <div className="row mp0">
         <div className="col-12">
           <div className="card mb-3 tab_box">
@@ -268,7 +276,7 @@ const Manufacturer = () => {
                         disabled={currentPage === 0}
                         className="btn btn-sm btn-primary mr-2"
                       >
-                        &lt; 
+                        &lt;
                       </button>
                       {Array.from({ length: Math.ceil(filteredUsers.length / itemsPerPage) }, (_, i) => (
                         <button

@@ -3,10 +3,12 @@ import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
 import ProMaster from "./ProMaster";
+import { SyncLoader } from 'react-spinners';
+import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 
 const Category = () => {
   // Step 1: Add this state to track errors
-  const token = localStorage.getItem("token"); 
+  const token = localStorage.getItem("token");
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -17,14 +19,14 @@ const Category = () => {
   const [duplicateError, setDuplicateError] = useState(""); // State to track duplicate error
   const createdBy = 1; // Static value for created_by
   const updatedBy = 2; // Static value for updated_by
-
+  const { loaders, axiosInstance } = useAxiosLoader();
   const [formData, setFormData] = useState({
     title: "",
   });
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getcat`,{
+      const response = await axiosInstance.get(`${Base_Url}/getcat`,{
         headers: {
           Authorization: token, // Send token in headers
         },
@@ -108,7 +110,7 @@ const Category = () => {
             .post(`${Base_Url}/postdatacat`, {
               ...formData,
               created_by: createdBy,
-     
+
             },{
               headers: {
                 Authorization: token,
@@ -132,7 +134,7 @@ const Category = () => {
 
   const deleted = async (id) => {
     try {
-      const response = await axios.post(`${Base_Url}/deletecatdata`, { id },{
+      const response = await axiosInstance.post(`${Base_Url}/deletecatdata`, { id },{
         headers: {
           Authorization: token,
         },
@@ -145,7 +147,7 @@ const Category = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestdatacat/${id}`,{
+      const response = await axiosInstance.get(`${Base_Url}/requestdatacat/${id}`,{
         headers: {
           Authorization: token,
         },
@@ -165,6 +167,11 @@ const Category = () => {
 
   return (
     <div className="tab-content">
+          {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
       <ProMaster />
       <div className="row mp0">
         <div className="col-12">

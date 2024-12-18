@@ -3,8 +3,10 @@ import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
 import LocationTabs from "./LocationTabs";
-
+import { SyncLoader } from 'react-spinners';
+import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 const Location = () => {
+  const { loaders, axiosInstance } = useAxiosLoader();
   const [countries, setCountries] = useState([]);
   const [currentUsers, setCurrentUsers] = useState([]);
   const [errors, setErrors] = useState({});
@@ -25,10 +27,10 @@ const Location = () => {
 
   const fetchCountries = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getcountries`,{
+      const response = await axiosInstance.get(`${Base_Url}/getcountries`,{
         headers: {
            Authorization: token, // Send token in headers
-         }, 
+         },
        });
       console.log(response.data);
       setCountries(response.data);
@@ -39,10 +41,10 @@ const Location = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getregionsr`,{
+      const response = await axiosInstance.get(`${Base_Url}/getregionsr`,{
         headers: {
            Authorization: token, // Send token in headers
-         }, 
+         },
        });
       console.log(response.data);
       setUsers(response.data);
@@ -132,7 +134,7 @@ const Location = () => {
 
   const deleted = async (id) => {
     try {
-      await axios.post(`${Base_Url}/deleteregion`, { id });
+      await axiosInstance.post(`${Base_Url}/deleteregion`, { id });
       setFormData({ title: "", country_id: "" });
       fetchUsers();
     } catch (error) {
@@ -142,7 +144,7 @@ const Location = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestregion/${id}`);
+      const response = await axiosInstance.get(`${Base_Url}/requestregion/${id}`);
       setFormData(response.data);
       setIsEdit(true);
     } catch (error) {
@@ -155,9 +157,14 @@ const Location = () => {
   const displayedUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
   return (
-    
+
     <div className="tab-content">
       <LocationTabs/>
+      {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
     <div className="row mp0">
       <div className="col-12">
         <div className="card mb-3 tab_box">
@@ -318,7 +325,7 @@ const Location = () => {
                     }
                     disabled={currentPage === 0}
                   >
-                    &lt; 
+                    &lt;
                   </button>
                   {Array.from(
                     { length: Math.ceil(filteredUsers.length / itemsPerPage) },

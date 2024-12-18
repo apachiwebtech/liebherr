@@ -11,7 +11,8 @@ import { saveAs } from "file-saver";
 import { array } from "js-md5";
 import { FaDownload } from "react-icons/fa6";
 import { Autocomplete, Chip, TextField } from "@mui/material";
-
+import { SyncLoader } from 'react-spinners';
+import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 
 export function Complaintview(params) {
   const token = localStorage.getItem("token");
@@ -23,7 +24,7 @@ export function Complaintview(params) {
   const [closestatus, setCloseStatus] = useState("");
   const [spareid, setspareid] = useState("");
   const [ticketTab, setTicketTab] = useState(JSON.parse(localStorage.getItem('tabticket')) || []);
-
+  const { loaders, axiosInstance } = useAxiosLoader();
 
   const [complaintview, setComplaintview] = useState({
     ticket_no: '',
@@ -89,7 +90,7 @@ export function Complaintview(params) {
 
   async function getProduct(params) {
 
-    axios.get(`${Base_Url}/product_master`)
+    axiosInstance.get(`${Base_Url}/product_master`)
       .then((res) => {
         if (res.data) {
 
@@ -103,7 +104,7 @@ export function Complaintview(params) {
 
 
     try {
-      const res = await axios.get(`${Base_Url}/getcvengineer`, {
+      const res = await axiosInstance.get(`${Base_Url}/getcvengineer`, {
         headers: {
           Authorization: token, // Send token in headers
         },
@@ -135,7 +136,7 @@ export function Complaintview(params) {
 
 
     try {
-      const res = await axios.get(`${Base_Url}/getSpareParts/${params}`, {
+      const res = await axiosInstance.get(`${Base_Url}/getSpareParts/${params}`, {
         headers: {
           Authorization: token, // Send token in headers
         },
@@ -166,7 +167,7 @@ export function Complaintview(params) {
 
     try {
 
-      const res = await axios.get(`${Base_Url}/getcom`, {
+      const res = await axiosInstance.get(`${Base_Url}/getcom`, {
         headers: {
           Authorization: token, // Send token in headers
         },
@@ -198,7 +199,7 @@ export function Complaintview(params) {
 
 
       try {
-        const res = await axios.post(`${Base_Url}/getDefectCodewisetype`, { defect_code: params }, {
+        const res = await axiosInstance.post(`${Base_Url}/getDefectCodewisetype`, { defect_code: params }, {
           headers: {
             Authorization: token, // Send token in headers
           },
@@ -225,7 +226,7 @@ export function Complaintview(params) {
     } else {
 
       try {
-        const res = await axios.get(`${Base_Url}/gettypeofdefect`, {
+        const res = await axiosInstance.get(`${Base_Url}/gettypeofdefect`, {
           headers: {
             Authorization: token, // Send token in headers
           },
@@ -260,7 +261,7 @@ export function Complaintview(params) {
     if (params) {
 
       try {
-        const res = await axios.post(`${Base_Url}/getDefectCodewisesite`, { defect_code: params }, {
+        const res = await axiosInstance.post(`${Base_Url}/getDefectCodewisesite`, { defect_code: params }, {
           headers: {
             Authorization: token, // Send token in headers
           },
@@ -286,7 +287,7 @@ export function Complaintview(params) {
     } else {
 
       try {
-        const res = await axios.get(`${Base_Url}/getsitedefect`, {
+        const res = await axiosInstance.get(`${Base_Url}/getsitedefect`, {
           headers: {
             Authorization: token, // Send token in headers
           },
@@ -319,7 +320,7 @@ export function Complaintview(params) {
 
 
     try {
-      const res = await axios.get(`${Base_Url}/getcallstatus`, {
+      const res = await axiosInstance.get(`${Base_Url}/getcallstatus`, {
         headers: {
           Authorization: token, // Send token in headers
         },
@@ -342,7 +343,7 @@ export function Complaintview(params) {
   const getsubcallstatus = async (value) => {
     if (value !== undefined) {
       try {
-        const res = await axios.post(
+        const res = await axiosInstance.post(
           `${Base_Url}/getsubcallstatus`,
           { Status_Id: value },
           {
@@ -361,7 +362,7 @@ export function Complaintview(params) {
       }
     } else {
       try {
-        const res = await axios.get(`${Base_Url}/getsubcallstatusdata`, {
+        const res = await axiosInstance.get(`${Base_Url}/getsubcallstatusdata`, {
           headers: {
             Authorization: token, // Send token in headers
           },
@@ -435,7 +436,7 @@ export function Complaintview(params) {
       finaldata: finaldata,
     };
 
-    axios.post(`${Base_Url}/add_uniqsparepart`, data)
+    axiosInstance.post(`${Base_Url}/add_uniqsparepart`, data)
       .then((res) => {
 
         getsparelist(complaintview.ticket_no)
@@ -469,7 +470,7 @@ export function Complaintview(params) {
     };
 
     // Send the POST request
-    axios.post(`${Base_Url}/add_quotation`, data)
+    axiosInstance.post(`${Base_Url}/add_quotation`, data)
       .then((response) => {
 
         alert("Quotation generated")
@@ -488,7 +489,7 @@ export function Complaintview(params) {
     const confirm = window.confirm("Are you sure?")
 
     if (confirm) {
-      axios.post(`${Base_Url}/removesparepart`, { spare_id: id })
+      axiosInstance.post(`${Base_Url}/removesparepart`, { spare_id: id })
         .then((res) => {
 
           // setAddedSpareParts(addedSpareParts.filter((part) => part.id !== id));
@@ -510,7 +511,7 @@ export function Complaintview(params) {
 
   const fetchComplaintDetails = async () => {
     try {
-      const response = await axios.get(
+      const response = await axiosInstance.get(
         `${Base_Url}/getComplaintDetails/${complaintview.ticket_no}`, {
         headers: {
           Authorization: token, // Send token in headers
@@ -530,7 +531,7 @@ export function Complaintview(params) {
 
   const fetchComplaintview = async (complaintid) => {
     try {
-      const response = await axios.get(
+      const response = await axiosInstance.get(
         `${Base_Url}/getcomplaintview/${complaintid}`, {
         headers: {
           Authorization: token, // Send token in headers
@@ -566,7 +567,7 @@ export function Complaintview(params) {
   };
 
   async function getupdateengineer(id) {
-    axios.post(`${Base_Url}/getupdateengineer`, { eng_id: id }, {
+    axiosInstance.post(`${Base_Url}/getupdateengineer`, { eng_id: id }, {
       headers: {
         Authorization: token,
       },
@@ -578,7 +579,7 @@ export function Complaintview(params) {
   }
   async function getupdatespare(id) {
 
-    axios.post(`${Base_Url}/getupdatesparelist`, { ticket_no: id }, {
+    axiosInstance.post(`${Base_Url}/getupdatesparelist`, { ticket_no: id }, {
       headers: {
         Authorization: token,
       },
@@ -590,7 +591,7 @@ export function Complaintview(params) {
   }
   async function getsparelist(id) {
 
-    axios.post(`${Base_Url}/getuniquespare`, { ticket_id: id }, {
+    axiosInstance.post(`${Base_Url}/getuniquespare`, { ticket_id: id }, {
       headers: {
         Authorization: token,
       },
@@ -603,7 +604,7 @@ export function Complaintview(params) {
 
   const fetchComplaintDuplicate = async () => {
     try {
-      const response = await axios.get(
+      const response = await axiosInstance.get(
         `${Base_Url}/getComplaintDuplicate/${complaintview.customer_mobile}`, {
         headers: {
           Authorization: token, // Send token in headers
@@ -619,7 +620,7 @@ export function Complaintview(params) {
   // New function to fetch Attachment 2 list
   const fetchAttachment2Details = async () => {
     try {
-      const response = await axios.get(
+      const response = await axiosInstance.get(
         `${Base_Url}/getAttachment2Details/${complaintview.ticket_no}`, {
         headers: {
           Authorization: token, // Send token in headers
@@ -660,7 +661,7 @@ export function Complaintview(params) {
           formData.append("attachment2", file);
         });
 
-        await axios.post(`${Base_Url}/uploadAttachment2`, formData, {
+        await axiosInstance.post(`${Base_Url}/uploadAttachment2`, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
 
@@ -711,7 +712,7 @@ export function Complaintview(params) {
       engineername: addedEngineers.map((item) => item.title),
     };
 
-    axios.post(`${Base_Url}/ticketFormData`, data, {
+    axiosInstance.post(`${Base_Url}/ticketFormData`, data, {
       headers: {
         Authorization: token, // Send token in headers
       },
@@ -801,7 +802,7 @@ export function Complaintview(params) {
         created_by,
       };
 
-      const remarkResponse = await axios.post(
+      const remarkResponse = await axiosInstance.post(
         `${Base_Url}/addcomplaintremark`,
         complaintRemarkData
       );
@@ -819,7 +820,7 @@ export function Complaintview(params) {
           formData.append("attachment", file);
         });
 
-        await axios.post(`${Base_Url}/uploadcomplaintattachments`, formData, {
+        await axiosInstance.post(`${Base_Url}/uploadcomplaintattachments`, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
 
@@ -1076,6 +1077,11 @@ export function Complaintview(params) {
 
   return (
     <div className="p-3">
+          {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
       <style>
         {`
           .modal {
@@ -1123,6 +1129,7 @@ export function Complaintview(params) {
                   label={item.ticket_no}
                   variant={activeTicket == item.ticket_id ? "filled" : "outlined"}
                   color={activeTicket == item.ticket_id ? "primary" : "default"}
+                  onClick={() => navigate(`/complaintview/${item.ticket_id}`)}
                   onDelete={() => handleDeleteTab(item.ticket_id)}
                   className="mx-2"
                 />

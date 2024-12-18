@@ -3,9 +3,11 @@ import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
 import Serviceagenttabs from "../Master/Serviceagenttabs";
-
+import { SyncLoader } from 'react-spinners';
+import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 const Serviceagent = () => {
   // Step 1: Add this state to track errors
+  const { loaders, axiosInstance } = useAxiosLoader();
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -24,10 +26,10 @@ const Serviceagent = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getsdata`,{
+      const response = await axiosInstance.get(`${Base_Url}/getsdata`,{
         headers: {
             Authorization: token, // Send token in headers
-            }, 
+            },
         });
       console.log(response.data);
       setUsers(response.data);
@@ -90,7 +92,7 @@ const Serviceagent = () => {
             .post(`${Base_Url}/putsdata`, { ...formData, updated_by: updatedBy },{
               headers: {
                   Authorization: token, // Send token in headers
-                  }, 
+                  },
               })
             .then((response) => {
               setFormData({
@@ -114,7 +116,7 @@ const Serviceagent = () => {
             },{
               headers: {
                   Authorization: token, // Send token in headers
-                  }, 
+                  },
               })
 
             .then((response) => {
@@ -139,10 +141,10 @@ const Serviceagent = () => {
 
   const deleted = async (id) => {
     try {
-      const response = await axios.post(`${Base_Url}/deletesdata`, { id },{
+      const response = await axiosInstance.post(`${Base_Url}/deletesdata`, { id },{
         headers: {
             Authorization: token, // Send token in headers
-            }, 
+            },
         });
       // alert(response.data[0]);
       //  window.location.reload();
@@ -153,10 +155,10 @@ const Serviceagent = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestsdata/${id}`,{
+      const response = await axiosInstance.get(`${Base_Url}/requestsdata/${id}`,{
         headers: {
             Authorization: token, // Send token in headers
-            }, 
+            },
         });
       setFormData(response.data);
       setIsEdit(true);
@@ -173,6 +175,11 @@ const Serviceagent = () => {
   return (
     <div className="tab-content">
       <Serviceagenttabs></Serviceagenttabs>
+      {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
       <div className="row mp0">
         <div className="col-12">
           <div className="card mb-3 tab_box">

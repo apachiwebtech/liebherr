@@ -3,8 +3,11 @@ import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
 import ProMaster from "./ProMaster";
+import { SyncLoader } from 'react-spinners';
+import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 
 const ProductLine = () => {
+  const { loaders, axiosInstance } = useAxiosLoader();
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -24,7 +27,7 @@ const ProductLine = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getproductline`, {
+      const response = await axiosInstance.get(`${Base_Url}/getproductline`, {
         headers: {
           Authorization: token, // Send token in headers
         },
@@ -139,7 +142,7 @@ const ProductLine = () => {
 
   const deleted = async (id) => {
     try {
-      const response = await axios.post(`${Base_Url}/deleteproductlinedata`, {
+      const response = await axiosInstance.post(`${Base_Url}/deleteproductlinedata`, {
         id,
       }, {
         headers: {
@@ -158,7 +161,7 @@ const ProductLine = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(
+      const response = await axiosInstance.get(
         `${Base_Url}/requestdataproductline/${id}`
         , {
           headers: {
@@ -180,6 +183,11 @@ const ProductLine = () => {
   return (
     <div className="tab-content">
       <ProMaster />
+      {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
       <div className="row mp0">
         <div className="col-12">
           <div className="card mb-3 tab_box">

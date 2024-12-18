@@ -4,10 +4,12 @@ import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
 import Endcustomertabs from "./Endcustomertabs";
+import { SyncLoader } from 'react-spinners';
+import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 
 const Uniqueproduct = () => {
   const { customer_id } = useParams();
-
+  const { loaders, axiosInstance } = useAxiosLoader();
   const [errors, setErrors] = useState({});
   //   const [Customerlocation, setCustomerlocation] = useState({});
   const [product, setProduct] = useState([]);
@@ -49,12 +51,12 @@ const Uniqueproduct = () => {
 
   const fetchCustomerlocationById = async (customer_id) => {
     try {
-      const response = await axios.get(`${Base_Url}/fetchcustomerlocationByCustomerid/${customer_id}`, {
+      const response = await axiosInstance.get(`${Base_Url}/fetchcustomerlocationByCustomerid/${customer_id}`, {
         headers: {
           Authorization: token,
         },
       });
-  
+
       if (Array.isArray(response.data)) {
         setCustomerAddress(response.data); // Handle as array
       } else if (response.data && typeof response.data === 'object') {
@@ -68,11 +70,11 @@ const Uniqueproduct = () => {
       console.error("Error fetching customer location by ID:", error);
     }
   };
-  
+
 
   const fecthProduct = async (customer_id) => {
     try {
-      const response = await axios.get(`${Base_Url}/getproductunique/${customer_id}`,{
+      const response = await axiosInstance.get(`${Base_Url}/getproductunique/${customer_id}`,{
         headers: {
           Authorization: token, // Send token in headers
         },
@@ -86,7 +88,7 @@ const Uniqueproduct = () => {
 
   const fetchModelno = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/product_master`,{
+      const response = await axiosInstance.get(`${Base_Url}/product_master`,{
         headers: {
           Authorization: token, // Send token in headers
         },
@@ -99,7 +101,7 @@ const Uniqueproduct = () => {
   };
 
   useEffect(() => {
- 
+
     if (customer_id) {
       fecthProduct(customer_id);
       fetchCustomerlocationById(customer_id);
@@ -109,12 +111,12 @@ const Uniqueproduct = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
+
     // Check if e.target.options exists before accessing it
     if (e.target.options) {
       const selectedOption = e.target.options[e.target.selectedIndex];
       const customername = selectedOption ? selectedOption.getAttribute("data-customername") : '';
-    
+
       setFormData({
         ...formData,
         [name]: value,
@@ -128,8 +130,8 @@ const Uniqueproduct = () => {
       });
     }
   };
-  
-  
+
+
 
   // Step 2: Add form validation function
   const validateForm = () => {
@@ -227,7 +229,7 @@ const Uniqueproduct = () => {
 
   const deleted = async (id) => {
     try {
-      const response = await axios.post(`${Base_Url}/deleteproductunique`, { id },{
+      const response = await axiosInstance.post(`${Base_Url}/deleteproductunique`, { id },{
         headers: {
           Authorization: token, // Send token in headers
         },
@@ -240,7 +242,7 @@ const Uniqueproduct = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(
+      const response = await axiosInstance.get(
         `${Base_Url}/requestproductunique/${id}`
         ,{
           headers: {
@@ -268,6 +270,11 @@ const Uniqueproduct = () => {
   return (
     <div className="tab-content">
       <Endcustomertabs></Endcustomertabs>
+      {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
     <div className="row mp0">
       <div className="col-12">
         <div className="card mb-3 tab_box">
@@ -297,7 +304,7 @@ const Uniqueproduct = () => {
                                       <small className="text-danger">{duplicateError}</small>
                                     )}
                                   </div>
-                    
+
 
                                   <div className="col-md-6 mb-3">
                                       <label htmlFor="pdate" className="form-label">
@@ -321,9 +328,9 @@ const Uniqueproduct = () => {
                                         <label htmlFor="pname" className="form-label">
                                           Product<span className="text-danger">*</span>
                                         </label>
-                                            <select 
-                                              className="form-control" 
-                                              onChange={handleChange} 
+                                            <select
+                                              className="form-control"
+                                              onChange={handleChange}
                                               value={formData.product || ''}
                                               name="product"
                                             >
@@ -376,7 +383,7 @@ const Uniqueproduct = () => {
                                       )}
                                 </div>
 
-                    
+
                     {/* <div className="col-md-6 mb-3">
                       <label htmlFor="locationc" className="form-label">
                         Location

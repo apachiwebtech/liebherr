@@ -4,13 +4,15 @@ import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
 import Endcustomertabs from "./Endcustomertabs";
 import { useParams } from "react-router-dom";
-
+import { SyncLoader } from 'react-spinners';
+import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 const Customerlocation = () => {
   const [countries, setCountries] = useState([]);
+  const { loaders, axiosInstance } = useAxiosLoader();
   const{customer_id} = useParams()
   console.log(customer_id);
-  
-  const token = localStorage.getItem("token"); 
+
+  const token = localStorage.getItem("token");
   const [regions, setRegions] = useState([]);
   const [geoStates, setGeoStates] = useState([]);
   const [geoCities, setGeoCities] = useState([]);
@@ -30,7 +32,7 @@ const Customerlocation = () => {
   const [successMessage, setSuccessMessage] = useState('');
 
   const [locations, setlocations] = useState([])
-  
+
   const [formData, setFormData] = useState({
     country_id: "",
     region_id: "",
@@ -47,7 +49,7 @@ const Customerlocation = () => {
 
   // const fetchCustomermobile = async () => {
   //   try {
-  //     const response = await axios.get(`${Base_Url}/getcustomer`);
+  //     const response = await axiosInstance.get(`${Base_Url}/getcustomer`);
   //     console.log("pf",response.data);
   //     setCustomernumber(response.data);
   //   } catch (error) {
@@ -57,15 +59,15 @@ const Customerlocation = () => {
 
   const fetchCustomermobile = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getcustomer`,{
-        headers: { 
+      const response = await axiosInstance.get(`${Base_Url}/getcustomer`,{
+        headers: {
           Authorization: token,
         },
       });
       console.log("Customer data:", response.data); // Check data structure
       console.log("Data type:", typeof response.data); // Check data type
       console.log("Is Array:", Array.isArray(response.data)); // Check if it's an array
-      
+
       // Ensure we're setting an array
       const customerData = Array.isArray(response.data) ? response.data : [];
       setCustomernumber(customerData);
@@ -77,7 +79,7 @@ const Customerlocation = () => {
 
   const fetchCountries = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getcountries`,{
+      const response = await axiosInstance.get(`${Base_Url}/getcountries`,{
         headers: {
           Authorization: token,
         },
@@ -91,7 +93,7 @@ const Customerlocation = () => {
 
   const fetchRegions = async (countryId) => {
     try {
-      const response = await axios.get(`${Base_Url}/getregions/${countryId}`,{
+      const response = await axiosInstance.get(`${Base_Url}/getregions/${countryId}`,{
         headers: {
           Authorization: token,
         },
@@ -104,7 +106,7 @@ const Customerlocation = () => {
 
   const fetchGeoStates = async (regionId) => {
     try {
-      const response = await axios.get(`${Base_Url}/getgeostates/${regionId}`
+      const response = await axiosInstance.get(`${Base_Url}/getgeostates/${regionId}`
 ,{
         headers: {
           Authorization: token,
@@ -118,7 +120,7 @@ const Customerlocation = () => {
 
   const fetchGeoCities = async (district_id) => {
     try {
-      const response = await axios.get(
+      const response = await axiosInstance.get(
         `${Base_Url}/getgeocities_a/${district_id}`,{
           headers: {
             Authorization: token,
@@ -135,7 +137,7 @@ const Customerlocation = () => {
 
   const fetchDistrict = async (geostate_id) => {
     try {
-      const response = await axios.get(
+      const response = await axiosInstance.get(
         `${Base_Url}/getareadrop/${geostate_id}`,{
           headers: {
             Authorization: token,
@@ -151,7 +153,7 @@ const Customerlocation = () => {
 
   const fetchPincodedrop = async (geocity_id) => {
     try {
-      const response = await axios.get(
+      const response = await axiosInstance.get(
         `${Base_Url}/getpincodedrop/${geocity_id}`,{
           headers: {
             Authorization: token,
@@ -168,7 +170,7 @@ const Customerlocation = () => {
   const fetchCustomerlocation = async () => {
     try {
 
-      const response = await axios.get(`${Base_Url}/getcustomerlocation/${customer_id}`,{
+      const response = await axiosInstance.get(`${Base_Url}/getcustomerlocation/${customer_id}`,{
         headers: {
           Authorization: token,
         },
@@ -184,7 +186,7 @@ const Customerlocation = () => {
 
   const fetchcustomerid = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getcustomerid`,{
+      const response = await axiosInstance.get(`${Base_Url}/getcustomerid`,{
         headers: {
           Authorization: token,
         },
@@ -302,24 +304,24 @@ const Customerlocation = () => {
     const { name, value } = e.target;
     if (name === "pincode_id") {
      if(value.length === 6){
-      fetchlocations(value);     
+      fetchlocations(value);
      }
       setFormData(prevState => ({
         ...prevState,
         pincode_id: value,
       }));
-      
+
     } else {
       setFormData(prevState => ({
         ...prevState,
         [name]: value
       }));
     }
-  };  
+  };
 
   const fetchlocations = async (pincode) => {
     try {
-      const response = await axios.get(
+      const response = await axiosInstance.get(
         `${Base_Url}/getmultiplelocation/${pincode}`,
         {
           headers: {
@@ -368,19 +370,19 @@ const Customerlocation = () => {
 
   const validateForm = () => {
     let newErrors = {};
-    
+
     if (!formData.address?.trim()) {
       newErrors.address = "Address is required";
     }
-    
+
     if (!formData.pincode_id) {
       newErrors.pincode_id = "Pincode is required";
     }
-    
+
     if (!formData.ccperson?.trim()) {
       newErrors.ccperson = "Contact person is required";
     }
-    
+
     if (!formData.address_type) {
       newErrors.address_type = "Address type is required";
     }
@@ -397,7 +399,7 @@ const Customerlocation = () => {
 
   const deleted = async (id) => {
     try {
-      await axios.post(`${Base_Url}/deletecustomerlocation`, { id },{
+      await axiosInstance.post(`${Base_Url}/deletecustomerlocation`, { id },{
         headers: {
           Authorization: token,
         },
@@ -422,10 +424,10 @@ const Customerlocation = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestcustomerlocation/${id}`,{
+      const response = await axiosInstance.get(`${Base_Url}/requestcustomerlocation/${id}`,{
         headers: {
            Authorization: token, // Send token in headers
-         }, 
+         },
        });
       setFormData(response.data);
       console.log("Form Data", setFormData);
@@ -441,6 +443,11 @@ const Customerlocation = () => {
 
   return (
     <div className="tab-content">
+          {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
       <Endcustomertabs></Endcustomertabs>
       <div className="row mp0">
         <div className="col-12">
@@ -506,7 +513,7 @@ const Customerlocation = () => {
                           Region
                         </label>
     <input type="text" className="form-control" value={locations.region} name="region_id" onChange={handleChange} placeholder="" disabled />
-                        
+
                         {/* <select
                           id="region"
                           name="region_id"
@@ -619,7 +626,7 @@ const Customerlocation = () => {
                           Pincode<span className="text-danger">*</span>
                         </label>
 
-              
+
                         <input type="text" className="form-control" value={formData.pincode_id} name="pincode_id" onChange={handleChange} placeholder="" />
 
                         {/* <select
@@ -686,7 +693,7 @@ const Customerlocation = () => {
                           Customer Contact Number
                         </label>
                         <select
-                          
+
                           className="form-select"
                           name="ccnumber"
                           id="ccnumber"
@@ -698,7 +705,7 @@ const Customerlocation = () => {
                           aria-describedby="cpnumber"
                         >
                           <option value="">Select Customer Contact Number</option>
-                          {Customernumber.map((pf) => ( 
+                          {Customernumber.map((pf) => (
                             <option key={pf.id} value={pf.id}>
                               {pf.mobileno}
                             </option>
@@ -806,7 +813,7 @@ const Customerlocation = () => {
                           <td style={{ padding: "2px", textAlign: "center" }}>
                             {index + 1 + indexOfFirstUser}
                           </td>
-                          
+
                           <td>{item.ccperson}</td>
                           <td>{item.customer_id}</td>
                           <td>{item.address}</td>

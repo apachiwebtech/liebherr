@@ -4,11 +4,14 @@ import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
 import Endcustomertabs from './Endcustomertabs';
 import { useParams } from 'react-router-dom';
+import { SyncLoader } from 'react-spinners';
+import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 
 const Customer = () => {
+  const { loaders, axiosInstance } = useAxiosLoader();
   const { customerid } = useParams();
   const [customerData, setCustomerData] = useState([]);
-  const token = localStorage.getItem("token"); 
+  const token = localStorage.getItem("token");
   const [errors, setErrors] = useState({});
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [isEdit, setIsEdit] = useState(false);
@@ -33,7 +36,7 @@ const Customer = () => {
 
   const fetchCustomerData = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/getcustomer`,{
+      const response = await axiosInstance.get(`${Base_Url}/getcustomer`,{
         headers: {
           Authorization: token,
         },
@@ -48,7 +51,7 @@ const Customer = () => {
   const fetchCustomerpopulate = async (customerid) => {
 
     try {
-      const response = await axios.get(`${Base_Url}/getcustomerpopulate/${customerid}`,{
+      const response = await axiosInstance.get(`${Base_Url}/getcustomerpopulate/${customerid}`,{
         headers: {
           Authorization: token,
         },
@@ -65,14 +68,14 @@ const Customer = () => {
         dateofbirth: response.data[0].dateofbirth,
         alt_mobileno: response.data[0].alt_mobileno,
         anniversary_date: response.data[0].anniversary_date,
-        salutation: response.data[0].salutation,   
-        customer_id:response.data[0].customer_id     
+        salutation: response.data[0].salutation,
+        customer_id:response.data[0].customer_id
       });
 
 
       setIsEdit(true);
 
-      
+
 
 
     } catch (error) {
@@ -166,13 +169,13 @@ const Customer = () => {
       if (confirmSubmission) {
         if (isEdit) {
           // For update, include duplicate check
-          await axios.post(`${Base_Url}/putcustomer`, { ...formData },{
+          await axiosInstance.post(`${Base_Url}/putcustomer`, { ...formData },{
             headers: {
               Authorization: token,
             },
           })
             .then(response => {
-              setFormData({ 
+              setFormData({
                 customer_fname: '',
                 // customer_lname: '',
                 customer_type: '',
@@ -196,7 +199,7 @@ const Customer = () => {
             });
         } else {
           // For insert, include duplicate check
-          await axios.post(`${Base_Url}/postcustomer`, { ...formData },{
+          await axiosInstance.post(`${Base_Url}/postcustomer`, { ...formData },{
             headers: {
               Authorization: token,
             },
@@ -234,7 +237,7 @@ const Customer = () => {
 
   const deleted = async (id) => {
     try {
-      const response = await axios.post(`${Base_Url}/deletecustomer`, { id },{
+      const response = await axiosInstance.post(`${Base_Url}/deletecustomer`, { id },{
         headers: {
           Authorization: token,
         },
@@ -259,7 +262,7 @@ const Customer = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestcustomer/${id}`);
+      const response = await axiosInstance.get(`${Base_Url}/requestcustomer/${id}`);
       setFormData(response.data)
       setIsEdit(true);
       console.log(response.data);
@@ -271,6 +274,11 @@ const Customer = () => {
 
   return (
     <div className="tab-content">
+          {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
       <Endcustomertabs></Endcustomertabs>
       <div className="row mp0">
         <div className="col-12">
@@ -372,7 +380,7 @@ const Customer = () => {
                           <small className="text-danger">{errors.email}</small>
                         )}
                       </div>
-                     
+
                       <div className="col-md-2 mb-3">
                         <label htmlFor="cclassification" className="form-label">Customer Classification<span className="text-danger">*</span></label>
                         <select id="cclassification" name="customer_classification" className="form-select" aria-label=".form-select-lg example" value={formData.customer_classification} onChange={handleChange} >
@@ -399,7 +407,7 @@ const Customer = () => {
                           <small className="text-danger">{errors.customer_type}</small>
                         )}
                       </div>
-                      
+
                       <div className="col-md-3 mb-3">
                         <label htmlFor="mobilenumber" className="form-label">Mobile No.<span className="text-danger">*</span> <input type="checkbox" />Whatsapp </label>
                         <input
@@ -462,7 +470,7 @@ const Customer = () => {
                           <small className="text-danger">{errors.anniversary_date}</small>
                         )}
                       </div>
-                      
+
                       <div className="col-md-12 text-right">
                         <button type="submit" className="btn btn-liebherr">{isEdit ? "Update" : "Submit"}</button>
                       </div>

@@ -4,11 +4,13 @@ import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
 import { Base_Url } from '../../Utils/Base_Url';
 import Endcustomertabs from './Endcustomertabs';
-
+import { SyncLoader } from 'react-spinners';
+import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 
 
 export function Customerlist(params) {
-    const [Customerdata, setCustomerdata] = useState([]);
+  const { loaders, axiosInstance } = useAxiosLoader();
+  const [Customerdata, setCustomerdata] = useState([]);
     const token = localStorage.getItem("token");
     const [isEdit, setIsEdit] = useState(false);
     const [filteredData, setFilteredData] = useState([]);
@@ -61,7 +63,7 @@ export function Customerlist(params) {
 
     const fetchCustomerlist = async (page) => {
         try {
-            const response = await axios.get(`${Base_Url}/getcustomerlist`, {
+            const response = await axiosInstance.get(`${Base_Url}/getcustomerlist`, {
                 headers: {
                     Authorization: token,
                 },
@@ -71,26 +73,26 @@ export function Customerlist(params) {
                     pageSize: pageSize, // page size
                 },
             });
-    
+
             // Update state with data and total record count
             setCustomerdata(response.data.data);
             setFilteredData(response.data.data);
-    
+
             // You can store total count for pagination logic on the frontend
             setTotalCount(response.data.totalCount);
-    
+
         } catch (error) {
             console.error('Error fetching Customerdata:', error);
             setCustomerdata([]);
             setFilteredData([]);
         }
     };
-    
+
 
 
     const deleted = async (id) => {
         try {
-            const response = await axios.post(`${Base_Url}/deletecustomer`, { id }, {
+            const response = await axiosInstance.post(`${Base_Url}/deletecustomer`, { id }, {
                 headers: {
                     Authorization: token,
                 },
@@ -126,7 +128,7 @@ export function Customerlist(params) {
 
             console.log('Sending params:', params.toString()); // Debug log
 
-            const response = await axios.get(`${Base_Url}/getcustomerlist?${params}`, {
+            const response = await axiosInstance.get(`${Base_Url}/getcustomerlist?${params}`, {
                 headers: {
                     Authorization: token,
                 },
@@ -172,7 +174,7 @@ export function Customerlist(params) {
 
     const edit = async (id) => {
         try {
-            const response = await axios.get(`${Base_Url}/requestcustomerlist/${id}`);
+            const response = await axiosInstance.get(`${Base_Url}/requestcustomerlist/${id}`);
             setFormData(response.data)
             setIsEdit(true);
             console.log(response.data);
@@ -196,6 +198,11 @@ export function Customerlist(params) {
 
     return (
         <div className="tab-content">
+              {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
             <Endcustomertabs />
             <div className="row mp0" >
                 <div className="col-md-12 col-12">
@@ -360,7 +367,7 @@ export function Customerlist(params) {
                                         <th width="10%">Mobile Number</th>
                                         <th width="15%">Customer Classification</th>
                                         <th width="20%">Customer Email</th>
-                                        
+
                                         <th width="15%">Add Location</th>
                                         <th width="10%">Add Product</th>
                                         <th width="5%">Edit</th>
@@ -370,7 +377,7 @@ export function Customerlist(params) {
                                 <tbody>
 
                                     {Customerdata.map((item, index) => {
-                                        const displayIndex = (currentPage - 1) * pageSize + index + 1; 
+                                        const displayIndex = (currentPage - 1) * pageSize + index + 1;
                                         return (
                                             <tr key={item.id}>
                                                 <td >{displayIndex}</td>
@@ -381,7 +388,7 @@ export function Customerlist(params) {
                                                 <td >{item.mobileno}</td>
                                                 <td >{item.customer_classification}</td>
                                                 <td >{item.email}</td>
-                                                
+
                                                 <td>
                                                     <Link to={`/Customerlocation/${item.customer_id}`}>
                                                         <button style={{ backgroundColor: '#0D6EFD', color: "white" }} className='btn'
@@ -430,7 +437,7 @@ export function Customerlist(params) {
 
                                 </tbody>
                             </table>
-                        
+
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
     <button
         onClick={() => handlePageChange(currentPage - 1)}

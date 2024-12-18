@@ -33,9 +33,12 @@ import 'datatables.net-keytable';
 
 // DataTables Select Extension
 import 'datatables.net-select';
+import { SyncLoader } from 'react-spinners';
+import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 
 export function Products(params) {
-    const [Productdata, setProductdata] = useState([]);
+  const { loaders, axiosInstance } = useAxiosLoader();
+  const [Productdata, setProductdata] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
     const token = localStorage.getItem("token");
     const [formData, setFormData] = useState({
@@ -54,7 +57,7 @@ export function Products(params) {
 
     const fetchProductlist = async () => {
         try {
-            const response = await axios.get(`${Base_Url}/getproductlist`,{
+            const response = await axiosInstance.get(`${Base_Url}/getproductlist`,{
                 headers: {
                     Authorization: token,
                 },
@@ -68,7 +71,7 @@ export function Products(params) {
 
     const deleted = async (id) => {
         try {
-            const response = await axios.post(`${Base_Url}/deleteproductlist`, { id }, {
+            const response = await axiosInstance.post(`${Base_Url}/deleteproductlist`, { id }, {
                 headers: {
                     Authorization: token,
                 },
@@ -94,7 +97,7 @@ export function Products(params) {
 
     const edit = async (id) => {
         try {
-            const response = await axios.get(`${Base_Url}/requestproductlist/${id}`, {
+            const response = await axiosInstance.get(`${Base_Url}/requestproductlist/${id}`, {
                 headers: {
                     Authorization: token,
                 },
@@ -148,6 +151,11 @@ export function Products(params) {
     return (
         <div className="tab-content">
             <ProMaster />
+            {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
             <div className="row mp0">
                 <div className="col-md-12 col-12">
                     <div className="card mb-3 tab_box">
@@ -209,7 +217,7 @@ export function Products(params) {
                                 </tbody>
                             </table>
                             </div>
-                         
+
                         </div>
                     </div>
                 </div>

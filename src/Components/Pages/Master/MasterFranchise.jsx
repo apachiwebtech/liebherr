@@ -7,9 +7,12 @@ import { useParams } from "react-router-dom";
 import Franchisemaster from '../Master/Franchisemaster';
 import { useNavigate } from "react-router-dom";
 import md5 from 'js-md5';
+import { SyncLoader } from 'react-spinners';
+import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 
 const MasterFranchise = (params) => {
   // Step 1: Add this state to track errors
+  const { loaders, axiosInstance } = useAxiosLoader();
   const { masterid } = useParams();
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
@@ -62,10 +65,10 @@ const MasterFranchise = (params) => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getfranchisedata`,{
+      const response = await axiosInstance.get(`${Base_Url}/getfranchisedata`,{
         headers: {
            Authorization: token, // Send token in headers
-         }, 
+         },
        });
       console.log(response.data);
       setUsers(response.data);
@@ -77,7 +80,7 @@ const MasterFranchise = (params) => {
 
   const fetchData = async (url, setStateFunction, errorMessage) => {
     try {
-      const response = await axios.get(url);
+      const response = await axiosInstance.get(url);
       setStateFunction(response.data);
     } catch (error) {
       console.error(errorMessage, error);
@@ -85,10 +88,10 @@ const MasterFranchise = (params) => {
   };
   const fetchcountries = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getcountries`,{
+      const response = await axiosInstance.get(`${Base_Url}/getcountries`,{
         headers: {
            Authorization: token, // Send token in headers
-         }, 
+         },
        });
       setCountries(response.data);
     } catch (error) {
@@ -99,10 +102,10 @@ const MasterFranchise = (params) => {
   //region
   const fetchregion = async (country_id) => {
     try {
-      const response = await axios.get(`${Base_Url}/getregionscity/${country_id}`,{
+      const response = await axiosInstance.get(`${Base_Url}/getregionscity/${country_id}`,{
         headers: {
            Authorization: token, // Send token in headers
-         }, 
+         },
        });
       setRegions(response.data);
     } catch (error) {
@@ -113,10 +116,10 @@ const MasterFranchise = (params) => {
   //geostate
   const fetchState = async (region_id) => {
     try {
-      const response = await axios.get(`${Base_Url}/getgeostatescity/${region_id}`,{
+      const response = await axiosInstance.get(`${Base_Url}/getgeostatescity/${region_id}`,{
         headers: {
            Authorization: token, // Send token in headers
-         }, 
+         },
        });
       setState(response.data);
     } catch (error) {
@@ -126,10 +129,10 @@ const MasterFranchise = (params) => {
 
   const fetchdistricts = async (geostateID) => {
     try {
-      const response = await axios.get(`${Base_Url}/getdistrictcity/${geostateID}`,{
+      const response = await axiosInstance.get(`${Base_Url}/getdistrictcity/${geostateID}`,{
         headers: {
            Authorization: token, // Send token in headers
-         }, 
+         },
        });
       setdistricts(response.data);
     } catch (error) {
@@ -139,10 +142,10 @@ const MasterFranchise = (params) => {
 
   const fetchCity = async (area_id) => {
     try {
-      const response = await axios.get(`${Base_Url}/getgeocities_p/${area_id}`,{
+      const response = await axiosInstance.get(`${Base_Url}/getgeocities_p/${area_id}`,{
         headers: {
            Authorization: token, // Send token in headers
-         }, 
+         },
        });
       setCity(response.data);
     } catch (error) {
@@ -152,10 +155,10 @@ const MasterFranchise = (params) => {
 
   const fetchpincode = async (cityid) => {
     try {
-      const response = await axios.get(`${Base_Url}/getpincodebyid/${cityid}`,{
+      const response = await axiosInstance.get(`${Base_Url}/getpincodebyid/${cityid}`,{
         headers: {
            Authorization: token, // Send token in headers
-         }, 
+         },
        });
       setPincode(response.data);
     } catch (error) {
@@ -166,10 +169,10 @@ const MasterFranchise = (params) => {
   const fetchFranchisemasterpopulate = async (masterid) => {
 
     try {
-      const response = await axios.get(`${Base_Url}/getmasterfranchisepopulate/${masterid}`,{
+      const response = await axiosInstance.get(`${Base_Url}/getmasterfranchisepopulate/${masterid}`,{
         headers: {
            Authorization: token, // Send token in headers
-         }, 
+         },
        });
       setFormData({
         ...response.data[0],
@@ -350,7 +353,7 @@ const MasterFranchise = (params) => {
             .post(`${Base_Url}/putfranchisedata`, { ...hashedFormData, created_by },{
               headers: {
                  Authorization: token, // Send token in headers
-               }, 
+               },
              })
             .then((response) => {
               setFormData({
@@ -398,7 +401,7 @@ const MasterFranchise = (params) => {
             .post(`${Base_Url}/postfranchisedata`, { ...formData, created_by },{
               headers: {
                  Authorization: token, // Send token in headers
-               }, 
+               },
              })
             .then((response) => {
               //const newpassword = md5(formData.password)
@@ -450,12 +453,12 @@ const MasterFranchise = (params) => {
 
   const deleted = async (id) => {
     try {
-      const response = await axios.post(`${Base_Url}/deletefranchisedata`, {
+      const response = await axiosInstance.post(`${Base_Url}/deletefranchisedata`, {
         id,
       },{
         headers: {
            Authorization: token, // Send token in headers
-         }, 
+         },
        });
 
       setFormData({
@@ -469,12 +472,12 @@ const MasterFranchise = (params) => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(
+      const response = await axiosInstance.get(
         `${Base_Url}/requestfranchisedata/${id}`
         ,{
           headers: {
              Authorization: token, // Send token in headers
-           }, 
+           },
          });
       setFormData(response.data);
       setIsEdit(true);
@@ -492,6 +495,11 @@ const MasterFranchise = (params) => {
 
     <div className="tab-content">
       <Franchisemaster />
+      {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
       <div className="row mp0">
         <div className="col-12">
           <div className="card mb-3 tab_box">

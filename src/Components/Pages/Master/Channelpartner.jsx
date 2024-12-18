@@ -3,10 +3,12 @@ import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
 import Channelpartnertabs from "./Channelpartnertabs";
-
+import { SyncLoader } from 'react-spinners';
+import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 const Channelpartner = () => {
   // Step 1: Add this state to track errors
-   const token = localStorage.getItem("token"); 
+  const { loaders, axiosInstance } = useAxiosLoader();
+  const token = localStorage.getItem("token");
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -24,7 +26,7 @@ const Channelpartner = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getcdata`,{
+      const response = await axiosInstance.get(`${Base_Url}/getcdata`,{
         headers: {
           Authorization: token,
         },
@@ -141,7 +143,7 @@ const Channelpartner = () => {
 
   const deleted = async (id) => {
     try {
-      const response = await axios.post(`${Base_Url}/deletecdata`, { id },{
+      const response = await axiosInstance.post(`${Base_Url}/deletecdata`, { id },{
         headers: {
           Authorization: token,
         },
@@ -155,7 +157,7 @@ const Channelpartner = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestcdata/${id}`,{
+      const response = await axiosInstance.get(`${Base_Url}/requestcdata/${id}`,{
         headers: {
           Authorization: token,
         },
@@ -174,6 +176,11 @@ const Channelpartner = () => {
 
   return (
     <div className="tab-content">
+          {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
       <Channelpartnertabs/>
     <div className="row mp0">
       <div className="col-12">

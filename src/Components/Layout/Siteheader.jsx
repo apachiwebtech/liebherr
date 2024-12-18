@@ -1,16 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import Logo from '../../images/Liebherr-logo-768x432.png'
+import { Avatar } from '@mui/material';
 
 
 
 
 export function Siteheader(params) {
-
-
-
-
-
+const [Name, setName] = useState([])
   const navigate = useNavigate();
   const redirect = () => {
     window.location.pathname = '/registercomaplaint'
@@ -26,6 +23,13 @@ export function Siteheader(params) {
     }
   }
 
+  useEffect(() => {
+    const updatedTickets = localStorage.getItem('Lhiuser') || ""; // Directly use the stored string or an empty string
+    const firstLetter = updatedTickets.charAt(0); // Safe to use charAt here
+    setName(firstLetter)
+  }, [])
+
+
   return (
 
     <header className="p-3 border-bottom">
@@ -40,7 +44,7 @@ export function Siteheader(params) {
             <li>
               <Link className={`nav-link px-2 link-secondary site `}
                 to="/"
-        >
+              >
                 Dashboard
               </Link></li>
 
@@ -51,7 +55,7 @@ export function Siteheader(params) {
                 role="button"
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
-                >
+              >
                 Master
               </Link>
 
@@ -92,7 +96,7 @@ export function Siteheader(params) {
                 id="navbarDropdown"
                 role="button"
                 aria-expanded="false"
-               >
+              >
                 Tickets
               </Link>
 
@@ -103,7 +107,7 @@ export function Siteheader(params) {
                 id="navbarDropdown"
                 role="button"
                 aria-expanded="false"
-               >
+              >
                 Quotations
               </Link>
 
@@ -115,7 +119,7 @@ export function Siteheader(params) {
                 role="button"
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
-        >
+              >
                 Reports
               </Link>
               <ul className="dropdown-menu site" aria-labelledby="navbarDropdown">
@@ -131,20 +135,24 @@ export function Siteheader(params) {
 
 
 
-          <div className="dropdown text-end">
-            <Link className="btn btn-primary newcomplaint" onClick={redirect}>New Ticket</Link>
+          <div className="dropdown text-end d-flex align-content-center justify-content-center">
+            <Link className="btn btn-primary mr-2 newcomplaint" onClick={redirect}>New Ticket</Link>
 
-            <a href="#" className="link-dark text-decoration-none dropdown-toggle" id="dropdownUser1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <img src="https://github.com/mdo.png" alt="mdo" width="32" height="32" className="rounded-circle" />
+            <a href="#"  className="link-dark d-flex align-content-center justify-content-center text-decoration-none " id="dropdownUser1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <Avatar
+                sx={{
+                  bgcolor: "primary.main",
+                  textTransform: "uppercase", // Convert text to uppercase
+                  display:'flex',
+                  alignContent:'center',
+                  justifyContent:'center',
+                }}
+              >
+                {Name}
+              </Avatar>
+
             </a>
             <ul className="dropdown-menu text-small" aria-labelledby="dropdownUser1">
-              <li className="dropdown-item" role="button">
-                <Link className="dropdown-item" to="#">New project...</Link></li>
-              <li className="dropdown-item" role="button">
-                <Link className="dropdown-item" to="#">Settings</Link></li>
-              <li className="dropdown-item" role="button">
-                <Link className="dropdown-item" to="#">Profile</Link></li>
-              <li><hr className="dropdown-divider" /></li>
               <li className="dropdown-item" role="button">
                 <Link className="dropdown-item" onClick={clearLocal} tabIndex="0">Sign out</Link></li>
             </ul>
@@ -155,5 +163,3 @@ export function Siteheader(params) {
     </header>
   )
 }
-
-  

@@ -4,24 +4,27 @@ import makeAnimated from 'react-select/animated';
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url } from "../../Utils/Base_Url";
+import { SyncLoader } from 'react-spinners';
+import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 
 // Step 1: Set up animated components for react-select
 const animatedComponents = makeAnimated();
 
 const Groupmasterpg = () => {
+  const { loaders, axiosInstance } = useAxiosLoader();
   const [isEdit, setIsEdit] = useState(false);
- 
+
   const [Childfranchise, setChildfranchise] = useState([]);
   // Step 2: Define state to store the options for the dropdown (fetched from API)
   const [options, setOptions] = useState([]);
-  
+
   // Step 3: Define state to store selected options from the dropdown
   const [selectedOptions, setSelectedOptions] = useState([]);
-  
+
   // Step 4: Define state to store data for the group table (fetched from API when editing)
   const [groupdata, setGroupdata] = useState([]);
 
-  const [formData, setFormData] = useState({ 
+  const [formData, setFormData] = useState({
     cfranchise_id: '',
     engineer: '',
     product: '',
@@ -35,8 +38,8 @@ const [selectedProducts, setSelectedProducts] = useState([]);
   // Step 5: Function to fetch options for the dropdown from the API
   const fetchOptions = async (cfranchise_id) => {
     try {
-      const response = await axios.get(`${Base_Url}/getgroupmengineer/${cfranchise_id}`);
-      
+      const response = await axiosInstance.get(`${Base_Url}/getgroupmengineer/${cfranchise_id}`);
+
       // Map response data to format required by react-select
       const engineerOptions = response.data.map(engineer => ({
         value: engineer.id,      // Unique value for each option
@@ -54,18 +57,18 @@ const [selectedProducts, setSelectedProducts] = useState([]);
 
   const fetchChildfranchise = async () => {
     try {
-      const response = await axios.get(`${Base_Url}/getchildfranchisegroupm`);
-      console.log(response.data); 
+      const response = await axiosInstance.get(`${Base_Url}/getchildfranchisegroupm`);
+      console.log(response.data);
       setChildfranchise(response.data);
     } catch (error) {
-      console.error('Error fetching Childfranchise:', error); 
+      console.error('Error fetching Childfranchise:', error);
     }
   };
 
   // Function to fetch product options from API
 const fetchProductOptions = async () => {
   try {
-    const response = await axios.get(`${Base_Url}/getproduct`); 
+    const response = await axiosInstance.get(`${Base_Url}/getproduct`);
     const options = response.data.map(product => ({
       value: product.id,     // Adjust 'id' to match your actual property
       label: product.item_description    // Adjust 'name' to match your actual property
@@ -133,7 +136,7 @@ const clearProductSelection = (e) => {
   // Step 11: Function to delete an item by its id
   const deleted = async (id) => {
     try {
-      const response = await axios.post(`${Base_Url}/deletesdata`, { id });
+      const response = await axiosInstance.post(`${Base_Url}/deletesdata`, { id });
       console.log("Item deleted successfully");
       // Optionally, you can refresh data here or remove the item from groupdata
     } catch (error) {
@@ -144,7 +147,7 @@ const clearProductSelection = (e) => {
   // Step 12: Function to fetch and set group data for editing an item by id
   const edit = async (id) => {
     try {
-      const response = await axios.get(`${Base_Url}/requestsdata/${id}`);
+      const response = await axiosInstance.get(`${Base_Url}/requestsdata/${id}`);
       setGroupdata(response.data); // Update groupdata state with fetched data
       console.log("Fetched data for editing:", response.data);
       setIsEdit(true);
@@ -155,13 +158,18 @@ const clearProductSelection = (e) => {
 
   return (
     <div className="row mp0">
+          {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
       <div className="col-12">
         <div className="card mb-3 tab_box">
           <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
             <div className="row mp0">
               <div className="col-6">
                 <form style={{ width: "50%" }} className="text-left">
-                  
+
                   {/* Step 13: Select All and Clear All buttons */}
                         <div style={{ width: '300px', margin: '20px' }}>
                                 <div className="form-group">
@@ -173,9 +181,9 @@ const clearProductSelection = (e) => {
                                       {Childfranchise.map((pf) => (
                                         <option key={pf.id} value={pf.id}>{pf.title}</option>
                                       ))}
-                                    </select>                                     
+                                    </select>
                                 </div>
-                        </div> 
+                        </div>
                   <div style={{ width: '300px', margin: '20px' }}>
                       <div className="mb-0">
                         {/* Label */}
@@ -214,9 +222,9 @@ const clearProductSelection = (e) => {
                       placeholder="Select Engineer"
                       className="custom-select"
                       name="engineer"
-              
+
                       styles={{
-                       
+
                         placeholder: (provided) => ({
                           ...provided,
                           color: 'black', // Set placeholder text color to black
@@ -234,7 +242,7 @@ const clearProductSelection = (e) => {
                       }}
                     />
                   </div>
-                      
+
                       {/* For Products Option */}
 
                        {/* Step 13: Select All and Clear All buttons */}
@@ -274,10 +282,10 @@ const clearProductSelection = (e) => {
                           value={selectedProducts}               // Currently selected products
                           onChange={handleProductSelectChange}    // Handle change for products
                           placeholder="Select Products"
-                          className="custom-select" 
+                          className="custom-select"
                           name="product"
                           styles={{
-                           
+
                             placeholder: (provided) => ({
                               ...provided,
                               color: 'black', // Set placeholder text color to black
