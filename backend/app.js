@@ -2408,7 +2408,7 @@ app.get("/gettypeofdefect", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
     const sql = `
-     SELECT
+     SELECT 
         td.*, dg.defectgrouptitle as grouptitle
       FROM awt_typeofdefect td
       LEFT JOIN awt_defectgroup dg ON td.groupdefect_code = dg.defectgroupcode
@@ -2468,13 +2468,13 @@ app.get("/requestdatatypeofdefect/:id", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
     const sql = `
-      SELECT
-        defect_code,
-        groupdefect_code,
-        defect_title,
-        description,
-        created_by,
-        created_date,
+      SELECT 
+        defect_code, 
+        groupdefect_code, 
+        defect_title, 
+        description, 
+        created_by, 
+        created_date, 
         deleted
       FROM awt_typeofdefect
       WHERE id = ${id}
@@ -2513,7 +2513,7 @@ app.put("/putdatatypeofdefect", authenticateToken, async (req, res) => {
     } else {
       const updateSql = `
         UPDATE awt_typeofdefect
-        SET
+        SET 
           defect_code = '${defect_code}',
           groupdefect_code = '${groupdefect_code}',
           defect_title = '${defect_title}',
@@ -2560,7 +2560,7 @@ app.get("/getsitedefect", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
     const sql = `
-    SELECT
+    SELECT 
     td.*, dg.defectgrouptitle as grouptitle
   FROM awt_site_defect td
   LEFT JOIN awt_defectgroup dg ON td.defectgroupcode = dg.defectgroupcode
@@ -2621,13 +2621,13 @@ app.get("/requestsitedefect/:id", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
     const sql = `
-      SELECT
-      dsite_code,
-        defectgroupcode,
-        dsite_title,
-        description,
-        created_by,
-        created_date,
+      SELECT 
+      dsite_code, 
+        defectgroupcode, 
+        dsite_title, 
+        description, 
+        created_by, 
+        created_date, 
         deleted
       FROM awt_site_defect
       WHERE id = ${id}
@@ -2656,7 +2656,7 @@ app.put("/putsitedefect", authenticateToken, async (req, res) => {
     // Check for duplicates with same `dsite_code` and `defectgroupcode`, excluding the current record (`id`)
     const checkDuplicateSql = `
       SELECT * FROM awt_site_defect
-      WHERE dsite_code = '${dsite_code}'
+      WHERE dsite_code = '${dsite_code}' 
       AND defectgroupcode = '${groupdefectcode}'
       AND deleted = 0
       AND id != ${id}
@@ -2670,7 +2670,7 @@ app.put("/putsitedefect", authenticateToken, async (req, res) => {
       // Update record
       const updateSql = `
         UPDATE awt_site_defect
-        SET
+        SET 
           dsite_code = '${dsite_code}',
           defectgroupcode = '${groupdefectcode}',
           dsite_title = '${dsite_title}',
@@ -3081,13 +3081,13 @@ app.post("/getticketendcustomer", async (req, res) => {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
     //     const sql = `
-    // SELECT c.*,
-    //        l.address,
+    // SELECT c.*, 
+    //        l.address, 
     //        CONCAT(c.customer_fname, ' ', c.customer_lname) AS customer_name
-    // FROM awt_customer AS c
-    // LEFT JOIN awt_customerlocation AS l ON c.id = l.customer_id
-    // WHERE c.deleted = 0
-    //   AND (c.email LIKE '%${searchparam}%'
+    // FROM awt_customer AS c 
+    // LEFT JOIN awt_customerlocation AS l ON c.id = l.customer_id 
+    // WHERE c.deleted = 0 
+    //   AND (c.email LIKE '%${searchparam}%' 
     //        OR c.mobileno LIKE '%${searchparam}%')
 
 
@@ -3095,7 +3095,7 @@ app.post("/getticketendcustomer", async (req, res) => {
 
     const checkincomplaint = `select * from complaint_ticket where (customer_email LIKE '%${searchparam}%' OR ticket_no LIKE '%${searchparam}%' OR customer_name LIKE '%${searchparam}%' OR serial_no LIKE '%${searchparam}%' OR customer_mobile LIKE '%${searchparam}%' OR customer_id LIKE '%${searchparam}%')`
 
-
+    console.log(checkincomplaint)
 
     const result = await pool.request().query(checkincomplaint);
 
@@ -3212,11 +3212,11 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
     // Insert into awt_customerlocation using insertedCustomerId as customer_id
     const customerLocationSQL = `
       INSERT INTO awt_customerlocation (
-        customer_id, geostate_id, geocity_id, district_id, pincode_id,
+        customer_id, geostate_id, geocity_id, district_id, pincode_id, 
         created_date, created_by, ccperson, ccnumber, address
       )
       VALUES (
-        @customer_id, @state, @city, @area, @pincode,
+        @customer_id, @state, @city, @area, @pincode, 
         @formattedDate, @created_by, @customer_name, @mobile, @address
       )`;
 
@@ -3285,15 +3285,15 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
     if (!ticket_id) {
       complaintSQL = `
         INSERT INTO complaint_ticket (
-          ticket_no, ticket_date, customer_name, customer_mobile, customer_email, address,
-          state, city, area, pincode, customer_id, ModelNumber, ticket_type, call_type,
-          call_status, warranty_status, invoice_date, call_charges, mode_of_contact,
+          ticket_no, ticket_date, customer_name, customer_mobile, customer_email, address, 
+          state, city, area, pincode, customer_id, ModelNumber, ticket_type, call_type, 
+          call_status, warranty_status, invoice_date, call_charges, mode_of_contact, 
           contact_person,  created_date, created_by,  purchase_date, serial_no, child_service_partner, sevice_partner, specification ,customer_class,call_priority
-        )
+        ) 
         VALUES (
-          @ticket_no, @complaint_date, @customer_name, @mobile, @email, @address,
-          @state, @city, @area, @pincode, @customer_id, @model, @ticket_type, @cust_type,
-          'Open', @warranty_status, @invoice_date, @call_charge, @mode_of_contact,
+          @ticket_no, @complaint_date, @customer_name, @mobile, @email, @address, 
+          @state, @city, @area, @pincode, @customer_id, @model, @ticket_type, @cust_type, 
+          'Open', @warranty_status, @invoice_date, @call_charge, @mode_of_contact, 
           @contact_person,  @formattedDate, @created_by,  @purchase_date, @serial, @child_service_partner, @master_service_partner, @specification ,@classification , @priority
         )
       `;
@@ -3538,7 +3538,7 @@ app.get("/getmasterlist/:masterid", async (req, res) => {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
     const sql = `SELECT m.*,c.title as country_name, r.title as region_name, s. title as state_name, d.title as district_name,ct. title city_name from  awt_franchisemaster as m,
-awt_country as c,awt_region as r,awt_geostate as s,awt_district as d,awt_geocity as ct WHERE m.country_id = c.id AND m.region_id = r.id AND m.geostate_id = s.id
+awt_country as c,awt_region as r,awt_geostate as s,awt_district as d,awt_geocity as ct WHERE m.country_id = c.id AND m.region_id = r.id AND m.geostate_id = s.id 
 AND m.area_id = d.id AND m.geocity_id = ct.id AND m.deleted =	0 AND m.id = ${masterid}`;
     const result = await pool.request().query(sql);
 
@@ -3805,7 +3805,7 @@ app.post("/postcustomer", authenticateToken, async (req, res) => {
 
 
 
-// customer put
+// customer put 
 
 app.put("/putcustomer", authenticateToken, async (req, res) => {
   const { id, customer_fname, customer_type, customer_classification, mobileno, alt_mobileno, dateofbirth, anniversary_date, email, salutation, customer_id, created_by } = req.body;
@@ -3821,7 +3821,7 @@ app.put("/putcustomer", authenticateToken, async (req, res) => {
       SELECT * FROM awt_customer
       WHERE email = @email
       AND deleted = 0
-      AND id != @id
+      AND id != @id      
     `;
 
     console.log("Executing Duplicate Check SQL:", duplicateCheckSQL);
@@ -3840,7 +3840,7 @@ app.put("/putcustomer", authenticateToken, async (req, res) => {
     // Step 2: Update Query
     const updateSQL = `
      UPDATE awt_customer
-     SET
+     SET 
        customer_fname = @customer_fname,
        email = @email,
        mobileno = @mobileno,
@@ -3850,7 +3850,7 @@ app.put("/putcustomer", authenticateToken, async (req, res) => {
        dateofbirth = @dateofbirth,
        anniversary_date = @anniversary_date,
        salutation = @salutation,
-       customer_id = @customer_id,
+       customer_id = @customer_id,      
        updated_by = @created_by
      WHERE id = @id
    `;
@@ -3981,7 +3981,7 @@ app.get("/requestcustomerlocation/:id", authenticateToken, async (req, res) => {
   }
 });
 
-// delete customer location
+// delete customer location 
 app.post("/deletecustomerlocation", authenticateToken, async (req, res) => {
   const { id } = req.body;
 
@@ -4016,7 +4016,7 @@ app.post("/postcustomerlocation", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
 
     const checkCustomerSql = `
-    SELECT customer_id FROM awt_customer
+    SELECT customer_id FROM awt_customer 
     WHERE customer_id = '${customer_id}' AND deleted = 0
   `;
 
@@ -4471,11 +4471,11 @@ app.get("/getmasterlist", authenticateToken, async (req, res) => {
     // Modified SQL query with explicit JOIN conditions
     const sql = `
       SELECT m.*,
-        c.title as country_name,
-        r.title as region_name,
-        s.title as state_name,
+        c.title as country_name, 
+        r.title as region_name, 
+        s.title as state_name, 
         d.title as district_name,
-        ct.title as city_name
+        ct.title as city_name 
       FROM awt_franchisemaster m
       LEFT JOIN awt_country c ON m.country_id = CAST(c.id AS VARCHAR)
       LEFT JOIN awt_region r ON m.region_id = CAST(r.id AS VARCHAR)
@@ -4593,13 +4593,13 @@ app.post("/postfranchisedata", authenticateToken, async (req, res) => {
         .input('contract_acti', sql.DateTime, contract_acti)
         .input('contract_expir', sql.DateTime, contract_expir)
         .query(`
-          INSERT INTO awt_franchisemaster
-          (title, licarecode, partner_name, contact_person, email, mobile_no, password, address, country_id, region_id, geostate_id,
-           area_id, geocity_id, pincode_id, webste, gstno, panno, bankname, bankacc, bankifsc, bankaddress, withliebher,
+          INSERT INTO awt_franchisemaster 
+          (title, licarecode, partner_name, contact_person, email, mobile_no, password, address, country_id, region_id, geostate_id, 
+           area_id, geocity_id, pincode_id, webste, gstno, panno, bankname, bankacc, bankifsc, bankaddress, withliebher, 
            lastworkinddate, contractacti, contractexpir)
-          VALUES
-          (@title, @licarecode, @partner_name, @contact_person, @email, @mobile_no, @password, @address, @country_id,
-           @region_id, @state, @area, @city, @pincode_id, @website, @gst_no, @panno, @bank_name, @bank_acc, @bank_ifsc,
+          VALUES 
+          (@title, @licarecode, @partner_name, @contact_person, @email, @mobile_no, @password, @address, @country_id, 
+           @region_id, @state, @area, @city, @pincode_id, @website, @gst_no, @panno, @bank_name, @bank_acc, @bank_ifsc, 
            @bank_address, @with_liebherr, @lastworkindate, @contract_acti, @contract_expir)
         `);
 
@@ -4653,7 +4653,7 @@ app.put("/putfranchisedata", authenticateToken, async (req, res) => {
     // Step 2: Update Query
     const updateSQL = `
      UPDATE awt_franchisemaster
-     SET
+     SET 
        title = @title,
        licarecode = @licarecode,
        partner_name = @partner_name,
@@ -4770,7 +4770,7 @@ app.get("/getparentfranchise", authenticateToken, async (req, res) => {
 //     // SQL query to fetch data from the master list, customize based on your needs
 //     const sql = `
 //     SELECT m.*,p.title as parentfranchisetitle,c.title as country_name, r.title as region_name, s. title as state_name, d.title as district_name,ct. title city_name from  awt_childfranchisemaster as m,
-//     awt_country as c,awt_region as r,awt_geostate as s,awt_district as d,awt_geocity as ct,awt_franchisemaster as p WHERE m.country_id = c.id AND m.region_id = r.id AND m.geostate_id = s.id
+//     awt_country as c,awt_region as r,awt_geostate as s,awt_district as d,awt_geocity as ct,awt_franchisemaster as p WHERE m.country_id = c.id AND m.region_id = r.id AND m.geostate_id = s.id 
 //     AND m.area_id = d.id AND m.geocity_id = ct.id AND m.pfranchise_id = p.licarecode AND m.deleted = 0
 //     `;
 //     // Execute the SQL query
@@ -4791,13 +4791,13 @@ app.get("/getchildFranchiseDetails", authenticateToken, async (req, res) => {
 
     // SQL query to fetch data from the master list, customize based on your needs
     const sql = `
- SELECT m.*,
-       p.title AS parentfranchisetitle,
-       c.title AS country_name,
-       r.title AS region_name,
-       s.title AS state_name,
-       d.title AS district_name,
-       ct.title AS city_name
+ SELECT m.*, 
+       p.title AS parentfranchisetitle, 
+       c.title AS country_name, 
+       r.title AS region_name, 
+       s.title AS state_name, 
+       d.title AS district_name, 
+       ct.title AS city_name 
 FROM awt_childfranchisemaster m
 LEFT JOIN awt_country c ON m.country_id = CAST(c.id AS VARCHAR)
 LEFT JOIN awt_region r ON m.region_id = CAST(r.id AS VARCHAR)
@@ -4856,13 +4856,13 @@ app.get("/getmasterfranchisepopulate/:masterid", authenticateToken, async (req, 
 
     // SQL query to fetch data from the master list, customize based on your needs
     const sql = `
-SELECT
+SELECT 
     m.*,
-    c.title as country_name,
-    r.title as region_name,
-    s.title as state_name,
+    c.title as country_name, 
+    r.title as region_name, 
+    s.title as state_name, 
     d.title as district_name,
-    ct.title as city_name
+    ct.title as city_name 
 FROM awt_franchisemaster m
 LEFT JOIN awt_country c ON TRY_CONVERT(INT, m.country_id) = c.id
 LEFT JOIN awt_region r ON TRY_CONVERT(INT, m.region_id) = r.id
@@ -4882,7 +4882,7 @@ WHERE m.deleted = 0 and m.id = ${masterid}
   }
 });
 
-// customer populate
+// customer populate 
 
 app.get("/getcustomerpopulate/:customerid", authenticateToken, async (req, res) => {
   const { customerid } = req.params;
@@ -5032,8 +5032,8 @@ app.post("/postchildfranchise", authenticateToken, async (req, res) => {
         .input('contract_activation_date', sql.DateTime, contract_activation_date)
         .input('contract_expiration_date', sql.DateTime, contract_expiration_date)
         .query(`
-          UPDATE awt_childfranchisemaster
-          SET
+          UPDATE awt_childfranchisemaster 
+          SET 
             title = @title,
             licare_code = @licare_code,
             partner_name = @partner_name,
@@ -5097,14 +5097,14 @@ app.post("/postchildfranchise", authenticateToken, async (req, res) => {
       .input('contract_expiration_date', sql.DateTime, contract_expiration_date)
       .input('with_liebherr', sql.DateTime, with_liebherr)
       .query(`
-        INSERT INTO awt_childfranchisemaster
-        (title, pfranchise_id, licare_code, partner_name, contact_person, email, mobile_no, password, address,
-         country_id, region_id, geostate_id, area_id, geocity_id, pincode_id, webste, gstno, panno, bankname,
+        INSERT INTO awt_childfranchisemaster 
+        (title, pfranchise_id, licare_code, partner_name, contact_person, email, mobile_no, password, address, 
+         country_id, region_id, geostate_id, area_id, geocity_id, pincode_id, webste, gstno, panno, bankname, 
          bankacc, bankifsc, bankaddress, withliebher, lastworkinddate, contractacti, contractexpir, created_by)
-        VALUES
-        (@title, @pfranchise_id, @licare_code, @partner_name, @contact_person, @email, @mobile_no, @password,
-         @address, @country_id, @region_id, @state, @area, @city, @pincode_id, @website, @gst_number, @pan_number,
-         @bank_name, @bank_account_number, @bank_ifsc_code, @bank_address,@with_liebherr , @last_working_date,
+        VALUES 
+        (@title, @pfranchise_id, @licare_code, @partner_name, @contact_person, @email, @mobile_no, @password, 
+         @address, @country_id, @region_id, @state, @area, @city, @pincode_id, @website, @gst_number, @pan_number, 
+         @bank_name, @bank_account_number, @bank_ifsc_code, @bank_address,@with_liebherr , @last_working_date, 
          @contract_activation_date, @contract_expiration_date,${created_by})
       `);
     return res.json({
@@ -5132,7 +5132,7 @@ app.put("/putchildfranchise", authenticateToken, async (req, res) => {
 
     // Step 1: Duplicate Check Query
     const duplicateCheckSQL = `
-      SELECT * FROM awt_childfranchisemaster
+      SELECT * FROM awt_childfranchisemaster 
       WHERE email = @email
       AND deleted = 0
       AND id != @id
@@ -5154,7 +5154,7 @@ app.put("/putchildfranchise", authenticateToken, async (req, res) => {
     // Step 2: Update Query
     const updateSQL = `
       UPDATE awt_childfranchisemaster
-      SET
+      SET 
         title = @title,
         pfranchise_id = @pfranchise_id,
         licare_code = @licare_code,
@@ -6110,7 +6110,7 @@ app.put("/putservicecontract", authenticateToken, async (req, res) => {
       SELECT * FROM awt_servicecontract
       WHERE customerMobile = @customerMobile
       AND deleted = 0
-      AND id != @id
+      AND id != @id      
     `;
 
     console.log("Executing Duplicate Check SQL:", duplicateCheckSQL);
@@ -6129,7 +6129,7 @@ app.put("/putservicecontract", authenticateToken, async (req, res) => {
     // Step 2: Update Query
     const updateSQL = `
      UPDATE awt_servicecontract
-     SET
+     SET 
        customerName = @customerName,
        customerMobile = @customerMobile,
        contractNumber = @contractNumber,
@@ -6137,7 +6137,7 @@ app.put("/putservicecontract", authenticateToken, async (req, res) => {
        productName = @productName,
        serialNumber = @serialNumber,
        startDate = @startDate,
-       endDate = @endDate,
+       endDate = @endDate,     
        updated_by = @created_by
      WHERE id = @id
    `;
@@ -6187,7 +6187,7 @@ app.post("/deleteservicecontract", authenticateToken, async (req, res) => {
   }
 });
 
-//Service contract listing
+//Service contract listing 
 // app.get("/getservicecontractlist", async (req, res) => {
 //   try {
 //     // Use the poolPromise to get the connection pool
@@ -6217,7 +6217,7 @@ app.post("/deleteservicecontract", authenticateToken, async (req, res) => {
 //   }
 // });
 
-// Service Contract list api with filters
+// Service Contract list api with filters 
 app.get("/getservicecontractlist", async (req, res) => {
   try {
     const pool = await poolPromise;
@@ -7081,8 +7081,6 @@ app.post("/ticketFormData", authenticateToken, async (req, res) => {
 
 
 app.post("/add_new_ticket", authenticateToken, async (req, res) => {
-  console.log('test');
-
   const {
     customer_name,
     email,
@@ -7095,8 +7093,7 @@ app.post("/add_new_ticket", authenticateToken, async (req, res) => {
     state,
     city,
     area,
-    pincode,
-    customerId
+    pincode
   } = req.body;
 
   const formattedDate = new Date().toISOString().slice(0, 19).replace("T", " ");
@@ -7104,56 +7101,42 @@ app.post("/add_new_ticket", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
-    const productdetail = `select * from awt_uniqueproductmaster where ModelNumber = '${product_id}' and serial_no = '${serial_no}' and CustomerID = '${customerId}'`
-    const productdetailquery = await pool.request()
-      .query(productdetail);
-
-
-    console.log(productdetailquery.recordset[0]);
-    const details = productdetailquery.recordset[0];
-    const purchaseDateFormatted = purchaseDateFormattedss = details.purchase_date.toISOString().slice(0, 10).replace("T", " ");
-
-
-
     // Insert complaint ticket and return the inserted ID
     const complaintSQL = `
       INSERT INTO complaint_ticket (
-        customer_name, customer_mobile, customer_email, address,
-        customer_id, ModelNumber,serial_no, assigned_to,state,city,area,pincode, created_date, created_by,purchase_date,invoice_date
-      )
+        customer_name, customer_mobile, customer_email, address, 
+        customer_id, ModelNumber,serial_no, assigned_to,state,city,area,pincode, created_date, created_by
+      ) 
       OUTPUT INSERTED.id
       VALUES (
-        @customer_name, @mobile, @email, @address,
-        @customer_id, @model,@serial_no, 1,@state, @city,@area,@pincode, @formattedDate, @created_by,@purchase_date,@invoice_date
+        @customer_name, @mobile, @email, @address, 
+        @customer_id, @model,@serial_no, 1,@state, @city,@area,@pincode, @formattedDate, @created_by
       )
     `;
 
     const result = await pool
       .request()
-      .input("customer_name", sql.NVarChar, details.CustomerName)
+      .input("customer_name", sql.NVarChar, customer_name)
       .input("mobile", sql.NVarChar, mobile)
       .input("email", sql.NVarChar, email)
       .input("address", sql.NVarChar, address)
       .input("customer_id", sql.Int, cust_id)
-      .input("model", sql.NVarChar, details.ModelNumber)
-      .input("serial_no", details.serial_no)
-      .input("state", sql.NVarChar, details.state)
-      .input("city", sql.NVarChar, details.city)
-      .input("area", sql.NVarChar, details.district)
-      .input("pincode", sql.NVarChar, details.pincode)
+      .input("model", sql.NVarChar, product_id)
+      .input("serial_no", serial_no)
+      .input("state", sql.NVarChar, state)
+      .input("city", sql.NVarChar, city)
+      .input("area", sql.NVarChar, area)
+      .input("pincode", sql.NVarChar, pincode)
       .input("formattedDate", sql.DateTime, formattedDate)
       .input("created_by", sql.Int, created_by)
-      .input("purchase_date", purchaseDateFormatted)
-      .input("invoice_date", purchaseDateFormattedss)
       .query(complaintSQL);
 
     const insertedId = result.recordset[0].id;
 
-
     // Fetch the newly created complaint ticket
     const getComplaintRow = `
-      SELECT *
-      FROM complaint_ticket
+      SELECT * 
+      FROM complaint_ticket 
       WHERE id = @id
     `;
 
@@ -7171,7 +7154,7 @@ app.post("/add_new_ticket", authenticateToken, async (req, res) => {
     console.error("Error:", err);
     return res
       .status(500)
-      .json({ error: "An error occurred while adding the ticket.", "Error": err });
+      .json({ error: "An error occurred while adding the ticket." });
   }
 });
 
@@ -7260,7 +7243,7 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
     let sql = `
         SELECT c.*,
                DATEDIFF(DAY, c.ticket_date, GETDATE()) AS ageingdays
-        FROM complaint_ticket AS c
+        FROM complaint_ticket AS c 
         WHERE c.deleted = 0`;
 
     const countSql = `
@@ -7338,21 +7321,49 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
       sql += ` AND c.call_status != 'Closed' AND c.call_status != 'Cancelled'`;
     }
 
-    // Sorting by call_priority and ticket_date for additional ordering
-    sql += `
-        ORDER BY
-          CASE
-            WHEN c.call_priority = 'High' THEN 1
-            WHEN c.call_priority = 'Regular' THEN 2
-            ELSE 3
-          END,
-          c.ticket_date DESC
-        OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY`;
+    if(upcoming == 'current'){
+      sql += ` AND ticket_date <= @currentdate`;
+      params.push({ name: "currentdate", value: currentDate });
 
-    params.push(
-      { name: "offset", value: offset },
-      { name: "pageSize", value: parseInt(pageSize) }
-    );
+
+    }else {
+      sql += ` AND ticket_date > @currentdate`;
+      params.push({ name: "currentdate", value: currentDate });
+      
+    }
+
+    // Sorting by call_priority and ticket_date for additional ordering
+
+    if(upcoming == 'current'){
+      sql += `
+      ORDER BY 
+        CASE 
+          WHEN c.call_priority = 'High' THEN 1
+          WHEN c.call_priority = 'Regular' THEN 2
+          ELSE 3 
+        END,
+        c.ticket_date DESC
+      OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY`;
+
+      params.push(
+        { name: "offset", value: offset },
+        { name: "pageSize", value: parseInt(pageSize) }
+      );
+  
+    }else{
+      sql += `
+      ORDER BY 
+        CASE 
+          WHEN c.call_priority = 'High' THEN 1
+          WHEN c.call_priority = 'Regular' THEN 2
+          ELSE 3 
+        END,
+        c.ticket_date DESC`;
+
+    }
+   
+
+  
 
     // Execute queries
     const request = pool.request();
@@ -7414,10 +7425,10 @@ app.get("/getcomplainlistcsp", async (req, res) => {
     console.log('Received status:', status); // Debug log
 
     let sql = `
-        SELECT c.*,
-        DATEDIFF(day, (c.ticket_date), GETDATE()) AS ageingdays
+        SELECT c.*, 
+        DATEDIFF(day, (c.ticket_date), GETDATE()) AS ageingdays 
         FROM complaint_ticket AS c
-
+       
         WHERE c.deleted = 0 AND c.csp = '${licare_code}'
     `;
 
@@ -7521,7 +7532,7 @@ app.get("/getcomplainlistcsp", async (req, res) => {
   }
 });
 
-//CSP LIST END
+//CSP LIST END 
 
 
 //MSP complaint list
@@ -7554,8 +7565,8 @@ app.get("/getcomplainlistmsp", async (req, res) => {
     console.log('Received status:', status); // Debug log
 
     let sql = `
-        SELECT c.*, e.title as assigned_name,
-        DATEDIFF(day, (c.ticket_date), GETDATE()) AS ageingdays
+        SELECT c.*, e.title as assigned_name, 
+        DATEDIFF(day, (c.ticket_date), GETDATE()) AS ageingdays 
         FROM complaint_ticket AS c
         JOIN awt_engineermaster AS e ON c.engineer_id = e.engineer_id
         WHERE c.deleted = 0 AND c.msp = '${licare_code}'
@@ -7666,27 +7677,24 @@ app.get("/getcomplainlistmsp", async (req, res) => {
 app.get("/getmultiplelocation/:pincode", authenticateToken, async (req, res) => {
   const { pincode } = req.params;
 
-  console.log(pincode);
-
-
   try {
 
     const pool = await poolPromise;
 
-    const sql = `SELECT cn.title as country, p.region_name as region, p.geostate_name as state, p.area_name as district, p.geocity_name as city, o.owner, f.title as franchiseem, fm.title as childfranchiseem ,p.pincode
-    FROM awt_pincode as p
-    LEFT JOIN awt_region as r on p.region_id = r.id
+    const sql = `SELECT cn.title as country, p.region_name as region, p.geostate_name as state, p.area_name as district, p.geocity_name as city, o.owner, f.title as franchiseem, fm.title as childfranchiseem ,p.pincode  FROM awt_pincode as p 
+    LEFT JOIN awt_region as r on p.region_id = r.id 
     LEFT JOIN awt_country as cn on p.country_id = cn.id
-    LEFT JOIN awt_geostate as s on p.geostate_id = s.id
-    LEFT JOIN awt_district as d on p.area_id = d.id
-    LEFT JOIN awt_geocity as c on p.geocity_id = c.id
+    LEFT JOIN awt_geostate as s on p.geostate_id = s.id 
+    LEFT JOIN awt_district as d on p.area_id = d.id 
+    LEFT JOIN awt_geocity as c on p.geocity_id = c.id 
     LEFT JOIN pincode_allocation as o on p.pincode = o.pincode
-	  LEFT JOIN awt_franchisemaster as f on f.licarecode = o.account_manager
-    LEFT JOIN awt_childfranchisemaster as fm on fm.pfranchise_id = o.owner
-    where p.pincode =  ${pincode}`
-    console.log(sql);
+    LEFT JOIN awt_childfranchisemaster as fm on fm.licare_code = o.owner
+    LEFT JOIN awt_franchisemaster as f on f.licarecode = fm.pfranchise_id
+    where p.pincode = @pincode`
 
-    const result = await pool.request().query(sql);
+    const result = await pool.request()
+      .input('pincode', pincode)
+      .query(sql);
 
     return res.json(result.recordset);
 
@@ -7804,13 +7812,13 @@ app.post("/getupdateengineer", authenticateToken,
 
     try {
       const pool = await poolPromise;
-      // Modified SQL query using parameterized query
+      // Modified SQL query using parameterized query 
       const sql = `
-    SELECT *
-    FROM awt_engineermaster
-    WHERE deleted = 0
+    SELECT * 
+    FROM awt_engineermaster 
+    WHERE deleted = 0 
       AND engineer_id IN (
-          SELECT value
+          SELECT value 
           FROM STRING_SPLIT('${eng_id}', ',')
       )
 `;
@@ -7830,13 +7838,13 @@ app.post("/getupdateengineer", authenticateToken,
 
     try {
       const pool = await poolPromise;
-      // Modified SQL query using parameterized query
+      // Modified SQL query using parameterized query 
       const sql = `
-    SELECT *
-    FROM awt_engineermaster
-    WHERE deleted = 0
+    SELECT * 
+    FROM awt_engineermaster 
+    WHERE deleted = 0 
       AND engineer_id IN (
-          SELECT value
+          SELECT value 
           FROM STRING_SPLIT('${eng_id}', ',')
       )
 `;
@@ -7857,9 +7865,9 @@ app.post("/getupdatesparelist", authenticateToken,
 
     try {
       const pool = await poolPromise;
-      // Modified SQL query using parameterized query
+      // Modified SQL query using parameterized query 
       const sql = `
-    SELECT * FROM awt_quotation
+    SELECT * FROM awt_quotation 
     WHERE deleted = 0 and ticketId = '${ticket_no}'`;
 
       const result = await pool.request().query(sql);
@@ -7884,6 +7892,7 @@ app.get("/getEndCustomerAddresses/:customerEndId", async (req, res) => {
 
     // Execute the SQL query
 
+    console.log("Get Customer Address", sql)
     const result = await pool.request().query(sql);
 
     return res.json(result.recordset
@@ -7959,7 +7968,7 @@ app.post("/getDefectCodewisesite", authenticateToken,
     }
   });
 
-// Quotation Listing
+// Quotation Listing 
 app.get("/getquotationlist", authenticateToken, async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
@@ -7997,7 +8006,7 @@ app.post('/add_uniqsparepart', async (req, res) => {
     const poolRequest = pool.request(); // Ensure `pool` is initialized correctly.
 
     const addspare = `
-      INSERT INTO awt_uniquespare (ticketId, spareId, article_code, article_description, price)
+      INSERT INTO awt_uniquespare (ticketId, spareId, article_code, article_description, price) 
       VALUES (@ticket_no, @product_code, @title, @ItemDescription, '100')
     `;
 
@@ -8054,13 +8063,13 @@ app.post(`/add_quotation`, async (req, res) => {
 
 
     const query = `
-    INSERT INTO awt_quotation
-    (ticketId, ticketdate, quotationNumber, CustomerName, state, city, assignedEngineer, status, customerId, ModelNumber,  created_date, created_by)
-    VALUES
+    INSERT INTO awt_quotation 
+    (ticketId, ticketdate, quotationNumber, CustomerName, state, city, assignedEngineer, status, customerId, ModelNumber,  created_date, created_by) 
+    VALUES 
     (@ticket_no, @date, @quotationNumber, @CustomerName, @state, @city, @assignedEngineer, @status, @customer_id, @ModelNumber,  @created_date, @created_by)
   `;
 
-    const result = await pool.request()
+   const result =  await pool.request()
       .input('ticket_no', sql.NVarChar, ticket_no)
       .input('date', sql.NVarChar, date.toISOString()) // Format date properly
       .input('quotationNumber', sql.NVarChar, quotationcode)
@@ -8075,7 +8084,7 @@ app.post(`/add_quotation`, async (req, res) => {
       .input('created_by', sql.NVarChar, '1') // Replace with actual user
       .query(query);
 
-    console.log(result.recordset);
+      console.log(result.recordset);
 
 
 
@@ -8160,18 +8169,7 @@ app.post('/getquotedetails', async (req, res) => {
 
   try {
     // Use parameterized query to prevent SQL Injection
-    const query = `SELECT
-    q.*, -- Select all columns from awt_quotation
-    c.email,c.mobileno,c.customer_id, -- Select all columns from awt_customer
-    cl.address-- Select all columns from awt_customerlocation
-FROM
-    awt_quotation q
-LEFT JOIN
-    awt_customer c ON q.customer_id = c.customer_id
-LEFT JOIN
-    awt_customerlocation cl ON c.customer_id = cl.customer_id
-WHERE
-    q.id = @quote_id;`;
+    const query = `select * from  awt_quotation  WHERE id = @quote_id`;
 
 
 
