@@ -3164,24 +3164,24 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
 
 
-    if (ticket_id == '') {
-      // Split customer_name into customer_fname and customer_lname
-
-
-      const [customer_fname, ...customer_lnameArr] = customer_name.split(' ');
+    // Split customer_name into customer_fname and customer_lname
+    
+    
+    const [customer_fname, ...customer_lnameArr] = customer_name.split(' ');
       const customer_lname = customer_lnameArr.join(' ');
-
+      
 
       const getcustcount = `select top 1 id from awt_customer where customer_id is not null order by id desc`
 
       const getcustresult = await pool.request().query(getcustcount)
 
       const custcount = getcustresult.recordset[0].id;
-
+      
       const newcustid = 'B' + custcount.toString().padStart(7, "0")
 
 
 
+      if (ticket_id == '') {
 
 
       // Insert into awt_customer
@@ -3352,7 +3352,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
       .input('city', city)
       .input('area', area)
       .input('pincode', pincode)
-      .input('customer_id',  cust_id)
+      .input('customer_id', ticket_id == '' ? newcustid : cust_id)
       .input('model', model)
       .input('ticket_type', ticket_type)
       .input('cust_type', cust_type)
