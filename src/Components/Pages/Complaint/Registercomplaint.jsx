@@ -22,7 +22,7 @@ export function Registercomplaint(params) {
   const [city, setCity] = useState([])
   const [pincode, setPincode] = useState([])
   const [product, setProduct] = useState([])
-  const [purchase_data, setpurchase_data] = useState([])
+  const [purchase_data, setpurchase_data] = useState('')
   const [ChildPartner, setChildPartner] = useState([])
   const [ModelNumber, setModelNumber] = useState([])
   const [duplicate, setDuplicate] = useState([]);
@@ -108,7 +108,7 @@ export function Registercomplaint(params) {
   })
 
   const getDateAfterOneYear = (value) => {
-    console.log(value);
+
 
     try {
       // Ensure value is in a recognized format
@@ -128,11 +128,8 @@ export function Registercomplaint(params) {
 
 
       if (lastDate < currentDate) {
-                setWarranty_status_data("OUT OF WARRANTY")
-        setSearchData({
-          ...searchdata,
-          invoice_date: value
-        })
+      setWarranty_status_data("OUT OF WARRANTY")
+      
 
       setpurchase_data(value)
 
@@ -140,10 +137,7 @@ export function Registercomplaint(params) {
         setpurchase_data(value)
 
         setWarranty_status_data("WARRANTY")
-        setSearchData({
-          ...searchdata,
-          invoice_date: value
-        })
+   
       }
 
 
@@ -231,6 +225,7 @@ export function Registercomplaint(params) {
     // }
 
 
+ 
 
     setErrors(newErrors);
     setTimeout(() => {
@@ -243,6 +238,7 @@ export function Registercomplaint(params) {
   const [selectedAddress, setSelectedAddress] = useState('');
   const [newAddress, setNewAddress] = useState('');
 
+  console.log(value.serial , value.model , "####")
   // Sample existing addresses (you can fetch this from your API)
   const existingAddresses = [
     "Address 1",
@@ -597,7 +593,7 @@ export function Registercomplaint(params) {
             state: res.data.information[0].state,
             city: res.data.information[0].city,
             area: res.data.information[0].area
-
+            
           })
           // Fetch addresses of end customer from customer
 
@@ -625,7 +621,7 @@ export function Registercomplaint(params) {
   const handlesubmit = (e) => {
 
     e.preventDefault()
-    console.log(value);
+
 
     const confirm = window.confirm("Are you sure?")
 
@@ -652,7 +648,7 @@ export function Registercomplaint(params) {
         cust_id: searchdata.id || value.customer_id || "", // Fix customer ID handling
         model: value.model,
         serial: value.serial,
-        purchase_date: purchase_data,
+        purchase_date: purchase_data || value.purchase_date,
         master_service_partner: value.master_service_partner,
         child_service_partner: value.child_service_partner,
         additional_remarks: value.additional_remarks,
@@ -663,7 +659,7 @@ export function Registercomplaint(params) {
         callType: value.callType,
         ticket_id: ticketid
       };
-      console.log(data)
+  
 
       if (validateForm()) {
 
@@ -792,7 +788,7 @@ export function Registercomplaint(params) {
   // Fix the onHandleChange function
   const onHandleChange = (e) => {
     const { name, value: inputValue } = e.target;
-console.log(name ,'name',value ,'value');
+
 
     setValue(prevState => ({
       ...prevState,
@@ -826,9 +822,9 @@ console.log(name ,'name',value ,'value');
       setDate(e.target.value);
     }
 
-    if (name == 'purchase_date') {
-      getDateAfterOneYear()
-    }
+    // if (name == 'purchase_date') {
+    //   getDateAfterOneYear()
+    // }
   };
 
 
@@ -889,11 +885,6 @@ console.log(name ,'name',value ,'value');
           serial: response.data[0].serial_no
         })
 
-      } else {
-        setValue({
-          model: ''
-        })
-
       }
 
 
@@ -948,7 +939,7 @@ console.log(name ,'name',value ,'value');
         setadd_new_ticketdata(res.data.rowdata[0])
         setModelNumber(res.data.rowdata[0].ModelNumber)
         getDateAfterOneYear(res.data.rowdata[0].invoice_date)
-        console.log(res.data.rowdata[0].invoice_date);
+      
 
       }).catch((err) => {
         console.log(err)
@@ -1181,7 +1172,7 @@ useEffect(() => {
                         <input
                           type="text"
                           name="serial"
-                          value={searchdata.serial_no}
+                          value={value.serial}
                           onChange={onHandleChange}
                           className="form-control"
                           placeholder="Enter.."
@@ -1216,11 +1207,11 @@ useEffect(() => {
                             onHandleChange(e)
                             getDateAfterOneYear(e.target.value)
                           }}
-                          value={searchdata.invoice_date}
+                          value={purchase_data}
                           className="form-control"
                         />
                         {errors.purchase_date && <span style={{ fontSize: "12px" }} className="text-danger">{errors.purchase_date}</span>}
-                      </div> : <div>{value.purchase_date}</div>}
+                      </div> : <div>{purchase_data}</div>}
                   </div>
 
                   {/* Add Warranty Status field */}

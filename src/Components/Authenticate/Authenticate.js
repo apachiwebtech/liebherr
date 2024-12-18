@@ -1,22 +1,33 @@
+import axios from 'axios';
 import React, { useEffect, useState } from 'react';
+import { Base_Url } from '../Utils/Base_Url';
 
 const Authenticate = () => {
-    const [reloadCount, setReloadCount] = useState(0);
+
+  
+    const token = localStorage.getItem("token"); // Get token from localStorage
+    async function checkuser(params) {
+
+      const data = {
+       email : "akash@gmail.com"
+      }
+
+      axios.post(`${Base_Url}/checkuser`,data ,  {
+        headers: {
+            Authorization: token, // Send token in headers
+        }
+    })
+      .then((res) =>{
+       console.log(res)
+       window.location.pathname = '/quotationlist'
+      })
+      .catch((res) =>{
+        console.log(res)
+      })
+    }
 
     useEffect(() => {
-      // Get the current reload count from localStorage or initialize to 0
-      const count = parseInt(localStorage.getItem("reloadCount") || "0", 10);
-  
-      if (count < 1) {
-        // If this is the first visit, reload the page and increment the counter
-        localStorage.setItem("reloadCount", count + 1);
-        window.location.reload();
-      } else {
-        // Update the counter in state
-        setReloadCount(count);
-        window.location.pathname = '/'
-      }
-      
+      checkuser()
     }, []);
 
     return null; // The component does not render anything

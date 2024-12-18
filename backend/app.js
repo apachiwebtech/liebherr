@@ -3206,6 +3206,8 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
     }
 
+ 
+
 
 
 
@@ -3269,7 +3271,6 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
     const count = checkResult.recordset[0] ? checkResult.recordset[0].ticket_no : 'G0000';
 
-    console.log(count, "Count")
 
     // Accessing the last 4 digits from the result
     const lastFourDigits = count.slice(-4)
@@ -3351,7 +3352,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
       .input('city', city)
       .input('area', area)
       .input('pincode', pincode)
-      .input('customer_id', ticket_id == '' ? newcustid : cust_id)
+      .input('customer_id',  cust_id)
       .input('model', model)
       .input('ticket_type', ticket_type)
       .input('cust_type', cust_type)
@@ -3370,11 +3371,12 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
       .input('priority', priority)
       .query(complaintSQL);
 
-      console.log(resutlt,priority , "$$$$")
+    console.log(resutlt, priority, "$$$$")
 
 
-    //Remark insert query
-    const reamrks = `
+    if (additional_remarks) {
+      //Remark insert query
+      const reamrks = `
     INSERT INTO awt_complaintremark (
         ticket_no, remark, created_date, created_by
     )
@@ -3383,18 +3385,19 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
     )`;
 
 
-    await pool.request()
-      .input('ticket_no', ticket_no) // Use existing ticket_no from earlier query
-      .input('formattedDate', formattedDate) // Use current timestamp
-      .input('created_by', created_by) // Use current user ID
-      .input('additional_remarks', additional_remarks) // Use current user ID
-      .query(reamrks);
+      await pool.request()
+        .input('ticket_no', ticket_no) // Use existing ticket_no from earlier query
+        .input('formattedDate', formattedDate) // Use current timestamp
+        .input('created_by', created_by) // Use current user ID
+        .input('additional_remarks', additional_remarks) // Use current user ID
+        .query(reamrks);
+
+    }
 
 
-    //Fault Description *************
 
-
-    const faultreamrks = `
+    if (specification) {
+      const faultreamrks = `
       INSERT INTO awt_complaintremark (
           ticket_no, remark, created_date, created_by
       )
@@ -3403,12 +3406,17 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
       )`;
 
 
-    await pool.request()
-      .input('ticket_no', ticket_no) // Use existing ticket_no from earlier query
-      .input('formattedDate', formattedDate) // Use current timestamp
-      .input('created_by', created_by) // Use current user ID
-      .input('additional_remarks', specification) // Use current user ID
-      .query(faultreamrks);
+      await pool.request()
+        .input('ticket_no', ticket_no) // Use existing ticket_no from earlier query
+        .input('formattedDate', formattedDate) // Use current timestamp
+        .input('created_by', created_by) // Use current user ID
+        .input('additional_remarks', specification) // Use current user ID
+        .query(faultreamrks);
+    }
+    //Fault Description *************
+
+
+
 
     return res.json({ message: 'Complaint added successfully!', ticket_no, cust_id });
   } catch (err) {
@@ -3423,7 +3431,7 @@ app.post("/update_complaint", authenticateToken,
     let {
       complaint_date, customer_name, contact_person, email, mobile, address,
       state, city, area, pincode, mode_of_contact, ticket_type, cust_type,
-      warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks, ticket_no , classification, priority
+      warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks, ticket_no, classification, priority
     } = req.body;
 
     const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
@@ -3473,7 +3481,7 @@ app.post("/update_complaint", authenticateToken,
 
 
 
-// Debugging log
+      // Debugging log
 
       await pool.request()
         .input('ticket_no', ticket_no)
@@ -7338,12 +7346,12 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
       sql += ` AND c.call_status != 'Closed' AND c.call_status != 'Cancelled'`;
     }
 
-    if(upcoming == 'current'){
+    if (upcoming == 'current') {
       sql += ` AND ticket_date <= @currentdate`;
       params.push({ name: "currentdate", value: currentDate });
 
 
-    }else {
+    } else {
       sql += ` AND ticket_date > @currentdate`;
       params.push({ name: "currentdate", value: currentDate });
 
@@ -7351,7 +7359,7 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
 
     // Sorting by call_priority and ticket_date for additional ordering
 
-    if(upcoming == 'current'){
+    if (upcoming == 'current') {
       sql += `
       ORDER BY
         CASE
@@ -7367,7 +7375,7 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
         { name: "pageSize", value: parseInt(pageSize) }
       );
 
-    }else{
+    } else {
       sql += `
       ORDER BY
         CASE
@@ -8091,7 +8099,7 @@ app.post(`/add_quotation`, async (req, res) => {
     (@ticket_no, @date, @quotationNumber, @CustomerName, @state, @city, @assignedEngineer, @status, @customer_id, @ModelNumber,  @created_date, @created_by)
   `;
 
-   const result =  await pool.request()
+    const result = await pool.request()
       .input('ticket_no', sql.NVarChar, ticket_no)
       .input('date', sql.NVarChar, date.toISOString()) // Format date properly
       .input('quotationNumber', sql.NVarChar, quotationcode)
@@ -8106,7 +8114,7 @@ app.post(`/add_quotation`, async (req, res) => {
       .input('created_by', sql.NVarChar, '1') // Replace with actual user
       .query(query);
 
-      console.log(result.recordset);
+    console.log(result.recordset);
 
 
 
@@ -8230,3 +8238,26 @@ app.post("/getuniquespare", authenticateToken, async (req, res) => {
     return res.status(500).json({ error: "Database error occurred" });
   }
 });
+
+
+app.post("/checkuser", authenticateToken, async (req, res) => {
+
+  const { email } = req.body
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    // Directly use the query (no parameter binding)
+    const sql = `select * from l_user where email = '${email}'`;
+
+    // Execute the query
+    const result = await pool.request().query(sql);
+
+    // Return the result as JSON
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred" });
+  }
+});
+
