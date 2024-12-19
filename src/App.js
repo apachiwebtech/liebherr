@@ -95,6 +95,7 @@ import History from './Components/App/Compo/History';
 import Data_lost from './Components/App/Compo/Data_lost';
 import Details from './Components/App/Compo/Details';
 import Mobile from './Components/App/Compo/Mobile';
+import { Complaintviewmsp } from './Components/Pages/Master/Complaintviewmsp';
 
 
 
@@ -125,15 +126,21 @@ const Router = createBrowserRouter([
     element: <MSP_Login />,
   },
 
+
+
   {
-    path: "/msp/ticketlistmsp",
+    path: "/msp",
     element: <MSPAPP />,
     children: [
 
       {
         path: "/msp/ticketlistmsp",
         element: <Ticketlistmsp />,
-      }
+      },
+      {
+        path: "/msp/complaintviewmsp/:complaintid",
+        element: <Complaintviewmsp />,
+      },
 
     ]
   },

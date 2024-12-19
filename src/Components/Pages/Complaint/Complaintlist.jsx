@@ -89,31 +89,43 @@ export function Complaintlist(params) {
   };
 
   const fetchComplaintlist = async (page) => {
-
-
-
     try {
+      // Build the params object dynamically
+      const params = {
+        page: page, // Current page number
+        pageSize: pageSize, // Page size
+      };
+
+      // Add search filters dynamically to params
+      Object.entries(searchFilters).forEach(([key, value]) => {
+        if (value) { // Only add if the value is not empty
+          params[key] = value;
+        }
+      });
+
+      console.log('Sending params:', params); // Debug log
+
+      // Send the request with the built params
       const response = await axiosInstance.get(`${Base_Url}/getcomplainlist`, {
         headers: {
           Authorization: token, // Send token in headers
         },
-        params: {
-          // You can add any additional filter parameters here if needed
-          page: page, // current page number
-          pageSize: pageSize, // page size
-        },
-      }
-      );
-      // Filter out 'Closed' and 'Cancelled' status complaints by default
+        params: params, // Pass the dynamic params object
+      });
+
+      // Filter out 'Cancelled' complaints by default
       const filteredComplaints = response.data.data.filter(complaint =>
         !['Cancelled'].includes(complaint.call_status)
       );
 
-      console.log(filteredComplaints)
-      setComplaintdata(response.data.data);
-      setFilteredData(filteredComplaints);
-      setTotalCount(response.data.totalCount);
-    } catch (error) {
+      console.log(filteredComplaints); // Debug log for filtered complaints
+
+      // Update state
+      setComplaintdata(response.data.data); // Full data
+      setFilteredData(filteredComplaints); // Filtered data
+      setTotalCount(response.data.totalCount); // Total count
+
+    }catch (error) {
       console.error('Error fetching Ticketdata:', error);
       setComplaintdata([]);
       setFilteredData([]);
@@ -140,6 +152,9 @@ export function Complaintlist(params) {
         },
       });
       setFilteredData(response.data.data);
+      setComplaintdata(response.data.data);
+      setTotalCount(response.data.totalCount);
+
     } catch (error) {
       console.error('Error fetching filtered data:', error);
       setFilteredData([]);
