@@ -80,7 +80,7 @@ import Servicecontract from './Components/Pages/Master/Servicecontract';
 import Ticketlistmsp from './Components/Pages/Master/Ticketlistmsp';
 import Servicecontracttabs from './Components/Pages/Master/Servicecontracttabs';
 import { Servicecontractlist } from './Components/Pages/Master/Servicecontractlist';
-import { Base_Url } from './Components/Utils/Base_Url';
+import { App_Url, Base_Url } from './Components/Utils/Base_Url';
 import axios from 'axios';
 import DataTable from './Components/Pages/Complaint/Compdatatablebackup';
 import HeaderMsp from './Components/Layout/HeaderMsp';
@@ -104,7 +104,7 @@ const Router = createBrowserRouter([
 
   },
   {
-    path: "/Authenticate",
+    path: "/VerifyUser",
     element: <Authenticate />,
 
   },
@@ -281,7 +281,7 @@ const Router = createBrowserRouter([
 
       },
       {
-        path: "/",
+        path: "/dashboard",
         element: <Dashboard />,
 
       },
@@ -552,7 +552,9 @@ function App() {
     } catch (error) {
       console.error("Error fetching protected route:", error);
       // alert(error.response.data.message || "Access denied");
-      navigate('/login')
+      // navigate('/login')
+      window.location.href = App_Url
+
     }
   };
 

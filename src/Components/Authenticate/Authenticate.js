@@ -19,10 +19,8 @@ const Authenticate = () => {
     })
       .then((res) => {
         if (res.data) {
-          setInterval(() => {
             setLoading(false)
-            window.location.pathname = '/quotationlist'
-          }, 2000);
+            window.location.pathname = '/dashboard'
 
         }
       })
