@@ -26,7 +26,7 @@ const Authenticate = () => {
 
  
     const data = {
-      email: user.Email
+      email: user.email
     }
 
     axios.post(`${Base_Url}/checkuser`, data, {

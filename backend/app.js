@@ -110,7 +110,7 @@ app.post("/loginuser", async (req, res) => {
 
       // Generate JWT token
       const token = jwt.sign(
-        { id: user.id, Lhiuser: user.Lhiuser  ,Email : user.email}, // Payload
+        { id: user.id, Lhiuser: user.Lhiuser  ,email : user.email}, // Payload
         JWT_SECRET, // Secret key
         { expiresIn: "8h" } // Token validity
       );

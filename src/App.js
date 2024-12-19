@@ -96,6 +96,7 @@ import Data_lost from './Components/App/Compo/Data_lost';
 import Details from './Components/App/Compo/Details';
 import Mobile from './Components/App/Compo/Mobile';
 import { Complaintviewmsp } from './Components/Pages/Master/Complaintviewmsp';
+import { CspTicketView } from './Components/Pages/Master/CspTicketView';
 
 
 
@@ -150,7 +151,7 @@ const Router = createBrowserRouter([
 
   },
   {
-    path: "/csp/ticketlist",
+    path: "/csp",
     element: <CSPAPP />,
     children: [
 
@@ -159,6 +160,11 @@ const Router = createBrowserRouter([
         element: <Ticketlistcsp />,
 
       },
+      {
+        path: "/csp/ticketview/:complaintid",
+        element: <CspTicketView />,
+
+      }
     ],
   },
   {
@@ -469,7 +475,6 @@ const Router = createBrowserRouter([
       {
         path: "/complaintview/:complaintid",
         element: <Complaintview />,
-
       },
       {
         path: "/groupmaster",
@@ -619,7 +624,7 @@ function App() {
     const timer = setTimeout(() => {
       alert("Session Timeout")
       window.location.reload();
-    }, 3600 * 8000); // 1 hour in milliseconds
+    }, 3600 * 8000);
 
     return () => clearTimeout(timer); // Cleanup the timer on unmount
   }, [navigate])
@@ -642,6 +647,9 @@ function CSPAPP() {
   React.useEffect(() => {
     checkLocalStorageAndRedirectCSP(navigate)
   }, [navigate])
+
+
+
   return (
     <>
       <Loginheader />
@@ -659,6 +667,9 @@ function MSPAPP() {
   React.useEffect(() => {
     checkLocalStorageAndRedirect(navigate);
   }, [navigate])
+
+
+
   return (
     <>
       <HeaderMsp />

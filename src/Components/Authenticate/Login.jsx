@@ -39,8 +39,10 @@ export function Login() {
 
         // Start the timer to refresh the page
         setTimeout(() => {
+          alert("Session Timeout")
           window.location.reload();
-        }, 60 * 1000); // 1 minute in milliseconds
+        }, 3600 * 8000); 
+
         navigate('/');
       } else {
         alert("Invalid username or password");
