@@ -88,6 +88,7 @@ import { Quotationlist } from './Components/Pages/Quotation/Quotationlist';
 import QuotationEdit from './Components/Pages/Quotation/QuotationEdit';
 import Dash from './Components/Authenticate/Dash';
 import Authenticate from './Components/Authenticate/Authenticate';
+import AppLogin from './Components/App/AppLogin';
 
 
 
@@ -144,6 +145,17 @@ const Router = createBrowserRouter([
         path: "/csp/ticketlist",
         element: <Ticketlistcsp />,
 
+      },
+    ],
+  },
+  {
+    path: "/App/login",
+    element: <AppLogin />,
+    children: [
+
+      {
+        path: "/App/login",
+        element: <AppLogin />,
       },
     ],
   },

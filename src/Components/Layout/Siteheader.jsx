@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import Logo from '../../images/Liebherr-logo-768x432.png'
 import { Avatar } from '@mui/material';
+import { App_Url } from '../Utils/Base_Url';
 
 
 
@@ -16,7 +17,7 @@ const [Name, setName] = useState([])
   const clearLocal = async () => {
     try {
       localStorage.clear();
-      navigate('/login');
+      window.location.href = App_Url
     }
     catch (error) {
       console.error('error signing out', error)

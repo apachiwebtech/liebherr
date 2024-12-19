@@ -5,6 +5,7 @@ const cors = require('cors');
 const complaint = require("./Routes/complaint");
 const common = require("./Routes/common");
 const Category = require("./Routes/ProductMaster/Category");
+const MobApp = require("./Routes/MobApp");
 const multer = require("multer");
 const bodyParser = require("body-parser");
 const path = require("path");
@@ -45,6 +46,7 @@ const authenticateToken = (req, res, next) => {
 app.use("/", complaint);
 app.use("/", common);
 app.use("/", Category);
+app.use("/", MobApp);
 
 
 
