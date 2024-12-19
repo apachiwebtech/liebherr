@@ -89,6 +89,12 @@ import QuotationEdit from './Components/Pages/Quotation/QuotationEdit';
 import Dash from './Components/Authenticate/Dash';
 import Authenticate from './Components/Authenticate/Authenticate';
 import AppLogin from './Components/App/AppLogin';
+import Dashbord from './Components/App/Compo/Dashbord';
+
+import History from './Components/App/Compo/History';
+import Data_lost from './Components/App/Compo/Data_lost';
+import Details from './Components/App/Compo/Details';
+import Mobile from './Components/App/Compo/Mobile';
 
 
 
@@ -149,16 +155,37 @@ const Router = createBrowserRouter([
     ],
   },
   {
-    path: "/App/login",
-    element: <AppLogin />,
+    path: "/mobapp",
+    element: <MobApp />,
     children: [
 
       {
-        path: "/App/login",
-        element: <AppLogin />,
+        path: "/mobapp/dash",
+        element: <Dashbord/>,
+      },
+      {
+        path: '/mobapp/details',
+        element: <Details />,
+      },
+      {
+        path: '/mobapp/details/:id',
+        element: <Details />,
+      },
+      {
+        path: '/mobapp/history/:id',
+        element: <History />,
+      },
+      {
+        path: '/mobapp/offline',
+        element: <Data_lost />,
+      },
+      {
+        path: '/mobapp/mobile',
+        element: <Mobile />,
       },
     ],
   },
+
   {
     path: "/",
     element: <App />,
@@ -541,7 +568,7 @@ function checkLocalStorageAndRedirectCSP(navigate) {
 
 function App() {
 
-  
+
 
 
 
@@ -630,6 +657,17 @@ function MSPAPP() {
       <HeaderMsp />
       <Outlet />
       <Sitefooter />
+    </>
+
+  );
+}
+function MobApp() {
+
+
+
+  return (
+    <>
+      <Outlet />
     </>
 
   );
