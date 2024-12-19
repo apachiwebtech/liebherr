@@ -2,6 +2,10 @@ const express = require('express');
 const app = express.Router();
 const poolPromise = require('../db');
 
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' });
+
+
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
 

@@ -101,18 +101,18 @@ app.post("/loginuser", async (req, res) => {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
 
-    const sql = `SELECT id, Lhiuser FROM lhi_user WHERE Lhiuser = '${Lhiuser}' AND password = '${password}'`;
+    const sql = `SELECT id, Lhiuser ,email FROM lhi_user WHERE Lhiuser = '${Lhiuser}' AND password = '${password}'`;
 
-    console.log(sql);
 
     const result = await pool.request().query(sql);
 
     if (result.recordset.length > 0) {
       const user = result.recordset[0];
 
+
       // Generate JWT token
       const token = jwt.sign(
-        { id: user.id, Lhiuser: user.Lhiuser }, // Payload
+        { id: user.id, Lhiuser: user.Lhiuser  ,Email : user.email}, // Payload
         JWT_SECRET, // Secret key
         { expiresIn: "8h" } // Token validity
       );
@@ -123,6 +123,7 @@ app.post("/loginuser", async (req, res) => {
         user: {
           id: user.id,
           Lhiuser: user.Lhiuser,
+          Email: user.email,
         },
       });
 
@@ -139,28 +140,54 @@ app.post("/lhilogin", async (req, res) => {
 
   const apiKey = req.header('x-api-key');
 
-
+  const pool = await poolPromise;
   if (apiKey !== API_KEY) {
     return res.status(403).json({ error: 'Forbidden: Invalid API key' });
   }
 
   try {
-    const { lhiemail } = req.body;
+      const { lhiemail } = req.body;
 
-    // Validate the provided email (this is just a placeholder; replace with your actual validation logic)
-    if (!lhiemail || !lhiemail.includes("@")) {
-      return res.status(400).json({ error: "Invalid email provided" });
-    }
+      // Validate the provided email (this is just a placeholder; replace with your actual validation logic)
+      if (!lhiemail || !lhiemail.includes("@")) {
+          return res.status(400).json({ error: "Invalid email provided" });
+      }
+      const sql = `SELECT top 1  id, Lhiuser, email FROM lhi_user WHERE email = '${lhiemail}' and deleted = 0 and status = 1 `;
+      
+      const result = await pool.request().query(sql);
+        if (result.recordset.length > 0) {
+          const user = result.recordset[0];
+        // Generate JWT token
+       
+        const token = jwt.sign( { email: lhiemail , id: user.id, Lhiuser: user.Lhiuser }, JWT_SECRET, { expiresIn: '8h' });
+        
+        res.json({
+          message: "Login successful.",
+          token, // Send token to client
+          user: {
+            id: user.id,
+            Lhiuser: user.Lhiuser,
+            Email : user.lhiemail
+          },
+        });
+      }else {
+        res.json({
+          message: "Login Failed.",
+          token:"", // Send token to client
+          user: {
+            id: "",
+            Lhiuser:"",
+            Email:''
+          },
+        });
 
-    // Generate JWT token
-    const token = jwt.sign({ email: lhiemail }, JWT_SECRET, { expiresIn: '1h' });
-
-    // Respond with the token
-    res.status(200).json({ token });
+      }
+     
+      
   } catch (error) {
-    console.error("Error during login:", error);
-    res.status(500).json({ error: "An error occurred during login" });
-  }
+      console.error("Error during login:", error);
+      res.status(500).json({ error: "An error occurred during login" });
+  }
 });
 
 
@@ -8250,11 +8277,11 @@ app.post("/checkuser", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
 
     // Directly use the query (no parameter binding)
-    const sql = `select * from l_user where email = '${email}'`;
+    const sql = `select * from userlogin where username = '${email}'`;
 
     // Execute the query
     const result = await pool.request().query(sql);
-
+    console.log(result)
     // Return the result as JSON
     return res.json(result.recordset);
   } catch (err) {
