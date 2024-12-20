@@ -1,12 +1,13 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { App_Url, Base_Url } from '../Utils/Base_Url';
+import { useNavigate } from 'react-router-dom';
 
 const Authenticate = () => {
 
   const [loading, setLoading] = useState(true)
   const token = localStorage.getItem("token"); // Get token from localStorage
-
+  const navigate = useNavigate()
 
 
   function parseJwt(token) {
@@ -22,43 +23,62 @@ const Authenticate = () => {
 
   async function checkuser(params) {
 
-   const user =  parseJwt(token)
 
- 
-    const data = {
-      email: user.email
+
+    if (token) {
+
+      const user = parseJwt(token)
+
+
+      const data = {
+        email: user.email
+      }
+
+      axios.post(`${Base_Url}/checkuser`, data, {
+        headers: {
+          Authorization: token, // Send token in headers
+        }
+      })
+        .then((res) => {
+          if (res.data.length <= 0) {
+            navigate('/notauthenticate');
+            return; // Stop further execution
+          }
+      
+
+
+          if(res.data && res.data[0].usercode){
+            localStorage.setItem('licare_code', res.data[0].usercode)
+
+          }
+
+
+
+          if (res.data[0].userrole == 'lhi_user') {
+            setLoading(false)
+            window.location.pathname = '/dashboard'
+          } else if (res.data[0].userrole == 'awt_franchisemaster') {
+            setLoading(false)
+            window.location.pathname = '/msp/ticketlistmsp'
+          } else if (res.data[0].userrole == 'awt_childfranchisemaster') {
+            setLoading(false)
+            window.location.pathname = '/csp/ticketlist'
+          } else if (res.data[0].userrole == 'awt_engineermaster') {
+            setLoading(false)
+            window.location.pathname = '/mobapp/dash'
+          }
+
+        })
+        .catch((res) => {
+          console.log(res)
+        })
+
+    }else{
+      window.location.href = App_Url
     }
 
-    axios.post(`${Base_Url}/checkuser`, data, {
-      headers: {
-        Authorization: token, // Send token in headers
-      }
-    })
-      .then((res) => {
 
-        if(!token){
-           window.location.href = App_Url
-        }
 
-        if (res.data[0].userrole == 'lhi_user') {
-          setLoading(false)
-
-          window.location.pathname = '/dashboard'
-
-        } else if (res.data[0].userrole == 'awt_franchisemaster') {
-          setLoading(false)
-          window.location.pathname = '/msp/ticketlistmsp'
-        } else if (res.data[0].userrole == 'awt_childfranchisemaster') {
-          setLoading(false)
-          window.location.pathname = '/csp/ticketlist'
-        } else if (res.data[0].userrole == 'awt_engineermaster') {
-          setLoading(false)
-          window.location.pathname = '/mobapp/dash'
-        }
-      })
-      .catch((res) => {
-        console.log(res)
-      })
   }
 
   useEffect(() => {

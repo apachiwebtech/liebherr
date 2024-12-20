@@ -2818,7 +2818,7 @@ app.post("/uploadcomplaintattachments", upload.array("attachment"), async (req, 
     // Insert the attachments with the remark_id obtained from the previous step
     const sql = `
       INSERT INTO awt_complaintattachment (remark_id, ticket_no, attachment, created_by, created_date)
-      VALUES (${remark_id}, '${ticket_no}', '${attachmentString}', ${created_by}, '${formattedDate}')
+      VALUES (${remark_id}, '${ticket_no}', '${attachmentString}', '${created_by}', '${formattedDate}')
     `;
     console.log("SQL Query:", sql);
 
@@ -2845,7 +2845,9 @@ app.get("/getComplaintDetails/:ticket_no", async (req, res) => {
     const pool = await poolPromise;
 
     // Direct SQL query without parameter binding for remarks
-    const remarkQuery = `SELECT ac.*, lu.title FROM awt_complaintremark as ac LEFT JOIN awt_engineermaster as lu ON lu.engineer_id = ac.created_by WHERE ac.ticket_no = ${"'" + ticket_no + "'"} order by id DESC`;
+    const remarkQuery = `SELECT ac.*, ud.title FROM awt_complaintremark as ac LEFT JOIN userdetails as ud on ud.usercode = ac.created_by WHERE ac.ticket_no = ${"'" + ticket_no + "'"} order by id DESC`;
+
+    console.log(remarkQuery, "$$")
 
     // Execute remark query
     const remarksResult = await pool.request().query(remarkQuery);
@@ -2857,8 +2859,6 @@ app.get("/getComplaintDetails/:ticket_no", async (req, res) => {
       WHERE ticket_no = ${"'" + ticket_no + "'"}
     `;
 
-    console.log(remarkQuery, "%%%")
-    console.log(attachmentQuery, "SSS")
 
 
     // Execute attachment query
@@ -6789,7 +6789,7 @@ app.post("/uploadcomplaintattachments", upload.array("attachment"), async (req, 
 
     // SQL query to insert attachments
     const sql = `INSERT INTO awt_complaintattachment (remark_id, ticket_no, attachment, created_by, created_date)
-                    VALUES (${remark_id}, ${ticket_no}, '${attachmentString}', ${created_by}, GETDATE())`;
+                    VALUES (${remark_id}, ${ticket_no}, '${attachmentString}', '${created_by}', GETDATE())`;
     const result = await pool.request().query(sql);
 
     res.json({
@@ -7177,7 +7177,7 @@ app.post("/add_new_ticket", authenticateToken, async (req, res) => {
       .input("area", sql.NVarChar, details.district)
       .input("pincode", sql.NVarChar, details.pincode)
       .input("formattedDate", sql.DateTime, formattedDate)
-      .input("created_by", sql.Int, created_by)
+      .input("created_by", sql.NVarChar, created_by)
       .input("purchase_date", purchaseDateFormatted)
       .input("invoice_date", purchaseDateFormattedss)
       .query(complaintSQL);
@@ -7417,7 +7417,7 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
       OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY`;
 
 
-      console.log(countSql)
+
 
 
 
@@ -7481,8 +7481,6 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
 app.get("/getcomplainlistcsp", async (req, res) => {
   const { licare_code } = req.query;
 
-
-
   try {
     const pool = await poolPromise;
     const {
@@ -7500,117 +7498,130 @@ app.get("/getcomplainlistcsp", async (req, res) => {
       msp,
       mode_of_contact,
       customer_class,
+      page = 1, // Default to page 1
+      pageSize = 10 // Default to 10 items per page
     } = req.query;
 
-    console.log('Received status:', status); // Debug log
 
     let sql = `
         SELECT c.*,
         DATEDIFF(day, (c.ticket_date), GETDATE()) AS ageingdays
         FROM complaint_ticket AS c
-
         WHERE c.deleted = 0 AND c.csp = '${licare_code}'
     `;
 
-    let nots = 'NOT';
+        // Fetch total count of records (without pagination)
+        let countSql = `
+        SELECT COUNT(*) AS totalRecords
+        FROM complaint_ticket AS c
+        WHERE c.deleted = 0 AND c.csp = '${licare_code}'
+      `;
 
-    console.log("CSp Query", sql);
 
 
     if (fromDate && toDate) {
       sql += ` AND CAST(c.ticket_date AS DATE) >= CAST('${fromDate}' AS DATE)
                 AND CAST(c.ticket_date AS DATE) <= CAST('${toDate}' AS DATE)`;
-      nots = ''
+      countSql += ` AND CAST(c.ticket_date AS DATE) >= CAST('${fromDate}' AS DATE)
+                AND CAST(c.ticket_date AS DATE) <= CAST('${toDate}' AS DATE)`
     }
 
     if (customerName) {
       sql += ` AND c.customer_name LIKE '%${customerName}%'`;
-      nots = ''
+      countSql += ` AND c.customer_name LIKE '%${customerName}%'`
     }
 
     if (customerEmail) {
       sql += ` AND c.customer_email LIKE '%${customerEmail}%'`;
-      nots = ''
+      countSql += ` AND c.customer_email LIKE '%${customerEmail}%'`
     }
-
+    
     if (customerMobile) {
       sql += ` AND c.customer_mobile LIKE '%${customerMobile}%'`;
-      nots = ''
+      countSql += ` AND c.customer_mobile LIKE '%${customerMobile}%'`
+      
     }
-
+    
     if (serialNo) {
       sql += ` AND c.serial_no LIKE '%${serialNo}%'`;
-      nots = ''
+      countSql += ` AND c.serial_no LIKE '%${serialNo}%'`
+      
     }
-
+    
     if (productCode) {
       sql += ` AND c.ModelNumber LIKE '%${productCode}%'`;
-      nots = ''
+      countSql += ` AND c.ModelNumber LIKE '%${productCode}%'`
+      
     }
-
+    
     if (ticketno) {
       sql += ` AND c.ticket_no LIKE '%${ticketno}%'`;
-      nots = ''
+      countSql += ` AND c.ticket_no LIKE '%${ticketno}%'`
+      
     }
     if (customerID) {
       sql += ` AND c.customer_id LIKE '%${customerID}%'`;
-      nots = ''
+      countSql += ` AND c.customer_id LIKE '%${customerID}%'`
+      
     }
-
-    //csp msp call_type and customer_class
-
+    
     if (csp) {
       sql += ` AND c.csp LIKE '%${csp}%'`;
-      nots = ''
+      countSql += ` AND c.csp LIKE '%${csp}%'`
+      
     }
-
-    // if (msp) {
-    //   sql += ` AND c.msp LIKE '%${msp}%'`;
-    //   nots = ''
-    // }
-
+    
     if (mode_of_contact) {
       sql += ` AND c.mode_of_contact LIKE '%${mode_of_contact}%'`;
-      nots = ''
+      countSql += ` AND c.mode_of_contact LIKE '%${mode_of_contact}%'`
+      
     }
-
+    
     if (customer_class) {
       sql += ` AND c.customer_class LIKE '%${customer_class}%'`;
-      nots = ''
+      countSql += ` AND c.customer_class LIKE '%${customer_class}%'`
+      
     }
-
-
-    // Modified status filtering logic
-    if (status === 'Closed' || status === 'Cancelled') {
+    
+    if (status) {
       sql += ` AND c.call_status = '${status}'`;
-    } else if (status === '') {
-      // sql += ` AND c.call_status  IN ('Closed', 'Cancelled')`;
-      sql += ``;
-    } else if (status) {
-      sql += ` AND c.call_status = '${status}'`;
+      countSql += ` AND c.call_status = '${status}'`
+      
     } else {
-      // sql += ` AND c.call_status ${nots} IN ('Closed', 'Cancelled')`;
-      sql += ``;
+      sql += ` AND c.call_status != 'Closed' AND c.call_status != 'Cancelled'`;
+      countSql += ` AND c.call_status != 'Closed' AND c.call_status != 'Cancelled'`
+
     }
 
     if (status == undefined) {
-      sql += ``
+      sql += ``;
     }
 
-
-    sql += " ORDER BY c.id DESC";
-
-
+    // Add ORDER BY and pagination
+    const offset = (page - 1) * pageSize;
+    sql += ` ORDER BY c.id DESC OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
 
     console.log('SQL Query:', sql); // Debug log
     const result = await pool.request().query(sql);
 
-    return res.json(result.recordset);
+
+    const countResult = await pool.request().query(countSql);
+    const totalRecords = countResult.recordset[0].totalRecords;
+
+    // Respond with data and pagination details
+    return res.json({
+      data: result.recordset,
+      totalRecords,
+      currentPage: parseInt(page, 10),
+      pageSize: parseInt(pageSize, 10),
+      totalPages: Math.ceil(totalRecords / pageSize),
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "An error occurred while fetching the complaint list" });
   }
 });
+
 
 //CSP LIST END
 
@@ -8315,3 +8326,5 @@ app.post("/checkuser", authenticateToken, async (req, res) => {
     return res.status(500).json({ error: "Database error occurred" });
   }
 });
+
+

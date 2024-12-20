@@ -97,6 +97,7 @@ import Details from './Components/App/Compo/Details';
 import Mobile from './Components/App/Compo/Mobile';
 import { Complaintviewmsp } from './Components/Pages/Master/Complaintviewmsp';
 import { CspTicketView } from './Components/Pages/Master/CspTicketView';
+import NotAuthenticate from './Components/Authenticate/NotAuthenticate';
 
 
 
@@ -125,6 +126,10 @@ const Router = createBrowserRouter([
   {
     path: "/msp/msplogin",
     element: <MSP_Login />,
+  },
+  {
+    path: "/notauthenticate",
+    element: <NotAuthenticate />,
   },
 
 

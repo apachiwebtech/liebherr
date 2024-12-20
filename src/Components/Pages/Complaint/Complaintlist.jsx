@@ -44,9 +44,9 @@ export function Complaintlist(params) {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [totalCount, setTotalCount] = useState(0);
   const { loaders, axiosInstance } = useAxiosLoader();
-
+  
+  const [totalCount, setTotalCount] = useState(0);
   const totalPages = Math.ceil(totalCount / pageSize);
 
   const handlePageChange = (page) => {

@@ -9,7 +9,9 @@ import { App_Url } from '../Utils/Base_Url';
 
 export function Siteheader(params) {
 const [Name, setName] = useState([])
+
   const navigate = useNavigate();
+
   const redirect = () => {
     window.location.pathname = '/registercomaplaint'
   }

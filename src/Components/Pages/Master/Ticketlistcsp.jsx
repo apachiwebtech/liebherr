@@ -11,12 +11,21 @@ const Ticketlistcsp = (params) => {
     const [Complaintdata, setComplaintdata] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
     const token = localStorage.getItem("token"); // Get token from localStorage
-
+    const [paginationInfo, setPaginationInfo] = useState(null);
     const created_by = localStorage.getItem("userId"); // Get user ID from localStorage
     const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
     const licare_code = localStorage.getItem("licare_code");
-
+    const [currentPage, setCurrentPage] = useState(1);
     const [isEdit, setIsEdit] = useState(false);
+    const [totalCount, setTotalCount] = useState(0);
+    const [pageSize, setPageSize] = useState(10);
+    const totalPages = Math.ceil(totalCount / pageSize);
+
+    const handlePageChange = (page) => {
+
+        setCurrentPage(page);
+        fetchFilteredData(page); // Fetch data for the new page
+    };
 
     const [formData, setFormData] = useState({
         title: '',
@@ -50,39 +59,63 @@ const Ticketlistcsp = (params) => {
         return date.toLocaleDateString('en-GB', options).replace(/\//g, '-');
     };
 
-
-    const fetchComplaintlist = async () => {
+    const fetchComplaintlist = async (page) => {
+        
         try {
-            const response = await axiosInstance.get(`${Base_Url}/getcomplainlistcsp?licare_code=${licare_code}`, {
+            const response = await axiosInstance.get(`${Base_Url}/getcomplainlistcsp`, {
+                params: {
+                    licare_code,
+                    page, // Add page parameter for pagination
+                    pageSize, // Add pageSize parameter for pagination
+                },
                 headers: {
                     Authorization: token, // Send token in headers
                 },
             });
-            // Filter out 'Closed' and 'Cancelled' status complaints by default
-            const filteredComplaints = response.data.filter(complaint =>
-                !['Closed', 'Cancelled'].includes(complaint.call_status)
-            );
-            setComplaintdata(response.data);
-            setFilteredData(filteredComplaints);
+
+            const { data, totalRecords, currentPage, totalPages } = response.data;
+            setTotalCount(totalRecords); // Total count
+
+            // // Filter out complaints with 'Closed' or 'Cancelled' call statuses
+            // const filteredComplaints = data.filter(
+            //     (complaint) => !['Closed', 'Cancelled'].includes(complaint.call_status)
+            // );
+
+            // Update states with received data
+            setComplaintdata(data);
+            setFilteredData(data);
+            setPaginationInfo({
+                totalRecords,
+                currentPage,
+                totalPages,
+                pageSize,
+            });
         } catch (error) {
-            console.error('Error fetching Complaintdata:', error);
+            console.error('Error fetching Complaint data:', error);
+
+            // Reset states in case of an error
             setComplaintdata([]);
             setFilteredData([]);
+            setPaginationInfo(null); // Reset pagination info
         }
     };
 
-    const fetchFilteredData = async () => {
+
+
+    const fetchFilteredData = async (page = 1, pageSize = 10) => {
         try {
             const params = new URLSearchParams();
 
-            // Add all filters to params
+            // Add all filters and pagination parameters to params
             Object.entries(searchFilters).forEach(([key, value]) => {
-                if (value) { // Only add if value is not empty
+                if (value) { // Only add non-empty values
                     params.append(key, value);
                 }
             });
 
             params.append('licare_code', licare_code);
+            params.append('page', page); // Add page parameter
+            params.append('pageSize', pageSize); // Add pageSize parameter
 
             console.log('Sending params:', params.toString()); // Debug log
 
@@ -91,12 +124,27 @@ const Ticketlistcsp = (params) => {
                     Authorization: token, // Send token in headers
                 },
             });
-            setFilteredData(response.data);
+
+            const { data, totalRecords, currentPage, totalPages } = response.data;
+            setTotalCount(totalRecords); 
+            // Update filtered data and pagination info
+            setFilteredData(data);
+            setComplaintdata(data);
+            setPaginationInfo({
+                totalRecords,
+                currentPage,
+                totalPages,
+                pageSize,
+            });
         } catch (error) {
             console.error('Error fetching filtered data:', error);
+
+            // Reset states in case of an error
             setFilteredData([]);
+            setPaginationInfo(null); // Reset pagination info
         }
     };
+
 
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
@@ -358,42 +406,8 @@ const Ticketlistcsp = (params) => {
                                     </div>
                                 </div>
 
-                                {/* Buttons and message at the far-right corner */}
-                                {/* <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
-        <div className="form-group">
-            <button
-                className="btn btn-primary mr-2"
-                onClick={applyFilters}
-            >
-                Search
-            </button>
-            <button
-                className="btn btn-secondary"
-                onClick={resetFilters}
-                style={{
-                    marginLeft: '5px',
-                }}
-            >
-                Reset
-            </button>
-            {filteredData.length === 0 && (
-                <div
-                    style={{
-                        backgroundColor: '#f8d7da',
-                        color: '#721c24',
-                        padding: '5px 10px',
-                        marginLeft: '10px',
-                        borderRadius: '4px',
-                        border: '1px solid #f5c6cb',
-                        fontSize: '14px',
-                        display: 'inline-block'
-                    }}
-                >
-                    No Record Found
-                </div>
-            )}
-        </div>
-    </div> */}
+                          
+
                             </div>
 
                             {/* Third row of filter */}
@@ -448,19 +462,6 @@ const Ticketlistcsp = (params) => {
                                     </div>
                                 </div>
 
-                                {/* <div className="col-md-3">
-    <div className="form-group">
-        <label>Customer Email</label>
-        <input
-            type="text"
-            className="form-control"
-            name="customerEmail"
-            value={searchFilters.customerEmail}
-            placeholder="Search by customer email"
-            onChange={handleFilterChange}
-        />
-    </div>
-</div> */}
 
                                 {/* Buttons and message at the far-right corner */}
                                 <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
@@ -525,74 +526,121 @@ const Ticketlistcsp = (params) => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredData.map((item, index) => (
-                                    <tr key={item.id}>
-                                        <td>{index + 1}</td>
-                                        <td>{item.ticket_no}</td>
-                                        <td>{formatDate(item.ticket_date)}</td>
-                                        <td>{item.customer_name}</td>
-                                        <td>{item.ModelNumber}</td>
-                                        <td>{item.serial_no}</td>
-                                        <td>{item.ageingdays}</td>
-                                        <td>{item.assigned_name}</td>
-                                        <td>{item.call_status}</td>
-                                        {/* <td>
-                                        <Link to={`/registercomaplaint/${item.ticket_no}`}><button
-                                                className='btn'
+                            {filteredData.map((item, index) => {
+    const displayIndex = (currentPage - 1) * pageSize + index + 1;
+    return (
+        <tr key={item.id}>
+            <td>{displayIndex}</td>
+            <td>{item.ticket_no}</td>
+            <td>{formatDate(item.ticket_date)}</td>
+            <td>{item.customer_name}</td>
+            <td>{item.ModelNumber}</td>
+            <td>{item.serial_no}</td>
+            <td>{item.ageingdays}</td>
+            <td>{item.assigned_name}</td>
+            <td>{item.call_status}</td>
+            {/* Uncomment the below block if editing is needed */}
+            {/* <td>
+                <Link to={`/registercomaplaint/${item.ticket_no}`}>
+                    <button
+                        className="btn"
+                        disabled={isActionDisabled(item.call_status)}
+                        title={
+                            isActionDisabled(item.call_status)
+                                ? "Cannot edit closed or cancelled complaints"
+                                : "Edit"
+                        }
+                        style={{
+                            backgroundColor: 'transparent',
+                            border: 'none',
+                            color: isActionDisabled(item.call_status) ? 'gray' : 'blue',
+                            fontSize: '20px',
+                            cursor: isActionDisabled(item.call_status) ? 'not-allowed' : 'pointer',
+                        }}
+                    >
+                        <FaPencilAlt />
+                    </button>
+                </Link>
+            </td> */}
+            <td>
+                <button
+                    className="btn"
+                    onClick={() => {
+                        navigate(`/csp/ticketview/${item.id}`);
+                        addInTab(item.ticket_no, item.id);
+                    }}
+                    title="View"
+                    style={{
+                        backgroundColor: 'transparent',
+                        border: 'none',
+                        color: 'blue',
+                        fontSize: '20px',
+                        cursor: 'pointer',
+                    }}
+                >
+                    <FaEye />
+                </button>
+            </td>
+            {/* Uncomment the below block if deletion is needed */}
+            {/* <td>
+                <button
+                    className="btn"
+                    onClick={() => deleted(item.id)}
+                    title="Delete"
+                    style={{
+                        backgroundColor: 'transparent',
+                        border: 'none',
+                        color: 'red',
+                        fontSize: '20px',
+                    }}
+                >
+                    <FaTrash />
+                </button>
+            </td> */}
+        </tr>
+    );
+})}
 
-                                                disabled={isActionDisabled(item.call_status)}
-                                                title={isActionDisabled(item.call_status) ? "Cannot edit closed or cancelled complaints" : "Edit"}
-                                                style={{
-                                                    backgroundColor: 'transparent',
-                                                    border: 'none',
-                                                    color: isActionDisabled(item.call_status) ? 'gray' : 'blue',
-                                                    fontSize: '20px',
-                                                    cursor: isActionDisabled(item.call_status) ? 'not-allowed' : 'pointer'
-                                                }}
-                                            >
-                                                <FaPencilAlt />
-                                            </button></Link>
-                                        </td> */}
-                                        <td>
-                                            <button
-                                                className='btn'
-                                                onClick={() => {
-                                                    navigate(`/csp/ticketview/${item.id}`)
-                                                    addInTab(item.ticket_no, item.id)
-                                                }}
-                                                title="View"
-                                                style={{
-                                                    backgroundColor: 'transparent',
-                                                    border: 'none',
-                                                    color: 'blue',
-                                                    fontSize: '20px',
-                                                    cursor: 'pointer'
-                                                }}
-                                            >
-                                                <FaEye />
-                                            </button>
-
-
-                                        </td>
-                                        {/* <td>
-                                            <button
-                                                    className='btn'
-                                                    onClick={() => deleted(item.id)}
-                                                    title="Delete"
-                                                    style={{
-                                                        backgroundColor: 'transparent',
-                                                        border: 'none',
-                                                        color: 'red',
-                                                        fontSize: '20px'
-                                                    }}
-                                                >
-                                                    <FaTrash />
-                                                </button>
-                                        </td> */}
-                                    </tr>
-                                ))}
                             </tbody>
                         </table>
+
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                            <button
+                                onClick={() => handlePageChange(currentPage - 1)}
+                                disabled={currentPage <= 1}
+                                style={{
+                                    padding: '8px 15px',
+                                    fontSize: '16px',
+                                    cursor: currentPage <= 1 ? 'not-allowed' : 'pointer',
+                                    backgroundColor: currentPage <= 1 ? '#ccc' : '#007bff',
+                                    color: '#fff',
+                                    border: 'none',
+                                    borderRadius: '5px',
+                                    transition: 'background-color 0.3s',
+                                }}
+                            >
+                                Previous
+                            </button>
+                            <span style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                                Page {currentPage} of {totalPages}
+                            </span>
+                            <button
+                                onClick={() => handlePageChange(currentPage + 1)}
+                                disabled={currentPage >= totalPages}
+                                style={{
+                                    padding: '8px 15px',
+                                    fontSize: '16px',
+                                    cursor: currentPage >= totalPages ? 'not-allowed' : 'pointer',
+                                    backgroundColor: currentPage >= totalPages ? '#ccc' : '#007bff',
+                                    color: '#fff',
+                                    border: 'none',
+                                    borderRadius: '5px',
+                                    transition: 'background-color 0.3s',
+                                }}
+                            >
+                                Next
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -36,7 +36,7 @@ export function Registercomplaint(params) {
   const { Comp_id } = useParams()
   const [files2, setFiles2] = useState([]); // New state for Attachment 2 files
   const [location, setLocation] = useState([])
-  const created_by = localStorage.getItem("userId"); // Get user ID from localStorage
+  const created_by = localStorage.getItem("licare_code"); // Get user ID from localStorage
   const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
   const [attachments2, setAttachments2] = useState([]);
   const [locations, setlocations] = useState([])

@@ -256,7 +256,7 @@ app.post("/fetchservicemaster", async (req, res) => {
          .input('bank_acc', sql.VarChar, bank_acc)
          .input('bank_ifsc', sql.VarChar, bank_ifsc)
          .input('bank_address', sql.VarChar, bank_address)
-         .input('with_liebherr', sql.Bit, with_liebherr)
+         .input('with_liebherr', sql.DateTime, with_liebherr)
          .input('lastworkindate', sql.DateTime, lastworkindate)
          .input('contract_acti', sql.DateTime, contract_acti)
          .input('contract_expir', sql.DateTime, contract_expir)

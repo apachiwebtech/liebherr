@@ -77,7 +77,7 @@ export function Complaintview(params) {
   const [callstatus, setCallstatus] = useState([]); // Current attachment for modal
   const [subcallstatus, setsubCallstatus] = useState([]); // Current attachment for modal
   const [callstatusid, setCallstatusid] = useState(""); // Current attachment for modal
-  const created_by = localStorage.getItem("userId"); // Get user ID from localStorage
+  const created_by = localStorage.getItem("licare_code"); // Get user ID from localStorage
   const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
   const [GroupDefectsite, setGroupDefectsite] = useState([]);
   const [GroupDefecttype, setGroupDefecttype] = useState([]);
@@ -703,7 +703,7 @@ export function Complaintview(params) {
       engineer_id: complaintview.engineer_id,
       call_status: callstatusid,
       sub_call_status: complaintview.sub_call_status,
-      updated_by: 1,
+      updated_by: created_by,
       ticket_no: complaintview.ticket_no,
       group_code: groupstatusid,
       site_defect: complaintview.site_defect,
