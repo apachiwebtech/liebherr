@@ -58,12 +58,12 @@ export function Engineerlist(params) {
                 },
             }
             );
-            setEngineerdata(response.data);
+            setEngineerdata(response.data.data);
             setTotalCount(response.data.totalCount);
         } catch (error) {
             console.error('Error fetching Engineerdata:', error);
             setEngineerdata([]);
-        }
+        }   
     };
     const handleChangestatus = (e) => {
         try {

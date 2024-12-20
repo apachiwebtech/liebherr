@@ -5,6 +5,7 @@ const cors = require('cors');
 const complaint = require("./Routes/complaint");
 const common = require("./Routes/common");
 const Category = require("./Routes/ProductMaster/Category");
+const MobApp = require("./Routes/MobApp");
 const multer = require("multer");
 const bodyParser = require("body-parser");
 const path = require("path");
@@ -45,6 +46,7 @@ const authenticateToken = (req, res, next) => {
 app.use("/", complaint);
 app.use("/", common);
 app.use("/", Category);
+app.use("/", MobApp);
 
 
 
@@ -110,7 +112,7 @@ app.post("/loginuser", async (req, res) => {
 
       // Generate JWT token
       const token = jwt.sign(
-        { id: user.id, Lhiuser: user.Lhiuser  ,email : user.email}, // Payload
+        { id: user.id, Lhiuser: user.Lhiuser  ,Email : user.email}, // Payload
         JWT_SECRET, // Secret key
         { expiresIn: "8h" } // Token validity
       );
@@ -3192,23 +3194,23 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
 
     // Split customer_name into customer_fname and customer_lname
-
-
+    
+    
     const [customer_fname, ...customer_lnameArr] = customer_name.split(' ');
-    const customer_lname = customer_lnameArr.join(' ');
+      const customer_lname = customer_lnameArr.join(' ');
+      
+
+      const getcustcount = `select top 1 id from awt_customer where customer_id is not null order by id desc`
+
+      const getcustresult = await pool.request().query(getcustcount)
+
+      const custcount = getcustresult.recordset[0].id;
+      
+      const newcustid = 'B' + custcount.toString().padStart(7, "0")
 
 
-    const getcustcount = `select top 1 id from awt_customer where customer_id is not null order by id desc`
 
-    const getcustresult = await pool.request().query(getcustcount)
-
-    const custcount = getcustresult.recordset[0].id;
-
-    const newcustid = 'B' + custcount.toString().padStart(7, "0")
-
-
-
-    if (ticket_id == '') {
+      if (ticket_id == '') {
 
 
       // Insert into awt_customer
@@ -3233,7 +3235,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
     }
 
-
+ 
 
 
 
@@ -4322,7 +4324,7 @@ app.get("/getengineer", authenticateToken, async (req, res) => {
 
     let params = [];
 
-    sql += ` ORDER BY t.engineer_id DESC OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY`;
+    sql += ` ORDER BY r.engineer_id DESC OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY`;
     params.push(
       { name: "offset", value: offset },
       { name: "pageSize", value: parseInt(pageSize) }
@@ -7292,15 +7294,13 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
 
     const currentDate = new Date().toISOString().split('T')[0]
 
-    console.log(currentDate, "$$$")
-
     let sql = `
         SELECT c.*,
                DATEDIFF(DAY, c.ticket_date, GETDATE()) AS ageingdays
         FROM complaint_ticket AS c
         WHERE c.deleted = 0`;
 
-    let countSql = `
+    const countSql = `
         SELECT COUNT(*) AS totalCount
         FROM complaint_ticket AS c
         WHERE c.deleted = 0`;
@@ -7310,95 +7310,78 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
     // Filtering conditions
     if (fromDate && toDate) {
       sql += ` AND CAST(c.ticket_date AS DATE) BETWEEN @fromDate AND @toDate`;
-      countSql += ` AND CAST(c.ticket_date AS DATE) BETWEEN @fromDate AND @toDate`;
       params.push({ name: "fromDate", value: fromDate }, { name: "toDate", value: toDate });
     }
 
     if (customerName) {
       sql += ` AND c.customer_name LIKE @customerName`;
-      countSql += ` AND c.customer_name LIKE @customerName`;
       params.push({ name: "customerName", value: `%${customerName}%` });
     }
 
     if (customerEmail) {
       sql += ` AND c.customer_email LIKE @customerEmail`;
-      countSql += ` AND c.customer_email LIKE @customerEmail`;
       params.push({ name: "customerEmail", value: `%${customerEmail}%` });
     }
 
     if (customerMobile) {
       sql += ` AND c.customer_mobile LIKE @customerMobile`;
-      countSql += ` AND c.customer_mobile LIKE @customerMobile`;
       params.push({ name: "customerMobile", value: `%${customerMobile}%` });
     }
 
     if (serialNo) {
       sql += ` AND c.serial_no LIKE @serialNo`;
-      countSql += ` AND c.serial_no LIKE @serialNo`;
       params.push({ name: "serialNo", value: `%${serialNo}%` });
     }
 
     if (productCode) {
       sql += ` AND c.ModelNumber LIKE @productCode`;
-      countSql += ` AND c.ModelNumber LIKE @productCode`;
       params.push({ name: "productCode", value: `%${productCode}%` });
     }
 
     if (ticketno) {
       sql += ` AND c.ticket_no LIKE @ticketno`;
-      countSql += ` AND c.ticket_no LIKE @ticketno`;
       params.push({ name: "ticketno", value: `%${ticketno}%` });
     }
 
     if (customerID) {
       sql += ` AND c.customer_id LIKE @customerID`;
-      countSql += ` AND c.customer_id LIKE @customerID`;
       params.push({ name: "customerID", value: `%${customerID}%` });
     }
 
     if (csp) {
       sql += ` AND c.csp LIKE @csp`;
-      countSql += ` AND c.csp LIKE @csp`;
       params.push({ name: "csp", value: `%${csp}%` });
     }
 
     if (msp) {
       sql += ` AND c.msp LIKE @msp`;
-      countSql += ` AND c.msp LIKE @msp`;
       params.push({ name: "msp", value: `%${msp}%` });
     }
 
     if (mode_of_contact) {
       sql += ` AND c.mode_of_contact LIKE @mode_of_contact`;
-      countSql += ` AND c.mode_of_contact LIKE @mode_of_contact`;
       params.push({ name: "mode_of_contact", value: `%${mode_of_contact}%` });
     }
 
     if (customer_class) {
       sql += ` AND c.customer_class LIKE @customer_class`;
-      countSql += ` AND c.customer_class LIKE @customer_class`;
       params.push({ name: "customer_class", value: `%${customer_class}%` });
     }
 
     if (status) {
       sql += ` AND c.call_status = @status`;
-      countSql += ` AND c.call_status = @status`;
       params.push({ name: "status", value: status });
     } else {
       sql += ` AND c.call_status != 'Closed' AND c.call_status != 'Cancelled'`;
-      countSql += ` AND c.call_status != 'Closed' AND c.call_status != 'Cancelled'`;
     }
 
     if (upcoming == 'current') {
       sql += ` AND ticket_date <= @currentdate`;
-      countSql += ` AND ticket_date <= @currentdate`;
       params.push({ name: "currentdate", value: currentDate });
 
 
     } else {
       sql += ` AND ticket_date > @currentdate`;
-      countSql += ` AND ticket_date > @currentdate`;
-
       params.push({ name: "currentdate", value: currentDate });
 
     }
@@ -7416,12 +7399,6 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
         c.ticket_date DESC
       OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY`;
 
-
-      console.log(countSql)
-
-
-
-
       params.push(
         { name: "offset", value: offset },
         { name: "pageSize", value: parseInt(pageSize) }
@@ -7436,8 +7413,6 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
           ELSE 3
         END,
         c.ticket_date DESC`;
-
-
 
     }
 
@@ -7465,7 +7440,6 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
     console.error("Error fetching complaint list:", err.message);
     return res.status(500).json({
       message: "An error occurred while fetching the complaint list",
-      err: err.message
     });
   }
 });
@@ -7618,7 +7592,9 @@ app.get("/getcomplainlistcsp", async (req, res) => {
 //MSP complaint list
 
 app.get("/getcomplainlistmsp", async (req, res) => {
-  const { licare_code, page = 1, pageSize = 10 } = req.query;
+  const { licare_code } = req.query;
+
+
 
   try {
     const pool = await poolPromise;
@@ -7631,121 +7607,119 @@ app.get("/getcomplainlistmsp", async (req, res) => {
       productCode,
       customerMobile,
       ticketno,
+
       status,
       customerID,
+
       msp,
       mode_of_contact,
       customer_class,
     } = req.query;
 
-    const offset = (page - 1) * pageSize;
+    console.log('Received status:', status); // Debug log
 
     let sql = `
         SELECT c.*, e.title as assigned_name,
-               DATEDIFF(day, (c.ticket_date), GETDATE()) AS ageingdays
-        FROM complaint_ticket AS c
-        JOIN awt_engineermaster AS e ON c.engineer_id = e.engineer_id
-        WHERE c.deleted = 0 AND c.msp = '${licare_code}'
-    `;
-    let countSql = `
-        SELECT COUNT(*) as totalCount
+        DATEDIFF(day, (c.ticket_date), GETDATE()) AS ageingdays
         FROM complaint_ticket AS c
         JOIN awt_engineermaster AS e ON c.engineer_id = e.engineer_id
         WHERE c.deleted = 0 AND c.msp = '${licare_code}'
     `;
 
-    // Dynamic filters
+    let nots = 'NOT';
+
+
+
     if (fromDate && toDate) {
-      sql += ` AND CAST(c.ticket_date AS DATE) BETWEEN CAST('${fromDate}' AS DATE) AND CAST('${toDate}' AS DATE)`;
-      countSql += ` AND CAST(c.ticket_date AS DATE) BETWEEN CAST('${fromDate}' AS DATE) AND CAST('${toDate}' AS DATE)`;
+      sql += ` AND CAST(c.ticket_date AS DATE) >= CAST('${fromDate}' AS DATE)
+                AND CAST(c.ticket_date AS DATE) <= CAST('${toDate}' AS DATE)`;
+      nots = ''
     }
 
     if (customerName) {
       sql += ` AND c.customer_name LIKE '%${customerName}%'`;
-      countSql += ` AND c.customer_name LIKE '%${customerName}%'`;
+      nots = ''
     }
 
     if (customerEmail) {
       sql += ` AND c.customer_email LIKE '%${customerEmail}%'`;
-      countSql += ` AND c.customer_email LIKE '%${customerEmail}%'`;
+      nots = ''
     }
 
     if (customerMobile) {
       sql += ` AND c.customer_mobile LIKE '%${customerMobile}%'`;
-      countSql += ` AND c.customer_mobile LIKE '%${customerMobile}%'`;
+      nots = ''
     }
 
     if (serialNo) {
       sql += ` AND c.serial_no LIKE '%${serialNo}%'`;
-      countSql += ` AND c.serial_no LIKE '%${serialNo}%'`;
+      nots = ''
     }
 
     if (productCode) {
       sql += ` AND c.ModelNumber LIKE '%${productCode}%'`;
-      countSql += ` AND c.ModelNumber LIKE '%${productCode}%'`;
+      nots = ''
     }
 
     if (ticketno) {
       sql += ` AND c.ticket_no LIKE '%${ticketno}%'`;
-      countSql += ` AND c.ticket_no LIKE '%${ticketno}%'`;
+      nots = ''
     }
-
     if (customerID) {
       sql += ` AND c.customer_id LIKE '%${customerID}%'`;
-      countSql += ` AND c.customer_id LIKE '%${customerID}%'`;
+      nots = ''
     }
+
+    //csp msp call_type and customer_class
+
 
     if (msp) {
       sql += ` AND c.msp LIKE '%${msp}%'`;
-      countSql += ` AND c.msp LIKE '%${msp}%'`;
+      nots = ''
     }
 
     if (mode_of_contact) {
       sql += ` AND c.mode_of_contact LIKE '%${mode_of_contact}%'`;
-      countSql += ` AND c.mode_of_contact LIKE '%${mode_of_contact}%'`;
+      nots = ''
     }
 
     if (customer_class) {
       sql += ` AND c.customer_class LIKE '%${customer_class}%'`;
-      countSql += ` AND c.customer_class LIKE '%${customer_class}%'`;
+      nots = ''
     }
 
-    // Status filtering
+
+    // Modified status filtering logic
     if (status === 'Closed' || status === 'Cancelled') {
       sql += ` AND c.call_status = '${status}'`;
-      countSql += ` AND c.call_status = '${status}'`;
+    } else if (status === '') {
+      // sql += ` AND c.call_status  IN ('Closed', 'Cancelled')`;
+      sql += ``;
     } else if (status) {
       sql += ` AND c.call_status = '${status}'`;
-      countSql += ` AND c.call_status = '${status}'`;
+    } else {
+      // sql += ` AND c.call_status ${nots} IN ('Closed', 'Cancelled')`;
+      sql += ``;
     }
 
-    // Add pagination
-    sql += `
-      ORDER BY c.id DESC
-      OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY
-    `;
+    if (status == undefined) {
+      sql += ``
+    }
 
-    console.log(sql);
 
-    // Execute the queries
-    const dataResult = await pool.request().query(sql);
-    const countResult = await pool.request().query(countSql);
+    sql += " ORDER BY c.id DESC";
 
-    return res.json({
-      data: dataResult.recordset,
-      totalCount: countResult.recordset[0].totalCount,
-      page: parseInt(page),
-      pageSize: parseInt(pageSize),
-    });
+
+
+    console.log('SQL Query:', sql); // Debug log
+    const result = await pool.request().query(sql);
+
+    return res.json(result.recordset);
   } catch (err) {
-    console.error("Error fetching complaint list:", err.message);
-    return res.status(500).json({
-      message: "An error occurred while fetching the complaint list",
-      error: err.message,
-    });
+    console.error(err);
+    return res.status(500).json({ message: "An error occurred while fetching the complaint list" });
   }
 });
-
 
 //MSP complaint list
 
@@ -8315,3 +8289,4 @@ app.post("/checkuser", authenticateToken, async (req, res) => {
     return res.status(500).json({ error: "Database error occurred" });
   }
 });
+
