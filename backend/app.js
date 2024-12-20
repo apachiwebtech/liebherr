@@ -4322,7 +4322,7 @@ app.get("/getengineer", authenticateToken, async (req, res) => {
 
     let params = [];
 
-    sql += ` ORDER BY t.engineer_id DESC OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY`;
+    sql += ` ORDER BY r.engineer_id DESC OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY`;
     params.push(
       { name: "offset", value: offset },
       { name: "pageSize", value: parseInt(pageSize) }
