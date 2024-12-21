@@ -1,13 +1,24 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import { Base_Url } from '../../Utils/Base_Url';
+import { Base_Url, secretKey } from '../../Utils/Base_Url';
 import { useNavigate, useParams } from 'react-router-dom';
 import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
+import CryptoJS from 'crypto-js';
+import { error } from 'jquery';
 
 const QuotationEdit = () => {
   const { loaders, axiosInstance } = useAxiosLoader();
-    const { qid } = useParams()
+    let { qid } = useParams()
+
+try{
+    const bytes = CryptoJS.AES.decrypt(qid, secretKey);
+    const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+    qid = parseInt(decrypted, 10)
+}catch(error){
+    console.log("Error".error)
+}
+
     const navigate = useNavigate()
 
     const [value, setValue] = useState({
@@ -49,7 +60,9 @@ const QuotationEdit = () => {
 
 
     useEffect(() => {
+       
         getquotedetails()
+
     }, [])
 
 

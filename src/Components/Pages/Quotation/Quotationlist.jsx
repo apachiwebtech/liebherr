@@ -2,8 +2,8 @@ import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
-import { Base_Url } from '../../Utils/Base_Url';
-
+import { Base_Url, secretKey } from '../../Utils/Base_Url';
+import CryptoJS from 'crypto-js';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'datatables.net-bs4/css/dataTables.bootstrap4.min.css';
 import $ from 'jquery';
@@ -87,18 +87,12 @@ export function Quotationlist(params) {
         }
     };
 
-    const edit = async (id) => {
-        try {
-            const response = await axiosInstance.get(`${Base_Url}/requestquotationlist/${id}`, {
-                headers: {
-                    Authorization: token,
-                },
-            });
-            setFormData(response.data);
-            setIsEdit(true);
-        } catch (error) {
-            console.error('Error editing user:', error);
-        }
+    const sendtoedit = async (id) => {
+        alert(id)
+        id = id.toString()
+        const encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
+        alert(encrypted)
+        navigate(`quotation/${encrypted}`)
     };
 
     useEffect(() => {
@@ -112,7 +106,7 @@ export function Quotationlist(params) {
                 destroy: true, // Destroy any existing DataTable instance before reinitializing
                 paging: true,
                 searching: true,
-                ordering: true,
+                ordering: false ,
                 info: true,
                 lengthChange: false,
                 autoWidth: false,
@@ -186,16 +180,16 @@ export function Quotationlist(params) {
                                               {item.status}
                                             </td>
                                             <td>
-                                                <Link to={`/quotation/${item.id}`}>
+                                                
                                                     <button
                                                         className='btn'
-                                                        // onClick={() => edit(item.id)}
+                                                        onClick={()=>sendtoedit(item.id)}
                                                         title="Edit"
                                                         style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
                                                     >
                                                         <FaPencilAlt />
                                                     </button>
-                                                </Link>
+                                                
                                             </td>
                                         </tr>
                                     ))}

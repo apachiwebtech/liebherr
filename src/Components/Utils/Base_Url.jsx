@@ -2,3 +2,4 @@
 // export const Base_Url = "https://nodejs.licarecrm.in";
 //  export const Img_Url = "https://nodejs.licarecrm.in/uploads";
 export const App_Url = 'https://test-licare.liebherr.com'
+export const secretKey = 'licare'
