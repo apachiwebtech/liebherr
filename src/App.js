@@ -1,8 +1,7 @@
 import logo from './logo.svg';
 import './siteheader.css'
 import './App.css';
-import * as React from "react";
-import * as ReactDOM from "react-dom";
+import React, { Suspense } from 'react';
 import {
   createBrowserRouter,
   Outlet,
@@ -88,9 +87,7 @@ import { Quotationlist } from './Components/Pages/Quotation/Quotationlist';
 import QuotationEdit from './Components/Pages/Quotation/QuotationEdit';
 import Dash from './Components/Authenticate/Dash';
 import Authenticate from './Components/Authenticate/Authenticate';
-import AppLogin from './Components/App/AppLogin';
 import Dashbord from './Components/App/Compo/Dashbord';
-
 import History from './Components/App/Compo/History';
 import Data_lost from './Components/App/Compo/Data_lost';
 import Details from './Components/App/Compo/Details';
@@ -98,10 +95,24 @@ import Mobile from './Components/App/Compo/Mobile';
 import { Complaintviewmsp } from './Components/Pages/Master/Complaintviewmsp';
 import { CspTicketView } from './Components/Pages/Master/CspTicketView';
 import NotAuthenticate from './Components/Authenticate/NotAuthenticate';
+import AppLogin from './Components/App/Compo/Login';
+import ProtectedRoute from './Components/Authenticate/ProtectedRoute';
 
 
 
+const isAuthenticated = () => {
+  const token = localStorage.getItem('token');
 
+  alert(token)
+
+  if (!token) {
+    return false; // No token found, user is not authenticated
+
+  } else {
+    return true
+  }
+
+};
 
 
 
@@ -179,7 +190,7 @@ const Router = createBrowserRouter([
 
       {
         path: "/mobapp/dash",
-        element: <Dashbord/>,
+        element: <Dashbord />,
       },
       {
         path: '/mobapp/details',
@@ -200,6 +211,10 @@ const Router = createBrowserRouter([
       {
         path: '/mobapp/mobile',
         element: <Mobile />,
+      },
+      {
+        path: '/mobapp/applogin',
+        element: <AppLogin />,
       },
     ],
   },
@@ -555,7 +570,11 @@ const Router = createBrowserRouter([
       },
       {
         path: "/quotationlist",
-        element: <Quotationlist />
+        element: (
+          <Suspense fallback={<div>Loading data...</div>}>
+            <Quotationlist />
+          </Suspense>
+        )
       },
       {
         path: "/quotation/:qid",
@@ -614,14 +633,14 @@ function App() {
     }
   };
 
-  React.useEffect(() =>{
+  React.useEffect(() => {
     window.addEventListener('storage', (event) => {
       if (event.key === 'token') {
-          window.location.reload()
+        window.location.reload()
       }
-  });
+    });
 
-  },[])
+  }, [])
 
   React.useEffect(() => {
     fetchProtectedData()

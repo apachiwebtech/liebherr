@@ -46,24 +46,23 @@ const Authenticate = () => {
           }
       
 
-
-          if(res.data && res.data[0].usercode){
-            localStorage.setItem('licare_code', res.data[0].usercode)
-
-          }
-
-
-
+          
+          
+          
           if (res.data[0].userrole == 'lhi_user') {
+            localStorage.setItem('licare_code', res.data[0].usercode)
             setLoading(false)
             window.location.pathname = '/dashboard'
           } else if (res.data[0].userrole == 'awt_franchisemaster') {
+            localStorage.setItem('licare_code', res.data[0].usercode)
             setLoading(false)
             window.location.pathname = '/msp/ticketlistmsp'
           } else if (res.data[0].userrole == 'awt_childfranchisemaster') {
+            localStorage.setItem('licare_code', res.data[0].usercode)
             setLoading(false)
             window.location.pathname = '/csp/ticketlist'
           } else if (res.data[0].userrole == 'awt_engineermaster') {
+            localStorage.setItem('engineer_id', res.data[0].usercode)
             setLoading(false)
             window.location.pathname = '/mobapp/dash'
           }

@@ -8,7 +8,9 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { Network } from '@capacitor/network';
 
 
-function Login() {
+function AppLogin() {
+
+
   const navigate = useNavigate();
   const [datas, setdatas] = useState({})
   const [value, setValue] = useState({
@@ -69,53 +71,53 @@ function Login() {
   };
 
 
-    const handleSubmit = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault()
 
 
 
-      const passwordMd5 = CryptoJS.MD5(value.password).toString();
-      const data = {
-        username: value.username,
-        password: passwordMd5
-      }
+    const passwordMd5 = CryptoJS.MD5(value.password).toString();
+    const data = {
+      username: value.username,
+      password: passwordMd5
+    }
 
-      axios.post(`${BASE_URL}/login`, data)
-        .then((res) => {
-          console.log(res)
+    axios.post(`${BASE_URL}/login`, data)
+      .then((res) => {
+        console.log(res)
+        setValue({
+          err: '',
+          username: '',
+          password: '',
+        })
+        console.log(res.data.id)
+
+        localStorage.setItem('userid', res.data.engineer_id)
+        localStorage.setItem('Name', res.data.title)
+        localStorage.setItem('employee_code', res.data.employee_code)
+
+        navigate('/mobapp/dash')
+      })
+      .catch((err) => {
+        console.log(err)
+
+        if (err) {
+
           setValue({
-            err: '',
+            err: 'Invalid username or password',
+            // err: err,
             username: '',
             password: '',
           })
-          console.log(res.data.id)
 
-          localStorage.setItem('userid', res.data.engineer_id)
-          localStorage.setItem('Name', res.data.title)
-          localStorage.setItem('employee_code', res.data.employee_code)
-
-          navigate('/dashboard')
-        })
-        .catch((err) => {
-          console.log(err)
-
-          if (err) {
-
+          setTimeout(() => {
             setValue({
-              err: 'Invalid username or password',
-              // err: err,
-              username: '',
-              password: '',
+              err: ''
             })
+          }, 2000);
+        }
 
-            setTimeout(() => {
-              setValue({
-                err: ''
-              })
-            }, 2000);
-          }
-
-        })
+      })
 
   }
 
@@ -153,4 +155,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default AppLogin;

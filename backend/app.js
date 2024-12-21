@@ -10,7 +10,7 @@ const bodyParser = require("body-parser");
 const path = require("path");
 const fs = require("fs");
 const jwt = require("jsonwebtoken");
-
+const MobApp = require('./Routes/MobApp')
 
 // Secret key for JWT
 const JWT_SECRET = "Lh!_Login_123"; // Replace with a strong, secret key
@@ -45,6 +45,7 @@ const authenticateToken = (req, res, next) => {
 app.use("/", complaint);
 app.use("/", common);
 app.use("/", Category);
+app.use("/", MobApp);
 
 
 
@@ -3154,7 +3155,7 @@ app.post("/getticketendcustomer", async (req, res) => {
 // Add Complaint Start
 app.post("/add_complaintt", authenticateToken, async (req, res) => {
   let {
-    complaint_date, customer_name, contact_person, email, mobile, address,
+    complaint_date, customer_name = "NA", contact_person, email, mobile, address,
     state, city, area, pincode, mode_of_contact, ticket_type, cust_type,
     warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks
     , ticket_id, classification, priority, callType
@@ -8002,7 +8003,7 @@ app.get("/getEndCustomerAddresses/:customerEndId", async (req, res) => {
 app.get("/getSpareParts/:model", authenticateToken, async (req, res) => {
   const { model } = req.params;
 
-  console.log(model, "EEE"); // Model number like CNPef 4516-20 136 HL-AUSTRALI EEE
+
 
   try {
     const pool = await poolPromise;
@@ -8324,6 +8325,71 @@ app.post("/checkuser", authenticateToken, async (req, res) => {
   } catch (err) {
     console.error("Database error:", err);
     return res.status(500).json({ error: "Database error occurred" });
+  }
+});
+
+
+app.post("/fetchproductmaster", async (req, res) => {
+
+  const apiKey = req.header('x-api-key'); // Get API key from request header
+
+  if (apiKey !== API_KEY) {
+    return res.status(403).json({ error: 'Forbidden: Invalid API key' });
+  }
+
+  const { item_code, ModelNumber, product_model, product_type, product_class_code, product_class, product_line_code, product_line, material, manufacturer, item_type, serialized, size, crmproducttype, colour, handle_type, serial_identification, installation_type, customer_classification, price_group, mrp, service_partner_basic , packed } = req.body;
+
+
+  try {
+    const pool = await poolPromise;
+    // SQL query to insert a new complaint remark
+    const sql = `INSERT INTO product_master (
+  serial_no, item_code, item_description, productType, productLineCode, productLine,
+  productClassCode, productClass, material, manufacturer, itemType, serialized,
+  sizeProduct, crm_productType, color, installationType, handleType, customerClassification,
+  price_group, mrp, service_partner_basic, packed)
+VALUES (
+  @serial_identification, @item_code, @item_description, @product_type, @product_line_code,
+  @product_line, @product_class_code, @product_class, @material, @manufacturer, @item_type,
+  @serialized, @size, @crmproducttype, @colour, @installation_type, @handle_type,
+  @customer_classification, @price_group, @mrp, @service_partner_basic , @packed
+)`;
+
+
+
+    const request = pool.request()
+      .input('item_code', item_code)
+      .input('item_description', ModelNumber)
+      .input('product_model', product_model)
+      .input('product_type', product_type)
+      .input('product_class_code', product_class_code)
+      .input('product_class', product_class)
+      .input('product_line_code', product_line_code)
+      .input('product_line', product_line)
+      .input('material', material)
+      .input('manufacturer', manufacturer)
+      .input('item_type', item_type)
+      .input('serialized', serialized)
+      .input('size', size)
+      .input('crmproducttype', crmproducttype)
+      .input('colour', colour)
+      .input('handle_type', handle_type)
+      .input('serial_identification', serial_identification)
+      .input('installation_type', installation_type)
+      .input('customer_classification', customer_classification)
+      .input('price_group', price_group)
+      .input('mrp', mrp)
+      .input('service_partner_basic', service_partner_basic)
+      .input('packed', packed );
+
+
+
+    const result = await request.query(sql);
+
+    res.json({ insertId: result.rowsAffected[0] }); // Send the inserted ID back to the client
+  } catch (err) {
+    console.error("Error inserting remark:", err);
+    return res.status(500).json({ error: "Database error", details: err.message }); // Send back more details for debugging
   }
 });
 

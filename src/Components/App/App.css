@@ -68,15 +68,15 @@ header {
 
 .btn-liebherr {
   color: #000 !important;
-  background-color: #ffd000 !important;
-  border-color: #ffd000f4 !important;
+  background-color: #0D6EFD !important;
+  border-color: #0D6EFDf4 !important;
   text-transform: uppercase !important;
 }
 
 .btn-liebherr:hover {
   color: #000 !important;
-  background-color: #ffd000ea !important;
-  border-color: #ffd000ea !important;
+  background-color: #0D6EFDea !important;
+  border-color: #0D6EFDea !important;
   text-transform: uppercase !important;
 }
 .newcomplaint {
@@ -137,7 +137,7 @@ header {
 
 .activeM {
   color: #000 !important;
-  background-color: #ffd000ea !important;
+  background-color: #0D6EFDea !important;
 }
 
 .complbread{
@@ -146,12 +146,12 @@ header {
 }
 
 .breadMain {
-  background: #ffd000ea !important;
+  background: #0D6EFDea !important;
   padding: 15px !important;
 }
 
 .breadcrumbc{
-  background: #ffd000ea !important;
+  background: #0D6EFDea !important;
   margin-bottom: 15px !important;
   padding: 5px 15px !important;
   font-size: 18px !important;
@@ -165,7 +165,7 @@ header {
 }
 
 .breadcrumb li.active {
-  background-color: #ffd000ea !important;
+  background-color: #0D6EFDea !important;
   color:#222 !important;
   padding:5px !important;
 }
@@ -262,7 +262,7 @@ h3.mainheadinh {
 }
 
 .bg-yellow {
-  background-color: #ffd000ea !important;
+  background-color: #0D6EFDea !important;
 }
 
 .bg-green {

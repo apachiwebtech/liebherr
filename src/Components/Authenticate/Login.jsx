@@ -1,7 +1,7 @@
 import axios from "axios";
 import { Base_Url } from "../Utils/Base_Url";
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import md5 from "js-md5";
 import logo from '../../images/Liebherr-logo-768x432.png'
 import back from '../../images/login.jpeg'
@@ -11,10 +11,13 @@ import { SyncLoader } from 'react-spinners';
 
 
 export function Login() {
+
+
   const [Lhiuser, setLhiuser] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const { loaders, axiosInstance } = useAxiosLoader();
+  const location = useLocation();
   // Login submit handler
   const handleSubmit = async (e) => {
 
@@ -42,8 +45,8 @@ export function Login() {
           alert("Session Timeout")
           window.location.reload();
         }, 3600 * 8000); 
-
-        navigate('/');
+        const redirectTo = location.state?.from || '/dashboard';
+        navigate(redirectTo, { replace: true });
       } else {
         alert("Invalid username or password");
       }

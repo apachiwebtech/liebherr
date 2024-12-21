@@ -22,6 +22,7 @@ export function Complaintview(params) {
   const { complaintid } = useParams();
   const [quantity, setQuantity] = useState("");
   const [closestatus, setCloseStatus] = useState("");
+  const [subclosestatus, setsubCloseStatus] = useState("");
   const [spareid, setspareid] = useState("");
   const [ticketTab, setTicketTab] = useState(JSON.parse(localStorage.getItem('tabticket')) || []);
   const { loaders, axiosInstance } = useAxiosLoader();
@@ -563,6 +564,7 @@ export function Complaintview(params) {
       setComplaintview(response.data);
 
       setCloseStatus(response.data.call_status)
+      setsubCloseStatus(response.data.sub_call_status)
 
       if (response.data.call_status != null) {
         setCallstatusid(response.data.call_status)
@@ -1098,7 +1100,7 @@ export function Complaintview(params) {
 
   return (
     <div className="p-3">
-          {loaders && (
+      {loaders && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
@@ -1242,7 +1244,7 @@ export function Complaintview(params) {
                               <span style={{ fontSize: "14px" }}>
                                 <button
                                   className="btn"
-                                  onClick={() =>{ 
+                                  onClick={() => {
                                     navigate(`/complaintview/${item.id}`)
                                     addInTab(item.ticket_no, item.id)
                                   }}
@@ -1302,28 +1304,31 @@ export function Complaintview(params) {
           <div className="card" id="attachmentInfocs">
             <div className="card-body">
               <h4 className="pname" style={{ fontSize: "14px" }}>Attachment</h4>
-              <div className="mb-3">
-                <input
-                  type="file"
-                  className="form-control"
-                  multiple
-                  accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,.eml"
-                  onChange={handleFile2Change}
-                  disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
-                  ref={fileInputRef} // Attach the ref to the input
-                />
-              </div>
-              <div className="d-flex justify-content-end mb-3">
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={handleAttachment2Submit}
-                  disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
-                  style={{ fontSize: "14px" }}
-                >
-                  Upload
-                </button>
-              </div>
+              {closestatus == 'Closed' && subclosestatus == "Fully" || closestatus == 'Cancelled' ? null :    <div>
+                <div className="mb-3">
+                  <input
+                    type="file"
+                    className="form-control"
+                    multiple
+                    accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,.eml"
+                    onChange={handleFile2Change}
+                    disabled={closestatus == 'Closed' && subclosestatus == "Fully" || closestatus == 'Cancelled' ? true : false}
+                    ref={fileInputRef} // Attach the ref to the input
+                  />
+                </div>
+                <div className="d-flex justify-content-end mb-3">
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={handleAttachment2Submit}
+                    disabled={closestatus == 'Closed' && subclosestatus == "Fully" || closestatus == 'Cancelled' ? true : false}
+                    style={{ fontSize: "14px" }}
+                  >
+                    Upload
+                  </button>
+                </div>
+              </div> } 
+          
 
               <div id="allattachme">
                 {attachments2.length > 0 ? (
@@ -1566,62 +1571,67 @@ export function Complaintview(params) {
                       </>
                     ) : null}
 
-                    <form onSubmit={handleSubmit}>
-                      <div className="card-body p-4">
-                        <div className="form-outline mb-2">
-                          <input
-                            type="text"
-                            id="addANote"
-                            name="note"
-                            className="form-control"
-                            placeholder="Type comment..."
-                            disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
-                            value={note}
-                            onChange={(e) => setNote(e.target.value)}
-                          />
-                        </div>
+                    {(closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled') ? null :
+                      <form onSubmit={handleSubmit}>
+                        <div className="card-body p-4">
+                          <div className="form-outline mb-2">
+                            <input
+                              type="text"
+                              id="addANote"
+                              name="note"
+                              className="form-control"
+                              placeholder="Type comment..."
+                              disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
+                              value={note}
+                              onChange={(e) => setNote(e.target.value)}
+                            />
+                          </div>
 
-                        {/* File upload field for images, videos, and audio */}
-                        <div className="form-outline mb-4">
-                          <label
-                            htmlFor="uploadFiles"
-                            className="form-label mp-0"
-                            style={{ fontSize: "14px" }}
-                          >
-                            Upload Files (Images, Videos, Audios)
-                          </label>
-                          <input
-                            type="file"
-                            id="uploadFiles"
-                            name="attachment"
-                            className="form-control"
-                            multiple
-                            accept="image/*,video/*,audio/*,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,.eml"
-                            onChange={handleFileChange}
-                            disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
-                            ref={fileInputRef2} // Attach the ref to the input
-                          />
-                        </div>
+                          {/* File upload field for images, videos, and audio */}
+                          <div className="form-outline mb-4">
+                            <label
+                              htmlFor="uploadFiles"
+                              className="form-label mp-0"
+                              style={{ fontSize: "14px" }}
+                            >
+                              Upload Files (Images, Videos, Audios)
+                            </label>
+                            <input
+                              type="file"
+                              id="uploadFiles"
+                              name="attachment"
+                              className="form-control"
+                              multiple
+                              accept="image/*,video/*,audio/*,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,.eml"
+                              onChange={handleFileChange}
+                              disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
+                              ref={fileInputRef2} // Attach the ref to the input
+                            />
+                          </div>
 
-                        {/* Consolidated error message */}
-                        {errorMessage && (
-                          <div className="text-danger mt-2">{errorMessage}</div>
-                        )}
+                          {/* Consolidated error message */}
+                          {errorMessage && (
+                            <div className="text-danger mt-2">{errorMessage}</div>
+                          )}
 
-                        {/* Right-aligned submit button */}
-                        <div className="d-flex justify-content-end">
-                          <button
-                            type="submit"
-                            className="btn btn-primary"
-                            style={{ fontSize: "14px" }}
-                            onClick={handleSubmit}
-                            disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
-                          >
-                            Upload Remark
-                          </button>
+                          {/* Right-aligned submit button */}
+                          <div className="d-flex justify-content-end">
+                            <button
+                              type="submit"
+                              className="btn btn-primary"
+                              style={{ fontSize: "14px" }}
+                              onClick={handleSubmit}
+                              disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
+                            >
+                              Upload Remark
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    </form>
+                      </form>
+                    }
+
+
+
                   </div>
                 </div>
               </div>
@@ -1846,7 +1856,7 @@ export function Complaintview(params) {
                 <select
                   name="call_status"
                   className="form-control"
-                  disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
+                  disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
                   style={{ fontSize: "14px" }}
                   value={complaintview.call_status}
                   onChange={(e) => {
@@ -1869,7 +1879,7 @@ export function Complaintview(params) {
               </div>
               <h4 className="pname" style={{ fontSize: "14px" }}>Sub Call Status</h4>
               <div className="mb-3">
-                <select name="sub_call_status" value={complaintview.sub_call_status} disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false} className="form-control" style={{ fontSize: "14px" }} onChange={handleModelChange}>
+                <select name="sub_call_status" value={complaintview.sub_call_status} disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false} className="form-control" style={{ fontSize: "14px" }} onChange={handleModelChange}>
                   <option value="" >Select Status</option>
                   {subcallstatus.map((item) => {
                     return (
@@ -1882,13 +1892,13 @@ export function Complaintview(params) {
                 </select>
               </div>
 
-              <div className="d-flex mb-3">
+              {closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? null : <div className="d-flex mb-3">
 
                 <div className="form-check me-3">
                   <input
                     type="radio"
                     className="form-check-input"
-                    disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
+                    disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
                     id="lhi"
                     name="engineer_type"
                     value="LHI"
@@ -1902,7 +1912,7 @@ export function Complaintview(params) {
                 <div className="form-check">
                   <input
                     type="radio"
-                    disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
+                    disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
                     className="form-check-input"
                     id="franchisee"
                     name="engineer_type"
@@ -1914,13 +1924,15 @@ export function Complaintview(params) {
                   </label>
                 </div>
 
-              </div>
+              </div>}
 
-              <h4 className="pname" style={{ fontSize: "14px" }}>Engineer</h4>
 
-              <div className="row">
-                <div className="col-lg-9">
-                  {/* <select
+              {(closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled') ? null : <h4 className="pname" style={{ fontSize: "14px" }}>Engineer</h4>}
+
+              {(closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled') ? null :
+                <div className="row">
+                  <div className="col-lg-9">
+                    {/* <select
                     className="form-select dropdown-select"
                     name="engineer_id"
                     value={complaintview.engineer_id}
@@ -1941,48 +1953,50 @@ export function Complaintview(params) {
                     )}
                   </select> */}
 
-<Autocomplete
-  options={engineer}
-  size="small"
-  getOptionLabel={(option) => option.title || ""} // Display engineer title in dropdown
-  value={engineer.find((e) => e.id === complaintview.engineer_id) || null}
-  onChange={(event, newValue) =>
-    handleModelChange({
-      target: {
-        name: "engineer_id",
-        value: newValue?.id || "", // Update with engineer_id, not title
-      },
-    })
-  }
-  inputValue={inputValue}
-  onInputChange={(event, newInputValue) => setInputValue(newInputValue)}
-  renderInput={(params) => <TextField {...params} label="Select Engineer" />}
+                    <Autocomplete
+                      options={engineer}
+                      size="small"
+                      getOptionLabel={(option) => option.title || ""} // Display engineer title in dropdown
+                      value={engineer.find((e) => e.id === complaintview.engineer_id) || null}
+                      onChange={(event, newValue) =>
+                        handleModelChange({
+                          target: {
+                            name: "engineer_id",
+                            value: newValue?.id || "", // Update with engineer_id, not title
+                          },
+                        })
+                      }
+                      inputValue={inputValue}
+                      onInputChange={(event, newInputValue) => setInputValue(newInputValue)}
+                      renderInput={(params) => <TextField {...params} label="Select Engineer" />}
 
-  // Render option with custom styling (or whatever you want to show in the dropdown)
-  renderOption={(props, option) => (
-    <li {...props} key={option.engineer_id}> {/* Assign unique key using engineer_id */}
-      <span>{option.title}</span> {/* Display title (name) */}
-    </li>
-  )}
+                      // Render option with custom styling (or whatever you want to show in the dropdown)
+                      renderOption={(props, option) => (
+                        <li {...props} key={option.engineer_id}> {/* Assign unique key using engineer_id */}
+                          <span>{option.title}</span> {/* Display title (name) */}
+                        </li>
+                      )}
 
-  isOptionEqualToValue={(option, value) => option.engineer_id === value.engineer_id} // Use engineer_id to compare values
-  getOptionSelected={(option, value) => option.engineer_id === value.engineer_id} // Ensure option is selected using engineer_id
-/>
+                      isOptionEqualToValue={(option, value) => option.engineer_id === value.engineer_id} // Use engineer_id to compare values
+                      getOptionSelected={(option, value) => option.engineer_id === value.engineer_id} // Ensure option is selected using engineer_id
+                    />
 
 
 
+                  </div>
+
+                  <div className="col-lg-3">
+                    <button
+                      className="btn btn-primary btn-sm"
+                      disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
+                      onClick={AddEngineer}
+                    >
+                      Add
+                    </button>
+                  </div>
                 </div>
+              }
 
-                <div className="col-lg-3">
-                  <button
-                    className="btn btn-primary btn-sm"
-                    disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
-                    onClick={AddEngineer}
-                  >
-                    Add
-                  </button>
-                </div>
-              </div>
 
               {/* Display added engineers */}
               <div className="mt-3">
@@ -2004,7 +2018,7 @@ export function Complaintview(params) {
                           <button
                             className="btn btn-sm btn-danger"
                             style={{ padding: "0.2rem 0.5rem" }}
-                            disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
+                            disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
                             onClick={() => handleRemoveEngineer(eng.id)}
                           >
                             ✖
@@ -2016,13 +2030,14 @@ export function Complaintview(params) {
                 </table>
               </div>
 
-              {(complaintview.call_status == 'Closed' || complaintview.group_code != null) && <>
+              {(complaintview.call_status == 'Closed' ||  complaintview.group_code != "" ) &&
+               <>
                 <div className="mt-3">
                   <h4 className="pname" style={{ fontSize: "14px" }}>Defect Group Code:</h4>
                   <select
                     name="group_code"
                     className="form-control"
-                    disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
+                    disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
                     style={{ fontSize: "14px" }}
                     value={complaintview.group_code}
                     onChange={(e) => {
@@ -2047,7 +2062,7 @@ export function Complaintview(params) {
                   <select
                     name="defect_type"
                     className="form-control"
-                    disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
+                    disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
                     style={{ fontSize: "14px" }}
                     value={complaintview.defect_type}
                     onChange={handleModelChange}
@@ -2065,7 +2080,7 @@ export function Complaintview(params) {
                   <select
                     name="site_defect"
                     className="form-control"
-                    disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
+                    disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
                     style={{ fontSize: "14px" }}
                     value={complaintview.site_defect}
                     onChange={handleModelChange}
@@ -2078,7 +2093,22 @@ export function Complaintview(params) {
                     ))}
                   </select>
                 </div>
-              </>}
+                <div className="mt-3">
+                  <h4 className="pname" style={{ fontSize: "14px" }}>Activity Code</h4>
+                  <select
+                    name="site_defect"
+                    className="form-control"
+                    disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
+                    style={{ fontSize: "14px" }}
+
+                  >
+                    <option value="">Select </option>
+                    <option>1234</option>
+                  </select>
+                </div>
+
+              </>
+              }
 
 
 
@@ -2090,11 +2120,12 @@ export function Complaintview(params) {
                   className="btn btn-primary"
                   style={{ fontSize: "14px", marginTop: '5px' }}
                   onClick={handleSubmitTicketFormData}
-                  disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
+                  disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
                 >
                   Submit
                 </button>
               </div>
+
               {TicketUpdateSuccess.visible && (
                 <div style={successMessageStyle}>
                   {TicketUpdateSuccess.message}
@@ -2108,55 +2139,59 @@ export function Complaintview(params) {
             <div className="card-body">
 
               <div className="mt-3">
-                <h4 className="pname" style={{ fontSize: "14px" }}>Spare Parts:</h4>
+                {closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? null : <h4 className="pname" style={{ fontSize: "14px" }}>Spare Parts:</h4>}
 
+               {closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? null :
                 <div className="row align-items-center">
-                  <div className="col-lg-6">
-                    <select
-                      className="form-select dropdown-select m-0"
-                      name="spare_part_id"
-                      value={spareid}
-                      disabled={closestatus === "Closed" || closestatus == 'Cancelled'}
-                      onChange={(e) => handlesparechange(e.target.value)}
-                    >
-                      <option value="">Select Spare Part</option>
-                      {Array.isArray(spare) && spare.length > 0 ? (
-                        spare.map((part) => (
-                          <option key={part.id} value={part.id}>
-                            {part.article_code + '-' + part.article_description}
-                          </option>
-                        ))
-                      ) : (
-                        <option value="" disabled>
-                          No spare parts available
+
+                <div className="col-lg-6">
+                  <select
+                    className="form-select dropdown-select m-0"
+                    name="spare_part_id"
+                    value={spareid}
+                    disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
+                    onChange={(e) => handlesparechange(e.target.value)}
+                  >
+                    <option value="">Select Spare Part</option>
+                    {Array.isArray(spare) && spare.length > 0 ? (
+                      spare.map((part) => (
+                        <option key={part.id} value={part.id}>
+                          {part.article_code + '-' + part.article_description}
                         </option>
-                      )}
-                    </select>
-                  </div>
-
-                  <div className="col-lg-3">
-                    <input
-                      type="number"
-                      className="form-control"
-                      name="quantity"
-                      placeholder="Qty"
-                      value={quantity}
-                      onChange={(e) => setQuantity(e.target.value)}
-                      disabled={closestatus === "Closed" || closestatus == 'Cancelled'}
-                      min="1"
-                    />
-                  </div>
-
-                  <div className="col-lg-3">
-                    <button
-                      className="btn btn-primary btn-sm"
-                      disabled={closestatus === "Closed" || !quantity || closestatus == 'Cancelled'}
-                      onClick={handleAddSparePart}
-                    >
-                      Add
-                    </button>
-                  </div>
+                      ))
+                    ) : (
+                      <option value="" disabled>
+                        No spare parts available
+                      </option>
+                    )}
+                  </select>
                 </div>
+
+                <div className="col-lg-3">
+                  <input
+                    type="number"
+                    className="form-control"
+                    name="quantity"
+                    placeholder="Qty"
+                    value={quantity}
+                    onChange={(e) => setQuantity(e.target.value)}
+                    disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
+                    min="1"
+                  />
+                </div>
+
+                <div className="col-lg-3">
+                  <button
+                    className="btn btn-primary btn-sm"
+                    disabled={closestatus == "Closed" && subclosestatus == 'Fully'  || !quantity || closestatus == 'Cancelled'}
+                    onClick={handleAddSparePart}
+                  >
+                    Add
+                  </button>
+                </div>
+              </div>
+               }
+               
 
                 {/* Display added spare parts */}
                 <div className="mt-3">
@@ -2182,7 +2217,7 @@ export function Complaintview(params) {
                               <button
                                 className="btn btn-sm btn-danger"
                                 style={{ padding: "0.2rem 0.5rem" }}
-                                disabled={closestatus === "Closed" || closestatus == 'Cancelled'}
+                                disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
                                 onClick={() => handleRemoveSparePart(part.id)}
                               >
                                 ✖
@@ -2202,7 +2237,7 @@ export function Complaintview(params) {
                     className="btn btn-primary"
                     style={{ fontSize: "14px" }}
                     onClick={GenerateQuotation}
-                    disabled={closestatus === "Closed" || closestatus == 'Cancelled'}
+                    disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
                   >
                     Generate Quotation
                   </button>

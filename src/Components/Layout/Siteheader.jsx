@@ -46,7 +46,7 @@ const [Name, setName] = useState([])
 
             <li>
               <Link className={`nav-link px-2 link-secondary site `}
-                to="/"
+                to="/dashboard"
               >
                 Dashboard
               </Link></li>
