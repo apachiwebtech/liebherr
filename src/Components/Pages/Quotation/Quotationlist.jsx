@@ -37,8 +37,8 @@ import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 
 export function Quotationlist(params) {
-  const { loaders, axiosInstance } = useAxiosLoader();
-  const [Quotationdata, setQuotationdata] = useState([]);
+    const { loaders, axiosInstance } = useAxiosLoader();
+    const [Quotationdata, setQuotationdata] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
     const token = localStorage.getItem("token");
     const [formData, setFormData] = useState({
@@ -53,7 +53,7 @@ export function Quotationlist(params) {
 
     const fetchQuotationlist = async () => {
         try {
-            const response = await axiosInstance.get(`${Base_Url}/getquotationlist`,{
+            const response = await axiosInstance.get(`${Base_Url}/getquotationlist`, {
                 headers: {
                     Authorization: token,
                 },
@@ -88,11 +88,10 @@ export function Quotationlist(params) {
     };
 
     const sendtoedit = async (id) => {
-        alert(id)
         id = id.toString()
-        const encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
-        alert(encrypted)
-        navigate(`quotation/${encrypted}`)
+        let  encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
+        encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        navigate(`/quotation/${encrypted}`)
     };
 
     useEffect(() => {
@@ -106,7 +105,7 @@ export function Quotationlist(params) {
                 destroy: true, // Destroy any existing DataTable instance before reinitializing
                 paging: true,
                 searching: true,
-                ordering: false ,
+                ordering: false,
                 info: true,
                 lengthChange: false,
                 autoWidth: false,
@@ -119,8 +118,8 @@ export function Quotationlist(params) {
                 select: true,
                 dom: '<"d-flex justify-content-between"<"table-title"><"search-box"f>>t<"d-flex justify-content-between"ip>',
                 language: {
-                  search: '', // Remove the "Search:" label
-                  searchPlaceholder: 'Search...', // Add placeholder text
+                    search: '', // Remove the "Search:" label
+                    searchPlaceholder: 'Search...', // Add placeholder text
                 },
 
             });
@@ -136,65 +135,65 @@ export function Quotationlist(params) {
 
     return (
         <div className="tab-content">
-    {loaders && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <SyncLoader loading={loaders} color="#FFFFFF" />
-        </div>
-      )}
+            {loaders && (
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <SyncLoader loading={loaders} color="#FFFFFF" />
+                </div>
+            )}
             <div className="row mp0">
                 <div className="col-md-12 col-12">
                     <div className="card mb-3 tab_box">
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
                             <div className='table-responsive'>
-                            <table id="example" className="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th width="3%">#</th>
-                                        <th width="7%">Quotation Number</th>
-                                        <th width="20%">Engineer</th>
-                                        <th width="10%">Customer Name</th>
-                                        <th width="8%">Spare ID</th>
-                                        <th width="15%">ModelNumber</th>
-                                        <th width="10%">Spare Name</th>
-                                        <th width="10%">Quantity</th>
-                                        <th width="15%">Price</th>
-                                        <th width="10%">Status</th>
-                                        <th width="10%">Edit</th>
+                                <table id="example" className="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th width="3%">#</th>
+                                            <th width="7%">Quotation Number</th>
+                                            <th width="20%">Engineer</th>
+                                            <th width="10%">Customer Name</th>
+                                            <th width="8%">Spare ID</th>
+                                            <th width="15%">ModelNumber</th>
+                                            <th width="10%">Spare Name</th>
+                                            <th width="10%">Quantity</th>
+                                            <th width="15%">Price</th>
+                                            <th width="10%">Status</th>
+                                            <th width="10%">Edit</th>
 
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {Quotationdata.map((item, index) => (
-                                        <tr key={item.id}>
-                                            <td>{index + 1}</td>
-                                            <td>{item.quotationNumber}</td>
-                                            <td>{item.assignedEngineer}</td>
-                                            <td>{item.CustomerName}</td>
-                                            <td>{item.spareId}</td>
-                                            <td>{item.ModelNumber}</td>
-                                            <td>{item.title}</td>
-                                            <td>{item.quantity}</td>
-                                            <td>{item.price}</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {Quotationdata.map((item, index) => (
+                                            <tr key={item.id}>
+                                                <td>{index + 1}</td>
+                                                <td>{item.quotationNumber}</td>
+                                                <td>{item.assignedEngineer}</td>
+                                                <td>{item.CustomerName}</td>
+                                                <td>{item.spareId}</td>
+                                                <td>{item.ModelNumber}</td>
+                                                <td>{item.title}</td>
+                                                <td>{item.quantity}</td>
+                                                <td>{item.price}</td>
 
-                                            <td style={{ padding: '0px', textAlign: 'center' }}>
-                                              {item.status}
-                                            </td>
-                                            <td>
-                                                
+                                                <td style={{ padding: '0px', textAlign: 'center' }}>
+                                                    {item.status}
+                                                </td>
+                                                <td>
+
                                                     <button
                                                         className='btn'
-                                                        onClick={()=>sendtoedit(item.id)}
+                                                        onClick={() => sendtoedit(item.id)}
                                                         title="Edit"
                                                         style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
                                                     >
                                                         <FaPencilAlt />
                                                     </button>
-                                                
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
                             </div>
 
                         </div>

@@ -1,17 +1,18 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
-import { Base_Url } from "../../Utils/Base_Url";
+import { Base_Url, secretKey } from "../../Utils/Base_Url";
 import Franchisemaster from '../Master/Franchisemaster';
 import { useParams } from "react-router-dom";
 import md5 from "js-md5";
 import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
+import CryptoJS from 'crypto-js';
 
 
 const Childfranchisemaster = () => {
   const { loaders, axiosInstance } = useAxiosLoader();
-  const { childid } = useParams();
+  let { childid } = useParams();
   const token = localStorage.getItem("token");
   const [Parentfranchise, setParentfranchise] = useState([]);
   const [errors, setErrors] = useState({});
@@ -34,6 +35,18 @@ const Childfranchisemaster = () => {
   const [pincode, setPincode] = useState([])
   const created_by = localStorage.getItem("userId"); // Get user ID from localStorage
   const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
+
+ 
+        try{
+          childid = childid.replace(/-/g, '+').replace(/_/g, '/');
+          const bytes = CryptoJS.AES.decrypt(childid, secretKey);
+          const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+          childid = parseInt(decrypted, 10)
+      }catch(error){
+          console.log("Error".error)
+      }
+          
+ 
 
   const [formData, setFormData] = useState({
     title: "",
@@ -159,6 +172,7 @@ const Childfranchisemaster = () => {
 
     fetchUsers();
     fetchParentfranchise();
+
 
     if (childid && childid !== '0') {
       fetchchildfranchisepopulate(childid);

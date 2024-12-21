@@ -2,10 +2,11 @@ import axios from 'axios';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
-import { Base_Url } from '../../Utils/Base_Url';
+import { Base_Url, secretKey } from '../../Utils/Base_Url';
 import { IoArrowBack, IoArrowBackCircle } from "react-icons/io5";
 import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
+import CryptoJS from 'crypto-js';
 
 
 export function AddProduct(params) {
@@ -20,8 +21,23 @@ export function AddProduct(params) {
 
     const [itemtype, setItemtype] = useState([])
     const [productclass, setPrductclass] = useState([])
+   
+    let { productid } = useParams()
+
+   
+      
+        try{
+            productid = productid.replace(/-/g, '+').replace(/_/g, '/');
+            const bytes = CryptoJS.AES.decrypt(productid, secretKey);
+            const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+            productid = parseInt(decrypted, 10)
+        }catch(error){
+            console.log("Error".error)
+        }
+        
+
     const navigate = useNavigate()
-    const { productid } = useParams()
+
 
     const [value, setValue] = useState({
         item_code: "",

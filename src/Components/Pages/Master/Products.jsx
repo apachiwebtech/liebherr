@@ -2,7 +2,8 @@ import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
-import { Base_Url } from '../../Utils/Base_Url';
+import { Base_Url, secretKey } from '../../Utils/Base_Url';
+import CryptoJS from 'crypto-js';
 import ProMaster from './ProMaster';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'datatables.net-bs4/css/dataTables.bootstrap4.min.css';
@@ -37,8 +38,8 @@ import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 
 export function Products(params) {
-  const { loaders, axiosInstance } = useAxiosLoader();
-  const [Productdata, setProductdata] = useState([]);
+    const { loaders, axiosInstance } = useAxiosLoader();
+    const [Productdata, setProductdata] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
     const token = localStorage.getItem("token");
     const [formData, setFormData] = useState({
@@ -57,7 +58,7 @@ export function Products(params) {
 
     const fetchProductlist = async () => {
         try {
-            const response = await axiosInstance.get(`${Base_Url}/getproductlist`,{
+            const response = await axiosInstance.get(`${Base_Url}/getproductlist`, {
                 headers: {
                     Authorization: token,
                 },
@@ -96,17 +97,12 @@ export function Products(params) {
     };
 
     const edit = async (id) => {
-        try {
-            const response = await axiosInstance.get(`${Base_Url}/requestproductlist/${id}`, {
-                headers: {
-                    Authorization: token,
-                },
-            });
-            setFormData(response.data);
-            setIsEdit(true);
-        } catch (error) {
-            console.error('Error editing user:', error);
-        }
+
+        id = id.toString()
+        let encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
+        encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        
+        navigate(`/addproduct/${encrypted}`)
     };
 
     useEffect(() => {
@@ -120,7 +116,7 @@ export function Products(params) {
                 destroy: true, // Destroy any existing DataTable instance before reinitializing
                 paging: true,
                 searching: true,
-                ordering: true,
+                ordering: false,
                 info: true,
                 lengthChange: false,
                 autoWidth: false,
@@ -133,8 +129,8 @@ export function Products(params) {
                 select: true,
                 dom: '<"d-flex justify-content-between"<"table-title"><"search-box"f>>t<"d-flex justify-content-between"ip>',
                 language: {
-                  search: '', // Remove the "Search:" label
-                  searchPlaceholder: 'Search...', // Add placeholder text
+                    search: '', // Remove the "Search:" label
+                    searchPlaceholder: 'Search...', // Add placeholder text
                 },
 
             });
@@ -152,10 +148,10 @@ export function Products(params) {
         <div className="tab-content">
             <ProMaster />
             {loaders && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <SyncLoader loading={loaders} color="#FFFFFF" />
-        </div>
-      )}
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <SyncLoader loading={loaders} color="#FFFFFF" />
+                </div>
+            )}
             <div className="row mp0">
                 <div className="col-md-12 col-12">
                     <div className="card mb-3 tab_box">
@@ -164,58 +160,57 @@ export function Products(params) {
                                 <Link to={`/addproduct/:productid`}><button className='btn btn-primary'>Add Product</button></Link>
                             </div>
                             <div className='table-responsive'>
-                            <table id="example" className="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th width="3%">#</th>
-                                        <th width="7%">Serial No.</th>
-                                        <th width="8%">Item Code</th>
-                                        <th width="20%">Product Name</th>
-                                        <th width="20%">Product Type</th>
-                                        <th width="10%">Product Line</th>
-                                        <th width="15%">Material</th>
-                                        <th width="5%">Manufacturer</th>
-                                        <th width="5%">Edit</th>
-                                        <th width="5%">Delete</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {Productdata.map((item, index) => (
-                                        <tr key={item.id}>
-                                            <td>{index + 1}</td>
-                                            <td>{item.serial_no}</td>
-                                            <td>{item.item_code}</td>
-                                            <td>{item.product_model}<br />{item.item_description}</td>
-                                            <td>{item.productType}</td>
-                                            <td>{item.productLine}</td>
-                                            <td>{item.material}</td>
-                                            <td>{item.manufacturer}</td>
-                                            <td>
-                                                <Link to={`/addproduct/${item.id}`}>
+                                <table id="example" className="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th width="3%">#</th>
+                                            <th width="7%">Serial No.</th>
+                                            <th width="8%">Item Code</th>
+                                            <th width="20%">Product Name</th>
+                                            <th width="20%">Product Type</th>
+                                            <th width="10%">Product Line</th>
+                                            <th width="15%">Material</th>
+                                            <th width="5%">Manufacturer</th>
+                                            <th width="5%">Edit</th>
+                                            <th width="5%">Delete</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {Productdata.map((item, index) => (
+                                            <tr key={item.id}>
+                                                <td>{index + 1}</td>
+                                                <td>{item.serial_no}</td>
+                                                <td>{item.item_code}</td>
+                                                <td>{item.product_model}<br />{item.item_description}</td>
+                                                <td>{item.productType}</td>
+                                                <td>{item.productLine}</td>
+                                                <td>{item.material}</td>
+                                                <td>{item.manufacturer}</td>
+                                                <td>
+                                                        <button
+                                                            className='btn'
+                                                            onClick={() => edit(item.id)}
+                                                            title="Edit"
+                                                            style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                                                        >
+                                                            <FaPencilAlt />
+                                                        </button>
+                                                    
+                                                </td>
+                                                <td style={{ padding: '0px', textAlign: 'center' }}>
                                                     <button
                                                         className='btn'
-                                                        onClick={() => edit(item.id)}
-                                                        title="Edit"
-                                                        style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                                                        onClick={() => deleted(item.id)}
+                                                        title="Delete"
+                                                        style={{ backgroundColor: 'transparent', border: 'none', color: 'red', fontSize: '20px' }}
                                                     >
-                                                        <FaPencilAlt />
+                                                        <FaTrash />
                                                     </button>
-                                                </Link>
-                                            </td>
-                                            <td style={{ padding: '0px', textAlign: 'center' }}>
-                                                <button
-                                                    className='btn'
-                                                    onClick={() => deleted(item.id)}
-                                                    title="Delete"
-                                                    style={{ backgroundColor: 'transparent', border: 'none', color: 'red', fontSize: '20px' }}
-                                                >
-                                                    <FaTrash />
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
                             </div>
 
                         </div>

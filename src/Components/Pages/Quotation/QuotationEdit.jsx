@@ -8,16 +8,17 @@ import CryptoJS from 'crypto-js';
 import { error } from 'jquery';
 
 const QuotationEdit = () => {
-  const { loaders, axiosInstance } = useAxiosLoader();
+    const { loaders, axiosInstance } = useAxiosLoader();
     let { qid } = useParams()
 
-try{
-    const bytes = CryptoJS.AES.decrypt(qid, secretKey);
-    const decrypted = bytes.toString(CryptoJS.enc.Utf8);
-    qid = parseInt(decrypted, 10)
-}catch(error){
-    console.log("Error".error)
-}
+    try {
+        qid = qid.replace(/-/g, '+').replace(/_/g, '/');
+        const bytes = CryptoJS.AES.decrypt(qid, secretKey);
+        const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+        qid = parseInt(decrypted, 10)
+    } catch (error) {
+        console.log("Error".error)
+    }
 
     const navigate = useNavigate()
 
@@ -60,7 +61,7 @@ try{
 
 
     useEffect(() => {
-       
+
         getquotedetails()
 
     }, [])
@@ -91,16 +92,16 @@ try{
         const year = date.getFullYear();
 
         return `${day}-${month}-${year}`;
-      };
+    };
 
 
     return (
         <div className="tab-content">
-    {loaders && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <SyncLoader loading={loaders} color="#FFFFFF" />
-        </div>
-      )}
+            {loaders && (
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <SyncLoader loading={loaders} color="#FFFFFF" />
+                </div>
+            )}
             <div className="row mp0">
                 <div className="col-12">
                     <div className="card mb-3 tab_box">
@@ -110,7 +111,7 @@ try{
                                 <h2 className="pname" style={{ fontSize: "20px" }}>Quotation Details:</h2>
                                 <hr></hr>
                                 <div className="col-lg-12">
-                                    <div class="card " style={{  backgroundColor: "#F5F5DC" }}>
+                                    <div class="card " style={{ backgroundColor: "#F5F5DC" }}>
                                         <div class="card-head">
                                             <div class="card-head-label" style={{ paddingLeft: "1" }}>
                                                 <h3

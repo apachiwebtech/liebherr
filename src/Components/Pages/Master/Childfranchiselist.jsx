@@ -2,14 +2,16 @@ import axios from 'axios';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
-import { Base_Url } from '../../Utils/Base_Url';
+import { Base_Url, secretKey } from '../../Utils/Base_Url';
 import Franchisemaster from './Franchisemaster';
 import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
+import CryptoJS from 'crypto-js';
+
 
 export function ChildFranchiselist(params) {
-  const { loaders, axiosInstance } = useAxiosLoader();
-  const token = localStorage.getItem("token");
+    const { loaders, axiosInstance } = useAxiosLoader();
+    const token = localStorage.getItem("token");
     const [Franchisemasterdata, setChildfranchisemasterdata] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
     const [formData, setFormData] = useState({
@@ -17,28 +19,28 @@ export function ChildFranchiselist(params) {
         pfranchise_id: "",
         password: "",
         contact_person: '',
-        email:"",
-        mobile_no:'',
-        address:'',
-        country_id:'',
-        region_id:'',
-        state:'',
-        area:'',
-        city:'',
-        pincode_id:'',
-        website:'',
-        gst_no:'',
-        panno:'',
-        bank_name:'',
-        bank_acc:'',
-        bank_ifsc:'',
-        with_liebherr:'',
-        last_working_date:'',
-        contract_acti:'',
-        contract_expir:'',
-        bank_address:'',
-        licarecode:'',
-        partner_name:'',
+        email: "",
+        mobile_no: '',
+        address: '',
+        country_id: '',
+        region_id: '',
+        state: '',
+        area: '',
+        city: '',
+        pincode_id: '',
+        website: '',
+        gst_no: '',
+        panno: '',
+        bank_name: '',
+        bank_acc: '',
+        bank_ifsc: '',
+        with_liebherr: '',
+        last_working_date: '',
+        contract_acti: '',
+        contract_expir: '',
+        bank_address: '',
+        licarecode: '',
+        partner_name: '',
     });
 
     const formatDate = (dateString) => {
@@ -49,11 +51,11 @@ export function ChildFranchiselist(params) {
 
     const fetchChildfranchisemasterlist = async () => {
         try {
-            const response = await axiosInstance.get(`${Base_Url}/getchildFranchiseDetails`,{
+            const response = await axiosInstance.get(`${Base_Url}/getchildFranchiseDetails`, {
                 headers: {
-                  Authorization: token,
+                    Authorization: token,
                 },
-              });
+            });
             setChildfranchisemasterdata(response.data);
         } catch (error) {
             console.error('Error fetching franchisemasterdata:', error);
@@ -62,19 +64,19 @@ export function ChildFranchiselist(params) {
     };
     const handleChangestatus = (e) => {
         try {
-          const dataId = e.target.getAttribute('data-id');
+            const dataId = e.target.getAttribute('data-id');
 
-          const response = axiosInstance.post(`${Base_Url}/updatestatus`, { dataId: dataId },{
-            headers: {
-              Authorization: token,
-            },
-          });
+            const response = axiosInstance.post(`${Base_Url}/updatestatus`, { dataId: dataId }, {
+                headers: {
+                    Authorization: token,
+                },
+            });
 
         } catch (error) {
-          console.error("Error editing user:", error);
+            console.error("Error editing user:", error);
         }
 
-      };
+    };
 
 
     const deleted = async (id) => {
@@ -84,28 +86,28 @@ export function ChildFranchiselist(params) {
                 title: "",
                 password: "",
                 contact_person: '',
-                email:"",
-                mobile_no:'',
-                address:'',
-                country_id:'',
-                region_id:'',
-                state:'',
-                area:'',
-                city:'',
-                pincode_id:'',
-                website:'',
-                gst_no:'',
-                panno:'',
-                bank_name:'',
-                bank_acc:'',
-                bank_ifsc:'',
-                with_liebherr:'',
-                last_working_date:'',
-                contract_acti:'',
-                contract_expir:'',
-                bank_address:'',
-                licarecode:'',
-                partner_name:'',
+                email: "",
+                mobile_no: '',
+                address: '',
+                country_id: '',
+                region_id: '',
+                state: '',
+                area: '',
+                city: '',
+                pincode_id: '',
+                website: '',
+                gst_no: '',
+                panno: '',
+                bank_name: '',
+                bank_acc: '',
+                bank_ifsc: '',
+                with_liebherr: '',
+                last_working_date: '',
+                contract_acti: '',
+                contract_expir: '',
+                bank_address: '',
+                licarecode: '',
+                partner_name: '',
             })
             fetchChildfranchisemasterlist();
         } catch (error) {
@@ -113,16 +115,13 @@ export function ChildFranchiselist(params) {
         }
     };
 
-    const edit = async (id) => {
-        try {
-            const response = await axiosInstance.get(`${Base_Url}/requestengineer/${id}`);
-            setFormData(response.data)
-            setIsEdit(true);
-            console.log(response.data);
-        } catch (error) {
-            console.error('Error editing user:', error);
-        }
+    const sendtoedit = async (id) => {
+        id = id.toString()
+        let encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
+        encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        navigate(`/Childfranchisemaster/${encrypted}`)
     };
+
     useEffect(() => {
         fetchChildfranchisemasterlist();
     }, []);
@@ -146,27 +145,27 @@ export function ChildFranchiselist(params) {
 
     return (
         <div className="tab-content">
-              {loaders && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <SyncLoader loading={loaders} color="#FFFFFF" />
-        </div>
-      )}
+            {loaders && (
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <SyncLoader loading={loaders} color="#FFFFFF" />
+                </div>
+            )}
             <div className="row mp0" >
                 <div className="col-md-12 col-12">
                     <div className="card mb-3 tab_box">
 
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
-                        <div className="p-1 text-right">
-                        <button
-                            className="btn btn-primary"
-                            onClick={() => navigate("/Childfranchisemaster")}
-                        >
-                            Add Child Master Franchise
-                        </button>
-                        </div>
+                            <div className="p-1 text-right">
+                                <button
+                                    className="btn btn-primary"
+                                    onClick={() => navigate("/Childfranchisemaster")}
+                                >
+                                    Add Child Master Franchise
+                                </button>
+                            </div>
                             <table className="table">
                                 <thead>
-                                     <tr>
+                                    <tr>
                                         <th width="3%">#</th>
                                         <th width="15%">Parent Franchise Name</th>
                                         <th width="15%">Child Franchise Name</th>
@@ -199,18 +198,14 @@ export function ChildFranchiselist(params) {
                                                 <td >{item.area_id}</td>
 
                                                 <td >
-                                                <Link to={`/Childfranchisemaster/${item.id}`}><button
-                                                className='btn'
-                                                style={{
-                                                    backgroundColor: 'transparent',
-                                                    border: 'none',
-                                                    color:  'blue',
-                                                    fontSize: '20px',
-                                                    cursor: 'pointer'
-                                                }}
-                                            >
-                                                <FaPencilAlt />
-                                            </button></Link>
+                                                    <button
+                                                        className='btn'
+                                                        onClick={() => sendtoedit(item.id)}
+                                                        title="Edit"
+                                                        style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                                                    >
+                                                        <FaPencilAlt />
+                                                    </button>
                                                 </td>
                                                 {/* <td >
                                                     <button

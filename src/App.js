@@ -534,7 +534,7 @@ const Router = createBrowserRouter([
         element: <Servicecontract />
       },
       {
-        path: "/Servicecontract/:serviceid",
+        path: "/Servicecontract/:serviceid/:view",
         element: <Servicecontract />
       },
       {

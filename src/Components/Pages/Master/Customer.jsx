@@ -1,15 +1,16 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
-import { Base_Url } from '../../Utils/Base_Url';
+import { Base_Url, secretKey } from '../../Utils/Base_Url';
 import Endcustomertabs from './Endcustomertabs';
 import { useParams } from 'react-router-dom';
 import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
+import CryptoJS from 'crypto-js';
 
 const Customer = () => {
   const { loaders, axiosInstance } = useAxiosLoader();
-  const { customerid } = useParams();
+  let { customerid } = useParams();
   const [customerData, setCustomerData] = useState([]);
   const token = localStorage.getItem("token");
   const [errors, setErrors] = useState({});
@@ -18,7 +19,16 @@ const Customer = () => {
   const [duplicateError, setDuplicateError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
-  const { eid } = useParams();
+ 
+
+     try{
+          customerid = customerid.replace(/-/g, '+').replace(/_/g, '/');
+          const bytes = CryptoJS.AES.decrypt(customerid, secretKey);
+          const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+          customerid = parseInt(decrypted, 10)
+      }catch(error){
+          console.log("Error".error)
+      }
 
   const [formData, setFormData] = useState({
     customer_fname: '',

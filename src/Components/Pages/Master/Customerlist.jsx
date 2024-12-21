@@ -2,10 +2,11 @@ import axios from 'axios';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
-import { Base_Url } from '../../Utils/Base_Url';
+import { Base_Url, secretKey } from '../../Utils/Base_Url';
 import Endcustomertabs from './Endcustomertabs';
 import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
+import CryptoJS from 'crypto-js';
 
 
 export function Customerlist(params) {
@@ -173,14 +174,10 @@ export function Customerlist(params) {
     };
 
     const edit = async (id) => {
-        try {
-            const response = await axiosInstance.get(`${Base_Url}/requestcustomerlist/${id}`);
-            setFormData(response.data)
-            setIsEdit(true);
-            console.log(response.data);
-        } catch (error) {
-            console.error('Error editing user:', error);
-        }
+              id = id.toString()
+              let encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
+              encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+              navigate(`/Customer/${encrypted}`)
     };
     useEffect(() => {
         fetchCustomerlist();
@@ -409,17 +406,16 @@ export function Customerlist(params) {
                                                 </td>
 
                                                 <td >
-                                                    <Link to={`/Customer/${item.id}`}> <button
+                                              <button
                                                         className='btn'
-                                                        onClick={() => {
-                                                            // alert(item.id)
+                                                        onClick={() => 
                                                             edit(item.id)
-                                                        }}
+                                                        }
                                                         title="Edit"
                                                         style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
                                                     >
                                                         <FaPencilAlt />
-                                                    </button></Link>
+                                                    </button>
                                                 </td>
                                                 <td style={{ padding: '0px', textAlign: 'center' }}>
                                                     <button

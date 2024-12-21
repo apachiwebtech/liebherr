@@ -1,15 +1,17 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
-import { Base_Url } from "../../Utils/Base_Url";
+import { Base_Url, secretKey } from "../../Utils/Base_Url";
 import { Navigate, useParams } from "react-router-dom";
 import Servicecontracttabs from "./Servicecontracttabs";
 import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
+import CryptoJS from 'crypto-js';
 const Servicecontract = () => {
   // Step 1: Add this state to track errors
   const { loaders, axiosInstance } = useAxiosLoader();
-  const { serviceid } = useParams();
+
+  let { serviceid } = useParams();
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -22,6 +24,15 @@ const Servicecontract = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const createdBy = 1; // Static value for created_by
   const updatedBy = 2; // Static value for updated_by
+
+    try {
+      serviceid = serviceid.replace(/-/g, '+').replace(/_/g, '/');
+          const bytes = CryptoJS.AES.decrypt(serviceid, secretKey);
+          const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+          serviceid = parseInt(decrypted, 10)
+      } catch (error) {
+          console.log("Error".error)
+      }
 
   const [formData, setFormData] = useState({
     customerName: "",

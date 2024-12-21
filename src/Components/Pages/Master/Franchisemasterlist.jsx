@@ -2,10 +2,11 @@ import axios from 'axios';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
-import { Base_Url } from '../../Utils/Base_Url';
+import { Base_Url, secretKey } from '../../Utils/Base_Url';
 import Franchisemaster from './Franchisemaster';
 import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
+import CryptoJS from 'crypto-js';
 
 export function Franchisemasterlist(params) {
   const { loaders, axiosInstance } = useAxiosLoader();
@@ -118,20 +119,12 @@ export function Franchisemasterlist(params) {
     }
   };
 
-  const edit = async (id) => {
-    try {
-      const response = await axiosInstance.get(`${Base_Url}/requestengineer/${id}`, {
-        headers: {
-          Authorization: token,
-        },
-      });
-      setFormData(response.data)
-      setIsEdit(true);
-      console.log(response.data);
-    } catch (error) {
-      console.error('Error editing user:', error);
-    }
-  };
+    const sendtoedit = async (id) => {
+        id = id.toString()
+        let encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
+        encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        navigate(`/Masterfranchise/${encrypted}`)
+    };
   useEffect(() => {
     fetchFranchisemasterlist();
   }, []);
@@ -202,13 +195,14 @@ export function Franchisemasterlist(params) {
                         <td >{item.district_name}</td>
 
                         <td >
-                          <Link to={`/Masterfranchise/${item.id}`}> <button
+                          <button
                             className='btn'
+                             onClick={() => sendtoedit(item.id)}
                             title="Edit"
                             style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
                           >
                             <FaPencilAlt />
-                          </button></Link>
+                          </button>
                         </td>
                         {/* <td >
                                                     <button

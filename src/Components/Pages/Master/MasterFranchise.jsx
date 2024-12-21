@@ -2,7 +2,7 @@ import axios from "axios";
 import CryptoJS from 'crypto-js';
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
-import { Base_Url } from "../../Utils/Base_Url";
+import { Base_Url, secretKey } from "../../Utils/Base_Url";
 import { useParams } from "react-router-dom";
 import Franchisemaster from '../Master/Franchisemaster';
 import { useNavigate } from "react-router-dom";
@@ -10,10 +10,11 @@ import md5 from 'js-md5';
 import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 
+
 const MasterFranchise = (params) => {
   // Step 1: Add this state to track errors
   const { loaders, axiosInstance } = useAxiosLoader();
-  const { masterid } = useParams();
+  let { masterid } = useParams();
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -62,6 +63,16 @@ const MasterFranchise = (params) => {
 
 
   });
+
+  
+       try{
+        masterid = masterid.replace(/-/g, '+').replace(/_/g, '/');
+          const bytes = CryptoJS.AES.decrypt(masterid, secretKey);
+          const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+          masterid = parseInt(decrypted, 10)
+      }catch(error){
+          console.log("Error".error)
+      }
 
   const fetchUsers = async () => {
     try {
