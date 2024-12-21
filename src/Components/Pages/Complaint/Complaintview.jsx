@@ -393,6 +393,27 @@ export function Complaintview(params) {
 
   };
 
+  const addInTab = (ticket_no, ticket_id) => {
+    // Retrieve the existing array of ticket numbers, or initialize as an empty array
+    const prevTickets = JSON.parse(localStorage.getItem('tabticket')) || [];
+
+    // Check if the ticket already exists in the array
+    const isTicketExists = prevTickets.some(
+      (ticket) => ticket.ticket_id === ticket_id
+    );
+
+    // Add the current ticket number to the array only if it doesn't already exist
+    if (!isTicketExists) {
+      prevTickets.push({
+        ticket_id: ticket_id,
+        ticket_no: ticket_no,
+      });
+
+      // Store the updated array back in localStorage
+      localStorage.setItem('tabticket', JSON.stringify(prevTickets));
+    }
+  };
+
 
 
 
@@ -1221,7 +1242,10 @@ export function Complaintview(params) {
                               <span style={{ fontSize: "14px" }}>
                                 <button
                                   className="btn"
-                                  onClick={() => navigate(`/complaintview/${item.id}`)}
+                                  onClick={() =>{ 
+                                    navigate(`/complaintview/${item.id}`)
+                                    addInTab(item.ticket_no, item.id)
+                                  }}
                                   title="View"
                                   style={{ backgroundColor: "transparent", border: "none", color: "blue", fontSize: "20px" }}
                                 >

@@ -330,6 +330,27 @@ export function Registercomplaint(params) {
   };
 
 
+  const addInTab = (ticket_no, ticket_id) => {
+    // Retrieve the existing array of ticket numbers, or initialize as an empty array
+    const prevTickets = JSON.parse(localStorage.getItem('tabticket')) || [];
+
+    // Check if the ticket already exists in the array
+    const isTicketExists = prevTickets.some(
+      (ticket) => ticket.ticket_id === ticket_id
+    );
+
+    // Add the current ticket number to the array only if it doesn't already exist
+    if (!isTicketExists) {
+      prevTickets.push({
+        ticket_id: ticket_id,
+        ticket_no: ticket_no,
+      });
+
+      // Store the updated array back in localStorage
+      localStorage.setItem('tabticket', JSON.stringify(prevTickets));
+    }
+  };
+
   //This is for State Dropdown
 
   async function getState(params) {
@@ -978,7 +999,7 @@ export function Registercomplaint(params) {
         <div className="complbread">
           <div className="row">
             <div className="col-md-3">
-              <label className="breadMain">Register New Ticket</label>
+              {Comp_id ? < label className="breadMain">{Comp_id}</label>  : < label className="breadMain">Register New Ticket</label> }
             </div>
           </div>
         </div>
@@ -989,7 +1010,7 @@ export function Registercomplaint(params) {
 
       <div className="row mt-25">
         <div className="col-3">
-          <div className="card mb-3">
+          {!Comp_id &&   <div className="card mb-3">
             <div className="card-body">
               <div>
                 <p>Search by Ticket No. / Serial No. / Mobile No./ Customer Name / Customer Id / Email Id</p>
@@ -1027,7 +1048,8 @@ export function Registercomplaint(params) {
               </div>
 
             </div>
-          </div>
+          </div> }
+        
 
           {hideticket ? <div id="searchResult" className="card">
 
@@ -1082,7 +1104,7 @@ export function Registercomplaint(params) {
                 </div>
               </div>
 
-              {!form && ProductCustomer ? (
+              {!form && ProductCustomer  ? (
                 <>
                   <ul className="nav nav-tabs" id="myTab2" role="tablist">
                     <li className="nav-item">
@@ -1096,7 +1118,7 @@ export function Registercomplaint(params) {
                       <table className="table table-striped">
                         <tbody>
 
-                          {!form && ProductCustomer.map((item, index) => (
+                          {!form &&  ProductCustomer.map((item, index) => (
                             <tr key={index}>
                               <td><div>{item.ModelNumber}</div></td>
                               <td>
@@ -1135,7 +1157,10 @@ export function Registercomplaint(params) {
                             <div style={{ fontSize: "14px" }}>{item.call_status}</div>
                             <span style={{ fontSize: "14px" }}><button
                               className='btn'
-                              onClick={() => navigate(`/complaintview/${item.id}`)}
+                              onClick={() =>{
+                                 navigate(`/complaintview/${item.id}`)
+                                 addInTab(item.ticket_no, item.id)
+                                }}
                               title="View Info"
                               style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
                             >
@@ -1153,11 +1178,13 @@ export function Registercomplaint(params) {
             </div>
 
           </div> : <div className="card">
-            <div className="card-body">
+            {!Comp_id &&   <div className="card-body">
               {/* Only show "No Result Found" if a search was performed and no results were found */}
               {hasSearched && searchdata.length === 0 && <p>No Result Found</p>}
               <button onClick={() => setForm(true)} className="btn btn-sm btn-primary">New Ticket</button>
-            </div>
+            </div>}
+          
+
           </div>}
 
 
@@ -1243,6 +1270,22 @@ export function Registercomplaint(params) {
                 </div>
 
                 <form className="row" onSubmit={handlesubmit}>
+
+                <div className="col-md-4">
+                    <div className="mb-3">
+                      <label className="form-label">Ticket Type<span className="text-danger">*</span></label>
+                      <select className="form-control" onChange={onHandleChange} value={value.ticket_type} name="ticket_type">
+                        <option value="">Select</option>
+                        <option value="Installation">Installation</option>
+                        <option value="Breakdown">Breakdown</option>
+                        <option value="Visit">Visit</option>
+                        <option value="Helpdesk">Helpdesk</option>
+                        <option value="Maintenance">Maintenance</option>
+                        <option value="Demo">Demo</option>
+                      </select>
+                      {errors.ticket_type && <span style={{ fontSize: "12px" }} className="text-danger">{errors.ticket_type}</span>}
+                    </div>
+                  </div>
 
                   <div className="col-md-3">
                     <div className="mb-3">
@@ -1543,21 +1586,7 @@ export function Registercomplaint(params) {
                       {errors.mode_of_contact && <span style={{ fontSize: "12px" }} className="text-danger">{errors.mode_of_contact}</span>}
                     </div>
                   </div>
-                  <div className="col-md-4">
-                    <div className="mb-3">
-                      <label className="form-label">Ticket Type<span className="text-danger">*</span></label>
-                      <select className="form-control" onChange={onHandleChange} value={value.ticket_type} name="ticket_type">
-                        <option value="">Select</option>
-                        <option value="Installation">Installation</option>
-                        <option value="Breakdown">Breakdown</option>
-                        <option value="Visit">Visit</option>
-                        <option value="Helpdesk">Helpdesk</option>
-                        <option value="Maintenance">Maintenance</option>
-                        <option value="Demo">Demo</option>
-                      </select>
-                      {errors.ticket_type && <span style={{ fontSize: "12px" }} className="text-danger">{errors.ticket_type}</span>}
-                    </div>
-                  </div>
+              
 
                   <div className="col-md-4">
                     <div className="mb-3">
@@ -1677,7 +1706,7 @@ export function Registercomplaint(params) {
 
               <div className="card mb-3" id="engineerInfo">
                 <div className="card-body">
-                  <h4 className="pname">Fault Description</h4>
+                  <h4 className="pname">Fault Description<span className="text-danger">*</span></h4>
                   <div className="mb-3">
                     <textarea
                       className="form-control"
