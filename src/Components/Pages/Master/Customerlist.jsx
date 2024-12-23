@@ -408,7 +408,7 @@ export function Customerlist(params) {
                                                 <td >
                                               <button
                                                         className='btn'
-                                                        onClick={() => 
+                                                        onClick={() =>
                                                             edit(item.id)
                                                         }
                                                         title="Edit"

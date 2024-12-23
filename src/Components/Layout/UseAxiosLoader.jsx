@@ -17,12 +17,12 @@ export function useAxiosLoader() {
     const requestInterceptor = axiosInstance.interceptors.request.use(
       (config) => {
         setLoaders(true);  // Show loader when request starts
-        console.log('Request started, setting loader to true');
+        // console.log('Request started, setting loader to true');
         return config;
       },
       (error) => {
         setLoaders(false);  // Hide loader if request fails
-        console.log('Request failed, hiding loader');
+        // console.log('Request failed, hiding loader');
         return Promise.reject(error);
       }
     );
@@ -31,12 +31,12 @@ export function useAxiosLoader() {
     const responseInterceptor = axiosInstance.interceptors.response.use(
       (response) => {
         setLoaders(false);  // Hide loader when response is received
-        console.log('Response received, hiding loader');
+        // console.log('Response received, hiding loader');
         return response;
       },
       (error) => {
         setLoaders(false);  // Hide loader if response fails
-        console.log('Response error, hiding loader');
+        // console.log('Response error, hiding loader');
         return Promise.reject(error);
       }
     );

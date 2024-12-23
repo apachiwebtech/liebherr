@@ -395,6 +395,8 @@ export function Complaintview(params) {
   };
 
   const addInTab = (ticket_no, ticket_id) => {
+    console.log(ticket_no, ticket_id ,"ticket_no, ticket_id");
+
     // Retrieve the existing array of ticket numbers, or initialize as an empty array
     const prevTickets = JSON.parse(localStorage.getItem('tabticket')) || [];
 
@@ -413,6 +415,8 @@ export function Complaintview(params) {
       // Store the updated array back in localStorage
       localStorage.setItem('tabticket', JSON.stringify(prevTickets));
     }
+
+    navigate(`/complaintview/${ticket_id}`)
   };
 
 
@@ -565,7 +569,7 @@ export function Complaintview(params) {
 
       setCloseStatus(response.data.call_status)
       setsubCloseStatus(response.data.sub_call_status)
-
+      setActiveTicket(complaintid);
       if (response.data.call_status != null) {
         setCallstatusid(response.data.call_status)
       }
@@ -893,7 +897,9 @@ export function Complaintview(params) {
     }
     getProduct();
 
-
+    const storedTabTicket = JSON.parse(localStorage.getItem('tabticket')) || [];
+    setTicketTab(storedTabTicket);
+    
     setActiveTicket(complaintid); // Set the active ticket ID
 
 
@@ -1077,10 +1083,12 @@ export function Complaintview(params) {
 
 
   const handleDeleteTab = (ticket_id) => {
+
     const updatedTickets = JSON.parse(localStorage.getItem('tabticket')) || [];
     const newTicketList = updatedTickets.filter(
       (ticket) => ticket.ticket_id !== ticket_id
     );
+
     localStorage.setItem('tabticket', JSON.stringify(newTicketList));
     if (ticket_id == activeTicket) {
       if (newTicketList.length > 0) {
@@ -1245,8 +1253,8 @@ export function Complaintview(params) {
                                 <button
                                   className="btn"
                                   onClick={() => {
-                                    navigate(`/complaintview/${item.id}`)
                                     addInTab(item.ticket_no, item.id)
+
                                   }}
                                   title="View"
                                   style={{ backgroundColor: "transparent", border: "none", color: "blue", fontSize: "20px" }}
@@ -1327,8 +1335,8 @@ export function Complaintview(params) {
                     Upload
                   </button>
                 </div>
-              </div> } 
-          
+              </div> }
+
 
               <div id="allattachme">
                 {attachments2.length > 0 ? (
@@ -2191,7 +2199,7 @@ export function Complaintview(params) {
                 </div>
               </div>
                }
-               
+
 
                 {/* Display added spare parts */}
                 <div className="mt-3">
