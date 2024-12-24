@@ -2,8 +2,6 @@
 
 // This is for gettiing data from the another database
 
-const API_KEY = "satyam_123";
-
 
 app.post("/fetchproductmaster", async (req, res) => {
 

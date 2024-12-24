@@ -209,12 +209,27 @@ app.post("/csplogin", async (req, res) => {
 
     const sql = `SELECT * FROM awt_childfranchisemaster WHERE email = '${Lhiuser}' AND password = '${password}'`;
 
-    // console.log(sql)
-
     const result = await pool.request().query(sql);
 
     if (result.recordset.length > 0) {
-      res.json({ id: result.recordset[0].id, Lhiuser: result.recordset[0].email, licare_code: result.recordset[0].licare_code });
+      const user = result.recordset[0];
+
+      // Generate a JWT token
+      const token = jwt.sign(
+        { id: user.id, email: user.email, licare_code: user.licare_code },
+        JWT_SECRET,
+        { expiresIn: "1h" } // Token validity duration
+      );
+
+      res.json({
+        message: "Login successful",
+        token, // Send the token to the client
+        user: {
+          id: user.id,
+          Lhiuser: user.email,
+          licare_code: user.licare_code,
+        },
+      });
     } else {
       res.status(401).json({ message: "Invalid username or password" });
     }
@@ -235,14 +250,31 @@ app.post("/loginmsp", async (req, res) => {
 
     const sql = `SELECT * FROM awt_franchisemaster WHERE email = '${Lhiuser}' AND password = '${password}'`;
 
-    console.log(sql)
+    console.log(sql);
 
     const result = await pool.request().query(sql);
 
     if (result.recordset.length > 0) {
-      res.json({ id: result.recordset[0].id, Lhiuser: result.recordset[0].email, licare_code: result.recordset[0].licarecode });
+      const user = result.recordset[0];
+
+      // Generate a JWT token
+      const token = jwt.sign(
+        { id: user.id, email: user.email, licare_code: user.licarecode },
+        JWT_SECRET,
+        { expiresIn: "1h" } // Token validity duration
+      );
+
+      res.json({
+        message: "Login successful",
+        token, // Send the token to the client
+        user: {
+          id: user.id,
+          Lhiuser: user.email,
+          licare_code: user.licarecode,
+        },
+      });
     } else {
-      res.status(500).json({ message: "Invalid username or password" });
+      res.status(401).json({ message: "Invalid username or password" });
     }
   } catch (err) {
     console.error(err);

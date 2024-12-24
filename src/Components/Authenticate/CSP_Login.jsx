@@ -27,11 +27,13 @@ export function CSP_Login() {
         password: hashpass,
       });
 
+      console.log(response ,"%%%")
+
 
       if (response.data) {
-        localStorage.setItem("userId", response.data.id);
-        localStorage.setItem("Lhiuser", response.data.Lhiuser);
-        localStorage.setItem("licare_code", response.data.licare_code);
+        localStorage.setItem("userId", response.data.user.id);
+        localStorage.setItem("Lhiuser", response.data.user.Lhiuser);
+        localStorage.setItem("licare_code", response.data.user.licare_code);
 
         // Navigate to the home page
         navigate('/csp/ticketlist');
