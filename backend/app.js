@@ -3158,11 +3158,10 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
     complaint_date, customer_name = "NA", contact_person, email, mobile, address,
     state, city, area, pincode, mode_of_contact, ticket_type, cust_type,
     warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks
-    , ticket_id, classification, priority, callType
+    , ticket_id, classification, priority, callType,requested_by,requested_email,requested_mobile
   } = req.body;
 
 
-  // console.log(req.body, "%%")
 
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
@@ -3317,13 +3316,13 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
           ticket_no, ticket_date, customer_name, customer_mobile, customer_email, address,
           state, city, area, pincode, customer_id, ModelNumber, ticket_type, call_type,
           call_status, warranty_status, invoice_date, call_charges, mode_of_contact,
-          contact_person,  created_date, created_by,  purchase_date, serial_no, child_service_partner, sevice_partner, specification ,customer_class,call_priority
+          contact_person,  created_date, created_by,  purchase_date, serial_no, child_service_partner, sevice_partner, specification ,customer_class,call_priority,requested_mobile,requested_email,requested_by
         )
         VALUES (
           @ticket_no, @complaint_date, @customer_name, @mobile, @email, @address,
           @state, @city, @area, @pincode, @customer_id, @model, @ticket_type, @cust_type,
           'Open', @warranty_status, @invoice_date, @call_charge, @mode_of_contact,
-          @contact_person,  @formattedDate, @created_by,  @purchase_date, @serial, @child_service_partner, @master_service_partner, @specification ,@classification , @priority
+          @contact_person,  @formattedDate, @created_by,  @purchase_date, @serial, @child_service_partner, @master_service_partner, @specification ,@classification , @priority ,@requested_mobile,@requested_email,@requested_by
         )
       `;
     } else {
@@ -3358,7 +3357,10 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
           sevice_partner = @master_service_partner,
           specification = @specification,
           customer_class = @classification,
-          call_priority = @priority
+          call_priority = @priority.
+          requested_mobile = @requested_mobile,
+          requested_email = @requested_email,
+          requested_by = @requested_by
         WHERE
           id = @ticket_id
       `;
@@ -3397,6 +3399,9 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
       .input('specification', specification)
       .input('classification', classification)
       .input('priority', priority)
+      .input('requested_by', requested_by)
+      .input('requested_email', requested_email)
+      .input('requested_mobile', requested_mobile)
       .query(complaintSQL);
 
     console.log(resutlt, priority, "$$$$")
@@ -3459,8 +3464,10 @@ app.post("/update_complaint", authenticateToken,
     let {
       complaint_date, customer_name, contact_person, email, mobile, address,
       state, city, area, pincode, mode_of_contact, ticket_type, cust_type,
-      warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks, ticket_no, classification, priority
+      warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks, ticket_no, classification, priority ,requested_by,requested_email,requested_mobile
     } = req.body;
+
+    console.log(requested_by,requested_email,requested_mobile, "$$$")
 
     const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
@@ -3502,7 +3509,10 @@ app.post("/update_complaint", authenticateToken,
     sevice_partner = @master_service_partner,
     specification = @specification,
     customer_class = @classification,
-    call_priority = @priority
+    call_priority = @priority,
+    requested_by = @requested_by,
+    requested_mobile = @requested_mobile,
+    requested_email = @requested_email
   WHERE
     ticket_no = @ticket_no
 `;
@@ -3540,6 +3550,9 @@ app.post("/update_complaint", authenticateToken,
         .input('specification', specification)
         .input('classification', classification)
         .input('priority', priority)
+        .input('requested_by', requested_by)
+        .input('requested_email', requested_email)
+        .input('requested_mobile', requested_mobile)
         .query(complaintSQL);
 
       //Remark insert query

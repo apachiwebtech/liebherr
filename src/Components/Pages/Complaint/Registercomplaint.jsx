@@ -219,6 +219,18 @@ export function Registercomplaint(params) {
       isValid = false;
       newErrors.cust_type = "Type is required";
     }
+    if (!value.requested_by && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
+      isValid = false;
+      newErrors.requested_by = "This is required";
+    }
+    if (!value.requested_email && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
+      isValid = false;
+      newErrors.requested_email = "This is required";
+    }
+    if (!value.requested_mobile && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
+      isValid = false;
+      newErrors.requested_mobile = "This is required";
+    }
 
     if (!value.classification && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
       isValid = false;
@@ -1592,24 +1604,24 @@ export function Registercomplaint(params) {
 
                   </>}
 
-                  <div className="col-md-3">
+                  <div className="col-md-4">
                     <div className="mb-3">
-                      <label htmlFor="exampleFormControlInput1" className="form-label">Requested by</label>
-                      <input type="text" className="form-control" value={value.requested_by} name="requested_by" onChange={onHandleChange} placeholder="" disabled />
+                      <label htmlFor="exampleFormControlInput1" className="form-label">Requested by {value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
+                      <input type="text" className="form-control" value={value.requested_by} name="requested_by" onChange={onHandleChange} placeholder=""  />
                       {errors.requested_by && <span style={{ fontSize: "12px" }} className="text-danger">{errors.requested_by}</span>}
                     </div>
                   </div>
-                  <div className="col-md-3">
+                  <div className="col-md-4">
                     <div className="mb-3">
-                      <label htmlFor="exampleFormControlInput1" className="form-label">Requested Email</label>
-                      <input type="text" className="form-control" value={value.requested_email} name="requested_email" onChange={onHandleChange} placeholder="" disabled />
+                      <label htmlFor="exampleFormControlInput1" className="form-label">Requested Email {value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
+                      <input type="text" className="form-control" value={value.requested_email} name="requested_email" onChange={onHandleChange} placeholder=""  />
                       {errors.requested_email && <span style={{ fontSize: "12px" }} className="text-danger">{errors.requested_email}</span>}
                     </div>
                   </div>
-                  <div className="col-md-3">
+                  <div className="col-md-4">
                     <div className="mb-3">
-                      <label htmlFor="exampleFormControlInput1" className="form-label">Requested Mobile</label>
-                      <input type="text" className="form-control" value={value.requested_mobile} name="requested_mobile" onChange={onHandleChange} placeholder="" disabled />
+                      <label htmlFor="exampleFormControlInput1" className="form-label">Requested Mobile {value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
+                      <input type="text" className="form-control" value={value.requested_mobile} name="requested_mobile" onChange={onHandleChange} placeholder=""  />
                       {errors.requested_mobile && <span style={{ fontSize: "12px" }} className="text-danger">{errors.requested_mobile}</span>}
                     </div>
                   </div>
