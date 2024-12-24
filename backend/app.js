@@ -111,7 +111,7 @@ app.post("/loginuser", async (req, res) => {
 
       // Generate JWT token
       const token = jwt.sign(
-        { id: user.id, Lhiuser: user.Lhiuser  ,email : user.email}, // Payload
+        { id: user.id, Lhiuser: user.Lhiuser, email: user.email }, // Payload
         JWT_SECRET, // Secret key
         { expiresIn: "8h" } // Token validity
       );
@@ -145,48 +145,48 @@ app.post("/lhilogin", async (req, res) => {
   }
 
   try {
-      const { lhiemail } = req.body;
+    const { lhiemail } = req.body;
 
-      // Validate the provided email (this is just a placeholder; replace with your actual validation logic)
-      if (!lhiemail || !lhiemail.includes("@")) {
-          return res.status(400).json({ error: "Invalid email provided" });
-      }
-      const sql = `SELECT top 1  id, Lhiuser, email FROM lhi_user WHERE email = '${lhiemail}' and deleted = 0 and status = 1 `;
+    // Validate the provided email (this is just a placeholder; replace with your actual validation logic)
+    if (!lhiemail || !lhiemail.includes("@")) {
+      return res.status(400).json({ error: "Invalid email provided" });
+    }
+    const sql = `SELECT top 1  id, Lhiuser, email FROM lhi_user WHERE email = '${lhiemail}' and deleted = 0 and status = 1 `;
 
-      const result = await pool.request().query(sql);
-        if (result.recordset.length > 0) {
-          const user = result.recordset[0];
-        // Generate JWT token
+    const result = await pool.request().query(sql);
+    if (result.recordset.length > 0) {
+      const user = result.recordset[0];
+      // Generate JWT token
 
-        const token = jwt.sign( { email: lhiemail , id: user.id, Lhiuser: user.Lhiuser }, JWT_SECRET, { expiresIn: '8h' });
+      const token = jwt.sign({ email: lhiemail, id: user.id, Lhiuser: user.Lhiuser }, JWT_SECRET, { expiresIn: '8h' });
 
-        res.json({
-          message: "Login successful.",
-          token, // Send token to client
-          user: {
-            id: user.id,
-            Lhiuser: user.Lhiuser,
-            Email : user.lhiemail
-          },
-        });
-      }else {
-        res.json({
-          message: "Login Failed.",
-          token:"", // Send token to client
-          user: {
-            id: "",
-            Lhiuser:"",
-            Email:''
-          },
-        });
+      res.json({
+        message: "Login successful.",
+        token, // Send token to client
+        user: {
+          id: user.id,
+          Lhiuser: user.Lhiuser,
+          Email: user.lhiemail
+        },
+      });
+    } else {
+      res.json({
+        message: "Login Failed.",
+        token: "", // Send token to client
+        user: {
+          id: "",
+          Lhiuser: "",
+          Email: ''
+        },
+      });
 
-      }
+    }
 
 
   } catch (error) {
-      console.error("Error during login:", error);
-      res.status(500).json({ error: "An error occurred during login" });
-  }
+    console.error("Error during login:", error);
+    res.status(500).json({ error: "An error occurred during login" });
+  }
 });
 
 
@@ -2462,6 +2462,21 @@ app.get("/getgroupdefectcode", authenticateToken, async (req, res) => {
     return res.status(500).json(err);
   }
 });
+app.get("/getactivity", authenticateToken, async (req, res) => {
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    const sql = "select * from awt_activity WHERE deleted = 0";
+
+    const result = await pool.request().query(sql);
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json(err);
+  }
+});
 
 
 app.get("/gettypeofdefect", authenticateToken, async (req, res) => {
@@ -2615,6 +2630,7 @@ app.post("/deletetypeofdefect", authenticateToken, async (req, res) => {
 // Type Of Defect Code End
 
 
+
 //Site code Start
 app.get("/getsitedefect", authenticateToken, async (req, res) => {
   try {
@@ -2634,6 +2650,47 @@ app.get("/getsitedefect", authenticateToken, async (req, res) => {
   }
 });
 
+// Insert  Type Of Defect Code
+app.post("/postactivity", authenticateToken, async (req, res) => {
+  const { dsite_code, groupdefectcode, dsite_title, description, created_by } = req.body;
+
+  try {
+    const pool = await poolPromise;
+
+    // Check if the same defect_code exists and is not soft-deleted
+    const checkDuplicateSql = `
+      SELECT * FROM awt_activity
+      WHERE code = '${dsite_code}' AND  title = '${groupdefectcode}'
+      AND deleted = 0
+    `;
+
+    const checkDuplicateResult = await pool.request().query(checkDuplicateSql);
+
+    if (checkDuplicateResult.recordset.length > 0) {
+      // If duplicate active record exists
+      return res.status(409).json({ message: "Duplicate entry, Site Defect code already exists!" });
+    } else {
+      // Insert new record
+      const insertSql = `
+        INSERT INTO awt_activity (
+          code, title,description, created_date, created_by, deleted
+        )
+        VALUES (
+          '${dsite_code}', '${dsite_title}', '${description}', GETDATE(), '${created_by}', 0
+        )
+      `;
+
+
+
+      await pool.request().query(insertSql);
+
+      return res.json({ message: "Site defect code added successfully!" });
+    }
+  } catch (err) {
+    console.error("Error handling defect_code:", err);
+    return res.status(500).json({ message: "Error handling Site defect code" });
+  }
+});
 // Insert  Type Of Defect Code
 app.post("/postsitedefect", authenticateToken, async (req, res) => {
   const { dsite_code, groupdefectcode, dsite_title, description, created_by } = req.body;
@@ -2675,6 +2732,31 @@ app.post("/postsitedefect", authenticateToken, async (req, res) => {
 });
 
 
+// Edit Type Of Activity by ID
+app.get("/requestactivity/:id", authenticateToken, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const pool = await poolPromise;
+    const sql = `
+      SELECT
+     *
+      FROM awt_activity
+      WHERE id = ${id}
+      AND deleted = 0
+    `;
+    const result = await pool.request().query(sql);
+
+    if (result.recordset.length > 0) {
+      return res.json(result.recordset[0]);
+    } else {
+      return res.status(404).json({ message: "Type Of Defect not found" });
+    }
+  } catch (err) {
+    console.error("Error fetching Type Of Defect:", err);
+    return res.status(500).json({ message: "Error fetching Type Of Defect" });
+  }
+});
+
 // Edit Type Of Defect Code by ID
 app.get("/requestsitedefect/:id", authenticateToken, async (req, res) => {
   const { id } = req.params;
@@ -2705,6 +2787,52 @@ app.get("/requestsitedefect/:id", authenticateToken, async (req, res) => {
     return res.status(500).json({ message: "Error fetching Type Of Defect" });
   }
 });
+
+// Update Type Of Activity
+app.post("/putactivity", authenticateToken, async (req, res) => {
+  const { id, dsite_code, groupdefectcode, dsite_title, description, updated_by } = req.body;
+
+  try {
+    const pool = await poolPromise;
+
+    // Check for duplicates with same `dsite_code` and `defectgroupcode`, excluding the current record (`id`)
+    const checkDuplicateSql = `
+      SELECT * FROM awt_activity
+      WHERE title = '${dsite_code}'
+      AND code = '${groupdefectcode}'
+      AND deleted = 0
+      AND id != ${id}
+    `;
+    const checkDuplicateResult = await pool.request().query(checkDuplicateSql);
+
+    if (checkDuplicateResult.recordset.length > 0) {
+      // If duplicate entry exists
+      return res.status(409).json({ message: "Duplicate entry, Site Defect code already exists!" });
+    } else {
+      // Update record
+      const updateSql = `
+        UPDATE awt_activity
+        SET
+          code = '${dsite_code}',
+          title = '${dsite_title}',
+          description = '${description}',
+          updated_by = '${updated_by}',
+          updated_date = GETDATE()
+        WHERE id = ${id} AND deleted = 0
+      `;
+
+      console.log(updateSql);
+
+      await pool.request().query(updateSql);
+
+      return res.json({ message: "Site defect code updated successfully!" });
+    }
+  } catch (err) {
+    console.error("Error updating Site Defect code:", err);
+    return res.status(500).json({ message: "Error updating Site Defect code" });
+  }
+});
+
 
 // Update Type Of Defect Code
 app.post("/putsitedefect", authenticateToken, async (req, res) => {
@@ -2751,6 +2879,23 @@ app.post("/putsitedefect", authenticateToken, async (req, res) => {
 
 
 
+// Soft-delete rType Of Defect Code by ID
+app.post("/deleteactivity", authenticateToken, async (req, res) => {
+  const { id } = req.body;
+  try {
+    const pool = await poolPromise;
+    const sql = `
+      UPDATE awt_activity
+      SET deleted = 1, updated_date = GETDATE()
+      WHERE id = ${id}
+    `;
+    await pool.request().query(sql);
+    return res.json({ message: "Type of Defect deleted successfully!" });
+  } catch (err) {
+    console.error("Error deleting Type of Defect:", err);
+    return res.status(500).json({ message: "Error deleting Type of Defect" });
+  }
+});
 // Soft-delete rType Of Defect Code by ID
 app.post("/deletesitedefect", authenticateToken, async (req, res) => {
   const { id } = req.body;
@@ -3030,16 +3175,17 @@ app.get("/getAttachment2Details/:ticket_no",
 
 //Complaint view  Attachment 2 End
 
-app.get("/getcvengineer", authenticateToken, async (req, res) => {
+app.get("/getcvengineer/:pincode/:msp/:csp", authenticateToken, async (req, res) => {
+
+  let { pincode ,msp ,csp } = req.params;
+console.log( pincode ,msp ,csp,"vkjuyfhdgviuc dyuhj");
+
   try {
     const pool = await poolPromise;
 
     // Direct SQL query without parameter binding
-    const sql = `
-      SELECT * FROM awt_engineermaster
-      WHERE deleted = 0
-    `;
-
+    const sql = `select * from pincode_allocation where pincode ='${pincode}' and account_manager = '${msp}' and owner ='${csp}'`;
+// console.log(sql)
     // Execute the query
     const result = await pool.request().query(sql);
 
@@ -3436,7 +3582,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
       .input('requested_mobile', requested_mobile)
       .query(complaintSQL);
 
-    console.log(resutlt, priority, "$$$$")
+    // console.log(resutlt, priority, "$$$$")
 
 
     if (additional_remarks) {
@@ -3531,10 +3677,8 @@ app.post("/update_complaint", authenticateToken,
     call_charges = @call_charge,
     mode_of_contact = @mode_of_contact,
     contact_person = @contact_person,
-    assigned_to = 1,
     created_date = @formattedDate,
     created_by = @created_by,
-    engineer_id = 1,
     purchase_date = @purchase_date,
     serial_no = @serial,
     child_service_partner = @child_service_partner,
@@ -4374,7 +4518,7 @@ app.get("/getengineer", authenticateToken, async (req, res) => {
       { name: "pageSize", value: parseInt(pageSize) }
     );
 
-    console.log(sql, "$$$$");
+    // console.log(sql, "$$$$");
 
     // Execute the SQL query
     const request = pool.request();
@@ -7338,7 +7482,7 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
 
     const currentDate = new Date().toISOString().split('T')[0]
 
-    console.log(currentDate, "$$$")
+    // console.log(currentDate, "$$$")
 
     let sql = `
         SELECT c.*,
@@ -7556,8 +7700,8 @@ app.get("/getcomplainlistcsp", async (req, res) => {
         WHERE c.deleted = 0 AND c.csp = '${licare_code}'
     `;
 
-        // Fetch total count of records (without pagination)
-        let countSql = `
+    // Fetch total count of records (without pagination)
+    let countSql = `
         SELECT COUNT(*) AS totalRecords
         FROM complaint_ticket AS c
         WHERE c.deleted = 0 AND c.csp = '${licare_code}'
@@ -7581,58 +7725,58 @@ app.get("/getcomplainlistcsp", async (req, res) => {
       sql += ` AND c.customer_email LIKE '%${customerEmail}%'`;
       countSql += ` AND c.customer_email LIKE '%${customerEmail}%'`
     }
-    
+
     if (customerMobile) {
       sql += ` AND c.customer_mobile LIKE '%${customerMobile}%'`;
       countSql += ` AND c.customer_mobile LIKE '%${customerMobile}%'`
-      
+
     }
-    
+
     if (serialNo) {
       sql += ` AND c.serial_no LIKE '%${serialNo}%'`;
       countSql += ` AND c.serial_no LIKE '%${serialNo}%'`
-      
+
     }
-    
+
     if (productCode) {
       sql += ` AND c.ModelNumber LIKE '%${productCode}%'`;
       countSql += ` AND c.ModelNumber LIKE '%${productCode}%'`
-      
+
     }
-    
+
     if (ticketno) {
       sql += ` AND c.ticket_no LIKE '%${ticketno}%'`;
       countSql += ` AND c.ticket_no LIKE '%${ticketno}%'`
-      
+
     }
     if (customerID) {
       sql += ` AND c.customer_id LIKE '%${customerID}%'`;
       countSql += ` AND c.customer_id LIKE '%${customerID}%'`
-      
+
     }
-    
+
     if (csp) {
       sql += ` AND c.csp LIKE '%${csp}%'`;
       countSql += ` AND c.csp LIKE '%${csp}%'`
-      
+
     }
-    
+
     if (mode_of_contact) {
       sql += ` AND c.mode_of_contact LIKE '%${mode_of_contact}%'`;
       countSql += ` AND c.mode_of_contact LIKE '%${mode_of_contact}%'`
-      
+
     }
-    
+
     if (customer_class) {
       sql += ` AND c.customer_class LIKE '%${customer_class}%'`;
       countSql += ` AND c.customer_class LIKE '%${customer_class}%'`
-      
+
     }
-    
+
     if (status) {
       sql += ` AND c.call_status = '${status}'`;
       countSql += ` AND c.call_status = '${status}'`
-      
+
     } else {
       sql += ` AND c.call_status != 'Closed' AND c.call_status != 'Cancelled'`;
       countSql += ` AND c.call_status != 'Closed' AND c.call_status != 'Cancelled'`
@@ -7877,7 +8021,7 @@ app.post("/getcomplaintticket", authenticateToken,
       const pool = await poolPromise;
 
       // Modified SQL query using parameterized query
-      const sql = "EXEC GetComplaintDetails @comp_no = @comp_no";
+      const sql = "SELECT t.*, f.title AS franchisee, c.title AS childPartner FROM complaint_ticket AS t LEFT JOIN awt_childfranchisemaster AS c ON c.licare_code = t.child_service_partner LEFT JOIN awt_franchisemaster AS f ON f.licarecode = c.pfranchise_id WHERE t.ticket_no = @comp_no";
 
       const result = await pool.request()
         .input('comp_no', comp_no) // Parameterized input
@@ -8382,7 +8526,7 @@ app.post("/fetchproductmaster", async (req, res) => {
     return res.status(403).json({ error: 'Forbidden: Invalid API key' });
   }
 
-  const { item_code, ModelNumber, product_model, product_type, product_class_code, product_class, product_line_code, product_line, material, manufacturer, item_type, serialized, size, crmproducttype, colour, handle_type, serial_identification, installation_type, customer_classification, price_group, mrp, service_partner_basic , packed } = req.body;
+  const { item_code, ModelNumber, product_model, product_type, product_class_code, product_class, product_line_code, product_line, material, manufacturer, item_type, serialized, size, crmproducttype, colour, handle_type, serial_identification, installation_type, customer_classification, price_group, mrp, service_partner_basic, packed } = req.body;
 
 
   try {
@@ -8425,7 +8569,7 @@ VALUES (
       .input('price_group', price_group)
       .input('mrp', mrp)
       .input('service_partner_basic', service_partner_basic)
-      .input('packed', packed );
+      .input('packed', packed);
 
 
 
@@ -8437,5 +8581,3 @@ VALUES (
     return res.status(500).json({ error: "Database error", details: err.message }); // Send back more details for debugging
   }
 });
-
-

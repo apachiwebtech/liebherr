@@ -103,12 +103,12 @@ export function Complaintview(params) {
 
   async function getEngineer(params) {
 
-
     try {
-      const res = await axiosInstance.get(`${Base_Url}/getcvengineer`, {
+      const res = await axiosInstance.get(`${Base_Url}/getcvengineer/${complaintview.pincode}/${complaintview.msp}/${complaintview.csp}`, {
         headers: {
           Authorization: token, // Send token in headers
         },
+
       });
 
 
@@ -395,7 +395,7 @@ export function Complaintview(params) {
   };
 
   const addInTab = (ticket_no, ticket_id) => {
-    console.log(ticket_no, ticket_id ,"ticket_no, ticket_id");
+    console.log(ticket_no, ticket_id, "ticket_no, ticket_id");
 
     // Retrieve the existing array of ticket numbers, or initialize as an empty array
     const prevTickets = JSON.parse(localStorage.getItem('tabticket')) || [];
@@ -899,7 +899,7 @@ export function Complaintview(params) {
 
     const storedTabTicket = JSON.parse(localStorage.getItem('tabticket')) || [];
     setTicketTab(storedTabTicket);
-    
+
     setActiveTicket(complaintid); // Set the active ticket ID
 
 
@@ -1146,31 +1146,30 @@ export function Complaintview(params) {
         `}
       </style>
       <div className="row mp0">
-        <div className="complbread">
-          <div className="row">
-            <div className="col-md-3">
-              <label className="breadMain">
-                <span style={{ fontSize: "14px" }}>Ticket : {complaintview.ticket_no}</span>
-              </label>
-            </div>
-            <div className="col-md-9 text-right pt-2">
-              {ticketTab.map((item) => (
-                <Chip
-                  key={item.ticket_id}
-                  label={item.ticket_no}
-                  variant={activeTicket == item.ticket_id ? "filled" : "outlined"}
-                  color={activeTicket == item.ticket_id ? "primary" : "default"}
-                  onClick={() => navigate(`/complaintview/${item.ticket_id}`)}
-                  onDelete={() => handleDeleteTab(item.ticket_id)}
-                  className="mx-2"
-                />
-              ))}
-
-
-            </div>
-          </div>
-        </div>
+  <div className="complbread">
+    <div className="row">
+      <div className="col-md-3">
+        <label className="breadMain">
+          <span style={{ fontSize: "14px" }}>Ticket : {complaintview.ticket_no}</span>
+        </label>
       </div>
+      <div className="col-md-9 text-right pt-2" style={{ overflowX: "auto", whiteSpace: "nowrap" }}>
+        {ticketTab.map((item) => (
+          <Chip
+            key={item.ticket_id}
+            label={item.ticket_no}
+            variant={activeTicket == item.ticket_id ? "filled" : "outlined"}
+            color={activeTicket == item.ticket_id ? "primary" : "default"}
+            onClick={() => navigate(`/complaintview/${item.ticket_id}`)}
+            onDelete={() => handleDeleteTab(item.ticket_id)}
+            className="mx-2"
+          />
+        ))}
+      </div>
+    </div>
+  </div>
+</div>
+
 
       <div className="row mp0 mt-25">
         <div className="col-3">
@@ -1312,7 +1311,7 @@ export function Complaintview(params) {
           <div className="card" id="attachmentInfocs">
             <div className="card-body">
               <h4 className="pname" style={{ fontSize: "14px" }}>Attachment</h4>
-              {closestatus == 'Closed' && subclosestatus == "Fully" || closestatus == 'Cancelled' ? null :    <div>
+              {closestatus == 'Closed' && subclosestatus == "Fully" || closestatus == 'Cancelled' ? null : <div>
                 <div className="mb-3">
                   <input
                     type="file"
@@ -1335,7 +1334,7 @@ export function Complaintview(params) {
                     Upload
                   </button>
                 </div>
-              </div> }
+              </div>}
 
 
               <div id="allattachme">
@@ -1682,8 +1681,8 @@ export function Complaintview(params) {
                             By: {remark.title}
                           </h3>
 
-                          <h3 className="mainheade" style={{ fontSize: "12px", margin: 0 }}>
-                            Date: {formatDate1(remark.created_date)}
+                          <h3 className=" date-header" >
+                            Date:  {formatDate1(remark.created_date)}
                           </h3>
                         </div>
                       </div>
@@ -2038,84 +2037,84 @@ export function Complaintview(params) {
                 </table>
               </div>
 
-              {(complaintview.call_status == 'Closed' ||  complaintview.group_code != "" ) &&
-               <>
-                <div className="mt-3">
-                  <h4 className="pname" style={{ fontSize: "14px" }}>Defect Group Code:</h4>
-                  <select
-                    name="group_code"
-                    className="form-control"
-                    disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
-                    style={{ fontSize: "14px" }}
-                    value={complaintview.group_code}
-                    onChange={(e) => {
-                      const selectedcode = e.target.value; // Get the id
-                      // const selectedid = groupdefect.find(item => item.Callstatus == selectedname)?.id; // Find the corresponding Callstatus value
-                      getdefecttype(selectedcode); // Send the id to fetch sub-call statuses
-                      getsitecode(selectedcode); // Send the id to fetch sub-call statuses
-                      setgroupstatusid(selectedcode)
-                      handleModelChange(e)
-                    }}
-                  >
-                    <option value="">Select Status</option>
-                    {groupdefect.map((item) => (
-                      <option key={item.id} value={item.defectgroupcode}>
-                        {item.defectgrouptitle}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="mt-3">
-                  <h4 className="pname" style={{ fontSize: "14px" }}>Type of Defect Code:</h4>
-                  <select
-                    name="defect_type"
-                    className="form-control"
-                    disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
-                    style={{ fontSize: "14px" }}
-                    value={complaintview.defect_type}
-                    onChange={handleModelChange}
-                  >
-                    <option value="">Select </option>
-                    {GroupDefecttype.map((item) => (
-                      <option key={item.id} value={item.defect_code}>
-                        {item.defect_title}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="mt-3">
-                  <h4 className="pname" style={{ fontSize: "14px" }}>Site Defect Code:</h4>
-                  <select
-                    name="site_defect"
-                    className="form-control"
-                    disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
-                    style={{ fontSize: "14px" }}
-                    value={complaintview.site_defect}
-                    onChange={handleModelChange}
-                  >
-                    <option value="">Select </option>
-                    {GroupDefectsite.map((item) => (
-                      <option key={item.id} value={item.dsite_code}>
-                        {item.dsite_title}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="mt-3">
-                  <h4 className="pname" style={{ fontSize: "14px" }}>Activity Code</h4>
-                  <select
-                    name="site_defect"
-                    className="form-control"
-                    disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
-                    style={{ fontSize: "14px" }}
+              {(complaintview.call_status == 'Closed' || complaintview.group_code != "") &&
+                <>
+                  <div className="mt-3">
+                    <h4 className="pname" style={{ fontSize: "14px" }}>Defect Group Code:</h4>
+                    <select
+                      name="group_code"
+                      className="form-control"
+                      disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
+                      style={{ fontSize: "14px" }}
+                      value={complaintview.group_code}
+                      onChange={(e) => {
+                        const selectedcode = e.target.value; // Get the id
+                        // const selectedid = groupdefect.find(item => item.Callstatus == selectedname)?.id; // Find the corresponding Callstatus value
+                        getdefecttype(selectedcode); // Send the id to fetch sub-call statuses
+                        getsitecode(selectedcode); // Send the id to fetch sub-call statuses
+                        setgroupstatusid(selectedcode)
+                        handleModelChange(e)
+                      }}
+                    >
+                      <option value="">Select Status</option>
+                      {groupdefect.map((item) => (
+                        <option key={item.id} value={item.defectgroupcode}>
+                          {item.defectgrouptitle}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="mt-3">
+                    <h4 className="pname" style={{ fontSize: "14px" }}>Type of Defect Code:</h4>
+                    <select
+                      name="defect_type"
+                      className="form-control"
+                      disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
+                      style={{ fontSize: "14px" }}
+                      value={complaintview.defect_type}
+                      onChange={handleModelChange}
+                    >
+                      <option value="">Select </option>
+                      {GroupDefecttype.map((item) => (
+                        <option key={item.id} value={item.defect_code}>
+                          {item.defect_title}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="mt-3">
+                    <h4 className="pname" style={{ fontSize: "14px" }}>Site Defect Code:</h4>
+                    <select
+                      name="site_defect"
+                      className="form-control"
+                      disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
+                      style={{ fontSize: "14px" }}
+                      value={complaintview.site_defect}
+                      onChange={handleModelChange}
+                    >
+                      <option value="">Select </option>
+                      {GroupDefectsite.map((item) => (
+                        <option key={item.id} value={item.dsite_code}>
+                          {item.dsite_title}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="mt-3">
+                    <h4 className="pname" style={{ fontSize: "14px" }}>Activity Code</h4>
+                    <select
+                      name="site_defect"
+                      className="form-control"
+                      disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
+                      style={{ fontSize: "14px" }}
 
-                  >
-                    <option value="">Select </option>
-                    <option>1234</option>
-                  </select>
-                </div>
+                    >
+                      <option value="">Select </option>
+                      <option>1234</option>
+                    </select>
+                  </div>
 
-              </>
+                </>
               }
 
 
@@ -2149,56 +2148,56 @@ export function Complaintview(params) {
               <div className="mt-3">
                 {closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? null : <h4 className="pname" style={{ fontSize: "14px" }}>Spare Parts:</h4>}
 
-               {closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? null :
-                <div className="row align-items-center">
+                {closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? null :
+                  <div className="row align-items-center">
 
-                <div className="col-lg-6">
-                  <select
-                    className="form-select dropdown-select m-0"
-                    name="spare_part_id"
-                    value={spareid}
-                    disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
-                    onChange={(e) => handlesparechange(e.target.value)}
-                  >
-                    <option value="">Select Spare Part</option>
-                    {Array.isArray(spare) && spare.length > 0 ? (
-                      spare.map((part) => (
-                        <option key={part.id} value={part.id}>
-                          {part.article_code + '-' + part.article_description}
-                        </option>
-                      ))
-                    ) : (
-                      <option value="" disabled>
-                        No spare parts available
-                      </option>
-                    )}
-                  </select>
-                </div>
+                    <div className="col-lg-6">
+                      <select
+                        className="form-select dropdown-select m-0"
+                        name="spare_part_id"
+                        value={spareid}
+                        disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
+                        onChange={(e) => handlesparechange(e.target.value)}
+                      >
+                        <option value="">Select Spare Part</option>
+                        {Array.isArray(spare) && spare.length > 0 ? (
+                          spare.map((part) => (
+                            <option key={part.id} value={part.id}>
+                              {part.article_code + '-' + part.article_description}
+                            </option>
+                          ))
+                        ) : (
+                          <option value="" disabled>
+                            No spare parts available
+                          </option>
+                        )}
+                      </select>
+                    </div>
 
-                <div className="col-lg-3">
-                  <input
-                    type="number"
-                    className="form-control"
-                    name="quantity"
-                    placeholder="Qty"
-                    value={quantity}
-                    onChange={(e) => setQuantity(e.target.value)}
-                    disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
-                    min="1"
-                  />
-                </div>
+                    <div className="col-lg-3">
+                      <input
+                        type="number"
+                        className="form-control"
+                        name="quantity"
+                        placeholder="Qty"
+                        value={quantity}
+                        onChange={(e) => setQuantity(e.target.value)}
+                        disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
+                        min="1"
+                      />
+                    </div>
 
-                <div className="col-lg-3">
-                  <button
-                    className="btn btn-primary btn-sm"
-                    disabled={closestatus == "Closed" && subclosestatus == 'Fully'  || !quantity || closestatus == 'Cancelled'}
-                    onClick={handleAddSparePart}
-                  >
-                    Add
-                  </button>
-                </div>
-              </div>
-               }
+                    <div className="col-lg-3">
+                      <button
+                        className="btn btn-primary btn-sm"
+                        disabled={closestatus == "Closed" && subclosestatus == 'Fully' || !quantity || closestatus == 'Cancelled'}
+                        onClick={handleAddSparePart}
+                      >
+                        Add
+                      </button>
+                    </div>
+                  </div>
+                }
 
 
                 {/* Display added spare parts */}

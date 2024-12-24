@@ -409,3 +409,10 @@ margin-bottom: 0 !important;
 .custom-modal-animation {
   animation: slideUp 0.5s ease-out;
 }
+.date-header {
+  font-size: 12px !important;
+  margin: 0 !important;
+  background: #f3f3f3 !important;
+  padding: 10px !important;
+  font-weight: 700 !important;
+}

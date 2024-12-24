@@ -64,15 +64,25 @@ export function Customerlist(params) {
 
     const fetchCustomerlist = async (page) => {
         try {
-            const response = await axiosInstance.get(`${Base_Url}/getcustomerlist`, {
+
+          const params = new URLSearchParams();
+
+           params = {
+            page: page, // Current page number
+            pageSize: pageSize, // Page size
+          };
+
+          // Add all filters to params
+          Object.entries(searchFilters).forEach(([key, value]) => {
+              if (value) { // Only add if value is not empty
+                  params.append(key, value);
+              }
+          });
+
+            const response = await axiosInstance.get(`${Base_Url}/getcustomerlist?${params}`, {
                 headers: {
                     Authorization: token,
-                },
-                params: {
-                    // You can add any additional filter parameters here if needed
-                    page: page, // current page number
-                    pageSize: pageSize, // page size
-                },
+                }
             });
 
             // Update state with data and total record count

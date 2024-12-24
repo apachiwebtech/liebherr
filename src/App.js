@@ -97,6 +97,7 @@ import { CspTicketView } from './Components/Pages/Master/CspTicketView';
 import NotAuthenticate from './Components/Authenticate/NotAuthenticate';
 import AppLogin from './Components/App/Compo/Login';
 import ProtectedRoute from './Components/Authenticate/ProtectedRoute';
+import Activity from './Components/Pages/Master/Activity';
 
 
 
@@ -288,6 +289,11 @@ const Router = createBrowserRouter([
       {
         path: "/SiteDefect",
         element: <ActionCode />,
+
+      },
+      {
+        path: "/Activity",
+        element: <Activity />,
 
       },
       {

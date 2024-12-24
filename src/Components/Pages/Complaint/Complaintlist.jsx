@@ -45,7 +45,7 @@ export function Complaintlist(params) {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const { loaders, axiosInstance } = useAxiosLoader();
-  
+
   const [totalCount, setTotalCount] = useState(0);
   const totalPages = Math.ceil(totalCount / pageSize);
 
@@ -157,6 +157,7 @@ export function Complaintlist(params) {
 
     } catch (error) {
       console.error('Error fetching filtered data:', error);
+      setComplaintdata([]);
       setFilteredData([]);
     }
   };

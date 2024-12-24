@@ -1325,7 +1325,7 @@ export function Registercomplaint(params) {
                   <div className="col-md-3">
                     <div className="mb-3">
                       <label className="form-label">Ticket Date{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
-                      <input type="date" name="complaint_date" onChange={onHandleChange} value={value.complaint_date} className="form-control" />
+                      <input type="date" name="complaint_date" onChange={onHandleChange} value={value.complaint_date || new Date().toISOString().split('T')[0]} className="form-control" />
                       {errors.complaint_date && <span style={{ fontSize: "12px" }} className="text-danger">{errors.complaint_date}</span>}
                     </div>
                   </div>
@@ -1465,7 +1465,7 @@ export function Registercomplaint(params) {
                     <div className="col-md-12">
                       <div className="mb-3">
                         <label htmlFor="exampleFormControlInput1" className="form-label">Address {value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
-                        <button onClick={openPopup} type="button" className="addressbtn">Add Address</button>
+                        <button onClick={openPopup} type="button" hidden className="addressbtn">Add Address</button>
                         <textarea
                           className="form-control"
                           value={value.address}
@@ -1701,7 +1701,7 @@ export function Registercomplaint(params) {
                   <div className="col-md-4">
                     <div className="mb-3">
                       <label className="form-label">Priority{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
-                      <select className="form-control" onChange={onHandleChange} value={value.Priority} name="Priority">
+                      <select className="form-control" onChange={onHandleChange} value={value.Priority || "REGULAR"} name="Priority">
                         <option value="">Select</option>
                         <option value="REGULAR">Regular</option>
                         <option value="HIGH">High</option>

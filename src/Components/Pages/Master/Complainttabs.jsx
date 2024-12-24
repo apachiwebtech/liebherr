@@ -19,7 +19,7 @@ function Complainttabs() {
     <>
       <style>
         {`
-           
+
            .headings {
               background: #2779c4;
               margin-bottom: 15px;
@@ -38,8 +38,8 @@ function Complainttabs() {
                 width:168.75px;
                 height:38.6;
           }
-          
-          
+
+
         `}
       </style>
 
@@ -55,11 +55,11 @@ function Complainttabs() {
             <div className="col-sm-6 p-0" style={{ width: '100%' }}>
             <div className="tabsMenu" style={{fontSize:"14px", marginLeft: "12px",fontWeight:"600",fontFamily:"Nunito"}}>
               <ul className="nav nav-tabs ">
-              
+
               <Link to={`/DefectGroup`}><li className="nav-item">
                   <button
                     className={`nav-link ${activeTab === "/DefectGroup" ? "active" : "onClick={() => setActiveTab('DefectGroup')}"}`}
-                    
+
                   >
                   DEFECT GROUP
                   </button>
@@ -67,7 +67,7 @@ function Complainttabs() {
                 <Link to={`/TypeOfDefect`}> <li className="nav-item">
                   <button
                     className={`nav-link ${activeTab === "/TypeOfDefect" ? "active" : "onClick={() => setActiveTab('TypeOfDefect')}"}`}
-                    
+
                   >
                     TYPE OF DEFECT
                   </button>
@@ -75,17 +75,25 @@ function Complainttabs() {
                 <Link to={`/SiteDefect`}>  <li className="nav-item">
                   <button
                     className={`nav-link ${activeTab === "/SiteDefect" ? "active" : "onClick={() => setActiveTab('SiteDefect')}"}`}
-                    
+
                   >
                    SITE DEFECT
                   </button>
                 </li></Link>
+                <Link to={`/Activity`}>  <li className="nav-item">
+                  <button
+                    className={`nav-link ${activeTab === "/Activity" ? "active" : "onClick={() => setActiveTab('Activity')}"}`}
+
+                  >
+                   Activity
+                  </button>
+                </li></Link>
               </ul>
-            </div> 
+            </div>
             </div>
 
 
-            {/* Tab Content */}       
+            {/* Tab Content */}
               <div className="col-12 col-custom" style={{paddingLeft:"12px",paddingRight:"12px"}}>
                 <div className="tab-content">
                   {/* {renderTabContent()} */}
