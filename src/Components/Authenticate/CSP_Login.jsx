@@ -34,7 +34,7 @@ export function CSP_Login() {
         localStorage.setItem("userId", response.data.user.id);
         localStorage.setItem("Lhiuser", response.data.user.Lhiuser);
         localStorage.setItem("licare_code", response.data.user.licare_code);
-
+        localStorage.setItem("token", response.data.token);
         // Navigate to the home page
         navigate('/csp/ticketlist');
       } else {

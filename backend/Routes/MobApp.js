@@ -12,25 +12,42 @@ app.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
-    return res.status(400).json({ message: 'User Id and password are required.' });
+    return res.status(400).json({ message: 'Username and password are required.' });
   }
 
   try {
     const pool = await poolPromise;
 
-
-
     const result = await pool.request()
       .input('username', sql.VarChar, username)
-      .input('password', sql.VarChar, password) // Adjust if password is hashed
+      .input('password', sql.VarChar, password) // Ensure the password is securely handled
       .query('SELECT * FROM awt_engineermaster WHERE engineer_id = @username AND password = @password');
 
-    // console.log('SELECT * FROM awt_engineermaster WHERE email = @username AND password = @password')
     if (result.recordset.length > 0) {
-      res.status(200).json(result.recordset[0]);
+      const user = result.recordset[0];
+
+      // Create JWT payload
+      const payload = {
+        engineer_id: user.engineer_id, // Example: use a unique identifier
+        title: user.title, // Include other necessary user info
+        employee_code: user.employee_code, // Example: Add a role if available
+      };
+
+      // Generate JWT token
+      const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' }); // Token expires in 1 hour
+
+      // Respond with user info and token
+      res.status(200).json({
+        message: 'Login successful',
+        user: {
+          engineer_id: user.engineer_id, // Example: use a unique identifier
+          title: user.title, // Include other necessary user info
+          employee_code: user.employee_code, // Example: Add a role if available
+        },
+        token,
+      });
     } else {
-      res.status(400).json({ message: 'Invalid username or password' });
-      console.log(res)
+      res.status(401).json({ message: 'Invalid username or password' });
     }
   } catch (error) {
     console.error('Database Query Error:', error);

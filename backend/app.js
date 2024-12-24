@@ -3184,20 +3184,21 @@ console.log( pincode ,msp ,csp,"vkjuyfhdgviuc dyuhj");
   try {
     const pool = await poolPromise;
 
-    // Direct SQL query without parameter binding
-    const sql = `SELECT em.id, em.title
-FROM pincode_allocation AS pa
-LEFT JOIN awt_franchisemaster AS fm
-       ON fm.licarecode = pa.account_manager
-LEFT JOIN awt_childfranchisemaster AS cfm
-       ON cfm.licare_code = pa.owner
-LEFT JOIN awt_engineermaster AS em
-       ON RIGHT(cfm.licare_code, LEN(cfm.licare_code) - 2) =
-          CASE
-            WHEN pa.account_manager = pa.owner THEN fm.licarecode
-            ELSE cfranchise_id
-          END
-WHERE  pa.pincode ='${pincode}' and pa.account_manager = '${msp}' and pa.owner ='${csp}'`;
+
+       // Direct SQL query without parameter binding
+       const sql = `SELECT em.id, em.title
+   FROM pincode_allocation AS pa
+   LEFT JOIN awt_franchisemaster AS fm
+          ON fm.licarecode = pa.account_manager
+   LEFT JOIN awt_childfranchisemaster AS cfm
+          ON cfm.licare_code = pa.owner
+   LEFT JOIN awt_engineermaster AS em
+          ON RIGHT(cfm.licare_code, LEN(cfm.licare_code) - 2) =
+             CASE
+               WHEN pa.account_manager = pa.owner THEN fm.licarecode
+               ELSE cfranchise_id
+             END
+   WHERE  pa.pincode ='${pincode}' and pa.account_manager = '${msp}' and pa.owner ='${csp}'`;
 // console.log(sql)
     // Execute the query
     const result = await pool.request().query(sql);
@@ -7987,7 +7988,7 @@ app.get("/getmultiplelocation/:pincode", authenticateToken, async (req, res) => 
     LEFT JOIN awt_geocity as c on p.geocity_id = c.id
     LEFT JOIN pincode_allocation as o on p.pincode = o.pincode
 	  LEFT JOIN awt_franchisemaster as f on f.licarecode = o.account_manager
-    LEFT JOIN awt_childfranchisemaster as fm on fm.pfranchise_id = o.owner
+    LEFT JOIN awt_childfranchisemaster as fm on fm.pfranchise_id = o.account_manager
     where p.pincode =  ${pincode}`
     console.log(sql);
 

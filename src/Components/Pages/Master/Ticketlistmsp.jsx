@@ -659,7 +659,7 @@ export function Ticketlistmsp(params) {
                     <th>Assigned Users</th>
                     <th>Status</th>
                     <th>Call Priority</th>
-                    <th>Edit</th>
+                    {/* <th>Edit</th> */}
                     <th>View</th>
                   </tr>
                 </thead>
@@ -681,7 +681,7 @@ export function Ticketlistmsp(params) {
                         <td style={rowStyle}>{item.assigned_to}</td>
                         <td style={rowStyle}>{item.call_status}</td>
                         <td style={rowStyle}>{item.call_priority}</td>
-                        <td style={rowStyle}>
+                        {/* <td style={rowStyle}>
                           <button
                             className='btn'
                             onClick={() => navigate(`/registercomaplaint/${item.ticket_no}`)}
@@ -697,7 +697,7 @@ export function Ticketlistmsp(params) {
                           >
                             <FaPencilAlt />
                           </button>
-                        </td>
+                        </td> */}
                         <td style={rowStyle}>
                           <button
                             className='btn'
