@@ -711,6 +711,8 @@ export function Registercomplaint(params) {
         requested_by : value.requested_by,
         requested_email : value.requested_email ,
         requested_mobile : value.requested_mobile,
+        msp:value.msp,
+        csp : value.csp,
         ticket_id: ticketid
       };
 
@@ -728,7 +730,7 @@ export function Registercomplaint(params) {
             if (res.data) {
               notify();
               setTimeout(() => {
-                navigate('/complaintlist');
+                // navigate('/complaintlist');
               }, 500);
             }
           })
@@ -904,14 +906,16 @@ export function Registercomplaint(params) {
 
         if (response.data && response.data[0]) {
 
-          setlocations({ franchiseem: response.data[0].franchiseem, childfranchiseem: response.data[0].childfranchiseem })
+          setlocations({ franchiseem: response.data[0].mspname, childfranchiseem: response.data[0].cspname })
 
           setValue({
             ...value,
             state: response.data[0].state,
             city: response.data[0].city,
             area: response.data[0].district,
-            pincode: response.data[0].pincode
+            pincode: response.data[0].pincode,
+            csp : response.data[0].csp,
+            msp : response.data[0].msp
           })
 
         }

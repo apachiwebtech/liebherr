@@ -2,10 +2,11 @@ const express = require('express');
 const app = express.Router();
 const sql = require('mssql');
 const poolPromise = require('../db');
-
+const jwt = require("jsonwebtoken");
 const multer = require('multer');
 // const path = require('path');
 const upload = multer({ dest: 'uploads/' });
+const JWT_SECRET = "Lh!_Login_123"; 
 
 
 app.post('/login', async (req, res) => {
@@ -90,7 +91,7 @@ app.get('/getcomplaint', async (req, res) => {
     const en_id = req.query.en_id;
 
     const result = await pool.request()
-      .query(`SELECT t.* , c.alt_mobileno  FROM complaint_ticket as t left join awt_customer as c on t.customer_id = c.customer_id  CROSS APPLY STRING_SPLIT(t.engineer_id, ',') AS split_values WHERE split_values.value = '${en_id}' ORDER BY t.id ASC;
+      .query(`SELECT t.* , c.alt_mobileno  FROM complaint_ticket as t left join awt_customer as c on t.customer_id = c.customer_id  CROSS APPLY STRING_SPLIT(t.engineer_id, ',') AS split_values WHERE split_values.value = '${en_id}' ORDER BY t.id desc;
 `);
 
 

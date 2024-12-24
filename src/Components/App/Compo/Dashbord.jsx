@@ -164,7 +164,7 @@ function Dashbord() {
                         </a>
                       </>
                     ) : null}
-                    <a href={`/details/${item.id}`} className="btn btn-info mr-2">
+                    <a href={`/mobapp/details/${item.id}`} className="btn btn-info mr-2">
                       <i className="fa-solid fa-eye"></i>
                     </a>
                     <p  className="btn btn-warning ml-2 statusbx">

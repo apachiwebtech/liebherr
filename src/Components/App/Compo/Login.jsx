@@ -92,9 +92,10 @@ function AppLogin() {
         })
         console.log(res.data.id)
 
-        localStorage.setItem('userid', res.data.engineer_id)
-        localStorage.setItem('Name', res.data.title)
-        localStorage.setItem('employee_code', res.data.employee_code)
+        localStorage.setItem('userid', res.data.user.engineer_id)
+        localStorage.setItem('Name', res.data.user.title)
+        localStorage.setItem('employee_code', res.data.user.employee_code)
+        localStorage.setItem('token', res.data.token)
 
         navigate('/mobapp/dash')
       })

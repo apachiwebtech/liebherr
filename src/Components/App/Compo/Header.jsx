@@ -43,21 +43,21 @@ const [isOnline, setIsOnline] = useState(true); // Default to true, assuming onl
 //   return <Navigate to="/offline" replace />;
 // }
 
-useEffect(() => {
-  const checkDevice = () => {
-    const check = window.matchMedia('(max-width: 768px)').matches ? 'Mobile' : 'Desktop';
-    if (check == 'Desktop') {
-      navigate('/mobapp/mobile')
-    }
-  };
+// useEffect(() => {
+//   const checkDevice = () => {
+//     const check = window.matchMedia('(max-width: 768px)').matches ? 'Mobile' : 'Desktop';
+//     if (check == 'Desktop') {
+//       navigate('/mobapp/mobile')
+//     }
+//   };
 
-  checkDevice(); // Initial check
-  window.addEventListener('resize', checkDevice); // Add resize listener
+//   checkDevice(); // Initial check
+//   window.addEventListener('resize', checkDevice); // Add resize listener
 
-  return () => {
-    window.removeEventListener('resize', checkDevice); // Cleanup
-  };
-}, []);
+//   return () => {
+//     window.removeEventListener('resize', checkDevice); // Cleanup
+//   };
+// }, []);
 
 
 

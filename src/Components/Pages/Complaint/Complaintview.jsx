@@ -396,6 +396,7 @@ export function Complaintview(params) {
     const selectedEngineer = engineer.find(
       (eng) => eng.id === parseInt(complaintview.engineer_id)
     );
+    console.log(selectedEngineer,"$$$")
     if (
       selectedEngineer &&
       !addedEngineers.some((eng) => eng.id === selectedEngineer.id)

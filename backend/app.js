@@ -3186,20 +3186,20 @@ console.log( pincode ,msp ,csp,"vkjuyfhdgviuc dyuhj");
 
 
        // Direct SQL query without parameter binding
-       const sql = `SELECT em.id, em.title
+       const sql = `SELECT em.id, em.title ,em.engineer_id
    FROM pincode_allocation AS pa
    LEFT JOIN awt_franchisemaster AS fm
           ON fm.licarecode = pa.account_manager
    LEFT JOIN awt_childfranchisemaster AS cfm
           ON cfm.licare_code = pa.owner
    LEFT JOIN awt_engineermaster AS em
-          ON RIGHT(cfm.licare_code, LEN(cfm.licare_code) - 2) =
+          ON em.cfranchise_id =
              CASE
-               WHEN pa.account_manager = pa.owner THEN fm.licarecode
-               ELSE cfranchise_id
+               WHEN pa.account_manager = pa.owner THEN RIGHT(pa.account_manager, LEN(pa.account_manager) - 2)
+               ELSE  RIGHT(pa.owner, LEN(pa.owner) - 2)
              END
    WHERE  pa.pincode ='${pincode}' and pa.account_manager = '${msp}' and pa.owner ='${csp}'`;
-// console.log(sql)
+console.log(sql)
     // Execute the query
     const result = await pool.request().query(sql);
 
@@ -3350,7 +3350,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
     complaint_date, customer_name = "NA", contact_person, email, mobile, address,
     state, city, area, pincode, mode_of_contact, ticket_type, cust_type,
     warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks
-    , ticket_id, classification, priority, callType,requested_by,requested_email,requested_mobile
+    , ticket_id, classification, priority, callType,requested_by,requested_email,requested_mobile,msp,csp
   } = req.body;
 
 
@@ -3508,13 +3508,13 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
           ticket_no, ticket_date, customer_name, customer_mobile, customer_email, address,
           state, city, area, pincode, customer_id, ModelNumber, ticket_type, call_type,
           call_status, warranty_status, invoice_date, call_charges, mode_of_contact,
-          contact_person,  created_date, created_by,  purchase_date, serial_no, child_service_partner, sevice_partner, specification ,customer_class,call_priority,requested_mobile,requested_email,requested_by
+          contact_person,  created_date, created_by,  purchase_date, serial_no, child_service_partner, sevice_partner, specification ,customer_class,call_priority,requested_mobile,requested_email,requested_by,msp,csp
         )
         VALUES (
           @ticket_no, @complaint_date, @customer_name, @mobile, @email, @address,
           @state, @city, @area, @pincode, @customer_id, @model, @ticket_type, @cust_type,
           'Open', @warranty_status, @invoice_date, @call_charge, @mode_of_contact,
-          @contact_person,  @formattedDate, @created_by,  @purchase_date, @serial, @child_service_partner, @master_service_partner, @specification ,@classification , @priority ,@requested_mobile,@requested_email,@requested_by
+          @contact_person,  @formattedDate, @created_by,  @purchase_date, @serial, @child_service_partner, @master_service_partner, @specification ,@classification , @priority ,@requested_mobile,@requested_email,@requested_by,@msp,@csp
         )
       `;
     } else {
@@ -3594,6 +3594,8 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
       .input('requested_by', requested_by)
       .input('requested_email', requested_email)
       .input('requested_mobile', requested_mobile)
+      .input('msp', msp)
+      .input('csp', csp)
       .query(complaintSQL);
 
     // console.log(resutlt, priority, "$$$$")
@@ -7979,7 +7981,7 @@ app.get("/getmultiplelocation/:pincode", authenticateToken, async (req, res) => 
 
     const pool = await poolPromise;
 
-    const sql = `SELECT cn.title as country, p.region_name as region, p.geostate_name as state, p.area_name as district, p.geocity_name as city, o.owner, f.title as franchiseem, fm.title as childfranchiseem ,p.pincode
+    const sql = `SELECT cn.title as country, p.region_name as region, p.geostate_name as state, p.area_name as district, p.geocity_name as city, o.account_manager as msp, f.title as mspname, o.owner as csp, fm.title as cspname,  p.pincode
     FROM awt_pincode as p
     LEFT JOIN awt_region as r on p.region_id = r.id
     LEFT JOIN awt_country as cn on p.country_id = cn.id
@@ -7987,9 +7989,9 @@ app.get("/getmultiplelocation/:pincode", authenticateToken, async (req, res) => 
     LEFT JOIN awt_district as d on p.area_id = d.id
     LEFT JOIN awt_geocity as c on p.geocity_id = c.id
     LEFT JOIN pincode_allocation as o on p.pincode = o.pincode
-	  LEFT JOIN awt_franchisemaster as f on f.licarecode = o.account_manager
-    LEFT JOIN awt_childfranchisemaster as fm on fm.pfranchise_id = o.account_manager
-    where p.pincode =  ${pincode}`
+	LEFT JOIN awt_franchisemaster as f on f.licarecode = o.account_manager 
+	LEFT JOIN awt_childfranchisemaster as fm on fm.licare_code = o.owner 
+	where p.pincode = ${pincode}`
     console.log(sql);
 
     const result = await pool.request().query(sql);
