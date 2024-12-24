@@ -171,22 +171,22 @@ export function Registercomplaint(params) {
       newErrors.customer_name = "Name is required";
     }
 
-    if (!value.serial && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
-      isValid = false;
-      newErrors.serial = "Serial No is required";
-    }
-    if (!value.model && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
-      isValid = false;
-      newErrors.model = "Model is required";
-    }
-    if (!purchase_data && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
-      isValid = false;
-      newErrors.purchase_date = "Date is required";
-    }
-    if (!warranty_status_data && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
-      isValid = false;
-      newErrors.warrenty_status = "Status is required";
-    }
+    // if (!value.serial && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
+    //   isValid = false;
+    //   newErrors.serial = "Serial No is required";
+    // }
+    // if (!value.model && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
+    //   isValid = false;
+    //   newErrors.model = "Model is required";
+    // }
+    // if (!purchase_data && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
+    //   isValid = false;
+    //   newErrors.purchase_date = "Date is required";
+    // }
+    // if (!warranty_status_data && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
+    //   isValid = false;
+    //   newErrors.warrenty_status = "Status is required";
+    // }
     if (!value.salutation && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
       isValid = false;
       newErrors.salutation = "Salutation is required";
@@ -512,6 +512,8 @@ export function Registercomplaint(params) {
           })
 
   }*/
+
+
 
   async function getCompticket(params) {
 
@@ -1237,9 +1239,9 @@ export function Registercomplaint(params) {
                 <div className="row">
 
                   <div className="col-md-3">
-                    <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Serial No {value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</p>
+                    <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Serial No </p>
 
-                    {searchdata.length == 0 && !Comp_id ?
+                    {searchdata.length == 0 && value.serial == null || value.serial == "" ?
                       <div className="mb-3">
                         <input
                           type="text"
@@ -1256,9 +1258,9 @@ export function Registercomplaint(params) {
                   </div>
 
                   <div className="col-md-3">
-                    <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Model{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</p>
+                    <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Model</p>
 
-                    {searchdata.length == 0 && !Comp_id ?
+                    {searchdata.length == 0 && value.model == null || value.mobile == "" ?
 
                       <div className="">
                         <input className="form-control" onChange={onHandleChange} value={value.model} name="model"></input>
@@ -1269,9 +1271,9 @@ export function Registercomplaint(params) {
                   </div>
                   {/* Add Purchase Date field */}
                   <div className="col-md-3">
-                    <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Purchase Date{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</p>
+                    <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Purchase Date</p>
 
-                    {searchdata.length == 0 && !Comp_id || value.purchase_date == null ?
+                    {searchdata.length == 0 && value.purchase_date == null || value.purchase_date == "" ?
                       <div className="mb-3">
                         <input
                           type="date"
@@ -1289,7 +1291,7 @@ export function Registercomplaint(params) {
 
                   {/* Add Warranty Status field */}
                   <div className="col-md-3">
-                    <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Warranty Status{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</p>
+                    <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Warranty Status</p>
                     <div className="mb-3">
                       <select className="form-control" onChange={onHandleChange} value={warranty_status_data} name="warrenty_status">
                         <option value="">Select Option</option>
