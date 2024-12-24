@@ -1241,7 +1241,7 @@ export function Registercomplaint(params) {
                   <div className="col-md-3">
                     <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Serial No </p>
 
-                    {searchdata.length == 0 && value.serial == null || value.serial == "" ?
+                    {searchdata.length == 0 && !Comp_id ?
                       <div className="mb-3">
                         <input
                           type="text"
@@ -1260,7 +1260,7 @@ export function Registercomplaint(params) {
                   <div className="col-md-3">
                     <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Model</p>
 
-                    {searchdata.length == 0 && value.model == null || value.mobile == "" ?
+                    {searchdata.length == 0 && !Comp_id  ?
 
                       <div className="">
                         <input className="form-control" onChange={onHandleChange} value={value.model} name="model"></input>
@@ -1273,7 +1273,7 @@ export function Registercomplaint(params) {
                   <div className="col-md-3">
                     <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Purchase Date</p>
 
-                    {searchdata.length == 0 && value.purchase_date == null || value.purchase_date == "" ?
+                    {searchdata.length == 0 && !Comp_id?
                       <div className="mb-3">
                         <input
                           type="date"
