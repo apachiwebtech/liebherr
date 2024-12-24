@@ -107,6 +107,9 @@ export function Registercomplaint(params) {
     classification: "",
     Priority: "REGULAR",
     callType: "",
+    requested_by:"",
+    requested_email :"",
+    requested_mobile :""
   })
 
   const getDateAfterOneYear = (value) => {
@@ -226,7 +229,7 @@ export function Registercomplaint(params) {
       newErrors.specification = "Description is required";
     }
 
-    if (!value.additional_remarks && value.ticket_type == 'Visit' ||  value.ticket_type == 'Helpdesk') {
+    if (!value.additional_remarks && value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk') {
       isValid = false;
       newErrors.additional_remarks = "Remark is required";
     }
@@ -549,7 +552,10 @@ export function Registercomplaint(params) {
             classification: res.data[0].customer_class,
             Priority: res.data[0].call_priority,
             callType: res.data[0].callType,
-            specification: res.data[0].specification
+            specification: res.data[0].specification,
+            requested_by :res.data[0].requested_by,
+            requested_email : res.data[0].requested_email,
+            requested_mobile : res.data[0].requested_mobile
           })
         }
       })
@@ -690,6 +696,9 @@ export function Registercomplaint(params) {
         classification: value.classification,
         priority: value.Priority,
         callType: value.callType,
+        requested_by : value.requested_by,
+        requested_email : value.requested_email ,
+        requested_mobile : value.requested_mobile,
         ticket_id: ticketid
       };
 
@@ -755,6 +764,9 @@ export function Registercomplaint(params) {
       classification: value.classification,
       priority: value.Priority,
       callType: value.callType,
+      requested_by : value.requested_by,
+      requested_email : value.requested_email ,
+      requested_mobile : value.requested_mobile,
       ticket_no: Comp_id
     };
 
@@ -1009,7 +1021,7 @@ export function Registercomplaint(params) {
         <div className="complbread">
           <div className="row">
             <div className="col-md-3">
-              {Comp_id ? < label className="breadMain">{Comp_id}</label>  : < label className="breadMain">Register New Ticket</label> }
+              {Comp_id ? < label className="breadMain">{Comp_id}</label> : < label className="breadMain">Register New Ticket</label>}
             </div>
           </div>
         </div>
@@ -1058,8 +1070,8 @@ export function Registercomplaint(params) {
               </div>
 
             </div>
-          </div> 
-        
+          </div>
+
 
           {hideticket ? <div id="searchResult" className="card">
 
@@ -1114,7 +1126,7 @@ export function Registercomplaint(params) {
                 </div>
               </div>
 
-              {!form && ProductCustomer  ? (
+              {!form && ProductCustomer ? (
                 <>
                   <ul className="nav nav-tabs" id="myTab2" role="tablist">
                     <li className="nav-item">
@@ -1128,7 +1140,7 @@ export function Registercomplaint(params) {
                       <table className="table table-striped">
                         <tbody>
 
-                          {!form &&  ProductCustomer.map((item, index) => (
+                          {!form && ProductCustomer.map((item, index) => (
                             <tr key={index}>
                               <td><div>{item.ModelNumber}</div></td>
                               <td>
@@ -1167,10 +1179,10 @@ export function Registercomplaint(params) {
                             <div style={{ fontSize: "14px" }}>{item.call_status}</div>
                             <span style={{ fontSize: "14px" }}><button
                               className='btn'
-                              onClick={() =>{
-                                 navigate(`/complaintview/${item.id}`)
-                                 addInTab(item.ticket_no, item.id)
-                                }}
+                              onClick={() => {
+                                navigate(`/complaintview/${item.id}`)
+                                addInTab(item.ticket_no, item.id)
+                              }}
                               title="View Info"
                               style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
                             >
@@ -1188,12 +1200,12 @@ export function Registercomplaint(params) {
             </div>
 
           </div> : <div className="card">
-        <div className="card-body">
+            <div className="card-body">
               {/* Only show "No Result Found" if a search was performed and no results were found */}
               {hasSearched && searchdata.length === 0 && <p>No Result Found</p>}
               <button onClick={() => setForm(true)} className="btn btn-sm btn-primary">New Ticket</button>
             </div>
-          
+
 
           </div>}
 
@@ -1209,7 +1221,7 @@ export function Registercomplaint(params) {
                 <div className="row">
 
                   <div className="col-md-3">
-                    <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Serial No {value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk'  ? null :  <span className="text-danger">*</span> }</p>
+                    <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Serial No {value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</p>
 
                     {searchdata.length == 0 && !Comp_id ?
                       <div className="mb-3">
@@ -1228,7 +1240,7 @@ export function Registercomplaint(params) {
                   </div>
 
                   <div className="col-md-3">
-                    <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Model{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk'  ? null :  <span className="text-danger">*</span> }</p>
+                    <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Model{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</p>
 
                     {searchdata.length == 0 && !Comp_id ?
 
@@ -1241,7 +1253,7 @@ export function Registercomplaint(params) {
                   </div>
                   {/* Add Purchase Date field */}
                   <div className="col-md-3">
-                    <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Purchase Date{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk'  ? null :  <span className="text-danger">*</span> }</p>
+                    <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Purchase Date{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</p>
 
                     {searchdata.length == 0 && !Comp_id || value.purchase_date == null ?
                       <div className="mb-3">
@@ -1261,7 +1273,7 @@ export function Registercomplaint(params) {
 
                   {/* Add Warranty Status field */}
                   <div className="col-md-3">
-                    <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Warranty Status{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk'  ? null :  <span className="text-danger">*</span> }</p>
+                    <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Warranty Status{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</p>
                     <div className="mb-3">
                       <select className="form-control" onChange={onHandleChange} value={warranty_status_data} name="warrenty_status">
                         <option value="">Select Option</option>
@@ -1282,10 +1294,10 @@ export function Registercomplaint(params) {
 
                 <form className="row" onSubmit={handlesubmit}>
 
-                <div className="col-md-4">
+                  <div className="col-md-4">
                     <div className="mb-3">
-                      <label className="form-label">Ticket Type{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk'  ? null :  <span className="text-danger">*</span> }</label>
-                      <select className="form-control" onChange={onHandleChange} disabled={Comp_id ? true :false} value={value.ticket_type} name="ticket_type">
+                      <label className="form-label">Ticket Type{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
+                      <select className="form-control" onChange={onHandleChange} disabled={Comp_id ? true : false} value={value.ticket_type} name="ticket_type">
                         <option value="">Select</option>
                         <option value="Installation">Installation</option>
                         <option value="Breakdown">Breakdown</option>
@@ -1300,14 +1312,14 @@ export function Registercomplaint(params) {
 
                   <div className="col-md-3">
                     <div className="mb-3">
-                      <label className="form-label">Ticket Date{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk'  ? null :  <span className="text-danger">*</span> }</label>
+                      <label className="form-label">Ticket Date{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
                       <input type="date" name="complaint_date" onChange={onHandleChange} value={value.complaint_date} className="form-control" />
                       {errors.complaint_date && <span style={{ fontSize: "12px" }} className="text-danger">{errors.complaint_date}</span>}
                     </div>
                   </div>
                   <div className="col-md-2">
                     <div className="mb-3">
-                      <label className="form-label">Salutation{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk'  ? null :  <span className="text-danger">*</span> }</label>
+                      <label className="form-label">Salutation{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
                       <select className="form-control" onChange={onHandleChange} value={value.salutation} name="salutation">
                         <option value="">Salutation</option>
                         <option value="Mr">Mr</option>
@@ -1322,14 +1334,14 @@ export function Registercomplaint(params) {
                   </div>
                   <div className="col-md-3">
                     <div className="mb-3">
-                      <label htmlFor="exampleFormControlInput1" className="form-label">Customer Name{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk'  ? null :  <span className="text-danger">*</span> }</label>
+                      <label htmlFor="exampleFormControlInput1" className="form-label">Customer Name{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
                       <input type="text" name="customer_name" onChange={onHandleChange} value={value.customer_name} className="form-control" placeholder="Enter Customer Name" />
                       {errors.customer_name && <span style={{ fontSize: "12px" }} className="text-danger">{errors.customer_name}</span>}
                     </div>
                   </div>
                   <div className="col-md-4">
                     <div className="mb-3">
-                      <label htmlFor="exampleFormControlInput1" className="form-label">Contact Person{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk'  ? null :  <span className="text-danger">*</span> }</label>
+                      <label htmlFor="exampleFormControlInput1" className="form-label">Contact Person{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
                       <input type="text" className="form-control" name="contact_person" value={value.contact_person} onChange={onHandleChange} placeholder="Enter Contact Person Name" />
                       {errors.contact_person && <span style={{ fontSize: "12px" }} className="text-danger">{errors.contact_person}</span>}
                     </div>
@@ -1343,7 +1355,7 @@ export function Registercomplaint(params) {
                   </div>
                   <div className="col-md-4">
                     <div className="mb-3">
-                      <label htmlFor="exampleFormControlInput1" className="form-label">Mobile No. {value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk'  ? null :  <span className="text-danger">*</span> }<input type="checkbox" />Whatsapp</label>
+                      <label htmlFor="exampleFormControlInput1" className="form-label">Mobile No. {value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}<input type="checkbox" />Whatsapp</label>
                       <input type="text" value={value.mobile} name="mobile" onChange={onHandleChange} className="form-control" placeholder="Enter Mobile" />
                       {errors.mobile && <span style={{ fontSize: "12px" }} className="text-danger">{errors.mobile}</span>}
                     </div>
@@ -1440,7 +1452,7 @@ export function Registercomplaint(params) {
 
                     <div className="col-md-12">
                       <div className="mb-3">
-                        <label htmlFor="exampleFormControlInput1" className="form-label">Address {value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk'  ? null :  <span className="text-danger">*</span> }</label>
+                        <label htmlFor="exampleFormControlInput1" className="form-label">Address {value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
                         <button onClick={openPopup} type="button" className="addressbtn">Add Address</button>
                         <textarea
                           className="form-control"
@@ -1486,7 +1498,7 @@ export function Registercomplaint(params) {
                   {!duplicate ? <>
                     <div className="col-md-3">
                       <div className="mb-3">
-                        <label className="form-label">Pincode{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk'  ? null :  <span className="text-danger">*</span> }</label>
+                        <label className="form-label">Pincode{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
                         <select className="form-control" value={value.pincode} name="pincode" onChange={onHandleChange}>
                           <option value="">Select Pincode</option>
                           {pincode.map((item) => {
@@ -1551,7 +1563,7 @@ export function Registercomplaint(params) {
 
                     <div className="col-md-3">
                       <div className="mb-3">
-                        <label htmlFor="exampleFormControlInput1" className="form-label">Pincode {value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk'  ? null :  <span className="text-danger">*</span> }</label>
+                        <label htmlFor="exampleFormControlInput1" className="form-label">Pincode {value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
                         <input type="text" className="form-control" value={value.pincode} name="pincode" onChange={onHandleChange} placeholder="" />
                         {errors.pincode && <span style={{ fontSize: "12px" }} className="text-danger">{errors.pincode}</span>}
                       </div>
@@ -1580,13 +1592,34 @@ export function Registercomplaint(params) {
 
                   </>}
 
+                  <div className="col-md-3">
+                    <div className="mb-3">
+                      <label htmlFor="exampleFormControlInput1" className="form-label">Requested by</label>
+                      <input type="text" className="form-control" value={value.requested_by} name="requested_by" onChange={onHandleChange} placeholder="" disabled />
+                      {errors.requested_by && <span style={{ fontSize: "12px" }} className="text-danger">{errors.requested_by}</span>}
+                    </div>
+                  </div>
+                  <div className="col-md-3">
+                    <div className="mb-3">
+                      <label htmlFor="exampleFormControlInput1" className="form-label">Requested Email</label>
+                      <input type="text" className="form-control" value={value.requested_email} name="requested_email" onChange={onHandleChange} placeholder="" disabled />
+                      {errors.requested_email && <span style={{ fontSize: "12px" }} className="text-danger">{errors.requested_email}</span>}
+                    </div>
+                  </div>
+                  <div className="col-md-3">
+                    <div className="mb-3">
+                      <label htmlFor="exampleFormControlInput1" className="form-label">Requested Mobile</label>
+                      <input type="text" className="form-control" value={value.requested_mobile} name="requested_mobile" onChange={onHandleChange} placeholder="" disabled />
+                      {errors.requested_mobile && <span style={{ fontSize: "12px" }} className="text-danger">{errors.requested_mobile}</span>}
+                    </div>
+                  </div>
 
 
 
 
                   <div className="col-md-4">
                     <div className="mb-3">
-                      <label className="form-label">Mode of Contact{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk'  ? null :  <span className="text-danger">*</span> }</label>
+                      <label className="form-label">Mode of Contact{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
                       <select className="form-control" onChange={onHandleChange} value={value.mode_of_contact} name="mode_of_contact">
                         <option value="">Select</option>
                         <option value="Call">Call</option>
@@ -1597,11 +1630,11 @@ export function Registercomplaint(params) {
                       {errors.mode_of_contact && <span style={{ fontSize: "12px" }} className="text-danger">{errors.mode_of_contact}</span>}
                     </div>
                   </div>
-              
+
 
                   <div className="col-md-4">
                     <div className="mb-3">
-                      <label className="form-label">Customer Type{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk'  ? null :  <span className="text-danger">*</span> }</label>
+                      <label className="form-label">Customer Type{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
                       <select className="form-control" onChange={onHandleChange} value={value.cust_type} name="cust_type">
                         <option value="">Select </option>
                         <option value="END CUSTOMER">END CUSTOMER</option>
@@ -1632,7 +1665,7 @@ export function Registercomplaint(params) {
 
                   <div className="col-md-4">
                     <div className="mb-3">
-                      <label className="form-label">Call Chargeable{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk'  ? null :  <span className="text-danger">*</span> }</label>
+                      <label className="form-label">Call Chargeable{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
                       <select className="form-control" onChange={onHandleChange} value={value.call_charge} name="call_charge">
                         <option value="">Select</option>
                         <option value="Yes">Yes</option>
@@ -1644,7 +1677,7 @@ export function Registercomplaint(params) {
 
                   <div className="col-md-4">
                     <div className="mb-3">
-                      <label className="form-label">Customer Classification{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk'  ? null :  <span className="text-danger">*</span> }</label>
+                      <label className="form-label">Customer Classification{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
                       <select className="form-control" onChange={onHandleChange} value={value.classification} name="classification">
                         <option value="">Select</option>
                         <option value="CONSUMER">Consumer</option>
@@ -1655,7 +1688,7 @@ export function Registercomplaint(params) {
                   </div>
                   <div className="col-md-4">
                     <div className="mb-3">
-                      <label className="form-label">Priority{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk'  ? null :  <span className="text-danger">*</span> }</label>
+                      <label className="form-label">Priority{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
                       <select className="form-control" onChange={onHandleChange} value={value.Priority} name="Priority">
                         <option value="">Select</option>
                         <option value="REGULAR">Regular</option>
@@ -1717,7 +1750,7 @@ export function Registercomplaint(params) {
 
               <div className="card mb-3" id="engineerInfo">
                 <div className="card-body">
-                  <h4 className="pname">Fault Description{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk'  ? null :  <span className="text-danger">*</span> }</h4>
+                  <h4 className="pname">Fault Description{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</h4>
                   <div className="mb-3">
                     <textarea
                       className="form-control"
@@ -1733,7 +1766,7 @@ export function Registercomplaint(params) {
 
               <div className="card mb-3" id="engineerInfo">
                 <div className="card-body">
-                  <h4 className="pname">Additional Info{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk'  ?  <span className="text-danger">*</span> :null}</h4>
+                  <h4 className="pname">Additional Info{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? <span className="text-danger">*</span> : null}</h4>
                   <div className="mb-3">
                     <textarea
                       className="form-control"
