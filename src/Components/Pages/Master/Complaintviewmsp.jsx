@@ -82,6 +82,7 @@ export function Complaintviewmsp(params) {
   const [GroupDefectsite, setGroupDefectsite] = useState([]);
   const [GroupDefecttype, setGroupDefecttype] = useState([]);
   const [inputValue, setInputValue] = useState("");
+  const [activity, setactivity] = useState([]);
   const [TicketUpdateSuccess, setTicketUpdateSuccess] = useState({
     message: '',
     visible: false,
@@ -99,6 +100,28 @@ export function Complaintviewmsp(params) {
       })
 
   }
+
+
+    async function getactivity(params) {
+      try {
+        const res = await axiosInstance.get(`${Base_Url}/getactivity`, {
+          headers: {
+            Authorization: token, // Send token in headers
+          },
+        });
+
+        if (res.data) {
+          setactivity(res.data);
+        } else {
+          console.error("Expected array from API but got:", typeof res.data);
+          setactivity([]); // Set empty array as fallback
+        }
+
+      } catch (error) {
+        console.error("Error fetching engineers:", error);
+        setactivity([]); // Set empty array on error
+      }
+    }
 
   async function getEngineer(params) {
 
@@ -869,7 +892,7 @@ export function Complaintviewmsp(params) {
       fetchAttachment2Details(); // Add this line to fetch Attachment 2
     }
     getProduct();
-
+    getactivity();
 
     setActiveTicket(complaintid); // Set the active ticket ID
 
@@ -2054,6 +2077,22 @@ export function Complaintviewmsp(params) {
                     ))}
                   </select>
                 </div>
+                <div className="mt-3">
+                    <h4 className="pname" style={{ fontSize: "14px" }}>Activity Code</h4>
+                    <select
+                      name="site_defect"
+                      disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
+                      className="form-control"
+                      style={{ fontSize: "14px" }}
+                    >
+                      <option value="">Select </option>
+                      {activity.map((item) => (
+                        <option key={item.id} value={item.title}>
+                          {item.code} - {item.title}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
               </>}
 
 

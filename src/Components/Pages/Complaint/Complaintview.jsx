@@ -19,6 +19,7 @@ export function Complaintview(params) {
   const [activeTicket, setActiveTicket] = useState(null);
   const [addedSpareParts, setAddedSpareParts] = useState([]);
   const [quotation, setQuotation] = useState([]);
+  const [activity, setactivity] = useState([]);
   const { complaintid } = useParams();
   const [quantity, setQuantity] = useState("");
   const [closestatus, setCloseStatus] = useState("");
@@ -164,10 +165,7 @@ export function Complaintview(params) {
   }
 
   async function getgroupdefect(params) {
-
-
     try {
-
       const res = await axiosInstance.get(`${Base_Url}/getcom`, {
         headers: {
           Authorization: token, // Send token in headers
@@ -181,16 +179,30 @@ export function Complaintview(params) {
         setGroupDefect([]); // Set empty array as fallback
       }
 
-
-
-
-
     } catch (error) {
       console.error("Error fetching engineers:", error);
       setGroupDefect([]); // Set empty array on error
     }
+  }
+  async function getactivity(params) {
+    try {
+      const res = await axiosInstance.get(`${Base_Url}/getactivity`, {
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      });
 
+      if (res.data) {
+        setactivity(res.data);
+      } else {
+        console.error("Expected array from API but got:", typeof res.data);
+        setactivity([]); // Set empty array as fallback
+      }
 
+    } catch (error) {
+      console.error("Error fetching engineers:", error);
+      setactivity([]); // Set empty array on error
+    }
   }
 
   async function getdefecttype(params) {
@@ -896,6 +908,7 @@ export function Complaintview(params) {
       fetchAttachment2Details(); // Add this line to fetch Attachment 2
     }
     getProduct();
+    getactivity();
 
     const storedTabTicket = JSON.parse(localStorage.getItem('tabticket')) || [];
     setTicketTab(storedTabTicket);
@@ -2107,10 +2120,13 @@ export function Complaintview(params) {
                       className="form-control"
                       disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
                       style={{ fontSize: "14px" }}
-
                     >
                       <option value="">Select </option>
-                      <option>1234</option>
+                      {activity.map((item) => (
+                        <option key={item.id} value={item.title}>
+                          {item.code} - {item.title}
+                        </option>
+                      ))}
                     </select>
                   </div>
 

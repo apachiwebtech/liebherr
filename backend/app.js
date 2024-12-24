@@ -2462,6 +2462,7 @@ app.get("/getgroupdefectcode", authenticateToken, async (req, res) => {
     return res.status(500).json(err);
   }
 });
+
 app.get("/getactivity", authenticateToken, async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
@@ -3184,7 +3185,19 @@ console.log( pincode ,msp ,csp,"vkjuyfhdgviuc dyuhj");
     const pool = await poolPromise;
 
     // Direct SQL query without parameter binding
-    const sql = `select * from pincode_allocation where pincode ='${pincode}' and account_manager = '${msp}' and owner ='${csp}'`;
+    const sql = `SELECT em.id, em.title
+FROM pincode_allocation AS pa
+LEFT JOIN awt_franchisemaster AS fm
+       ON fm.licarecode = pa.account_manager
+LEFT JOIN awt_childfranchisemaster AS cfm
+       ON cfm.licare_code = pa.owner
+LEFT JOIN awt_engineermaster AS em
+       ON RIGHT(cfm.licare_code, LEN(cfm.licare_code) - 2) =
+          CASE
+            WHEN pa.account_manager = pa.owner THEN fm.licarecode
+            ELSE cfranchise_id
+          END
+WHERE  pa.pincode ='${pincode}' and pa.account_manager = '${msp}' and pa.owner ='${csp}'`;
 // console.log(sql)
     // Execute the query
     const result = await pool.request().query(sql);
