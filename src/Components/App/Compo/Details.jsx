@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Header from './Header';
 import axios from 'axios';
 import { BASE_URL } from './BaseUrl';
+import { Base_Url } from '../../Utils/Base_Url';
 
 function Details() {
   const navigate = useNavigate();
@@ -19,8 +20,11 @@ function Details() {
   const [remark, setremark] = useState([])
   const [callstatus, setcallstatus] = useState([])
   const { id } = useParams();
+  const [activity, setactivity] = useState([]);
   const [otppart, setotppart] = useState(true);
+  const [iscomplate, setIscomplate] = useState(false)
   const [otp, setotp] = useState([]);
+
   const [Value, setValue] = useState({
     com_id: id,
     symptomcode: '',
@@ -50,9 +54,32 @@ function Details() {
       getDefectCodewisetype_app(e.target.value)
       getDefectCodewisesite_app(e.target.value)
     }
+    if (e.target.value == 'Completed') {
+      setIscomplate(true)
+    } else if (e.target.value === 'Closed' || e.target.value === 'Cancelled' || e.target.value === 'Spares') {
+      setIscomplate(false)
+      setotppart(true)
+    }
   }
 
 
+
+  async function getactivity() {
+    try {
+      const res = await axios.get(`${BASE_URL}/getactivity_app`);
+
+      if (res.data) {
+        setactivity(res.data);
+      } else {
+        console.error("Expected array from API but got:", typeof res.data);
+        setactivity([]); // Set empty array as fallback
+      }
+
+    } catch (error) {
+      console.error("Error fetching engineers:", error);
+      setactivity([]); // Set empty array on error
+    }
+  }
 
 
   const handleSubmit = (e) => {
@@ -129,8 +156,10 @@ function Details() {
           getremark(res.data.data[0].ticket_no)
           getspare(res.data.data[0].ModelNumber)
           // console.log(Value.symptomcode);
-          getDefectCodewisetype_app(res.data.data[0].group_code)
-          getDefectCodewisesite_app(res.data.data[0].group_code)
+          if (res.data.data[0].group_code != "") {
+            getDefectCodewisetype_app(res.data.data[0].group_code)
+            getDefectCodewisesite_app(res.data.data[0].group_code)
+          }
 
           setValue({
             symptomcode: res.data.data[0].group_code,
@@ -141,11 +170,14 @@ function Details() {
           })
           getsparelistapp(res.data.data[0].ticket_no)
 
+          console.log(res.data.data[0].call_status);
 
-          if (res.data.data[0].call_status == 'Closed' || res.data.data[0].call_status == 'Cancelled') {
+          if (res.data.data[0].call_status === 'Completed') {
             setdone(false)
+            setIscomplate(true)
           } else {
-            if (res.data.data[0].totp != '') {
+            setIscomplate(false)
+            if (res.data.data[0].totp != null) {
               setotp(res.data.data[0].totp)
               setotppart(false)
             }
@@ -351,9 +383,9 @@ function Details() {
 
 
   useEffect(() => {
+    getactivity()
     getcomplaintdetails()
     CallStatus()
-
     subcat()
     CallType()
     getcom_app()
@@ -522,6 +554,17 @@ function Details() {
                       })}
                     </select>
                   </div>
+                  <div class="mb-3">
+                    <label for="geostate" class="form-label">Activity Code</label>
+                    <select id="geostate" value={Value.actioncode} onChange={handleChange} name="actioncode" class="form-select" aria-label=".form-select-lg example">
+                      <option value="">Select Site Defect Code</option>
+                      {activity.map((item) => (
+                        <option key={item.id} value={item.title}>
+                          {item.code} - {item.title}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
             </div>
@@ -610,7 +653,7 @@ function Details() {
                   ) : null
                   }
                 </div>
-                <table className="table table-striped table-bordered">
+                <table hidden className="table table-striped table-bordered">
                   <thead className="table-light">
                     <tr>
                       <th className="text-center">#</th>
@@ -654,7 +697,7 @@ function Details() {
                           <select required name="call_status" onChange={handleChange} id="val-spare_status" class="form-control select2-hidden-accessible" >
                             <option value="2">Select Status</option>
                             {callstatus
-                              .filter((item) => item.Callstatus === 'Closed' || item.Callstatus === 'Cancelled') // Filter items
+                              .filter((item) => item.Callstatus === 'Closed' || item.Callstatus === 'Cancelled' || item.Callstatus === 'Spares' || item.Callstatus === 'Completed') // Filter items
                               .map((item) => (
                                 <option key={item.Callstatus} value={item.Callstatus}>
                                   {item.Callstatus}
@@ -667,7 +710,7 @@ function Details() {
                       </div>
                       {otppart ? (
                         <div class="mb-3">
-                          <button type="button" onClick={gogootp} name="spare_submit" class="btn btn-primary float-right">Send OTP</button>
+                          <button type="button" onClick={iscomplate ? gogootp : null} name="spare_submit" class="btn btn-primary float-right">{iscomplate ? "Send OTP" : "Submit"}</button>
                         </div>
 
                       ) : (
