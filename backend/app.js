@@ -7879,13 +7879,13 @@ app.get("/getcomplainlistmsp", async (req, res) => {
         SELECT c.*, e.title as assigned_name,
                DATEDIFF(day, (c.ticket_date), GETDATE()) AS ageingdays
         FROM complaint_ticket AS c
-        JOIN awt_engineermaster AS e ON c.engineer_id = e.engineer_id
+        LEFT JOIN awt_engineermaster AS e ON c.engineer_id = e.engineer_id
         WHERE c.deleted = 0 AND c.msp = '${licare_code}'
     `;
     let countSql = `
         SELECT COUNT(*) as totalCount
         FROM complaint_ticket AS c
-        JOIN awt_engineermaster AS e ON c.engineer_id = e.engineer_id
+        LEFT JOIN awt_engineermaster AS e ON c.engineer_id = e.engineer_id
         WHERE c.deleted = 0 AND c.msp = '${licare_code}'
     `;
 
