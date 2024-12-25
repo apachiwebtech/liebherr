@@ -3667,8 +3667,8 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
 app.post("/u_complaint", authenticateToken, async (req, res) => {
   let {
-    complaint_date, customer_name, contact_person, email, mobile, address,
-    state, city, area, pincode, mode_of_contact, ticket_type, cust_type,
+    customer_name, contact_person, email, mobile, address,
+    state, city, area, pincode, mode_of_contact, cust_type,
     warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks, ticket_no, classification, priority ,requested_by,requested_email,requested_mobile,sales_partner2,salutation
   } = req.body;
 
@@ -3731,7 +3731,6 @@ WHERE
 
     await pool.request()
       .input('ticket_no', ticket_no)
-      .input('complaint_date', complaint_date)
       .input('customer_name', customer_name)
       .input('mobile', mobile)
       .input('email', email)
@@ -3743,7 +3742,6 @@ WHERE
       .input('pincode', pincode)
       .input('customer_id', cust_id)
       .input('model', model)
-      .input('ticket_type', ticket_type)
       .input('cust_type', cust_type)
       .input("warranty_status", sql.NVarChar, warrenty_status || "WARRANTY")
       .input('invoice_date', invoice_date)

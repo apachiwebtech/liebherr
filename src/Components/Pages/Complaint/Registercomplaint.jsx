@@ -771,7 +771,7 @@ export function Registercomplaint(params) {
 
 
     const data = {
-      complaint_date: value.complaint_date,
+      // complaint_date: value.complaint_date,
       customer_name: value.customer_name,
       contact_person: value.contact_person,
       email: value.email,
@@ -783,7 +783,7 @@ export function Registercomplaint(params) {
       area: value.area,
       pincode: value.pincode,
       mode_of_contact: value.mode_of_contact,
-      ticket_type: value.ticket_type,
+      // ticket_type: value.ticket_type,
       cust_type: value.cust_type,
       warrenty_status: value.warrenty_status,
       invoice_date: value.invoice_date,

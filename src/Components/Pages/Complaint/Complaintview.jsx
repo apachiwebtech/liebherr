@@ -15,6 +15,7 @@ import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 
 export function Complaintview(params) {
+
   const token = localStorage.getItem("token");
   const [activeTicket, setActiveTicket] = useState(null);
   const [addedSpareParts, setAddedSpareParts] = useState([]);
@@ -1177,7 +1178,11 @@ export function Complaintview(params) {
             label={item.ticket_no}
             variant={activeTicket == item.ticket_id ? "filled" : "outlined"}
             color={activeTicket == item.ticket_id ? "primary" : "default"}
-            onClick={() => navigate(`/complaintview/${item.ticket_id}`)}
+            onClick={() => { 
+              setComplaintview({})
+              setAddedEngineers([])
+              setsubCallstatus([])
+              navigate(`/complaintview/${item.ticket_id}`)}}
             onDelete={() => handleDeleteTab(item.ticket_id)}
             className="mx-2"
           />
