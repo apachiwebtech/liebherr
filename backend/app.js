@@ -3367,7 +3367,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
   else if (ticket_type == 'DEMO') {
     t_type = 'D'
 
-  } else if (ticket_type == 'Installation') {
+  } else if (ticket_type == 'INSTALLATION') {
     t_type = 'I'
 
   } else if (ticket_type == 'MAINTENANCE') {
