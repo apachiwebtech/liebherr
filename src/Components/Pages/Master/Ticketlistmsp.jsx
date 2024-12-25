@@ -132,8 +132,8 @@ export function Ticketlistmsp(params) {
       setComplaintdata([]);
       setFilteredData([]);
       navigate('/login')
-    }
-  };
+    }
+  };
 
   const fetchFilteredData = async () => {
     try {

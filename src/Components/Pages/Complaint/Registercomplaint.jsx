@@ -752,7 +752,7 @@ export function Registercomplaint(params) {
             if (res.data) {
               notify();
               setTimeout(() => {
-                // navigate('/complaintlist');
+                navigate('/complaintlist');
               }, 500);
             }
           })
@@ -1645,7 +1645,7 @@ export function Registercomplaint(params) {
                   </div>
                   <div className="col-md-4">
                     <div className="mb-3">
-                      <label htmlFor="exampleFormControlInput1" className="form-label">Requested Mobile {value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
+                      <label htmlFor="exampleFormControlInput1" className="form-label">Requested Mobile </label>
                       <input type="text" className="form-control" value={value.requested_mobile} name="requested_mobile" onChange={onHandleChange} placeholder=""  />
                       {errors.requested_mobile && <span style={{ fontSize: "12px" }} className="text-danger">{errors.requested_mobile}</span>}
                     </div>
