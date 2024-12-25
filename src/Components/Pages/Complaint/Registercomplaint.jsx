@@ -1268,7 +1268,7 @@ export function Registercomplaint(params) {
                     {searchdata.length == 0 && !modelid  ?
 
                       <div className="">
-                        <input className="form-control" onChange={onHandleChange} value={value.model} name="model" disabled0></input>
+                        <input className="form-control" onChange={onHandleChange} value={value.model} name="model" disabled></input>
                         {errors.model && <span style={{ fontSize: "12px" }} className="text-danger">{errors.model}</span>}
                       </div> :
                       <div>{ModelNumber}</div>
