@@ -18,7 +18,7 @@ export function Registercomplaint(params) {
   const [p_date, setpdate] = useState('')
   const [searchdata, setSearchData] = useState([])
   const [ProductCustomer, setProductCustomer] = useState([])
-  const [warranty_status_data, setWarranty_status_data] = useState([])
+  const [warranty_status_data, setWarranty_status_data] = useState('OUT OF WARRANTY')
   const [DuplicateCustomerNumber, setDuplicateCustomerNumber] = useState([])
   const [hasSearched, setHasSearched] = useState(false)
   const [form, setForm] = useState(false)
@@ -131,8 +131,10 @@ export function Registercomplaint(params) {
       purchase_date.setFullYear(purchase_date.getFullYear() + 1);
 
       // Format the date as YYYY-MM-DD
-      const lastDate = purchase_date;
-      // const lastDate = purchase_date.toISOString().split('T')[0];
+      // const lastDate = purchase_date;
+      const lastDate = purchase_date.toISOString().split('T')[0];
+
+      console.log(lastDate, "%%%%")
 
 
 
@@ -223,18 +225,18 @@ export function Registercomplaint(params) {
       isValid = false;
       newErrors.cust_type = "Type is required";
     }
-    if (!value.requested_by && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
-      isValid = false;
-      newErrors.requested_by = "This is required";
-    }
-    if (!value.requested_email && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
-      isValid = false;
-      newErrors.requested_email = "This is required";
-    }
-    if (!value.requested_mobile && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
-      isValid = false;
-      newErrors.requested_mobile = "This is required";
-    }
+    // if (!value.requested_by && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
+    //   isValid = false;
+    //   newErrors.requested_by = "This is required";
+    // }
+    // if (!value.requested_email && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
+    //   isValid = false;
+    //   newErrors.requested_email = "This is required";
+    // }
+    // if (!value.requested_mobile && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
+    //   isValid = false;
+    //   newErrors.requested_mobile = "This is required";
+    // }
 
     if (!value.classification && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
       isValid = false;
@@ -550,7 +552,7 @@ export function Registercomplaint(params) {
             mobile: res.data[0].customer_mobile,
             address: res.data[0].address,
             customer_id: res.data[0].id,
-            alt_mobile: "",
+            alt_mobile: res.data[0].alt_mobile,
             state: res.data[0].state,
             city: res.data[0].city,
             area: res.data[0].area,
@@ -576,7 +578,9 @@ export function Registercomplaint(params) {
             specification: res.data[0].specification,
             requested_by :res.data[0].requested_by,
             requested_email : res.data[0].requested_email,
-            requested_mobile : res.data[0].requested_mobile
+            requested_mobile : res.data[0].requested_mobile,
+            additional_remarks : res.data[0].call_remark,
+            salutation : res.data[0].salutation
           })
 
           setlocations({childfranchiseem : res.data[0].sevice_partner,franchiseem : res.data[0].child_service_partner})
@@ -718,6 +722,7 @@ export function Registercomplaint(params) {
         child_service_partner: value.child_service_partner,
         additional_remarks: value.additional_remarks,
         specification: value.specification,
+        salutation: value.salutation,
         created_by: value.created_by,
         classification: value.classification,
         priority: value.Priority,
@@ -725,6 +730,7 @@ export function Registercomplaint(params) {
         requested_by : value.requested_by,
         requested_email : value.requested_email ,
         requested_mobile : value.requested_mobile,
+        salutation : value.salutation,
         msp:value.msp,
         csp : value.csp,
         sales_partner:value.sales_partner,
@@ -798,6 +804,7 @@ export function Registercomplaint(params) {
       requested_email : value.requested_email ,
       requested_mobile : value.requested_mobile,
       sales_partner2 : value.sales_partner2,
+      salutation : value.salutation,
       ticket_no: Comp_id
     };
 
@@ -871,36 +878,43 @@ export function Registercomplaint(params) {
       [name]: inputValue
     }));
 
-    if (name === "master_service_partner") {
-      getChildPartner(inputValue);
+    switch (name) {
+      case "master_service_partner":
+        getChildPartner(inputValue);
+        break;
+      case "state":
+        fetchdistricts(inputValue);
+        break;
+      case "area":
+        fetchCity(inputValue);
+        break;
+      case "city":
+        fetchPincodes(inputValue);
+        break;
+      case "pincode":
+        fetchlocations(inputValue);
+        setValue(prevState => ({
+          ...prevState,
+          city: "",
+          state: "",
+          area: ""
+        }));
+        break;
+      case "serial":
+        fetchserial(inputValue);
+        setpurchase_data("");
+        setValue(prevState => ({
+          ...prevState,
+          model: ""
+        }));
+        break;
+      case "complaint_date":
+        setDate(e.target.value);
+        break;
     }
+    
 
-    if (name === "state") {
-      fetchdistricts(inputValue);
-    }
 
-    if (name === "area") {
-      fetchCity(inputValue);
-    }
-    if (name === "city") {
-      fetchPincodes(inputValue);
-    }
-
-    if (name === "pincode") {
-      fetchlocations(inputValue);
-    }
-
-    if (name === "serial") {
-      fetchserial(inputValue);
-    }
-
-    if (name === "complaint_date") {
-      setDate(e.target.value);
-    }
-
-    // if (name == 'purchase_date') {
-    //   getDateAfterOneYear()
-    // }
   };
 
 
@@ -1322,12 +1336,12 @@ export function Registercomplaint(params) {
                       <label className="form-label">Ticket Type{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
                       <select className="form-control" onChange={onHandleChange} disabled={Comp_id ? true : false} value={value.ticket_type} name="ticket_type">
                         <option value="">Select</option>
-                        <option value="Installation">Installation</option>
-                        <option value="Breakdown">Breakdown</option>
-                        <option value="Visit">Visit</option>
-                        <option value="Helpdesk">Helpdesk</option>
-                        <option value="Maintenance">Maintenance</option>
-                        <option value="Demo">Demo</option>
+                        <option value="INSTALLATION">Installation</option>
+                        <option value="BREAKDOWN">Breakdown</option>
+                        <option value="VISIT">Visit</option>
+                        <option value="HELPDESK">Helpdesk</option>
+                        <option value="MAINTENANCE">Maintenance</option>
+                        <option value="DEMO">Demo</option>
                       </select>
                       {errors.ticket_type && <span style={{ fontSize: "12px" }} className="text-danger">{errors.ticket_type}</span>}
                     </div>
@@ -1617,14 +1631,14 @@ export function Registercomplaint(params) {
 
                   <div className="col-md-4">
                     <div className="mb-3">
-                      <label htmlFor="exampleFormControlInput1" className="form-label">Requested by {value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
+                      <label htmlFor="exampleFormControlInput1" className="form-label">Requested by </label>
                       <input type="text" className="form-control" value={value.requested_by} name="requested_by" onChange={onHandleChange} placeholder=""  />
                       {errors.requested_by && <span style={{ fontSize: "12px" }} className="text-danger">{errors.requested_by}</span>}
                     </div>
                   </div>
                   <div className="col-md-4">
                     <div className="mb-3">
-                      <label htmlFor="exampleFormControlInput1" className="form-label">Requested Email {value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
+                      <label htmlFor="exampleFormControlInput1" className="form-label">Requested Email </label>
                       <input type="text" className="form-control" value={value.requested_email} name="requested_email" onChange={onHandleChange} placeholder=""  />
                       {errors.requested_email && <span style={{ fontSize: "12px" }} className="text-danger">{errors.requested_email}</span>}
                     </div>

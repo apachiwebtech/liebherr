@@ -1520,7 +1520,7 @@ export function Complaintview(params) {
                   <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>
                     Serial No
                   </p>
-                  {sserial_no == "333"? (
+                  {sserial_no != ""? (
                   <p style={{ fontSize: "14px" }}>{complaintview.serial_no}</p>
                   ) : (
                     <input
