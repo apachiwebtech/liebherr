@@ -2087,7 +2087,7 @@ export function Complaintviewmsp(params) {
                     >
                       <option value="">Select </option>
                       {activity.map((item) => (
-                        <option key={item.id} value={item.title}>
+                        <option key={item.id} value={item.id}>
                           {item.code} - {item.title}
                         </option>
                       ))}

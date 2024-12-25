@@ -556,4 +556,20 @@ app.get("/getcompdata/:ticket_no", async (req, res) => {
 
 
 
+app.get("/getactivity_app", async (req, res) => {
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    const sql = "select * from awt_activity WHERE deleted = 0";
+
+    const result = await pool.request().query(sql);
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json(err);
+  }
+});
+
 module.exports = app;
