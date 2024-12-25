@@ -3673,6 +3673,8 @@ app.post("/u_complaint", authenticateToken, async (req, res) => {
   } = req.body;
 
 
+
+
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
 
@@ -3681,7 +3683,7 @@ app.post("/u_complaint", authenticateToken, async (req, res) => {
 
 
 
-    const complaintSQL = `
+const complaintSQL = `
 UPDATE complaint_ticket
 SET
   ticket_date = @complaint_date,
@@ -3743,7 +3745,7 @@ WHERE
       .input('model', model)
       .input('ticket_type', ticket_type)
       .input('cust_type', cust_type)
-      .input("warranty_status", sql.NVarChar, warrenty_status || "WARRENTY")
+      .input("warranty_status", sql.NVarChar, warrenty_status || "WARRANTY")
       .input('invoice_date', invoice_date)
       .input('call_charge', call_charge)
       .input('mode_of_contact', mode_of_contact)
@@ -7378,12 +7380,12 @@ app.post("/add_new_ticket", authenticateToken, async (req, res) => {
     const complaintSQL = `
       INSERT INTO complaint_ticket (
         customer_name, customer_mobile, customer_email, address,
-        customer_id, ModelNumber,serial_no, assigned_to,state,city,area,pincode, created_date, created_by,purchase_date,invoice_date
+        customer_id, ModelNumber,serial_no,state,city,area,pincode, created_date, created_by,purchase_date,invoice_date
       )
       OUTPUT INSERTED.id
       VALUES (
         @customer_name, @mobile, @email, @address,
-        @customer_id, @model,@serial_no, 1,@state, @city,@area,@pincode, @formattedDate, @created_by,@purchase_date,@invoice_date
+        @customer_id, @model,@serial_no,@state, @city,@area,@pincode, @formattedDate, @created_by,@purchase_date,@invoice_date
       )
     `;
 
