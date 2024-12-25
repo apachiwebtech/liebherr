@@ -126,12 +126,12 @@ export function CspTicketView(params) {
 
   async function getEngineer(params) {
 
-
     try {
-      const res = await axiosInstance.get(`${Base_Url}/getcvengineer`, {
+      const res = await axiosInstance.get(`${Base_Url}/getcvengineer/${complaintview.pincode}/${complaintview.msp}/${complaintview.csp}`, {
         headers: {
           Authorization: token, // Send token in headers
         },
+
       });
 
 

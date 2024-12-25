@@ -809,7 +809,7 @@ export function Registercomplaint(params) {
     };
 
 
-    axiosInstance.post(`${Base_Url}/update_complaint`, data, {
+    axiosInstance.post(`${Base_Url}/u_complaint`, data, {
       headers: {
         Authorization: token, // Send token in headers
       },
