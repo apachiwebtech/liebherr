@@ -6,7 +6,7 @@ const jwt = require("jsonwebtoken");
 const multer = require('multer');
 // const path = require('path');
 const upload = multer({ dest: 'uploads/' });
-const JWT_SECRET = "Lh!_Login_123"; 
+const JWT_SECRET = "Lh!_Login_123";
 
 
 app.post('/login', async (req, res) => {
@@ -84,18 +84,33 @@ app.get('/getheaddata', async (req, res) => {
   }
 });
 
-app.get('/getcomplaint', async (req, res) => {
+app.get('/getcomplaint/:en_id/:page/:limit', async (req, res) => {
   try {
     const pool = await poolPromise;
 
-    const en_id = req.query.en_id;
+    console.log(
+      req.params.en_id,
+      req.params.page,
+      req.params.limit
+
+    );
+
+
+    const en_id = req.params.en_id;
+    const page = parseInt(req.params.page) || 1; // Default to page 1
+    const limit = parseInt(req.params.limit) || 10; // Default to 10 items per page
+    const offset = (page - 1) * limit;
+
+
+console.log(`SELECT t.*, c.alt_mobileno FROM ( SELECT * FROM complaint_ticket WHERE engineer_id LIKE '${en_id}' ) AS t LEFT JOIN awt_customer AS c ON t.customer_id = c.customer_id CROSS APPLY STRING_SPLIT(t.engineer_id, ',') AS split_values WHERE split_values.value = '${en_id}' ORDER BY t.id DESC OFFSET ${offset} ROWS FETCH NEXT ${limit} ROWS ONLY;`);
+
 
     const result = await pool.request()
-      .query(`SELECT t.* , c.alt_mobileno  FROM complaint_ticket as t left join awt_customer as c on t.customer_id = c.customer_id  CROSS APPLY STRING_SPLIT(t.engineer_id, ',') AS split_values WHERE split_values.value = '${en_id}' ORDER BY t.id desc;
-`);
+      .query(`SELECT t.*, c.alt_mobileno FROM ( SELECT * FROM complaint_ticket WHERE engineer_id LIKE '${en_id}' ) AS t LEFT JOIN awt_customer AS c ON t.customer_id = c.customer_id CROSS APPLY STRING_SPLIT(t.engineer_id, ',') AS split_values WHERE split_values.value = '${en_id}' ORDER BY t.id DESC OFFSET ${offset} ROWS FETCH NEXT ${limit} ROWS ONLY;`);
 
 
-    console.log(result, "ddDd")
+
+
     if (result.recordset.length > 0) {
       res.status(200).json({ data: result.recordset });
     } else {

@@ -7,6 +7,10 @@ function Dashbord() {
   const [list, setList] = useState([]);
   const [filteredList, setFilteredList] = useState([]);
   const [serach, setserach] = useState(false);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [value, setValue] = useState({
     cancleled: 0,
@@ -32,24 +36,58 @@ function Dashbord() {
       });
   }
 
-  async function getcomplaint() {
-    const en_id = localStorage.getItem('userid');
+  const getComplaints = async () => {
+    const en_id = localStorage.getItem("userid");
+    if (!hasMore || loading) return;
 
-    axios.get(`${BASE_URL}/getcomplaint?en_id=${en_id}`)
-      .then((res) => {
-        if (res.data !== 0) {
-          setList(res.data.data);
-          setFilteredList(res.data.data);
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }
+    setLoading(true);
+    try {
+      console.log(page, "page");
+
+      const res = await axios.get(`${BASE_URL}/getcomplaint/${en_id}/${page}/10`);
+
+      if (res.data.data !== 0 || res.data.data.length !== 0) {
+
+        setList((prev) => [...prev, ...res.data.data]); // Append new data
+        setFilteredList((prev) => [...prev, ...res.data.data]);
+        // Increment the page using the functional update form
+        setPage((prevPage) => prevPage + 1);
+
+
+      } else {
+        setHasMore(false); // No more data to load
+      }
+    } catch (err) {
+      console.error(err);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    getComplaints(); // Initial fetch
+
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        window.innerHeight + document.documentElement.scrollTop + 1 >=
+        document.documentElement.scrollHeight
+      ) {
+        getComplaints(); // Fetch more complaints when scrolled to the bottom
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    // Cleanup the event listener on component unmount
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [page]); // Add page as a dependency
+
 
   useEffect(() => {
     getdata();
-    getcomplaint();
+
   }, []);
 
   const handleSearch = (e) => {
@@ -167,7 +205,7 @@ function Dashbord() {
                     <a href={`/mobapp/details/${item.id}`} className="btn btn-info mr-2">
                       <i className="fa-solid fa-eye"></i>
                     </a>
-                    <p  className="btn btn-warning ml-2 statusbx">
+                    <p className="btn btn-warning ml-2 statusbx">
                       {item.call_status}
                     </p>
                   </div>

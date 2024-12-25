@@ -7950,8 +7950,12 @@ app.get("/getcomplainlistmsp", async (req, res) => {
       sql += ` AND c.call_status = '${status}'`;
       countSql += ` AND c.call_status = '${status}'`;
     } else if (status) {
+
       sql += ` AND c.call_status = '${status}'`;
       countSql += ` AND c.call_status = '${status}'`;
+    }else{
+      sql += ` AND c.call_status != 'Closed' AND c.call_status != 'Cancelled'`;
+      countSql += ` AND c.call_status != 'Closed' AND c.call_status != 'Cancelled'`;
     }
 
     // Add pagination
@@ -7960,7 +7964,8 @@ app.get("/getcomplainlistmsp", async (req, res) => {
       OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY
     `;
 
-    console.log(sql);
+
+
 
     // Execute the queries
     const dataResult = await pool.request().query(sql);
@@ -8007,8 +8012,8 @@ app.get("/getmultiplelocation/:pincode", authenticateToken, async (req, res) => 
     LEFT JOIN awt_district as d on p.area_id = d.id
     LEFT JOIN awt_geocity as c on p.geocity_id = c.id
     LEFT JOIN pincode_allocation as o on p.pincode = o.pincode
-	LEFT JOIN awt_franchisemaster as f on f.licarecode = o.account_manager 
-	LEFT JOIN awt_childfranchisemaster as fm on fm.licare_code = o.owner 
+	LEFT JOIN awt_franchisemaster as f on f.licarecode = o.account_manager
+	LEFT JOIN awt_childfranchisemaster as fm on fm.licare_code = o.owner
 	where p.pincode = ${pincode}`
     console.log(sql);
 
@@ -8551,4 +8556,3 @@ app.post("/checkuser", authenticateToken, async (req, res) => {
     return res.status(500).json({ error: "Database error occurred" });
   }
 });
-

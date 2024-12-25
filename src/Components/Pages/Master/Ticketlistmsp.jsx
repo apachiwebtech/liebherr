@@ -116,15 +116,15 @@ export function Ticketlistmsp(params) {
       });
 
       // Filter out 'Cancelled' complaints by default
-      const filteredComplaints = response.data.data.filter(complaint =>
-        !['Cancelled'].includes(complaint.call_status)
-      );
+      // const filteredComplaints = response.data.data.filter(complaint =>
+      //   !['Cancelled'].includes(complaint.call_status)
+      // );
 
-      console.log(filteredComplaints); // Debug log for filtered complaints
+      console.log(response.data.data); // Debug log for filtered complaints
 
       // Update state
       setComplaintdata(response.data.data); // Full data
-      setFilteredData(filteredComplaints); // Filtered data
+      setFilteredData(response.data.data); // Filtered data
       setTotalCount(response.data.totalCount); // Total count
 
     }catch (error) {
