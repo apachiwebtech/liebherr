@@ -13,6 +13,9 @@ export function Registercomplaint(params) {
   const [hideticket, setHideticket] = useState(false)
   const [errors, setErrors] = useState({})
   const [serachval, setSearch] = useState('')
+  const [serialid, setSerialid] = useState('')
+  const [modelid, setModelid] = useState('')
+  const [p_date, setpdate] = useState('')
   const [searchdata, setSearchData] = useState([])
   const [ProductCustomer, setProductCustomer] = useState([])
   const [warranty_status_data, setWarranty_status_data] = useState([])
@@ -103,13 +106,14 @@ export function Registercomplaint(params) {
     created_by: created_by,
     dealer_info: "",
     salutation: "",
-    mdealer_info: "",
+    sales_partner: "",
+    sales_partner2:"",
     classification: "",
     Priority: "REGULAR",
     callType: "",
     requested_by:"",
     requested_email :"",
-    requested_mobile :""
+    requested_mobile :"",
   })
 
   const getDateAfterOneYear = (value) => {
@@ -532,8 +536,10 @@ export function Registercomplaint(params) {
         if (res.data) {
 
           setModelNumber(res.data[0].ModelNumber)
-          setLocation(res.data[0])
           setTicketNo(res.data[0].ticket_no)
+          setSerialid(res.data[0].serial_no)
+          setModelid(res.data[0].ModelNumber)
+          setpdate(res.data[0].purchase_date)
           getDateAfterOneYear(res.data[0].purchase_date)
           setValue({
             ...value,
@@ -557,12 +563,13 @@ export function Registercomplaint(params) {
             call_charge: res.data[0].call_charges,
             purchase_date: res.data[0].purchase_date || "",
             serial: res.data[0].serial_no || "",
-            master_service_partner: res.data[0].master_service_partner || "",
+            master_service_partner: res.data[0].service_partner || "",
             child_service_partner: res.data[0].child_service_partner || "",
             model: res.data[0].ModelNumber,
             msp: res.data[0].franchisee,
             csp: res.data[0].childPartner,
-            mdealer_info: res.data[0].sales_partner,
+            sales_partner: res.data[0].sales_partner,
+            sales_partner2: res.data[0].sales_partner2,
             classification: res.data[0].customer_class,
             Priority: res.data[0].call_priority,
             callType: res.data[0].callType,
@@ -571,6 +578,11 @@ export function Registercomplaint(params) {
             requested_email : res.data[0].requested_email,
             requested_mobile : res.data[0].requested_mobile
           })
+
+          setlocations({childfranchiseem : res.data[0].sevice_partner,franchiseem : res.data[0].child_service_partner})
+
+
+          
         }
       })
 
@@ -715,6 +727,8 @@ export function Registercomplaint(params) {
         requested_mobile : value.requested_mobile,
         msp:value.msp,
         csp : value.csp,
+        sales_partner:value.sales_partner,
+        sales_partner2 : value.sales_partner2,
         ticket_id: ticketid
       };
 
@@ -783,6 +797,7 @@ export function Registercomplaint(params) {
       requested_by : value.requested_by,
       requested_email : value.requested_email ,
       requested_mobile : value.requested_mobile,
+      sales_partner2 : value.sales_partner2,
       ticket_no: Comp_id
     };
 
@@ -916,6 +931,8 @@ export function Registercomplaint(params) {
             city: response.data[0].city,
             area: response.data[0].district,
             pincode: response.data[0].pincode,
+            master_service_partner : response.data[0].mspname,
+            child_service_partner : response.data[0].cspname,
             csp : response.data[0].csp,
             msp : response.data[0].msp
           })
@@ -945,7 +962,9 @@ export function Registercomplaint(params) {
         setValue({
           ...value,
           model: response.data[0].ModelNumber,
-          serial: response.data[0].serial_no
+          serial: response.data[0].serial_no,
+          sales_partner :response.data[0].SalesPartner,
+          classification : response.data[0].customerClassification
         })
 
       }
@@ -958,21 +977,7 @@ export function Registercomplaint(params) {
 
 
 
-  // const fetchComplaintDuplicate = async () => {
-  //     try {
-  //         const response = await axiosInstance.get(
-  //             `${Base_Url}/getComplaintDuplicateRegisterPage/${DuplicateCustomerNumber}`
-  //         );
 
-  //         if (response.data && response.data[0]) {
-
-  //             setLocation(response.data[0]);
-  //         }
-  //         // setDuplicate(response.data);
-  //     } catch (error) {
-  //         console.error("Error fetching ticket details:", error);
-  //     }
-  // };
 
   const addnewticket = (product_id) => {
     setForm(true)
@@ -1241,7 +1246,7 @@ export function Registercomplaint(params) {
                   <div className="col-md-3">
                     <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Serial No </p>
 
-                    {searchdata.length == 0 && !Comp_id ?
+                    {searchdata.length == 0 && !serialid ?
                       <div className="mb-3">
                         <input
                           type="text"
@@ -1260,10 +1265,10 @@ export function Registercomplaint(params) {
                   <div className="col-md-3">
                     <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Model</p>
 
-                    {searchdata.length == 0 && !Comp_id  ?
+                    {searchdata.length == 0 && !modelid  ?
 
                       <div className="">
-                        <input className="form-control" onChange={onHandleChange} value={value.model} name="model"></input>
+                        <input className="form-control" onChange={onHandleChange} value={value.model} name="model" disabled0></input>
                         {errors.model && <span style={{ fontSize: "12px" }} className="text-danger">{errors.model}</span>}
                       </div> :
                       <div>{ModelNumber}</div>
@@ -1273,7 +1278,7 @@ export function Registercomplaint(params) {
                   <div className="col-md-3">
                     <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Purchase Date</p>
 
-                    {searchdata.length == 0 && !Comp_id?
+                    {searchdata.length == 0 && !p_date?
                       <div className="mb-3">
                         <input
                           type="date"
@@ -1698,8 +1703,8 @@ export function Registercomplaint(params) {
                       <label className="form-label">Customer Classification{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
                       <select className="form-control" onChange={onHandleChange} value={value.classification} name="classification">
                         <option value="">Select</option>
-                        <option value="CONSUMER">Consumer</option>
-                        <option value="IMPORT">Import</option>
+                        <option value="Consumer">Consumer</option>
+                        <option value="Import">Import</option>
                       </select>
                       {errors.classification && <span style={{ fontSize: "12px" }} className="text-danger">{errors.classification}</span>}
                     </div>
@@ -1733,11 +1738,11 @@ export function Registercomplaint(params) {
                 <div className="card-body">
 
                   <h4 className="pname">Master Service Partner</h4>
-                  <p>{Comp_id ? value.msp : locations.franchiseem}</p>
+                  <p>{ locations.franchiseem}</p>
 
 
                   <h4 className="pname">Child Service Partner</h4>
-                  <p>{Comp_id ? value.csp : locations.childfranchiseem}</p>
+                  <p>{locations.childfranchiseem}</p>
 
                 </div>
               </div>
@@ -1751,7 +1756,7 @@ export function Registercomplaint(params) {
                   </div>
 
                   <div className="mb-3">
-                    <input type="text" className="form-control" name="sub_dealer" value={value.mdealer_info} onChange={onHandleChange} placeholder="Primary Dealer" />
+                    <input type="text" className="form-control" name="sub_dealer" value={value.sales_partner} onChange={onHandleChange} placeholder="Primary Dealer" disabled/>
                   </div>
                   <div className="row">
                     <div className="col-md-12">
@@ -1760,7 +1765,7 @@ export function Registercomplaint(params) {
                   </div>
 
                   <div className="mb-3">
-                    <input type="text" className="form-control" name="sub_dealer" value={value.dealer_info} onChange={onHandleChange} placeholder="Secondary Dealer" />
+                    <input type="text" className="form-control" name="sales_partner2" value={value.sales_partner2} onChange={onHandleChange} placeholder="Secondary Dealer" />
                   </div>
                 </div>
               </div>

@@ -139,7 +139,7 @@ const [Name, setName] = useState([])
 
 
           <div className="dropdown text-end d-flex align-content-center justify-content-center">
-            <Link className="btn btn-primary mr-2 newcomplaint" onClick={redirect}>New Ticket</Link>
+            <Link className="btn btn-primary mr-2 newcomplaint text-light" onClick={redirect}>New Ticket</Link>
 
             <a href="#"  className="link-dark d-flex align-content-center justify-content-center text-decoration-none " id="dropdownUser1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               <Avatar
