@@ -45,7 +45,8 @@ function Dashbord() {
       console.log(page, "page");
 
       const res = await axios.get(`${BASE_URL}/getcomplaint/${en_id}/${page}/10`);
-
+console.log("message",res.data.message);
+if (res.data.message != "No records found") {
       if (res.data.data !== 0 || res.data.data.length !== 0) {
 
         setList((prev) => [...prev, ...res.data.data]); // Append new data
@@ -57,6 +58,7 @@ function Dashbord() {
       } else {
         setHasMore(false); // No more data to load
       }
+    }
     } catch (err) {
       console.error(err);
     }
