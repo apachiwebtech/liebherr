@@ -60,7 +60,7 @@ const Ticketlistcsp = (params) => {
     };
 
     const fetchComplaintlist = async (page) => {
-        
+
         try {
             const response = await axiosInstance.get(`${Base_Url}/getcomplainlistcsp`, {
                 params: {
@@ -126,7 +126,7 @@ const Ticketlistcsp = (params) => {
             });
 
             const { data, totalRecords, currentPage, totalPages } = response.data;
-            setTotalCount(totalRecords); 
+            setTotalCount(totalRecords);
             // Update filtered data and pagination info
             setFilteredData(data);
             setComplaintdata(data);
@@ -368,12 +368,15 @@ const Ticketlistcsp = (params) => {
                                             value={searchFilters.status}
                                             onChange={handleFilterChange}
                                         >
-                                            <option value="">All</option>
+                                            <option value="Open">Open</option>
+                                            <option value="Appointment">Appointment</option>
+                                            <option value="Approval">Approval</option>
+                                            <option value="Spares">Spares</option>
+                                            <option value="Completed">Completed</option>
                                             <option value="Closed">Closed</option>
+                                            <option value="In Process">In Process</option>
                                             <option value="Cancelled">Cancelled</option>
-                                            <option value="Pending">Pending</option>
-                                            <option value="Quotation">Quotation</option>
-                                            <option value="Duplicates">Duplicates</option>
+                                            <option value="Duplicate">Duplicate</option>
                                         </select>
                                     </div>
                                 </div>
@@ -406,7 +409,7 @@ const Ticketlistcsp = (params) => {
                                     </div>
                                 </div>
 
-                          
+
 
                             </div>
 
@@ -526,21 +529,21 @@ const Ticketlistcsp = (params) => {
                                 </tr>
                             </thead>
                             <tbody>
-                            {filteredData.map((item, index) => {
-    const displayIndex = (currentPage - 1) * pageSize + index + 1;
-    return (
-        <tr key={item.id}>
-            <td>{displayIndex}</td>
-            <td>{item.ticket_no}</td>
-            <td>{formatDate(item.ticket_date)}</td>
-            <td>{item.customer_name}</td>
-            <td>{item.ModelNumber}</td>
-            <td>{item.serial_no}</td>
-            <td>{item.ageingdays}</td>
-            <td>{item.assigned_name}</td>
-            <td>{item.call_status}</td>
-            {/* Uncomment the below block if editing is needed */}
-            {/* <td>
+                                {filteredData.map((item, index) => {
+                                    const displayIndex = (currentPage - 1) * pageSize + index + 1;
+                                    return (
+                                        <tr key={item.id}>
+                                            <td>{displayIndex}</td>
+                                            <td>{item.ticket_no}</td>
+                                            <td>{formatDate(item.ticket_date)}</td>
+                                            <td>{item.customer_name}</td>
+                                            <td>{item.ModelNumber}</td>
+                                            <td>{item.serial_no}</td>
+                                            <td>{item.ageingdays}</td>
+                                            <td>{item.assigned_name}</td>
+                                            <td>{item.call_status}</td>
+                                            {/* Uncomment the below block if editing is needed */}
+                                            {/* <td>
                 <Link to={`/registercomaplaint/${item.ticket_no}`}>
                     <button
                         className="btn"
@@ -562,27 +565,27 @@ const Ticketlistcsp = (params) => {
                     </button>
                 </Link>
             </td> */}
-            <td>
-                <button
-                    className="btn"
-                    onClick={() => {
-                        navigate(`/csp/ticketview/${item.id}`);
-                        addInTab(item.ticket_no, item.id);
-                    }}
-                    title="View"
-                    style={{
-                        backgroundColor: 'transparent',
-                        border: 'none',
-                        color: 'blue',
-                        fontSize: '20px',
-                        cursor: 'pointer',
-                    }}
-                >
-                    <FaEye />
-                </button>
-            </td>
-            {/* Uncomment the below block if deletion is needed */}
-            {/* <td>
+                                            <td>
+                                                <button
+                                                    className="btn"
+                                                    onClick={() => {
+                                                        navigate(`/csp/ticketview/${item.id}`);
+                                                        addInTab(item.ticket_no, item.id);
+                                                    }}
+                                                    title="View"
+                                                    style={{
+                                                        backgroundColor: 'transparent',
+                                                        border: 'none',
+                                                        color: 'blue',
+                                                        fontSize: '20px',
+                                                        cursor: 'pointer',
+                                                    }}
+                                                >
+                                                    <FaEye />
+                                                </button>
+                                            </td>
+                                            {/* Uncomment the below block if deletion is needed */}
+                                            {/* <td>
                 <button
                     className="btn"
                     onClick={() => deleted(item.id)}
@@ -597,9 +600,9 @@ const Ticketlistcsp = (params) => {
                     <FaTrash />
                 </button>
             </td> */}
-        </tr>
-    );
-})}
+                                        </tr>
+                                    );
+                                })}
 
                             </tbody>
                         </table>

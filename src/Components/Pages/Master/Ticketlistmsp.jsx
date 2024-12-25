@@ -421,12 +421,15 @@ export function Ticketlistmsp(params) {
                   value={searchFilters.status}
                   onChange={handleFilterChange}
                 >
-                  <option value=""> All</option>
+                    <option value="Open">Open</option>
+                  <option value="Appointment">Appointment</option>
+                  <option value="Approval">Approval</option>
+                  <option value="Spares">Spares</option>
+                  <option value="Completed">Completed</option>
                   <option value="Closed">Closed</option>
+                  <option value="In Process">In Process</option>
                   <option value="Cancelled">Cancelled</option>
-                  <option value="Pending">Pending</option>
-                  <option value="Quotation">Quotation</option>
-                  <option value="Duplicates">Duplicates</option>
+                  <option value="Duplicate">Duplicate</option>
                 </select>
               </div>
             </div>
