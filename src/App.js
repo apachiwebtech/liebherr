@@ -98,6 +98,8 @@ import NotAuthenticate from './Components/Authenticate/NotAuthenticate';
 import AppLogin from './Components/App/Compo/Login';
 import ProtectedRoute from './Components/Authenticate/ProtectedRoute';
 import Activity from './Components/Pages/Master/Activity';
+import { Csplisting } from './Components/Pages/Master/Csplisting';
+import Engineeringlist from './Components/Pages/Master/Engineeringlist';
 
 
 
@@ -156,6 +158,10 @@ const Router = createBrowserRouter([
         element: <Ticketlistmsp />,
       },
       {
+        path: "/msp/csplist",
+        element: <Csplisting />,
+      },
+      {
         path: "/msp/complaintviewmsp/:complaintid",
         element: <Complaintviewmsp />,
       },
@@ -175,6 +181,11 @@ const Router = createBrowserRouter([
       {
         path: "/csp/ticketlist",
         element: <Ticketlistcsp />,
+
+      },
+      {
+        path: "/csp/engineeringlist",
+        element: <Engineeringlist />,
 
       },
       {

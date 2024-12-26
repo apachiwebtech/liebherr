@@ -57,7 +57,9 @@ if (res.data.message != "No records found") {
 
       } else {
         setHasMore(false); // No more data to load
-      }
+      } 
+    }else {
+      setHasMore(false); // No more data to load
     }
     } catch (err) {
       console.error(err);
@@ -66,8 +68,10 @@ if (res.data.message != "No records found") {
   };
 
   useEffect(() => {
-    getComplaints(); // Initial fetch
 
+      getComplaints();
+
+    console.log('i fire once');
   }, []);
 
   useEffect(() => {

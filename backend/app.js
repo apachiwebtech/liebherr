@@ -3178,15 +3178,15 @@ app.get("/getAttachment2Details/:ticket_no",
 
 app.get("/getcvengineer/:pincode/:msp/:csp", authenticateToken, async (req, res) => {
 
-  let { pincode ,msp ,csp } = req.params;
-console.log( pincode ,msp ,csp,"vkjuyfhdgviuc dyuhj");
+  let { pincode, msp, csp } = req.params;
+  console.log(pincode, msp, csp, "vkjuyfhdgviuc dyuhj");
 
   try {
     const pool = await poolPromise;
 
 
-       // Direct SQL query without parameter binding
-       const sql = `SELECT em.id, em.title ,em.engineer_id
+    // Direct SQL query without parameter binding
+    const sql = `SELECT em.id, em.title ,em.engineer_id
    FROM pincode_allocation AS pa
    LEFT JOIN awt_franchisemaster AS fm
           ON fm.licarecode = pa.account_manager
@@ -3199,7 +3199,7 @@ console.log( pincode ,msp ,csp,"vkjuyfhdgviuc dyuhj");
                ELSE  RIGHT(pa.owner, LEN(pa.owner) - 2)
              END
    WHERE  pa.pincode ='${pincode}' and pa.account_manager = '${msp}' and pa.owner ='${csp}'`;
-console.log(sql)
+    console.log(sql)
     // Execute the query
     const result = await pool.request().query(sql);
 
@@ -3339,7 +3339,7 @@ app.post("/getticketendcustomer", async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.json({ information: [], product: [] });
-  }specification
+  } specification
 });
 
 // Comaplint Module -> Start
@@ -3350,7 +3350,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
     complaint_date, customer_name = "NA", contact_person, email, mobile, address,
     state, city, area, pincode, mode_of_contact, ticket_type, cust_type,
     warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks
-    , ticket_id, classification, priority, callType,requested_by,requested_email,requested_mobile,msp,csp,sales_partner,sales_partner2,salutation
+    , ticket_id, classification, priority, callType, requested_by, requested_email, requested_mobile, msp, csp, sales_partner, sales_partner2, salutation
   } = req.body;
 
   console.log(req.body, "%%%%")
@@ -3669,7 +3669,7 @@ app.post("/u_complaint", authenticateToken, async (req, res) => {
   let {
     customer_name, contact_person, email, mobile, address,
     state, city, area, pincode, mode_of_contact, cust_type,
-    warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks, ticket_no, classification, priority ,requested_by,requested_email,requested_mobile,sales_partner2,salutation
+    warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks, ticket_no, classification, priority, requested_by, requested_email, requested_mobile, sales_partner2, salutation
   } = req.body;
 
 
@@ -3683,7 +3683,7 @@ app.post("/u_complaint", authenticateToken, async (req, res) => {
 
 
 
-const complaintSQL = `
+    const complaintSQL = `
 UPDATE complaint_ticket
 SET
   ticket_date = @complaint_date,
@@ -7847,6 +7847,131 @@ app.get("/getcomplainlistcsp", async (req, res) => {
 });
 
 
+
+app.get("/getcsplistmsp", async (req, res) => {
+  const { licare_code, page = 1, pageSize = 10 } = req.query;
+
+  try {
+    // Validate input
+    if (!licare_code) {
+      return res.status(400).json({ message: "licare_code is required" });
+    }
+
+    const pool = await poolPromise;
+
+    // Sanitize and validate pagination parameters
+    const currentPage = Math.max(parseInt(page, 10) || 1, 1); // Default to page 1
+    const size = Math.max(parseInt(pageSize, 10) || 10, 1); // Default to 10 items per page
+    const offset = (currentPage - 1) * size;
+
+    // Total count query
+    const countSql = `
+      SELECT COUNT(*) AS totalRecords
+      FROM awt_childfranchisemaster
+      WHERE pfranchise_id = @licare_code
+    `;
+
+    // Main data query with pagination
+    const dataSql = `
+      SELECT *
+      FROM awt_childfranchisemaster
+      WHERE pfranchise_id = @licare_code
+      ORDER BY id DESC
+      OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY
+    `;
+
+    // Execute total count query
+    const countResult = await pool.request()
+      .input("licare_code", sql.VarChar, licare_code)
+      .query(countSql);
+
+    const totalRecords = countResult.recordset[0].totalRecords;
+
+    // Execute paginated data query
+    const dataResult = await pool.request()
+      .input("licare_code", sql.VarChar, licare_code)
+      .input("offset", sql.Int, offset)
+      .input("pageSize", sql.Int, size)
+      .query(dataSql);
+
+    // Respond with data and pagination details
+    return res.json({
+      data: dataResult.recordset,
+      totalRecords,
+      currentPage,
+      pageSize: size,
+      totalPages: Math.ceil(totalRecords / size),
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "An error occurred while fetching the complaint list" });
+  }
+});
+
+
+app.get("/engineeringlisting", async (req, res) => {
+  const { licare_code, page = 1, pageSize = 10 } = req.query;
+
+  try {
+    // Validate input
+    if (!licare_code) {
+      return res.status(400).json({ message: "licare_code is required" });
+    }
+
+    const pool = await poolPromise;
+
+    // Sanitize and validate pagination parameters
+    const currentPage = Math.max(parseInt(page, 10) || 1, 1); // Default to page 1
+    const size = Math.max(parseInt(pageSize, 10) || 10, 1); // Default to 10 items per page
+    const offset = (currentPage - 1) * size;
+
+    // Total count query
+    const countSql = `
+       SELECT COUNT(*) as totalRecords
+    FROM awt_engineermaster
+    WHERE cfranchise_id = RIGHT(@licare_code, LEN(@licare_code) - 2)`;
+
+    // Main data query with pagination
+    const dataSql = `
+    SELECT *
+    FROM awt_engineermaster
+    WHERE cfranchise_id = RIGHT(@licare_code, LEN(@licare_code) - 2)
+    ORDER BY id DESC
+    OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY
+  `;
+
+
+    console.log(dataSql);
+
+    // Execute total count query
+    const countResult = await pool.request()
+      .input("licare_code", sql.VarChar, licare_code)
+      .query(countSql);
+
+    const totalRecords = countResult.recordset[0].totalRecords;
+
+    // Execute paginated data query
+    const dataResult = await pool.request()
+      .input("licare_code", sql.VarChar, licare_code)
+      .input("offset", sql.Int, offset)
+      .input("pageSize", sql.Int, size)
+      .query(dataSql);
+
+    // Respond with data and pagination details
+    return res.json({
+      data: dataResult.recordset,
+      totalRecords,
+      currentPage,
+      pageSize: size,
+      totalPages: Math.ceil(totalRecords / size),
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "An error occurred while fetching the complaint list" });
+  }
+});
+
+
 //CSP LIST END
 
 
@@ -7953,7 +8078,7 @@ app.get("/getcomplainlistmsp", async (req, res) => {
 
       sql += ` AND c.call_status = '${status}'`;
       countSql += ` AND c.call_status = '${status}'`;
-    }else{
+    } else {
       sql += ` AND c.call_status != 'Closed' AND c.call_status != 'Cancelled'`;
       countSql += ` AND c.call_status != 'Closed' AND c.call_status != 'Cancelled'`;
     }
@@ -7982,8 +8107,8 @@ app.get("/getcomplainlistmsp", async (req, res) => {
     return res.status(500).json({
       message: "An error occurred while fetching the complaint list",
       error: err.message,
-    });
-  }
+    });
+  }
 });
 
 //MSP complaint list
