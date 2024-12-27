@@ -49,9 +49,7 @@ export function Csplisting(params) {
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
-  console.log(pageSize, "pageSize");
-  console.log(totalCount, "totalCount");
-  console.log(totalPages, "totalPages");
+ 
 
   const handlePageChange = (page) => {
 
@@ -129,7 +127,7 @@ export function Csplisting(params) {
       // Update state
       setComplaintdata(response.data.data); // Full data
       setFilteredData(response.data.data); // Filtered data
-      setTotalCount(response.data.totalCount); // Total count
+      setTotalCount(response.data.totalRecords); // Total count
       setPageSize(response.data.pageSize)
 
 
@@ -161,7 +159,7 @@ export function Csplisting(params) {
       });
       setFilteredData(response.data.data);
       setComplaintdata(response.data.data);
-      setTotalCount(response.data.totalCount);
+      setTotalCount(response.data.totalRecords);
 
     } catch (error) {
       console.error('Error fetching filtered data:', error);

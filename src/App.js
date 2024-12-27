@@ -100,11 +100,11 @@ import ProtectedRoute from './Components/Authenticate/ProtectedRoute';
 import Activity from './Components/Pages/Master/Activity';
 import { Csplisting } from './Components/Pages/Master/Csplisting';
 import Engineeringlist from './Components/Pages/Master/Engineeringlist';
+import { Mspdata } from './Components/Pages/Master/Mspdata';
 import Engineers from './Components/Trainer/Engineers';
 import Nps from './Components/Pages/Nps/Nps';
 import { TrainerLogin } from './Components/Trainer/TrainerLogin';
 import TrainerHeader from './Components/Trainer/TrainerHeader';
-
 
 
 const isAuthenticated = () => {
@@ -155,7 +155,6 @@ const Router = createBrowserRouter([
   },
 
 
-
   {
     path: "/msp",
     element: <MSPAPP />,
@@ -170,6 +169,10 @@ const Router = createBrowserRouter([
         element: <Csplisting />,
       },
       {
+        path: "/msp/mspdata",
+        element: <Mspdata />,
+      },
+      {
         path: "/msp/complaintviewmsp/:complaintid",
         element: <Complaintviewmsp />,
       },
@@ -181,7 +184,6 @@ const Router = createBrowserRouter([
     element: <CSP_Login />,
 
   },
-
   {
     path: "/trainer/login",
     element: <TrainerLogin />,
@@ -630,6 +632,25 @@ const Router = createBrowserRouter([
   },
 ]);
 
+function TrainerApp() {
+
+  const navigate = useNavigate()
+
+  React.useEffect(() => {
+    checkLocalStorageAndRedirect(navigate);
+  }, [navigate])
+
+
+
+  return (
+    <>
+      <TrainerHeader />
+      <Outlet />
+      <Sitefooter />
+    </>
+
+  );
+}
 
 function checkLocalStorageAndRedirect(navigate) {
   const user_id = localStorage.getItem('userId')
@@ -740,26 +761,6 @@ function MSPAPP() {
   return (
     <>
       <HeaderMsp />
-      <Outlet />
-      <Sitefooter />
-    </>
-
-  );
-}
-
-function TrainerApp() {
-
-  const navigate = useNavigate()
-
-  React.useEffect(() => {
-    checkLocalStorageAndRedirect(navigate);
-  }, [navigate])
-
-
-
-  return (
-    <>
-      <TrainerHeader />
       <Outlet />
       <Sitefooter />
     </>

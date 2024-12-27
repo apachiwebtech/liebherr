@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Header from './Header';
 import { BASE_URL } from './BaseUrl';
 import axios from 'axios';
+import { Base_Url } from '../../Utils/Base_Url';
 
 function Dashbord() {
   const [list, setList] = useState([]);
@@ -44,7 +45,7 @@ function Dashbord() {
     try {
       console.log(page, "page");
 
-      const res = await axios.get(`${BASE_URL}/getcomplaint/${en_id}/${page}/10`);
+      const res = await axios.get(`${Base_Url}/getcomplaint/${en_id}/${page}/10`);
 console.log("message",res.data.message);
 if (res.data.message != "No records found") {
       if (res.data.data !== 0 || res.data.data.length !== 0) {
@@ -57,7 +58,7 @@ if (res.data.message != "No records found") {
 
       } else {
         setHasMore(false); // No more data to load
-      } 
+      }
     }else {
       setHasMore(false); // No more data to load
     }

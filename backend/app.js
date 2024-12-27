@@ -7878,7 +7878,7 @@ app.get("/getcomplainlistcsp", async (req, res) => {
       totalRecords,
       currentPage: parseInt(page, 10),
       pageSize: parseInt(pageSize, 10),
-      totalPages: Math.ceil(totalRecords / pageSize),
+      page: parseInt(Math.ceil(totalRecords / pageSize)),
     });
   } catch (err) {
     console.error(err);
@@ -7940,7 +7940,7 @@ app.get("/getcsplistmsp", async (req, res) => {
       totalRecords,
       currentPage,
       pageSize: size,
-      totalPages: Math.ceil(totalRecords / size),
+      page: parseInt(Math.ceil(totalRecords / size)),
     });
   } catch (err) {
     console.error(err);
@@ -7981,7 +7981,7 @@ app.get("/engineeringlisting", async (req, res) => {
   `;
 
 
-    console.log(dataSql);
+    // console.log(dataSql);
 
     // Execute total count query
     const countResult = await pool.request()
@@ -8003,7 +8003,7 @@ app.get("/engineeringlisting", async (req, res) => {
       totalRecords,
       currentPage,
       pageSize: size,
-      totalPages: Math.ceil(totalRecords / size),
+      page: parseInt(Math.ceil(totalRecords / size)),
     });
   } catch (err) {
     console.error(err);

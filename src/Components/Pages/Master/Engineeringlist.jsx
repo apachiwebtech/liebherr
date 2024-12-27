@@ -48,6 +48,9 @@ export function Engineeringlist(params) {
   const { loaders, axiosInstance } = useAxiosLoader();
 
   const totalPages = Math.ceil(totalCount / pageSize);
+  console.log(pageSize, "pageSize");
+  console.log(totalCount, "totalCount");
+  console.log(totalPages, "totalPages");
 
 
   const handlePageChange = (page) => {
@@ -126,8 +129,10 @@ export function Engineeringlist(params) {
       // Update state
       setComplaintdata(response.data.data); // Full data
       setFilteredData(response.data.data); // Filtered data
-      setTotalCount(response.data.totalCount); // Total count
+      setTotalCount(response.data.totalRecords); // Total count
       setPageSize(response.data.pageSize)
+
+
 
 
     } catch (error) {
@@ -158,7 +163,7 @@ export function Engineeringlist(params) {
       });
       setFilteredData(response.data.data);
       setComplaintdata(response.data.data);
-      setTotalCount(response.data.totalCount);
+      setTotalCount(response.data.totalRecords);
 
     } catch (error) {
       console.error('Error fetching filtered data:', error);
@@ -658,7 +663,7 @@ export function Engineeringlist(params) {
                   <tr >
                     <th>#</th>
                     <th>Licare Code</th>
-       
+
                     <th>Title</th>
                     <th>Mobile</th>
                     <th>View</th>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Logo from '../../images/Liebherr-logo-768x432.png'
 import { Avatar } from '@mui/material';
 import { App_Url } from '../Utils/Base_Url';
@@ -7,6 +7,7 @@ import { App_Url } from '../Utils/Base_Url';
 
 const Loginheader = (params) => {
   const [Name, setName] = useState([])
+    const location = useLocation(); // Get current route
 
 
   const redirect = () => {
@@ -44,17 +45,37 @@ const Loginheader = (params) => {
 
 
 
-            <li className="nav-item dropdown">
-              <Link to={`/csp/ticketlist`} className="nav-link  site" href="#" id="navbarDropdown" role="button" aria-expanded="false" >
+
+            <li
+              className={`nav-item dropdown ${location.pathname === "/csp/ticketlist" ? "active-class" : ""}`}
+              style={location.pathname === "/csp/ticketlist" ? { background: '#0d6efd', borderRadius: '5px' } : {}}
+            >
+              <Link
+                to={`/csp/ticketlist`}
+                className={`nav-link site ${location.pathname === "/csp/ticketlist" ? "text-light" : ""}`}
+                id="navbarDropdown"
+                role="button"
+                aria-expanded="false"
+              >
                 Tickets
               </Link>
             </li>
 
-            <li className="nav-item dropdown">
-              <Link to={`/csp/engineeringlist`} className="nav-link  site" href="#" id="navbarDropdown" role="button" aria-expanded="false" >
-              Engineering Listing
+            <li
+              className={`nav-item dropdown ${location.pathname === "/csp/engineeringlist" ? "active-class" : ""}`}
+              style={location.pathname === "/csp/engineeringlist" ? { background: '#0d6efd', borderRadius: '5px' } : {}}
+            >
+              <Link
+                to={`/csp/engineeringlist`}
+                className={`nav-link site ${location.pathname === "/csp/engineeringlist" ? "text-light" : ""}`}
+                id="navbarDropdown"
+                role="button"
+                aria-expanded="false"
+              >
+                Engineering Listing
               </Link>
             </li>
+
 
 
           </ul>
@@ -82,12 +103,7 @@ const Loginheader = (params) => {
             </a>
             <ul className="dropdown-menu text-small" aria-labelledby="dropdownUser1">
               <li className="dropdown-item" role="button">
-                <Link className="dropdown-item" to="#">New project...</Link></li>
-              <li className="dropdown-item" role="button">
-                <Link className="dropdown-item" to="#">Settings</Link></li>
-              <li className="dropdown-item" role="button">
-                <Link className="dropdown-item" to="#">Profile</Link></li>
-              <li><hr className="dropdown-divider" /></li>
+                <Link className="dropdown-item" to="/msp/mspdata">MSP Data</Link></li>
               <li className="dropdown-item" role="button">
                 <Link className="dropdown-item" to="/login" tabIndex="0" onClick={clearLocal}>Sign out</Link></li>
             </ul>
