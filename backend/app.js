@@ -3770,7 +3770,6 @@ SET
 
     await pool.request()
       .input('ticket_no', ticket_no)
-      .input('ticket_no', co)
       .input('customer_name', customer_name)
       .input('mobile', mobile)
       .input('email', email)
