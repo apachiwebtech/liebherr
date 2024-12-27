@@ -281,6 +281,47 @@ app.post("/loginmsp", async (req, res) => {
     res.status(500).json({ message: "Database error", error: err });
   }
 });
+
+
+app.post("/trainerlogin", async (req, res) => {
+  const { trainer, password } = req.body;
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    const sql = `SELECT * FROM lhi_trainer WHERE email = '${trainer}' AND password = '${password}'`;
+
+
+    const result = await pool.request().query(sql);
+
+    if (result.recordset.length > 0) {
+      const user = result.recordset[0];
+
+      // Generate a JWT token
+      const token = jwt.sign(
+        { id: user.id, email: user.email, licare_code: user.licare_code },
+        JWT_SECRET,
+        { expiresIn: "8h" } // Token validity duration
+      );
+
+      res.json({
+        message: "Login successful",
+        token, // Send the token to the client
+        user: {
+          id: user.id,
+          Lhiuser: user.email,
+          licare_code: user.licare_code,
+        },
+      });
+    } else {
+      res.status(401).json({ message: "Invalid username or password" });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Database error", error: err });
+  }
+});
 // app.post("/msplogin", async (req, res) => {
 //   const { title, password } = req.body;
 
@@ -3686,7 +3727,6 @@ app.post("/u_complaint", authenticateToken, async (req, res) => {
     const complaintSQL = `
 UPDATE complaint_ticket
 SET
-  ticket_date = @complaint_date,
   customer_name = @customer_name,
   customer_mobile = @mobile,
   customer_email = @email,
@@ -3697,7 +3737,6 @@ SET
   pincode = @pincode,
   customer_id = @customer_id,
   ModelNumber = @model,
-  ticket_type = @ticket_type,
   call_type = @cust_type,
   call_status = 'Pending',
   warranty_status = @warranty_status,
@@ -3721,7 +3760,7 @@ SET
   sales_partner2 = @sales_partner2,
   salutation = @salutation,
   alt_mobile = @alt_mobile
-WHERE
+  WHERE
   ticket_no = @ticket_no
 `;
 
@@ -3731,6 +3770,7 @@ WHERE
 
     await pool.request()
       .input('ticket_no', ticket_no)
+      .input('ticket_no', co)
       .input('customer_name', customer_name)
       .input('mobile', mobile)
       .input('email', email)
@@ -4576,6 +4616,7 @@ app.get("/getengineer", authenticateToken, async (req, res) => {
     return res.status(500).json({ error: 'An error occurred while fetching data' });
   }
 });
+
 app.get("/requestengineer/:id", authenticateToken,
   authenticateToken, async (req, res) => {
     const { id } = req.params;

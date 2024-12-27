@@ -100,6 +100,10 @@ import ProtectedRoute from './Components/Authenticate/ProtectedRoute';
 import Activity from './Components/Pages/Master/Activity';
 import { Csplisting } from './Components/Pages/Master/Csplisting';
 import Engineeringlist from './Components/Pages/Master/Engineeringlist';
+import Engineers from './Components/Trainer/Engineers';
+import Nps from './Components/Pages/Nps/Nps';
+import { TrainerLogin } from './Components/Trainer/TrainerLogin';
+import TrainerHeader from './Components/Trainer/TrainerHeader';
 
 
 
@@ -145,6 +149,10 @@ const Router = createBrowserRouter([
     path: "/notauthenticate",
     element: <NotAuthenticate />,
   },
+  {
+    path: "/nps/:email/:ticketno",
+    element: <Nps />,
+  },
 
 
 
@@ -173,6 +181,12 @@ const Router = createBrowserRouter([
     element: <CSP_Login />,
 
   },
+
+  {
+    path: "/trainer/login",
+    element: <TrainerLogin />,
+
+  },
   {
     path: "/csp",
     element: <CSPAPP />,
@@ -191,6 +205,18 @@ const Router = createBrowserRouter([
       {
         path: "/csp/ticketview/:complaintid",
         element: <CspTicketView />,
+
+      }
+    ],
+  },
+  {
+    path: "/trainer",
+    element: <TrainerApp />,
+    children: [
+
+      {
+        path: "/trainer/engineerlist",
+        element: <Engineers />,
 
       }
     ],
@@ -714,6 +740,26 @@ function MSPAPP() {
   return (
     <>
       <HeaderMsp />
+      <Outlet />
+      <Sitefooter />
+    </>
+
+  );
+}
+
+function TrainerApp() {
+
+  const navigate = useNavigate()
+
+  React.useEffect(() => {
+    checkLocalStorageAndRedirect(navigate);
+  }, [navigate])
+
+
+
+  return (
+    <>
+      <TrainerHeader />
       <Outlet />
       <Sitefooter />
     </>

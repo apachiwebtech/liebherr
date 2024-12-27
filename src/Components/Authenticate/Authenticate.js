@@ -40,6 +40,7 @@ const Authenticate = () => {
         }
       })
         .then((res) => {
+
           if (res.data.length <= 0) {
             navigate('/notauthenticate');
             return; // Stop further execution
@@ -73,7 +74,8 @@ const Authenticate = () => {
         })
 
     }else{
-      window.location.href = App_Url
+      
+        navigate('/notauthenticate');
     }
 
 
