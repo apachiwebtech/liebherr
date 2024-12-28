@@ -103,7 +103,14 @@ const Location = () => {
       if (confirmSubmission) {
         if (isEdit) {
           await axios
-            .post(`${Base_Url}/putregion`, { ...formData })
+            .post(`${Base_Url}/putregion`, {
+              ...formData,
+            },
+            {
+              headers: {
+                Authorization: token, // Send token in headers
+              },
+            })
             .then((response) => {
               setFormData({ title: "", country_id: "" });
               fetchUsers();
@@ -115,7 +122,15 @@ const Location = () => {
             });
         } else {
           await axios
-            .post(`${Base_Url}/postregion`, { ...formData })
+            .post(`${Base_Url}/postregion`, {
+              ...formData,
+              
+            },
+            {
+              headers: {
+                Authorization: token, // Send token in headers
+              },
+            })
             .then((response) => {
               setFormData({ title: "", country_id: "" });
               fetchUsers();
@@ -134,7 +149,11 @@ const Location = () => {
 
   const deleted = async (id) => {
     try {
-      await axiosInstance.post(`${Base_Url}/deleteregion`, { id });
+      await axiosInstance.post(`${Base_Url}/deleteregion`, { id },{
+        headers: {
+           Authorization: token, // Send token in headers
+         },
+       });
       setFormData({ title: "", country_id: "" });
       fetchUsers();
     } catch (error) {
@@ -144,7 +163,11 @@ const Location = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axiosInstance.get(`${Base_Url}/requestregion/${id}`);
+      const response = await axiosInstance.get(`${Base_Url}/requestregion/${id}`,{
+        headers: {
+           Authorization: token, // Send token in headers
+         },
+       });
       setFormData(response.data);
       setIsEdit(true);
     } catch (error) {

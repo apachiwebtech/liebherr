@@ -114,7 +114,11 @@ export function Servicecontractlist(params) {
 
             console.log('Sending params:', params.toString()); // Debug log
 
-            const response = await axiosInstance.get(`${Base_Url}/getservicecontractlist?${params}`);
+            const response = await axiosInstance.get(`${Base_Url}/getservicecontractlist?${params}`,{
+                headers: {
+                   Authorization: token, // Send token in headers
+                 },
+               });
             setServicecontractdata(response.data);
             setFilteredData(response.data);
 

@@ -8,6 +8,7 @@ import CryptoJS from 'crypto-js';
 import { error } from 'jquery';
 
 const QuotationEdit = () => {
+    const token = localStorage.getItem("token"); // Get token from localStorage
     const { loaders, axiosInstance } = useAxiosLoader();
     let { qid } = useParams()
 
@@ -43,7 +44,11 @@ const QuotationEdit = () => {
 
     async function getquotedetails() {
         try {
-            const res = await axiosInstance.post(`${Base_Url}/getquotedetails`, { quotaion_id: qid });
+            const res = await axiosInstance.post(`${Base_Url}/getquotedetails`, { quotaion_id: qid },{
+                headers: {
+                   Authorization: token, // Send token in headers
+                 },
+               });
             setValue(res.data[0]);
 
         } catch (error) {
@@ -77,7 +82,11 @@ const QuotationEdit = () => {
             qid: qid
         }
 
-        axiosInstance.post(`${Base_Url}/updatequotation`, data)
+        axiosInstance.post(`${Base_Url}/updatequotation`, data, {
+            headers: {
+              Authorization: token, // Send token in headers
+            },
+          })
             .then((res) => {
                 alert("Updated Successfully..")
                 navigate('/quotationlist')

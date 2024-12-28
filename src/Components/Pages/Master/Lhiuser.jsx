@@ -189,7 +189,11 @@ const Lhiuser = () => {
 
   const deleted = async (id) => {
     try {
-      const response = await axiosInstance.post(`${Base_Url}/deletelhidata`, { id });
+      const response = await axiosInstance.post(`${Base_Url}/deletelhidata`, { id },{
+        headers: {
+           Authorization: token, // Send token in headers
+         },
+       });
 
       window.location.reload();
     } catch (error) {

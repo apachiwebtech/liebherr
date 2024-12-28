@@ -437,7 +437,11 @@ export function Registercomplaint(params) {
 
   async function getProduct(params) {
 
-    axiosInstance.get(`${Base_Url}/product_master`)
+    axiosInstance.get(`${Base_Url}/product_master`,{
+      headers: {
+        Authorization: token, // Send token in headers
+      },
+    })
       .then((res) => {
         if (res.data) {
 
@@ -646,7 +650,11 @@ export function Registercomplaint(params) {
 
     setForm(false)
 
-    axiosInstance.post(`${Base_Url}/getticketendcustomer`, { searchparam: serachval })
+    axiosInstance.post(`${Base_Url}/getticketendcustomer`, { searchparam: serachval },{
+      headers: {
+        Authorization: token, // Send token in headers
+      },
+    })
       .then((res) => {
 
         if (res.data.information && res.data.information.length > 0) {

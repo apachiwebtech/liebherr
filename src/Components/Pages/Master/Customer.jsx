@@ -272,7 +272,11 @@ const Customer = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axiosInstance.get(`${Base_Url}/requestcustomer/${id}`);
+      const response = await axiosInstance.get(`${Base_Url}/requestcustomer/${id}`,{
+        headers: {
+           Authorization: token, // Send token in headers
+         },
+       });
       setFormData(response.data)
       setIsEdit(true);
       console.log(response.data);

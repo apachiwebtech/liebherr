@@ -13,6 +13,7 @@ const animatedComponents = makeAnimated();
 const Groupmasterpg = () => {
   const { loaders, axiosInstance } = useAxiosLoader();
   const [isEdit, setIsEdit] = useState(false);
+  const token = localStorage.getItem("token"); // Get token from localStorage
 
   const [Childfranchise, setChildfranchise] = useState([]);
   // Step 2: Define state to store the options for the dropdown (fetched from API)
@@ -38,7 +39,11 @@ const [selectedProducts, setSelectedProducts] = useState([]);
   // Step 5: Function to fetch options for the dropdown from the API
   const fetchOptions = async (cfranchise_id) => {
     try {
-      const response = await axiosInstance.get(`${Base_Url}/getgroupmengineer/${cfranchise_id}`);
+      const response = await axiosInstance.get(`${Base_Url}/getgroupmengineer/${cfranchise_id}`,{
+        headers: {
+           Authorization: token, // Send token in headers
+         },
+       });
 
       // Map response data to format required by react-select
       const engineerOptions = response.data.map(engineer => ({
@@ -57,7 +62,11 @@ const [selectedProducts, setSelectedProducts] = useState([]);
 
   const fetchChildfranchise = async () => {
     try {
-      const response = await axiosInstance.get(`${Base_Url}/getchildfranchisegroupm`);
+      const response = await axiosInstance.get(`${Base_Url}/getchildfranchisegroupm`,{
+        headers: {
+           Authorization: token, // Send token in headers
+         },
+       });
       console.log(response.data);
       setChildfranchise(response.data);
     } catch (error) {

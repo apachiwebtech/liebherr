@@ -23,6 +23,7 @@ function Details() {
   const [activity, setactivity] = useState([]);
   const [otppart, setotppart] = useState(true);
   const [iscomplate, setIscomplate] = useState(false)
+  const token = localStorage.getItem("token"); // Get token from localStorage
   const [otp, setotp] = useState([]);
 
   const [Value, setValue] = useState({
@@ -148,7 +149,11 @@ function Details() {
 
 
   async function getcomplaintdetails() {
-    axios.get(`${BASE_URL}/getcomplaintdetails?cid=${id}`)
+    axios.get(`${BASE_URL}/getcomplaintdetails?cid=${id}`, {
+      headers: {
+        Authorization: token, // Send token in headers
+      },
+    })
       .then((res) => {
         if (res.data != 0) {
 

@@ -93,6 +93,11 @@ const Callstatus = () => {
             .post(`${Base_Url}/putcalldata`, {
               ...formData,
               updated_by: updatedBy,
+            },
+            {
+              headers: {
+                Authorization: token, // Send token in headers
+              },
             })
             .then((response) => {
               //window.location.reload();
@@ -114,6 +119,11 @@ const Callstatus = () => {
             .post(`${Base_Url}/postcalldata`, {
               ...formData,
               created_by: createdBy,
+            },
+            {
+              headers: {
+                Authorization: token, // Send token in headers
+              },
             })
             .then((response) => {
               setFormData({

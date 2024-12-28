@@ -101,7 +101,11 @@ export function Complaintviewmsp(params) {
 
   async function getProduct(params) {
 
-    axiosInstance.get(`${Base_Url}/product_master`)
+    axiosInstance.get(`${Base_Url}/product_master`,{
+      headers: {
+        Authorization: token, // Send token in headers
+      },
+    })
       .then((res) => {
         if (res.data) {
 
@@ -469,7 +473,11 @@ export function Complaintviewmsp(params) {
       finaldata: finaldata,
     };
 
-    axiosInstance.post(`${Base_Url}/add_uniqsparepart`, data)
+    axiosInstance.post(`${Base_Url}/add_uniqsparepart`, data, {
+      headers: {
+        Authorization: token, // Send token in headers
+      },
+    })
       .then((res) => {
 
         getsparelist(complaintview.ticket_no)
@@ -503,7 +511,11 @@ export function Complaintviewmsp(params) {
     };
 
     // Send the POST request
-    axiosInstance.post(`${Base_Url}/add_quotation`, data)
+    axiosInstance.post(`${Base_Url}/add_quotation`, data, {
+      headers: {
+        Authorization: token, // Send token in headers
+      },
+    })
       .then((response) => {
 
         alert("Quotation generated")
@@ -522,7 +534,11 @@ export function Complaintviewmsp(params) {
     const confirm = window.confirm("Are you sure?")
 
     if (confirm) {
-      axiosInstance.post(`${Base_Url}/removesparepart`, { spare_id: id })
+      axiosInstance.post(`${Base_Url}/removesparepart`, { spare_id: id }, {
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      })
         .then((res) => {
 
           // setAddedSpareParts(addedSpareParts.filter((part) => part.id !== id));
@@ -838,7 +854,11 @@ export function Complaintviewmsp(params) {
       const remarkResponse = await axiosInstance.post(
         `${Base_Url}/addcomplaintremark`,
         complaintRemarkData
-      );
+        ,{
+          headers: {
+             Authorization: token, // Send token in headers
+           },
+         });
 
 
       const remarkId = remarkResponse.data.remark_id;
@@ -856,7 +876,7 @@ export function Complaintviewmsp(params) {
         await axiosInstance.post(`${Base_Url}/uploadcomplaintattachments`, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
-
+            Authorization: token,
           },
         });
       }

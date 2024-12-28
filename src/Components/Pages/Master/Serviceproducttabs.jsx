@@ -15,7 +15,7 @@ function Serviceproducttabs() {
   return (
     <>
       <style>
-        {`
+        {`x
            
            .headings {
               background: #2779c4;

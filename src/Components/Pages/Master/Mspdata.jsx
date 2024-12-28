@@ -6,11 +6,16 @@ import axios from "axios";
 export function Mspdata(params) {
   const Navigate = useNavigate()
 const [data, setdata] = useState([])
+const token = localStorage.getItem("token"); // Get token from localStorage
 
   async function getdata() {
     const licare_code = localStorage.getItem('userId');
 
-    axios.get(`${Base_Url}/getmspdata/${licare_code}`)
+    axios.get(`${Base_Url}/getmspdata/${licare_code}`, {
+      headers: {
+        Authorization: token, // Send token in headers
+      },
+    })
       .then((res) => {
         console.log(res.data);
 
