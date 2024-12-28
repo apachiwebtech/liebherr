@@ -3,13 +3,13 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
-import { Base_Url } from '../../Utils/Base_Url';
+import { Base_Url, secretKey } from '../../Utils/Base_Url';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'datatables.net-bs4/css/dataTables.bootstrap4.min.css';
 import $ from 'jquery';
 import 'datatables.net';
 import 'datatables.net-bs4';
-
+import CryptoJS from 'crypto-js';
 // DataTables Responsive Extension (JS and CSS for Bootstrap 4)
 import 'datatables.net-responsive';
 import 'datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css';
@@ -294,8 +294,23 @@ export function Complaintlist(params) {
 
 
 
-// Log loaders state to check if it's updating correctly
-  console.log('Loaders state:', loaders);
+    const sendtoedit = async (id) => {
+      // alert(id)
+        id = id
+        let  encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
+        encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        // navigate(`/quotation/${encrypted}`)
+        navigate(`/registercomaplaint/${encrypted}`)
+    };
+
+    const sendtoedit123 = async (id) => {
+      // alert(id)
+        id = id.toString()
+        let  encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
+        encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        // navigate(`/quotation/${encrypted}`)
+        navigate(`/complaintview/${encrypted}`)
+    };
 
   return (
 
@@ -688,7 +703,8 @@ export function Complaintlist(params) {
                         <td style={rowStyle}>
                           <button
                             className='btn'
-                            onClick={() => navigate(`/registercomaplaint/${item.ticket_no}`)}
+                            // onClick={() => navigate(`/registercomaplaint/${item.ticket_no}`)}
+                            onClick={() => sendtoedit(item.ticket_no)}
                             disabled={isActionDisabled(item.call_status)}
                             title={isActionDisabled(item.call_status) ? "Cannot edit closed or cancelled ticket" : "Edit"}
                             style={{
@@ -707,7 +723,8 @@ export function Complaintlist(params) {
                             className='btn'
                             onClick={() => {
                               addInTab(item.ticket_no, item.id)
-                              navigate(`/complaintview/${item.id}`)
+                              sendtoedit123(item.id)
+
                             }}
                             title="View"
                             style={{

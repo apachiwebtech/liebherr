@@ -4,7 +4,7 @@ import makeAnimated from 'react-select/animated';
 import { useNavigate } from 'react-router-dom';
 import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Base_Url } from "../../Utils/Base_Url";
+import { Base_Url, secretKey } from "../../Utils/Base_Url";
 import { FaEye } from "react-icons/fa";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
@@ -13,13 +13,23 @@ import { FaDownload } from "react-icons/fa6";
 import { Autocomplete, Chip, TextField } from "@mui/material";
 import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
+import CryptoJS from 'crypto-js';
+
 
 export function Complaintviewmsp(params) {
   const token = localStorage.getItem("token");
   const [activeTicket, setActiveTicket] = useState(null);
   const [addedSpareParts, setAddedSpareParts] = useState([]);
   const [quotation, setQuotation] = useState([]);
-  const { complaintid } = useParams();
+  let { complaintid } = useParams();
+  try {
+    complaintid = complaintid.replace(/-/g, '+').replace(/_/g, '/');
+    const bytes = CryptoJS.AES.decrypt(complaintid, secretKey);
+    const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+    complaintid = parseInt(decrypted, 10)
+  } catch (error) {
+    console.log("Error".error)
+  }
   const [quantity, setQuantity] = useState("");
   const [closestatus, setCloseStatus] = useState("");
   const [spareid, setspareid] = useState("");
@@ -102,26 +112,26 @@ export function Complaintviewmsp(params) {
   }
 
 
-    async function getactivity(params) {
-      try {
-        const res = await axiosInstance.get(`${Base_Url}/getactivity`, {
-          headers: {
-            Authorization: token, // Send token in headers
-          },
-        });
+  async function getactivity(params) {
+    try {
+      const res = await axiosInstance.get(`${Base_Url}/getactivity`, {
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      });
 
-        if (res.data) {
-          setactivity(res.data);
-        } else {
-          console.error("Expected array from API but got:", typeof res.data);
-          setactivity([]); // Set empty array as fallback
-        }
-
-      } catch (error) {
-        console.error("Error fetching engineers:", error);
-        setactivity([]); // Set empty array on error
+      if (res.data) {
+        setactivity(res.data);
+      } else {
+        console.error("Expected array from API but got:", typeof res.data);
+        setactivity([]); // Set empty array as fallback
       }
+
+    } catch (error) {
+      console.error("Error fetching engineers:", error);
+      setactivity([]); // Set empty array on error
     }
+  }
 
   async function getEngineer(params) {
 
@@ -1094,13 +1104,45 @@ export function Complaintviewmsp(params) {
     setTicketTab(newTicketList);
   };
 
+  const sendtoedit = async (id) => {
+    // alert(id)
+    id = id.toString()
+    let encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
+    encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    // navigate(`/quotation/${encrypted}`)
+    navigate(`/msp/complaintviewmsp/${encrypted}`)
+  };
 
+  const addInTab = (ticket_no, ticket_id) => {
+    console.log(ticket_no, ticket_id, "ticket_no, ticket_id");
 
+    // Retrieve the existing array of ticket numbers, or initialize as an empty array
+    const prevTickets = JSON.parse(localStorage.getItem('tabticket')) || [];
+
+    // Check if the ticket already exists in the array
+    const isTicketExists = prevTickets.some(
+      (ticket) => ticket.ticket_id === ticket_id
+    );
+
+    // Add the current ticket number to the array only if it doesn't already exist
+    if (!isTicketExists) {
+      prevTickets.push({
+        ticket_id: ticket_id,
+        ticket_no: ticket_no,
+      });
+
+      // Store the updated array back in localStorage
+      localStorage.setItem('tabticket', JSON.stringify(prevTickets));
+    }
+
+    // navigate(`/complaintview/${ticket_id}`)
+    sendtoedit(ticket_id)
+  };
 
 
   return (
     <div className="p-3">
-          {loaders && (
+      {loaders && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
@@ -1152,7 +1194,8 @@ export function Complaintviewmsp(params) {
                   label={item.ticket_no}
                   variant={activeTicket == item.ticket_id ? "filled" : "outlined"}
                   color={activeTicket == item.ticket_id ? "primary" : "default"}
-                  onClick={() => navigate(`/complaintview/${item.ticket_id}`)}
+                  // onClick={() => navigate(`/complaintview/${item.ticket_id}`)}
+                  onClick={() => sendtoedit(item.ticket_id)}
                   onDelete={() => handleDeleteTab(item.ticket_id)}
                   className="mx-2"
                 />
@@ -1244,7 +1287,8 @@ export function Complaintviewmsp(params) {
                               <span style={{ fontSize: "14px" }}>
                                 <button
                                   className="btn"
-                                  onClick={() => navigate(`/complaintview/${item.id}`)}
+                                  // onClick={() => navigate(`/complaintview/${item.id}`)}
+                                  onClick={() => addInTab(item.ticket_no , item.id)}
                                   title="View"
                                   style={{ backgroundColor: "transparent", border: "none", color: "blue", fontSize: "20px" }}
                                 >
@@ -1940,33 +1984,33 @@ export function Complaintviewmsp(params) {
                     )}
                   </select> */}
 
-<Autocomplete
-  options={engineer}
-  size="small"
-  getOptionLabel={(option) => option.title || ""} // Display engineer title in dropdown
-  value={engineer.find((e) => e.id === complaintview.engineer_id) || null}
-  onChange={(event, newValue) =>
-    handleModelChange({
-      target: {
-        name: "engineer_id",
-        value: newValue?.id || "", // Update with engineer_id, not title
-      },
-    })
-  }
-  inputValue={inputValue}
-  onInputChange={(event, newInputValue) => setInputValue(newInputValue)}
-  renderInput={(params) => <TextField {...params} label="Select Engineer" />}
+                  <Autocomplete
+                    options={engineer}
+                    size="small"
+                    getOptionLabel={(option) => option.title || ""} // Display engineer title in dropdown
+                    value={engineer.find((e) => e.id === complaintview.engineer_id) || null}
+                    onChange={(event, newValue) =>
+                      handleModelChange({
+                        target: {
+                          name: "engineer_id",
+                          value: newValue?.id || "", // Update with engineer_id, not title
+                        },
+                      })
+                    }
+                    inputValue={inputValue}
+                    onInputChange={(event, newInputValue) => setInputValue(newInputValue)}
+                    renderInput={(params) => <TextField {...params} label="Select Engineer" />}
 
-  // Render option with custom styling (or whatever you want to show in the dropdown)
-  renderOption={(props, option) => (
-    <li {...props} key={option.engineer_id}> {/* Assign unique key using engineer_id */}
-      <span>{option.title}</span> {/* Display title (name) */}
-    </li>
-  )}
+                    // Render option with custom styling (or whatever you want to show in the dropdown)
+                    renderOption={(props, option) => (
+                      <li {...props} key={option.engineer_id}> {/* Assign unique key using engineer_id */}
+                        <span>{option.title}</span> {/* Display title (name) */}
+                      </li>
+                    )}
 
-  isOptionEqualToValue={(option, value) => option.engineer_id === value.engineer_id} // Use engineer_id to compare values
-  getOptionSelected={(option, value) => option.engineer_id === value.engineer_id} // Ensure option is selected using engineer_id
-/>
+                    isOptionEqualToValue={(option, value) => option.engineer_id === value.engineer_id} // Use engineer_id to compare values
+                    getOptionSelected={(option, value) => option.engineer_id === value.engineer_id} // Ensure option is selected using engineer_id
+                  />
 
 
 
@@ -2078,21 +2122,21 @@ export function Complaintviewmsp(params) {
                   </select>
                 </div>
                 <div className="mt-3">
-                    <h4 className="pname" style={{ fontSize: "14px" }}>Activity Code</h4>
-                    <select
-                      name="site_defect"
-                      disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
-                      className="form-control"
-                      style={{ fontSize: "14px" }}
-                    >
-                      <option value="">Select </option>
-                      {activity.map((item) => (
-                        <option key={item.id} value={item.id}>
-                          {item.code} - {item.title}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  <h4 className="pname" style={{ fontSize: "14px" }}>Activity Code</h4>
+                  <select
+                    name="site_defect"
+                    disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
+                    className="form-control"
+                    style={{ fontSize: "14px" }}
+                  >
+                    <option value="">Select </option>
+                    {activity.map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {item.code} - {item.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </>}
 
 

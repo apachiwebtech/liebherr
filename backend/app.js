@@ -322,7 +322,8 @@ app.post("/trainerlogin", async (req, res) => {
     res.status(500).json({ message: "Database error", error: err });
   }
 });
-// app.post("/msplogin", async (req, res) => {
+// app
+//.post("/msplogin", async (req, res) => {
 //   const { title, password } = req.body;
 
 //   console.log(Msp)
@@ -5061,7 +5062,8 @@ app.get("/getparentfranchise", authenticateToken, async (req, res) => {
   }
 });
 
-// app.get("/getchildFranchiseDetails", async (req, res) => {
+// app
+//.get("/getchildFranchiseDetails", async (req, res) => {
 //   try {
 //     // Use the poolPromise to get the connection pool
 //     const pool = await poolPromise;
@@ -5223,7 +5225,8 @@ app.get("/requestchildfranchise/:id", async (req, res) => {
     return res.status(500).json({ message: "Error fetching child franchise data" });
   }
 });
-// app.post("/postchildfranchise", async (req, res) => {
+// app
+//.post("/postchildfranchise", async (req, res) => {
 //   const { title, pfranchise_id } = req.body;
 
 //   try {
@@ -6487,7 +6490,8 @@ app.post("/deleteservicecontract", authenticateToken, async (req, res) => {
 });
 
 //Service contract listing
-// app.get("/getservicecontractlist", async (req, res) => {
+// app
+//.get("/getservicecontractlist", async (req, res) => {
 //   try {
 //     // Use the poolPromise to get the connection pool
 //     const pool = await poolPromise;
@@ -7092,7 +7096,8 @@ app.get("/getComplaintDetails/:ticket_no", authenticateToken, async (req, res) =
   }
 });
 
-// app.get("/getComplaintDuplicate/:customer_mobile", async (req, res) => {
+// app
+//.get("/getComplaintDuplicate/:customer_mobile", async (req, res) => {
 //   const customer_mobile = req.params.customer_mobile;
 
 //   try {
@@ -7920,6 +7925,8 @@ app.get("/getcsplistmsp", async (req, res) => {
       OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY
     `;
 
+    console.log(dataSql);
+
     // Execute total count query
     const countResult = await pool.request()
       .input("licare_code", sql.VarChar, licare_code)
@@ -8128,6 +8135,7 @@ app.get("/getcomplainlistmsp", async (req, res) => {
       ORDER BY c.id DESC
       OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY
     `;
+
 
 
 
@@ -8718,5 +8726,34 @@ app.post("/checkuser", authenticateToken, async (req, res) => {
   } catch (err) {
     console.error("Database error:", err);
     return res.status(500).json({ error: "Database error occurred" });
+  }
+});
+
+
+app.get("/getmspdata/:licare_code", async (req, res) => {
+  const { licare_code } = req.params;
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    const sql = `   SELECT f.*
+   FROM  awt_childfranchisemaster as cf
+   left join  awt_franchisemaster as f on cf.pfranchise_id = f.licarecode
+   where cf.id ='${licare_code}'
+`;
+
+// console.log(sql);
+
+    const result = await pool.request().query(sql);
+
+    if (result.recordset.length > 0) {
+      res.json(result.recordset[0]);
+    } else {
+      res.status(404).json({ message: "Data not found" });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Database error", error: err });
   }
 });

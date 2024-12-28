@@ -3,12 +3,13 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
-import { Base_Url } from '../../Utils/Base_Url';
+import { Base_Url, secretKey } from '../../Utils/Base_Url';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'datatables.net-bs4/css/dataTables.bootstrap4.min.css';
 import $ from 'jquery';
 import 'datatables.net';
 import 'datatables.net-bs4';
+import CryptoJS from 'crypto-js';
 
 // DataTables Responsive Extension (JS and CSS for Bootstrap 4)
 import 'datatables.net-responsive';
@@ -294,9 +295,15 @@ export function Ticketlistmsp(params) {
 
 
 
-
-// Log loaders state to check if it's updating correctly
-  console.log('Loaders state:', loaders);
+  const sendtoedit = async (id) => {
+    // alert(id)
+      id = id.toString()
+      let  encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
+      encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      // navigate(`/quotation/${encrypted}`)
+      navigate(`/msp/complaintviewmsp/${encrypted}`)
+  // navigate(`/msp/complaintviewmsp/${item.id}`)
+    };
 
   return (
 
@@ -706,7 +713,8 @@ export function Ticketlistmsp(params) {
                             className='btn'
                             onClick={() => {
                               addInTab(item.ticket_no, item.id)
-                              navigate(`/msp/complaintviewmsp/${item.id}`)
+                              // navigate(`/msp/complaintviewmsp/${item.id}`)
+                              sendtoedit(item.id)
                             }}
                             title="View"
                             style={{

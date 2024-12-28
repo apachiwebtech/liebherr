@@ -1,12 +1,12 @@
 import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
 import toast, { Toaster } from 'react-hot-toast';
-import { Base_Url } from '../../Utils/Base_Url'
+import { Base_Url, secretKey } from '../../Utils/Base_Url'
 import { useNavigate, useParams } from "react-router-dom";
 import { FaEye } from "react-icons/fa";
 import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
-
+import CryptoJS from 'crypto-js';
 export function Registercomplaint(params) {
   const [customerEndId, setCustomerEndId] = useState('');
   const [addresses, setAddresses] = useState([]);
@@ -36,7 +36,18 @@ export function Registercomplaint(params) {
   const [ticketid, setTicketid] = useState('')
   const token = localStorage.getItem("token");
   const fileInputRef = useRef();
-  const { Comp_id } = useParams()
+  let { Comp_id } = useParams()
+// alert("this is")
+  try {
+    Comp_id = Comp_id.replace(/-/g, '+').replace(/_/g, '/');
+    const bytes = CryptoJS.AES.decrypt(Comp_id, secretKey);
+    const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+    Comp_id = decrypted
+
+  } catch (error) {
+    console.log("Error".error)
+  }
+
   const [files2, setFiles2] = useState([]); // New state for Attachment 2 files
   const [location, setLocation] = useState([])
   const created_by = localStorage.getItem("licare_code"); // Get user ID from localStorage
@@ -107,13 +118,13 @@ export function Registercomplaint(params) {
     dealer_info: "",
     salutation: "",
     sales_partner: "",
-    sales_partner2:"",
+    sales_partner2: "",
     classification: "",
     Priority: "REGULAR",
     callType: "",
-    requested_by:"",
-    requested_email :"",
-    requested_mobile :"",
+    requested_by: "",
+    requested_email: "",
+    requested_mobile: "",
   })
 
   const getDateAfterOneYear = (value) => {
@@ -576,17 +587,17 @@ export function Registercomplaint(params) {
             Priority: res.data[0].call_priority,
             callType: res.data[0].callType,
             specification: res.data[0].specification,
-            requested_by :res.data[0].requested_by,
-            requested_email : res.data[0].requested_email,
-            requested_mobile : res.data[0].requested_mobile,
-            additional_remarks : res.data[0].call_remark,
-            salutation : res.data[0].salutation
+            requested_by: res.data[0].requested_by,
+            requested_email: res.data[0].requested_email,
+            requested_mobile: res.data[0].requested_mobile,
+            additional_remarks: res.data[0].call_remark,
+            salutation: res.data[0].salutation
           })
 
-          setlocations({childfranchiseem : res.data[0].sevice_partner,franchiseem : res.data[0].child_service_partner})
+          setlocations({ childfranchiseem: res.data[0].sevice_partner, franchiseem: res.data[0].child_service_partner })
 
 
-          
+
         }
       })
 
@@ -727,14 +738,14 @@ export function Registercomplaint(params) {
         classification: value.classification,
         priority: value.Priority,
         callType: value.callType,
-        requested_by : value.requested_by,
-        requested_email : value.requested_email ,
-        requested_mobile : value.requested_mobile,
-        salutation : value.salutation,
-        msp:value.msp,
-        csp : value.csp,
-        sales_partner:value.sales_partner,
-        sales_partner2 : value.sales_partner2,
+        requested_by: value.requested_by,
+        requested_email: value.requested_email,
+        requested_mobile: value.requested_mobile,
+        salutation: value.salutation,
+        msp: value.msp,
+        csp: value.csp,
+        sales_partner: value.sales_partner,
+        sales_partner2: value.sales_partner2,
         ticket_id: ticketid
       };
 
@@ -778,7 +789,7 @@ export function Registercomplaint(params) {
       mobile: value.mobile || "",
       alt_mobile: value.alt_mobile || "",
       address: value.address || "",
-      state: value.state || "", 
+      state: value.state || "",
       city: value.city || "",
       area: value.area || "",
       pincode: value.pincode || "",
@@ -800,14 +811,14 @@ export function Registercomplaint(params) {
       classification: value.classification || "",
       priority: value.Priority || "",
       callType: value.callType || "",
-      requested_by : value.requested_by || "",
-      requested_email : value.requested_email || "",
-      requested_mobile : value.requested_mobile || "",
-      sales_partner2 : value.sales_partner2 || "",
-      salutation : value.salutation || "",
+      requested_by: value.requested_by || "",
+      requested_email: value.requested_email || "",
+      requested_mobile: value.requested_mobile || "",
+      sales_partner2: value.sales_partner2 || "",
+      salutation: value.salutation || "",
       ticket_no: Comp_id
     };
-    
+
 
 
     axiosInstance.post(`${Base_Url}/u_complaint`, data, {
@@ -913,7 +924,7 @@ export function Registercomplaint(params) {
         setDate(e.target.value);
         break;
     }
-    
+
 
 
   };
@@ -946,10 +957,10 @@ export function Registercomplaint(params) {
             city: response.data[0].city,
             area: response.data[0].district,
             pincode: response.data[0].pincode,
-            master_service_partner : response.data[0].mspname,
-            child_service_partner : response.data[0].cspname,
-            csp : response.data[0].csp,
-            msp : response.data[0].msp
+            master_service_partner: response.data[0].mspname,
+            child_service_partner: response.data[0].cspname,
+            csp: response.data[0].csp,
+            msp: response.data[0].msp
           })
 
         }
@@ -978,8 +989,8 @@ export function Registercomplaint(params) {
           ...value,
           model: response.data[0].ModelNumber,
           serial: response.data[0].serial_no,
-          sales_partner :response.data[0].SalesPartner,
-          classification : response.data[0].customerClassification
+          sales_partner: response.data[0].SalesPartner,
+          classification: response.data[0].customerClassification
         })
 
       }
@@ -1280,7 +1291,7 @@ export function Registercomplaint(params) {
                   <div className="col-md-3">
                     <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Model</p>
 
-                    {searchdata.length == 0 && !modelid  ?
+                    {searchdata.length == 0 && !modelid ?
 
                       <div className="">
                         <input className="form-control" onChange={onHandleChange} value={value.model} name="model" disabled></input>
@@ -1293,7 +1304,7 @@ export function Registercomplaint(params) {
                   <div className="col-md-3">
                     <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Purchase Date</p>
 
-                    {searchdata.length == 0 && !p_date?
+                    {searchdata.length == 0 && !p_date ?
                       <div className="mb-3">
                         <input
                           type="date"
@@ -1633,21 +1644,21 @@ export function Registercomplaint(params) {
                   <div className="col-md-4">
                     <div className="mb-3">
                       <label htmlFor="exampleFormControlInput1" className="form-label">Requested by </label>
-                      <input type="text" className="form-control" value={value.requested_by} name="requested_by" onChange={onHandleChange} placeholder=""  />
+                      <input type="text" className="form-control" value={value.requested_by} name="requested_by" onChange={onHandleChange} placeholder="" />
                       {errors.requested_by && <span style={{ fontSize: "12px" }} className="text-danger">{errors.requested_by}</span>}
                     </div>
                   </div>
                   <div className="col-md-4">
                     <div className="mb-3">
                       <label htmlFor="exampleFormControlInput1" className="form-label">Requested Email </label>
-                      <input type="text" className="form-control" value={value.requested_email} name="requested_email" onChange={onHandleChange} placeholder=""  />
+                      <input type="text" className="form-control" value={value.requested_email} name="requested_email" onChange={onHandleChange} placeholder="" />
                       {errors.requested_email && <span style={{ fontSize: "12px" }} className="text-danger">{errors.requested_email}</span>}
                     </div>
                   </div>
                   <div className="col-md-4">
                     <div className="mb-3">
                       <label htmlFor="exampleFormControlInput1" className="form-label">Requested Mobile </label>
-                      <input type="text" className="form-control" value={value.requested_mobile} name="requested_mobile" onChange={onHandleChange} placeholder=""  />
+                      <input type="text" className="form-control" value={value.requested_mobile} name="requested_mobile" onChange={onHandleChange} placeholder="" />
                       {errors.requested_mobile && <span style={{ fontSize: "12px" }} className="text-danger">{errors.requested_mobile}</span>}
                     </div>
                   </div>
@@ -1753,7 +1764,7 @@ export function Registercomplaint(params) {
                 <div className="card-body">
 
                   <h4 className="pname">Master Service Partner</h4>
-                  <p>{ locations.franchiseem}</p>
+                  <p>{locations.franchiseem}</p>
 
 
                   <h4 className="pname">Child Service Partner</h4>
@@ -1771,7 +1782,7 @@ export function Registercomplaint(params) {
                   </div>
 
                   <div className="mb-3">
-                    <input type="text" className="form-control" name="sub_dealer" value={value.sales_partner} onChange={onHandleChange} placeholder="Primary Dealer" disabled/>
+                    <input type="text" className="form-control" name="sub_dealer" value={value.sales_partner} onChange={onHandleChange} placeholder="Primary Dealer" disabled />
                   </div>
                   <div className="row">
                     <div className="col-md-12">

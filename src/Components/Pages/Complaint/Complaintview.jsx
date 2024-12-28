@@ -4,7 +4,7 @@ import makeAnimated from 'react-select/animated';
 import { useNavigate } from 'react-router-dom';
 import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Base_Url } from "../../Utils/Base_Url";
+import { Base_Url, secretKey } from "../../Utils/Base_Url";
 import { FaEye } from "react-icons/fa";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
@@ -13,7 +13,7 @@ import { FaDownload } from "react-icons/fa6";
 import { Autocomplete, Chip, TextField } from "@mui/material";
 import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
-
+import CryptoJS from 'crypto-js';
 export function Complaintview(params) {
 
   const token = localStorage.getItem("token");
@@ -21,7 +21,16 @@ export function Complaintview(params) {
   const [addedSpareParts, setAddedSpareParts] = useState([]);
   const [quotation, setQuotation] = useState([]);
   const [activity, setactivity] = useState([]);
-  const { complaintid } = useParams();
+  let { complaintid } = useParams();
+
+  try {
+    complaintid = complaintid.replace(/-/g, '+').replace(/_/g, '/');
+    const bytes = CryptoJS.AES.decrypt(complaintid, secretKey);
+    const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+    complaintid = parseInt(decrypted, 10)
+  } catch (error) {
+    console.log("Error".error)
+  }
   const [quantity, setQuantity] = useState("");
   const [closestatus, setCloseStatus] = useState("");
   const [subclosestatus, setsubCloseStatus] = useState("");
@@ -397,7 +406,7 @@ export function Complaintview(params) {
     const selectedEngineer = engineer.find(
       (eng) => eng.id === parseInt(complaintview.engineer_id)
     );
-    console.log(selectedEngineer,"$$$")
+    console.log(selectedEngineer, "$$$")
     if (
       selectedEngineer &&
       !addedEngineers.some((eng) => eng.id === selectedEngineer.id)
@@ -430,7 +439,8 @@ export function Complaintview(params) {
       localStorage.setItem('tabticket', JSON.stringify(prevTickets));
     }
 
-    navigate(`/complaintview/${ticket_id}`)
+    // navigate(`/complaintview/${ticket_id}`)
+    sendtoedit(ticket_id)
   };
 
 
@@ -1121,7 +1131,15 @@ export function Complaintview(params) {
   };
 
 
-
+  const sendtoedit = async (id) => {
+    // alert(id)
+    id = id.toString()
+    let encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
+    encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    // navigate(`/quotation/${encrypted}`)
+    // alert(encrypted)
+    navigate(`/complaintview/${encrypted}`)
+  };
 
 
   return (
@@ -1164,33 +1182,34 @@ export function Complaintview(params) {
         `}
       </style>
       <div className="row mp0">
-  <div className="complbread">
-    <div className="row">
-      <div className="col-md-3">
-        <label className="breadMain">
-          <span style={{ fontSize: "14px" }}>Ticket : {complaintview.ticket_no}</span>
-        </label>
+        <div className="complbread">
+          <div className="row">
+            <div className="col-md-3">
+              <label className="breadMain">
+                <span style={{ fontSize: "14px" }}>Ticket : {complaintview.ticket_no}</span>
+              </label>
+            </div>
+            <div className="col-md-9 text-right pt-2" style={{ overflowX: "auto", whiteSpace: "nowrap" }}>
+              {ticketTab.map((item) => (
+                <Chip
+                  key={item.ticket_id}
+                  label={item.ticket_no}
+                  variant={activeTicket == item.ticket_id ? "filled" : "outlined"}
+                  color={activeTicket == item.ticket_id ? "primary" : "default"}
+                  onClick={() => {
+                    setComplaintview({})
+                    setAddedEngineers([])
+                    setsubCallstatus([])
+                    sendtoedit(item.ticket_id)
+                  }}
+                  onDelete={() => handleDeleteTab(item.ticket_id)}
+                  className="mx-2"
+                />
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
-      <div className="col-md-9 text-right pt-2" style={{ overflowX: "auto", whiteSpace: "nowrap" }}>
-        {ticketTab.map((item) => (
-          <Chip
-            key={item.ticket_id}
-            label={item.ticket_no}
-            variant={activeTicket == item.ticket_id ? "filled" : "outlined"}
-            color={activeTicket == item.ticket_id ? "primary" : "default"}
-            onClick={() => { 
-              setComplaintview({})
-              setAddedEngineers([])
-              setsubCallstatus([])
-              navigate(`/complaintview/${item.ticket_id}`)}}
-            onDelete={() => handleDeleteTab(item.ticket_id)}
-            className="mx-2"
-          />
-        ))}
-      </div>
-    </div>
-  </div>
-</div>
 
 
       <div className="row mp0 mt-25">
@@ -1525,8 +1544,8 @@ export function Complaintview(params) {
                   <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>
                     Serial No
                   </p>
-                  {sserial_no != ""? (
-                  <p style={{ fontSize: "14px" }}>{complaintview.serial_no}</p>
+                  {sserial_no != "" ? (
+                    <p style={{ fontSize: "14px" }}>{complaintview.serial_no}</p>
                   ) : (
                     <input
                       type="text"
