@@ -177,23 +177,7 @@ export function Complaintlist(params) {
   };
 
   const resetFilters = () => {
-    setSearchFilters({
-      fromDate: '',
-      toDate: '',
-      customerName: '',
-      customerEmail: '',
-      serialNo: '',
-      productCode: '',
-      customerMobile: '',
-      ticketno: '',
-      status: '',
-      customerID: '',
-      csp: '',
-      msp: '',
-      mode_of_contact: '',
-      customer_class: '',
-      upcoming: ''
-    });
+    setSearchFilters({});
     fetchComplaintlist(); // Reset to original data
   };
 
@@ -621,7 +605,9 @@ export function Complaintlist(params) {
                 </button>
                 <button
                   className="btn btn-secondary"
-                  onClick={resetFilters}
+                  onClick={() =>{
+                    window.location.reload()
+                  }}
                   style={{
                     marginLeft: '5px',
                   }}
