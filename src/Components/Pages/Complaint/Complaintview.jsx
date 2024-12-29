@@ -14,6 +14,7 @@ import { Autocomplete, Chip, TextField } from "@mui/material";
 import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 import CryptoJS from 'crypto-js';
+import { error } from "jquery";
 export function Complaintview(params) {
 
   const token = localStorage.getItem("token");
@@ -37,7 +38,7 @@ export function Complaintview(params) {
   const [spareid, setspareid] = useState("");
   const [ticketTab, setTicketTab] = useState(JSON.parse(localStorage.getItem('tabticket')) || []);
   const { loaders, axiosInstance } = useAxiosLoader();
-
+  const [errors, setErrors] = useState({})
   const [complaintview, setComplaintview] = useState({
     ticket_no: '',
     customer_name: '',
@@ -102,7 +103,7 @@ export function Complaintview(params) {
 
   async function getProduct(params) {
 
-    axiosInstance.get(`${Base_Url}/product_master`,{
+    axiosInstance.get(`${Base_Url}/product_master`, {
       headers: {
         Authorization: token, // Send token in headers
       },
@@ -448,6 +449,27 @@ export function Complaintview(params) {
   };
 
 
+  const validateForm = () => {
+    let isValid = true;
+    const newErrors = { ...errors };
+
+
+    if (!complaintview.defect_type && complaintview.defect_type != "null" && complaintview.defect_type != null && complaintview.call_status == 'Closed') {
+    isValid = false;
+    newErrors.defect_type = "Name is required";
+  }
+  
+
+
+    setErrors(newErrors);
+    setTimeout(() => {
+      setErrors("")
+    }, 5000);
+    return isValid;
+  }
+
+
+
 
 
   const handlesparechange = (value) => {
@@ -490,7 +512,7 @@ export function Complaintview(params) {
       finaldata: finaldata,
     };
 
-    axiosInstance.post(`${Base_Url}/add_uniqsparepart`,data , {
+    axiosInstance.post(`${Base_Url}/add_uniqsparepart`, data, {
       headers: {
         Authorization: token, // Send token in headers
       },
@@ -606,6 +628,7 @@ export function Complaintview(params) {
       );
 
       setComplaintview(response.data);
+      setgroupstatusid(response.data.group_code)
 
       setCloseStatus(response.data.call_status)
       setsubCloseStatus(response.data.sub_call_status)
@@ -764,68 +787,94 @@ export function Complaintview(params) {
   const handleSubmitTicketFormData = (e) => {
     e.preventDefault();
 
-    const data = {
-      serial_no: complaintview.serial_no,
-      ModelNumber: complaintview.ModelNumber,
-      engineer_id: complaintview.engineer_id,
-      call_status: callstatusid,
-      sub_call_status: complaintview.sub_call_status,
-      updated_by: created_by,
-      ticket_no: complaintview.ticket_no,
-      group_code: groupstatusid,
-      site_defect: complaintview.site_defect,
-      defect_type: complaintview.defect_type,
-      engineerdata: addedEngineers.map((item) => item.engineer_id),
-      engineername: addedEngineers.map((item) => item.title),
-    };
 
-    axiosInstance.post(`${Base_Url}/ticketFormData`, data, {
-      headers: {
-        Authorization: token, // Send token in headers
-      },
-    })
-      .then(response => {
+    const isValidValue = (value) => value !== null && value !== 'null' && value !== '';
+   
 
-        setComplaintview({
-          ...complaintview,
-          serial_no: '',
-          ModelNumber: '',
-          engineer_id: '',
-          call_status: '',
-        });
-        fetchComplaintview(complaintid);
+   if (
+      isValidValue(complaintview.defect_type) &&
+      isValidValue(complaintview.site_defect) &&
+      groupstatusid &&
+      complaintview.call_status === 'Closed'
+    ) {
 
-        setTicketUpdateSuccess({
-          message: 'Ticket updated successfully!',
-          visible: true,
-          type: 'success'
-        });
+      const data = {
+        serial_no: complaintview.serial_no,
+        ModelNumber: complaintview.ModelNumber,
+        engineer_id: complaintview.engineer_id,
+        call_status: callstatusid,
+        sub_call_status: complaintview.sub_call_status,
+        updated_by: created_by,
+        ticket_no: complaintview.ticket_no,
+        group_code: groupstatusid,
+        site_defect: complaintview.site_defect,
+        defect_type: complaintview.defect_type,
+        engineerdata: addedEngineers.map((item) => item.engineer_id),
+        engineername: addedEngineers.map((item) => item.title),
+      };
 
-        // Hide the message after 3 seconds
-        setTimeout(() => {
+      axiosInstance.post(`${Base_Url}/ticketFormData`, data, {
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      })
+        .then(response => {
+
+          setComplaintview({
+            ...complaintview,
+            serial_no: '',
+            ModelNumber: '',
+            engineer_id: '',
+            call_status: '',
+          });
+          fetchComplaintview(complaintid);
+
           setTicketUpdateSuccess({
-            message: '',
-            visible: false,
+            message: 'Ticket updated successfully!',
+            visible: true,
             type: 'success'
           });
-        }, 3000);
-      })
-      .catch(error => {
-        console.error("Error updating ticket:", error);
-        setTicketUpdateSuccess({
-          message: 'Error updating ticket. Please try again.',
-          visible: true,
-          type: 'error'
-        });
 
-        setTimeout(() => {
+          // Hide the message after 3 seconds
+          setTimeout(() => {
+            setTicketUpdateSuccess({
+              message: '',
+              visible: false,
+              type: 'success'
+            });
+          }, 3000);
+        })
+        .catch(error => {
+          console.error("Error updating ticket:", error);
           setTicketUpdateSuccess({
-            message: '',
-            visible: false,
+            message: 'Error updating ticket. Please try again.',
+            visible: true,
             type: 'error'
           });
-        }, 3000);
-      });
+
+          setTimeout(() => {
+            setTicketUpdateSuccess({
+              message: '',
+              visible: false,
+              type: 'error'
+            });
+          }, 3000);
+        });
+
+    }else{
+      const isInvalidValue = (value) => !value || value === 'null';
+
+      if (!groupstatusid) {
+        alert("Please select the group code");
+      } else if (isInvalidValue(complaintview.defect_type)) {
+        alert("Please select the Defect type");
+      } else if (isInvalidValue(complaintview.site_defect)) {
+        alert("Please select the site defect");
+      }
+      
+    }
+
+
   };
 
   //handkesubmitticketdata end
@@ -872,11 +921,11 @@ export function Complaintview(params) {
       const remarkResponse = await axiosInstance.post(
         `${Base_Url}/addcomplaintremark`,
         complaintRemarkData
-        ,{
+        , {
           headers: {
-             Authorization: token, // Send token in headers
-           },
-         });
+            Authorization: token, // Send token in headers
+          },
+        });
 
 
       const remarkId = remarkResponse.data.remark_id;
@@ -1583,20 +1632,7 @@ export function Complaintview(params) {
                 <div className="col-md-4">
                   <h4 className="pname" style={{ fontSize: "11px" }}>Model</h4>
 
-                  {complaintview.ModelNumber ? <p>{complaintview.ModelNumber}</p> : <select
-                    className="form-select dropdown-select"
-                    name="ModelNumber"
-                    value={complaintview.ModelNumber}
-                    onChange={handleModelChange}
-                  >
-                    <option value="">Select Model</option>
-                    {product.map((products) => (
-                      <option key={products.id} value={products.item_description}>
-                        {products.item_description}
-                      </option>
-                    ))}
-                  </select>}
-
+                  {complaintview.ModelNumber ? <p>{complaintview.ModelNumber}</p> : null}
 
 
                 </div>
@@ -2099,7 +2135,7 @@ export function Complaintview(params) {
                 </table>
               </div>
 
-              {(complaintview.call_status == 'Closed' || complaintview.group_code != "") &&
+              {(complaintview.call_status == 'Closed' || complaintview.group_code != null) &&
                 <>
                   <div className="mt-3">
                     <h4 className="pname" style={{ fontSize: "14px" }}>Defect Group Code:</h4>
@@ -2108,7 +2144,7 @@ export function Complaintview(params) {
                       className="form-control"
                       disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
                       style={{ fontSize: "14px" }}
-                      value={complaintview.group_code}
+                      value={groupstatusid}
                       onChange={(e) => {
                         const selectedcode = e.target.value; // Get the id
                         // const selectedid = groupdefect.find(item => item.Callstatus == selectedname)?.id; // Find the corresponding Callstatus value
@@ -2143,6 +2179,7 @@ export function Complaintview(params) {
                         </option>
                       ))}
                     </select>
+                    {error.defect_type && <span className="text-danger">{error.defect_type}</span>}
                   </div>
                   <div className="mt-3">
                     <h4 className="pname" style={{ fontSize: "14px" }}>Site Defect Code:</h4>

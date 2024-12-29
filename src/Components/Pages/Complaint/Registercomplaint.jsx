@@ -8,6 +8,7 @@ import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 import CryptoJS from 'crypto-js';
 export function Registercomplaint(params) {
+
   const [customerEndId, setCustomerEndId] = useState('');
   const [addresses, setAddresses] = useState([]);
   const [hideticket, setHideticket] = useState(false)
@@ -37,7 +38,7 @@ export function Registercomplaint(params) {
   const token = localStorage.getItem("token");
   const fileInputRef = useRef();
   let { Comp_id } = useParams()
-// alert("this is")
+  // alert("this is")
   try {
     Comp_id = Comp_id.replace(/-/g, '+').replace(/_/g, '/');
     const bytes = CryptoJS.AES.decrypt(Comp_id, secretKey);
@@ -212,10 +213,28 @@ export function Registercomplaint(params) {
       isValid = false;
       newErrors.contact_person = "Contact Person is required";
     }
+    const mobileRegex = /^[0-9]{10,15}$/; // Matches only digits with a length between 10 and 15
+
+    const validateMobile = (mobile) => mobileRegex.test(mobile);
+
     if (!value.mobile && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
       isValid = false;
       newErrors.mobile = "Mobile is required";
+    } else if (value.mobile && !validateMobile(value.mobile)) {
+      isValid = false;
+      newErrors.mobile = "Please enter a valid mobile number (10 to 15 digits).";
     }
+    
+    if (value.alt_mobile && !validateMobile(value.alt_mobile)) {
+      newErrors.alt_mobile = "Please enter a valid alternate mobile number (10 to 15 digits).";
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (value.email && !emailRegex(value.email)) {
+      newErrors.email = "Email id is not valid"
+    }
+
     if (!newAddress && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
       isValid = false;
       newErrors.address = "Address is required";
@@ -244,10 +263,10 @@ export function Registercomplaint(params) {
     //   isValid = false;
     //   newErrors.requested_email = "This is required";
     // }
-    // if (!value.requested_mobile && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
-    //   isValid = false;
-    //   newErrors.requested_mobile = "This is required";
-    // }
+    if (value.requested_mobile && !validateMobile(value.requested_mobile) ) {
+      isValid = false;
+      newErrors.requested_mobile = "Please enter a valid mobile number (10 to 15 digits).";
+    }
 
     if (!value.classification && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
       isValid = false;
@@ -437,7 +456,7 @@ export function Registercomplaint(params) {
 
   async function getProduct(params) {
 
-    axiosInstance.get(`${Base_Url}/product_master`,{
+    axiosInstance.get(`${Base_Url}/product_master`, {
       headers: {
         Authorization: token, // Send token in headers
       },
@@ -650,7 +669,7 @@ export function Registercomplaint(params) {
 
     setForm(false)
 
-    axiosInstance.post(`${Base_Url}/getticketendcustomer`, { searchparam: serachval },{
+    axiosInstance.post(`${Base_Url}/getticketendcustomer`, { searchparam: serachval }, {
       headers: {
         Authorization: token, // Send token in headers
       },
@@ -997,20 +1016,20 @@ export function Registercomplaint(params) {
           ...value,
           model: response.data[0].ModelNumber,
           serial: response.data[0].serial_no,
-          sales_partner :response.data[0].SalesPartner,
-          classification : response.data[0].customerClassification,
-          salutation : response.data[0].salutation,
-          customer_name : response.data[0].customer_fname,
-          cust_type : response.data[0].customer_type,
-          mobile : response.data[0].mobileno,
-          alt_mobile : response.data[0].alt_mobileno,
-          email : response.data[0].email,
-          address : response.data[0].address,
-          state : response.data[0].state,
-          area : response.data[0].district,
-          city : response.data[0].city,
-          pincode : response.data[0].pincode,
-          customer_id : response.data[0].CustomerID
+          sales_partner: response.data[0].SalesPartner,
+          classification: response.data[0].customerClassification,
+          salutation: response.data[0].salutation,
+          customer_name: response.data[0].customer_fname,
+          cust_type: response.data[0].customer_type,
+          mobile: response.data[0].mobileno,
+          alt_mobile: response.data[0].alt_mobileno,
+          email: response.data[0].email,
+          address: response.data[0].address,
+          state: response.data[0].state,
+          area: response.data[0].district,
+          city: response.data[0].city,
+          pincode: response.data[0].pincode,
+          customer_id: response.data[0].CustomerID
 
         })
 
@@ -1272,7 +1291,7 @@ export function Registercomplaint(params) {
           </div> : <div className="card">
             <div className="card-body">
               {/* Only show "No Result Found" if a search was performed and no results were found */}
-              {hasSearched && searchdata.length === 0 && <p>No Result Found</p>}
+              {hasSearched && searchdata.length === 0 && <p className="text-danger ">No Result Found</p>}
               <button onClick={() => setForm(true)} className="btn btn-sm btn-primary">New Ticket</button>
             </div>
 
@@ -1331,10 +1350,11 @@ export function Registercomplaint(params) {
                           type="date"
                           name="purchase_date"
                           onChange={(e) => {
-                            onHandleChange(e)
-                            getDateAfterOneYear(e.target.value)
+                            onHandleChange(e);
+                            getDateAfterOneYear(e.target.value);
                           }}
                           value={purchase_data}
+                          max={new Date().toISOString().split("T")[0]} // Set the maximum selectable date to today
                           className="form-control"
                         />
                         {errors.purchase_date && <span style={{ fontSize: "12px" }} className="text-danger">{errors.purchase_date}</span>}
@@ -1383,7 +1403,7 @@ export function Registercomplaint(params) {
                   <div className="col-md-3">
                     <div className="mb-3">
                       <label className="form-label">Ticket Date{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
-                      <input type="date" name="complaint_date" onChange={onHandleChange} value={value.complaint_date || new Date().toISOString().split('T')[0]} className="form-control" disabled={Comp_id ? true : false} />
+                      <input type="date" name="complaint_date" onChange={onHandleChange} value={value.complaint_date || new Date().toISOString().split('T')[0]} className="form-control" disabled={Comp_id ? true : false} min={new Date().toISOString().split('T')[0]} />
                       {errors.complaint_date && <span style={{ fontSize: "12px" }} className="text-danger">{errors.complaint_date}</span>}
                     </div>
                   </div>
@@ -1402,6 +1422,7 @@ export function Registercomplaint(params) {
                       {errors.salutation && <span style={{ fontSize: "12px" }} className="text-danger">{errors.salutation}</span>}
                     </div>
                   </div>
+
                   <div className="col-md-3">
                     <div className="mb-3">
                       <label htmlFor="exampleFormControlInput1" className="form-label">Customer Name{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
@@ -1420,7 +1441,7 @@ export function Registercomplaint(params) {
                     <div className="mb-3">
                       <label htmlFor="exampleFormControlInput1" className="form-label">Email Id</label>
                       <input type="email" value={value.email} name="email" onChange={onHandleChange} className="form-control" placeholder="Enter Email Id" />
-
+                      {errors.email && <span style={{ fontSize: "12px" }} className="text-danger">{errors.email}</span>}
                     </div>
                   </div>
                   <div className="col-md-4">
@@ -1434,6 +1455,7 @@ export function Registercomplaint(params) {
                     <div className="mb-3">
                       <label htmlFor="exampleFormControlInput1" className="form-label">Alt. Mobile No. <input type="checkbox" />Whatsapp</label>
                       <input type="text" className="form-control" value={value.alt_mobile} name="alt_mobile" onChange={onHandleChange} placeholder="Enter Mobile" />
+                      {errors.alt_mobile && <span style={{ fontSize: "12px" }} className="text-danger">{errors.alt_mobile}</span>}
                     </div>
                   </div>
 
@@ -1672,7 +1694,7 @@ export function Registercomplaint(params) {
                   <div className="col-md-4">
                     <div className="mb-3">
                       <label htmlFor="exampleFormControlInput1" className="form-label">Requested Email </label>
-                      <input type="text" className="form-control" value={value.requested_email} name="requested_email" onChange={onHandleChange} placeholder="" />
+                      <input type="email" className="form-control" value={value.requested_email} name="requested_email" onChange={onHandleChange} placeholder="" />
                       {errors.requested_email && <span style={{ fontSize: "12px" }} className="text-danger">{errors.requested_email}</span>}
                     </div>
                   </div>

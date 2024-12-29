@@ -41,14 +41,11 @@ export function Complaintlist(params) {
   const [filteredData, setFilteredData] = useState([]);
   const [isEdit, setIsEdit] = useState(false);
   const token = localStorage.getItem("token"); // Get token from localStorage
-
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const { loaders, axiosInstance } = useAxiosLoader();
-
   const [totalCount, setTotalCount] = useState(0);
   const totalPages = Math.ceil(totalCount / pageSize);
-
   const handlePageChange = (page) => {
 
     setCurrentPage(page);
@@ -82,11 +79,15 @@ export function Complaintlist(params) {
 
   });
 
+  
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
     return date.toLocaleDateString('en-GB', options).replace(/\//g, '-');
   };
+
+
 
   const fetchComplaintlist = async (page) => {
     try {
@@ -306,7 +307,12 @@ export function Complaintlist(params) {
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
       )}
-      <div className="searchFilter">
+      <div className="searchFilter"   onKeyDown={(event) =>{
+                    if (event.key === "Enter") {
+                      event.preventDefault(); // Prevent form submission if inside a form
+                      applyFilters();
+                    }
+                  }}>
 
         <div className='m-3'>
 
@@ -595,11 +601,12 @@ export function Complaintlist(params) {
                             </div> */}
 
             {/* Buttons and message at the far-right corner */}
-            <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
+            <div className="col-md-12 d-flex justify-content-end align-items-center mt-3" >
               <div className="form-group">
                 <button
                   className="btn btn-primary mr-2"
                   onClick={applyFilters}
+                
                 >
                   Search
                 </button>
@@ -657,6 +664,7 @@ export function Complaintlist(params) {
                     <th>#</th>
                     <th>Ticket No.</th>
                     <th>Ticket Date</th>
+                    <th>Customer ID</th>
                     <th>Customer Name</th>
                     <th>Model No</th>
                     <th>Serial No</th>
@@ -679,6 +687,7 @@ export function Complaintlist(params) {
                         <td style={rowStyle}>{displayIndex}</td>  {/* Use displayIndex for correct pagination */}
                         <td style={rowStyle}>{item.ticket_no}</td>
                         <td style={rowStyle}>{formatDate(item.ticket_date)}</td>
+                        <td style={rowStyle}>{item.customer_id}</td>
                         <td style={rowStyle}>{item.customer_name}</td>
                         <td style={rowStyle}>{item.ModelNumber}</td>
                         <td style={rowStyle}>{item.serial_no}</td>
