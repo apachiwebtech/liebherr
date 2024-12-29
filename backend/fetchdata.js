@@ -1,6 +1,12 @@
-
-
+const express = require('express');
+const app = express.Router();
+const sql = require('mssql');
+const poolPromise = require('./db');
 // This is for gettiing data from the another database
+
+const API_KEY = "a8f2b3c4-d5e6-7f8g-h9i0-12345jklmn67";
+
+//This is for Product Master 
 
 
 app.post("/fetchproductmaster", async (req, res) => {
@@ -11,11 +17,26 @@ app.post("/fetchproductmaster", async (req, res) => {
     return res.status(403).json({ error: 'Forbidden: Invalid API key' });
   }
 
+
+
+
   const { item_code, ModelNumber, product_model, product_type, product_class_code, product_class, product_line_code, product_line, material, manufacturer, item_type, serialized, size, crmproducttype, colour, handle_type, serial_identification, installation_type, customer_classification, price_group, mrp, service_partner_basic , packed } = req.body;
 
 
   try {
     const pool = await poolPromise;
+
+
+
+    // Check if the serial number already exists
+    const checkSql = `SELECT COUNT(*) AS count FROM product_master WHERE serial_no = @serial_identification`;
+    const checkRequest = pool.request().input('serial_identification', serial_identification);
+    const checkResult = await checkRequest.query(checkSql);
+
+    if (checkResult.recordset[0].count > 0) {
+      return res.status(400).json({ error: 'Duplicate serial number: serial_no already exists' });
+    }
+
     // SQL query to insert a new complaint remark
     const sql = `INSERT INTO product_master (
   serial_no, item_code, item_description, productType, productLineCode, productLine,
@@ -67,150 +88,7 @@ VALUES (
   }
 });
 
-
-app.post("/fetchcustomermaster", async (req, res) => {
-
-  const apiKey = req.header('x-api-key'); // Get API key from request header
-
-  if (apiKey !== API_KEY) {
-    return res.status(403).json({ error: 'Forbidden: Invalid API key' });
-  }
-
-
-  const {
-    customer_fname,
-    customer_lname,
-    customer_type,
-    customer_classification,
-    mobileno,
-    alt_mobileno,
-    dateofbirth,
-    anniversary_date,
-    email,
-    salutation,
-    customer_id
-  } = req.body;
-
-  try {
-    // Use the poolPromise to get the connection pool
-    const pool = await poolPromise;
-
-    // Step 1: Check for duplicates using parameterized query
-    const checkDuplicateSql = `
-      SELECT * FROM awt_customer
-      WHERE customer_id = @customer_id
-      AND deleted = 0
-    `;
-    const checkDuplicateResult = await pool.request()
-      .input('customer_id', customer_id)
-      .query(checkDuplicateSql);
-
-    // If a duplicate customer is found
-    if (checkDuplicateResult.recordset.length > 0) {
-      return res.status(409).json({
-        message: "Duplicate entry, Customer with the same Customer_id already exists!"
-      });
-    }
-
-    // Step 2: Insert the customer if no duplicate is found
-    const insertSql = `
-      INSERT INTO awt_customer (
-        customer_fname,
-        customer_lname,
-        customer_type,
-        customer_classification,
-        mobileno,
-        alt_mobileno,
-        dateofbirth,
-        anniversary_date,
-        email,
-        salutation,
-        customer_id
-      ) VALUES (
-        @customer_fname,
-        @customer_lname,
-        @customer_type,
-        @customer_classification,
-        @mobileno,
-        @alt_mobileno,
-        @dateofbirth,
-        @anniversary_date,
-        @email,
-        @salutation,
-        @customer_id
-      )
-    `;
-
-    // Execute the insert query
-    await pool.request()
-      .input('customer_fname', customer_fname)
-      .input('customer_lname', customer_lname)
-      .input('customer_type', customer_type)
-      .input('customer_classification', customer_classification)
-      .input('mobileno', mobileno)
-      .input('alt_mobileno', alt_mobileno)
-      .input('dateofbirth', dateofbirth)
-      .input('anniversary_date', anniversary_date)
-      .input('email', email)
-      .input('salutation', salutation)
-      .input('customer_id', customer_id)
-      .query(insertSql);
-
-    // Send success response
-    return res.status(201).json({
-      message: "Customer master added successfully",
-    });
-
-  } catch (err) {
-    console.error("Database error:", err);
-    return res.status(500).json({ error: "Database error occurred" });
-  }
-});
-
-app.post("/fetchlhiusers", async (req, res) => {
-
-
-  const apiKey = req.header('x-api-key'); // Get API key from request header
-
-  if (apiKey !== API_KEY) {
-    return res.status(403).json({ error: 'Forbidden: Invalid API key' });
-  }
-
-
-  const { Lhiuser,
-    mobile_no,
-    Password,
-    UserCode,
-    email,
-    remarks,
-    status,
-  } = req.body;
-
-
-
-  try {
-    const pool = await poolPromise;
-
-    // Step 1: Check if the same Lhiuser exists and is not soft-deleted
-    let sql = `SELECT * FROM lhi_user WHERE  Usercode = '${UserCode}' AND deleted = 0`;
-    const result = await pool.request().query(sql);
-
-    if (result.recordset.length > 0) {
-      // If duplicate data exists (not soft-deleted)
-      return res.status(409).json({ message: "Duplicate entry, Lhiuser already exists!" });
-    } else {
-      
-      sql = `INSERT INTO lhi_user (Lhiuser,password,remarks,Usercode,mobile_no,email,status) VALUES ('${Lhiuser}','${Password}','${remarks}','${UserCode}','${mobile_no}','${email}','${status}')`
-      await pool.request().query(sql);
-
-      return res.json({ message: "Lhiuser added successfully!" });
-  
-    }
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "An error occurred while processing the request" });
-  }
-});
+//This is for Franchise Master
 
 app.post("/fetchservicemaster", async (req, res) => {
 
@@ -230,6 +108,15 @@ app.post("/fetchservicemaster", async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
+
+       // Check if the licarecode already exists in the table
+       const result = await pool.request()
+       .input('licarecode', sql.VarChar, licarecode)
+       .query('SELECT COUNT(*) AS count FROM awt_franchisemaster WHERE licarecode = @licarecode');
+     
+     if (result.recordset[0].count > 0) {
+       return res.status(409).json({ error: 'Duplicate licarecode: This licarecode already exists' });
+     }
 
    
          // Insert new record using parameterized query
@@ -308,6 +195,17 @@ app.post("/fetchsparemaster", async (req, res) => {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
 
+      // Check if the ProductCode already exists
+      const result = await pool.request()
+      .input('ProductCode', sql.VarChar, ProductCode)
+      .query(`
+        SELECT COUNT(*) AS count FROM Spare_parts WHERE ProductCode = @ProductCode
+      `);
+
+    if (result.recordset[0].count > 0) {
+      return res.status(400).json({ error: 'ProductCode already exists' });
+    }
+
     await pool.request()
       .input('ProductCode', sql.VarChar, ProductCode)
       .input('ModelNumber', sql.VarChar, ModelNumber)
@@ -344,3 +242,335 @@ app.post("/fetchsparemaster", async (req, res) => {
   }
 });
 
+
+
+//This is for Bussiness Partner
+
+app.post("/fetchbussiness_partner", async (req, res) => {
+  const apiKey = req.header("x-api-key"); // Get API key from request header
+
+  if (apiKey !== API_KEY) {
+    return res.status(403).json({ error: "Forbidden: Invalid API key" });
+  }
+
+  const {
+    Bp_code,
+    title,
+    address,
+    pincode_id,
+    geostate_id,
+    partner_name,
+    mobile_no,
+    email,
+    gstno,
+    panno,
+    created_date,
+    updated_date,
+    partner_status,
+    bankname,
+    bankacc,
+    bankaddress,
+    bankifsc,
+    Licare_Ac_Id,
+    Licare_code,
+    Vendor_Name,
+    withliebher,
+    lastworkingdate,
+    contractactive,
+    contractexpire,
+  } = req.body;
+
+  try {
+    const pool = await poolPromise;
+
+    // Check for duplicate Bp_code
+    const checkDuplicate = await pool.request()
+      .input("Bp_code", sql.VarChar, Bp_code)
+      .query(`SELECT COUNT(*) AS count FROM bussiness_partner WHERE Bp_code = @Bp_code`);
+
+    if (checkDuplicate.recordset[0].count > 0) {
+      return res.status(409).json({
+        error: "Conflict: Duplicate Bp_code",
+      });
+    }
+
+    // Insert new record
+    await pool.request()
+      .input("Bp_code", sql.VarChar, Bp_code)
+      .input("title", sql.VarChar, title)
+      .input("address", sql.VarChar, address)
+      .input("pincode_id", sql.VarChar, pincode_id)
+      .input("geostate_id", sql.VarChar, geostate_id)
+      .input("partner_name", sql.VarChar, partner_name)
+      .input("mobile_no", sql.VarChar, mobile_no)
+      .input("email", sql.VarChar, email)
+      .input("gstno", sql.VarChar, gstno)
+      .input("panno", sql.VarChar, panno)
+      .input("created_date", sql.DateTime, created_date)
+      .input("updated_date", sql.DateTime, updated_date)
+      .input("partner_status", sql.VarChar, partner_status)
+      .input("bankname", sql.VarChar, bankname)
+      .input("bankacc", sql.VarChar, bankacc)
+      .input("bankaddress", sql.VarChar, bankaddress)
+      .input("bankifsc", sql.VarChar, bankifsc)
+      .input("Licare_Ac_Id", sql.VarChar, Licare_Ac_Id)
+      .input("Licare_code", sql.VarChar, Licare_code)
+      .input("Vendor_Name", sql.VarChar, Vendor_Name)
+      .input("withliebher", sql.VarChar, withliebher)
+      .input("lastworkingdate", sql.DateTime, lastworkingdate)
+      .input("contractactive", sql.VarChar, contractactive)
+      .input("contractexpire", sql.DateTime, contractexpire)
+      .query(`
+        INSERT INTO bussiness_partner (
+          Bp_code, title, address, pincode_id, geostate_id, partner_name, mobile_no, email, 
+          gstno, panno, created_date, partner_status, bankname, bankacc, bankaddress, 
+          bankifsc, Licare_Ac_Id, Licare_code, Vendor_Name, withliebher, lastworkingdate, 
+          contractactive, contractexpire
+        ) VALUES (
+          @Bp_code, @title, @address, @pincode_id, @geostate_id, @partner_name, @mobile_no, @email, 
+          @gstno, @panno, @created_date, @partner_status, @bankname, @bankacc, @bankaddress, 
+          @bankifsc, @Licare_Ac_Id, @Licare_code, @Vendor_Name, @withliebher, @lastworkingdate, 
+          @contractactive, @contractexpire
+        )
+      `);
+
+    return res.json({
+      message: "Business partner added successfully!",
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Internal server error", details: err });
+  }
+});
+
+//This is for Shipment FG
+
+app.post("/fetchshipment_fg", async (req, res) => {
+  const apiKey = req.header("x-api-key"); // Get API key from request header
+
+  if (apiKey !== API_KEY) {
+    return res.status(403).json({ error: "Forbidden: Invalid API key" });
+  }
+
+  const {
+    InvoiceNumber,
+    InvoiceDate,
+    Invoice_bpcode,
+    Invoice_bpName,
+    Invoice_city,
+    Invoice_state,
+    orderType_desc,
+    Customer_Po,
+    Item_Code,
+    Item_Description,
+    Invoice_qty,
+    Serial_no,
+    compressor_bar,
+    Manufacture_date,
+    Vehicle_no,
+    Vehicale_Type,
+    Transporter_name,
+    Lr_number,
+    Lr_date,
+    Address_code,
+    Address,
+    Pincode,
+    Shipment_id,
+    Ship_date,
+    Transaction_Type,
+    created_date
+  } = req.body;
+
+  try {
+    const pool = await poolPromise;
+
+    // Check for duplicates based on Serial_no and Item_Code
+    const checkDuplicate = await pool.request()
+      .input("Serial_no", sql.VarChar, Serial_no)
+      .input("Item_Code", sql.VarChar, Item_Code)
+      .query(`
+        SELECT COUNT(*) AS count 
+        FROM Shipment_Fg 
+        WHERE Serial_no = @Serial_no AND Item_Code = @Item_Code
+      `);
+
+    if (checkDuplicate.recordset[0].count > 0) {
+      return res.status(409).json({
+        error: "Conflict: Duplicate Serial_no and Item_Code combination"
+      });
+    }
+
+    // Insert new record
+    await pool.request()
+      .input("InvoiceNumber", sql.VarChar, InvoiceNumber)
+      .input("InvoiceDate", sql.DateTime, InvoiceDate)
+      .input("Invoice_bpcode", sql.VarChar, Invoice_bpcode)
+      .input("Invoice_bpName", sql.VarChar, Invoice_bpName)
+      .input("Invoice_city", sql.VarChar, Invoice_city)
+      .input("Invoice_state", sql.VarChar, Invoice_state)
+      .input("orderType_desc", sql.VarChar, orderType_desc)
+      .input("Customer_Po", sql.VarChar, Customer_Po)
+      .input("Item_Code", sql.VarChar, Item_Code)
+      .input("Item_Description", sql.VarChar, Item_Description)
+      .input("Invoice_qty", sql.VarChar, Invoice_qty)
+      .input("Serial_no", sql.VarChar, Serial_no)
+      .input("compressor_bar", sql.VarChar, compressor_bar)
+      .input("Manufacture_date", sql.DateTime, Manufacture_date)
+      .input("Vehicle_no", sql.VarChar, Vehicle_no)
+      .input("Vehicale_Type", sql.VarChar, Vehicale_Type)
+      .input("Transporter_name", sql.VarChar, Transporter_name)
+      .input("Lr_number", sql.VarChar, Lr_number)
+      .input("Lr_date", sql.DateTime, Lr_date)
+      .input("Address_code", sql.VarChar, Address_code)
+      .input("Address", sql.VarChar, Address)
+      .input("Pincode", sql.VarChar, Pincode)
+      .input("Shipment_id", sql.VarChar, Shipment_id)
+      .input("Ship_date", sql.DateTime, Ship_date)
+      .input("Transaction_Type", sql.VarChar, Transaction_Type)
+      .input("created_date", sql.DateTime, created_date)
+      .query(`
+        INSERT INTO Shipment_Fg (
+          InvoiceNumber, InvoiceDate, Invoice_bpcode, Invoice_bpName, Invoice_city, Invoice_state,
+          orderType_desc, Customer_Po, Item_Code, Item_Description, Invoice_qty, Serial_no,
+          compressor_bar, Manufacture_date, Vehicle_no, Vehicale_Type, Transporter_name, Lr_number,
+          Lr_date, Address_code, Address, Pincode, Shipment_id, Ship_date, Transaction_Type ,created_date
+        ) VALUES (
+          @InvoiceNumber, @InvoiceDate, @Invoice_bpcode, @Invoice_bpName, @Invoice_city, @Invoice_state,
+          @orderType_desc, @Customer_Po, @Item_Code, @Item_Description, @Invoice_qty, @Serial_no,
+          @compressor_bar, @Manufacture_date, @Vehicle_no, @Vehicale_Type, @Transporter_name, @Lr_number,
+          @Lr_date, @Address_code, @Address, @Pincode, @Shipment_id, @Ship_date, @Transaction_Type ,@created_date
+        )
+      `);
+
+    return res.json({
+      message: "Added successfully!",
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Internal server error", details: err });
+  }
+});
+
+//This is for Shipment Parts
+
+app.post("/fetchshipment_Parts", async (req, res) => {
+  const apiKey = req.header("x-api-key"); // Get API key from request header
+
+  if (apiKey !== API_KEY) {
+    return res.status(403).json({ error: "Forbidden: Invalid API key" });
+  }
+
+  const {
+    InvoiceNumber,
+    InvoiceDate,
+    Invoice_bpcode,
+    Invoice_bpName,
+    Invoice_city,
+    Invoice_state,
+    orderType_desc,
+    Customer_Po,
+    Item_Code,
+    Item_Description,
+    Invoice_qty,
+    hsn_code,
+    Basic_rate,
+    compressor_bar,
+    Vehicle_no,
+    Vehicale_Type,
+    Transporter_name,
+    Lr_number,
+    Lr_date,
+    Address_code,
+    Address,
+    Pincode,
+    Licare_code,
+    Licare_Address,
+    Shipment_id,
+    Ship_date,
+    Transaction_Type,
+    Product_Choice,
+    Serial_Indentity,
+    created_date,
+  } = req.body;
+
+  try {
+    const pool = await poolPromise;
+
+    // Check for duplicate entry
+    const duplicateCheck = await pool.request()
+      .input("Serial_Indentity", sql.VarChar, Serial_Indentity)
+      .input("Item_Code", sql.VarChar, Item_Code)
+      .query(`
+        SELECT COUNT(*) AS count 
+        FROM Shipment_parts 
+        WHERE Serial_Indentity = @Serial_Indentity AND Item_Code = @Item_Code
+      `);
+
+    const { count } = duplicateCheck.recordset[0];
+
+    if (count > 0) {
+      return res.status(409).json({ error: "Duplicate entry: Serial_Indentity and Item_Code already exist" });
+    }
+
+    // Insert new record
+    await pool.request()
+      .input("InvoiceNumber", sql.VarChar, InvoiceNumber)
+      .input("InvoiceDate", sql.DateTime, InvoiceDate)
+      .input("Invoice_bpcode", sql.VarChar, Invoice_bpcode)
+      .input("Invoice_bpName", sql.VarChar, Invoice_bpName)
+      .input("Invoice_city", sql.VarChar, Invoice_city)
+      .input("Invoice_state", sql.VarChar, Invoice_state)
+      .input("orderType_desc", sql.VarChar, orderType_desc)
+      .input("Customer_Po", sql.VarChar, Customer_Po)
+      .input("Item_Code", sql.VarChar, Item_Code)
+      .input("Item_Description", sql.VarChar, Item_Description)
+      .input("Invoice_qty", sql.VarChar, Invoice_qty)
+      .input("hsn_code", sql.VarChar, hsn_code)
+      .input("Basic_rate", sql.VarChar, Basic_rate)
+      .input("compressor_bar", sql.VarChar, compressor_bar)
+      .input("Vehicle_no", sql.VarChar, Vehicle_no)
+      .input("Vehicale_Type", sql.VarChar, Vehicale_Type)
+      .input("Transporter_name", sql.VarChar, Transporter_name)
+      .input("Lr_number", sql.VarChar, Lr_number)
+      .input("Lr_date", sql.DateTime, Lr_date)
+      .input("Address_code", sql.VarChar, Address_code)
+      .input("Address", sql.VarChar, Address)
+      .input("Pincode", sql.VarChar, Pincode)
+      .input("Licare_code", sql.VarChar, Licare_code)
+      .input("Licare_Address", sql.VarChar, Licare_Address)
+      .input("Shipment_id", sql.Int, Shipment_id)
+      .input("Ship_date", sql.DateTime, Ship_date)
+      .input("Transaction_Type", sql.VarChar, Transaction_Type)
+      .input("Product_Choice", sql.VarChar, Product_Choice)
+      .input("Serial_Indentity", sql.VarChar, Serial_Indentity)
+      .input("created_date", sql.VarChar, created_date)
+      .query(`
+        INSERT INTO Shipment_parts (
+          InvoiceNumber, InvoiceDate, Invoice_bpcode, Invoice_bpName, 
+          Invoice_city, Invoice_state, orderType_desc, Customer_Po, Item_Code,
+          Item_Description, Invoice_qty, hsn_code, Basic_rate, compressor_bar,
+          Vehicle_no, Vehicale_Type, Transporter_name, Lr_number, Lr_date,
+          Address_code, Address, Pincode, Licare_code, Licare_Address,
+          Shipment_id, Ship_date, Transaction_Type, Product_Choice, Serial_Indentity, created_date
+        ) VALUES (
+          @InvoiceNumber, @InvoiceDate, @Invoice_bpcode, @Invoice_bpName,
+          @Invoice_city, @Invoice_state, @orderType_desc, @Customer_Po, @Item_Code,
+          @Item_Description, @Invoice_qty, @hsn_code, @Basic_rate, @compressor_bar,
+          @Vehicle_no, @Vehicale_Type, @Transporter_name, @Lr_number, @Lr_date,
+          @Address_code, @Address, @Pincode, @Licare_code, @Licare_Address,
+          @Shipment_id, @Ship_date, @Transaction_Type, @Product_Choice, @Serial_Indentity, @created_date
+        )
+      `);
+
+    return res.json({ message: "Added successfully!" });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Internal server error", details: err });
+  }
+});
+
+
+
+
+
+module.exports = app;

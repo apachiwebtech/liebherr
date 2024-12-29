@@ -11,6 +11,7 @@ const path = require("path");
 const fs = require("fs");
 const jwt = require("jsonwebtoken");
 const MobApp = require('./Routes/MobApp')
+const fetchdata = require('./fetchdata')
 
 // Secret key for JWT
 const JWT_SECRET = "Lh!_Login_123"; // Replace with a strong, secret key
@@ -46,6 +47,7 @@ app.use("/", complaint);
 app.use("/", common);
 app.use("/", Category);
 app.use("/", MobApp);
+app.use("/", fetchdata);
 
 
 
@@ -3395,7 +3397,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
     , ticket_id, classification, priority, callType, requested_by, requested_email, requested_mobile, msp, csp, sales_partner, sales_partner2, salutation
   } = req.body;
 
-  console.log(req.body, "%%%%")
+
 
 
 
@@ -3444,7 +3446,11 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
 
 
-    if (ticket_id == '') {
+
+
+
+
+    if (ticket_id == '' && cust_id == '') {
 
 
       // Insert into awt_customer
@@ -3462,7 +3468,9 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
         .input('created_by', created_by)
         .query(customerSQL);
 
-      const insertedCustomerId = customerResult.recordset[0].id;
+      const insertedCustomerId = customerResult.recordset;
+
+      console.log(insertedCustomerId, "insertedCustomerId")
 
 
 
@@ -3471,38 +3479,11 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
 
 
-
-
-
-    // Insert into awt_customerlocation using insertedCustomerId as customer_id
-    const customerLocationSQL = `
-      INSERT INTO awt_customerlocation (
-        customer_id, geostate_id, geocity_id, district_id, pincode_id,
-        created_date, created_by, ccperson, ccnumber, address
-      )
-      VALUES (
-        @customer_id, @state, @city, @area, @pincode,
-        @formattedDate, @created_by, @customer_name, @mobile, @address
-      )`;
-
-
-
-    await pool.request()
-      .input('customer_id', cust_id)
-      .input('state', state)
-      .input('city', city)
-      .input('area', area)
-      .input('created_by', created_by)
-      .input('pincode', pincode)
-      .input('formattedDate', formattedDate)
-      .input('customer_name', customer_name)
-      .input('mobile', mobile)
-      .input('address', address)
-      .query(customerLocationSQL);
-
     // Insert into awt_uniqueproductmaster using insertedCustomerId as customer_id
-    const productSQL = `
-      INSERT INTO awt_uniqueproductmaster (
+
+    if (cust_id == "") {
+
+      const productSQL = `INSERT INTO awt_uniqueproductmaster (
         CustomerID, ModelNumber, serial_no,  pincode , created_date, created_by
       )
       VALUES (
@@ -3511,22 +3492,65 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
 
 
-    await pool.request()
-      .input('customer_id', cust_id)
-      .input('model', model)
-      .input('created_by', created_by)
-      .input('serial', serial)
-      .input('purchase_date', purchase_date)
-      .input('pincode', pincode)
-      .input('formattedDate', formattedDate)
-      .query(productSQL);
+      await pool.request()
+        .input('customer_id', newcustid)
+        .input('model', model)
+        .input('created_by', created_by)
+        .input('serial', serial)
+        .input('purchase_date', purchase_date)
+        .input('pincode', pincode)
+        .input('formattedDate', formattedDate)
+        .query(productSQL);
 
+
+      // Insert into awt_customerlocation using insertedCustomerId as customer_id
+      const customerLocationSQL = `
+    INSERT INTO awt_customerlocation (
+      customer_id, geostate_id, geocity_id, district_id, pincode_id,
+      created_date, created_by, ccperson, ccnumber, address
+    )
+    VALUES (
+      @customer_id, @state, @city, @area, @pincode,
+      @formattedDate, @created_by, @customer_name, @mobile, @address
+    )`;
+
+
+
+      await pool.request()
+        .input('customer_id', newcustid)
+        .input('state', state)
+        .input('city', city)
+        .input('area', area)
+        .input('created_by', created_by)
+        .input('pincode', pincode)
+        .input('formattedDate', formattedDate)
+        .input('customer_name', customer_name)
+        .input('mobile', mobile)
+        .input('address', address)
+        .query(customerLocationSQL);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // this is for generating ticket no  
     const checkResult = await pool.request()
       .input('ticketType', sql.NVarChar, t_type)  // Define the parameter
       .query(`
         SELECT Top 1 ticket_no
         FROM complaint_ticket
-        WHERE ticket_no LIKE '%' + @ticketType + '%'
+        WHERE ticket_no LIKE @ticketType + '%'
           AND ticket_date >= CAST(DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0) AS DATE)
           AND ticket_date < CAST(DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) + 1, 0) AS DATE)
         ORDER BY ticket_no Desc;
@@ -3535,9 +3559,11 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
     const count = checkResult.recordset[0] ? checkResult.recordset[0].ticket_no : 'G0000';
 
 
+
+
+
     // Accessing the last 4 digits from the result
     const lastFourDigits = count.slice(-4)
-
 
     const newcount = Number(lastFourDigits) + 1
 
@@ -3623,7 +3649,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
       .input('city', city)
       .input('area', area)
       .input('pincode', pincode)
-      .input('customer_id', ticket_id == '' ? newcustid : cust_id)
+      .input('customer_id', cust_id == '' ? newcustid : cust_id)
       .input('model', model)
       .input('ticket_type', ticket_type)
       .input('cust_type', cust_type)
@@ -3652,7 +3678,6 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
       .input('alt_mobile', alt_mobile)
       .query(complaintSQL);
 
-    // console.log(resutlt, priority, "$$$$")
 
 
     if (additional_remarks) {
@@ -3825,7 +3850,8 @@ SET
     return res.json({ message: 'Complaint Updated successfully!' });
   } catch (err) {
     console.error("Error inserting complaint:", err.stack);
-    return res.status(500).json({ error: 'An error occurred while adding the complaint', details: err.message });
+    return res.json(err)
+    // return res.status(500).json({ error: 'An error occurred while adding the complaint', details: err.message });
   }
 });
 
@@ -7710,6 +7736,8 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
 
     }
 
+    console.log(sql , "$$$")
+
 
 
 
@@ -8215,7 +8243,33 @@ app.get("/getserial/:serial", authenticateToken, async (req, res) => {
       .input('serial', serial)
       .query(sql);
 
-    return res.json(result.recordset);
+
+
+    const fallbackSql = `SELECT ac.salutation , ac.customer_fname ,ac.customer_lname , ac.customer_type , ac.customer_classification , ac.mobileno , ac.alt_mobileno,ac.email ,
+au.CustomerID , au.ModelNumber , au.address , au.region , au.state ,au.district , au.city , au.pincode ,au.purchase_date,spm.SalesPartner , spm.SalesAM , pm.customerClassification 
+FROM awt_uniqueproductmaster as au
+left join awt_customer as ac on ac.customer_id = au.CustomerID
+left join awt_serial_list as asl on asl.serial_no = au.serial_no
+left join SalesPartnerMaster as spm on asl.PrimarySalesDealer =  spm.BPcode
+left join product_master as pm on pm.item_description = asl.ModelNumber WHERE au.serial_no = @serial order by au.id desc`;
+
+    const fallbackResult = await pool.request()
+      .input('serial', serial)
+      .query(fallbackSql);
+
+    if (fallbackResult.recordset.length !== 0) {
+
+      return res.json(fallbackResult.recordset);
+
+    } else {
+
+      return res.json(result.recordset);
+
+    }
+
+
+
+
 
   } catch (err) {
     console.error("Database error:", err);
@@ -8730,30 +8784,86 @@ app.post("/checkuser", authenticateToken, async (req, res) => {
 });
 
 
-app.get("/getmspdata/:licare_code",authenticateToken, async (req, res) => {
-  const { licare_code } = req.params;
+app.get("/getapproveEng", authenticateToken, async (req, res) => {
 
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
 
-    const sql = `   SELECT f.*
-   FROM  awt_childfranchisemaster as cf
-   left join  awt_franchisemaster as f on cf.pfranchise_id = f.licarecode
-   where cf.id ='${licare_code}'
-`;
+    // Directly use the query (no parameter binding)
+    const sql = `select * from awt_engineermaster where status != 1`;
 
-// console.log(sql);
-
+    // Execute the query
     const result = await pool.request().query(sql);
+    console.log(result)
 
-    if (result.recordset.length > 0) {
-      res.json(result.recordset[0]);
-    } else {
-      res.status(404).json({ message: "Data not found" });
-    }
+    return res.json(result.recordset);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Database error", error: err });
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred" });
   }
-});
+})
+app.get("/getcsp", authenticateToken, async (req, res) => {
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    // Directly use the query (no parameter binding)
+    const sql = `select id, title , licare_code from awt_childfranchisemaster where deleted = 0`;
+
+    // Execute the query
+    const result = await pool.request().query(sql);
+    console.log(result)
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred" });
+  }
+})
+app.get("/getmsp", authenticateToken, async (req, res) => {
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    // Directly use the query (no parameter binding)
+    const sql = `select id, title , licarecode from awt_franchisemaster where deleted = 0`;
+
+    // Execute the query
+    const result = await pool.request().query(sql);
+    console.log(result)
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred" });
+  }
+})
+
+app.get("/finalapproveenginner", authenticateToken, async (req, res) => {
+
+  const { eng_id } = req.body;
+
+
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    // Directly use the query (no parameter binding)
+    const sql = `update awt_engineermaster set status = 1 where id = '${eng_id}'`;
+
+    // Execute the query
+    const result = await pool.request().query(sql);
+    console.log(result)
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred" });
+  }
+})
+
+

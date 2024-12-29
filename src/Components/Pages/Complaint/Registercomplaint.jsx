@@ -997,8 +997,21 @@ export function Registercomplaint(params) {
           ...value,
           model: response.data[0].ModelNumber,
           serial: response.data[0].serial_no,
-          sales_partner: response.data[0].SalesPartner,
-          classification: response.data[0].customerClassification
+          sales_partner :response.data[0].SalesPartner,
+          classification : response.data[0].customerClassification,
+          salutation : response.data[0].salutation,
+          customer_name : response.data[0].customer_fname,
+          cust_type : response.data[0].customer_type,
+          mobile : response.data[0].mobileno,
+          alt_mobile : response.data[0].alt_mobileno,
+          email : response.data[0].email,
+          address : response.data[0].address,
+          state : response.data[0].state,
+          area : response.data[0].district,
+          city : response.data[0].city,
+          pincode : response.data[0].pincode,
+          customer_id : response.data[0].CustomerID
+
         })
 
       }
