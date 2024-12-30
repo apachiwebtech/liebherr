@@ -19,16 +19,16 @@ const Customer = () => {
   const [duplicateError, setDuplicateError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
- 
 
-     try{
-          customerid = customerid.replace(/-/g, '+').replace(/_/g, '/');
-          const bytes = CryptoJS.AES.decrypt(customerid, secretKey);
-          const decrypted = bytes.toString(CryptoJS.enc.Utf8);
-          customerid = parseInt(decrypted, 10)
-      }catch(error){
-          console.log("Error".error)
-      }
+
+  try {
+    customerid = customerid.replace(/-/g, '+').replace(/_/g, '/');
+    const bytes = CryptoJS.AES.decrypt(customerid, secretKey);
+    const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+    customerid = parseInt(decrypted, 10)
+  } catch (error) {
+    console.log("Error".error)
+  }
 
   const [formData, setFormData] = useState({
     customer_fname: '',
@@ -41,12 +41,12 @@ const Customer = () => {
     anniversary_date: '',
     email: '',
     salutation: '',
-    customer_id:''
+    customer_id: ''
   });
 
   const fetchCustomerData = async (id) => {
     try {
-      const response = await axiosInstance.get(`${Base_Url}/getcustomer`,{
+      const response = await axiosInstance.get(`${Base_Url}/getcustomer`, {
         headers: {
           Authorization: token,
         },
@@ -61,7 +61,7 @@ const Customer = () => {
   const fetchCustomerpopulate = async (customerid) => {
 
     try {
-      const response = await axiosInstance.get(`${Base_Url}/getcustomerpopulate/${customerid}`,{
+      const response = await axiosInstance.get(`${Base_Url}/getcustomerpopulate/${customerid}`, {
         headers: {
           Authorization: token,
         },
@@ -79,7 +79,7 @@ const Customer = () => {
         alt_mobileno: response.data[0].alt_mobileno,
         anniversary_date: response.data[0].anniversary_date,
         salutation: response.data[0].salutation,
-        customer_id:response.data[0].customer_id
+        customer_id: response.data[0].customer_id
       });
 
 
@@ -116,9 +116,9 @@ const Customer = () => {
   // Step 2: Add form validation function
   const validateForm = () => {
     const newErrors = {};
-     if (!formData.customer_fname?.trim()) {
-       newErrors.customer_fname = "Customer First Name Field is required.";
-     }
+    if (!formData.customer_fname?.trim()) {
+      newErrors.customer_fname = "Customer First Name Field is required.";
+    }
 
 
     //  if (!formData.customer_lname?.trim()) {
@@ -129,17 +129,15 @@ const Customer = () => {
       newErrors.customer_type = "Customer Type Dropdown is required.";
     }
 
-     if (!formData.customer_classification || formData.customer_classification === 'selected') {
-       newErrors.customer_classification = "Customer Classification Dropdown is required.";
-     }
+    if (!formData.customer_classification || formData.customer_classification === 'selected') {
+      newErrors.customer_classification = "Customer Classification Dropdown is required.";
+    }
 
     if (!formData.mobileno?.trim()) {
-       newErrors.mobileno = "Mobile Number Field is required.";
-     }
-
-     if (!formData.customer_id?.trim()) {
-      newErrors.customer_id = "Customer_id Field is required.";
+      newErrors.mobileno = "Mobile Number Field is required.";
     }
+
+
 
     // if (!formData.alt_mobileno) {
     //   newErrors.alt_mobileno = "Alternate Mobile Number Field is required.";
@@ -179,7 +177,7 @@ const Customer = () => {
       if (confirmSubmission) {
         if (isEdit) {
           // For update, include duplicate check
-          await axiosInstance.post(`${Base_Url}/putcustomer`, { ...formData },{
+          await axiosInstance.post(`${Base_Url}/putcustomer`, { ...formData }, {
             headers: {
               Authorization: token,
             },
@@ -196,7 +194,7 @@ const Customer = () => {
                 anniversary_date: '',
                 email: '',
                 salutation: '',
-                customer_id:'',
+                customer_id: '',
               })
               setSuccessMessage('Customer Updated Successfully!');
               setTimeout(() => setSuccessMessage(''), 3000);
@@ -209,7 +207,7 @@ const Customer = () => {
             });
         } else {
           // For insert, include duplicate check
-          await axiosInstance.post(`${Base_Url}/postcustomer`, { ...formData },{
+          await axiosInstance.post(`${Base_Url}/postcustomer`, { ...formData }, {
             headers: {
               Authorization: token,
             },
@@ -226,7 +224,7 @@ const Customer = () => {
                 anniversary_date: '',
                 email: '',
                 salutation: '',
-                customer_id:'',
+                customer_id: '',
               })
               setSuccessMessage('Customer Submitted Successfully!');
               setTimeout(() => setSuccessMessage(''), 3000);
@@ -247,7 +245,7 @@ const Customer = () => {
 
   const deleted = async (id) => {
     try {
-      const response = await axiosInstance.post(`${Base_Url}/deletecustomer`, { id },{
+      const response = await axiosInstance.post(`${Base_Url}/deletecustomer`, { id }, {
         headers: {
           Authorization: token,
         },
@@ -272,11 +270,11 @@ const Customer = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axiosInstance.get(`${Base_Url}/requestcustomer/${id}`,{
+      const response = await axiosInstance.get(`${Base_Url}/requestcustomer/${id}`, {
         headers: {
-           Authorization: token, // Send token in headers
-         },
-       });
+          Authorization: token, // Send token in headers
+        },
+      });
       setFormData(response.data)
       setIsEdit(true);
       console.log(response.data);
@@ -288,7 +286,7 @@ const Customer = () => {
 
   return (
     <div className="tab-content">
-          {loaders && (
+      {loaders && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
@@ -325,10 +323,10 @@ const Customer = () => {
                           <option value="M.">M.</option>
                           <option value="Lhi">Lhi</option>
                           <option value="Dl">Dl</option>
-                          </select>
-                          {errors.salutation && (
-                            <small className="text-danger">{errors.salutation}</small>
-                          )}
+                        </select>
+                        {errors.salutation && (
+                          <small className="text-danger">{errors.salutation}</small>
+                        )}
                       </div>
                       <div className="col-md-3 mb-3">
                         <label htmlFor="Customerfname" className="form-label">Customer  Name<span className="text-danger">*</span></label>

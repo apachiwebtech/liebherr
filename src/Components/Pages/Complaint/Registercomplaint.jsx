@@ -7,6 +7,9 @@ import { FaEye } from "react-icons/fa";
 import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 import CryptoJS from 'crypto-js';
+import { useOutletContext } from 'react-router-dom';
+
+
 export function Registercomplaint(params) {
 
   const [customerEndId, setCustomerEndId] = useState('');
@@ -37,6 +40,7 @@ export function Registercomplaint(params) {
   const [ticketid, setTicketid] = useState('')
   const token = localStorage.getItem("token");
   const fileInputRef = useRef();
+  const { setHeaderState } = useOutletContext();
   let { Comp_id } = useParams()
   // alert("this is")
   try {
@@ -137,6 +141,7 @@ export function Registercomplaint(params) {
     requested_mobile: "",
   })
 
+   console.log(value , ":::::")
   const getDateAfterOneYear = (value) => {
 
 
@@ -155,7 +160,7 @@ export function Registercomplaint(params) {
       // const lastDate = purchase_date;
       const lastDate = purchase_date.toISOString().split('T')[0];
 
-      console.log(lastDate, "%%%%")
+  
 
 
 
@@ -225,7 +230,7 @@ export function Registercomplaint(params) {
     const mobileRegex = /^\d{10}$/; // Matches exactly 10 digits
 
     const validateMobile = (mobile) => mobileRegex.test(mobile);
-    
+
     if (!value.mobile && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
       isValid = false;
       newErrors.mobile = "Mobile is required";
@@ -311,7 +316,7 @@ export function Registercomplaint(params) {
   const [selectedAddress, setSelectedAddress] = useState('');
   const [newAddress, setNewAddress] = useState('');
 
-  console.log(value.serial, value.model, "####")
+
   // Sample existing addresses (you can fetch this from your API)
   const existingAddresses = [
     "Address 1",
@@ -327,7 +332,6 @@ export function Registercomplaint(params) {
       address: value
     }));
     setNewAddress(value);
-    console.log(addresses);
 
   };
 
@@ -627,7 +631,7 @@ export function Registercomplaint(params) {
             salutation: res.data[0].salutation
           })
 
-          setlocations({ childfranchiseem: res.data[0].sevice_partner, franchiseem: res.data[0].child_service_partner })
+          setlocations({ childfranchiseem: res.data[0].child_service_partner, franchiseem: res.data[0].sevice_partner })
 
 
 
@@ -676,11 +680,9 @@ export function Registercomplaint(params) {
 
   const searchResult = () => {
     setHasSearched(true); // Set that a search has been performed
-
-
-    localStorage.setItem("search" , true)
-
     setForm(false)
+
+   setHeaderState(true)
 
     axiosInstance.post(`${Base_Url}/getticketendcustomer`, { searchparam: serachval }, {
       headers: {
@@ -765,7 +767,7 @@ export function Registercomplaint(params) {
         warrenty_status: value.warrenty_status,
         invoice_date: value.invoice_date,
         call_charge: value.call_charge,
-        cust_id: searchdata.id || value.customer_id || "", // Fix customer ID handling
+        cust_id:  value.customer_id || "", // Fix customer ID handling
         model: value.model,
         serial: value.serial,
         purchase_date: purchase_data || value.purchase_date,
@@ -818,7 +820,7 @@ export function Registercomplaint(params) {
 
   }
 
-  console.log(searchdata, "$$$", value.customer_id)
+
 
   const updatecomplaint = () => {
 
@@ -1027,29 +1029,26 @@ export function Registercomplaint(params) {
       );
 
       if (response.data && response.data[0]) {
-
-        // setserial({ ModelNumber: response.data[0].ModelNumber, purchase_date: response.data[0].purchase_date })
+        const data = response.data[0];
         setValue({
           ...value,
-          model: response.data[0].ModelNumber,
-          serial: response.data[0].serial_no,
-          sales_partner: response.data[0].SalesPartner,
-          classification: response.data[0].customerClassification,
-          salutation: response.data[0].salutation,
-          customer_name: response.data[0].customer_fname,
-          cust_type: response.data[0].customer_type,
-          mobile: response.data[0].mobileno,
-          alt_mobile: response.data[0].alt_mobileno,
-          email: response.data[0].email,
-          address: response.data[0].address,
-          state: response.data[0].state,
-          area: response.data[0].district,
-          city: response.data[0].city,
-          pincode: response.data[0].pincode,
-          customer_id: response.data[0].CustomerID
-
-        })
-
+          model: data.ModelNumber || "", // Default to an empty string if null/undefined
+          serial: data.serial_no || "",
+          sales_partner: data.SalesPartner || "",
+          classification: data.customerClassification || "",
+          salutation: data.salutation || "",
+          customer_name: data.customer_fname || "",
+          cust_type: data.customer_type || "",
+          mobile: data.mobileno || "",
+          alt_mobile: data.alt_mobileno || "",
+          email: data.email || "",
+          address: data.address || "",
+          state: data.state || "",
+          area: data.district || "",
+          city: data.city || "",
+          pincode: data.pincode || "",
+          customer_id: data.CustomerID || "",
+        });
       }
 
 
@@ -1063,6 +1062,7 @@ export function Registercomplaint(params) {
 
 
   const addnewticket = (product_id) => {
+
     setForm(true)
     const data = {
       customerId: searchdata.customer_id,
@@ -1095,6 +1095,36 @@ export function Registercomplaint(params) {
       }).catch((err) => {
         console.log(err)
       })
+  }
+
+
+  const getcustomerinfo = (cust_id) =>{
+
+
+    setForm(true)
+    const data = {
+      cust_id : cust_id
+    }
+    
+    axiosInstance.post(`${Base_Url}/getcustinfo` , data , {
+      headers: {
+        Authorization: token, // Send token in headers
+      },
+    })
+    .then((res) =>{
+      if (res.data && res.data.length > 0) {
+        
+        const customerInfo = res.data[0];
+
+        setValue((prevState) => ({
+          ...prevState, // Spread existing state
+          customer_name: customerInfo.customer_name,
+
+        }));
+      } else {
+        console.error("No customer information found in response.");
+      }
+    })
   }
 
   useEffect(() => {
@@ -1246,7 +1276,13 @@ export function Registercomplaint(params) {
                       <table className="table table-striped">
                         <tbody>
 
-                          {!form && ProductCustomer.map((item, index) => (
+                          {ProductCustomer.length == 0 ? <> <tr>
+                            <td>
+                              <div className="pb-2">
+                                <button  className="btn btn-sm btn-primary generateTicket" onClick={() =>getcustomerinfo(searchdata.customer_id)}>New Ticket</button>
+                              </div>
+                            </td>
+                          </tr></> : <> {ProductCustomer.map((item, index) => (
                             <tr key={index}>
                               <td><div>{item.ModelNumber}</div></td>
                               <td>
@@ -1255,7 +1291,9 @@ export function Registercomplaint(params) {
                                 </div>
                               </td>
                             </tr>
-                          ))}
+                          ))}</>}
+
+
                         </tbody>
                       </table>
                     </div>
@@ -1330,7 +1368,7 @@ export function Registercomplaint(params) {
                   <div className="col-md-3">
                     <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Serial No </p>
 
-                    {searchdata.length == 0 && !serialid ?
+                    {!serialid ?
                       <div className="mb-3">
                         <input
                           type="text"
@@ -1349,7 +1387,7 @@ export function Registercomplaint(params) {
                   <div className="col-md-3">
                     <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Model</p>
 
-                    {searchdata.length == 0 && !modelid ?
+                    {!modelid ?
 
                       <div className="">
                         <input className="form-control" onChange={onHandleChange} value={value.model} name="model" disabled></input>
@@ -1362,7 +1400,7 @@ export function Registercomplaint(params) {
                   <div className="col-md-3">
                     <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Purchase Date</p>
 
-                    {searchdata.length == 0 && !p_date ?
+                    { !p_date ?
                       <div className="mb-3">
                         <input
                           type="date"
@@ -1563,7 +1601,7 @@ export function Registercomplaint(params) {
                     <div className="col-md-12">
                       <div className="mb-3">
                         <label htmlFor="exampleFormControlInput1" className="form-label">Address {value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
-                        <button onClick={openPopup} type="button" hidden className="addressbtn">Add Address</button>
+                        <button onClick={openPopup} type="button" className="addressbtn">Add Address</button>
                         <textarea
                           className="form-control"
                           value={value.address}
@@ -1788,7 +1826,7 @@ export function Registercomplaint(params) {
                   <div className="col-md-4">
                     <div className="mb-3">
                       <label className="form-label">Customer Classification{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
-                      <select className="form-control" onChange={onHandleChange} value={value.classification} name="classification">
+                      <select className="form-control" onChange={onHandleChange} value={value.classification} name="classification" disabled>
                         <option value="">Select</option>
                         <option value="Consumer">Consumer</option>
                         <option value="Import">Import</option>

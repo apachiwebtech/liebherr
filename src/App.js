@@ -1,11 +1,12 @@
 import logo from './logo.svg';
 import './siteheader.css'
 import './App.css';
-import React, { Suspense } from 'react';
+import React, { Suspense, useState } from 'react';
 import {
   createBrowserRouter,
   Outlet,
   RouterProvider,
+  useLocation,
   useNavigate,
 } from "react-router-dom";
 import { Login } from './Components/Authenticate/Login';
@@ -669,13 +670,9 @@ function checkLocalStorageAndRedirectCSP(navigate) {
 function App() {
 
 
-
-
-
-
-
-
-  const navigate = useNavigate()
+  const [headerState, setHeaderState] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
 
   const fetchProtectedData = async () => {
@@ -721,15 +718,15 @@ function App() {
   }, [navigate])
 
 
-  // React.useEffect(() =>{
-  //    localStorage.removeItem("search")
-  // },[navigate])
+  React.useEffect(() => {
+    setHeaderState(false);
+  }, [location]);
 
 
   return (
     <>
-      <Siteheader />
-      <Outlet />
+      <Siteheader headerState={headerState} />
+      <Outlet  context={{ setHeaderState }}/>
       <Sitefooter />
     </>
 

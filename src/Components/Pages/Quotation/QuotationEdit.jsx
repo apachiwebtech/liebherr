@@ -10,6 +10,7 @@ import { error } from 'jquery';
 const QuotationEdit = () => {
     const token = localStorage.getItem("token"); // Get token from localStorage
     const { loaders, axiosInstance } = useAxiosLoader();
+    const [spare, setSpare] = useState([])
     let { qid } = useParams()
 
     try {
@@ -42,14 +43,35 @@ const QuotationEdit = () => {
         email: '',
     })
 
+
+
+
     async function getquotedetails() {
         try {
-            const res = await axiosInstance.post(`${Base_Url}/getquotedetails`, { quotaion_id: qid },{
+            const res = await axiosInstance.post(`${Base_Url}/getquotedetails`, { quotaion_id: qid }, {
                 headers: {
-                   Authorization: token, // Send token in headers
-                 },
-               });
+                    Authorization: token, // Send token in headers
+                },
+            });
             setValue(res.data[0]);
+
+            getquotespare(res.data[0].quotationNumber)
+
+
+
+        } catch (error) {
+            console.error('Error fetching quote details:', error);
+        }
+    }
+
+    async function getquotespare(quote_id) {
+        try {
+            const res = await axiosInstance.post(`${Base_Url}/getquotationspare`, { quote_id: quote_id }, {
+                headers: {
+                    Authorization: token, // Send token in headers
+                },
+            });
+            setSpare(res.data);
 
         } catch (error) {
             console.error('Error fetching quote details:', error);
@@ -66,7 +88,6 @@ const QuotationEdit = () => {
 
 
     useEffect(() => {
-
         getquotedetails()
 
     }, [])
@@ -84,9 +105,9 @@ const QuotationEdit = () => {
 
         axiosInstance.post(`${Base_Url}/updatequotation`, data, {
             headers: {
-              Authorization: token, // Send token in headers
+                Authorization: token, // Send token in headers
             },
-          })
+        })
             .then((res) => {
                 alert("Updated Successfully..")
                 navigate('/quotationlist')
@@ -200,32 +221,47 @@ const QuotationEdit = () => {
                                                 <thead>
                                                     <tr>
                                                         <th>#</th>
+                                                        <th>Spare Id</th>
                                                         <th>Spare Name</th>
-                                                        <th>Model Number</th>
                                                         <th>Quantity</th>
                                                         <th>Price</th>
 
                                                     </tr>
                                                 </thead>
-                                                <tbody><tr >
-                                                    <td>1</td>
-                                                    <td>Handle</td>
-                                                    <td>TCLbsB 2711 I01 20</td>
-                                                    <td>10</td>
-                                                    <td>1000</td>
+                                                <tbody>
+                                                    {spare.map((item, index) => {
+
+                                                        return (
+                                                            <tr >
+                                                                <td>{index + 1}</td>
+                                                                <td>{item.article_code}</td>
+                                                                <td>{item.article_description}</td>
+                                                                <td>
+                                                                    <input
+                                                                        type="text"
+                                                                        name="serial_no"
+                                                                        value={item.quantity}
+                                                                        placeholder="Enter Quantity"
+                                                                        style={{ fontSize: "14px", width: "100%" }}
+                                                                    />
+                                                                </td>
+                                                                <td>
+                                                                <input
+                                                                        type="text"
+                                                                        name="serial_no"
+                                                                        value={item.price}
+                                                                        placeholder="Enter Quantity"
+                                                                        style={{ fontSize: "14px", width: "100%" }}
+                                                                    />
+                                                                </td>
 
 
-                                                </tr>
-                                                    <tr >
-                                                        {/* <td>{displayIndex}</td>  Use displayIndex for correct pagination */}
-                                                        <td>2</td>
-                                                        <td>Trey</td>
-                                                        <td>CNPef 4516-20 136 HL-AUSTRALI</td>
-                                                        <td>20</td>
-                                                        <td>2000</td>
+                                                            </tr>
+                                                        )
+
+                                                    })}
 
 
-                                                    </tr>
                                                 </tbody>
                                             </table>
                                         </div>

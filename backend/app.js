@@ -3334,57 +3334,161 @@ app.get("/product_master", authenticateToken, async (req, res) => {
 
 
 // Ticket Search Start
-app.post("/getticketendcustomer", authenticateToken, async (req, res) => {
-  let { searchparam } = req.body;
+// app.post("/getticketendcustomer", authenticateToken, async (req, res) => {
+//   let { searchparam } = req.body;
 
-  if (searchparam === "") {
+//   if (searchparam === "") {
+//     return res.json([]);
+//   }
+
+//   try {
+//     // Use the poolPromise to get the connection pool
+//     const pool = await poolPromise;
+
+//     //     const checkfromcustomer = `
+//     // SELECT c.*,
+//     //        l.address,
+//     //        CONCAT(c.customer_fname, ' ', c.customer_lname) AS customer_name
+//     // FROM awt_customer AS c
+//     // LEFT JOIN awt_customerlocation AS l ON c.customer_id = l.customer_id
+//     // WHERE c.deleted = 0
+//     //   AND (c.email LIKE '%${searchparam}%'
+//     //        OR c.mobileno LIKE '%${searchparam}%')
+//     //     `;
+
+
+
+
+//     const checkincomplaint = `select * from complaint_ticket where (customer_email LIKE '%${searchparam}%' OR ticket_no LIKE '%${searchparam}%' OR customer_name LIKE '%${searchparam}%' OR serial_no LIKE '%${searchparam}%' OR customer_mobile LIKE '%${searchparam}%' OR customer_id LIKE '%${searchparam}%')`
+
+//     console.log(checkincomplaint)
+
+//     const result = await pool.request().query(checkincomplaint);
+
+
+
+//     const sql1 = `
+//     SELECT * FROM awt_uniqueproductmaster
+//     WHERE deleted = 0 AND CustomerID = @customerId
+//   `;
+//     // console.log(result.recordset[0])
+//     const result1 = await pool.request()
+//       .input('customerId', result.recordset[0].customer_id)
+//       .query(sql1);
+
+//     if (result1.recordset === 0) {
+
+//       return res.json({ information: result.recordset, product: [] });
+//     }
+//     else {
+
+//       return res.json({ information: result.recordset, product: result1.recordset });
+//     }
+
+
+
+//   } catch (err) {
+//     console.error(err);
+//     return res.json({ information: [], product: [] });
+//   } 
+// });
+
+
+app.post("/getticketendcustomer", authenticateToken, async (req, res) => {
+  const { searchparam } = req.body;
+
+  // Return empty array if search param is empty
+  if (!searchparam) {
     return res.json([]);
   }
 
   try {
-    // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
-    //     const sql = `
-    // SELECT c.*,
-    //        l.address,
-    //        CONCAT(c.customer_fname, ' ', c.customer_lname) AS customer_name
-    // FROM awt_customer AS c
-    // LEFT JOIN awt_customerlocation AS l ON c.id = l.customer_id
-    // WHERE c.deleted = 0
-    //   AND (c.email LIKE '%${searchparam}%'
-    //        OR c.mobileno LIKE '%${searchparam}%')
+
+    // Query for customer information
+    const checkfromcustomer = `
+      SELECT c.*, 
+             l.address, 
+             CONCAT(c.customer_fname, ' ', c.customer_lname) AS customer_name
+      FROM awt_customer AS c
+      LEFT JOIN awt_customerlocation AS l ON c.customer_id = l.customer_id
+      WHERE c.deleted = 0
+        AND (c.email LIKE @searchparam OR c.mobileno LIKE @searchparam)
+    `;
+
+    const custresult = await pool
+      .request()
+      .input("searchparam", `%${searchparam}%`)
+      .query(checkfromcustomer);
+
+    let information = custresult.recordset;
+    let customerId = null;
 
 
-    //     `;
 
-    const checkincomplaint = `select * from complaint_ticket where (customer_email LIKE '%${searchparam}%' OR ticket_no LIKE '%${searchparam}%' OR customer_name LIKE '%${searchparam}%' OR serial_no LIKE '%${searchparam}%' OR customer_mobile LIKE '%${searchparam}%' OR customer_id LIKE '%${searchparam}%')`
+    // If no data is found in checkfromcustomer, check in complaints
+    if (information.length === 0) {
+      const checkincomplaint = `
+        SELECT * 
+        FROM complaint_ticket
+        WHERE customer_email LIKE @searchparam 
+           OR ticket_no LIKE @searchparam
+           OR customer_name LIKE @searchparam
+           OR serial_no LIKE @searchparam
+           OR customer_mobile LIKE @searchparam
+           OR customer_id LIKE @searchparam
+      `;
 
-    console.log(checkincomplaint)
+      const complaintResult = await pool
+        .request()
+        .input("searchparam", `%${searchparam}%`)
+        .query(checkincomplaint);
 
-    const result = await pool.request().query(checkincomplaint);
+      information = complaintResult.recordset;
 
-    // Product of End Customer using customer_id | in Table awt_customer id is primary key and customer_id is foreign key in awt_customerlocation
-    const sql1 = `
-    SELECT * FROM awt_uniqueproductmaster
-    WHERE deleted = 0 AND CustomerID = @customerId
-  `;
-    // console.log(result.recordset[0])
-    const result1 = await pool.request()
-      .input('customerId', result.recordset[0].customer_id)
-      .query(sql1);
 
-    if (result1.recordset === 0) {
-      return res.json({ information: result.recordset, product: [] });
+
+      // Get customer_id from complaints if no data from customers
+      if (information.length > 0) {
+        customerId = information[0].customer_id;
+      }
+    } else {
+      // Get customer_id from customers if data is available
+      customerId = information[0].customer_id;
     }
-    else {
 
-      return res.json({ information: result.recordset, product: result1.recordset });
+    let product = [];
+    // Fetch product data only if customerId is available
+    if (customerId) {
+      const productQuery = `
+        SELECT * 
+        FROM awt_uniqueproductmaster
+        WHERE deleted = 0 AND CustomerID = @customerId
+      `;
+
+      const productResult = await pool
+        .request()
+        .input("customerId", customerId)
+        .query(productQuery);
+
+      product = productResult.recordset;
     }
+
+    return res.json({ information, product });
+
   } catch (err) {
-    console.error(err);
-    return res.json({ information: [], product: [] });
-  } specification
+    console.error("Error fetching data:", err);
+    return res.status(500).json({
+      error: "Internal server error",
+      information: [],
+      product: [],
+    });
+  }
 });
+
+
+
+
 
 // Comaplint Module -> Start
 
@@ -3484,7 +3588,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
     if (cust_id == "") {
 
-      console.log(purchase_date , "Purchase")
+      console.log(purchase_date, "Purchase")
 
       const productSQL = `INSERT INTO awt_uniqueproductmaster (
         CustomerID, ModelNumber, serial_no,  pincode ,address,state,city,district ,purchase_date, created_date, created_by
@@ -3495,7 +3599,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
 
 
-       const Unique = await pool.request()
+      const Unique = await pool.request()
         .input('customer_id', newcustid)
         .input('model', model)
         .input('created_by', created_by)
@@ -3509,7 +3613,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
         .input('city', city)
         .query(productSQL);
 
-        console.log(Unique , "Unique")
+      console.log(Unique, "Unique")
 
 
       // Insert into awt_customerlocation using insertedCustomerId as customer_id
@@ -4085,6 +4189,16 @@ app.post("/postcustomer", authenticateToken, async (req, res) => {
       });
     }
 
+    const getcustcount = `select top 1 id from awt_customer where customer_id is not null order by id desc`
+
+    const getcustresult = await pool.request().query(getcustcount)
+
+    const custcount = getcustresult.recordset[0].id;
+
+    const newcustid = 'B' + custcount.toString().padStart(7, "0")
+
+    console.log(newcustid, "$$$")
+
     // Step 2: Insert the customer if no duplicate is found
     const insertSql = `
       INSERT INTO awt_customer (
@@ -4123,7 +4237,7 @@ app.post("/postcustomer", authenticateToken, async (req, res) => {
       .input('anniversary_date', anniversary_date)
       .input('email', email)
       .input('salutation', salutation)
-      .input('customer_id', customer_id)
+      .input('customer_id', newcustid)
       .query(insertSql);
 
     // Send success response
@@ -4133,7 +4247,7 @@ app.post("/postcustomer", authenticateToken, async (req, res) => {
 
   } catch (err) {
     console.error("Database error:", err);
-    return res.status(500).json({ error: "Database error occurred" });
+    return res.status(500).json(err);
   }
 });
 
@@ -7443,14 +7557,21 @@ app.post("/add_new_ticket", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
-    const productdetail = `select * from awt_uniqueproductmaster where ModelNumber = '${product_id}' and serial_no = '${serial_no}' and CustomerID = '${customerId}'`
+    const productdetail = `select * from awt_uniqueproductmaster where ModelNumber LIKE '%${product_id}%' OR serial_no = '$${serial_no}%' OR CustomerID = '%${customerId}%'`
     const productdetailquery = await pool.request()
       .query(productdetail);
 
 
-    console.log(productdetailquery.recordset[0]);
+
     const details = productdetailquery.recordset[0];
-    const purchaseDateFormatted = purchaseDateFormattedss = details.purchase_date.toISOString().slice(0, 10).replace("T", " ");
+
+    // Ensure purchase_date is a valid Date object
+    const purchaseDate = new Date(details.purchase_date);
+
+    // Format the date as yyyy-mm-dd
+    const purchaseDateFormatted = purchaseDate.toISOString().slice(0, 10);
+
+    console.log(purchaseDateFormatted); // Outputs: yyyy-mm-dd
 
 
 
@@ -7483,7 +7604,7 @@ app.post("/add_new_ticket", authenticateToken, async (req, res) => {
       .input("formattedDate", sql.DateTime, formattedDate)
       .input("created_by", sql.NVarChar, created_by)
       .input("purchase_date", purchaseDateFormatted)
-      .input("invoice_date", purchaseDateFormattedss)
+      .input("invoice_date", purchaseDateFormatted)
       .query(complaintSQL);
 
     const insertedId = result.recordset[0].id;
@@ -7506,6 +7627,32 @@ app.post("/add_new_ticket", authenticateToken, async (req, res) => {
       id: insertedId,
       rowdata: result2.recordset,
     });
+  } catch (err) {
+    console.error("Error:", err);
+    return res
+      .status(500)
+      .json({ error: "An error occurred while adding the ticket.", "Error": err });
+  }
+});
+
+app.post("/getcustinfo", authenticateToken, async (req, res) => {
+
+  const { cust_id } = req.body;
+
+  try {
+    const pool = await poolPromise;
+
+    const getcustinfo = `select * from awt_customer where deleted = 0 and customer_id = '${cust_id}'`;
+
+    const productdetailquery = await pool.request().query(getcustinfo);
+
+    console.log(productdetailquery)
+
+    return res.json(productdetailquery.recordset)
+
+
+
+
   } catch (err) {
     console.error("Error:", err);
     return res
@@ -8246,7 +8393,23 @@ app.get("/getserial/:serial", authenticateToken, async (req, res) => {
 
     const pool = await poolPromise;
 
-    const sql = `SELECT  asl.* , spm.SalesPartner , spm.SalesAM , pm.customerClassification from awt_serial_list as asl left join SalesPartnerMaster as spm on asl.PrimarySalesDealer =  spm.BPcode left join product_master as pm on pm.item_description = asl.ModelNumber  where asl.serial_no = @serial`
+    const sql = `	SELECT  
+    asl.*, 
+    spm.SalesPartner, 
+    spm.SalesAM, 
+    CASE 
+        WHEN asl.CountryofOrigin = 'India' THEN 'Consumer'
+        ELSE 'Import'
+    END AS customerClassification
+FROM 
+    awt_serial_list AS asl
+LEFT JOIN 
+    SalesPartnerMaster AS spm 
+ON 
+    asl.PrimarySalesDealer = spm.BPcode
+WHERE 
+    asl.serial_no = @serial;
+`
 
     const result = await pool.request()
       .input('serial', serial)
@@ -8255,12 +8418,12 @@ app.get("/getserial/:serial", authenticateToken, async (req, res) => {
 
 
     const fallbackSql = `SELECT ac.salutation , ac.customer_fname ,ac.customer_lname , ac.customer_type , ac.customer_classification , ac.mobileno , ac.alt_mobileno,ac.email ,
-au.CustomerID , au.ModelNumber , au.address , au.region , au.state ,au.district , au.city , au.pincode ,au.purchase_date,spm.SalesPartner , spm.SalesAM , pm.customerClassification 
+au.CustomerID , au.ModelNumber , au.address , au.region , au.state ,au.district , au.city , au.pincode ,au.purchase_date,spm.SalesPartner,au.serial_no , spm.SalesAM , au.customer_classification as customerClassification 
 FROM awt_uniqueproductmaster as au
 left join awt_customer as ac on ac.customer_id = au.CustomerID
 left join awt_serial_list as asl on asl.serial_no = au.serial_no
 left join SalesPartnerMaster as spm on asl.PrimarySalesDealer =  spm.BPcode
-left join product_master as pm on pm.item_description = asl.ModelNumber WHERE au.serial_no = @serial order by au.id desc`;
+WHERE au.serial_no = @serial order by au.id desc`;
 
     const fallbackResult = await pool.request()
       .input('serial', serial)
@@ -8602,9 +8765,15 @@ app.post(`/add_quotation`, authenticateToken, async (req, res) => {
   const pool = await poolPromise;
 
 
+
+
   let engineer_id;
 
   engineer_id = Engineer.join(',');
+
+  console.log(finaldata.data)
+
+  const newdata = finaldata.data;
 
 
 
@@ -8649,26 +8818,26 @@ app.post(`/add_quotation`, authenticateToken, async (req, res) => {
 
 
 
-    // // Iterate over the items in `newdata`
-    // for (const item of newdata) {
-    //   const { id, title, ItemDescription, price, product_code } = item;
-    //   const date = new Date();
+    // Iterate over the items in `newdata`
+    for (const item of newdata) {
+      const { id, title, ItemDescription, price, product_code } = item;
+      const date = new Date();
 
-    //   const addspare = `insert into awt_uniquespare (ticketId , spareId , article_code ,article_description , price) values('${ticket_no}','${product_code}' ,'${title}','${ItemDescription}' , '${price}')`;
-
-
-    //   await pool.request().query(addspare)
+      const addspare = `insert into awt_uniquespare ( quotation_id,ticketId , spareId , article_code ,article_description , price) values('${quotationcode}','${ticket_no}','${product_code}' ,'${title}','${ItemDescription}' , '${price}')`;
 
 
-    //   // // Validate fields
-    //   // if (!id || !title || !quantity || !price) {
-    //   //   return res.status(400).json({ message: "Invalid item format in finaldata" });
-    //   // }
+      await pool.request().query(addspare)
 
 
-    //   // Insert query
+      // // Validate fields
+      // if (!id || !title || !quantity || !price) {
+      //   return res.status(400).json({ message: "Invalid item format in finaldata" });
+      // }
 
-    // }
+
+      // Insert query
+
+    }
 
     res.status(200).json({ message: "Quotation added successfully" });
 
@@ -8874,5 +9043,35 @@ app.get("/finalapproveenginner", authenticateToken, async (req, res) => {
     return res.status(500).json({ error: "Database error occurred" });
   }
 })
+
+app.post("/getquotationspare", authenticateToken, async (req, res) => {
+
+  const {quote_id} = req.body;
+
+
+
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    // Directly use the query (no parameter binding)
+    const sql = `select * from awt_uniquespare where quotation_id = '${quote_id}'`;
+
+    // Execute the query
+    const result = await pool.request().query(sql);
+    console.log(result)
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred" });
+  }
+})
+
+
+
+
+
 
 

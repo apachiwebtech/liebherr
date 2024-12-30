@@ -10,8 +10,8 @@ import CryptoJS from 'crypto-js';
 
 
 export function Customerlist(params) {
-  const { loaders, axiosInstance } = useAxiosLoader();
-  const [Customerdata, setCustomerdata] = useState([]);
+    const { loaders, axiosInstance } = useAxiosLoader();
+    const [Customerdata, setCustomerdata] = useState([]);
     const token = localStorage.getItem("token");
     const [isEdit, setIsEdit] = useState(false);
     const [filteredData, setFilteredData] = useState([]);
@@ -65,19 +65,19 @@ export function Customerlist(params) {
     const fetchCustomerlist = async (page) => {
         try {
 
-          const params = new URLSearchParams();
+            const params = new URLSearchParams();
 
-           params = {
-            page: page, // Current page number
-            pageSize: pageSize, // Page size
-          };
+            params = {
+                page: page, // Current page number
+                pageSize: pageSize, // Page size
+            };
 
-          // Add all filters to params
-          Object.entries(searchFilters).forEach(([key, value]) => {
-              if (value) { // Only add if value is not empty
-                  params.append(key, value);
-              }
-          });
+            // Add all filters to params
+            Object.entries(searchFilters).forEach(([key, value]) => {
+                if (value) { // Only add if value is not empty
+                    params.append(key, value);
+                }
+            });
 
             const response = await axiosInstance.get(`${Base_Url}/getcustomerlist?${params}`, {
                 headers: {
@@ -184,15 +184,12 @@ export function Customerlist(params) {
     };
 
     const edit = async (id) => {
-              id = id.toString()
-              let encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
-              encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-              navigate(`/Customer/${encrypted}`)
+        id = id.toString()
+        let encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
+        encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        navigate(`/Customer/${encrypted}`)
     };
-    useEffect(() => {
-        fetchCustomerlist();
 
-    }, []);
 
     const [isOpen, setIsOpen] = useState({}); // State to track which rows are expanded
     const toggleRow = (rowId) => {
@@ -203,13 +200,18 @@ export function Customerlist(params) {
 
     const navigate = useNavigate()
 
+    useEffect(() => {
+        fetchCustomerlist();
+
+    }, []);
+
     return (
         <div className="tab-content">
-              {loaders && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <SyncLoader loading={loaders} color="#FFFFFF" />
-        </div>
-      )}
+            {loaders && (
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <SyncLoader loading={loaders} color="#FFFFFF" />
+                </div>
+            )}
             <Endcustomertabs />
             <div className="row mp0" >
                 <div className="col-md-12 col-12">
@@ -406,7 +408,7 @@ export function Customerlist(params) {
                                                     </Link>
                                                 </td>
                                                 <td>
-                                                 <Link to={`/uniqueproduct/${item.customer_id}`}>
+                                                    <Link to={`/uniqueproduct/${item.customer_id}`}>
                                                         <button style={{ backgroundColor: '#0D6EFD', color: 'white' }} className='btn'
                                                             onClick={() => {
                                                                 navigate(`/uniqueproduct/${item.customer_id}`)
@@ -416,7 +418,7 @@ export function Customerlist(params) {
                                                 </td>
 
                                                 <td >
-                                              <button
+                                                    <button
                                                         className='btn'
                                                         onClick={() =>
                                                             edit(item.id)
@@ -445,42 +447,42 @@ export function Customerlist(params) {
                             </table>
 
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-    <button
-        onClick={() => handlePageChange(currentPage - 1)}
-        disabled={currentPage <= 1}
-        style={{
-            padding: '8px 15px',
-            fontSize: '16px',
-            cursor: currentPage <= 1 ? 'not-allowed' : 'pointer',
-            backgroundColor: currentPage <= 1 ? '#ccc' : '#007bff',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '5px',
-            transition: 'background-color 0.3s',
-        }}
-    >
-        Previous
-    </button>
-    <span style={{ fontSize: '16px', fontWeight: 'bold' }}>
-        Page {currentPage} of {totalPages}
-    </span>
-    <button
-        onClick={() => handlePageChange(currentPage + 1)}
-        disabled={currentPage >= totalPages}
-        style={{
-            padding: '8px 15px',
-            fontSize: '16px',
-            cursor: currentPage >= totalPages ? 'not-allowed' : 'pointer',
-            backgroundColor: currentPage >= totalPages ? '#ccc' : '#007bff',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '5px',
-            transition: 'background-color 0.3s',
-        }}
-    >
-        Next
-    </button>
-</div>
+                                <button
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    disabled={currentPage <= 1}
+                                    style={{
+                                        padding: '8px 15px',
+                                        fontSize: '16px',
+                                        cursor: currentPage <= 1 ? 'not-allowed' : 'pointer',
+                                        backgroundColor: currentPage <= 1 ? '#ccc' : '#007bff',
+                                        color: '#fff',
+                                        border: 'none',
+                                        borderRadius: '5px',
+                                        transition: 'background-color 0.3s',
+                                    }}
+                                >
+                                    Previous
+                                </button>
+                                <span style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                                    Page {currentPage} of {totalPages}
+                                </span>
+                                <button
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    disabled={currentPage >= totalPages}
+                                    style={{
+                                        padding: '8px 15px',
+                                        fontSize: '16px',
+                                        cursor: currentPage >= totalPages ? 'not-allowed' : 'pointer',
+                                        backgroundColor: currentPage >= totalPages ? '#ccc' : '#007bff',
+                                        color: '#fff',
+                                        border: 'none',
+                                        borderRadius: '5px',
+                                        transition: 'background-color 0.3s',
+                                    }}
+                                >
+                                    Next
+                                </button>
+                            </div>
 
                         </div>
                     </div>
