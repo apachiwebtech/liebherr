@@ -231,9 +231,10 @@ export function Registercomplaint(params) {
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (value.email && !emailRegex(value.email)) {
-      newErrors.email = "Email id is not valid"
+    if (value.email && !emailRegex.test(value.email)) {
+      newErrors.email = "Email id is not valid";
     }
+    
 
     if (!newAddress && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
       isValid = false;
