@@ -709,6 +709,9 @@ function App() {
   React.useEffect(() => {
     fetchProtectedData()
 
+
+
+
     const timer = setTimeout(() => {
       alert("Session Timeout")
       window.location.reload();
@@ -716,6 +719,11 @@ function App() {
 
     return () => clearTimeout(timer); // Cleanup the timer on unmount
   }, [navigate])
+
+
+  // React.useEffect(() =>{
+  //    localStorage.removeItem("search")
+  // },[navigate])
 
 
   return (

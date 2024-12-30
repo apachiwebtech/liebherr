@@ -81,6 +81,15 @@ export function Registercomplaint(params) {
     return `${year}-${month}-${day}`;
   };
 
+  const sendtoedit123 = async (id) => {
+    // alert(id)
+    id = id.toString()
+    let encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
+    encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    // navigate(`/quotation/${encrypted}`)
+    navigate(`/complaintview/${encrypted}`)
+  };
+
 
 
   //setting the values
@@ -213,18 +222,18 @@ export function Registercomplaint(params) {
       isValid = false;
       newErrors.contact_person = "Contact Person is required";
     }
-    const mobileRegex = /^[0-9]{10,15}$/; // Matches only digits with a length between 10 and 15
+    const mobileRegex = /^\d{10}$/; // Matches exactly 10 digits
 
     const validateMobile = (mobile) => mobileRegex.test(mobile);
-
+    
     if (!value.mobile && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
       isValid = false;
       newErrors.mobile = "Mobile is required";
     } else if (value.mobile && !validateMobile(value.mobile)) {
       isValid = false;
-      newErrors.mobile = "Please enter a valid mobile number (10 to 15 digits).";
+      newErrors.mobile = "Please enter a valid 10-digit mobile number.";
     }
-    
+
     if (value.alt_mobile && !validateMobile(value.alt_mobile)) {
       newErrors.alt_mobile = "Please enter a valid alternate mobile number (10 to 15 digits).";
     }
@@ -234,7 +243,7 @@ export function Registercomplaint(params) {
     if (value.email && !emailRegex.test(value.email)) {
       newErrors.email = "Email id is not valid";
     }
-    
+
 
     if (!newAddress && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
       isValid = false;
@@ -264,7 +273,7 @@ export function Registercomplaint(params) {
     //   isValid = false;
     //   newErrors.requested_email = "This is required";
     // }
-    if (value.requested_mobile && !validateMobile(value.requested_mobile) ) {
+    if (value.requested_mobile && !validateMobile(value.requested_mobile)) {
       isValid = false;
       newErrors.requested_mobile = "Please enter a valid mobile number (10 to 15 digits).";
     }
@@ -586,7 +595,7 @@ export function Registercomplaint(params) {
             email: res.data[0].customer_email,
             mobile: res.data[0].customer_mobile,
             address: res.data[0].address,
-            customer_id: res.data[0].id,
+            customer_id: res.data[0].customer_id,
             alt_mobile: res.data[0].alt_mobile,
             state: res.data[0].state,
             city: res.data[0].city,
@@ -667,6 +676,9 @@ export function Registercomplaint(params) {
 
   const searchResult = () => {
     setHasSearched(true); // Set that a search has been performed
+
+
+    localStorage.setItem("search" , true)
 
     setForm(false)
 
@@ -806,6 +818,8 @@ export function Registercomplaint(params) {
 
   }
 
+  console.log(searchdata, "$$$", value.customer_id)
+
   const updatecomplaint = () => {
 
 
@@ -827,7 +841,7 @@ export function Registercomplaint(params) {
       warrenty_status: value.warrenty_status || "",
       invoice_date: value.invoice_date || "",
       call_charge: value.call_charge || "",
-      cust_id: String(searchdata.id) || String(value.customer_id) || "", // Fix customer ID handling
+      cust_id: String(value.customer_id) || "", // Fix customer ID handling
       model: value.model || "",
       serial: String(value.serial),
       purchase_date: value.purchase_date || "",
@@ -846,6 +860,8 @@ export function Registercomplaint(params) {
       salutation: value.salutation || "",
       ticket_no: Comp_id
     };
+
+
 
 
 
@@ -1272,6 +1288,7 @@ export function Registercomplaint(params) {
                               onClick={() => {
                                 navigate(`/complaintview/${item.id}`)
                                 addInTab(item.ticket_no, item.id)
+                                sendtoedit123(item.id)
                               }}
                               title="View Info"
                               style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
@@ -1448,14 +1465,14 @@ export function Registercomplaint(params) {
                   <div className="col-md-4">
                     <div className="mb-3">
                       <label htmlFor="exampleFormControlInput1" className="form-label">Mobile No. {value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}<input type="checkbox" />Whatsapp</label>
-                      <input type="text" value={value.mobile} name="mobile" onChange={onHandleChange} className="form-control" placeholder="Enter Mobile" />
+                      <input type="number" value={value.mobile} name="mobile" onChange={onHandleChange} className="form-control" placeholder="Enter Mobile" />
                       {errors.mobile && <span style={{ fontSize: "12px" }} className="text-danger">{errors.mobile}</span>}
                     </div>
                   </div>
                   <div className="col-md-4">
                     <div className="mb-3">
                       <label htmlFor="exampleFormControlInput1" className="form-label">Alt. Mobile No. <input type="checkbox" />Whatsapp</label>
-                      <input type="text" className="form-control" value={value.alt_mobile} name="alt_mobile" onChange={onHandleChange} placeholder="Enter Mobile" />
+                      <input type="number" className="form-control" value={value.alt_mobile} name="alt_mobile" onChange={onHandleChange} placeholder="Enter Mobile" />
                       {errors.alt_mobile && <span style={{ fontSize: "12px" }} className="text-danger">{errors.alt_mobile}</span>}
                     </div>
                   </div>
@@ -1657,7 +1674,7 @@ export function Registercomplaint(params) {
                     <div className="col-md-3">
                       <div className="mb-3">
                         <label htmlFor="exampleFormControlInput1" className="form-label">Pincode {value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
-                        <input type="text" className="form-control" value={value.pincode} name="pincode" onChange={onHandleChange} placeholder="" />
+                        <input type="number" className="form-control" value={value.pincode} name="pincode" onChange={onHandleChange} placeholder="" />
                         {errors.pincode && <span style={{ fontSize: "12px" }} className="text-danger">{errors.pincode}</span>}
                       </div>
                     </div>
@@ -1702,7 +1719,7 @@ export function Registercomplaint(params) {
                   <div className="col-md-4">
                     <div className="mb-3">
                       <label htmlFor="exampleFormControlInput1" className="form-label">Requested Mobile </label>
-                      <input type="text" className="form-control" value={value.requested_mobile} name="requested_mobile" onChange={onHandleChange} placeholder="" />
+                      <input type="number" className="form-control" value={value.requested_mobile} name="requested_mobile" onChange={onHandleChange} placeholder="" />
                       {errors.requested_mobile && <span style={{ fontSize: "12px" }} className="text-danger">{errors.requested_mobile}</span>}
                     </div>
                   </div>
