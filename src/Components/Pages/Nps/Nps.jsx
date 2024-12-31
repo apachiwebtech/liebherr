@@ -1,7 +1,99 @@
 import React from 'react';
 import Logo from '../../../images/Liebherr-logo-768x432.png'
+import Rating from '@mui/material/Rating';
+import { Base_Url, secretKey } from '../../Utils/Base_Url';
+import { useParams } from 'react-router-dom';
+import { useState } from 'react';
+import CryptoJS from 'crypto-js';
+import axios from 'axios';
 
 const ContactForm = () => {
+    const [formState, setFormState] = useState({
+        rating1: 0,
+        remark:"",
+        rating2:0
+    })
+    const [errors,setErrors] = useState({})
+    let {email, customerId, ticketNo} = useParams()
+    
+    try {
+        email = email.replace(/-/g, '+').replace(/_/g, '/');
+        const bytes = CryptoJS.AES.decrypt(email, secretKey);
+        email = bytes.toString(CryptoJS.enc.Utf8);
+    } catch (error) {
+        console.log("Error",error)
+    }
+
+    try {
+        customerId = customerId.replace(/-/g, '+').replace(/_/g, '/');
+        const bytes = CryptoJS.AES.decrypt(customerId, secretKey);
+        customerId = bytes.toString(CryptoJS.enc.Utf8);
+    } catch (error) {
+        console.log("Error",error)
+    }
+
+    try {
+        ticketNo = ticketNo.replace(/-/g, '+').replace(/_/g, '/');
+        const bytes = CryptoJS.AES.decrypt(ticketNo, secretKey);
+        ticketNo = bytes.toString(CryptoJS.enc.Utf8);
+    } catch (error) {
+        console.log("Error",error)
+    }
+    console.log(email, ticketNo, customerId)
+
+
+    let rating1Style="";
+    if(formState.rating1 <= 6){
+        rating1Style = 'bg-danger text-white';
+    }else if(formState.rating1 <= 8){
+        rating1Style = 'bg-warning text-white';
+    }else{
+        rating1Style = 'bg-success text-white';
+    }
+
+    const validateForm = ()=>{
+        let isValid = true
+        if(!formState.rating1){
+            isValid = false;
+            setErrors((prev)=>({...prev, rating1:"Rating is required"}))
+        }
+        if(!formState.remark){
+            isValid = false;
+            setErrors((prev)=>({...prev, remark:"Remark is required"}))
+        }
+        if(!formState.rating2){
+            isValid = false;
+            setErrors((prev)=>({...prev, rating2:"Rating is required"}))
+        }
+        return isValid;
+    }
+
+    const handleSubmit = (e)=>{
+        e.preventDefault();
+        setErrors({})
+        if(validateForm()){
+            
+            const data = {
+                rating1:formState.rating1,
+                remark: formState.remark,
+                rating2: formState.rating2,
+                email: email,
+                ticketNo: ticketNo,
+                customerId: customerId
+            }
+            axios.post(`${Base_Url}/awt_service_contact`,data)
+            .then((res)=>{
+                console.log(res);
+                setFormState({
+                    rating1: 0,
+                    remark:"",
+                    rating2:0
+                })
+            })
+            .catch((err)=>console.log(err))
+        }
+    }
+
     return (
         <div className="container my-5 col-md-8 " style={{ fontFamily: 'Arial, sans-serif' }} >
             <div className='mb-3'><img src={Logo} /></div>
@@ -11,8 +103,7 @@ const ContactForm = () => {
 
             <div className="card shadow-sm rounded-0 border-0" style={{ backgroundColor: "#d7d7d7" }}>
                 <div className="card-body">
-                    <form>
-
+                    <form onSubmit={handleSubmit}>
                         <div className="row mb-3 ">
                             <div className="col-md-12">
                                 <h5 className="mb-3 fw-bold">Contact Form</h5>
@@ -22,29 +113,37 @@ const ContactForm = () => {
                                 </label>
                                 <div className="container">
                                     <div className="row text-center">
-                                        <div className="d-flex">
-                                            <div className="flex-fill border-end border-dark py-2 bg-danger text-white">1</div>
-                                            <div className="flex-fill border-end border-dark py-2 bg-danger text-white">2</div>
-                                            <div className="flex-fill border-end border-dark py-2 bg-danger text-white">3</div>
-                                            <div className="flex-fill border-end border-dark py-2 bg-danger text-white">4</div>
-                                            <div className="flex-fill border-end border-dark py-2 bg-danger text-white">5</div>
-                                            <div className="flex-fill border-end border-dark py-2 bg-danger text-white">6</div>
-                                            <div className="flex-fill border-end border-dark py-2 bg-warning text-white">7</div>
-                                            <div className="flex-fill border-end border-dark py-2 bg-warning text-white">8</div>
-                                            <div className="flex-fill border-end border-dark py-2 bg-success text-white">9</div>
-                                            <div className="flex-fill py-2 bg-success text-white">10</div>
+                                        <div className="d-flex px-0">
+                                        {
+                                            Array.from({ length: 10 }, (_, i) => i + 1).map((num) => (
+                                                <div
+                                                    key={num}
+                                                    className={`${num!= 10?"border-end border-dark":"" } py-2 ${
+                                                        num <= formState.rating1
+                                                            ? rating1Style
+                                                            : 'bg-white text-black'
+                                                    }`}
+                                                    onClick={() =>
+                                                        setFormState((prev) => ({ ...prev, rating1: num }))
+                                                    }
+                                                    style={{ flex: 1 }}
+                                                >
+                                                    {num}
+                                                </div>
+                                            ))
+                                        }
                                         </div>
                                     </div>
 
                                     <div className="row text-center">
-                                        <div className="d-flex">
-                                            <div className="flex-fill py-1 bg-danger text-white" style={{ flex: "6" }}>Detractors</div>
-                                            <div className="flex-fill py-1 bg-warning text-white" style={{ flex: "2" }}>Passives</div>
-                                            <div className="flex-fill py-1 bg-success text-white" style={{ flex: "2" }}>Promoters</div>
+                                        <div className="d-flex px-0">
+                                            <div className=" py-1 bg-danger text-white" style={{ flex: 6 }}>Detractors</div>
+                                            <div className=" py-1 bg-warning text-white" style={{ flex: 2 }}>Passives</div>
+                                            <div className=" py-1 bg-success text-white" style={{ flex: 2 }}>Promoters</div>
                                         </div>
                                     </div>
                                 </div>
-
+                                {errors.rating1&&<p className='text-danger mt-1'>{errors.rating1}</p>}
                             </div>
                         </div>
 
@@ -53,12 +152,10 @@ const ContactForm = () => {
                                 <label htmlFor="q2" className="form-label">
                                     Remarks / Feedback <span className="text-danger">*</span>
                                 </label>
-                                <input
-                                    type="text"
-                                    className="form-control rounded-0 border border-dark"
-                                    id="q2"
-                                    placeholder=""
-                                />
+                                <textarea id='q2' className='form-control rounded-0 border border-dark' rows={5} value={formState.remark}
+                                    onChange={(e)=>setFormState((prev)=>({...prev,remark:e.target.value}))}>
+                                </textarea>
+                                {errors.remark&&<p className='text-danger mt-1'>{errors.remark}</p>}
                             </div>
                         </div>
 
@@ -67,30 +164,20 @@ const ContactForm = () => {
                                 <label htmlFor="q3" className="form-label">
                                     Help us to serve you better by Rating Service Engineer <span className="text-danger">*</span>
                                 </label>
-                                <div className="mb-4 p-3">
-                                    <h5>Questionnaire - 3</h5>
-                                    <p>Help us to serve you better by Rating Service Engineer</p>
+                                <div className="">
+                                    
+                                    
                                     <div id="star-rating">
-                                        <div className="rating-row">
-                                            <span className="star" data-value="1">★</span>
-                                        </div>
-                                        <div className="rating-row">
-                                            <span className="star" data-value="2">★</span>
-                                            <span className="star" data-value="3">★</span>
-                                        </div>
-                                        <div className="rating-row">
-                                            <span className="star" data-value="4">★</span>
-                                            <span className="star" data-value="5">★</span>
-                                            <span className="star" data-value="6">★</span>
-                                        </div>
-                                        <div className="rating-row">
-                                            <span className="star" data-value="7">★</span>
-                                            <span className="star" data-value="8">★</span>
-                                            <span className="star" data-value="9">★</span>
-                                            <span className="star" data-value="10">★</span>
-                                        </div>
+                                        <Rating
+                                            name="simple-controlled"
+                                            value={formState.rating2}
+                                            onChange={(event, newValue) => {
+                                              setFormState((prev)=>({...prev,rating2:newValue}))
+                                            }}
+                                        />
                                     </div>
                                 </div>
+                                {errors.rating2&&<p className='text-danger mt-1'>{errors.rating2}</p>}
                             </div>
                         </div>
 

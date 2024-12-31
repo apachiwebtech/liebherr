@@ -3256,7 +3256,7 @@ app.get("/getcvengineer/:pincode/:msp/:csp", authenticateToken, async (req, res)
   }
 });
 
-app.get("/getProducts", async (req, res) => {
+app.get("/getProducts",authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
@@ -3278,7 +3278,7 @@ app.get("/getProducts", async (req, res) => {
   }
 });
 
-app.get("/getchildfranchises", async (req, res) => {
+app.get("/getchildfranchises",authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
@@ -5355,7 +5355,7 @@ app.get("/getcustomerpopulate/:customerid", authenticateToken, async (req, res) 
     return res.status(500).json({ error: 'An error occurred while fetching data' });
   }
 });
-app.get("/requestchildfranchise/:id", async (req, res) => {
+app.get("/requestchildfranchise/:id",authenticateToken,  async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -9072,7 +9072,23 @@ app.post("/getquotationspare", authenticateToken, async (req, res) => {
   }
 })
 
+app.post("/awt_service_contact",async(req,res)=>{
+    try{
+        const {rating1, remark, rating2, email, customerId, ticketNo} = req.body;
+    
+        const pool = await poolPromise;
+    
+        const insertSql = `INSERT INTO awt_service_contact_form (customer_id, ticket_no, email, rating1, remark, rating2, created_date)
+                            VALUES ('${customerId}','${ticketNo}','${email}','${rating1}','${remark}','${rating2}',GETDATE())`;
+        
+        await pool.request().query(insertSql);
 
+        res.send({message:"Contact form submitted successfully"})
+    }catch(err){
+        console.log("error /awt_service_contact",err);
+        res.status(500).send({error:"Error occurred"});
+    }
+})
 
 
 

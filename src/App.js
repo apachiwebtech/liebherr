@@ -151,7 +151,7 @@ const Router = createBrowserRouter([
     element: <NotAuthenticate />,
   },
   {
-    path: "/nps/:email/:ticketno",
+    path: "/nps/:email/:ticketNo/:customerId",
     element: <Nps />,
   },
 
