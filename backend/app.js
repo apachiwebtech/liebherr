@@ -3497,8 +3497,12 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
     complaint_date, customer_name = "NA", contact_person, email, mobile, address,
     state, city, area, pincode, mode_of_contact, ticket_type, cust_type,
     warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks
-    , ticket_id, classification, priority, callType, requested_by, requested_email, requested_mobile, msp, csp, sales_partner, sales_partner2, salutation
+    , ticket_id, classification, priority, callType, requested_by, requested_email, requested_mobile, msp, csp, sales_partner, sales_partner2, salutation ,mwhatsapp,awhatsapp
   } = req.body;
+
+  
+
+
 
 
 
@@ -3691,13 +3695,13 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
           ticket_no, ticket_date, customer_name, customer_mobile, customer_email, address,
           state, city, area, pincode, customer_id, ModelNumber, ticket_type, call_type,
           call_status, warranty_status, invoice_date, call_charges, mode_of_contact,
-          contact_person,  created_date, created_by,  purchase_date, serial_no, child_service_partner, sevice_partner, specification ,customer_class,call_priority,requested_mobile,requested_email,requested_by,msp,csp,sales_partner,sales_partner2,call_remark,salutation,alt_mobile
+          contact_person,  created_date, created_by,  purchase_date, serial_no, child_service_partner, sevice_partner, specification ,customer_class,call_priority,requested_mobile,requested_email,requested_by,msp,csp,sales_partner,sales_partner2,call_remark,salutation,alt_mobile,mwhatsapp,awhatsapp
         )
         VALUES (
           @ticket_no, @complaint_date, @customer_name, @mobile, @email, @address,
           @state, @city, @area, @pincode, @customer_id, @model, @ticket_type, @cust_type,
           'Open', @warranty_status, @invoice_date, @call_charge, @mode_of_contact,
-          @contact_person,  @formattedDate, @created_by,  @purchase_date, @serial, @child_service_partner, @master_service_partner, @specification ,@classification , @priority ,@requested_mobile,@requested_email,@requested_by,@msp,@csp,@sales_partner,@sales_partner2,@call_remark,@salutation,@alt_mobile
+          @contact_person,  @formattedDate, @created_by,  @purchase_date, @serial, @child_service_partner, @master_service_partner, @specification ,@classification , @priority ,@requested_mobile,@requested_email,@requested_by,@msp,@csp,@sales_partner,@sales_partner2,@call_remark,@salutation,@alt_mobile,@mwhatsapp,@awhatsapp
         )
       `;
     } else {
@@ -3740,7 +3744,9 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
           sales_partner = @sales_partner,
           sales_partner2 = @sales_partner2,
           salutation = @salutation,
-          alt_mobile = @alt_mobile
+          alt_mobile = @alt_mobile,
+          mwhatsapp = @mwhatsapp,
+          awhatsapp = @awhatsapp
           WHERE
           id = @ticket_id
       `;
@@ -3789,6 +3795,8 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
       .input('sales_partner2', sales_partner2)
       .input('salutation', salutation)
       .input('alt_mobile', alt_mobile)
+      .input('awhatsapp', awhatsapp)
+      .input('mwhatsapp', mwhatsapp)
       .query(complaintSQL);
 
 
@@ -3849,8 +3857,11 @@ app.post("/u_complaint", authenticateToken, async (req, res) => {
   let {
     customer_name, contact_person, email, mobile, address,
     state, city, area, pincode, mode_of_contact, cust_type,
-    warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks, ticket_no, classification, priority, requested_by, requested_email, requested_mobile, sales_partner2, salutation
+    warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks, ticket_no, classification, priority, requested_by, requested_email, requested_mobile, sales_partner2, salutation ,mwhatsapp,awhatsapp
   } = req.body;
+
+
+  
 
 
 
@@ -3898,7 +3909,9 @@ SET
   requested_email = @requested_email,
   sales_partner2 = @sales_partner2,
   salutation = @salutation,
-  alt_mobile = @alt_mobile
+  alt_mobile = @alt_mobile,
+  mwhatsapp = @mwhatsapp,
+  awhatsapp = @awhatsapp
   WHERE
   ticket_no = @ticket_no
 `;
@@ -3941,6 +3954,8 @@ SET
       .input('sales_partner2', sales_partner2)
       .input('salutation', salutation)
       .input('alt_mobile', alt_mobile)
+      .input('mwhatsapp', mwhatsapp)
+      .input('awhatsapp', awhatsapp)
       .query(complaintSQL);
 
     //Remark insert query
@@ -7478,7 +7493,7 @@ app.post("/updateProduct", authenticateToken,
 //Complaint view Insert TicketFormData start
 
 app.post("/ticketFormData", authenticateToken, async (req, res) => {
-  const { ticket_no, serial_no, ModelNumber, engineerdata, call_status, sub_call_status, updated_by, group_code, site_defect, defect_type, engineername } = req.body;
+  const { ticket_no, serial_no, ModelNumber, engineerdata, call_status, sub_call_status, updated_by, group_code, site_defect, defect_type, engineername,activity_code } = req.body;
 
 
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
@@ -7521,14 +7536,15 @@ app.post("/ticketFormData", authenticateToken, async (req, res) => {
     const updateSql = `
       UPDATE complaint_ticket
       SET engineer_id = '${engineer_id}',call_status = '${call_status}' , updated_by = '${updated_by}', updated_date = '${formattedDate}' , sub_call_status  = '${sub_call_status}' ,group_code = '${group_code}' , defect_type = '${defect_type}'
-       , site_defect = '${site_defect}' ,assigned_to = '${engineer_name}'   WHERE ticket_no = '${ticket_no}'`;
+       , site_defect = '${site_defect}' ,assigned_to = '${engineer_name}',activity_code = '${activity_code}'   WHERE ticket_no = '${ticket_no}'`;
 
     await pool.request().query(updateSql);
 
     return res.status(200).json({ message: "Ticket Formdata updated successfully!" });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: "An error occurred while updating the ticket" });
+    return res.json(err)
+    // return res.status(500).json({ error: "An error occurred while updating the ticket" });
   }
 });
 
@@ -8350,10 +8366,9 @@ app.get("/getcomplainlistmsp", authenticateToken, async (req, res) => {
 
 //Register Page Complaint Duplicate Start
 
-app.get("/getmultiplelocation/:pincode", authenticateToken, async (req, res) => {
-  const { pincode } = req.params;
+app.get("/getmultiplelocation/:pincode/:classification", authenticateToken, async (req, res) => {
+  const { pincode ,classification } = req.params;
 
-  console.log(pincode);
 
 
   try {
@@ -8370,9 +8385,8 @@ app.get("/getmultiplelocation/:pincode", authenticateToken, async (req, res) => 
     LEFT JOIN pincode_allocation as o on p.pincode = o.pincode
 	LEFT JOIN awt_franchisemaster as f on f.licarecode = o.account_manager
 	LEFT JOIN awt_childfranchisemaster as fm on fm.licare_code = o.owner
-	where p.pincode = ${pincode}`
-    console.log(sql);
-
+	where p.pincode = ${pincode} and o.customer_classification = '${classification}'`
+    
     const result = await pool.request().query(sql);
 
     return res.json(result.recordset);
@@ -8611,7 +8625,7 @@ app.get("/getEndCustomerAddresses/:customerEndId", authenticateToken, async (req
     const pool = await poolPromise;
 
     // Directly inject the `id` into the query string
-    const sql = `SELECT * FROM awt_customerlocation WHERE customer_id =  '${customerEndId}' AND deleted = 0`;
+    const sql = `SELECT * FROM awt_customerlocation WHERE customer_id =  '${customerEndId}' AND deleted = 0 order by id desc`;
 
     // Execute the SQL query
 

@@ -38,9 +38,31 @@ export function Registercomplaint(params) {
   const [ticket, setTicket] = useState([])
   const [ticketno, setTicketNo] = useState([])
   const [ticketid, setTicketid] = useState('')
+  const [serialhide , setserialHide] = useState('')
+  const [purchasehide , setpurchseHide] = useState('')
+  const [classificationid , setClassification] = useState('')
   const token = localStorage.getItem("token");
   const fileInputRef = useRef();
   const { setHeaderState } = useOutletContext();
+  const [checkboxes, setCheckboxes] = useState({
+    awhatsaap: 0,
+    mwhatsapp: 0,
+  });
+
+  console.log(checkboxes.awhatsaap , "$$$")
+
+
+  const oncheckchange = (e) => {
+    const { name, checked } = e.target;
+    setCheckboxes((prev) => ({
+      ...prev,
+      [name]: checked ? 1 : 0, // Convert to 1 or 0
+    }));
+  };
+
+
+  console.log(checkboxes.awhatsaap,"$$$$")
+
   let { Comp_id } = useParams()
   // alert("this is")
   try {
@@ -139,9 +161,10 @@ export function Registercomplaint(params) {
     requested_by: "",
     requested_email: "",
     requested_mobile: "",
+
   })
 
-   console.log(value , ":::::")
+  console.log(purchase_data, ":::::")
   const getDateAfterOneYear = (value) => {
 
 
@@ -160,7 +183,7 @@ export function Registercomplaint(params) {
       // const lastDate = purchase_date;
       const lastDate = purchase_date.toISOString().split('T')[0];
 
-  
+
 
 
 
@@ -382,7 +405,7 @@ export function Registercomplaint(params) {
         },
       });
 
-      if (response.data.success) {
+      if (response.data) {
 
 
         // Optimistically update the addresses state
@@ -395,6 +418,7 @@ export function Registercomplaint(params) {
         setNewAddress('');
         setPincode('');
         closePopup();
+        alert("Data submitted")
       } else {
         console.error("Error submitting new address:", response.data.message);
       }
@@ -633,6 +657,10 @@ export function Registercomplaint(params) {
 
           setlocations({ childfranchiseem: res.data[0].child_service_partner, franchiseem: res.data[0].sevice_partner })
 
+          setCheckboxes({
+            mwhatsapp :res.data[0].mwhatsapp ,
+            awhatsaap : res.data[0].awhatsapp 
+          })
 
 
         }
@@ -682,7 +710,7 @@ export function Registercomplaint(params) {
     setHasSearched(true); // Set that a search has been performed
     setForm(false)
 
-   setHeaderState(true)
+    setHeaderState(true)
 
     axiosInstance.post(`${Base_Url}/getticketendcustomer`, { searchparam: serachval }, {
       headers: {
@@ -733,7 +761,7 @@ export function Registercomplaint(params) {
 
   }
 
-
+  console.log(value , "%%%%")
 
   const notify = () => toast.success('Data Submitted..');
 
@@ -767,7 +795,7 @@ export function Registercomplaint(params) {
         warrenty_status: value.warrenty_status,
         invoice_date: value.invoice_date,
         call_charge: value.call_charge,
-        cust_id:  value.customer_id || "", // Fix customer ID handling
+        cust_id: value.customer_id || "", // Fix customer ID handling
         model: value.model,
         serial: value.serial,
         purchase_date: purchase_data || value.purchase_date,
@@ -788,9 +816,12 @@ export function Registercomplaint(params) {
         csp: value.csp,
         sales_partner: value.sales_partner,
         sales_partner2: value.sales_partner2,
+        mwhatsapp : checkboxes.mwhatsapp,
+        awhatsapp : checkboxes.awhatsaap,
         ticket_id: ticketid
       };
-
+   
+  
 
       if (validateForm()) {
 
@@ -860,6 +891,8 @@ export function Registercomplaint(params) {
       requested_mobile: value.requested_mobile || "",
       sales_partner2: value.sales_partner2 || "",
       salutation: value.salutation || "",
+      mwhatsapp : checkboxes.mwhatsapp || 0,
+      awhatsapp : checkboxes.awhatsaap || 0,
       ticket_no: Comp_id
     };
 
@@ -979,14 +1012,16 @@ export function Registercomplaint(params) {
 
 
 
-  const fetchlocations = async (pincode) => {
-    if (pincode.length == 6) {
+  const fetchlocations = async (pincode ) => {
+    
+
+    if ((pincode &&  pincode.length == 6) || value.pincode != undefined ) {
 
 
       try {
 
         const response = await axiosInstance.get(
-          `${Base_Url}/getmultiplelocation/${pincode}`, {
+          `${Base_Url}/getmultiplelocation/${pincode || value.pincode}/${value.classification}`, {
           headers: {
             Authorization: token, // Send token in headers
           },
@@ -1018,15 +1053,32 @@ export function Registercomplaint(params) {
     }
   };
 
+
+  useEffect(() =>{
+
+
+    if(value.pincode != undefined && value.classification){
+      
+      fetchlocations()
+    }
+
+    
+  },[value.pincode,value.classification])
+
+
   const fetchserial = async (serial) => {
     try {
       const response = await axiosInstance.get(
-        `${Base_Url}/getserial/${serial}`, {
+        `${Base_Url}/getserial/${serial || value.serial}`, {
         headers: {
           Authorization: token, // Send token in headers
         },
       }
       );
+
+      setClassification(response.data[0].customerClassification)
+
+      
 
       if (response.data && response.data[0]) {
         const data = response.data[0];
@@ -1058,6 +1110,13 @@ export function Registercomplaint(params) {
   };
 
 
+  useEffect(() => {
+    if (value.serial != undefined) {
+      fetchserial()
+    }
+  }, [value.serial])
+
+
 
 
 
@@ -1087,6 +1146,8 @@ export function Registercomplaint(params) {
     )
       .then((res) => {
         setTicketid(res.data.id)
+        setserialHide(res.data.rowdata[0].serial_no)
+        setpurchseHide(res.data.rowdata[0].purchase_date)
         setadd_new_ticketdata(res.data.rowdata[0])
         setModelNumber(res.data.rowdata[0].ModelNumber)
         getDateAfterOneYear(res.data.rowdata[0].invoice_date)
@@ -1098,33 +1159,33 @@ export function Registercomplaint(params) {
   }
 
 
-  const getcustomerinfo = (cust_id) =>{
+  const getcustomerinfo = (cust_id) => {
 
 
     setForm(true)
     const data = {
-      cust_id : cust_id
+      cust_id: cust_id
     }
-    
-    axiosInstance.post(`${Base_Url}/getcustinfo` , data , {
+
+    axiosInstance.post(`${Base_Url}/getcustinfo`, data, {
       headers: {
         Authorization: token, // Send token in headers
       },
     })
-    .then((res) =>{
-      if (res.data && res.data.length > 0) {
-        
-        const customerInfo = res.data[0];
+      .then((res) => {
+        if (res.data && res.data.length > 0) {
 
-        setValue((prevState) => ({
-          ...prevState, // Spread existing state
-          customer_name: customerInfo.customer_name,
+          const customerInfo = res.data[0];
 
-        }));
-      } else {
-        console.error("No customer information found in response.");
-      }
-    })
+          setValue((prevState) => ({
+            ...prevState, // Spread existing state
+            customer_name: customerInfo.customer_name,
+
+          }));
+        } else {
+          console.error("No customer information found in response.");
+        }
+      })
   }
 
   useEffect(() => {
@@ -1227,18 +1288,15 @@ export function Registercomplaint(params) {
 
                   {addresses && addresses.length > 0 ? (
                     // Check if it's an array or a single object
-                    Array.isArray(addresses) ? (
-                      addresses.map((addressItem, index) => (
-                        <p
-                          key={addressItem.id || index}
-                          style={{
-                            fontSize: '12px',
-
-                          }}
-                        >
-                          {addressItem.address} , {addressItem.pincode_id}
-                        </p>
-                      ))
+                    Array.isArray(addresses) && addresses.length > 0 ? (
+                      <p
+                        key={addresses[0].id || 0}
+                        style={{
+                          fontSize: '12px',
+                        }}
+                      >
+                        {addresses[0].address} , {addresses[0].pincode_id}
+                      </p>
                     ) : (
                       <p
                         key="single-address"
@@ -1279,7 +1337,7 @@ export function Registercomplaint(params) {
                           {ProductCustomer.length == 0 ? <> <tr>
                             <td>
                               <div className="pb-2">
-                                <button  className="btn btn-sm btn-primary generateTicket" onClick={() =>getcustomerinfo(searchdata.customer_id)}>New Ticket</button>
+                                <button className="btn btn-sm btn-primary generateTicket" onClick={() => getcustomerinfo(searchdata.customer_id)}>New Ticket</button>
                               </div>
                             </td>
                           </tr></> : <> {ProductCustomer.map((item, index) => (
@@ -1377,7 +1435,7 @@ export function Registercomplaint(params) {
                           onChange={onHandleChange}
                           className="form-control"
                           placeholder="Enter.."
-
+                          disabled={serialhide == '' ? false : true}
                         />
                         {errors.serial && <span style={{ fontSize: "12px" }} className="text-danger">{errors.serial}</span>}
                       </div> : <div>{value.serial}</div>}
@@ -1400,7 +1458,7 @@ export function Registercomplaint(params) {
                   <div className="col-md-3">
                     <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Purchase Date</p>
 
-                    { !p_date ?
+                    {!p_date ?
                       <div className="mb-3">
                         <input
                           type="date"
@@ -1412,6 +1470,7 @@ export function Registercomplaint(params) {
                           value={purchase_data}
                           max={new Date().toISOString().split("T")[0]} // Set the maximum selectable date to today
                           className="form-control"
+                          disabled={purchasehide == '' ? false : true}
                         />
                         {errors.purchase_date && <span style={{ fontSize: "12px" }} className="text-danger">{errors.purchase_date}</span>}
                       </div> : <div>{purchase_data}</div>}
@@ -1421,7 +1480,7 @@ export function Registercomplaint(params) {
                   <div className="col-md-3">
                     <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Warranty Status</p>
                     <div className="mb-3">
-                      <select className="form-control" onChange={onHandleChange} value={warranty_status_data} name="warrenty_status">
+                      <select className="form-control" onChange={onHandleChange} value={warranty_status_data} name="warrenty_status" disabled={warranty_status_data == '' ? false : true}>
                         <option value="">Select Option</option>
                         <option value="WARRANTY">IN WARRANTY</option>
                         <option value="OUT OF WARRANTY">OUT OF WARRANTY</option>
@@ -1502,14 +1561,14 @@ export function Registercomplaint(params) {
                   </div>
                   <div className="col-md-4">
                     <div className="mb-3">
-                      <label htmlFor="exampleFormControlInput1" className="form-label">Mobile No. {value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}<input type="checkbox" />Whatsapp</label>
+                      <label htmlFor="exampleFormControlInput1" className="form-label">Mobile No. {value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}<input type="checkbox"  name = 'mwhatsapp' onChange={oncheckchange} checked={checkboxes.mwhatsapp === 1} />Whatsapp</label>
                       <input type="number" value={value.mobile} name="mobile" onChange={onHandleChange} className="form-control" placeholder="Enter Mobile" />
                       {errors.mobile && <span style={{ fontSize: "12px" }} className="text-danger">{errors.mobile}</span>}
                     </div>
                   </div>
                   <div className="col-md-4">
                     <div className="mb-3">
-                      <label htmlFor="exampleFormControlInput1" className="form-label">Alt. Mobile No. <input type="checkbox" />Whatsapp</label>
+                      <label htmlFor="exampleFormControlInput1" className="form-label">Alt. Mobile No. <input type="checkbox" name="awhatsaap" onChange={oncheckchange} checked={checkboxes.awhatsaap === 1} />Whatsapp</label>
                       <input type="number" className="form-control" value={value.alt_mobile} name="alt_mobile" onChange={onHandleChange} placeholder="Enter Mobile" />
                       {errors.alt_mobile && <span style={{ fontSize: "12px" }} className="text-danger">{errors.alt_mobile}</span>}
                     </div>
@@ -1632,7 +1691,7 @@ export function Registercomplaint(params) {
                             value={newAddress}
                             onChange={(e) => {
                               setNewAddress(e.target.value); // Update new address in state
-                              onhashchange(e);
+                              // onhashchange(e);
                             }}
                             placeholder="Enter New Address"
                           />
@@ -1826,7 +1885,7 @@ export function Registercomplaint(params) {
                   <div className="col-md-4">
                     <div className="mb-3">
                       <label className="form-label">Customer Classification{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
-                      <select className="form-control" onChange={onHandleChange} value={value.classification} name="classification" disabled>
+                      <select className="form-control" onChange={onHandleChange} value={value.classification} name="classification" disabled = {value.serial == undefined || value.serial == ''? false : true}>
                         <option value="">Select</option>
                         <option value="Consumer">Consumer</option>
                         <option value="Import">Import</option>

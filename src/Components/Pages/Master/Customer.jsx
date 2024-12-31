@@ -361,7 +361,7 @@ const Customer = () => {
                         )}
                       </div> */}
                       <div className="col-md-3 mb-3">
-                        <label htmlFor="Customerid" className="form-label">Customer ID<span className="text-danger">*</span></label>
+                        <label htmlFor="Customerid" className="form-label">Customer ID</label>
                         <input
                           type="text"
                           className="form-control"
@@ -371,6 +371,7 @@ const Customer = () => {
                           placeholder='Enter  Customer ID'
                           onChange={handleChange}
                           value={formData.customer_id}
+                          disabled
                         />
                         {errors.customer_lname && (
                           <small className="text-danger">{errors.customer_id}</small>

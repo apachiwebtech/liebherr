@@ -60,7 +60,8 @@ export function Complaintview(params) {
     spare_part_id: "",
     quantity: "",
     state: "",
-    city: ""
+    city: "",
+    activity_code: ""
   });
 
 
@@ -791,13 +792,13 @@ export function Complaintview(params) {
     const isValidValue = (value) => value !== null && value !== 'null' && value !== '';
 
 
-    if (
-      isValidValue(complaintview.defect_type) &&
-      isValidValue(complaintview.site_defect) &&
-      groupstatusid &&
-      complaintview.call_status === 'Closed'
-    ) {
 
+    if (
+
+      (complaintview.call_status === 'Closed'
+        ? isValidValue(complaintview.defect_type) && isValidValue(complaintview.site_defect) && groupstatusid
+        : true) // For other statuses, skip defect_type and site_defect validation
+    ) {
       const data = {
         serial_no: complaintview.serial_no,
         ModelNumber: complaintview.ModelNumber,
@@ -811,6 +812,7 @@ export function Complaintview(params) {
         defect_type: complaintview.defect_type,
         engineerdata: addedEngineers.map((item) => item.engineer_id),
         engineername: addedEngineers.map((item) => item.title),
+        activity_code: complaintview.activity_code
       };
 
       axiosInstance.post(`${Base_Url}/ticketFormData`, data, {
@@ -818,8 +820,7 @@ export function Complaintview(params) {
           Authorization: token, // Send token in headers
         },
       })
-        .then(response => {
-
+        .then((response) => {
           setComplaintview({
             ...complaintview,
             serial_no: '',
@@ -832,7 +833,7 @@ export function Complaintview(params) {
           setTicketUpdateSuccess({
             message: 'Ticket updated successfully!',
             visible: true,
-            type: 'success'
+            type: 'success',
           });
 
           // Hide the message after 3 seconds
@@ -840,39 +841,40 @@ export function Complaintview(params) {
             setTicketUpdateSuccess({
               message: '',
               visible: false,
-              type: 'success'
+              type: 'success',
             });
           }, 3000);
         })
-        .catch(error => {
-          console.error("Error updating ticket:", error);
+        .catch((error) => {
+          console.error('Error updating ticket:', error);
           setTicketUpdateSuccess({
             message: 'Error updating ticket. Please try again.',
             visible: true,
-            type: 'error'
+            type: 'error',
           });
 
           setTimeout(() => {
             setTicketUpdateSuccess({
               message: '',
               visible: false,
-              type: 'error'
+              type: 'error',
             });
           }, 3000);
         });
-
     } else {
       const isInvalidValue = (value) => !value || value === 'null';
 
       if (!groupstatusid) {
-        alert("Please select the group code");
-      } else if (isInvalidValue(complaintview.defect_type)) {
-        alert("Please select the Defect type");
-      } else if (isInvalidValue(complaintview.site_defect)) {
-        alert("Please select the site defect");
+        alert('Please select the group code');
+      } else if (complaintview.call_status === 'Closed') {
+        if (isInvalidValue(complaintview.defect_type)) {
+          alert('Please select the Defect type');
+        } else if (isInvalidValue(complaintview.site_defect)) {
+          alert('Please select the site defect');
+        }
       }
-
     }
+
 
 
   };
@@ -2202,19 +2204,24 @@ export function Complaintview(params) {
                   <div className="mt-3">
                     <h4 className="pname" style={{ fontSize: "14px" }}>Activity Code</h4>
                     <select
-                      name="site_defect"
+                      name="activity_code"
                       className="form-control"
-                      disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
+                      disabled={
+                        (closestatus === 'Closed' && subclosestatus === 'Fully') || closestatus === 'Cancelled'
+                      }
                       style={{ fontSize: "14px" }}
+                      value={complaintview.activity_code}
+                      onChange={handleModelChange}
                     >
-                      <option value="">Select </option>
+                      <option value="">Select</option>
                       {activity.map((item) => (
-                        <option key={item.id} value={item.title}>
+                        <option key={item.id} value={item.code}>
                           {item.code} - {item.title}
                         </option>
                       ))}
                     </select>
                   </div>
+
 
                 </>
               }
@@ -2314,7 +2321,7 @@ export function Complaintview(params) {
                       </tr>
                     </thead>
                     <tbody>
-                    
+
 
                       {addedSpareParts.filter(part => {
                         if (uniqueParts.has(part.article_code)) {
