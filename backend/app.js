@@ -3390,7 +3390,7 @@ app.get("/product_master", authenticateToken, async (req, res) => {
 //   } catch (err) {
 //     console.error(err);
 //     return res.json({ information: [], product: [] });
-//   } 
+//   }
 // });
 
 
@@ -3410,9 +3410,9 @@ app.post("/getticketendcustomer", authenticateToken, async (req, res) => {
 
     // First, check in complaints
     const checkInComplaint = `
-      SELECT * 
+      SELECT *
       FROM complaint_ticket
-      WHERE customer_email LIKE @searchparam 
+      WHERE customer_email LIKE @searchparam
          OR ticket_no LIKE @searchparam
          OR customer_name LIKE @searchparam
          OR serial_no LIKE @searchparam
@@ -3433,8 +3433,8 @@ app.post("/getticketendcustomer", authenticateToken, async (req, res) => {
     } else {
       // If no data in complaints, check in customers
       const checkFromCustomer = `
-        SELECT c.*, 
-               l.address, 
+        SELECT c.*,
+               l.address,
                CONCAT(c.customer_fname, ' ', c.customer_lname) AS customer_name
         FROM awt_customer AS c
         LEFT JOIN awt_customerlocation AS l ON c.customer_id = l.customer_id
@@ -3459,7 +3459,7 @@ app.post("/getticketendcustomer", authenticateToken, async (req, res) => {
     // Fetch product data only if customerId is available
     if (customerId) {
       const productQuery = `
-        SELECT * 
+        SELECT *
         FROM awt_uniqueproductmaster
         WHERE deleted = 0 AND CustomerID = @customerId
       `;
@@ -3657,7 +3657,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
 
 
-    // this is for generating ticket no  
+    // this is for generating ticket no
     const checkResult = await pool.request()
       .input('ticketType', sql.NVarChar, t_type)  // Define the parameter
       .query(`
@@ -8393,21 +8393,21 @@ app.get("/getserial/:serial", authenticateToken, async (req, res) => {
 
     const pool = await poolPromise;
 
-    const sql = `	SELECT  
-    asl.*, 
-    spm.SalesPartner, 
-    spm.SalesAM, 
-    CASE 
+    const sql = `	SELECT
+    asl.*,
+    spm.SalesPartner,
+    spm.SalesAM,
+    CASE
         WHEN asl.CountryofOrigin = 'India' THEN 'Consumer'
         ELSE 'Import'
     END AS customerClassification
-FROM 
+FROM
     awt_serial_list AS asl
-LEFT JOIN 
-    SalesPartnerMaster AS spm 
-ON 
+LEFT JOIN
+    SalesPartnerMaster AS spm
+ON
     asl.PrimarySalesDealer = spm.BPcode
-WHERE 
+WHERE
     asl.serial_no = @serial;
 `
 
@@ -8418,7 +8418,7 @@ WHERE
 
 
     const fallbackSql = `SELECT ac.salutation , ac.customer_fname ,ac.customer_lname , ac.customer_type , ac.customer_classification , ac.mobileno , ac.alt_mobileno,ac.email ,
-au.CustomerID , au.ModelNumber , au.address , au.region , au.state ,au.district , au.city , au.pincode ,au.purchase_date,spm.SalesPartner,au.serial_no , spm.SalesAM , au.customer_classification as customerClassification 
+au.CustomerID , au.ModelNumber , au.address , au.region , au.state ,au.district , au.city , au.pincode ,au.purchase_date,spm.SalesPartner,au.serial_no , spm.SalesAM , au.customer_classification as customerClassification
 FROM awt_uniqueproductmaster as au
 left join awt_customer as ac on ac.customer_id = au.CustomerID
 left join awt_serial_list as asl on asl.serial_no = au.serial_no
@@ -9072,25 +9072,41 @@ app.post("/getquotationspare", authenticateToken, async (req, res) => {
   }
 })
 
-app.post("/awt_service_contact",async(req,res)=>{
-    try{
-        const {rating1, remark, rating2, email, customerId, ticketNo} = req.body;
-    
-        const pool = await poolPromise;
-    
-        const insertSql = `INSERT INTO awt_service_contact_form (customer_id, ticket_no, email, rating1, remark, rating2, created_date)
-                            VALUES ('${customerId}','${ticketNo}','${email}','${rating1}','${remark}','${rating2}',GETDATE())`;
-        
-        await pool.request().query(insertSql);
+// const API_KEY = "a8f2b3c4-d5e6-7f8g-h9i0-12345jklmn67";
 
-        res.send({message:"Contact form submitted successfully"})
-    }catch(err){
-        console.log("error /awt_service_contact",err);
-        res.status(500).send({error:"Error occurred"});
-    }
-})
+app.post("/awt_service_contact", async (req, res) => {
+  // Validate API key
+  const apiKey = req.header('x-api-key'); // Get API key from request header
 
+  if (apiKey !== API_KEY) {
+    return res.status(403).json({ error: 'Forbidden: Invalid API key' });
+  }
 
+  try {
+    const { rating1, remark, rating2, email, customerId, ticketNo } = req.body;
 
+    const pool = await poolPromise;
 
+    const insertSql = `
+      INSERT INTO awt_service_contact_form (
+        customer_id, ticket_no, email, rating1, remark, rating2, created_date
+      ) VALUES (
+        @customerId, @ticketNo, @email, @rating1, @remark, @rating2, GETDATE()
+      )`;
 
+    const request = pool.request()
+      .input('customerId', customerId)
+      .input('ticketNo', ticketNo)
+      .input('email', email)
+      .input('rating1', rating1)
+      .input('remark', remark)
+      .input('rating2', rating2);
+
+    await request.query(insertSql);
+
+    res.send({ message: "Contact form submitted successfully" });
+  } catch (err) {
+    console.log("Error /awt_service_contact", err);
+    res.status(500).send({ error: "Error occurred", details: err.message });
+  }
+});

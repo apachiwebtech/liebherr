@@ -15,7 +15,7 @@ const ContactForm = () => {
     })
     const [errors,setErrors] = useState({})
     let {email, customerId, ticketNo} = useParams()
-    
+
     try {
         email = email.replace(/-/g, '+').replace(/_/g, '/');
         const bytes = CryptoJS.AES.decrypt(email, secretKey);
@@ -67,32 +67,35 @@ const ContactForm = () => {
         }
         return isValid;
     }
+    const handleSubmit = (e) => {
+      e.preventDefault();
+      setErrors({});
+      if (validateForm()) {
+          const data = {
+              rating1: formState.rating1,
+              remark: formState.remark,
+              rating2: formState.rating2,
+              email: email,
+              ticketNo: ticketNo,
+              customerId: customerId
+          };
 
-    const handleSubmit = (e)=>{
-        e.preventDefault();
-        setErrors({})
-        if(validateForm()){
-            
-            const data = {
-                rating1:formState.rating1,
-                remark: formState.remark,
-                rating2: formState.rating2,
-                email: email,
-                ticketNo: ticketNo,
-                customerId: customerId
-            }
-            axios.post(`${Base_Url}/awt_service_contact`,data)
-            .then((res)=>{
-                console.log(res);
-                setFormState({
-                    rating1: 0,
-                    remark:"",
-                    rating2:0
-                })
-            })
-            .catch((err)=>console.log(err))
-        }
-    }
+          axios.post(`${Base_Url}/awt_service_contact`, data, {
+              headers: {
+                  'x-api-key': 'a8f2b3c4-d5e6-7f8g-h9i0-12345jklmn67' // Include API key here
+              }
+          })
+          .then((res) => {
+              console.log(res);
+              setFormState({
+                  rating1: 0,
+                  remark: "",
+                  rating2: 0
+              });
+          })
+          .catch((err) => console.log(err));
+      }
+  };
 
     return (
         <div className="container my-5 col-md-8 " style={{ fontFamily: 'Arial, sans-serif' }} >
@@ -165,8 +168,8 @@ const ContactForm = () => {
                                     Help us to serve you better by Rating Service Engineer <span className="text-danger">*</span>
                                 </label>
                                 <div className="">
-                                    
-                                    
+
+
                                     <div id="star-rating">
                                         <Rating
                                             name="simple-controlled"
