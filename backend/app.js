@@ -3397,7 +3397,7 @@ app.get("/product_master", authenticateToken, async (req, res) => {
 app.post("/getticketendcustomer", authenticateToken, async (req, res) => {
   const { searchparam } = req.body;
 
-  // Return empty array if search param is empty
+  // Return empty array if searchparam is empty
   if (!searchparam) {
     return res.json([]);
   }
@@ -3405,56 +3405,54 @@ app.post("/getticketendcustomer", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
-    // Query for customer information
-    const checkfromcustomer = `
-      SELECT c.*, 
-             l.address, 
-             CONCAT(c.customer_fname, ' ', c.customer_lname) AS customer_name
-      FROM awt_customer AS c
-      LEFT JOIN awt_customerlocation AS l ON c.customer_id = l.customer_id
-      WHERE c.deleted = 0
-        AND (c.email LIKE @searchparam OR c.mobileno LIKE @searchparam)
-    `;
-
-    const custresult = await pool
-      .request()
-      .input("searchparam", `%${searchparam}%`)
-      .query(checkfromcustomer);
-
-    let information = custresult.recordset;
+    let information = [];
     let customerId = null;
 
+    // First, check in complaints
+    const checkInComplaint = `
+      SELECT * 
+      FROM complaint_ticket
+      WHERE customer_email LIKE @searchparam 
+         OR ticket_no LIKE @searchparam
+         OR customer_name LIKE @searchparam
+         OR serial_no LIKE @searchparam
+         OR customer_mobile LIKE @searchparam
+         OR customer_id LIKE @searchparam
+    `;
 
+    const complaintResult = await pool
+      .request()
+      .input("searchparam", `%${searchparam}%`)
+      .query(checkInComplaint);
 
-    // If no data is found in checkfromcustomer, check in complaints
-    if (information.length === 0) {
-      const checkincomplaint = `
-        SELECT * 
-        FROM complaint_ticket
-        WHERE customer_email LIKE @searchparam 
-           OR ticket_no LIKE @searchparam
-           OR customer_name LIKE @searchparam
-           OR serial_no LIKE @searchparam
-           OR customer_mobile LIKE @searchparam
-           OR customer_id LIKE @searchparam
+    information = complaintResult.recordset;
+
+    // If data is found in complaints, set customerId
+    if (information.length > 0) {
+      customerId = information[0].customer_id;
+    } else {
+      // If no data in complaints, check in customers
+      const checkFromCustomer = `
+        SELECT c.*, 
+               l.address, 
+               CONCAT(c.customer_fname, ' ', c.customer_lname) AS customer_name
+        FROM awt_customer AS c
+        LEFT JOIN awt_customerlocation AS l ON c.customer_id = l.customer_id
+        WHERE c.deleted = 0
+          AND (c.email LIKE @searchparam OR c.mobileno LIKE @searchparam)
       `;
 
-      const complaintResult = await pool
+      const customerResult = await pool
         .request()
         .input("searchparam", `%${searchparam}%`)
-        .query(checkincomplaint);
+        .query(checkFromCustomer);
 
-      information = complaintResult.recordset;
+      information = customerResult.recordset;
 
-
-
-      // Get customer_id from complaints if no data from customers
+      // Set customerId from customers if data is available
       if (information.length > 0) {
         customerId = information[0].customer_id;
       }
-    } else {
-      // Get customer_id from customers if data is available
-      customerId = information[0].customer_id;
     }
 
     let product = [];
@@ -3485,6 +3483,7 @@ app.post("/getticketendcustomer", authenticateToken, async (req, res) => {
     });
   }
 });
+
 
 
 
@@ -3591,10 +3590,10 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
       console.log(purchase_date, "Purchase")
 
       const productSQL = `INSERT INTO awt_uniqueproductmaster (
-        CustomerID, ModelNumber, serial_no,  pincode ,address,state,city,district ,purchase_date, created_date, created_by
+        CustomerID, ModelNumber, serial_no,  pincode ,address,state,city,district ,purchase_date, created_date, created_by,customer_classification
       )
       VALUES (
-        @customer_id, @model, @serial,  @pincode,@address,@state,@city,@area,@purchase_date,@formattedDate, @created_by
+        @customer_id, @model, @serial,  @pincode,@address,@state,@city,@area,@purchase_date,@formattedDate, @created_by,@customer_classification
       )`;
 
 
@@ -3611,6 +3610,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
         .input('area', area)
         .input('state', state)
         .input('city', city)
+        .input('customer_classification', classification)
         .query(productSQL);
 
       console.log(Unique, "Unique")
@@ -8823,10 +8823,13 @@ app.post(`/add_quotation`, authenticateToken, async (req, res) => {
       const { id, title, ItemDescription, price, product_code } = item;
       const date = new Date();
 
-      const addspare = `insert into awt_uniquespare ( quotation_id,ticketId , spareId , article_code ,article_description , price) values('${quotationcode}','${ticket_no}','${product_code}' ,'${title}','${ItemDescription}' , '${price}')`;
+      // const addspare = `insert into awt_uniquespare ( quotation_id,ticketId , spareId , article_code ,article_description , price) values('${quotationcode}','${ticket_no}','${product_code}' ,'${title}','${ItemDescription}' , '${price}')`;
 
 
-      await pool.request().query(addspare)
+      const updatespare = `update awt_uniquespare set quotation_id = '${quotationcode}' where id = '${id}'`
+
+
+      await pool.request().query(updatespare)
 
 
       // // Validate fields

@@ -378,7 +378,8 @@ app.post("/fetchshipment_fg", async (req, res) => {
     Shipment_id,
     Ship_date,
     Transaction_Type,
-    created_date
+    created_date,
+    customer_classification
   } = req.body;
 
   try {
@@ -428,17 +429,18 @@ app.post("/fetchshipment_fg", async (req, res) => {
       .input("Ship_date", sql.DateTime, Ship_date)
       .input("Transaction_Type", sql.VarChar, Transaction_Type)
       .input("created_date", sql.DateTime, created_date)
+      .input("customer_classification", sql.VarChar, customer_classification)
       .query(`
         INSERT INTO Shipment_Fg (
           InvoiceNumber, InvoiceDate, Invoice_bpcode, Invoice_bpName, Invoice_city, Invoice_state,
           orderType_desc, Customer_Po, Item_Code, Item_Description, Invoice_qty, Serial_no,
           compressor_bar, Manufacture_date, Vehicle_no, Vehicale_Type, Transporter_name, Lr_number,
-          Lr_date, Address_code, Address, Pincode, Shipment_id, Ship_date, Transaction_Type ,created_date
+          Lr_date, Address_code, Address, Pincode, Shipment_id, Ship_date, Transaction_Type ,created_date,customer_classification
         ) VALUES (
           @InvoiceNumber, @InvoiceDate, @Invoice_bpcode, @Invoice_bpName, @Invoice_city, @Invoice_state,
           @orderType_desc, @Customer_Po, @Item_Code, @Item_Description, @Invoice_qty, @Serial_no,
           @compressor_bar, @Manufacture_date, @Vehicle_no, @Vehicale_Type, @Transporter_name, @Lr_number,
-          @Lr_date, @Address_code, @Address, @Pincode, @Shipment_id, @Ship_date, @Transaction_Type ,@created_date
+          @Lr_date, @Address_code, @Address, @Pincode, @Shipment_id, @Ship_date, @Transaction_Type ,@created_date,@customer_classification
         )
       `);
 

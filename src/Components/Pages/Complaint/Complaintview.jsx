@@ -23,7 +23,7 @@ export function Complaintview(params) {
   const [quotation, setQuotation] = useState([]);
   const [activity, setactivity] = useState([]);
   let { complaintid } = useParams();
-
+  const uniqueParts = new Set();
   try {
     complaintid = complaintid.replace(/-/g, '+').replace(/_/g, '/');
     const bytes = CryptoJS.AES.decrypt(complaintid, secretKey);
@@ -455,10 +455,10 @@ export function Complaintview(params) {
 
 
     if (!complaintview.defect_type && complaintview.defect_type != "null" && complaintview.defect_type != null && complaintview.call_status == 'Closed') {
-    isValid = false;
-    newErrors.defect_type = "Name is required";
-  }
-  
+      isValid = false;
+      newErrors.defect_type = "Name is required";
+    }
+
 
 
     setErrors(newErrors);
@@ -789,9 +789,9 @@ export function Complaintview(params) {
 
 
     const isValidValue = (value) => value !== null && value !== 'null' && value !== '';
-   
 
-   if (
+
+    if (
       isValidValue(complaintview.defect_type) &&
       isValidValue(complaintview.site_defect) &&
       groupstatusid &&
@@ -861,7 +861,7 @@ export function Complaintview(params) {
           }, 3000);
         });
 
-    }else{
+    } else {
       const isInvalidValue = (value) => !value || value === 'null';
 
       if (!groupstatusid) {
@@ -871,7 +871,7 @@ export function Complaintview(params) {
       } else if (isInvalidValue(complaintview.site_defect)) {
         alert("Please select the site defect");
       }
-      
+
     }
 
 
@@ -2314,10 +2314,15 @@ export function Complaintview(params) {
                       </tr>
                     </thead>
                     <tbody>
-                      {addedSpareParts.map((part) => {
+                    
 
-
-
+                      {addedSpareParts.filter(part => {
+                        if (uniqueParts.has(part.article_code)) {
+                          return false; // Skip duplicate
+                        }
+                        uniqueParts.add(part.article_code);
+                        return true; // Include unique
+                      }).map((part) => {
                         return (
                           <tr key={part.id}>
                             <td>{part.article_code} - {part.article_description}</td>
@@ -2326,7 +2331,7 @@ export function Complaintview(params) {
                               <button
                                 className="btn btn-sm btn-danger"
                                 style={{ padding: "0.2rem 0.5rem" }}
-                                disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
+                                disabled={closestatus === 'Closed' && subclosestatus === 'Fully' || closestatus === 'Cancelled'}
                                 onClick={() => handleRemoveSparePart(part.id)}
                               >
                                 ✖
@@ -2335,6 +2340,7 @@ export function Complaintview(params) {
                           </tr>
                         );
                       })}
+
 
                     </tbody>
                   </table>
