@@ -57,10 +57,10 @@ const ContactForm = () => {
             isValid = false;
             setErrors((prev)=>({...prev, rating1:"Rating is required"}))
         }
-        if(!formState.remark){
-            isValid = false;
-            setErrors((prev)=>({...prev, remark:"Remark is required"}))
-        }
+        // if(!formState.remark){
+        //     isValid = false;
+        //     setErrors((prev)=>({...prev, remark:"Remark is required"}))
+        // }
         if(!formState.rating2){
             isValid = false;
             setErrors((prev)=>({...prev, rating2:"Rating is required"}))
@@ -101,7 +101,7 @@ const ContactForm = () => {
         <div className="container my-5 col-md-8 " style={{ fontFamily: 'Arial, sans-serif' }} >
             <div className='mb-3'><img src={Logo} /></div>
             <div className="mb-5">
-                <h1 className="">Online service contact form</h1>
+                {/* <h1 className="">Online service contact form</h1> */}
             </div>
 
             <div className="card shadow-sm rounded-0 border-0" style={{ backgroundColor: "#d7d7d7" }}>
@@ -109,7 +109,7 @@ const ContactForm = () => {
                     <form onSubmit={handleSubmit}>
                         <div className="row mb-3 ">
                             <div className="col-md-12">
-                                <h5 className="mb-3 fw-bold">Contact Form</h5>
+                                <h5 className="mb-3 fw-bold">Feedback Form</h5>
 
                                 <label htmlFor="q1" className="form-label">
                                     Would you recommend the Liebherr brand to your friends and relatives based on your experience? <span className="text-danger">*</span>
@@ -137,14 +137,14 @@ const ContactForm = () => {
                                         }
                                         </div>
                                     </div>
-
+{/* 
                                     <div className="row text-center">
                                         <div className="d-flex px-0">
                                             <div className=" py-1 bg-danger text-white" style={{ flex: 6 }}>Detractors</div>
                                             <div className=" py-1 bg-warning text-white" style={{ flex: 2 }}>Passives</div>
                                             <div className=" py-1 bg-success text-white" style={{ flex: 2 }}>Promoters</div>
                                         </div>
-                                    </div>
+                                    </div> */}
                                 </div>
                                 {errors.rating1&&<p className='text-danger mt-1'>{errors.rating1}</p>}
                             </div>
@@ -153,7 +153,7 @@ const ContactForm = () => {
                         <div className="row mb-3">
                             <div className="col-md-12">
                                 <label htmlFor="q2" className="form-label">
-                                    Remarks / Feedback <span className="text-danger">*</span>
+                                    Remarks / Feedback 
                                 </label>
                                 <textarea id='q2' className='form-control rounded-0 border border-dark' rows={5} value={formState.remark}
                                     onChange={(e)=>setFormState((prev)=>({...prev,remark:e.target.value}))}>

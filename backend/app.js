@@ -7205,34 +7205,34 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
   }
 });
 
-app.post("/uploadcomplaintattachments", upload.array("attachment"), async (req, res) => {
-  const { ticket_no, remark_id, created_by } = req.body;
+// app.post("/uploadcomplaintattachments", upload.array("attachment"), async (req, res) => {
+//   const { ticket_no, remark_id, created_by } = req.body;
 
-  if (!req.files || req.files.length === 0) {
-    return res.status(400).json({ error: "No files uploaded" });
-  }
+//   if (!req.files || req.files.length === 0) {
+//     return res.status(400).json({ error: "No files uploaded" });
+//   }
 
-  // Combine filenames into a single string
-  const attachments = req.files.map((file) => file.filename); // Get all filenames
-  const attachmentString = attachments.join(", "); // For a comma-separated string
+//   // Combine filenames into a single string
+//   const attachments = req.files.map((file) => file.filename); // Get all filenames
+//   const attachmentString = attachments.join(", "); // For a comma-separated string
 
-  try {
-    const pool = await poolPromise;
+//   try {
+//     const pool = await poolPromise;
 
-    // SQL query to insert attachments
-    const sql = `INSERT INTO awt_complaintattachment (remark_id, ticket_no, attachment, created_by, created_date)
-                    VALUES (${remark_id}, ${ticket_no}, '${attachmentString}', '${created_by}', GETDATE())`;
-    const result = await pool.request().query(sql);
+//     // SQL query to insert attachments
+//     const sql = `INSERT INTO awt_complaintattachment (remark_id, ticket_no, attachment, created_by, created_date)
+//                     VALUES (${remark_id}, ${ticket_no}, '${attachmentString}', '${created_by}', GETDATE())`;
+//     const result = await pool.request().query(sql);
 
-    res.json({
-      message: "Files uploaded successfully",
-      count: 1, // Only one entry created
-    });
-  } catch (err) {
-    console.error("Error inserting attachments:", err);
-    return res.status(500).json({ error: "Database error", details: err.message });
-  }
-});
+//     res.json({
+//       message: "Files uploaded successfully",
+//       count: 1, // Only one entry created
+//     });
+//   } catch (err) {
+//     console.error("Error inserting attachments:", err);
+//     return res.status(500).json({ error: "Database error", details: err.message });
+//   }
+// });
 
 app.get("/getComplaintDetails/:ticket_no", authenticateToken, async (req, res) => {
   const ticket_no = req.params.ticket_no;
