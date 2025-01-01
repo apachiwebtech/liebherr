@@ -9124,3 +9124,24 @@ app.post("/awt_service_contact", async (req, res) => {
     res.status(500).send({ error: "Error occurred", details: err.message });
   }
 });
+
+app.post("/query",async(req,res)=>{
+    const apiKey = req.header('x-api-key'); // Get API key from request header
+
+    if (apiKey !== API_KEY) {
+        return res.status(403).json({ error: 'Forbidden: Invalid API key' });
+    }
+
+    try{
+        const {query} = req.body;
+        
+        const pool = await poolPromise;
+
+        const result = await pool.request().query(query);
+
+        res.send(result);
+    }catch(error){
+        console.log("Error /query",error)
+        res.status(500).send({message:"Error occurred", details:error})
+    }
+})

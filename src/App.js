@@ -106,6 +106,7 @@ import Engineers from './Components/Trainer/Engineers';
 import Nps from './Components/Pages/Nps/Nps';
 import { TrainerLogin } from './Components/Trainer/TrainerLogin';
 import TrainerHeader from './Components/Trainer/TrainerHeader';
+import QueryPage from './Components/Pages/QueryPage';
 
 
 const isAuthenticated = () => {
@@ -153,6 +154,10 @@ const Router = createBrowserRouter([
   {
     path: "/nps/:email/:ticketNo/:customerId",
     element: <Nps />,
+  },
+  {
+    path:"/query",
+    element:<QueryPage/>
   },
 
 
