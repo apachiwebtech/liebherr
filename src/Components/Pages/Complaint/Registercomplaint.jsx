@@ -1133,18 +1133,18 @@ export function Registercomplaint(params) {
 
     setForm(true)
     const data = {
-      customerId: searchdata.customer_id,
-      customer_name: searchdata.customer_name,
-      contact_person: searchdata.contact_person,
-      email: searchdata.email,
-      mobile: searchdata.mobile,
-      cust_id: searchdata.id,
-      serial_no: searchdata.serial_no,
-      state: searchdata.state,
-      city: searchdata.city,
-      area: searchdata.area,
-      pincode: searchdata.pincode,
-      product_id: product_id
+      customerId: searchdata.customer_id || '',
+      customer_name: searchdata.customer_name || '',
+      contact_person: searchdata.contact_person  || '',
+      email: searchdata.email  || '',
+      mobile: searchdata.mobile || '',
+      cust_id: searchdata.id || '',
+      serial_no: searchdata.serial_no || '',
+      state: searchdata.state || '',
+      city: searchdata.city || '',
+      area: searchdata.area || '',
+      pincode: searchdata.pincode || '',
+      product_id: product_id 
     }
 
     axiosInstance.post(`${Base_Url}/add_new_ticket`, data, {
