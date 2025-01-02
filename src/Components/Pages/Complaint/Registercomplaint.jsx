@@ -1114,15 +1114,16 @@ export function Registercomplaint(params) {
   }, [value.serial])
 
   useEffect(() =>{
+    
 
 
-    if(value.pincode != undefined && !Comp_id){
+    if(value.pincode != undefined && value.classification && !Comp_id){
       
       fetchlocations()
     }
 
     
-  },[value.pincode])
+  },[value.pincode,value.classification])
 
 
 

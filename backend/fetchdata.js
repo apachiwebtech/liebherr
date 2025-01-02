@@ -444,6 +444,18 @@ app.post("/fetchshipment_fg", async (req, res) => {
         )
       `);
 
+   
+
+
+      const inserintoserial = 'insert into awt_serial_list(serial_no, ModelNumber,ItemNumber,CountryofOrigin,PrimarySalesDealer) values(@serial_no,@ModelNumber,@ItemNumber,@CountryofOrigin,@PrimarySalesDealer)';
+      await pool.request()
+      .input("serial_no", sql.VarChar, Serial_no)
+      .input("ModelNumber", sql.VarChar, Item_Description)
+      .input("ItemNumber", sql.VarChar, Item_Code)
+      .input("CountryofOrigin", sql.VarChar, Item_Description)
+      .input("PrimarySalesDealer", sql.VarChar, Invoice_bpName)
+      .query(inserintoserial)
+
     return res.json({
       message: "Added successfully!",
     });
