@@ -4279,27 +4279,10 @@ app.post("/putcustomer", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
 
 
-    // Step 1: Duplicate Check Query
-    const duplicateCheckSQL = `
-      SELECT * FROM awt_customer
-      WHERE email = @email
-      AND deleted = 0
-      AND id != @id
-    `;
 
-    console.log("Executing Duplicate Check SQL:", duplicateCheckSQL);
+   
 
-    const duplicateCheckResult = await pool.request()
-      .input('email', email)
-      .input('id', id)
-      .query(duplicateCheckSQL);
-
-    if (duplicateCheckResult.recordset.length > 0) {
-      return res.status(409).json({
-        message: "Duplicate entry,  Customer already exists!"
-      });
-    }
-
+  
     // Step 2: Update Query
     const updateSQL = `
      UPDATE awt_customer

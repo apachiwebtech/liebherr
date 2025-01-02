@@ -66,47 +66,47 @@ export function Customerlist(params) {
         try {
             // Initialize URLSearchParams for query parameters
             const params = new URLSearchParams();
-    
+
             // Add the page and pageSize parameters
             params.append('page', page || 1); // Current page number
             params.append('pageSize', pageSize); // Page size
-    
+
             // Add all filters to params if they have values
             Object.entries(searchFilters).forEach(([key, value]) => {
                 if (value) { // Only add if value is not empty
                     params.append(key, value);
                 }
             });
-    
+
             // Make the API call with query parameters and headers
             const response = await axiosInstance.get(`${Base_Url}/getcustomerlist?${params.toString()}`, {
                 headers: {
                     Authorization: token,
                 }
             });
-    
+
             // Update state with data and total record count
             setCustomerdata(response.data.data);
             setFilteredData(response.data.data);
-    
+
             // Store total count for pagination logic on the frontend
             setTotalCount(response.data.totalCount);
-    
+
         } catch (error) {
             console.error('Error fetching Customerdata:', error);
             setCustomerdata([]);
             setFilteredData([]);
         }
     };
-    
-
-    
 
 
-    useEffect(() =>{
-    fetchCustomerlist()
 
-    },[])
+
+
+    useEffect(() => {
+        fetchCustomerlist()
+
+    }, [])
 
 
 
@@ -256,12 +256,12 @@ export function Customerlist(params) {
                                             onChange={handleFilterChange}
                                         >
                                             <option value="selected">Select Customer Type</option>
-                                            <option value="EndCustomer">EndCustomer</option>
-                                            <option value="Sales Dealer WH/Display">Sales Dealer WH/Display</option>
-                                            <option value=" Service Partner">Service Partner</option>
-                                            <option value="Warehouse">Warehouse</option>
-                                            <option value="Lhidisplay">LHI Display/WH</option>
-                                            <option value="Sub-Dealer">Sub-Dealer</option>
+                                            <option value="END CUSTOMER">END CUSTOMER</option>
+                                            <option value="DISPLAY / EVENTS">DISPLAY / EVENTS</option>
+                                            <option value="SERVICE PARTNER">SERVICE PARTNER</option>
+                                            <option value="WAREHOUSE">WAREHOUSE</option>
+                                            <option value="LHI DISPLAY/WH">LHI DISPLAY/WH</option>
+                                            <option value="SUB-DEALER">SUB-DEALER</option>
 
                                         </select>
                                     </div>
