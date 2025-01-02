@@ -85,7 +85,7 @@ function Complainttabs() {
                     className={`nav-link ${activeTab === "/Activity" ? "active" : "onClick={() => setActiveTab('Activity')}"}`}
 
                   >
-                   Activity
+                   ACTIVITY
                   </button>
                 </li></Link>
               </ul>
