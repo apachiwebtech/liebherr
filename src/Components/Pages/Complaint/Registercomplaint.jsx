@@ -1137,7 +1137,7 @@ export function Registercomplaint(params) {
       customer_name: searchdata.customer_name || '',
       contact_person: searchdata.contact_person  || '',
       email: searchdata.email  || '',
-      mobile: String(searchdata.mobile) || '',
+      mobile: searchdata.mobile || '',
       cust_id: String(searchdata.id) || '',
       serial_no: String(searchdata.serial_no) || '',
       state: searchdata.state || '',
