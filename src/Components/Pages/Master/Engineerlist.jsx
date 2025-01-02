@@ -160,8 +160,13 @@ export function Engineerlist(params) {
                     <div className="card mb-3 tab_box">
 
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
-                            <div className='p-1 text-right'>
-                                <Link to={`/engineermaster`}><button className='btn btn-primary'>Add Engineer</button></Link>
+                        <div className="p-1 text-right">
+                                <button
+                                    className="btn btn-primary"
+                                    onClick={() => navigate("/EngineerMaster")}
+                                >
+                                    Add Engineer
+                                </button>
                             </div>
                             <table className="table">
                                 <thead>

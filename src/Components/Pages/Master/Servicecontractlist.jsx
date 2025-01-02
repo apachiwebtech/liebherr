@@ -187,8 +187,13 @@ export function Servicecontractlist(params) {
                     <div className="card mb-3 tab_box">
 
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
-                            <div className='p-1 text-right'>
-                                <Link to={`/Servicecontract`}><button className='btn btn-primary'>Add  Service Contract Registration </button></Link>
+                        <div className="p-1 text-right">
+                                <button
+                                    className="btn btn-primary"
+                                    onClick={() => navigate("/Servicecontract")}
+                                >
+                                    Add Service Contract Registration
+                                </button>
                             </div>
                             <div className="row mb-3">
 
