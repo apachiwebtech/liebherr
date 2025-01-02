@@ -7575,11 +7575,11 @@ app.post("/add_new_ticket", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
-    const productdetail = `select * from awt_uniqueproductmaster where ModelNumber LIKE '%${product_id}%' OR serial_no = '$${serial_no}%' OR CustomerID = '%${customerId}%'`
+    const productdetail = `select * from awt_uniqueproductmaster where CustomerID = '${customerId}'`
     const productdetailquery = await pool.request()
       .query(productdetail);
 
-
+    console.log(productdetail);
 
     const details = productdetailquery.recordset[0];
 
@@ -8434,11 +8434,9 @@ WHERE
 
 
     const fallbackSql = `SELECT ac.salutation , ac.customer_fname ,ac.customer_lname , ac.customer_type , ac.customer_classification , ac.mobileno , ac.alt_mobileno,ac.email ,
-au.CustomerID , au.ModelNumber , au.address , au.region , au.state ,au.district , au.city , au.pincode ,au.purchase_date,spm.SalesPartner,au.serial_no , spm.SalesAM , au.customer_classification as customerClassification
+au.CustomerID , au.ModelNumber , au.address , au.region , au.state ,au.district , au.city , au.pincode ,au.purchase_date,au.SalesDealer as SalesPartner,au.serial_no , au.SubDealer as SalesAM , au.customer_classification as customerClassification
 FROM awt_uniqueproductmaster as au
 left join awt_customer as ac on ac.customer_id = au.CustomerID
-left join awt_serial_list as asl on asl.serial_no = au.serial_no
-left join SalesPartnerMaster as spm on asl.PrimarySalesDealer =  spm.BPcode
 WHERE au.serial_no = @serial order by au.id desc`;
 
     const fallbackResult = await pool.request()
