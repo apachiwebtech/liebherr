@@ -398,8 +398,8 @@ const Customer = () => {
                         <label htmlFor="cclassification" className="form-label">Customer Classification<span className="text-danger">*</span></label>
                         <select id="cclassification" name="customer_classification" className="form-select" aria-label=".form-select-lg example" value={formData.customer_classification} onChange={handleChange} >
                           <option value="selected">Select Customer Classification</option>
-                          <option value="Import">Import</option>
-                          <option value="Consumer">Consumer</option>
+                          <option value="IMPORT">IMPORT</option>
+                          <option value="CONSUMER">CONSUMER</option>
                         </select>
                         {errors.customer_classification && (
                           <small className="text-danger">{errors.customer_classification}</small>
@@ -409,12 +409,12 @@ const Customer = () => {
                         <label htmlFor="custype" className="form-label">Customer Type<span className="text-danger">*</span></label>
                         <select id="custype" className="form-select" aria-label=".form-select-lg example" name="customer_type" value={formData.customer_type} onChange={handleChange} >
                           <option value="selected">Select Customer Type</option>
-                          <option value="EndCustomer">EndCustomer</option>
-                          <option value="Sales Dealer WH/Display">Sales Dealer WH/Display</option>
-                          <option value="Service Partner">Service Partner</option>
-                          <option value="Warehouse">Warehouse</option>
-                          <option value="Lhidisplay">LHI Display/WH</option>
-                          <option value="Sub-Dealer">Sub-Dealer</option>
+                          <option value="END CUSTOMER">END CUSTOMER</option>
+                          <option value="DISPLAY / EVENTS">DISPLAY / EVENTS</option>
+                          <option value="SERVICE PARTNER">SERVICE PARTNER</option>
+                          <option value="WAREHOUSE">WAREHOUSE</option>
+                          <option value="LHI DISPLAY/WH">LHI DISPLAY/WH</option>
+                          <option value="SUB-DEALER">SUB-DEALER</option>
                         </select>
                         {errors.customer_type && (
                           <small className="text-danger">{errors.customer_type}</small>
