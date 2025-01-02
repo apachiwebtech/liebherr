@@ -119,12 +119,12 @@ export function Franchisemasterlist(params) {
     }
   };
 
-    const sendtoedit = async (id) => {
-        id = id.toString()
-        let encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
-        encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-        navigate(`/Masterfranchise/${encrypted}`)
-    };
+  const sendtoedit = async (id) => {
+    id = id.toString()
+    let encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
+    encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    navigate(`/Masterfranchise/${encrypted}`)
+  };
   useEffect(() => {
     fetchFranchisemasterlist();
   }, []);
@@ -159,8 +159,12 @@ export function Franchisemasterlist(params) {
           <div className="card mb-3 tab_box">
 
             <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
-              <div className='p-1 text-right'>
-                <Link to={`/Masterfranchise`}><button className='btn btn-primary'>Add  Master Franchise </button></Link>
+              <div className="p-1 text-right">
+                <button
+                  className="btn btn-primary"
+                  onClick={() => navigate("/MasterFranchise")}
+                >
+                  Add  Master Service Partner                </button>
               </div>
               <table className="table">
                 <thead>
@@ -197,7 +201,7 @@ export function Franchisemasterlist(params) {
                         <td >
                           <button
                             className='btn'
-                             onClick={() => sendtoedit(item.id)}
+                            onClick={() => sendtoedit(item.id)}
                             title="Edit"
                             style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
                           >

@@ -10,31 +10,31 @@ import CryptoJS from 'crypto-js';
 
 
 export function AddProduct(params) {
-  const { loaders, axiosInstance } = useAxiosLoader();
-  const [error, setError] = useState({})
+    const { loaders, axiosInstance } = useAxiosLoader();
+    const [error, setError] = useState({})
     const [product_type, setProducttype] = useState([])
     const [product_line, setProductLine] = useState([])
     const [material, setMaterial] = useState([])
     const [facturer, setManufacturer] = useState([])
 
-   const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token");
 
     const [itemtype, setItemtype] = useState([])
     const [productclass, setPrductclass] = useState([])
-   
+
     let { productid } = useParams()
 
-   
-      
-        try{
-            productid = productid.replace(/-/g, '+').replace(/_/g, '/');
-            const bytes = CryptoJS.AES.decrypt(productid, secretKey);
-            const decrypted = bytes.toString(CryptoJS.enc.Utf8);
-            productid = parseInt(decrypted, 10)
-        }catch(error){
-            console.log("Error".error)
-        }
-        
+
+
+    try {
+        productid = productid.replace(/-/g, '+').replace(/_/g, '/');
+        const bytes = CryptoJS.AES.decrypt(productid, secretKey);
+        const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+        productid = parseInt(decrypted, 10)
+    } catch (error) {
+        console.log("Error".error)
+    }
+
 
     const navigate = useNavigate()
 
@@ -139,63 +139,63 @@ export function AddProduct(params) {
 
     async function getproducttype() {
         axiosInstance.get(`${Base_Url}/product_type`
-,{
+            , {
                 headers: {
-                  Authorization: token, // Send token in headers
+                    Authorization: token, // Send token in headers
                 },
-              })
+            })
             .then((res) => {
                 setProducttype(res.data)
             })
     }
 
     async function getproductline() {
-        axiosInstance.get(`${Base_Url}/fetchproductline`,{
+        axiosInstance.get(`${Base_Url}/fetchproductline`, {
             headers: {
-              Authorization: token, // Send token in headers
+                Authorization: token, // Send token in headers
             },
-          })
+        })
             .then((res) => {
                 setProductLine(res.data)
             })
     }
     async function getmaterial() {
         axiosInstance.get(`${Base_Url}/fetchmaterial`
-,{
+            , {
                 headers: {
-                  Authorization: token, // Send token in headers
+                    Authorization: token, // Send token in headers
                 },
-              })
+            })
             .then((res) => {
                 setMaterial(res.data)
             })
     }
     async function getItemtype() {
-        axiosInstance.get(`${Base_Url}/fetchitemtype`,{
+        axiosInstance.get(`${Base_Url}/fetchitemtype`, {
             headers: {
-              Authorization: token, // Send token in headers
+                Authorization: token, // Send token in headers
             },
-          })
+        })
             .then((res) => {
                 setItemtype(res.data)
             })
     }
     async function getproductclass() {
-        axiosInstance.get(`${Base_Url}/fetchproductclass`,{
+        axiosInstance.get(`${Base_Url}/fetchproductclass`, {
             headers: {
-              Authorization: token, // Send token in headers
+                Authorization: token, // Send token in headers
             },
-          })
+        })
             .then((res) => {
                 setPrductclass(res.data)
             })
     }
     async function getmanufacturer() {
-        axiosInstance.get(`${Base_Url}/fetchmanufacturer`,{
+        axiosInstance.get(`${Base_Url}/fetchmanufacturer`, {
             headers: {
-              Authorization: token, // Send token in headers
+                Authorization: token, // Send token in headers
             },
-          })
+        })
             .then((res) => {
                 setManufacturer(res.data)
             })
@@ -204,11 +204,11 @@ export function AddProduct(params) {
         const data = {
             productid: productid
         }
-        axiosInstance.post(`${Base_Url}/getupdateparam`, data,{
+        axiosInstance.post(`${Base_Url}/getupdateparam`, data, {
             headers: {
-              Authorization: token, // Send token in headers
+                Authorization: token, // Send token in headers
             },
-          })
+        })
             .then((res) => {
                 setValue({
                     item_code: res.data[0].item_code,
@@ -238,6 +238,8 @@ export function AddProduct(params) {
     }
 
 
+
+    console.log(productid, "$$$")
 
 
     useEffect(() => {
@@ -287,17 +289,17 @@ export function AddProduct(params) {
                 price_group: value.price_group || "",
                 mrp: value.mrp || "",
                 service_partner_basic: value.service_partner_basic || "",
-                uid:productid
+                uid: productid
 
             }
 
             if (productid != ":productid") {
-                axiosInstance.post(`${Base_Url}/updateProduct`, data,{
+                axiosInstance.post(`${Base_Url}/updateProduct`, data, {
                     headers: {
-                      Authorization: token, // Send token in headers
+                        Authorization: token, // Send token in headers
                     },
-                  }
-    )
+                }
+                )
                     .then((res) => {
                         alert("Data Submitted Successfully")
                         setValue({
@@ -325,40 +327,40 @@ export function AddProduct(params) {
                             service_partner_basic: ""
                         })
                     })
-            }else{
-                axiosInstance.post(`${Base_Url}/addProduct`, data,{
+            } else {
+                axiosInstance.post(`${Base_Url}/addProduct`, data, {
                     headers: {
-                      Authorization: token, // Send token in headers
+                        Authorization: token, // Send token in headers
                     },
-                  }
-    )
-                .then((res) => {
-                    alert("Data Submitted Successfully")
-                    setValue({
-                        item_code: "",
-                        item_description: "",
-                        product_model: "",
-                        product_type: "",
-                        product_class_code: "",
-                        product_class: "",
-                        product_line_code: "",
-                        product_line: "",
-                        material: "",
-                        manufacturer: "",
-                        item_type: "",
-                        serialized: "",
-                        size: "",
-                        crmproducttype: "",
-                        colour: "",
-                        handle_type: "",
-                        serial_identification: "",
-                        installation_type: "",
-                        customer_classification: "",
-                        price_group: "",
-                        mrp: "",
-                        service_partner_basic: ""
+                }
+                )
+                    .then((res) => {
+                        alert("Data Submitted Successfully")
+                        setValue({
+                            item_code: "",
+                            item_description: "",
+                            product_model: "",
+                            product_type: "",
+                            product_class_code: "",
+                            product_class: "",
+                            product_line_code: "",
+                            product_line: "",
+                            material: "",
+                            manufacturer: "",
+                            item_type: "",
+                            serialized: "",
+                            size: "",
+                            crmproducttype: "",
+                            colour: "",
+                            handle_type: "",
+                            serial_identification: "",
+                            installation_type: "",
+                            customer_classification: "",
+                            price_group: "",
+                            mrp: "",
+                            service_partner_basic: ""
+                        })
                     })
-                })
             }
 
 
@@ -369,11 +371,11 @@ export function AddProduct(params) {
 
     return (
         <div className="tab-content">
-              {loaders && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <SyncLoader loading={loaders} color="#FFFFFF" />
-        </div>
-      )}
+            {loaders && (
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <SyncLoader loading={loaders} color="#FFFFFF" />
+                </div>
+            )}
             <div className="row mp0" >
                 <div className="col-md-12 col-12">
                     <div className="card col-md-12 tab_box">
@@ -389,25 +391,20 @@ export function AddProduct(params) {
                             >
 
                                 <div className="form-group col-lg-3">
-                                    <label
-                                        htmlFor="regionInput"
-                                        className="input-field"
-                                        style={{ marginBottom: "15px", fontSize: "18px" }}
-                                    >
-                                        Item Code <span className='text-danger'>*</span>{error.item_code && <sapn className="text-danger">{error.item_code}</sapn>}
+                                    <label htmlFor="item_code" className="input-field">
+                                        Item Code
                                     </label>
                                     <input
                                         type="text"
                                         className="form-control"
                                         name="item_code"
-                                        id="subcatInput"
-                                        value={value.item_code}
+                                        id="item_code"
+                                        value={value.item_code || ''}
                                         onChange={handleChange}
-                                        placeholder="Enter.."
-                                    />
-
-
+                                        placeholder="Enter Item Code"
+                                    />  
                                 </div>
+
                                 <div className="form-group col-lg-6">
                                     <label
                                         htmlFor="regionInput"

@@ -145,6 +145,7 @@ export function ChildFranchiselist(params) {
 
     return (
         <div className="tab-content">
+            <Franchisemaster />
             {loaders && (
                 <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     <SyncLoader loading={loaders} color="#FFFFFF" />
@@ -163,20 +164,21 @@ export function ChildFranchiselist(params) {
                                     Add Child Master Franchise
                                 </button>
                             </div>
+                            <div className='table-responsive' >
                             <table className="table">
                                 <thead>
                                     <tr>
                                         <th width="3%">#</th>
-                                        <th width="15%">Parent Franchise Name</th>
-                                        <th width="15%">Child Franchise Name</th>
-                                        <th width="8%">Email</th>
-                                        <th width="8%">Mobile No</th>
+                                        <th width="2%">Parent Franchise Name</th>
+                                        <th width="8%"> Name</th>
+                                        <th width="3%">Email</th>
+                                        <th width="3%">Mobile No</th>
                                         <th width="8%">Licare Code</th>
-                                        <th width="15%">Partner Name</th>
-                                        <th width="10%">Country</th>
+                                        <th width="8%">Partner Name</th>
+                                        <th width="8%">Country</th>
                                         <th width="8%">Region</th>
-                                        <th width="10%">State</th>
-                                        <th width="10%">District</th>
+                                        <th width="8%">State</th>
+                                        <th width="5%">District</th>
                                         <th width="5%">Edit</th>
                                     </tr>
                                 </thead>
@@ -188,7 +190,7 @@ export function ChildFranchiselist(params) {
                                                 <td >{index + 1}</td>
                                                 <td >{item.parentfranchisetitle}</td>
                                                 <td >{item.title}</td>
-                                                <td >{item.email}</td>
+                                                <td width="5%" >{item.email}</td>
                                                 <td >{item.mobile_no}</td>
                                                 <td >{item.licare_code}</td>
                                                 <td >{item.partner_name}</td>
@@ -225,6 +227,7 @@ export function ChildFranchiselist(params) {
 
                                 </tbody>
                             </table>
+                            </div>  
                         </div>
                     </div>
                 </div>
