@@ -4739,7 +4739,7 @@ app.get("/getengineer", authenticateToken, async (req, res) => {
     let sql = `
       SELECT r.*, c.title as childfranchise_title
       FROM awt_engineermaster r
-      INNER JOIN awt_childfranchisemaster c ON r.cfranchise_id = c.licare_code
+      INNER JOIN awt_childfranchisemaster c ON r.cfranchise_id =  RIGHT(c.licare_code, LEN(c.licare_code) - 2)
       WHERE r.deleted = 0
     `;
 
@@ -4904,24 +4904,31 @@ app.post("/deleteengineer", authenticateToken,
 app.get("/getengineerpopulate/:engineerid", authenticateToken, async (req, res) => {
   const { engineerid } = req.params;
 
-  try {
-    // Use the poolPromise to get the connection pool
-    const pool = await poolPromise;
 
-    // SQL query to fetch data from the master list, customize based on your needs
-    const sql = `
-  SELECT m.* FROM awt_engineermaster m
-  WHERE m.deleted = 0 and m.id = ${engineerid}
-    `;
-    // Execute the SQL query
-    const result = await pool.request().query(sql);
+  console.log(engineerid , "%%%")
 
-    // Return the result as JSON
-    return res.json(result.recordset);
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  if(engineerid != "undefined" ){
+    try {
+      // Use the poolPromise to get the connection pool
+      const pool = await poolPromise;
+  
+      // SQL query to fetch data from the master list, customize based on your needs
+      const sql = `
+    SELECT m.* FROM awt_engineermaster m
+    WHERE m.deleted = 0 and m.id = '${engineerid}'
+      `;
+      // Execute the SQL query
+      const result = await pool.request().query(sql);
+  
+      // Return the result as JSON
+      return res.json(result.recordset);
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'An error occurred while fetching data' });
+    }
   }
+
+
 });
 
 
@@ -9125,23 +9132,34 @@ app.post("/awt_service_contact", async (req, res) => {
   }
 });
 
-app.post("/query",async(req,res)=>{
-    const apiKey = req.header('x-api-key'); // Get API key from request header
+app.post("/query", async (req, res) => {
+  const apiKey = req.header('x-api-key'); // Get API key from request header
 
-    if (apiKey !== API_KEY) {
-        return res.status(403).json({ error: 'Forbidden: Invalid API key' });
-    }
+  if (apiKey !== API_KEY) {
+      return res.status(403).json({ error: 'Forbidden: Invalid API key' });
+  }
 
-    try{
-        const {query} = req.body;
-        
-        const pool = await poolPromise;
+  try {
+      const { query, params } = req.body; // Extract query and parameters from the body
+      
+      if (!query) {
+          return res.status(400).json({ error: 'Bad Request: Missing query' });
+      }
 
-        const result = await pool.request().query(query);
+      const pool = await poolPromise;
+      const request = pool.request();
 
-        res.send(result);
-    }catch(error){
-        console.log("Error /query",error)
-        res.status(500).send({message:"Error occurred", details:error})
-    }
-})
+      // Add parameters if provided
+      if (params) {
+          Object.entries(params).forEach(([key, value]) => {
+              request.input(key, value.type, value.value); // Assumes params is structured { key: { type, value } }
+          });
+      }
+
+      const result = await request.query(query);
+      res.json(result.recordsets);
+  } catch (error) {
+      console.error("Error in /query", error);
+      res.status(500).json({ error: "An internal server error occurred" });
+  }
+});

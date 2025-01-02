@@ -566,7 +566,7 @@ export function Complaintlist(params) {
                 >
                   <option value=""> SELECT</option>
                   <option value="Import">Import</option>
-                  <option value="India">India</option>
+                  <option value="Consumer">Consumer</option>
                 </select>
               </div>
             </div>

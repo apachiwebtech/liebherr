@@ -64,40 +64,49 @@ export function Customerlist(params) {
 
     const fetchCustomerlist = async (page) => {
         try {
-
+            // Initialize URLSearchParams for query parameters
             const params = new URLSearchParams();
-
-            params = {
-                page: page, // Current page number
-                pageSize: pageSize, // Page size
-            };
-
-            // Add all filters to params
+    
+            // Add the page and pageSize parameters
+            params.append('page', page || 1); // Current page number
+            params.append('pageSize', pageSize); // Page size
+    
+            // Add all filters to params if they have values
             Object.entries(searchFilters).forEach(([key, value]) => {
                 if (value) { // Only add if value is not empty
                     params.append(key, value);
                 }
             });
-
-            const response = await axiosInstance.get(`${Base_Url}/getcustomerlist?${params}`, {
+    
+            // Make the API call with query parameters and headers
+            const response = await axiosInstance.get(`${Base_Url}/getcustomerlist?${params.toString()}`, {
                 headers: {
                     Authorization: token,
                 }
             });
-
+    
             // Update state with data and total record count
             setCustomerdata(response.data.data);
             setFilteredData(response.data.data);
-
-            // You can store total count for pagination logic on the frontend
+    
+            // Store total count for pagination logic on the frontend
             setTotalCount(response.data.totalCount);
-
+    
         } catch (error) {
             console.error('Error fetching Customerdata:', error);
             setCustomerdata([]);
             setFilteredData([]);
         }
     };
+    
+
+    
+
+
+    useEffect(() =>{
+    fetchCustomerlist()
+
+    },[])
 
 
 
@@ -200,10 +209,7 @@ export function Customerlist(params) {
 
     const navigate = useNavigate()
 
-    useEffect(() => {
-        fetchCustomerlist();
 
-    }, []);
 
     return (
         <div className="tab-content">

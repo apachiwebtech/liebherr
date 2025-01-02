@@ -339,7 +339,7 @@ const EngineerMaster = () => {
 
   const indexOfLastUser = (currentPage + 1) * itemsPerPage;
   const indexOfFirstUser = indexOfLastUser - itemsPerPage;
-  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+  // const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
   return (
     <div className="tab-content">

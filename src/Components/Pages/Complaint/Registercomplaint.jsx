@@ -1095,10 +1095,6 @@ export function Registercomplaint(params) {
           alt_mobile: data.alt_mobileno || "",
           email: data.email || "",
           address: data.address || "",
-          state: data.state || "",
-          area: data.district || "",
-          city: data.city || "",
-          pincode: data.pincode || "",
           customer_id: data.CustomerID || "",
         });
       }
