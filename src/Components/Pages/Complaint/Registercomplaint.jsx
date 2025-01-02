@@ -49,7 +49,12 @@ export function Registercomplaint(params) {
     mwhatsapp: 0,
   });
 
-  console.log(checkboxes.awhatsaap , "$$$")
+  const handleKeyDown = (e) => {
+    // Prevent '+' and '-' keys
+    if (e.key === "-" || e.key === "+") {
+      e.preventDefault();
+    }
+  };
 
 
   const oncheckchange = (e) => {
@@ -263,7 +268,7 @@ export function Registercomplaint(params) {
     }
 
     if (value.alt_mobile && !validateMobile(value.alt_mobile)) {
-      newErrors.alt_mobile = "Please enter a valid alternate mobile number (10 to 15 digits).";
+      newErrors.alt_mobile = "Please enter a valid 10-digit mobile number.";
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -303,7 +308,7 @@ export function Registercomplaint(params) {
     // }
     if (value.requested_mobile && !validateMobile(value.requested_mobile)) {
       isValid = false;
-      newErrors.requested_mobile = "Please enter a valid mobile number (10 to 15 digits).";
+      newErrors.requested_mobile = "Please enter a valid 10-digit mobile number.";
     }
 
     if (!value.classification && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
@@ -1057,7 +1062,7 @@ export function Registercomplaint(params) {
   useEffect(() =>{
 
 
-    if(value.pincode != undefined && value.classification){
+    if(value.pincode != undefined && value.classification && !Comp_id){
       
       fetchlocations()
     }
@@ -1107,7 +1112,7 @@ export function Registercomplaint(params) {
 
 
   useEffect(() => {
-    if (value.serial != undefined) {
+    if (value.serial != undefined && !Comp_id) {
       fetchserial()
     }
   }, [value.serial])
@@ -1558,14 +1563,14 @@ export function Registercomplaint(params) {
                   <div className="col-md-4">
                     <div className="mb-3">
                       <label htmlFor="exampleFormControlInput1" className="form-label">Mobile No. {value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}<input type="checkbox"  name = 'mwhatsapp' onChange={oncheckchange} checked={checkboxes.mwhatsapp === 1} />Whatsapp</label>
-                      <input type="number" value={value.mobile} name="mobile" onChange={onHandleChange} className="form-control" placeholder="Enter Mobile" />
+                      <input type="number" onKeyDown={handleKeyDown} value={value.mobile} name="mobile" onChange={onHandleChange} className="form-control" placeholder="Enter Mobile" />
                       {errors.mobile && <span style={{ fontSize: "12px" }} className="text-danger">{errors.mobile}</span>}
                     </div>
                   </div>
                   <div className="col-md-4">
                     <div className="mb-3">
                       <label htmlFor="exampleFormControlInput1" className="form-label">Alt. Mobile No. <input type="checkbox" name="awhatsaap" onChange={oncheckchange} checked={checkboxes.awhatsaap === 1} />Whatsapp</label>
-                      <input type="number" className="form-control" value={value.alt_mobile} name="alt_mobile" onChange={onHandleChange} placeholder="Enter Mobile" />
+                      <input type="number" onKeyDown={handleKeyDown}  className="form-control" value={value.alt_mobile} name="alt_mobile" onChange={onHandleChange} placeholder="Enter Mobile" />
                       {errors.alt_mobile && <span style={{ fontSize: "12px" }} className="text-danger">{errors.alt_mobile}</span>}
                     </div>
                   </div>
@@ -1812,7 +1817,7 @@ export function Registercomplaint(params) {
                   <div className="col-md-4">
                     <div className="mb-3">
                       <label htmlFor="exampleFormControlInput1" className="form-label">Requested Mobile </label>
-                      <input type="number" className="form-control" value={value.requested_mobile} name="requested_mobile" onChange={onHandleChange} placeholder="" />
+                      <input type="number"  className="form-control" value={value.requested_mobile} name="requested_mobile" onKeyDown={handleKeyDown} onChange={onHandleChange} placeholder="" />
                       {errors.requested_mobile && <span style={{ fontSize: "12px" }} className="text-danger">{errors.requested_mobile}</span>}
                     </div>
                   </div>

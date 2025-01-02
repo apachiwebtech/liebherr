@@ -3657,7 +3657,15 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
 
 
+   const test = `SELECT Top 1 ticket_no
+        FROM complaint_ticket
+        WHERE ticket_no LIKE @ticketType + 'H' + '%'
+          AND ticket_date >= CAST(DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0) AS DATE)
+          AND ticket_date < CAST(DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) + 1, 0) AS DATE)
+        ORDER BY ticket_no Desc`
 
+
+        console.log(test,"EEE")
 
 
 
@@ -3667,13 +3675,17 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
       .query(`
         SELECT Top 1 ticket_no
         FROM complaint_ticket
-        WHERE ticket_no LIKE @ticketType + '%'
+        WHERE ticket_no LIKE @ticketType + 'H' + '%'
           AND ticket_date >= CAST(DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0) AS DATE)
           AND ticket_date < CAST(DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) + 1, 0) AS DATE)
         ORDER BY ticket_no Desc;
       `);
 
-    const count = checkResult.recordset[0] ? checkResult.recordset[0].ticket_no : 'G0000';
+
+
+    const count = checkResult.recordset[0] ? checkResult.recordset[0].ticket_no : 'H0000';
+
+    console.log(count)
 
 
 
@@ -3685,7 +3697,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
     const newcount = Number(lastFourDigits) + 1
 
     const formatDate = `${(new Date().getMonth() + 1).toString().padStart(2, '0')}${new Date().getDate().toString().padStart(2, '0')}`;
-    const ticket_no = `${t_type}G${formatDate}-${newcount.toString().padStart(4, "0")}`;
+    const ticket_no = `${t_type}H${formatDate}-${newcount.toString().padStart(4, "0")}`;
 
     let complaintSQL
 
