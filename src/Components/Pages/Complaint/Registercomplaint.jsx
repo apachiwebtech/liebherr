@@ -66,7 +66,7 @@ export function Registercomplaint(params) {
   };
 
 
-  console.log(checkboxes.awhatsaap,"$$$$")
+
 
   let { Comp_id } = useParams()
   // alert("this is")
@@ -169,7 +169,7 @@ export function Registercomplaint(params) {
 
   })
 
-  console.log(purchase_data, ":::::")
+
   const getDateAfterOneYear = (value) => {
 
 
@@ -766,7 +766,7 @@ export function Registercomplaint(params) {
 
   }
 
-  console.log(value , "%%%%")
+
 
   const notify = () => toast.success('Data Submitted..');
 
@@ -1035,6 +1035,8 @@ export function Registercomplaint(params) {
 
         if (response.data && response.data[0]) {
 
+          console.log("location")
+
           setlocations({ franchiseem: response.data[0].mspname, childfranchiseem: response.data[0].cspname })
 
           setValue({
@@ -1059,16 +1061,7 @@ export function Registercomplaint(params) {
   };
 
 
-  useEffect(() =>{
 
-
-    if(value.pincode != undefined && value.classification && !Comp_id){
-      
-      fetchlocations()
-    }
-
-    
-  },[value.pincode,value.classification])
 
 
   const fetchserial = async (serial) => {
@@ -1086,6 +1079,8 @@ export function Registercomplaint(params) {
       
 
       if (response.data && response.data[0]) {
+
+        console.log("serial")
         const data = response.data[0];
         setValue({
           ...value,
@@ -1112,10 +1107,22 @@ export function Registercomplaint(params) {
 
 
   useEffect(() => {
-    if (value.serial != undefined && !Comp_id) {
+    if (value.serial != undefined && !Comp_id && !classificationid ) {
       fetchserial()
-    }
+      
+    } 
   }, [value.serial])
+
+  useEffect(() =>{
+
+
+    if(value.pincode != undefined && !Comp_id){
+      
+      fetchlocations()
+    }
+
+    
+  },[value.pincode])
 
 
 
