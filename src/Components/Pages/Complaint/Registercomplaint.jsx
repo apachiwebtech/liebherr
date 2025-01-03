@@ -821,9 +821,9 @@ export function Registercomplaint(params) {
         csp: value.csp,
         sales_partner: value.sales_partner,
         sales_partner2: value.sales_partner2,
-        mwhatsapp : checkboxes.mwhatsapp,
-        awhatsapp : checkboxes.awhatsaap,
-        ticket_id: ticketid
+        mwhatsapp : String(checkboxes.mwhatsapp),
+        awhatsapp : String(checkboxes.awhatsaap),
+        ticket_id: String(ticketid)
       };
    
   
