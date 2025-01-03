@@ -1,4 +1,4 @@
-import React, { useEffect,useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import Ratecard from "./Ratecard";
@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 function Ratecardtabs() {
   const [activeTab, setActiveTab] = useState("Ratecard");
 
- 
+
   useEffect(() => {
 
     setActiveTab(window.location.pathname);
@@ -45,7 +45,7 @@ function Ratecardtabs() {
       <div className="container-fluid p-0">
         {/* Top Header */}
         <div className="text-left headings">
-          <span style={{ paddingLeft: "20px",color:'#FFFFFF' }}>RATE CARD MATRIX MASTER </span>
+          <span style={{ paddingLeft: "20px", color: '#FFFFFF' }}>RATE CARD MATRIX MASTER </span>
         </div>
 
         {/* Nav Tabs */}
@@ -62,16 +62,39 @@ function Ratecardtabs() {
                 }}
               >
                 <ul className="nav nav-tabs ">
-                <Link to={`/serviceagent`}> <li className="nav-item">
-                    <button
-                      className={`nav-link ${
-                        activeTab === "Ratecard" ? "active" : "onClick={() => setActiveTab('Ratecard')}"
-                      }`}
-                      
-                    >
-                      RATE CARD MATRIX
-                    </button>
-                  </li></Link>
+                  <Link to={`/ratecard`}>
+                    <li className="nav-item">
+                      <button
+                        className={`nav-link ${activeTab === "/ratecard" ? "active" : "onClick={() => setActiveTab('Ratecard')}"
+                          }`}
+
+                      >
+                        RATE CARD MATRIX
+                      </button>
+                    </li
+                    ></Link>
+                  <Link to={`/master_warrenty`}>
+                    <li className="nav-item">
+                      <button
+                        className={`nav-link ${activeTab === "/master_warrenty" ? "active" : "onClick={() => setActiveTab('Ratecard')}"
+                          }`}
+
+                      >
+                        Master Warrenty
+                      </button>
+                    </li
+                    ></Link>
+                  <Link to={`/post_sale_warrenty`}>
+                    <li className="nav-item">
+                      <button
+                        className={`nav-link ${activeTab === "/post_sale_warrenty" ? "active" : "onClick={() => setActiveTab('Ratecard')}"
+                          }`}
+
+                      >
+                        Post Sale Warrenty
+                      </button>
+                    </li
+                    ></Link>
                 </ul>
               </div>
             </div>
@@ -83,7 +106,7 @@ function Ratecardtabs() {
             >
               <div className="tab-content">
                 {/* {renderTabContent()} */}
-                </div>
+              </div>
             </div>
           </div>
         </div>

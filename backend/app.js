@@ -2,8 +2,6 @@ const sql = require("mssql");
 const express = require('express');
 const app = express();
 const cors = require('cors');
-const complaint = require("./Routes/complaint");
-const common = require("./Routes/common");
 const Category = require("./Routes/ProductMaster/Category");
 const multer = require("multer");
 const bodyParser = require("body-parser");
@@ -12,6 +10,7 @@ const fs = require("fs");
 const jwt = require("jsonwebtoken");
 const MobApp = require('./Routes/MobApp')
 const fetchdata = require('./fetchdata')
+const RateCardExcel = require('./Routes/Utils/RateCardExcel')
 
 // Secret key for JWT
 const JWT_SECRET = "Lh!_Login_123"; // Replace with a strong, secret key
@@ -43,11 +42,11 @@ const authenticateToken = (req, res, next) => {
 
 // this is for use routing
 
-app.use("/", complaint);
-app.use("/", common);
+
 app.use("/", Category);
 app.use("/", MobApp);
 app.use("/", fetchdata);
+app.use("/", RateCardExcel)
 
 
 

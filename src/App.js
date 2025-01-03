@@ -107,6 +107,8 @@ import Nps from './Components/Pages/Nps/Nps';
 import { TrainerLogin } from './Components/Trainer/TrainerLogin';
 import TrainerHeader from './Components/Trainer/TrainerHeader';
 import QueryPage from './Components/Pages/QueryPage';
+import Master_Warrenty from './Components/Pages/Master/Master_Warrenty';
+import PostSaleWarrenty from './Components/Pages/Master/PostSaleWarrenty';
 
 
 const isAuthenticated = () => {
@@ -459,6 +461,16 @@ const Router = createBrowserRouter([
       {
         path: "/ratecardtabs",
         element: <Ratecardtabs />,
+
+      },
+      {
+        path: "/master_warrenty",
+        element: <Master_Warrenty />,
+
+      },
+      {
+        path: "/post_sale_warrenty",
+        element: <PostSaleWarrenty />,
 
       },
       {

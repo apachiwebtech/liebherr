@@ -5,6 +5,8 @@ import { Base_Url } from "../../Utils/Base_Url";
 import Ratecardtabs from "./Ratecardtabs";
 import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
+import * as XLSX from "xlsx";
+
 
 const Ratecard = () => {
   // Step 1: Add this state to track errors
@@ -15,6 +17,7 @@ const Ratecard = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [excelData, setExcelData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [duplicateError, setDuplicateError] = useState(""); // State to track duplicate error
   const token = localStorage.getItem("token"); // Get token from localStorage
@@ -27,11 +30,11 @@ const Ratecard = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axiosInstance.get(`${Base_Url}/getratedata`,{
+      const response = await axiosInstance.get(`${Base_Url}/getratedata`, {
         headers: {
-            Authorization: token, // Send token in headers
-            },
-        });
+          Authorization: token, // Send token in headers
+        },
+      });
       console.log(response.data);
       setUsers(response.data);
       setFilteredUsers(response.data);
@@ -92,11 +95,11 @@ const Ratecard = () => {
             .post(`${Base_Url}/putratedata`, {
               ...formData,
               updated_by: updatedBy,
-            },{
+            }, {
               headers: {
-                  Authorization: token, // Send token in headers
-                  },
-              })
+                Authorization: token, // Send token in headers
+              },
+            })
             .then((response) => {
               //window.location.reload();
               setFormData({
@@ -115,11 +118,11 @@ const Ratecard = () => {
             .post(`${Base_Url}/postratedata`, {
               ...formData,
               created_by: createdBy,
-            },{
+            }, {
               headers: {
-                  Authorization: token, // Send token in headers
-                  },
-              })
+                Authorization: token, // Send token in headers
+              },
+            })
             .then((response) => {
               // window.location.reload();
               setFormData({
@@ -141,11 +144,11 @@ const Ratecard = () => {
 
   const deleted = async (id) => {
     try {
-      const response = await axiosInstance.post(`${Base_Url}/deleteratedata`, { id },{
+      const response = await axiosInstance.post(`${Base_Url}/deleteratedata`, { id }, {
         headers: {
-            Authorization: token, // Send token in headers
-            },
-        });
+          Authorization: token, // Send token in headers
+        },
+      });
       // alert(response.data[0]);
       window.location.reload();
     } catch (error) {
@@ -155,11 +158,11 @@ const Ratecard = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axiosInstance.get(`${Base_Url}/requestratedata/${id}`,{
+      const response = await axiosInstance.get(`${Base_Url}/requestratedata/${id}`, {
         headers: {
-            Authorization: token, // Send token in headers
-            },
-        });
+          Authorization: token, // Send token in headers
+        },
+      });
       setFormData(response.data);
       setIsEdit(true);
       console.log(response.data);
@@ -171,6 +174,48 @@ const Ratecard = () => {
   const indexOfLastUser = (currentPage + 1) * itemsPerPage;
   const indexOfFirstUser = indexOfLastUser - itemsPerPage;
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+
+
+  const importexcel = (event) => {
+    // If triggered by file input
+    const file = event?.target?.files ? event.target.files[0] : null;
+
+    // If triggered by button click, use the file uploaded
+    if (!file) {
+      alert("Please upload an Excel file first!");
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      const binaryStr = e.target.result;
+      const workbook = XLSX.read(binaryStr, { type: "binary" });
+      const sheetName = workbook.SheetNames[0]; // Get the first sheet
+      const sheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(sheet); // Convert to JSON
+      setExcelData(jsonData);
+      console.log("Excel Data Imported:", jsonData);
+    };
+
+    reader.readAsBinaryString(file);
+  };
+
+  const uploadexcel = () =>{
+
+    const data  = {
+      excelData: JSON.stringify(excelData),
+      created_by : localStorage.getItem("licare_code")
+    }
+
+    axios.post(`${Base_Url}/uplaodratecardexcel` , data)
+    .then((res) =>{
+      console.log(res)
+    })
+    .catch((err) =>{
+      console.log(err)
+    })
+  }
 
   return (
     <div className="tab-content">
@@ -187,6 +232,15 @@ const Ratecard = () => {
               className="card-body"
               style={{ flex: "1 1 auto", padding: "13px 28px" }}
             >
+              <div>
+                <input type="file" accept=".xlsx, .xls" onChange={importexcel} />
+                <button className="btn btn-primary" onClick={uploadexcel}>
+                  Import Rate Card
+                </button>
+
+              </div>
+
+              <pre>{JSON.stringify(excelData, null, 2)}</pre>
               <div className="row mp0">
                 <div className="col-6">
                   <form
@@ -195,9 +249,11 @@ const Ratecard = () => {
                     className="text-left"
                   >
                     <div className="mb-3">
+
                       <label htmlFor="RatecardInput" className="input-field">
                         Rate Card Matrix<span className="text-danger">*</span>
                       </label>
+
                       <input
                         type="text"
                         className="form-control"
