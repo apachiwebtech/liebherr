@@ -800,19 +800,19 @@ export function Complaintview(params) {
         : true) // For other statuses, skip defect_type and site_defect validation
     ) {
       const data = {
-        serial_no: complaintview.serial_no,
-        ModelNumber: complaintview.ModelNumber,
-        engineer_id: complaintview.engineer_id,
-        call_status: callstatusid,
-        sub_call_status: complaintview.sub_call_status,
-        updated_by: created_by,
-        ticket_no: complaintview.ticket_no,
-        group_code: groupstatusid,
-        site_defect: complaintview.site_defect,
-        defect_type: complaintview.defect_type,
+        serial_no: String(complaintview.serial_no) || '',
+        ModelNumber: complaintview.ModelNumber || '',
+        engineer_id: complaintview.engineer_id || '',
+        call_status: callstatusid || '',
+        sub_call_status: complaintview.sub_call_status || '',
+        updated_by: created_by || '',
+        ticket_no: complaintview.ticket_no || '',
+        group_code: groupstatusid || '',
+        site_defect: complaintview.site_defect || '',
+        defect_type: complaintview.defect_type || '',
         engineerdata: addedEngineers.map((item) => item.engineer_id),
         engineername: addedEngineers.map((item) => item.title),
-        activity_code: complaintview.activity_code
+        activity_code: complaintview.activity_code || ''
       };
 
       axiosInstance.post(`${Base_Url}/ticketFormData`, data, {
