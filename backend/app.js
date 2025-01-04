@@ -101,7 +101,7 @@ app.post("/loginuser", async (req, res) => {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
 
-    const sql = `SELECT id, Lhiuser ,email FROM lhi_user WHERE Lhiuser = '${Lhiuser}' AND password = '${password}'`;
+    const sql = `SELECT id, Lhiuser ,email,Role FROM lhi_user WHERE Lhiuser = '${Lhiuser}' AND password = '${password}'`;
 
 
     const result = await pool.request().query(sql);
@@ -124,6 +124,7 @@ app.post("/loginuser", async (req, res) => {
           id: user.id,
           Lhiuser: user.Lhiuser,
           Email: user.email,
+          Role: user.Role,
         },
       });
 

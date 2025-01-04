@@ -4,14 +4,15 @@ import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { getRoleData } from '../../Store/Role/role-action';
 import Lhiusertabs from './Lhiusertabs';
-import { Base_Url } from '../../Utils/Base_Url';
+import { Base_Url,secretKey } from '../../Utils/Base_Url';
 import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 import { SyncLoader } from 'react-spinners';
 import toast, { Toaster } from 'react-hot-toast';
+import CryptoJS from 'crypto-js';
 
 
 const Roleassign = () => {
-    
+
     const { loaders, axiosInstance } = useAxiosLoader();
     const [selectedOption, setSelectedOption] = useState(null);
     const [role, setRoleData] = useState([])
@@ -30,7 +31,6 @@ const Roleassign = () => {
         });
         setRolePages(updatedData);
 
-        console.log(updatedData, "(((")
     };
 
 
@@ -72,8 +72,6 @@ const Roleassign = () => {
                 // console.log(res.data, ">>>>>")
                 setRolePages(res.data)
 
-
-
             })
             .catch((err) => {
                 console.log(err)
@@ -91,9 +89,17 @@ const Roleassign = () => {
                 }
             })
     }
+    const Decrypt = (encrypted) => {
+        encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+        const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+        return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+      };
+
+    const storedEncryptedRole = localStorage.getItem("Userrole");
+    const decryptedRole = Decrypt(storedEncryptedRole);
 
     const roledata = {
-        role: String(1),
+        role: decryptedRole,
         pageid: String(5)
     }
 
@@ -113,8 +119,8 @@ const Roleassign = () => {
                     <SyncLoader loading={loaders} color="#FFFFFF" />
                 </div>
             )}
-                <Toaster position="bottom-center"
-                    reverseOrder={false} />
+            <Toaster position="bottom-center"
+                reverseOrder={false} />
 
             <Lhiusertabs />
             <div className="row mp0">
@@ -149,7 +155,7 @@ const Roleassign = () => {
                                     </div>
                                 </div>
 
-                                 {roleId === true &&<div class="form-group" >
+                                {roleId === true && <div class="form-group" >
 
                                     <table class="table table-bordered">
                                         <thead>
@@ -184,7 +190,7 @@ const Roleassign = () => {
                                                         </td>
                                                         <td>
                                                             <Radio
-                                                                checked={''}
+                                                                checked={item.accessid === 1}
                                                                 onChange={(e) => handleRadioChange(e, index)}
                                                                 value={1}
                                                                 name={`radio-buttons-${item.pageid}`}
@@ -227,7 +233,7 @@ const Roleassign = () => {
                                             })}
                                         </tbody>
                                     </table>
-                                </div> }
+                                </div>}
                             </form>
 
 

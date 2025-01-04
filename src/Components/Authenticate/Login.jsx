@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Base_Url } from "../Utils/Base_Url";
+import { Base_Url ,secretKey } from "../Utils/Base_Url";
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import md5 from "js-md5";
@@ -7,7 +7,7 @@ import logo from '../../images/Liebherr-logo-768x432.png'
 import back from '../../images/login.jpeg'
 import { useAxiosLoader } from "../Layout/UseAxiosLoader";
 import { SyncLoader } from 'react-spinners';
-
+import CryptoJS from 'crypto-js';
 
 
 export function Login() {
@@ -33,18 +33,32 @@ export function Login() {
       });
 
 
+      const Encrypt = (id) => {
+        id = id.toString();
+        let encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
+        encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        return encrypted; // Return the encrypted value
+      };
+
+      
       if (response.data) {
+        
+        const Userrole = response.data.user.Role
+
+        
+        
         localStorage.setItem("userId", response.data.user.id);
         localStorage.setItem("Lhiuser", response.data.user.Lhiuser);
         localStorage.setItem("token", response.data.token);
-
+        localStorage.setItem("Userrole", Encrypt(Userrole));
+        
         // Navigate to the home page
 
         // Start the timer to refresh the page
         setTimeout(() => {
           alert("Session Timeout")
           window.location.reload();
-        }, 3600 * 8000); 
+        }, 3600 * 8000);
         const redirectTo = location.state?.from || '/dashboard';
         navigate(redirectTo, { replace: true });
       } else {
