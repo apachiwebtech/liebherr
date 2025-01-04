@@ -393,8 +393,8 @@ export function AddProduct(params) {
                                 <div className="form-group col-lg-3">
                                     <label htmlFor="item_code" className="input-field">
                                         Item Code
-                                    </label>
-                                    <input
+                                    </label> 
+                                    <input disabled
                                         type="text"
                                         className="form-control"
                                         name="item_code"
@@ -413,7 +413,7 @@ export function AddProduct(params) {
                                     >
                                         Item Description <span className='text-danger'>*</span>{error.item_description && <sapn className="text-danger">{error.item_description}</sapn>}
                                     </label>
-                                    <textarea
+                                    <textarea disabled
                                         type="text"
                                         className="form-control"
                                         name="item_description"
@@ -436,7 +436,7 @@ export function AddProduct(params) {
                                     >
                                         Product Model<span className='text-danger'>*</span>{error.product_model && <sapn className="text-danger">{error.product_model}</sapn>}
                                     </label>
-                                    <input
+                                    <input disabled
                                         type="text"
                                         className="form-control"
                                         name="product_model"
@@ -455,7 +455,7 @@ export function AddProduct(params) {
                                     >
                                         Product Type<span className='text-danger'>*</span>{error.product_type && <sapn className="text-danger">{error.product_type}</sapn>}
                                     </label>
-                                    <select
+                                    <select disabled
                                         className="form-select dropdown-select"
                                         name="product_type"
                                         value={value.product_type}
@@ -479,7 +479,7 @@ export function AddProduct(params) {
                                     >
                                         Product Class Code<span className='text-danger'>*</span>{error.product_class_code && <sapn className="text-danger">{error.product_class_code}</sapn>}
                                     </label>
-                                    <select
+                                    <select disabled
                                         className="form-select dropdown-select"
                                         name="product_class_code"
                                         value={value.product_class_code}
@@ -503,7 +503,7 @@ export function AddProduct(params) {
                                     >
                                         Product Line Code<span className='text-danger'>*</span>{error.product_line_code && <sapn className="text-danger">{error.product_line_code}</sapn>}
                                     </label>
-                                    <select
+                                    <select disabled
                                         className="form-select dropdown-select"
                                         name="product_line_code"
                                         value={value.product_line_code}
@@ -527,7 +527,7 @@ export function AddProduct(params) {
                                     >
                                         Material<span className='text-danger'>*</span>{error.material && <sapn className="text-danger">{error.material}</sapn>}
                                     </label>
-                                    <select
+                                    <select disabled
                                         className="form-select dropdown-select"
                                         name="material"
                                         value={value.material}
@@ -550,7 +550,7 @@ export function AddProduct(params) {
                                     >
                                         Manufacturer<span className='text-danger'>*</span>{error.manufacturer && <sapn className="text-danger">{error.manufacturer}</sapn>}
                                     </label>
-                                    <select
+                                    <select disabled
                                         className="form-select dropdown-select"
                                         name="manufacturer"
                                         value={value.manufacturer}
@@ -573,7 +573,7 @@ export function AddProduct(params) {
                                     >
                                         Item Type<span className='text-danger'>*</span>{error.item_type && <sapn className="text-danger">{error.item_type}</sapn>}
                                     </label>
-                                    <select
+                                    <select disabled
                                         className="form-select dropdown-select"
                                         name="item_type"
                                         value={value.item_type}
@@ -596,7 +596,7 @@ export function AddProduct(params) {
                                     >
                                         Serialized<span className='text-danger'>*</span>{error.serialized && <sapn className="text-danger">{error.serialized}</sapn>}
                                     </label>
-                                    <select
+                                    <select disabled
                                         className="form-select dropdown-select"
                                         name="serialized"
                                         value={value.serialized}
@@ -623,7 +623,7 @@ export function AddProduct(params) {
                                     >
                                         Size<span className='text-danger'>*</span>{error.size && <sapn className="text-danger">{error.size}</sapn>}
                                     </label>
-                                    <input
+                                    <input disabled
                                         type="text"
                                         className="form-control"
                                         name="size"
@@ -642,7 +642,7 @@ export function AddProduct(params) {
                                     >
                                         CRM Product Type<span className='text-danger'>*</span>{error.crmproducttype && <sapn className="text-danger">{error.crmproducttype}</sapn>}
                                     </label>
-                                    <select
+                                    <select disabled
                                         className="form-select dropdown-select"
                                         name="crmproducttype"
                                         value={value.crmproducttype}
@@ -665,7 +665,7 @@ export function AddProduct(params) {
                                     >
                                         Colour
                                     </label>
-                                    <input
+                                    <input disabled
                                         type="text"
                                         className="form-control"
                                         name="colour"
@@ -684,7 +684,7 @@ export function AddProduct(params) {
                                     >
                                         Handle Type<span className='text-danger'>*</span>{error.handle_type && <sapn className="text-danger">{error.handle_type}</sapn>}
                                     </label>
-                                    <select
+                                    <select disabled
                                         className="form-select dropdown-select"
                                         name="handle_type"
                                         value={value.handle_type}
@@ -712,7 +712,7 @@ export function AddProduct(params) {
                                     >
                                         Serial Identification<span className='text-danger'>*</span>{error.serial_identification && <sapn className="text-danger">{error.serial_identification}</sapn>}
                                     </label>
-                                    <input
+                                    <input disabled
                                         type="text"
                                         className="form-control"
                                         name="serial_identification"
@@ -731,7 +731,7 @@ export function AddProduct(params) {
                                     >
                                         Installation Type<span className='text-danger'>*</span>{error.installation_type && <sapn className="text-danger">{error.installation_type}</sapn>}
                                     </label>
-                                    <select
+                                    <select disabled
                                         className="form-select dropdown-select"
                                         name="installation_type"
                                         value={value.installation_type}
@@ -757,7 +757,7 @@ export function AddProduct(params) {
                                     >
                                         Customer Classification
                                     </label>
-                                    <input
+                                    <input disabled
                                         type="text"
                                         className="form-control"
                                         name="customer_classification"
@@ -777,7 +777,7 @@ export function AddProduct(params) {
                                     >
                                         Price Group
                                     </label>
-                                    <input
+                                    <input disabled
                                         type="text"
                                         className="form-control"
                                         name="price_group"
@@ -797,7 +797,7 @@ export function AddProduct(params) {
                                     >
                                         MRP
                                     </label>
-                                    <input
+                                    <input disabled
                                         type="text"
                                         className="form-control"
                                         name="mrp"
@@ -817,7 +817,7 @@ export function AddProduct(params) {
                                     >
                                         Service Partner Basic
                                     </label>
-                                    <input
+                                    <input disabled
                                         type="text"
                                         className="form-control"
                                         name="service_partner_basic"
@@ -830,15 +830,7 @@ export function AddProduct(params) {
 
                                 </div>
 
-                                <div className="text-right">
-                                    <button
-                                        className="btn btn-liebherr"
-                                        type="submit"
-                                        style={{ marginTop: "15px" }}
-                                    >
-                                        Submit
-                                    </button>
-                                </div>
+                               
                             </form>
                         </div>
                     </div>

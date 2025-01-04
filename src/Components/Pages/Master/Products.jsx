@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
-import { FaPencilAlt, FaTrash } from 'react-icons/fa';
+import { FaEye, FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { Base_Url, secretKey } from '../../Utils/Base_Url';
 import CryptoJS from 'crypto-js';
 import ProMaster from './ProMaster';
@@ -171,8 +171,8 @@ export function Products(params) {
                                             <th width="10%">Product Line</th>
                                             <th width="15%">Material</th>
                                             <th width="5%">Manufacturer</th>
-                                            <th width="5%">Edit</th>
-                                            <th width="5%">Delete</th>
+                                            <th width="5%">View</th>
+                                            
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -193,20 +193,11 @@ export function Products(params) {
                                                             title="Edit"
                                                             style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
                                                         >
-                                                            <FaPencilAlt />
+                                                            <FaEye />
                                                         </button>
                                                     
                                                 </td>
-                                                <td style={{ padding: '0px', textAlign: 'center' }}>
-                                                    <button
-                                                        className='btn'
-                                                        onClick={() => deleted(item.id)}
-                                                        title="Delete"
-                                                        style={{ backgroundColor: 'transparent', border: 'none', color: 'red', fontSize: '20px' }}
-                                                    >
-                                                        <FaTrash />
-                                                    </button>
-                                                </td>
+                                            
                                             </tr>
                                         ))}
                                     </tbody>
