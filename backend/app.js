@@ -6780,6 +6780,23 @@ app.get("/getlhidata", authenticateToken, async (req, res) => {
     return res.status(500).json({ message: "An error occurred while fetching LHI data" });
   }
 });
+
+//Reporting to dropdown Query
+
+app.get("/getreport", authenticateToken, async (req, res) => {
+  try {
+    const pool = await poolPromise;
+
+    // SQL query to fetch lhi_user data where deleted is 0
+    const sql = "SELECT Lhiuser FROM lhi_user WHERE deleted = 0";
+    const result = await pool.request().query(sql);
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "An error occurred while fetching LHI data" });
+  }
+});
 // Insert for Lhiuser
 app.post("/postlhidata", authenticateToken, async (req, res) => {
   const { Lhiuser,
@@ -6789,6 +6806,9 @@ app.post("/postlhidata", authenticateToken, async (req, res) => {
     email,
     remarks,
     status,
+    Roles,
+    Reporting_to,
+    Designation,
 
 
   } = req.body;
@@ -6818,7 +6838,7 @@ app.post("/postlhidata", authenticateToken, async (req, res) => {
         return res.json({ message: "Soft-deleted data restored successfully!" });
       } else {
         // Step 3: Insert new entry if no duplicates found
-        sql = `INSERT INTO lhi_user (Lhiuser,password,remarks,Usercode,mobile_no,email,status) VALUES ('${Lhiuser}','${Password}','${remarks}','${UserCode}','${mobile_no}','${email}','${status}')`
+        sql = `INSERT INTO lhi_user (Lhiuser,password,remarks,Usercode,mobile_no,email,status,Role,Reporting_to,Designation) VALUES ('${Lhiuser}','${Password}','${remarks}','${UserCode}','${mobile_no}','${email}','${status}','${Roles}','${Reporting_to}','${Designation}')`
         await pool.request().query(sql);
 
         return res.json({ message: "Lhiuser added successfully!" });
@@ -6853,7 +6873,7 @@ app.get("/requestlhidata/:id", authenticateToken, async (req, res) => {
 // update for Lhiuser
 app.post("/putlhidata", authenticateToken, async (req, res) => {
   const {
-    Lhiuser, id, updated_by, mobile_no, Usercode, password, status, email, remarks
+    Lhiuser, id, updated_by, mobile_no, Usercode, password, status, email, remarks,Roles,Designation,Reporting_to
   } = req.body;
 
   try {
@@ -6884,7 +6904,10 @@ app.post("/putlhidata", authenticateToken, async (req, res) => {
           password = '${password}',
           status = ${status},
           email = '${email}',
-          remarks = '${remarks}'
+          remarks = '${remarks}',
+          Role = '${Roles}',
+          Designation = '${Designation}',
+          Reporting_to = '${Reporting_to}'
         WHERE id = '${id}'
       `;
       await pool.request().query(updateSql);

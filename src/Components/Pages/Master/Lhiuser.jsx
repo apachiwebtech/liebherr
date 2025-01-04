@@ -11,6 +11,8 @@ import Lhiusertabs from './Lhiusertabs';
 const Lhiuser = () => {
   // Step 1: Add this state to track errors
   const { loaders, axiosInstance } = useAxiosLoader();
+  const [roles,setRoles] = useState([]);
+  const [Reporting_to,setReporting] = useState([]);
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -29,9 +31,37 @@ const Lhiuser = () => {
     passwordmd5: "",
   });
 
+    const fetchRoles = async () => {
+      try {
+        const response = await axiosInstance.get(`${Base_Url}/getrole`,{
+          headers: {
+             Authorization: token, // Send token in headers
+           },
+         });
+        console.log(response.data);
+        setRoles(response.data);
+      } catch (error) {
+        console.error("Error fetching countries:", error);
+      }
+    };
+    
+
+    const fetchReporting = async () => {
+      try {
+        const response = await axiosInstance.get(`${Base_Url}/getreport`, {
+          headers: {
+            Authorization: token, // Send token in headers
+          },
+        });
+        console.log(response.data);
+        setReporting(response.data);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
   const fetchUsers = async () => {
     try {
-      const response = await axiosInstance.get(`${Base_Url}/getlhidata`,{
+      const response = await axiosInstance.get(`${Base_Url}/getlhidata`, {
         headers: {
           Authorization: token, // Send token in headers
         },
@@ -46,6 +76,8 @@ const Lhiuser = () => {
 
   useEffect(() => {
     fetchUsers();
+    fetchRoles();
+    fetchReporting();
   }, []);
 
   const handleChange = (e) => {
@@ -134,11 +166,11 @@ const Lhiuser = () => {
                 ...formData,
                 updated_by: updatedBy,
               },
-              {
-              headers: {
-                Authorization: token, // Send token in headers
-              },
-            })
+                {
+                  headers: {
+                    Authorization: token, // Send token in headers
+                  },
+                })
               .then((response) => {
                 setFormData({
                   Lhiuser: "",
@@ -157,11 +189,11 @@ const Lhiuser = () => {
                 ...formData,
                 created_by: createdBy,
               },
-              {
-                headers: {
-                  Authorization: token, // Send token in headers
-                },
-              })
+                {
+                  headers: {
+                    Authorization: token, // Send token in headers
+                  },
+                })
               .then((response) => {
                 setFormData({
                   Lhiuser: "",
@@ -190,11 +222,11 @@ const Lhiuser = () => {
 
   const deleted = async (id) => {
     try {
-      const response = await axiosInstance.post(`${Base_Url}/deletelhidata`, { id },{
+      const response = await axiosInstance.post(`${Base_Url}/deletelhidata`, { id }, {
         headers: {
-           Authorization: token, // Send token in headers
-         },
-       });
+          Authorization: token, // Send token in headers
+        },
+      });
 
       window.location.reload();
     } catch (error) {
@@ -204,11 +236,11 @@ const Lhiuser = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axiosInstance.get(`${Base_Url}/requestlhidata/${id}`,{
+      const response = await axiosInstance.get(`${Base_Url}/requestlhidata/${id}`, {
         headers: {
-           Authorization: token, // Send token in headers
-         },
-       });
+          Authorization: token, // Send token in headers
+        },
+      });
       setFormData(response.data);
       setIsEdit(true);
       console.log(response.data);
@@ -221,11 +253,11 @@ const Lhiuser = () => {
     try {
       const dataId = e.target.getAttribute('data-id');
 
-      const response = axiosInstance.post(`${Base_Url}/updatestatus`, { dataId: dataId },{
+      const response = axiosInstance.post(`${Base_Url}/updatestatus`, { dataId: dataId }, {
         headers: {
-           Authorization: token, // Send token in headers
-         },
-       });
+          Authorization: token, // Send token in headers
+        },
+      });
 
     } catch (error) {
       console.error("Error editing user:", error);
@@ -239,354 +271,428 @@ const Lhiuser = () => {
 
   return (
     <div className="tab-content">
-    <div className="row mp0">
-          {loaders && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <SyncLoader loading={loaders} color="#FFFFFF" />
-        </div>
-      )}
-      <Lhiusertabs />
-      <div className="col-12">
-        <div className="card mb-3 tab_box">
-          <div
-            className="card-body"
-            style={{ flex: "1 1 auto", padding: "13px 28px" }}
-          >
-            <div className="row mp0">
-              <form
-                onSubmit={handleSubmit}
+      <div className="row mp0">
+        {loaders && (
+          <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <SyncLoader loading={loaders} color="#FFFFFF" />
+          </div>
+        )}
+        <Lhiusertabs />
+        <div className="col-12">
+          <div className="card mb-3 tab_box">
+            <div
+              className="card-body"
+              style={{ flex: "1 1 auto", padding: "13px 28px" }}
+            >
+              <div className="row mp0">
+                <form
+                  onSubmit={handleSubmit}
 
-                className="text-left col-md-5"
-              >
-                <div className="row ">
- {/*  */}
-                  <div className="col-4">
-
-
-                    <div className="mb-3">
-                      <label htmlFor="LhiuserInput" className="input-field">
-                        FullName<span className="text-danger">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        name="Lhiuser"
-                        id="LhiuserInput"
-                        value={formData.Lhiuser}
-                        onChange={handleChange}
-                        placeholder="Enter FullName "
-                      />
-                      {errors.Lhiuser && (
-                        <small className="text-danger">{errors.Lhiuser}</small>
-                      )}
-                      {duplicateError && (
-                        <small className="text-danger">{duplicateError}</small>
-                      )}{" "}
-                      {/* Show duplicate error */}
-                    </div>
-
-                  </div>
-                  <div className="col-4">
-                    <div className="mb-3">
-                      <label htmlFor="UsercodeInput" className="input-field">
-                        User Code<span className="text-danger">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        name="Usercode"
-                        id="UsercodeInput"
-                        value={formData.Usercode}
-                        onChange={handleChange}
-                        placeholder="Enter User Code"
-                      />
-                      {errors.Usercode && (
-                        <small className="text-danger">{errors.Usercode}</small>
-                      )}
-                      {duplicateError && (
-                        <small className="text-danger">{duplicateError}</small>
-                      )}{" "}
-                      {/* Show duplicate error */}
-                    </div>
-                  </div>
-
-                  <div className="col-4">
-                    <div className="mb-3">
-                      <label htmlFor="PassInput" className="input-field">
-                        Password<span className="text-danger">*</span>
-                      </label>
-                      <input
-                        type="password"
-                        className="form-control"
-                        name="Password"
-                        id="PassInput"
-                        value={formData.Password}
-                        onChange={handleChange}
-                        placeholder="Enter Password "
-                      />
-                      {errors.Password && (
-                        <small className="text-danger">{errors.Password}</small>
-                      )}
-                      {duplicateError && (
-                        <small className="text-danger">{duplicateError}</small>
-                      )}{" "}
-                      {/* Show duplicate error */}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="row ">
-                  <div className="col-4">
-                    <div className="mb-3">
-                      <label htmlFor="MobileInput" className="input-field">
-                        Mobile Number<span className="text-danger">*</span>
-                      </label>
-                      <input
-                        type="tel"
-                        className="form-control"
-                        name="mobile_no"
-                        id="MobileInput"
-                        value={formData.mobile_no}
-                        onChange={handleChange}
-                        placeholder="Enter Mobile Number"
-                        pattern="[0-9]{10}"
-                        maxLength="10"
-                      />
-
-
-                      {errors.mobile_no && <small className="text-danger">{errors.mobile_no}</small>}
-                      {/* Show duplicate error */}
-                    </div>
-                  </div>
-                  <div className="col-4">
-                    <div className="mb-3">
-                      <label htmlFor="EmailInput" className="input-field">
-                        Email Address<span className="text-danger">*</span>
-                      </label>
-                      <input
-                        type="email"
-                        className="form-control"
-                        name="email"
-                        id="EmailInput"
-                        value={formData.email}
-                        onChange={handleChange}
-                        placeholder="Enter Email Address"
-                      />
-                      {errors.email && (
-                        <small className="text-danger">{errors.email}</small>
-                      )}
-                      {duplicateError && (
-                        <small className="text-danger">{duplicateError}</small>
-                      )}{" "}
-                      {/* Show duplicate error */}
-                    </div>
-                  </div>
-                  <div className="col-4">
-                    <div className="mb-3">
-                      <label htmlFor="StatusInput" className="input-field">
-                        Status
-                      </label>
-                      <select
-                        className="form-select"
-                        id="StatusInput"
-                        name="status"
-                        value={formData.status}
-                        onChange={handleChange}
-                      >
-                        <option value=''>Select Status</option>
-                        <option value="1">Active</option>
-                        <option value="0">Inactive</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-                <div className="row ">
-                  <div className="col-12">
-                    <div className="mb-3">
-                      <label htmlFor="RemarksInput" className="input-field">
-                        Remarks
-                      </label>
-                      <textarea
-                        className="form-control"
-                        id="RemarksInput"
-                        name="remarks"
-                        rows="2"
-                        value={formData.remarks}
-                        onChange={handleChange}
-                        placeholder="Enter remarks here"
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <button className="btn btn-liebherr" type="submit">
-                    {isEdit ? "Update" : "Submit"}
-                  </button>
-                </div>
-              </form>
-
-
-
-
-
-
-              <div className="col-md-7">
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                  <span>
-                    Show
-                    <select
-                      value={itemsPerPage}
-                      onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                      className="form-control d-inline-block"
-                      style={{
-                        width: "51px",
-                        display: "inline-block",
-                        marginLeft: "5px",
-                        marginRight: "5px",
-                      }}
-                    >
-                      <option value={10}>10</option>
-                      <option value={15}>15</option>
-                      <option value={20}>20</option>
-                    </select>
-                    entries
-                  </span>
-
-                  <input
-                    type="text"
-                    placeholder="Search..."
-                    value={searchTerm}
-                    onChange={handleSearch}
-                    className="form-control d-inline-block"
-                    style={{ width: "300px" }}
-                  />
-                </div>
-
-                {/* Adjust table padding and spacing */}
-                <table
-                  className="table table-bordered table dt-responsive nowrap w-100 table-css"
-                  style={{ marginTop: "20px", tableLayout: "fixed" }}
+                  className="text-left col-md-5"
                 >
-                  <thead>
-                    <tr>
-                      <th style={{ padding: "12px 15px", textAlign: "center" }}>
-                        #
-                      </th>
-                      <th style={{ padding: "12px 15px", textAlign: "center" }}>
-                        Usercode
-                      </th>
-
-                      <th style={{ padding: "12px 15px", textAlign: "center" }}>
-                        Full Name
-                      </th>
-
-                      <th style={{ padding: "12px 0px", textAlign: "center" }}>
-                        Status
-                      </th>
-                      <th style={{ padding: "12px 0px", textAlign: "center" }}>
-                        Activation date
-                      </th>
+                  <div className="row ">
+                    {/*  */}
+                    <div className="col-4">
 
 
-                      <th style={{ padding: "12px 0px", textAlign: "center" }}>
-                        Edit
-                      </th>
+                      <div className="mb-3">
+                        <label htmlFor="LhiuserInput" className="input-field">
+                          FullName<span className="text-danger">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          name="Lhiuser"
+                          id="LhiuserInput"
+                          value={formData.Lhiuser}
+                          onChange={handleChange}
+                          placeholder="Enter FullName "
+                        />
+                        {errors.Lhiuser && (
+                          <small className="text-danger">{errors.Lhiuser}</small>
+                        )}
+                        {duplicateError && (
+                          <small className="text-danger">{duplicateError}</small>
+                        )}{" "}
+                        {/* Show duplicate error */}
+                      </div>
 
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {currentUsers.map((item, index) => (
-                      <tr key={item.id}>
-                        <td style={{ padding: "2px", textAlign: "center" }}>
-                          {index + 1 + indexOfFirstUser}
-                        </td>
+                    </div>
+                    <div className="col-4">
+                      <div className="mb-3">
+                        <label htmlFor="UsercodeInput" className="input-field">
+                          User Code<span className="text-danger">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          name="Usercode"
+                          id="UsercodeInput"
+                          value={formData.Usercode}
+                          onChange={handleChange}
+                          placeholder="Enter User Code"
+                        />
+                        {errors.Usercode && (
+                          <small className="text-danger">{errors.Usercode}</small>
+                        )}
+                        {duplicateError && (
+                          <small className="text-danger">{duplicateError}</small>
+                        )}{" "}
+                        {/* Show duplicate error */}
+                      </div>
+                    </div>
 
-                        <td style={{ padding: "10px" }}>{item.Usercode}</td>
+                    <div className="col-4">
+                      <div className="mb-3">
+                        <label htmlFor="PassInput" className="input-field">
+                          Password<span className="text-danger">*</span>
+                        </label>
+                        <input
+                          type="password"
+                          className="form-control"
+                          name="Password"
+                          id="PassInput"
+                          value={formData.Password}
+                          onChange={handleChange}
+                          placeholder="Enter Password "
+                        />
+                        {errors.Password && (
+                          <small className="text-danger">{errors.Password}</small>
+                        )}
+                        {duplicateError && (
+                          <small className="text-danger">{duplicateError}</small>
+                        )}{" "}
+                        {/* Show duplicate error */}
+                      </div>
+                    </div>
+                  </div>
 
-                        <td style={{ padding: "10px" }}>{item.Lhiuser}</td>
+                  <div className="row ">
+                    <div className="col-4">
+                      <div className="mb-3">
+                        <label htmlFor="MobileInput" className="input-field">
+                          Mobile Number<span className="text-danger">*</span>
+                        </label>
+                        <input
+                          type="tel"
+                          className="form-control"
+                          name="mobile_no"
+                          id="MobileInput"
+                          value={formData.mobile_no}
+                          onChange={handleChange}
+                          placeholder="Enter Mobile Number"
+                          pattern="[0-9]{10}"
+                          maxLength="10"
+                        />
 
-                        <td style={{ padding: "10px" }}>
-                          <label class="switch">
-                            <input
-                              type="checkbox"
-                              onChange={handleChangestatus}
-                              data-id={item.id}
-                              checked={item.status === 1}  // Check if status is 1 (checked)
-                              className="status"
-                            />
+
+                        {errors.mobile_no && <small className="text-danger">{errors.mobile_no}</small>}
+                        {/* Show duplicate error */}
+                      </div>
+                    </div>
+                    <div className="col-4">
+                      <div className="mb-3">
+                        <label htmlFor="EmailInput" className="input-field">
+                          Email Address<span className="text-danger">*</span>
+                        </label>
+                        <input
+                          type="email"
+                          className="form-control"
+                          name="email"
+                          id="EmailInput"
+                          value={formData.email}
+                          onChange={handleChange}
+                          placeholder="Enter Email Address"
+                        />
+                        {errors.email && (
+                          <small className="text-danger">{errors.email}</small>
+                        )}
+                        {duplicateError && (
+                          <small className="text-danger">{duplicateError}</small>
+                        )}{" "}
+                        {/* Show duplicate error */}
+                      </div>
+                    </div>
+                    <div className="col-4">
+                      <div className="mb-3">
+                        <label htmlFor="StatusInput" className="input-field">
+                          Status
+                        </label>
+                        <select
+                          className="form-select"
+                          id="StatusInput"
+                          name="status"
+                          value={formData.status}
+                          onChange={handleChange}
+                        >
+                          <option value=''>Select Status</option>
+                          <option value="1">Active</option>
+                          <option value="0">Inactive</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="row ">
+                    <div className="col-4">
+                    <div className="mb-3">
+                    <label htmlFor="Roles" className="form-label pb-0 dropdown-label"
+                    > Roles<span className="text-danger">*</span>
+                    </label>
+                    <select
+                      className="form-select dropdown-select"
+                      name="Roles"
+                      value={formData.Roles}
+                      onChange={handleChange}
+                    >
+                      <option value="">Select Role</option>
+                      {roles.map((Roles) => (
+                        <option key={Roles.id} value={Roles.id}>
+                          {Roles.title}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.Roles && (
+                      <small className="text-danger">{errors.Roles}</small>
+                    )}
+                  </div>
+                    </div>
+                    <div className="col-4">
+                    <div className="mb-3">
+                    <label htmlFor="Reporting_to" className="form-label pb-0 dropdown-label"
+                    > Reporting To<span className="text-danger">*</span>
+                    </label>
+                    <select
+                      className="form-select dropdown-select"
+                      name="Reporting_to"
+                      value={formData.Reporting_to}
+                      onChange={handleChange}
+                    >
+                      <option value="">Reporting To</option>
+                      {Reporting_to.map((Reporting_to) => (
+                        <option key={Reporting_to.id} value={Reporting_to.id}>
+                          {Reporting_to.Lhiuser}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.Repoting_to && (
+                      <small className="text-danger">{errors.Reporting_to}</small>
+                    )}
+                  </div>
+                    </div>
+                    
+                    <div className="col-4">
+                        <div className="mb-3">
+                        <label htmlFor="DesignationInput" className="input-field">
+                          Designation<span className="text-danger">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          name="Designation"
+                          id="DesignationInput"
+                          value={formData.Designation}
+                          onChange={handleChange}
+                          placeholder="Enter Designation "
+                        />
+                        {errors.Designation && (
+                          <small className="text-danger">{errors.Designation}</small>
+                        )}
+                        {duplicateError && (
+                          <small Designation="text-danger">{duplicateError}</small>
+                        )}{" "}
+                        {/* Show duplicate error */}
+                      </div>
+
+                    </div>
+                    </div>
+                    <div className='row'>
+                    <div className="col-12">
+                      <div className="mb-3">
+                        <label htmlFor="RemarksInput" className="input-field">
+                          Remarks
+                        </label>
+                        <textarea
+                          className="form-control"
+                          id="RemarksInput"
+                          name="remarks"
+                          rows="2"
+                          value={formData.remarks}
+                          onChange={handleChange}
+                          placeholder="Enter remarks here"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <button className="btn btn-liebherr" type="submit">
+                      {isEdit ? "Update" : "Submit"}
+                    </button>
+                  </div>
+                </form>
 
 
-                            <span class="slider round"></span>
-                          </label>
-
-                        </td>
-                        <td style={{ padding: "10px" }}>{item.Lhiuser}</td>
 
 
-                        <td style={{ padding: "0px", textAlign: "center" }}>
-                          <button
-                            className="btn"
-                            onClick={() => {
-                              // alert(item.id)
-                              edit(item.id);
-                            }}
-                            Lhiuser="Edit"
-                            style={{
-                              backgroundColor: "transparent",
-                              border: "none",
-                              color: "blue",
-                              fontSize: "20px",
-                            }}
-                          >
-                            <FaPencilAlt />
-                          </button>
-                        </td>
+
+
+                <div className="col-md-7">
+                  <div className="d-flex justify-content-between align-items-center mb-3">
+                    <span>
+                      Show
+                      <select
+                        value={itemsPerPage}
+                        onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                        className="form-control d-inline-block"
+                        style={{
+                          width: "51px",
+                          display: "inline-block",
+                          marginLeft: "5px",
+                          marginRight: "5px",
+                        }}
+                      >
+                        <option value={10}>10</option>
+                        <option value={15}>15</option>
+                        <option value={20}>20</option>
+                      </select>
+                      entries
+                    </span>
+
+                    <input
+                      type="text"
+                      placeholder="Search..."
+                      value={searchTerm}
+                      onChange={handleSearch}
+                      className="form-control d-inline-block"
+                      style={{ width: "300px" }}
+                    />
+                  </div>
+
+                  {/* Adjust table padding and spacing */}
+                  <table
+                    className="table table-bordered table dt-responsive nowrap w-100 table-css"
+                    style={{ marginTop: "20px", tableLayout: "fixed" }}
+                  >
+                    <thead>
+                      <tr>
+                        <th style={{ padding: "12px 15px", textAlign: "center" }}>
+                          #
+                        </th>
+                        <th style={{ padding: "12px 15px", textAlign: "center" }}>
+                          Usercode
+                        </th>
+
+                        <th style={{ padding: "12px 15px", textAlign: "center" }}>
+                          Full Name
+                        </th>
+
+                        <th style={{ padding: "12px 0px", textAlign: "center" }}>
+                          Status
+                        </th>
+                        <th style={{ padding: "12px 0px", textAlign: "center" }}>
+                          Activation date
+                        </th>
+
+
+                        <th style={{ padding: "12px 0px", textAlign: "center" }}>
+                          Edit
+                        </th>
 
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {currentUsers.map((item, index) => (
+                        <tr key={item.id}>
+                          <td style={{ padding: "2px", textAlign: "center" }}>
+                            {index + 1 + indexOfFirstUser}
+                          </td>
 
-                <div
-                  className="d-flex justify-content-between"
-                  style={{ marginTop: "10px" }}
-                >
-                  <div>
-                    Showing {indexOfFirstUser + 1} to{" "}
-                    {Math.min(indexOfLastUser, filteredUsers.length)} of{" "}
-                    {filteredUsers.length} entries
-                  </div>
+                          <td style={{ padding: "10px" }}>{item.Usercode}</td>
 
-                  <div className="pagination" style={{ marginLeft: "auto" }}>
-                    <button
-                      onClick={() => setCurrentPage(currentPage - 1)}
-                      disabled={currentPage === 0}
-                    >
-                      {"<"}
-                    </button>
-                    {Array.from(
-                      {
-                        length: Math.ceil(filteredUsers.length / itemsPerPage),
-                      },
-                      (_, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setCurrentPage(index)}
-                          className={currentPage === index ? "active" : ""}
-                        >
-                          {index + 1}
-                        </button>
-                      )
-                    )}
-                    <button
-                      onClick={() => setCurrentPage(currentPage + 1)}
-                      disabled={
-                        currentPage ===
-                        Math.ceil(filteredUsers.length / itemsPerPage) - 1
-                      }
-                    >
-                      {">"}
-                    </button>
+                          <td style={{ padding: "10px" }}>{item.Lhiuser}</td>
+
+                          <td style={{ padding: "10px" }}>
+                            <label class="switch">
+                              <input
+                                type="checkbox"
+                                onChange={handleChangestatus}
+                                data-id={item.id}
+                                checked={item.status === 1}  // Check if status is 1 (checked)
+                                className="status"
+                              />
+
+
+                              <span class="slider round"></span>
+                            </label>
+
+                          </td>
+                          <td style={{ padding: "10px" }}>{item.Lhiuser}</td>
+
+
+                          <td style={{ padding: "0px", textAlign: "center" }}>
+                            <button
+                              className="btn"
+                              onClick={() => {
+                                // alert(item.id)
+                                edit(item.id);
+                              }}
+                              Lhiuser="Edit"
+                              style={{
+                                backgroundColor: "transparent",
+                                border: "none",
+                                color: "blue",
+                                fontSize: "20px",
+                              }}
+                            >
+                              <FaPencilAlt />
+                            </button>
+                          </td>
+
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+
+                  <div
+                    className="d-flex justify-content-between"
+                    style={{ marginTop: "10px" }}
+                  >
+                    <div>
+                      Showing {indexOfFirstUser + 1} to{" "}
+                      {Math.min(indexOfLastUser, filteredUsers.length)} of{" "}
+                      {filteredUsers.length} entries
+                    </div>
+
+                    <div className="pagination" style={{ marginLeft: "auto" }}>
+                      <button
+                        onClick={() => setCurrentPage(currentPage - 1)}
+                        disabled={currentPage === 0}
+                      >
+                        {"<"}
+                      </button>
+                      {Array.from(
+                        {
+                          length: Math.ceil(filteredUsers.length / itemsPerPage),
+                        },
+                        (_, index) => (
+                          <button
+                            key={index}
+                            onClick={() => setCurrentPage(index)}
+                            className={currentPage === index ? "active" : ""}
+                          >
+                            {index + 1}
+                          </button>
+                        )
+                      )}
+                      <button
+                        onClick={() => setCurrentPage(currentPage + 1)}
+                        disabled={
+                          currentPage ===
+                          Math.ceil(filteredUsers.length / itemsPerPage) - 1
+                        }
+                      >
+                        {">"}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -594,7 +700,6 @@ const Lhiuser = () => {
           </div>
         </div>
       </div>
-    </div>
     </div>
   );
 };
