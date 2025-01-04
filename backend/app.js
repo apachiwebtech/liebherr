@@ -1788,6 +1788,8 @@ app.get("/getcat", authenticateToken, async (req, res) => {
   }
 });
 
+
+
 // Insert for category
 app.post("/postdatacat", authenticateToken, async (req, res) => {
   const { title } = req.body;
@@ -9153,5 +9155,185 @@ app.post("/query", async (req, res) => {
   } catch (error) {
       console.error("Error in /query", error);
       res.status(500).json({ error: "An internal server error occurred" });
+  }
+});
+
+// API FOR ROLES 
+
+// fetch roles data
+
+app.get("/getrole", authenticateToken, async (req, res) => {
+  try {
+    // Access the connection pool using poolPromise
+    const pool = await poolPromise;
+
+    // Direct SQL query
+    const sql = `
+      SELECT *
+      FROM role_master
+      WHERE deleted = 0
+    `;
+
+    // Execute the query
+    const result = await pool.request().query(sql);
+
+    // Return only the recordset from the result
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Error fetching categories:", err); // Log the error for debugging
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+});
+
+// put role data
+
+app.post("/putrole", authenticateToken, async (req, res) => {
+  const { title,id, description } = req.body;
+
+  try {
+    // Access the connection pool using poolPromise
+    const pool = await poolPromise;
+
+    // Step 1: Direct SQL query to check for duplicates without parameter binding
+    const checkDuplicateSql = `
+      SELECT *
+      FROM role_master
+      WHERE title = '${title}'  AND id != ${id} AND deleted = 0
+    `;
+
+    // Execute the duplicate check query
+    const duplicateCheckResult = await pool.request().query(checkDuplicateSql);
+
+    if (duplicateCheckResult.recordset.length > 0) {
+      // If a duplicate title exists (other than the current record)
+      return res.status(409).json({ message: "Duplicate entry, Role already exists!" });
+    } else {
+      // Step 2: Update the record if no duplicates are found
+      const updateSql = `
+        UPDATE role_master
+        SET title = '${title}', description ='${description}'
+        WHERE id = ${id}
+      `;
+
+      // Execute the update query
+      await pool.request().query(updateSql);
+
+      return res.json({ message: "Roles updated successfully!" });
+    }
+  } catch (err) {
+    console.error("Error updating category:", err); // Log the error for debugging
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+});
+
+// post role data 
+app.post("/postrole", authenticateToken, async (req, res) => {
+  const { title,description } = req.body;
+
+  try {
+    // Access the connection pool using poolPromise
+    const pool = await poolPromise;
+
+    // Step 1: Check if the same title exists and is not soft-deleted
+    const checkDuplicateSql = `
+      SELECT *
+      FROM role_master
+      WHERE title = '${title}' AND deleted = 0
+    `;
+    const duplicateCheckResult = await pool.request().query(checkDuplicateSql);
+
+    if (duplicateCheckResult.recordset.length > 0) {
+      // If duplicate data exists (not soft-deleted)
+      return res.status(409).json({ message: "Duplicate entry, role already exists!" });
+    } else {
+      // Step 2: Check if the same title exists but is soft-deleted
+      const checkSoftDeletedSql = `
+        SELECT *
+        FROM role_master
+        WHERE title = '${title}' AND deleted = 1
+      `;
+      const softDeletedCheckResult = await pool.request().query(checkSoftDeletedSql);
+
+      if (softDeletedCheckResult.recordset.length > 0) {
+        // If soft-deleted data exists, restore the entry
+        const restoreSoftDeletedSql = `
+          UPDATE role_master
+          SET deleted = 0
+          WHERE title = '${title}'
+        `;
+        await pool.request().query(restoreSoftDeletedSql);
+        return res.json({ message: "Soft-deleted data restored successfully!" });
+      } else {
+        // Step 3: Insert new entry if no duplicates found
+        const insertSql = `
+          INSERT INTO role_master (title,description)
+          VALUES ('${title}','${description}')
+        `;
+        await pool.request().query(insertSql);
+        return res.json({ message: "Roles added successfully!" });
+      }
+    }
+  } catch (err) {
+    console.error("Error adding Roles:", err); // Log the error for debugging
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+});
+
+// delete role data 
+
+app.post("/deleterole", authenticateToken, async (req, res) => {
+  const { id } = req.body;
+
+  try {
+    // Access the connection pool using poolPromise
+    const pool = await poolPromise;
+
+    // Direct SQL query without parameter binding
+    const sql = `
+      UPDATE role_master
+      SET deleted = 1
+      WHERE id = ${id}
+    `;
+
+    // Execute the update query
+    const result = await pool.request().query(sql);
+
+    // Return the result
+    return res.json(result);
+  } catch (err) {
+    console.error("Error deleting category:", err); // Log error for debugging
+    return res.status(500).json({ message: "Error updating category" });
+  }
+});
+
+//edit role data
+
+app.get("/requestrole/:id", authenticateToken, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // Access the connection pool using poolPromise
+    const pool = await poolPromise;
+
+    // Direct SQL query without parameter binding
+    const sql = `
+      SELECT *
+      FROM role_master
+      WHERE id = ${id} AND deleted = 0
+    `;
+
+    // Execute the query and get the results
+    const result = await pool.request().query(sql);
+
+    // Check if the result is empty
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "role not found" });
+    }
+
+    // Return the first record from the result set
+    return res.json(result.recordset[0]);
+  } catch (err) {
+    console.error("Error fetching Role:", err); // Log the error for debugging
+    return res.status(500).json({ message: "Internal Server Error", error: err });
   }
 });

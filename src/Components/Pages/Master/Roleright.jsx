@@ -27,7 +27,7 @@ const Roleright = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axiosInstance.get(`${Base_Url}/getcat`,{
+      const response = await axiosInstance.get(`${Base_Url}/getrole`,{
         headers: {
           Authorization: token, // Send token in headers
         },
@@ -64,7 +64,7 @@ const Roleright = () => {
     const newErrors = {}; // Initialize an empty error object
     if (!formData.title.trim()) {
       // Check if the title is empty
-      newErrors.title = "Roleright Field is required."; // Set error message if title is empty
+      newErrors.title = "Role Field is required."; // Set error message if title is empty
     }
     return newErrors; // Return the error object
   };
@@ -89,7 +89,7 @@ const Roleright = () => {
         if (isEdit) {
           // For update, include 'updated_by'
           await axios
-            .post(`${Base_Url}/putcatdata`, {
+            .post(`${Base_Url}/putrole`, {
               ...formData,
               updated_by: updatedBy,
             },{
@@ -102,13 +102,13 @@ const Roleright = () => {
             })
             .catch((error) => {
               if (error.response && error.response.status === 409) {
-                setDuplicateError("Duplicate entry, Roleright already exists!"); // Show duplicate error for update
+                setDuplicateError("Duplicate entry, Role already exists!"); // Show duplicate error for update
               }
             });
         } else {
           // For insert, include 'created_by'
           await axios
-            .post(`${Base_Url}/postdatacat`, {
+            .post(`${Base_Url}/postrole`, {
               ...formData,
               created_by: createdBy,
 
@@ -123,7 +123,7 @@ const Roleright = () => {
             })
             .catch((error) => {
               if (error.response && error.response.status === 409) {
-                setDuplicateError("Duplicate entry, Roleright already exists!"); // Show duplicate error for insert
+                setDuplicateError("Duplicate entry, Role already exists!"); // Show duplicate error for insert
               }
             });
         }
@@ -135,20 +135,20 @@ const Roleright = () => {
 
   const deleted = async (id) => {
     try {
-      const response = await axiosInstance.post(`${Base_Url}/deletecatdata`, { id },{
+      const response = await axiosInstance.post(`${Base_Url}/deleterole`, { id },{
         headers: {
           Authorization: token,
         },
       });
       window.location.reload();
     } catch (error) {
-      console.error("Error deleting user:", error);
+      console.error("Error deleting role:", error);
     }
   };
 
   const edit = async (id) => {
     try {
-      const response = await axiosInstance.get(`${Base_Url}/requestdatacat/${id}`,{
+      const response = await axiosInstance.get(`${Base_Url}/requestrole/${id}`,{
         headers: {
           Authorization: token,
         },
