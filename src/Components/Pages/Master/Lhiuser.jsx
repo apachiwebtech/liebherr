@@ -29,7 +29,16 @@ const Lhiuser = () => {
     Lhiuser: "",
     Usercode: "",
     passwordmd5: "",
+    mobile_no: "",
+    email: "",
+    status: "",
+    remarks: "",
+    Role: "",
+    Designation: "",
+    Reporting_to:"",
   });
+
+ 
 
     const fetchRoles = async () => {
       try {
@@ -39,6 +48,7 @@ const Lhiuser = () => {
            },
          });
         console.log(response.data);
+        
         setRoles(response.data);
       } catch (error) {
         console.error("Error fetching countries:", error);
@@ -119,9 +129,7 @@ const Lhiuser = () => {
     if (!formData.Lhiuser || !formData.Lhiuser.trim()) {
       newErrors.Lhiuser = "Lhiuser Field is required.";
     }
-    if (!formData.Usercode || !formData.Usercode.trim()) {
-      newErrors.Usercode = "Usercode Field is required.";
-    }
+  
     if (!formData.Password || !formData.passwordmd5.trim()) {
       newErrors.Password = "Password Field is required.";
     }
@@ -174,6 +182,17 @@ const Lhiuser = () => {
               .then((response) => {
                 setFormData({
                   Lhiuser: "",
+                  Usercode: "",
+                  Password: "",
+                  mobile_no: "",
+                  email: "",
+                  status: "",
+                  remarks: "",
+                  Roles: "",
+                  Designation: "",
+                  Reporting_to:"",
+
+
                 });
                 fetchUsers();
               })
@@ -203,6 +222,9 @@ const Lhiuser = () => {
                   email: "",
                   status: "",
                   remarks: "",
+                  Roles: "",
+                  Designation: "",
+                  Reporting_to:"",
                 });
                 fetchUsers();
 
@@ -220,19 +242,19 @@ const Lhiuser = () => {
     }
   };
 
-  const deleted = async (id) => {
-    try {
-      const response = await axiosInstance.post(`${Base_Url}/deletelhidata`, { id }, {
-        headers: {
-          Authorization: token, // Send token in headers
-        },
-      });
+  // const deleted = async (id) => {
+  //   try {
+  //     const response = await axiosInstance.post(`${Base_Url}/deletelhidata`, { id }, {
+  //       headers: {
+  //         Authorization: token, // Send token in headers
+  //       },
+  //     });
 
-      window.location.reload();
-    } catch (error) {
-      console.error("Error deleting user:", error);
-    }
-  };
+  //     window.location.reload();
+  //   } catch (error) {
+  //     console.error("Error deleting user:", error);
+  //   }
+  // };
 
   const edit = async (id) => {
     try {
@@ -242,8 +264,10 @@ const Lhiuser = () => {
         },
       });
       setFormData(response.data);
+      
       setIsEdit(true);
       console.log(response.data);
+     
     } catch (error) {
       console.error("Error editing user:", error);
     }
@@ -321,9 +345,9 @@ const Lhiuser = () => {
                     <div className="col-4">
                       <div className="mb-3">
                         <label htmlFor="UsercodeInput" className="input-field">
-                          User Code<span className="text-danger">*</span>
+                          User Code<span className="text-danger"></span>
                         </label>
-                        <input
+                        <input disabled
                           type="text"
                           className="form-control"
                           name="Usercode"
@@ -435,31 +459,32 @@ const Lhiuser = () => {
                   <div className="row ">
                     <div className="col-4">
                     <div className="mb-3">
-                    <label htmlFor="Roles" className="form-label pb-0 dropdown-label"
+                    <label htmlFor="Role" className="form-label pb-0 dropdown-label"
                     > Roles<span className="text-danger">*</span>
                     </label>
                     <select
                       className="form-select dropdown-select"
-                      name="Roles"
-                      value={formData.Roles}
+                      name="Role"
+                      value={formData.Role}
                       onChange={handleChange}
                     >
                       <option value="">Select Role</option>
-                      {roles.map((Roles) => (
-                        <option key={Roles.id} value={Roles.id}>
-                          {Roles.title}
+                      {roles.map((Role) => (
+                        <option key={Role.id} value={Role.id}>
+                          {Role.title}
                         </option>
                       ))}
                     </select>
-                    {errors.Roles && (
-                      <small className="text-danger">{errors.Roles}</small>
+                    
+                    {errors.Role && (
+                      <small className="text-danger">{errors.Role}</small>
                     )}
                   </div>
                     </div>
                     <div className="col-4">
                     <div className="mb-3">
                     <label htmlFor="Reporting_to" className="form-label pb-0 dropdown-label"
-                    > Reporting To<span className="text-danger">*</span>
+                    > Reporting To<span className="text-danger"></span>
                     </label>
                     <select
                       className="form-select dropdown-select"

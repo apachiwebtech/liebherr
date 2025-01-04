@@ -6875,6 +6875,7 @@ app.post("/putlhidata", authenticateToken, async (req, res) => {
   const {
     Lhiuser, id, updated_by, mobile_no, Usercode, password, status, email, remarks,Roles,Designation,Reporting_to
   } = req.body;
+  
 
   try {
     const pool = await poolPromise;
