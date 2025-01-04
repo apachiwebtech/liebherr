@@ -80,7 +80,7 @@ export function Siteheader({ headerState }) {
                 <li>
                   <Link className="dropdown-item" to="/callstatus">Call Status Code Master</Link></li>
                 <li>
-                  <Link className="dropdown-item" to="/lhiusertabs">LHI User Master</Link></li>
+                  <Link className="dropdown-item" to="/Lhiuser">LHI User Master</Link></li>
                 <li>
                   <Link className="dropdown-item" to="/servicecontract">Service Contract Registration</Link></li>
                 <li>

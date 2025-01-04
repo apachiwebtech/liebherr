@@ -190,7 +190,7 @@ const Roleright = () => {
                   >
                     <div className="mb-3">
                       <label htmlFor="RolerightInput" className="input-field">
-                        Roleright<span className="text-danger">*</span>
+                        Add Role<span className="text-danger">*</span>
                       </label>
                       <input
                         type="text"
@@ -199,7 +199,7 @@ const Roleright = () => {
                         id="RolerightInput"
                         value={formData.title}
                         onChange={handleChange}
-                        placeholder="Enter Roleright"
+                        placeholder="Enter Role"
                       />
                       {errors.title && (
                         <small className="text-danger">{errors.title}</small>
@@ -209,6 +209,21 @@ const Roleright = () => {
                       )}{" "}
                       {/* Show duplicate error */}
                     </div>
+                    <div className="mb-3">
+                    <label htmlFor="ComplaintcodeInput" className="input-field">
+                      Description
+                    </label>
+                      <textarea
+                      type="text"
+                      className="form-control"
+                      name="description"
+                      id="description"
+                      value={formData.description}
+                      onChange={handleChange}
+                      placeholder="Enter Description "
+                      />
+
+                  </div>
                     <div className="text-right">
                       <button className="btn btn-liebherr" type="submit">
                         {isEdit ? "Update" : "Submit"}
