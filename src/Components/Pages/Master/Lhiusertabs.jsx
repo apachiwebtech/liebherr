@@ -78,7 +78,7 @@ function Lhiusertabs() {
                          }`}
                          
                        >
-                         Role Rights
+                         ROLE RIGHTS
                        </button></Link>
                      </li>
                     
@@ -89,7 +89,7 @@ function Lhiusertabs() {
                          }`}
                          
                        >
-                         Role Assign
+                        ROLE ASSIGN
                        </button></Link>
                      </li>
                    </ul>
