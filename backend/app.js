@@ -3257,7 +3257,7 @@ app.get("/getcvengineer/:pincode/:msp/:csp", authenticateToken, async (req, res)
   }
 });
 
-app.get("/getProducts",authenticateToken, async (req, res) => {
+app.get("/getProducts", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
@@ -3279,7 +3279,7 @@ app.get("/getProducts",authenticateToken, async (req, res) => {
   }
 });
 
-app.get("/getchildfranchises",authenticateToken, async (req, res) => {
+app.get("/getchildfranchises", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
@@ -3498,10 +3498,10 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
     complaint_date, customer_name = "NA", contact_person, email, mobile, address,
     state, city, area, pincode, mode_of_contact, ticket_type, cust_type,
     warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks
-    , ticket_id, classification, priority, callType, requested_by, requested_email, requested_mobile, msp, csp, sales_partner, sales_partner2, salutation ,mwhatsapp,awhatsapp
+    , ticket_id, classification, priority, callType, requested_by, requested_email, requested_mobile, msp, csp, sales_partner, sales_partner2, salutation, mwhatsapp, awhatsapp
   } = req.body;
 
-  
+
 
 
 
@@ -3658,7 +3658,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
 
 
-   const test = `SELECT Top 1 ticket_no
+    const test = `SELECT Top 1 ticket_no
         FROM complaint_ticket
         WHERE ticket_no LIKE @ticketType + 'H' + '%'
           AND ticket_date >= CAST(DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0) AS DATE)
@@ -3666,7 +3666,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
         ORDER BY ticket_no Desc`
 
 
-        console.log(test,"EEE")
+    console.log(test, "EEE")
 
 
 
@@ -3870,11 +3870,11 @@ app.post("/u_complaint", authenticateToken, async (req, res) => {
   let {
     customer_name, contact_person, email, mobile, address,
     state, city, area, pincode, mode_of_contact, cust_type,
-    warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks, ticket_no, classification, priority, requested_by, requested_email, requested_mobile, sales_partner2, salutation ,mwhatsapp,awhatsapp
+    warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks, ticket_no, classification, priority, requested_by, requested_email, requested_mobile, sales_partner2, salutation, mwhatsapp, awhatsapp
   } = req.body;
 
 
-  
+
 
 
 
@@ -4293,9 +4293,9 @@ app.post("/putcustomer", authenticateToken, async (req, res) => {
 
 
 
-   
 
-  
+
+
     // Step 2: Update Query
     const updateSQL = `
      UPDATE awt_customer
@@ -4901,13 +4901,13 @@ app.get("/getengineerpopulate/:engineerid", authenticateToken, async (req, res) 
   const { engineerid } = req.params;
 
 
-  console.log(engineerid , "%%%")
+  console.log(engineerid, "%%%")
 
-  if(engineerid != "undefined" ){
+  if (engineerid != "undefined") {
     try {
       // Use the poolPromise to get the connection pool
       const pool = await poolPromise;
-  
+
       // SQL query to fetch data from the master list, customize based on your needs
       const sql = `
     SELECT m.* FROM awt_engineermaster m
@@ -4915,7 +4915,7 @@ app.get("/getengineerpopulate/:engineerid", authenticateToken, async (req, res) 
       `;
       // Execute the SQL query
       const result = await pool.request().query(sql);
-  
+
       // Return the result as JSON
       return res.json(result.recordset);
     } catch (err) {
@@ -5373,7 +5373,7 @@ app.get("/getcustomerpopulate/:customerid", authenticateToken, async (req, res) 
     return res.status(500).json({ error: 'An error occurred while fetching data' });
   }
 });
-app.get("/requestchildfranchise/:id",authenticateToken,  async (req, res) => {
+app.get("/requestchildfranchise/:id", authenticateToken, async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -7519,7 +7519,7 @@ app.post("/updateProduct", authenticateToken,
 //Complaint view Insert TicketFormData start
 
 app.post("/ticketFormData", authenticateToken, async (req, res) => {
-  const { ticket_no, serial_no, ModelNumber, engineerdata, call_status, sub_call_status, updated_by, group_code, site_defect, defect_type, engineername,activity_code } = req.body;
+  const { ticket_no, serial_no, ModelNumber, engineerdata, call_status, sub_call_status, updated_by, group_code, site_defect, defect_type, engineername, activity_code } = req.body;
 
 
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
@@ -8393,7 +8393,7 @@ app.get("/getcomplainlistmsp", authenticateToken, async (req, res) => {
 //Register Page Complaint Duplicate Start
 
 app.get("/getmultiplelocation/:pincode/:classification", authenticateToken, async (req, res) => {
-  const { pincode ,classification } = req.params;
+  const { pincode, classification } = req.params;
 
 
 
@@ -8412,7 +8412,7 @@ app.get("/getmultiplelocation/:pincode/:classification", authenticateToken, asyn
 	LEFT JOIN awt_franchisemaster as f on f.licarecode = o.account_manager
 	LEFT JOIN awt_childfranchisemaster as fm on fm.licare_code = o.owner
 	where p.pincode = ${pincode} and o.customer_classification = '${classification}'`
-    
+
     const result = await pool.request().query(sql);
 
     return res.json(result.recordset);
@@ -9087,7 +9087,7 @@ app.get("/finalapproveenginner", authenticateToken, async (req, res) => {
 
 app.post("/getquotationspare", authenticateToken, async (req, res) => {
 
-  const {quote_id} = req.body;
+  const { quote_id } = req.body;
 
 
 
@@ -9153,31 +9153,31 @@ app.post("/query", async (req, res) => {
   const apiKey = req.header('x-api-key'); // Get API key from request header
 
   if (apiKey !== API_KEY) {
-      return res.status(403).json({ error: 'Forbidden: Invalid API key' });
+    return res.status(403).json({ error: 'Forbidden: Invalid API key' });
   }
 
   try {
-      const { query, params } = req.body; // Extract query and parameters from the body
-      
-      if (!query) {
-          return res.status(400).json({ error: 'Bad Request: Missing query' });
-      }
+    const { query, params } = req.body; // Extract query and parameters from the body
 
-      const pool = await poolPromise;
-      const request = pool.request();
+    if (!query) {
+      return res.status(400).json({ error: 'Bad Request: Missing query' });
+    }
 
-      // Add parameters if provided
-      if (params) {
-          Object.entries(params).forEach(([key, value]) => {
-              request.input(key, value.type, value.value); // Assumes params is structured { key: { type, value } }
-          });
-      }
+    const pool = await poolPromise;
+    const request = pool.request();
 
-      const result = await request.query(query);
-      res.json(result.recordsets);
+    // Add parameters if provided
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        request.input(key, value.type, value.value); // Assumes params is structured { key: { type, value } }
+      });
+    }
+
+    const result = await request.query(query);
+    res.json(result.recordsets);
   } catch (error) {
-      console.error("Error in /query", error);
-      res.status(500).json({ error: "An internal server error occurred" });
+    console.error("Error in /query", error);
+    res.status(500).json({ error: "An internal server error occurred" });
   }
 });
 
@@ -9211,7 +9211,7 @@ app.get("/getrole", authenticateToken, async (req, res) => {
 // put role data
 
 app.post("/putrole", authenticateToken, async (req, res) => {
-  const { title,id, description } = req.body;
+  const { title, id, description } = req.body;
 
   try {
     // Access the connection pool using poolPromise
@@ -9251,7 +9251,7 @@ app.post("/putrole", authenticateToken, async (req, res) => {
 
 // post role data 
 app.post("/postrole", authenticateToken, async (req, res) => {
-  const { title,description } = req.body;
+  const { title, description } = req.body;
 
   try {
     // Access the connection pool using poolPromise
@@ -9358,5 +9358,166 @@ app.get("/requestrole/:id", authenticateToken, async (req, res) => {
   } catch (err) {
     console.error("Error fetching Role:", err); // Log the error for debugging
     return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+});
+
+
+app.post('/role_pages', async (req, res) => {
+  const role_id = req.body.role_id;
+
+  try {
+    const pool = await poolPromise;
+
+    const sqlSelect = `
+      SELECT * 
+      FROM pagerole AS pg 
+      LEFT JOIN page_master AS pm ON pg.pageid = pm.id 
+      WHERE pg.roleid = @role_id 
+      ORDER BY pg.id ASC
+    `;
+
+    const result = await pool.request()
+      .input("role_id", sql.Int, role_id)
+      .query(sqlSelect);
+
+    const data = result.recordset;
+
+    if (data.length === 0) {
+      const fetchPageIds = `
+        SELECT id AS page_id 
+        FROM page_master 
+        WHERE deleted = 0
+      `;
+
+      const pageIdsResult = await pool.request().query(fetchPageIds);
+      const pageIds = pageIdsResult.recordset;
+
+      if (pageIds.length > 0) {
+        const transaction = new sql.Transaction(pool);
+        await transaction.begin();
+
+        try {
+          const request = transaction.request();
+          for (const { page_id } of pageIds) {
+            await request.query(`
+                INSERT INTO pagerole (roleid, pageid, accessid) 
+                VALUES (${role_id}, ${page_id},1)
+              `);
+          }
+
+          await transaction.commit();
+
+          const getData = `
+            SELECT * 
+            FROM pagerole AS pg 
+            LEFT JOIN page_master AS pm ON pg.pageid = pm.id 
+            WHERE pg.roleid = @role2_id 
+            ORDER BY pg.id ASC
+          `;
+
+          const newData = await pool.request()
+            .input("role2_id", sql.Int, role_id)
+            .query(getData);
+
+          return res.json(newData.recordset);
+        } catch (err) {
+          await transaction.rollback();
+          console.error("Transaction error:", err);
+          return res.status(500).json({ error: "Failed to insert rows", details: err });
+        }
+      }
+    } else {
+      return res.json(data);
+    }
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
+
+
+
+app.post('/getRoleData', async (req, res) => {
+  const { role, pageid } = req.body;
+
+  try {
+    // Connect to the MSSQL database
+    const pool = await poolPromise;
+
+    // Query to fetch data based on `pageid` and `roleid`
+    const query = `
+      SELECT * 
+      FROM pagerole 
+      WHERE pageid = @pageid AND roleid = @roleid
+    `;
+
+    const result = await pool.request()
+      .input("pageid", sql.Int, pageid)
+      .input("roleid", sql.Int, role)
+      .query(query);
+
+    // Return the fetched data
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
+
+app.post('/assign_role', async (req, res) => {
+  const rolePages = req.body;
+
+  // Validate the input
+  if (!Array.isArray(rolePages) || rolePages.length === 0) {
+    return res.status(400).json({ error: "Invalid input: 'rolePages' should be a non-empty array." });
+  }
+
+  const role_id = rolePages[0]?.roleid;
+
+  if (!role_id) {
+    return res.status(400).json({ error: "Invalid input: 'roleid' is required." });
+  }
+
+  try {
+    // Connect to the MSSQL database
+    const pool = await poolPromise;
+
+    // Delete existing roles for the given role_id
+    const deleteSql = "DELETE FROM pagerole WHERE roleid = @roleid";
+    await pool.request()
+      .input("roleid", sql.Int, role_id)
+      .query(deleteSql);
+
+    // Prepare values for bulk insert
+    const insertSql = "INSERT INTO pagerole (roleid, pageid, accessid) VALUES (@roleid, @pageid, @accessid)";
+    const transaction = new sql.Transaction(pool);
+
+    try {
+      await transaction.begin();
+
+      for (const rolePage of rolePages) {
+        await transaction.request()
+          .input("roleid", sql.Int, rolePage.roleid)
+          .input("pageid", sql.Int, rolePage.pageid)
+          .input("accessid", sql.Int, rolePage.accessid)
+          .query(insertSql);
+      }
+
+      await transaction.commit();
+
+      return res.json({
+        message: "Roles assigned successfully",
+        affectedRows: rolePages.length,
+      });
+
+    } catch (err) {
+      await transaction.rollback();
+      console.error("Transaction error:", err);
+      return res.status(500).json({ error: "Failed to insert roles", details: err });
+    }
+
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
   }
 });

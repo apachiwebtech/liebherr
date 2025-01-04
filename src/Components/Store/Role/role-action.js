@@ -1,4 +1,4 @@
-import { BASE_URL } from "../../AdminComponent/BaseUrl";
+import { Base_Url } from "../../Utils/Base_Url";
 import { roleActions } from "./roleSilce";
 
 
@@ -10,7 +10,7 @@ export const getRoleData = (data) => {
       
 
         try {
-            const response = await fetch(`${BASE_URL}/getRoleData`, {
+            const response = await fetch(`${Base_Url}/getRoleData`, {
                 method: "POST",
                 body: JSON.stringify({
                     role: data.role,

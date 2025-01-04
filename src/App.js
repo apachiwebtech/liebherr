@@ -110,6 +110,7 @@ import QueryPage from './Components/Pages/QueryPage';
 import Master_Warrenty from './Components/Pages/Master/Master_Warrenty';
 import PostSaleWarrenty from './Components/Pages/Master/PostSaleWarrenty';
 import Roleright from './Components/Pages/Master/Roleright';
+import Roleassign from './Components/Pages/Master/Roleassign';
 
 
 const isAuthenticated = () => {
@@ -439,6 +440,11 @@ const Router = createBrowserRouter([
       {
         path: "/Roleright",
         element: <Roleright />,
+
+      },
+      {
+        path: "/Roleassign",
+        element: <Roleassign />,
 
       },
       {
