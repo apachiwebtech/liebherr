@@ -1,21 +1,17 @@
-import React, { useState } from "react";
+import React, { useEffect,useState } from "react";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import Lhiuser from "./Lhiuser";
 import { Link } from "react-router-dom";
 
 function Lhiusertabs() {
-  const [activeTab, setActiveTab] = useState("Lhiuser");
-
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case "Lhiuser":
-        return <Lhiuser />;
-
-      default:
-        return <Lhiuser />;
-    }
-  };
+  const [activeTab, setActiveTab] = useState('/Lhiuser');
+ 
+   useEffect(() => {
+ 
+     setActiveTab(window.location.pathname);
+ 
+   }, [window.location.pathname]);
 
   return (
     <>
@@ -89,7 +85,7 @@ function Lhiusertabs() {
                      <li className="nav-item">
                      <Link to={`/Roleassign`}><button
                          className={`nav-link ${
-                           activeTab === "/producttype" ? "active" : "onClick={() => setActiveTab('Roleassign')}"
+                           activeTab === "/Roleassign" ? "active" : "onClick={() => setActiveTab('Roleassign')}"
                          }`}
                          
                        >

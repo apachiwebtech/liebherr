@@ -6,6 +6,7 @@ import { Base_Url } from "../../Utils/Base_Url";
 import { Navigate } from "react-router-dom";
 import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
+import Lhiusertabs from './Lhiusertabs';
 
 const Lhiuser = () => {
   // Step 1: Add this state to track errors
@@ -237,12 +238,14 @@ const Lhiuser = () => {
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
   return (
+    <div className="tab-content">
     <div className="row mp0">
           {loaders && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
       )}
+      <Lhiusertabs />
       <div className="col-12">
         <div className="card mb-3 tab_box">
           <div
@@ -591,6 +594,7 @@ const Lhiuser = () => {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 };

@@ -5,6 +5,7 @@ import { Base_Url } from "../../Utils/Base_Url";
 import ProMaster from "./ProMaster";
 import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
+import Lhiusertabs from "./Lhiusertabs";
 
 const Roleright = () => {
   // Step 1: Add this state to track errors
@@ -172,7 +173,7 @@ const Roleright = () => {
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
       )}
-      <ProMaster />
+      <Lhiusertabs />
       <div className="row mp0">
         <div className="col-12">
           <div className="card mb-3 tab_box">
