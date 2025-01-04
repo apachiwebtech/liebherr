@@ -4,9 +4,12 @@ import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
 import { Base_Url, secretKey } from '../../Utils/Base_Url';
 import Endcustomertabs from './Endcustomertabs';
+import { useSelector } from 'react-redux';
 import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 import CryptoJS from 'crypto-js';
+import { useDispatch } from "react-redux";
+import { getRoleData } from "../../Store/Role/role-action";
 
 
 export function Customerlist(params) {
@@ -209,6 +212,33 @@ export function Customerlist(params) {
 
     const navigate = useNavigate()
 
+    // Role Right 
+
+
+    const Decrypt = (encrypted) => {
+        encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+        const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+        return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+    };
+
+    const storedEncryptedRole = localStorage.getItem("Userrole");
+    const decryptedRole = Decrypt(storedEncryptedRole);
+
+    const roledata = {
+        role: decryptedRole,
+        pageid: String(14)
+    }
+
+    const dispatch = useDispatch()
+    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+
+
+    useEffect(() => {
+        dispatch(getRoleData(roledata))
+    }, [])
+
+    // Role Right End 
+
 
 
     return (
@@ -219,7 +249,7 @@ export function Customerlist(params) {
                 </div>
             )}
             <Endcustomertabs />
-            <div className="row mp0" >
+            {roleaccess > 1 ? <div className="row mp0" >
                 <div className="col-md-12 col-12">
                     <div className="card mb-3 tab_box">
 
@@ -493,7 +523,7 @@ export function Customerlist(params) {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> : null}
         </div>
     )
 }
