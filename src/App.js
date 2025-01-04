@@ -109,6 +109,7 @@ import TrainerHeader from './Components/Trainer/TrainerHeader';
 import QueryPage from './Components/Pages/QueryPage';
 import Master_Warrenty from './Components/Pages/Master/Master_Warrenty';
 import PostSaleWarrenty from './Components/Pages/Master/PostSaleWarrenty';
+import Roleright from './Components/Pages/Master/Roleright';
 
 
 const isAuthenticated = () => {
@@ -433,6 +434,16 @@ const Router = createBrowserRouter([
       {
         path: "/lhiusertabs",
         element: <Lhiusertabs />,
+
+      },
+      {
+        path: "/Roleright",
+        element: <Roleright />,
+
+      },
+      {
+        path: "/lhiuser",
+        element: <Lhiuser />,
 
       },
       {

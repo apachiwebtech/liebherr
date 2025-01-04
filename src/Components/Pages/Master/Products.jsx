@@ -157,7 +157,7 @@ export function Products(params) {
                     <div className="card mb-3 tab_box">
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
                             <div className='p-1 text-right'>
-                                <Link to={`/addproduct/:productid`}><button className='btn btn-primary'>Add Product</button></Link>
+                                <Link to={`/addproduct/:productid`}><button  hidden className='btn btn-primary'>Add Product</button></Link>
                             </div>
                             <div className='table-responsive'>
                                 <table id="example" className="table table-striped">

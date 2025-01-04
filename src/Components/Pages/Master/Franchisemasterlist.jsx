@@ -160,11 +160,11 @@ export function Franchisemasterlist(params) {
 
             <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
               <div className="p-1 text-right">
-                <button
+                <button hidden
                   className="btn btn-primary"
                   onClick={() => navigate("/MasterFranchise")}
                 >
-                  Add  Master Service Partner                </button>
+                  Add  Master Service Partner  </button>
               </div>
               <table className="table">
                 <thead>

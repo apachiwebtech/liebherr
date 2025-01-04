@@ -58,7 +58,7 @@ function Lhiusertabs() {
                 className="tabsMenu"
                 style={{
                   fontSize: "14px",
-                  marginLeft: "12px",
+                  marginLeft: "27px",
                   fontWeight: "600",
                   fontFamily: "Nunito",
                 }}
@@ -74,7 +74,28 @@ function Lhiusertabs() {
                       LHI USER
                     </button>
                   </li>
+                  <li className="nav-item">
+                    <button
+                      className={`nav-link ${
+                        activeTab === "Roleright" ? "active" : "onClick={() => setActiveTab('Roleright')}"
+                      }`}
+                      
+                    >
+                      Role Rights
+                    </button>
+                  </li>
+                  <li className="nav-item">
+                    <button
+                      className={`nav-link ${
+                        activeTab === "Roleassign" ? "active" : "onClick={() => setActiveTab('Roleassign')}"
+                      }`}
+                      
+                    >
+                      Role Assign
+                    </button>
+                  </li>
                 </ul>
+                
               </div>
             </div>
 
