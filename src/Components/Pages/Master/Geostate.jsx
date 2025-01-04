@@ -1,10 +1,14 @@
  import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
-import { Base_Url } from '../../Utils/Base_Url';
+import { Base_Url,secretKey } from '../../Utils/Base_Url';
 import LocationTabs from './LocationTabs';
 import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
+import { useSelector } from 'react-redux';
+import CryptoJS from 'crypto-js';
+import { useDispatch } from "react-redux";
+import { getRoleData } from "../../Store/Role/role-action";
 
 const Geostate = () => {
   const { loaders, axiosInstance } = useAxiosLoader();
@@ -206,6 +210,33 @@ const Geostate = () => {
   const indexOfFirstUser = indexOfLastUser - itemsPerPage;
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
+   // Role Right 
+  
+  
+    const Decrypt = (encrypted) => {
+      encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+      const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+      return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+    };
+  
+    const storedEncryptedRole = localStorage.getItem("Userrole");
+    const decryptedRole = Decrypt(storedEncryptedRole);
+  
+    const roledata = {
+      role: decryptedRole,
+      pageid: String(3)
+    }
+  
+    const dispatch = useDispatch()
+    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+  
+  
+    useEffect(() => {
+      dispatch(getRoleData(roledata))
+    }, [])
+  
+    // Role Right End 
+
   return (
     <div className="tab-content">
       <LocationTabs/>
@@ -214,7 +245,7 @@ const Geostate = () => {
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
       )}
-    <div className="row mp0" >
+ {roleaccess > 1 ?   <div className="row mp0" >
       <div className="col-12">
         <div className="card mb-3 tab_box">
           <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
@@ -260,11 +291,11 @@ const Geostate = () => {
                     {errors.title && <small className="text-danger">{errors.title}</small>}
                     {duplicateError && <small className="text-danger">{duplicateError}</small>}
                   </div>
-                  <div className="text-right">
+                  {roleaccess > 2 ?  <div className="text-right">
                     <button className="btn btn-liebherr" type="submit" style={{ marginTop: '15px' }}>
                       {isEdit ? "Update" : "Submit"}
                     </button>
-                  </div>
+                  </div>: null } 
                 </form>
               </div>
 
@@ -314,10 +345,10 @@ const Geostate = () => {
                         <td className='text-center'>{user.region_title}</td>
                         <td className='text-center'>{user.title}</td>
                         <td className='text-center'>
-                          <FaPencilAlt style={{ cursor: 'pointer', color: 'blue' }} onClick={() => edit(user.id)} />
+                          <FaPencilAlt style={{ cursor: 'pointer', color: 'blue' }} onClick={() => edit(user.id)}  disabled={roleaccess > 3 ? false : true} />
                         </td>
                         <td className='text-center'>
-                          <FaTrash style={{ cursor: 'pointer', color: 'red' }} onClick={() => deleted(user.id)} />
+                          <FaTrash style={{ cursor: 'pointer', color: 'red' }} onClick={() => deleted(user.id)}disabled = {roleaccess > 4 ?false : true} />
                         </td>
                       </tr>
                     ))}
@@ -345,7 +376,8 @@ const Geostate = () => {
           </div>
         </div>
       </div>
-    </div></div>
+    </div>: null}
+    </div>
   );
 };
 

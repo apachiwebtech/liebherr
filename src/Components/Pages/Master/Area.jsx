@@ -1,10 +1,14 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
-import { Base_Url } from "../../Utils/Base_Url";
+import { Base_Url,secretKey } from "../../Utils/Base_Url";
 import LocationTabs from "./LocationTabs";
 import { SyncLoader } from 'react-spinners';
+import CryptoJS from 'crypto-js';
 import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
+import { useSelector } from 'react-redux';
+import { useDispatch } from "react-redux";
+import { getRoleData } from "../../Store/Role/role-action";
 
 
 const Area = () => {
@@ -261,6 +265,32 @@ const Area = () => {
       console.error("Error editing area:", error);
     }
   };
+  // Role Right 
+  
+  
+    const Decrypt = (encrypted) => {
+      encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+      const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+      return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+    };
+  
+    const storedEncryptedRole = localStorage.getItem("Userrole");
+    const decryptedRole = Decrypt(storedEncryptedRole);
+  
+    const roledata = {
+      role: decryptedRole,
+      pageid: String(4)
+    }
+  
+    const dispatch = useDispatch()
+    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+  
+  
+    useEffect(() => {
+      dispatch(getRoleData(roledata))
+    }, [])
+  
+    // Role Right End 
 
   return (
     <div className="tab-content">
@@ -270,7 +300,7 @@ const Area = () => {
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
       )}
-      <div className="row mp0">
+      {roleaccess > 1 ? <div className="row mp0">
         <div className="col-12">
           <div className="card mb-3 tab_box">
             <div
@@ -411,7 +441,7 @@ const Area = () => {
                         <small className="text-danger">{duplicateError}</small>
                       )}
                     </div>
-                    <div className="text-right">
+                    {roleaccess > 2 ?  <div className="text-right">
                       <button
                         className="btn btn-liebherr"
                         type="submit"
@@ -419,7 +449,7 @@ const Area = () => {
                       >
                         {isEdit ? "Update" : "Submit"}
                       </button>
-                    </div>
+                    </div> : null } 
                   </form>
                 </div>
 
@@ -478,10 +508,10 @@ const Area = () => {
                             <td className='text-center'>{area.geostate_title}</td>
                             <td className='text-center'>{area.title}</td>
                             <td className='text-center'>
-                              <FaPencilAlt style={{ cursor: 'pointer', color: 'blue' }} onClick={() => edit(area.id)} />
+                              <FaPencilAlt style={{ cursor: 'pointer', color: 'blue' }} onClick={() => edit(area.id)} disabled={roleaccess > 3 ? false : true} />
                             </td>
                             <td className='text-center'>
-                              <FaTrash style={{ cursor: 'pointer', color: 'red' }} onClick={() => deleted(area.id)} />
+                              <FaTrash style={{ cursor: 'pointer', color: 'red' }} onClick={() => deleted(area.id)}  disabled = {roleaccess > 4 ?false : true} />
                             </td>
                           </tr>
                         ))}
@@ -501,7 +531,8 @@ const Area = () => {
             </div>
           </div>
         </div>
-      </div></div>
+      </div>: null}
+      </div>
   );
 };
 

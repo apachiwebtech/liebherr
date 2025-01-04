@@ -1,10 +1,14 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
-import { Base_Url } from "../../Utils/Base_Url";
+import { Base_Url, secretKey } from "../../Utils/Base_Url";
 import LocationTabs from "./LocationTabs";
+import { useSelector } from 'react-redux';
 import { SyncLoader } from 'react-spinners';
+import CryptoJS from 'crypto-js';
 import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
+import { useDispatch } from "react-redux";
+import { getRoleData } from "../../Store/Role/role-action";
 
 const Geocity = () => {
   const { loaders, axiosInstance } = useAxiosLoader();
@@ -255,6 +259,33 @@ const Geocity = () => {
     }
   };
 
+   // Role Right 
+  
+  
+    const Decrypt = (encrypted) => {
+      encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+      const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+      return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+    };
+  
+    const storedEncryptedRole = localStorage.getItem("Userrole");
+    const decryptedRole = Decrypt(storedEncryptedRole);
+  
+    const roledata = {
+      role: decryptedRole,
+      pageid: String(5)
+    }
+  
+    const dispatch = useDispatch()
+    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+  
+  
+    useEffect(() => {
+      dispatch(getRoleData(roledata))
+    }, [])
+  
+    // Role Right End
+
   return (
     <div className="tab-content">
       <LocationTabs/>
@@ -263,7 +294,7 @@ const Geocity = () => {
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
       )}
-    <div className="row mp0">
+  {roleaccess > 1 ?   <div className="row mp0">
       <div className="col-12">
         <div className="card mb-3 tab_box">
           <div
@@ -405,7 +436,7 @@ const Geocity = () => {
                       <small className="text-danger">{duplicateError}</small>
                     )}
                   </div>
-                  <div className="text-right">
+                  {roleaccess > 2 ?  <div className="text-right">
                     <button
                       className="btn btn-liebherr"
                       type="submit"
@@ -413,7 +444,7 @@ const Geocity = () => {
                     >
                       {isEdit ? "Update" : "Submit"}
                     </button>
-                  </div>
+                  </div> : null } 
                 </form>
               </div>
 
@@ -473,8 +504,8 @@ const Geocity = () => {
                             <td className="text-center">{user.district_title}</td>
                             <td className="text-center">{user.title}</td>
                             <td className='text-center'>
-                              <FaPencilAlt style={{ cursor: 'pointer', color: 'blue', marginRight: '10px' }} onClick={() => edit(user.id)} />
-                              <FaTrash style={{ cursor: 'pointer', color: 'red' }} onClick={() => deleted(user.id)} />
+                              <FaPencilAlt style={{ cursor: 'pointer', color: 'blue', marginRight: '10px' }} onClick={() => edit(user.id)}  disabled={roleaccess > 3 ? false : true}/>
+                              <FaTrash style={{ cursor: 'pointer', color: 'red' }} onClick={() => deleted(user.id)} disabled = {roleaccess > 4 ?false : true}/>
                             </td>
                           </tr>
                         ))}
@@ -519,7 +550,8 @@ const Geocity = () => {
           </div>
         </div>
       </div>
-    </div></div>
+    </div> : null}
+    </div>
   );
 };
 

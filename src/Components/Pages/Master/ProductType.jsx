@@ -1,10 +1,14 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
-import { Base_Url } from "../../Utils/Base_Url";
+import { Base_Url,secretKey } from "../../Utils/Base_Url";
 import ProMaster from "./ProMaster";
+import { useSelector } from 'react-redux';
 import { SyncLoader } from 'react-spinners';
+import CryptoJS from 'crypto-js';
 import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
+import { useDispatch } from "react-redux";
+import { getRoleData } from "../../Store/Role/role-action";
 
 const ProductType = () => {
   // Step 1: Add this state to track errors
@@ -180,6 +184,33 @@ const ProductType = () => {
   const indexOfFirstUser = indexOfLastUser - itemsPerPage;
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
+   // Role Right 
+  
+  
+    const Decrypt = (encrypted) => {
+      encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+      const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+      return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+    };
+  
+    const storedEncryptedRole = localStorage.getItem("Userrole");
+    const decryptedRole = Decrypt(storedEncryptedRole);
+  
+    const roledata = {
+      role: decryptedRole,
+      pageid: String(9)
+    }
+  
+    const dispatch = useDispatch()
+    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+  
+  
+    useEffect(() => {
+      dispatch(getRoleData(roledata))
+    }, [])
+  
+    // Role Right End 
+
   return (
     <div className="tab-content">
       <ProMaster />
@@ -188,14 +219,15 @@ const ProductType = () => {
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
       )}
-      <div className="row mp0">
+        {roleaccess > 1 ? <div className="row mp0">
         <div className="col-12">
           <div className="card mb-3 tab_box">
             <div
               className="card-body"
               style={{ flex: "1 1 auto", padding: "13px 28px" }}
             >
-              <div className="row mp0">
+            
+      <div className="row mp0">
                 <div className="col-6">
                   <form
                     onSubmit={handleSubmit}
@@ -225,11 +257,11 @@ const ProductType = () => {
                       )}{" "}
                       {/* Show duplicate error */}
                     </div>
-                    <div className="text-right">
+                    {roleaccess > 2 ?  <div className="text-right">
                       <button className="btn btn-liebherr" type="submit">
                         {isEdit ? "Update" : "Submit"}
                       </button>
-                    </div>
+                    </div> : null } 
                   </form>
                 </div>
 
@@ -285,6 +317,7 @@ const ProductType = () => {
                               className="btn btn-link text-primary"
                               onClick={() => edit(item.id)}
                               title="Edit"
+                              disabled={roleaccess > 3 ? false : true}
                             >
                               <FaPencilAlt />
                             </button>
@@ -294,6 +327,7 @@ const ProductType = () => {
                               className="btn btn-link text-danger"
                               onClick={() => deleted(item.id)}
                               title="Delete"
+                              disabled = {roleaccess > 4 ?false : true}
                             >
                               <FaTrash />
                             </button>
@@ -346,11 +380,11 @@ const ProductType = () => {
                     </div>
                   </div>
                 </div>
-              </div>
+              </div> 
             </div>
           </div>
         </div>
-      </div>
+      </div> : null}
     </div>
   );
 };

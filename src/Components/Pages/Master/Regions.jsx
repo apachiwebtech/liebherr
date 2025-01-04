@@ -1,10 +1,14 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
-import { Base_Url } from "../../Utils/Base_Url";
+import { Base_Url,secretKey } from "../../Utils/Base_Url";
 import LocationTabs from "./LocationTabs";
 import { SyncLoader } from 'react-spinners';
+import { useSelector } from 'react-redux';
 import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
+import { useDispatch } from "react-redux";
+import { getRoleData } from "../../Store/Role/role-action";
+import CryptoJS from 'crypto-js';
 const Location = () => {
   const { loaders, axiosInstance } = useAxiosLoader();
   const [countries, setCountries] = useState([]);
@@ -175,6 +179,33 @@ const Location = () => {
     }
   };
 
+    // Role Right 
+
+
+    const Decrypt = (encrypted) => {
+      encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+      const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+      return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+    };
+  
+    const storedEncryptedRole = localStorage.getItem("Userrole");
+    const decryptedRole = Decrypt(storedEncryptedRole);
+  
+    const roledata = {
+      role: decryptedRole,
+      pageid: String(2)
+    }
+  
+    const dispatch = useDispatch()
+    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+  
+  
+    useEffect(() => {
+      dispatch(getRoleData(roledata))
+    }, [])
+  
+    // Role Right End 
+
   const indexOfLastUser = (currentPage + 1) * itemsPerPage;
   const indexOfFirstUser = indexOfLastUser - itemsPerPage;
   const displayedUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
@@ -188,7 +219,7 @@ const Location = () => {
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
       )}
-    <div className="row mp0">
+      {roleaccess > 1 ? <div className="row mp0">
       <div className="col-12">
         <div className="card mb-3 tab_box">
           <div
@@ -250,7 +281,7 @@ const Location = () => {
                       <small className="text-danger">{duplicateError}</small>
                     )}
                   </div>
-                  <div className="text-right">
+                  {roleaccess > 2 ? <div className="text-right">
                     <button
                       className="btn btn-liebherr"
                       type="submit"
@@ -258,7 +289,7 @@ const Location = () => {
                     >
                       {isEdit ? "Update" : "Submit"}
                     </button>
-                  </div>
+                  </div> : null}
                 </form>
               </div>
 
@@ -314,6 +345,7 @@ const Location = () => {
                           <button
                             className="btn btn-link text-primary"
                             onClick={() => edit(item.id)}
+                            disabled={roleaccess > 3 ? false : true}
                             title="Edit"
                           >
                             <FaPencilAlt />
@@ -323,6 +355,7 @@ const Location = () => {
                           <button
                             className="btn btn-link text-danger"
                             onClick={() => deleted(item.id)}
+                            disabled = {roleaccess > 4 ?false : true}
                             title="Delete"
                           >
                             <FaTrash />
@@ -384,7 +417,7 @@ const Location = () => {
           </div>
         </div>
       </div>
-    </div>
+    </div> : null}
     </div>
   );
 };
