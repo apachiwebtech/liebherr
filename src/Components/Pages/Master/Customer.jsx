@@ -3,9 +3,12 @@ import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { Base_Url, secretKey } from '../../Utils/Base_Url';
 import Endcustomertabs from './Endcustomertabs';
+import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
+import { useDispatch } from "react-redux";
+import { getRoleData } from "../../Store/Role/role-action";
 import CryptoJS from 'crypto-js';
 
 const Customer = () => {
@@ -283,6 +286,33 @@ const Customer = () => {
     }
   };
 
+  // Role Right 
+    
+    
+     const Decrypt = (encrypted) => {
+      encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+      const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+      return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+    };
+  
+    const storedEncryptedRole = localStorage.getItem("Userrole");
+    const decryptedRole = Decrypt(storedEncryptedRole);
+  
+    const roledata = {
+      role: decryptedRole,
+      pageid: String(15)
+    }
+  
+    const dispatch = useDispatch()
+    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+  
+  
+    useEffect(() => {
+      dispatch(getRoleData(roledata))
+    }, [])
+  
+    // Role Right End 
+
 
   return (
     <div className="tab-content">
@@ -292,7 +322,7 @@ const Customer = () => {
         </div>
       )}
       <Endcustomertabs></Endcustomertabs>
-      <div className="row mp0">
+      {roleaccess > 1 ?    <div className="row mp0">
         <div className="col-12">
           <div className="card mb-3 tab_box">
             <div className="card-body">
@@ -484,9 +514,9 @@ const Customer = () => {
                         )}
                       </div>
 
-                      <div className="col-md-12 text-right">
+                      {roleaccess > 2 ?    <div className="col-md-12 text-right">
                         <button type="submit" className="btn btn-liebherr">{isEdit ? "Update" : "Submit"}</button>
-                      </div>
+                      </div> : null } 
                     </div>
                   </form>
                 </div>
@@ -494,7 +524,8 @@ const Customer = () => {
             </div>
           </div>
         </div>
-      </div></div>
+      </div> : null}
+      </div>
 
   );
 };

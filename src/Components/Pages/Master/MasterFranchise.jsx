@@ -5,10 +5,13 @@ import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url, secretKey } from "../../Utils/Base_Url";
 import { useParams } from "react-router-dom";
 import Franchisemaster from '../Master/Franchisemaster';
+import { useSelector } from 'react-redux';
 import { useNavigate } from "react-router-dom";
 import md5 from 'js-md5';
 import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
+import { useDispatch } from "react-redux";
+import { getRoleData } from "../../Store/Role/role-action";
 
 
 const MasterFranchise = (params) => {
@@ -502,6 +505,33 @@ const MasterFranchise = (params) => {
   const indexOfFirstUser = indexOfLastUser - itemsPerPage;
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
+   // Role Right 
+    
+    
+     const Decrypt = (encrypted) => {
+      encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+      const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+      return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+    };
+  
+    const storedEncryptedRole = localStorage.getItem("Userrole");
+    const decryptedRole = Decrypt(storedEncryptedRole);
+  
+    const roledata = {
+      role: decryptedRole,
+      pageid: String(19)
+    }
+  
+    const dispatch = useDispatch()
+    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+  
+  
+    useEffect(() => {
+      dispatch(getRoleData(roledata))
+    }, [])
+  
+    // Role Right End
+
   return (
 
     <div className="tab-content">
@@ -511,7 +541,7 @@ const MasterFranchise = (params) => {
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
       )}
-      <div className="row mp0">
+    {roleaccess > 1 ?    <div className="row mp0">
         <div className="col-12">
           <div className="card mb-3 tab_box">
             <div
@@ -1092,7 +1122,7 @@ const MasterFranchise = (params) => {
 
 
 
-                    <div className="text-right">
+                    {roleaccess > 2 ?   <div className="text-right">
                       <button
                         className="btn btn-liebherr"
                         type="submit"
@@ -1100,7 +1130,7 @@ const MasterFranchise = (params) => {
                       >
                         {isEdit ? "Update" : "Submit"}
                       </button>
-                    </div>
+                    </div> : null } 
                   </div>
                 </form>
 
@@ -1110,7 +1140,8 @@ const MasterFranchise = (params) => {
             </div>
           </div>
         </div>
-      </div></div>
+      </div> : null}
+      </div>
   );
 };
 

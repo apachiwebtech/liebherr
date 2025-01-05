@@ -4,9 +4,12 @@ import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
 import { Base_Url, secretKey } from '../../Utils/Base_Url';
 import Franchisemaster from './Franchisemaster';
+import { useSelector } from 'react-redux';
 import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 import CryptoJS from 'crypto-js';
+import { useDispatch } from "react-redux";
+import { getRoleData } from "../../Store/Role/role-action";
 
 export function Franchisemasterlist(params) {
   const { loaders, axiosInstance } = useAxiosLoader();
@@ -145,6 +148,32 @@ export function Franchisemasterlist(params) {
   }, []);
 
   const navigate = useNavigate()
+  // Role Right 
+    
+    
+     const Decrypt = (encrypted) => {
+      encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+      const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+      return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+    };
+  
+    const storedEncryptedRole = localStorage.getItem("Userrole");
+    const decryptedRole = Decrypt(storedEncryptedRole);
+  
+    const roledata = {
+      role: decryptedRole,
+      pageid: String(20)
+    }
+  
+    const dispatch = useDispatch()
+    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+  
+  
+    useEffect(() => {
+      dispatch(getRoleData(roledata))
+    }, [])
+  
+    // Role Right End 
 
   return (
     <div className="tab-content">
@@ -154,7 +183,7 @@ export function Franchisemasterlist(params) {
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
       )}
-      <div className="row mp0" >
+   {roleaccess > 1 ?      <div className="row mp0" >
         <div className="col-md-12 col-12">
           <div className="card mb-3 tab_box">
 
@@ -204,6 +233,7 @@ export function Franchisemasterlist(params) {
                             onClick={() => sendtoedit(item.id)}
                             title="Edit"
                             style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                            disabled={roleaccess > 3 ? false : true}
                           >
                             <FaPencilAlt />
                           </button>
@@ -244,7 +274,7 @@ export function Franchisemasterlist(params) {
             </div>
           </div>
         </div>
-      </div>
+      </div> : null}
     </div>
   )
 }

@@ -1,11 +1,15 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
-import { Base_Url } from "../../Utils/Base_Url";
+import { Base_Url,secretKey } from "../../Utils/Base_Url";
 import Endcustomertabs from "./Endcustomertabs";
 import { useParams } from "react-router-dom";
 import { SyncLoader } from 'react-spinners';
+import CryptoJS from 'crypto-js';
+import { useSelector } from 'react-redux';
 import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
+import { useDispatch } from "react-redux";
+import { getRoleData } from "../../Store/Role/role-action";
 const Customerlocation = () => {
   const [countries, setCountries] = useState([]);
   const { loaders, axiosInstance } = useAxiosLoader();
@@ -441,6 +445,33 @@ const Customerlocation = () => {
   const indexOfFirstUser = indexOfLastUser - itemsPerPage;
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
+   // Role Right 
+    
+    
+     const Decrypt = (encrypted) => {
+      encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+      const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+      return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+    };
+  
+    const storedEncryptedRole = localStorage.getItem("Userrole");
+    const decryptedRole = Decrypt(storedEncryptedRole);
+  
+    const roledata = {
+      role: decryptedRole,
+      pageid: String(16)
+    }
+  
+    const dispatch = useDispatch()
+    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+  
+  
+    useEffect(() => {
+      dispatch(getRoleData(roledata))
+    }, [])
+  
+    // Role Right End 
+
   return (
     <div className="tab-content">
           {loaders && (
@@ -449,7 +480,7 @@ const Customerlocation = () => {
         </div>
       )}
       <Endcustomertabs></Endcustomertabs>
-      <div className="row mp0">
+      {roleaccess > 1 ?     <div className="row mp0">
         <div className="col-12">
           <div className="card mb-3 tab_box">
             <div className="card-body">
@@ -738,11 +769,11 @@ const Customerlocation = () => {
                     )}
                     </div>
 
-                      <div className="col-md-12 text-right">
+                    {roleaccess > 2 ?    <div className="col-md-12 text-right">
                         <button type="submit" className="btn btn-liebherr">
                           Submit
                         </button>
-                      </div>
+                      </div> : null } 
                     </div>
                   </form>
                 </div>
@@ -822,6 +853,7 @@ const Customerlocation = () => {
                               className="btn btn-link text-primary"
                               onClick={() => edit(item.id)}
                               title="Edit"
+                              disabled={roleaccess > 3 ? false : true}
                             >
                               <FaPencilAlt />
                             </button>
@@ -831,6 +863,7 @@ const Customerlocation = () => {
                               className="btn btn-link text-danger"
                               onClick={() => deleted(item.id)}
                               title="Delete"
+                              disabled = {roleaccess > 4 ?false : true}
                             >
                               <FaTrash />
                             </button>
@@ -886,7 +919,8 @@ const Customerlocation = () => {
             </div>
           </div>
         </div>
-      </div></div>
+      </div> : null}
+      </div>
   );
 };
 
