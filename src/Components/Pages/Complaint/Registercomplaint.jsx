@@ -4,8 +4,11 @@ import toast, { Toaster } from 'react-hot-toast';
 import { Base_Url, secretKey } from '../../Utils/Base_Url'
 import { useNavigate, useParams } from "react-router-dom";
 import { FaEye } from "react-icons/fa";
+import { useSelector } from 'react-redux';
 import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
+import { useDispatch } from "react-redux";
+import { getRoleData } from "../../Store/Role/role-action";
 import CryptoJS from 'crypto-js';
 import { useOutletContext } from 'react-router-dom';
 
@@ -1217,19 +1220,45 @@ export function Registercomplaint(params) {
 
   }, [add_new_ticketdata])
 
+   // Role Right 
+    
+    
+     const Decrypt = (encrypted) => {
+      encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+      const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+      return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+    };
+  
+    const storedEncryptedRole = localStorage.getItem("Userrole");
+    const decryptedRole = Decrypt(storedEncryptedRole);
+  
+    const roledata = {
+      role: decryptedRole,
+      pageid: String(42)
+    }
+  
+    const dispatch = useDispatch()
+    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+  
+  
+    useEffect(() => {
+      dispatch(getRoleData(roledata))
+    }, [])
+  
+    // Role Right End 
+
 
 
 
 
   return (
-
-    < div className="p-3">
+     < div className="p-3">
       {loaders && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
       )}
-      <div className="row ">
+    <div className="row ">
         <div className="complbread">
           <div className="row">
             <div className="col-md-3">
@@ -1934,7 +1963,7 @@ export function Registercomplaint(params) {
 
 
 
-                  <div className="col-md-12">
+                    <div className="col-md-12">
                     {Comp_id ? <button style={{ float: "right" }} type="button" onClick={() => updatecomplaint()} className="btn btn-liebherr">Submit</button>
                       : <button style={{ float: "right" }} className="btn btn-liebherr">Submit</button>}
                   </div>
@@ -2056,6 +2085,7 @@ export function Registercomplaint(params) {
 
 
 
-    </div>
+    </div> 
+    
   )
 }
