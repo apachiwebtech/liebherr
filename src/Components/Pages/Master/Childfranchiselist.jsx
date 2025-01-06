@@ -186,14 +186,7 @@ export function ChildFranchiselist(params) {
                     <div className="card mb-3 tab_box">
 
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
-                            <div className="p-1 text-right">
-                                <button
-                                    className="btn btn-primary"
-                                    onClick={() => navigate("/Childfranchisemaster")}
-                                >
-                                    Add Child Master Franchise
-                                </button>
-                            </div>
+                            
                             <div className='table-responsive' >
                             <table className="table">
                                 <thead>
@@ -237,7 +230,7 @@ export function ChildFranchiselist(params) {
                                                         disabled={roleaccess > 3 ? false : true}
                                                         style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
                                                     >
-                                                        <FaPencilAlt />
+                                                        <FaEye />
                                                     </button>
                                                 </td>
                                                 {/* <td >

@@ -56,14 +56,7 @@ function MasterFranchiseTabs() {
             <div className="col-sm-6 p-0" style={{ width: '100%' }}>
             <div className="tabsMenu" style={{fontSize:"14px", marginLeft: "12px",fontWeight:"600",fontFamily:"Nunito"}}>
               <ul className="nav nav-tabs ">
-              <Link to={`/MasterFranchise`}><li className="nav-item">
-                  <button
-                    className={`nav-link ${activeTab === '/MasterFranchise' ? 'active' : ' onClick={() => setActiveTab("MasterFranchise")}'}`}
-                   
-                  >
-                  MASTER SERVICE PARTNER 
-                  </button>
-                </li></Link>
+             
 
                 <Link to={`/Franchisemasterlist`}><li className="nav-item">
                   <button
@@ -74,14 +67,7 @@ function MasterFranchiseTabs() {
                   </button>
                 </li></Link>
                 
-                <Link to={`/Childfranchisemaster`}><li className="nav-item">
-                  <button
-                    className={`nav-link ${activeTab === '/Childfranchisemaster' ? 'active' : 'onClick={() => setActiveTab("Childfranchisemaster")}'}`}
-                    
-                  >
-                   CHILD SERVICE PARTNER MASTER
-                  </button>
-                </li></Link>
+                
 
                 <Link to={`/Childfranchiselist`}><li className="nav-item">
                   <button

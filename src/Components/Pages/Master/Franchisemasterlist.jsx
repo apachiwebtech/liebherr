@@ -235,7 +235,7 @@ export function Franchisemasterlist(params) {
                             style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
                             disabled={roleaccess > 3 ? false : true}
                           >
-                            <FaPencilAlt />
+                            <FaEye />
                           </button>
                         </td>
                         {/* <td >

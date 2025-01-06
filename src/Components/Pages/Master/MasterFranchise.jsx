@@ -1123,7 +1123,7 @@ const MasterFranchise = (params) => {
 
 
                     {roleaccess > 2 ?   <div className="text-right">
-                      <button
+                      <button hidden
                         className="btn btn-liebherr"
                         type="submit"
                         style={{ marginTop: "15px" }}
