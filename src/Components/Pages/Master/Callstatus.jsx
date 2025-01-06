@@ -1,10 +1,14 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
-import { Base_Url } from "../../Utils/Base_Url";
+import { Base_Url,secretKey } from "../../Utils/Base_Url";
 import Callstatuscodetabs from "./Callstatuscodetabs";
+import { useSelector } from 'react-redux';
 import { SyncLoader } from 'react-spinners';
+import CryptoJS from 'crypto-js';
 import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
+import { useDispatch } from "react-redux";
+import { getRoleData } from "../../Store/Role/role-action";
 
 const Callstatus = () => {
   // Step 1: Add this state to track errors
@@ -180,6 +184,33 @@ const Callstatus = () => {
   const indexOfFirstUser = indexOfLastUser - itemsPerPage;
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
+  // Role Right 
+    
+    
+     const Decrypt = (encrypted) => {
+      encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+      const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+      return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+    };
+  
+    const storedEncryptedRole = localStorage.getItem("Userrole");
+    const decryptedRole = Decrypt(storedEncryptedRole);
+  
+    const roledata = {
+      role: decryptedRole,
+      pageid: String(26)
+    }
+  
+    const dispatch = useDispatch()
+    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+  
+  
+    useEffect(() => {
+      dispatch(getRoleData(roledata))
+    }, [])
+  
+    // Role Right End 
+
   return (
     <div className="tab-content">
           <Callstatuscodetabs />
@@ -188,7 +219,7 @@ const Callstatus = () => {
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
       )}
-    <div className="row mp0">
+    {roleaccess > 1 ?   <div className="row mp0">
       <div className="col-12">
         <div className="card mb-3 tab_box">
           <div
@@ -224,11 +255,11 @@ const Callstatus = () => {
                     )}{" "}
                     {/* Show duplicate error */}
                   </div>
-                  <div className="text-right">
+                  {roleaccess > 2 ?    <div className="text-right">
                     <button className="btn btn-liebherr" type="submit">
                       {isEdit ? "Update" : "Submit"}
                     </button>
-                  </div>
+                  </div> : null } 
                 </form>
               </div>
 
@@ -306,6 +337,7 @@ const Callstatus = () => {
                               color: "blue",
                               fontSize: "20px",
                             }}
+                            disabled={roleaccess > 3 ? false : true}
                           >
                             <FaPencilAlt />
                           </button>
@@ -321,6 +353,7 @@ const Callstatus = () => {
                               color: "red",
                               fontSize: "20px",
                             }}
+                            disabled = {roleaccess > 4 ?false : true}
                           >
                             <FaTrash />
                           </button>
@@ -377,7 +410,7 @@ const Callstatus = () => {
           </div>
         </div>
       </div>
-    </div>
+    </div> : null}
     </div>
   );
 };

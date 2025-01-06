@@ -2,11 +2,14 @@ import CryptoJS from 'crypto-js';
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash, FaEye } from "react-icons/fa";
-import { Base_Url } from "../../Utils/Base_Url";
+import { Base_Url,secretKey } from "../../Utils/Base_Url";
 import { Navigate } from "react-router-dom";
 import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 import Lhiusertabs from './Lhiusertabs';
+import { useSelector } from 'react-redux';
+import { useDispatch } from "react-redux";
+import { getRoleData } from "../../Store/Role/role-action";
 
 const Lhiuser = () => {
   // Step 1: Add this state to track errors
@@ -292,10 +295,38 @@ const Lhiuser = () => {
   const indexOfLastUser = (currentPage + 1) * itemsPerPage;
   const indexOfFirstUser = indexOfLastUser - itemsPerPage;
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+  
+  // Role Right 
+    
+    
+     const Decrypt = (encrypted) => {
+      encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+      const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+      return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+    };
+  
+    const storedEncryptedRole = localStorage.getItem("Userrole");
+    const decryptedRole = Decrypt(storedEncryptedRole);
+  
+    const roledata = {
+      role: decryptedRole,
+      pageid: String(27)
+    }
+  
+    const dispatch = useDispatch()
+    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+  
+  
+    useEffect(() => {
+      dispatch(getRoleData(roledata))
+    }, [])
+  
+    // Role Right End 
+  
 
   return (
     <div className="tab-content">
-      <div className="row mp0">
+     {roleaccess > 1 ?  <div className="row mp0">
         {loaders && (
           <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <SyncLoader loading={loaders} color="#FFFFFF" />
@@ -548,11 +579,11 @@ const Lhiuser = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="text-right">
+                  {roleaccess > 2 ?   <div className="text-right">
                     <button className="btn btn-liebherr" type="submit">
                       {isEdit ? "Update" : "Submit"}
                     </button>
-                  </div>
+                  </div> : null } 
                 </form>
 
 
@@ -667,6 +698,7 @@ const Lhiuser = () => {
                                 color: "blue",
                                 fontSize: "20px",
                               }}
+                              disabled={roleaccess > 3 ? false : true}
                             >
                               <FaPencilAlt />
                             </button>
@@ -724,7 +756,7 @@ const Lhiuser = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> : null}
     </div>
   );
 };

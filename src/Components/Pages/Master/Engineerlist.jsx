@@ -2,10 +2,14 @@ import axios from 'axios';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
-import { Base_Url } from '../../Utils/Base_Url';
+import { Base_Url,secretKey } from '../../Utils/Base_Url';
 import Franchisemaster from './Franchisemaster';
+import { useSelector } from 'react-redux';
 import { SyncLoader } from 'react-spinners';
+import CryptoJS from 'crypto-js';
 import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
+import { useDispatch } from "react-redux";
+import { getRoleData } from "../../Store/Role/role-action";
 export function Engineerlist(params) {
   const { loaders, axiosInstance } = useAxiosLoader();
   const [Engineerdata, setEngineerdata] = useState([]);
@@ -146,6 +150,32 @@ export function Engineerlist(params) {
     }, []);
 
     const navigate = useNavigate()
+     // Role Right 
+      
+      
+       const Decrypt = (encrypted) => {
+        encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+        const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+        return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+      };
+    
+      const storedEncryptedRole = localStorage.getItem("Userrole");
+      const decryptedRole = Decrypt(storedEncryptedRole);
+    
+      const roledata = {
+        role: decryptedRole,
+        pageid: String(24)
+      }
+    
+      const dispatch = useDispatch()
+      const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+    
+    
+      useEffect(() => {
+        dispatch(getRoleData(roledata))
+      }, [])
+    
+      // Role Right End 
 
     return (
         <div className="tab-content">
@@ -155,7 +185,7 @@ export function Engineerlist(params) {
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
       )}
-            <div className="row mp0" >
+         {roleaccess > 1 ?      <div className="row mp0" >
                 <div className="col-md-12 col-12">
                     <div className="card mb-3 tab_box">
 
@@ -197,6 +227,7 @@ export function Engineerlist(params) {
                                                         className='btn'
                                                         title="Edit"
                                                         style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                                                        disabled={roleaccess > 2 ? false : true}
                                                     >
                                                         <FaPencilAlt />
                                                     </button></Link>
@@ -276,7 +307,7 @@ export function Engineerlist(params) {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> : null}
         </div>
     )
 }

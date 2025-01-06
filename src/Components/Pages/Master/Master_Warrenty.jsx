@@ -1,10 +1,15 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { Base_Url } from "../../Utils/Base_Url";
+import { Base_Url ,secretKey} from "../../Utils/Base_Url";
 import Ratecardtabs from "./Ratecardtabs";
+import { useSelector } from 'react-redux';
 import { SyncLoader } from 'react-spinners';
+import CryptoJS from 'crypto-js';
 import * as XLSX from "xlsx";
 import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
+import { useDispatch } from "react-redux";
+import { getRoleData } from "../../Store/Role/role-action";
+
 
 const  Master_Warrenty = () => {
 
@@ -51,6 +56,33 @@ const  Master_Warrenty = () => {
         console.log(err);
       });
   }
+
+  // Role Right 
+    
+    
+     const Decrypt = (encrypted) => {
+      encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+      const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+      return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+    };
+  
+    const storedEncryptedRole = localStorage.getItem("Userrole");
+    const decryptedRole = Decrypt(storedEncryptedRole);
+  
+    const roledata = {
+      role: decryptedRole,
+      pageid: String(38)
+    }
+  
+    const dispatch = useDispatch()
+    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+  
+  
+    useEffect(() => {
+      dispatch(getRoleData(roledata))
+    }, [])
+  
+    // Role Right End 
   
 
   return (
@@ -61,7 +93,7 @@ const  Master_Warrenty = () => {
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
       )}
-      <div className="row mp0">
+    {roleaccess > 1 ?    <div className="row mp0">
         <div className="col-12">
           <div className="card mb-3 tab_box">
             <div
@@ -81,7 +113,8 @@ const  Master_Warrenty = () => {
             </div>
           </div>
         </div>
-      </div></div>
+      </div> : null}
+      </div>
   );
 };
 
