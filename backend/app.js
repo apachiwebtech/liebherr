@@ -3003,25 +3003,32 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
-    // Insert remark and retrieve the remark_id
+    // Use parameterized queries to prevent SQL injection
     const sql = `
       INSERT INTO awt_complaintremark (ticket_no, remark, created_by, created_date)
       OUTPUT INSERTED.id AS remark_id
-      VALUES ('${ticket_no}', '${note}', '${created_by}', '${formattedDate}')
+      VALUES (@ticket_no, @note, @created_by, @created_date)
     `;
 
-    const result = await pool.request().query(sql);
-    const remark_id = result.recordset[0].remark_id;
+    const result = await pool.request()
+      .input("ticket_no", ticket_no)
+      .input("note", note)
+      .input("created_by", created_by)
+      .input("created_date", formattedDate)
+      .query(sql);
+
+    const remark_id = result.recordset[0]?.remark_id;
 
     return res.json({
       message: "Remark added successfully!",
-      remark_id: remark_id // Send the generated remark ID back to the client
+      remark_id: remark_id, // Send the generated remark ID back to the client
     });
   } catch (err) {
     console.error("Error inserting remark:", err);
     return res.status(500).json({ error: "Database error", details: err.message });
   }
 });
+
 
 
 

@@ -38,9 +38,9 @@ export function Registercomplaint(params) {
   const [ticket, setTicket] = useState([])
   const [ticketno, setTicketNo] = useState([])
   const [ticketid, setTicketid] = useState('')
-  const [serialhide , setserialHide] = useState('')
-  const [purchasehide , setpurchseHide] = useState('')
-  const [classificationid , setClassification] = useState('')
+  const [serialhide, setserialHide] = useState('')
+  const [purchasehide, setpurchseHide] = useState('')
+  const [classificationid, setClassification] = useState('')
   const token = localStorage.getItem("token");
   const fileInputRef = useRef();
   const { setHeaderState } = useOutletContext();
@@ -278,7 +278,7 @@ export function Registercomplaint(params) {
     }
 
 
-    if (!newAddress && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
+    if (!value.address && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
       isValid = false;
       newErrors.address = "Address is required";
     }
@@ -663,8 +663,8 @@ export function Registercomplaint(params) {
           setlocations({ childfranchiseem: res.data[0].child_service_partner, franchiseem: res.data[0].sevice_partner })
 
           setCheckboxes({
-            mwhatsapp :res.data[0].mwhatsapp ,
-            awhatsaap : res.data[0].awhatsapp 
+            mwhatsapp: res.data[0].mwhatsapp,
+            awhatsaap: res.data[0].awhatsapp
           })
 
 
@@ -784,49 +784,49 @@ export function Registercomplaint(params) {
 
       const data = {
         complaint_date: value.complaint_date || currentDate,
-        customer_name: value.customer_name,
-        contact_person: value.contact_person,
-        email: value.email,
-        mobile: value.mobile,
-        alt_mobile: value.alt_mobile,
-        address: newAddress,
-        state: value.state,
-        city: value.city,
-        area: value.area,
-        pincode: value.pincode,
-        mode_of_contact: value.mode_of_contact,
-        ticket_type: value.ticket_type,
-        cust_type: value.cust_type,
-        warrenty_status: value.warrenty_status,
-        invoice_date: value.invoice_date,
-        call_charge: value.call_charge,
+        customer_name: value.customer_name || '',
+        contact_person: value.contact_person || '',
+        email: value.email || '',
+        mobile: value.mobile || '',
+        alt_mobile: value.alt_mobile || '',
+        address: newAddress || value.address || '',
+        state: value.state || '',
+        city: value.city || '',
+        area: value.area || '',
+        pincode: value.pincode || '',
+        mode_of_contact: value.mode_of_contact || '',
+        ticket_type: value.ticket_type || '',
+        cust_type: value.cust_type || '',
+        warrenty_status: value.warrenty_status || '',
+        invoice_date: value.invoice_date || '',
+        call_charge: value.call_charge || '',
         cust_id: value.customer_id || "", // Fix customer ID handling
-        model: value.model,
-        serial: value.serial,
-        purchase_date: purchase_data || value.purchase_date,
-        master_service_partner: value.master_service_partner,
-        child_service_partner: value.child_service_partner,
-        additional_remarks: value.additional_remarks,
-        specification: value.specification,
-        salutation: value.salutation,
-        created_by: value.created_by,
-        classification: value.classification,
-        priority: value.Priority,
-        callType: value.callType,
-        requested_by: value.requested_by,
-        requested_email: value.requested_email,
-        requested_mobile: value.requested_mobile,
-        salutation: value.salutation,
-        msp: value.msp,
-        csp: value.csp,
-        sales_partner: value.sales_partner,
-        sales_partner2: value.sales_partner2,
-        mwhatsapp : String(checkboxes.mwhatsapp),
-        awhatsapp : String(checkboxes.awhatsaap),
+        model: value.model || '',
+        serial: value.serial || '',
+        purchase_date: purchase_data || value.purchase_date || '',
+        master_service_partner: value.master_service_partner || '',
+        child_service_partner: value.child_service_partner || '',
+        additional_remarks: value.additional_remarks || '',
+        specification: value.specification || '',
+        salutation: value.salutation || '',
+        created_by: value.created_by || '',
+        classification: value.classification || '',
+        priority: value.Priority || '',
+        callType: value.callType || '',
+        requested_by: value.requested_by || '',
+        requested_email: value.requested_email || '',
+        requested_mobile: value.requested_mobile || '',
+        salutation: value.salutation || '',
+        msp: value.msp || '',
+        csp: value.csp || '',
+        sales_partner: value.sales_partner || '',
+        sales_partner2: value.sales_partner2 || '',
+        mwhatsapp: String(checkboxes.mwhatsapp),
+        awhatsapp: String(checkboxes.awhatsaap),
         ticket_id: String(ticketid)
       };
-   
-  
+
+
 
       if (validateForm()) {
 
@@ -896,8 +896,8 @@ export function Registercomplaint(params) {
       requested_mobile: value.requested_mobile || "",
       sales_partner2: value.sales_partner2 || "",
       salutation: value.salutation || "",
-      mwhatsapp : checkboxes.mwhatsapp || 0,
-      awhatsapp : checkboxes.awhatsaap || 0,
+      mwhatsapp: checkboxes.mwhatsapp || 0,
+      awhatsapp: checkboxes.awhatsaap || 0,
       ticket_no: Comp_id
     };
 
@@ -1017,10 +1017,10 @@ export function Registercomplaint(params) {
 
 
 
-  const fetchlocations = async (pincode ) => {
-    
+  const fetchlocations = async (pincode) => {
 
-    if ((pincode &&  pincode.length == 6) || value.pincode != undefined ) {
+
+    if ((pincode && pincode.length == 6) || value.pincode != undefined) {
 
 
       try {
@@ -1035,7 +1035,6 @@ export function Registercomplaint(params) {
 
         if (response.data && response.data[0]) {
 
-          console.log("location")
 
           setlocations({ franchiseem: response.data[0].mspname, childfranchiseem: response.data[0].cspname })
 
@@ -1076,7 +1075,14 @@ export function Registercomplaint(params) {
 
       setClassification(response.data[0].customerClassification)
 
-      
+      const purchase_date = response.data[0].purchase_date
+      const date = new Date(purchase_date);
+      // Format the date as YYYY-MM-DD
+      const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
+      setpurchase_data(formattedDate)
+
+
 
       if (response.data && response.data[0]) {
 
@@ -1107,23 +1113,23 @@ export function Registercomplaint(params) {
 
 
   useEffect(() => {
-    if (value.serial != undefined && !Comp_id && !classificationid ) {
+    if (value.serial != undefined && !Comp_id && !classificationid) {
       fetchserial()
-      
-    } 
+
+    }
   }, [value.serial])
 
-  useEffect(() =>{
-    
+  useEffect(() => {
 
 
-    if(value.pincode != undefined && value.classification && !Comp_id){
-      
+
+    if (value.pincode != undefined && value.classification && !Comp_id) {
+
       fetchlocations()
     }
 
-    
-  },[value.pincode,value.classification])
+
+  }, [value.pincode, value.classification])
 
 
 
@@ -1135,8 +1141,8 @@ export function Registercomplaint(params) {
     const data = {
       customerId: searchdata.customer_id || '',
       customer_name: searchdata.customer_name || '',
-      contact_person: searchdata.contact_person  || '',
-      email: searchdata.email  || '',
+      contact_person: searchdata.contact_person || '',
+      email: searchdata.email || '',
       mobile: searchdata.mobile || '',
       cust_id: String(searchdata.id) || '',
       serial_no: String(searchdata.serial_no) || '',
@@ -1144,7 +1150,7 @@ export function Registercomplaint(params) {
       city: searchdata.city || '',
       area: searchdata.area || '',
       pincode: searchdata.pincode || '',
-      product_id: product_id 
+      product_id: product_id
     }
 
     axiosInstance.post(`${Base_Url}/add_new_ticket`, data, {
@@ -1325,7 +1331,7 @@ export function Registercomplaint(params) {
 
               <div className="row mb-3">
                 <div className="col-md-12">
-                  <p><strong>Mobile :</strong> {searchdata.customer_mobile}</p>
+                  <p><strong>Mobile :</strong> {searchdata.customer_mobile || searchdata.mobileno }</p>
                 </div>
               </div>
 
@@ -1570,15 +1576,23 @@ export function Registercomplaint(params) {
                   </div>
                   <div className="col-md-4">
                     <div className="mb-3">
-                      <label htmlFor="exampleFormControlInput1" className="form-label">Mobile No. {value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}<input type="checkbox"  name = 'mwhatsapp' onChange={oncheckchange} checked={checkboxes.mwhatsapp === 1} />Whatsapp</label>
-                      <input type="number" onKeyDown={handleKeyDown} value={value.mobile} name="mobile" onChange={onHandleChange} className="form-control" placeholder="Enter Mobile" />
+                      <label htmlFor="exampleFormControlInput1" className="form-label">Mobile No. {value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}<input type="checkbox" name='mwhatsapp' onChange={oncheckchange} checked={checkboxes.mwhatsapp === 1} />Whatsapp</label>
+                      <input type="number" onKeyDown={handleKeyDown} value={value.mobile} name="mobile" onChange={(e) =>{
+                         if (e.target.value.length <= 10) {
+                          onHandleChange(e);
+                        }
+                      }} className="form-control" placeholder="Enter Mobile" />
                       {errors.mobile && <span style={{ fontSize: "12px" }} className="text-danger">{errors.mobile}</span>}
                     </div>
                   </div>
                   <div className="col-md-4">
                     <div className="mb-3">
                       <label htmlFor="exampleFormControlInput1" className="form-label">Alt. Mobile No. <input type="checkbox" name="awhatsaap" onChange={oncheckchange} checked={checkboxes.awhatsaap === 1} />Whatsapp</label>
-                      <input type="number" onKeyDown={handleKeyDown}  className="form-control" value={value.alt_mobile} name="alt_mobile" onChange={onHandleChange} placeholder="Enter Mobile" />
+                      <input type="number" onKeyDown={handleKeyDown} className="form-control" value={value.alt_mobile} name="alt_mobile" onChange={(e) =>{
+                         if (e.target.value.length <= 10) {
+                          onHandleChange(e);
+                        }
+                      }} placeholder="Enter Mobile" />
                       {errors.alt_mobile && <span style={{ fontSize: "12px" }} className="text-danger">{errors.alt_mobile}</span>}
                     </div>
                   </div>
@@ -1825,7 +1839,11 @@ export function Registercomplaint(params) {
                   <div className="col-md-4">
                     <div className="mb-3">
                       <label htmlFor="exampleFormControlInput1" className="form-label">Requested Mobile </label>
-                      <input type="number"  className="form-control" value={value.requested_mobile} name="requested_mobile" onKeyDown={handleKeyDown} onChange={onHandleChange} placeholder="" />
+                      <input type="number" className="form-control" value={value.requested_mobile} name="requested_mobile" onKeyDown={handleKeyDown} onChange={(e) =>{
+                         if (e.target.value.length <= 10) {
+                          onHandleChange(e);
+                        }
+                      }} placeholder="" />
                       {errors.requested_mobile && <span style={{ fontSize: "12px" }} className="text-danger">{errors.requested_mobile}</span>}
                     </div>
                   </div>
@@ -1894,7 +1912,7 @@ export function Registercomplaint(params) {
                   <div className="col-md-4">
                     <div className="mb-3">
                       <label className="form-label">Customer Classification{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
-                      <select className="form-control" onChange={onHandleChange} value={value.classification} name="classification" disabled = {value.serial == undefined || value.serial == ''? false : true}>
+                      <select className="form-control" onChange={onHandleChange} value={value.classification} name="classification" disabled={value.serial == undefined || value.serial == '' ? false : true}>
                         <option value="">Select</option>
                         <option value="Consumer">Consumer</option>
                         <option value="Import">Import</option>

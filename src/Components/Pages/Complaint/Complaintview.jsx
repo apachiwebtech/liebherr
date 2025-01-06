@@ -1643,10 +1643,9 @@ export function Complaintview(params) {
 
 
 
-
                 <div className="col-md-2">
                   <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Purchase Date</p>
-                  <p style={{ fontSize: "14px" }}>{formatDate(complaintview.purchase_date)}</p>
+                  <p style={{ fontSize: "14px" }}>{complaintview.purchase_date == null ? null : formatDate(complaintview.purchase_date)}</p>
                 </div>
                 <div className="col-md-4">
                   <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Warranty Status</p>
@@ -1778,13 +1777,13 @@ export function Complaintview(params) {
                         {/* By and Date Section - 20% */}
                         <div style={{ flex: "0 0 20%", textAlign: "right" }}>
 
-                          <h3 className="mainheade important-margin" style={{ fontSize: "12px", margin: 0 }}>
+                        {remark.title == '' || remark.title == null? null : <h3 className="mainheade important-margin" style={{ fontSize: "12px", margin: 0 }}>
                             By: {remark.title}
-                          </h3>
+                          </h3> }
 
-                          <h3 className=" date-header" >
+                          {remark.created_date == '' || remark.created_date == null ? null : <h3 className=" date-header" >
                             Date:  {formatDate1(remark.created_date)}
-                          </h3>
+                          </h3> }
                         </div>
                       </div>
 
