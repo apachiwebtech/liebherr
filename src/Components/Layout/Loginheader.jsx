@@ -75,6 +75,20 @@ const Loginheader = (params) => {
                 Engineering Listing
               </Link>
             </li>
+            <li
+              className={`nav-item dropdown ${location.pathname === "/csp/adduser" ? "active-class" : ""}`}
+              style={location.pathname === "/csp/adduser" ? { background: '#0d6efd', borderRadius: '5px' } : {}}
+            >
+              <Link
+                to={`/csp/adduser`}
+                className={`nav-link site ${location.pathname === "/csp/adduser" ? "text-light" : ""}`}
+                id="navbarDropdown"
+                role="button"
+                aria-expanded="false"
+              >
+                Add User
+              </Link>
+            </li>
 
 
 

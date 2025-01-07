@@ -112,6 +112,7 @@ import PostSaleWarrenty from './Components/Pages/Master/PostSaleWarrenty';
 import Roleright from './Components/Pages/Master/Roleright';
 import Roleassign from './Components/Pages/Master/Roleassign';
 import { FeedBackreport } from './Components/Pages/Reports/Feedbackreport';
+import AddCspUser from './Components/Pages/Master/AddCspUser';
 
 
 const isAuthenticated = () => {
@@ -219,6 +220,10 @@ const Router = createBrowserRouter([
         path: "/csp/ticketview/:complaintid",
         element: <CspTicketView />,
 
+      },
+      {
+        path: "/csp/adduser",
+        element: <AddCspUser />,
       }
     ],
   },

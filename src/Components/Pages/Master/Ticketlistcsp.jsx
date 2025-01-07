@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
-import { Base_Url } from '../../Utils/Base_Url';
+import { Base_Url, secretKey } from '../../Utils/Base_Url';
 import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
-
+import CryptoJS from 'crypto-js';
 const Ticketlistcsp = (params) => {
     const { loaders, axiosInstance } = useAxiosLoader();
     const [Complaintdata, setComplaintdata] = useState([]);
@@ -143,6 +143,15 @@ const Ticketlistcsp = (params) => {
             setFilteredData([]);
             setPaginationInfo(null); // Reset pagination info
         }
+    };
+
+    const sendtoedit123 = async (id) => {
+      // alert(id)
+      id = id.toString()
+      let encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
+      encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      // navigate(`/quotation/${encrypted}`)
+      navigate(`/csp/ticketview/${encrypted}`)
     };
 
 
@@ -569,8 +578,9 @@ const Ticketlistcsp = (params) => {
                                                 <button
                                                     className="btn"
                                                     onClick={() => {
-                                                        navigate(`/csp/ticketview/${item.id}`);
+                                                        // navigate(`/csp/ticketview/${item.id}`);
                                                         addInTab(item.ticket_no, item.id);
+                                                        sendtoedit123(item.id)
                                                     }}
                                                     title="View"
                                                     style={{

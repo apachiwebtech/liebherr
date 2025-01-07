@@ -4,7 +4,7 @@ import makeAnimated from 'react-select/animated';
 import { useNavigate } from 'react-router-dom';
 import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Base_Url } from "../../Utils/Base_Url";
+import { Base_Url, secretKey } from "../../Utils/Base_Url";
 import { FaEye } from "react-icons/fa";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
@@ -13,6 +13,8 @@ import { FaDownload } from "react-icons/fa6";
 import { Autocomplete, Chip, TextField } from "@mui/material";
 import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
+import CryptoJS from 'crypto-js';
+import { error } from "jquery";
 
 export function CspTicketView(params) {
 
@@ -20,13 +22,60 @@ export function CspTicketView(params) {
   const [activeTicket, setActiveTicket] = useState(null);
   const [addedSpareParts, setAddedSpareParts] = useState([]);
   const [quotation, setQuotation] = useState([]);
-  const { complaintid } = useParams();
+  const [activity, setactivity] = useState([]);
+  let { complaintid } = useParams();
+
+
+
+  const uniqueParts = new Set();
+
+
+  try {
+    // Replace characters and log intermediate steps
+    complaintid = complaintid.replace(/-/g, '+').replace(/_/g, '/');
+    console.log("Modified complaintid:", complaintid);
+
+    // Decrypt
+    const bytes = CryptoJS.AES.decrypt(complaintid, secretKey);
+
+    // Check if bytes are valid
+    if (!bytes) {
+      throw new Error("Decryption failed: No bytes returned.");
+    }
+
+    const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+
+    // Ensure decrypted result is valid
+    if (!decrypted) {
+      throw new Error("Decryption failed: Empty decrypted string.");
+    }
+
+    console.log("Decrypted string:", decrypted);
+
+    // Convert to integer
+    complaintid = parseInt(decrypted, 10);
+
+
+    if (isNaN(complaintid)) {
+      throw new Error("Decryption succeeded, but the result is not a valid integer.");
+    }
+
+    console.log("Parsed complaintid:", complaintid);
+  } catch (error) {
+    console.error("Error during decryption:", error.message);
+  }
+
+
+
+
+
   const [quantity, setQuantity] = useState("");
   const [closestatus, setCloseStatus] = useState("");
+  const [subclosestatus, setsubCloseStatus] = useState("");
   const [spareid, setspareid] = useState("");
   const [ticketTab, setTicketTab] = useState(JSON.parse(localStorage.getItem('tabticket')) || []);
   const { loaders, axiosInstance } = useAxiosLoader();
-
+  const [errors, setErrors] = useState({})
   const [complaintview, setComplaintview] = useState({
     ticket_no: '',
     customer_name: '',
@@ -48,7 +97,8 @@ export function CspTicketView(params) {
     spare_part_id: "",
     quantity: "",
     state: "",
-    city: ""
+    city: "",
+    activity_code: ""
   });
 
 
@@ -83,7 +133,6 @@ export function CspTicketView(params) {
   const [GroupDefectsite, setGroupDefectsite] = useState([]);
   const [GroupDefecttype, setGroupDefecttype] = useState([]);
   const [inputValue, setInputValue] = useState("");
-  const [activity, setactivity] = useState([]);
   const [TicketUpdateSuccess, setTicketUpdateSuccess] = useState({
     message: '',
     visible: false,
@@ -92,7 +141,7 @@ export function CspTicketView(params) {
 
   async function getProduct(params) {
 
-    axiosInstance.get(`${Base_Url}/product_master`,{
+    axiosInstance.get(`${Base_Url}/product_master`, {
       headers: {
         Authorization: token, // Send token in headers
       },
@@ -104,28 +153,6 @@ export function CspTicketView(params) {
         }
       })
 
-  }
-
-
-  async function getactivity(params) {
-    try {
-      const res = await axiosInstance.get(`${Base_Url}/getactivity`, {
-        headers: {
-          Authorization: token, // Send token in headers
-        },
-      });
-
-      if (res.data) {
-        setactivity(res.data);
-      } else {
-        console.error("Expected array from API but got:", typeof res.data);
-        setactivity([]); // Set empty array as fallback
-      }
-
-    } catch (error) {
-      console.error("Error fetching engineers:", error);
-      setactivity([]); // Set empty array on error
-    }
   }
 
   async function getEngineer(params) {
@@ -191,10 +218,7 @@ export function CspTicketView(params) {
   }
 
   async function getgroupdefect(params) {
-
-
     try {
-
       const res = await axiosInstance.get(`${Base_Url}/getcom`, {
         headers: {
           Authorization: token, // Send token in headers
@@ -208,16 +232,30 @@ export function CspTicketView(params) {
         setGroupDefect([]); // Set empty array as fallback
       }
 
-
-
-
-
     } catch (error) {
       console.error("Error fetching engineers:", error);
       setGroupDefect([]); // Set empty array on error
     }
+  }
+  async function getactivity(params) {
+    try {
+      const res = await axiosInstance.get(`${Base_Url}/getactivity`, {
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      });
 
+      if (res.data) {
+        setactivity(res.data);
+      } else {
+        console.error("Expected array from API but got:", typeof res.data);
+        setactivity([]); // Set empty array as fallback
+      }
 
+    } catch (error) {
+      console.error("Error fetching engineers:", error);
+      setactivity([]); // Set empty array on error
+    }
   }
 
   async function getdefecttype(params) {
@@ -411,6 +449,7 @@ export function CspTicketView(params) {
     const selectedEngineer = engineer.find(
       (eng) => eng.id === parseInt(complaintview.engineer_id)
     );
+    console.log(selectedEngineer, "$$$")
     if (
       selectedEngineer &&
       !addedEngineers.some((eng) => eng.id === selectedEngineer.id)
@@ -420,6 +459,53 @@ export function CspTicketView(params) {
     }
 
   };
+
+  const addInTab = (ticket_no, ticket_id) => {
+    console.log(ticket_no, ticket_id, "ticket_no, ticket_id");
+
+    // Retrieve the existing array of ticket numbers, or initialize as an empty array
+    const prevTickets = JSON.parse(localStorage.getItem('tabticket')) || [];
+
+    // Check if the ticket already exists in the array
+    const isTicketExists = prevTickets.some(
+      (ticket) => ticket.ticket_id === ticket_id
+    );
+
+    // Add the current ticket number to the array only if it doesn't already exist
+    if (!isTicketExists) {
+      prevTickets.push({
+        ticket_id: ticket_id,
+        ticket_no: ticket_no,
+      });
+
+      // Store the updated array back in localStorage
+      localStorage.setItem('tabticket', JSON.stringify(prevTickets));
+    }
+
+    // navigate(`/complaintview/${ticket_id}`)
+    sendtoedit(ticket_id)
+  };
+
+
+  const validateForm = () => {
+    let isValid = true;
+    const newErrors = { ...errors };
+
+
+    if (!complaintview.defect_type && complaintview.defect_type != "null" && complaintview.defect_type != null && complaintview.call_status == 'Closed') {
+      isValid = false;
+      newErrors.defect_type = "Name is required";
+    }
+
+
+
+    setErrors(newErrors);
+    setTimeout(() => {
+      setErrors("")
+    }, 5000);
+    return isValid;
+  }
+
 
 
 
@@ -580,9 +666,11 @@ export function CspTicketView(params) {
       );
 
       setComplaintview(response.data);
+      setgroupstatusid(response.data.group_code)
 
       setCloseStatus(response.data.call_status)
-
+      setsubCloseStatus(response.data.sub_call_status)
+      setActiveTicket(complaintid);
       if (response.data.call_status != null) {
         setCallstatusid(response.data.call_status)
       }
@@ -737,68 +825,95 @@ export function CspTicketView(params) {
   const handleSubmitTicketFormData = (e) => {
     e.preventDefault();
 
-    const data = {
-      serial_no: complaintview.serial_no,
-      ModelNumber: complaintview.ModelNumber,
-      engineer_id: complaintview.engineer_id,
-      call_status: callstatusid,
-      sub_call_status: complaintview.sub_call_status,
-      updated_by: created_by,
-      ticket_no: complaintview.ticket_no,
-      group_code: groupstatusid,
-      site_defect: complaintview.site_defect,
-      defect_type: complaintview.defect_type,
-      engineerdata: addedEngineers.map((item) => item.engineer_id),
-      engineername: addedEngineers.map((item) => item.title),
-    };
 
-    axiosInstance.post(`${Base_Url}/ticketFormData`, data, {
-      headers: {
-        Authorization: token, // Send token in headers
-      },
-    })
-      .then(response => {
+    const isValidValue = (value) => value !== null && value !== 'null' && value !== '';
 
-        setComplaintview({
-          ...complaintview,
-          serial_no: '',
-          ModelNumber: '',
-          engineer_id: '',
-          call_status: '',
-        });
-        fetchComplaintview(complaintid);
 
-        setTicketUpdateSuccess({
-          message: 'Ticket updated successfully!',
-          visible: true,
-          type: 'success'
-        });
 
-        // Hide the message after 3 seconds
-        setTimeout(() => {
-          setTicketUpdateSuccess({
-            message: '',
-            visible: false,
-            type: 'success'
-          });
-        }, 3000);
+    if (
+
+      (complaintview.call_status === 'Closed'
+        ? isValidValue(complaintview.defect_type) && isValidValue(complaintview.site_defect) && groupstatusid
+        : true) // For other statuses, skip defect_type and site_defect validation
+    ) {
+      const data = {
+        serial_no: String(complaintview.serial_no) || '',
+        ModelNumber: complaintview.ModelNumber || '',
+        engineer_id: complaintview.engineer_id || '',
+        call_status: callstatusid || '',
+        sub_call_status: complaintview.sub_call_status || '',
+        updated_by: created_by || '',
+        ticket_no: complaintview.ticket_no || '',
+        group_code: groupstatusid || '',
+        site_defect: complaintview.site_defect || '',
+        defect_type: complaintview.defect_type || '',
+        engineerdata: addedEngineers.map((item) => item.engineer_id),
+        engineername: addedEngineers.map((item) => item.title),
+        activity_code: complaintview.activity_code || ''
+      };
+
+      axiosInstance.post(`${Base_Url}/ticketFormData`, data, {
+        headers: {
+          Authorization: token, // Send token in headers
+        },
       })
-      .catch(error => {
-        console.error("Error updating ticket:", error);
-        setTicketUpdateSuccess({
-          message: 'Error updating ticket. Please try again.',
-          visible: true,
-          type: 'error'
-        });
-
-        setTimeout(() => {
-          setTicketUpdateSuccess({
-            message: '',
-            visible: false,
-            type: 'error'
+        .then((response) => {
+          setComplaintview({
+            ...complaintview,
+            serial_no: '',
+            ModelNumber: '',
+            engineer_id: '',
+            call_status: '',
           });
-        }, 3000);
-      });
+          fetchComplaintview(complaintid);
+
+          setTicketUpdateSuccess({
+            message: 'Ticket updated successfully!',
+            visible: true,
+            type: 'success',
+          });
+
+          // Hide the message after 3 seconds
+          setTimeout(() => {
+            setTicketUpdateSuccess({
+              message: '',
+              visible: false,
+              type: 'success',
+            });
+          }, 3000);
+        })
+        .catch((error) => {
+          console.error('Error updating ticket:', error);
+          setTicketUpdateSuccess({
+            message: 'Error updating ticket. Please try again.',
+            visible: true,
+            type: 'error',
+          });
+
+          setTimeout(() => {
+            setTicketUpdateSuccess({
+              message: '',
+              visible: false,
+              type: 'error',
+            });
+          }, 3000);
+        });
+    } else {
+      const isInvalidValue = (value) => !value || value === 'null';
+
+      if (!groupstatusid) {
+        alert('Please select the group code');
+      } else if (complaintview.call_status === 'Closed') {
+        if (isInvalidValue(complaintview.defect_type)) {
+          alert('Please select the Defect type');
+        } else if (isInvalidValue(complaintview.site_defect)) {
+          alert('Please select the site defect');
+        }
+      }
+    }
+
+
+
   };
 
   //handkesubmitticketdata end
@@ -845,11 +960,11 @@ export function CspTicketView(params) {
       const remarkResponse = await axiosInstance.post(
         `${Base_Url}/addcomplaintremark`,
         complaintRemarkData
-        ,{
+        , {
           headers: {
-             Authorization: token, // Send token in headers
-           },
-         });
+            Authorization: token, // Send token in headers
+          },
+        });
 
 
       const remarkId = remarkResponse.data.remark_id;
@@ -868,6 +983,7 @@ export function CspTicketView(params) {
           headers: {
             "Content-Type": "multipart/form-data",
             Authorization: token,
+
           },
         });
       }
@@ -894,9 +1010,12 @@ export function CspTicketView(params) {
   };
 
 
+
+
+
   useEffect(() => {
     if (ticketTab.length == 0) {
-      navigate(`/csp/ticketlist`);
+      navigate(`/complaintlist`);
     }
 
     if (complaintid) {
@@ -913,7 +1032,10 @@ export function CspTicketView(params) {
       fetchAttachment2Details(); // Add this line to fetch Attachment 2
     }
     getProduct();
-    getactivity()
+    getactivity();
+
+    const storedTabTicket = JSON.parse(localStorage.getItem('tabticket')) || [];
+    setTicketTab(storedTabTicket);
 
     setActiveTicket(complaintid); // Set the active ticket ID
 
@@ -1098,10 +1220,12 @@ export function CspTicketView(params) {
 
 
   const handleDeleteTab = (ticket_id) => {
+
     const updatedTickets = JSON.parse(localStorage.getItem('tabticket')) || [];
     const newTicketList = updatedTickets.filter(
       (ticket) => ticket.ticket_id !== ticket_id
     );
+
     localStorage.setItem('tabticket', JSON.stringify(newTicketList));
     if (ticket_id == activeTicket) {
       if (newTicketList.length > 0) {
@@ -1109,19 +1233,27 @@ export function CspTicketView(params) {
         navigate(`/complaintview/${newTicketList[0].ticket_id}`);
       } else {
         setActiveTicket(null);
-        navigate(`/csp/ticketlist`);
+        navigate(`/complaintlist`);
       }
     }
     setTicketTab(newTicketList);
   };
 
 
-
+  const sendtoedit = async (id) => {
+    // alert(id)
+    id = id.toString()
+    let encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
+    encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    // navigate(`/quotation/${encrypted}`)
+    // alert(encrypted)
+    navigate(`/complaintview/${encrypted}`)
+  };
 
 
   return (
     <div className="p-3">
-          {loaders && (
+      {loaders && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
@@ -1166,24 +1298,28 @@ export function CspTicketView(params) {
                 <span style={{ fontSize: "14px" }}>Ticket : {complaintview.ticket_no}</span>
               </label>
             </div>
-            <div className="col-md-9 text-right pt-2">
+            <div className="col-md-9 text-right pt-2" style={{ overflowX: "auto", whiteSpace: "nowrap" }}>
               {ticketTab.map((item) => (
                 <Chip
                   key={item.ticket_id}
                   label={item.ticket_no}
                   variant={activeTicket == item.ticket_id ? "filled" : "outlined"}
                   color={activeTicket == item.ticket_id ? "primary" : "default"}
-                  onClick={() => navigate(`/complaintview/${item.ticket_id}`)}
+                  onClick={() => {
+                    setComplaintview({})
+                    setAddedEngineers([])
+                    setsubCallstatus([])
+                    sendtoedit(item.ticket_id)
+                  }}
                   onDelete={() => handleDeleteTab(item.ticket_id)}
                   className="mx-2"
                 />
               ))}
-
-
             </div>
           </div>
         </div>
       </div>
+
 
       <div className="row mp0 mt-25">
         <div className="col-3">
@@ -1265,7 +1401,10 @@ export function CspTicketView(params) {
                               <span style={{ fontSize: "14px" }}>
                                 <button
                                   className="btn"
-                                  onClick={() => navigate(`/complaintview/${item.id}`)}
+                                  onClick={() => {
+                                    addInTab(item.ticket_no, item.id)
+
+                                  }}
                                   title="View"
                                   style={{ backgroundColor: "transparent", border: "none", color: "blue", fontSize: "20px" }}
                                 >
@@ -1322,28 +1461,31 @@ export function CspTicketView(params) {
           <div className="card" id="attachmentInfocs">
             <div className="card-body">
               <h4 className="pname" style={{ fontSize: "14px" }}>Attachment</h4>
-              <div className="mb-3">
-                <input
-                  type="file"
-                  className="form-control"
-                  multiple
-                  accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,.eml"
-                  onChange={handleFile2Change}
-                  disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
-                  ref={fileInputRef} // Attach the ref to the input
-                />
-              </div>
-              <div className="d-flex justify-content-end mb-3">
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={handleAttachment2Submit}
-                  disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
-                  style={{ fontSize: "14px" }}
-                >
-                  Upload
-                </button>
-              </div>
+              {closestatus == 'Closed' && subclosestatus == "Fully" || closestatus == 'Cancelled' ? null : <div>
+                <div className="mb-3">
+                  <input
+                    type="file"
+                    className="form-control"
+                    multiple
+                    accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,.eml"
+                    onChange={handleFile2Change}
+                    disabled={closestatus == 'Closed' && subclosestatus == "Fully" || closestatus == 'Cancelled' ? true : false}
+                    ref={fileInputRef} // Attach the ref to the input
+                  />
+                </div>
+                <div className="d-flex justify-content-end mb-3">
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={handleAttachment2Submit}
+                    disabled={closestatus == 'Closed' && subclosestatus == "Fully" || closestatus == 'Cancelled' ? true : false}
+                    style={{ fontSize: "14px" }}
+                  >
+                    Upload
+                  </button>
+                </div>
+              </div>}
+
 
               <div id="allattachme">
                 {attachments2.length > 0 ? (
@@ -1511,7 +1653,7 @@ export function CspTicketView(params) {
                   <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>
                     Serial No
                   </p>
-                  {sserial_no ? (
+                  {sserial_no != "" ? (
                     <p style={{ fontSize: "14px" }}>{complaintview.serial_no}</p>
                   ) : (
                     <input
@@ -1529,20 +1671,7 @@ export function CspTicketView(params) {
                 <div className="col-md-4">
                   <h4 className="pname" style={{ fontSize: "11px" }}>Model</h4>
 
-                  {complaintview.ModelNumber ? <p>{complaintview.ModelNumber}</p> : <select
-                    className="form-select dropdown-select"
-                    name="ModelNumber"
-                    value={complaintview.ModelNumber}
-                    onChange={handleModelChange}
-                  >
-                    <option value="">Select Model</option>
-                    {product.map((products) => (
-                      <option key={products.id} value={products.item_description}>
-                        {products.item_description}
-                      </option>
-                    ))}
-                  </select>}
-
+                  {complaintview.ModelNumber ? <p>{complaintview.ModelNumber}</p> : null}
 
 
                 </div>
@@ -1550,10 +1679,9 @@ export function CspTicketView(params) {
 
 
 
-
                 <div className="col-md-2">
                   <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Purchase Date</p>
-                  <p style={{ fontSize: "14px" }}>{formatDate(complaintview.purchase_date)}</p>
+                  <p style={{ fontSize: "14px" }}>{complaintview.purchase_date == null ? null : formatDate(complaintview.purchase_date)}</p>
                 </div>
                 <div className="col-md-4">
                   <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Warranty Status</p>
@@ -1586,62 +1714,67 @@ export function CspTicketView(params) {
                       </>
                     ) : null}
 
-                    <form onSubmit={handleSubmit}>
-                      <div className="card-body p-4">
-                        <div className="form-outline mb-2">
-                          <input
-                            type="text"
-                            id="addANote"
-                            name="note"
-                            className="form-control"
-                            placeholder="Type comment..."
-                            disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
-                            value={note}
-                            onChange={(e) => setNote(e.target.value)}
-                          />
-                        </div>
+                    {(closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled') ? null :
+                      <form onSubmit={handleSubmit}>
+                        <div className="card-body p-4">
+                          <div className="form-outline mb-2">
+                            <input
+                              type="text"
+                              id="addANote"
+                              name="note"
+                              className="form-control"
+                              placeholder="Type comment..."
+                              disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
+                              value={note}
+                              onChange={(e) => setNote(e.target.value)}
+                            />
+                          </div>
 
-                        {/* File upload field for images, videos, and audio */}
-                        <div className="form-outline mb-4">
-                          <label
-                            htmlFor="uploadFiles"
-                            className="form-label mp-0"
-                            style={{ fontSize: "14px" }}
-                          >
-                            Upload Files (Images, Videos, Audios)
-                          </label>
-                          <input
-                            type="file"
-                            id="uploadFiles"
-                            name="attachment"
-                            className="form-control"
-                            multiple
-                            accept="image/*,video/*,audio/*,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,.eml"
-                            onChange={handleFileChange}
-                            disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
-                            ref={fileInputRef2} // Attach the ref to the input
-                          />
-                        </div>
+                          {/* File upload field for images, videos, and audio */}
+                          <div className="form-outline mb-4">
+                            <label
+                              htmlFor="uploadFiles"
+                              className="form-label mp-0"
+                              style={{ fontSize: "14px" }}
+                            >
+                              Upload Files (Images, Videos, Audios)
+                            </label>
+                            <input
+                              type="file"
+                              id="uploadFiles"
+                              name="attachment"
+                              className="form-control"
+                              multiple
+                              accept="image/*,video/*,audio/*,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,.eml"
+                              onChange={handleFileChange}
+                              disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
+                              ref={fileInputRef2} // Attach the ref to the input
+                            />
+                          </div>
 
-                        {/* Consolidated error message */}
-                        {errorMessage && (
-                          <div className="text-danger mt-2">{errorMessage}</div>
-                        )}
+                          {/* Consolidated error message */}
+                          {errorMessage && (
+                            <div className="text-danger mt-2">{errorMessage}</div>
+                          )}
 
-                        {/* Right-aligned submit button */}
-                        <div className="d-flex justify-content-end">
-                          <button
-                            type="submit"
-                            className="btn btn-primary"
-                            style={{ fontSize: "14px" }}
-                            onClick={handleSubmit}
-                            disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
-                          >
-                            Upload Remark
-                          </button>
+                          {/* Right-aligned submit button */}
+                          <div className="d-flex justify-content-end">
+                            <button
+                              type="submit"
+                              className="btn btn-primary"
+                              style={{ fontSize: "14px" }}
+                              onClick={handleSubmit}
+                              disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
+                            >
+                              Upload Remark
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    </form>
+                      </form>
+                    }
+
+
+
                   </div>
                 </div>
               </div>
@@ -1680,13 +1813,13 @@ export function CspTicketView(params) {
                         {/* By and Date Section - 20% */}
                         <div style={{ flex: "0 0 20%", textAlign: "right" }}>
 
-                          <h3 className="mainheade important-margin" style={{ fontSize: "12px", margin: 0 }}>
+                          {remark.title == '' || remark.title == null ? null : <h3 className="mainheade important-margin" style={{ fontSize: "12px", margin: 0 }}>
                             By: {remark.title}
-                          </h3>
+                          </h3>}
 
-                          <h3 className="mainheade" style={{ fontSize: "12px", margin: 0 }}>
-                            Date: {formatDate1(remark.created_date)}
-                          </h3>
+                          {remark.created_date == '' || remark.created_date == null ? null : <h3 className=" date-header" >
+                            Date:  {formatDate1(remark.created_date)}
+                          </h3>}
                         </div>
                       </div>
 
@@ -1866,7 +1999,7 @@ export function CspTicketView(params) {
                 <select
                   name="call_status"
                   className="form-control"
-                  disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
+                  disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
                   style={{ fontSize: "14px" }}
                   value={complaintview.call_status}
                   onChange={(e) => {
@@ -1889,7 +2022,7 @@ export function CspTicketView(params) {
               </div>
               <h4 className="pname" style={{ fontSize: "14px" }}>Sub Call Status</h4>
               <div className="mb-3">
-                <select name="sub_call_status" value={complaintview.sub_call_status} disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false} className="form-control" style={{ fontSize: "14px" }} onChange={handleModelChange}>
+                <select name="sub_call_status" value={complaintview.sub_call_status} disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false} className="form-control" style={{ fontSize: "14px" }} onChange={handleModelChange}>
                   <option value="" >Select Status</option>
                   {subcallstatus.map((item) => {
                     return (
@@ -1902,13 +2035,13 @@ export function CspTicketView(params) {
                 </select>
               </div>
 
-              <div className="d-flex mb-3">
+              {closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? null : <div className="d-flex mb-3">
 
                 <div className="form-check me-3">
                   <input
                     type="radio"
                     className="form-check-input"
-                    disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
+                    disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
                     id="lhi"
                     name="engineer_type"
                     value="LHI"
@@ -1922,7 +2055,7 @@ export function CspTicketView(params) {
                 <div className="form-check">
                   <input
                     type="radio"
-                    disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
+                    disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
                     className="form-check-input"
                     id="franchisee"
                     name="engineer_type"
@@ -1934,13 +2067,15 @@ export function CspTicketView(params) {
                   </label>
                 </div>
 
-              </div>
+              </div>}
 
-              <h4 className="pname" style={{ fontSize: "14px" }}>Engineer</h4>
 
-              <div className="row">
-                <div className="col-lg-9">
-                  {/* <select
+              {(closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled') ? null : <h4 className="pname" style={{ fontSize: "14px" }}>Engineer</h4>}
+
+              {(closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled') ? null :
+                <div className="row">
+                  <div className="col-lg-9">
+                    {/* <select
                     className="form-select dropdown-select"
                     name="engineer_id"
                     value={complaintview.engineer_id}
@@ -1961,48 +2096,50 @@ export function CspTicketView(params) {
                     )}
                   </select> */}
 
-<Autocomplete
-  options={engineer}
-  size="small"
-  getOptionLabel={(option) => option.title || ""} // Display engineer title in dropdown
-  value={engineer.find((e) => e.id === complaintview.engineer_id) || null}
-  onChange={(event, newValue) =>
-    handleModelChange({
-      target: {
-        name: "engineer_id",
-        value: newValue?.id || "", // Update with engineer_id, not title
-      },
-    })
-  }
-  inputValue={inputValue}
-  onInputChange={(event, newInputValue) => setInputValue(newInputValue)}
-  renderInput={(params) => <TextField {...params} label="Select Engineer" />}
+                    <Autocomplete
+                      options={engineer}
+                      size="small"
+                      getOptionLabel={(option) => option.title || ""} // Display engineer title in dropdown
+                      value={engineer.find((e) => e.id === complaintview.engineer_id) || null}
+                      onChange={(event, newValue) =>
+                        handleModelChange({
+                          target: {
+                            name: "engineer_id",
+                            value: newValue?.id || "", // Update with engineer_id, not title
+                          },
+                        })
+                      }
+                      inputValue={inputValue}
+                      onInputChange={(event, newInputValue) => setInputValue(newInputValue)}
+                      renderInput={(params) => <TextField {...params} label="Select Engineer" />}
 
-  // Render option with custom styling (or whatever you want to show in the dropdown)
-  renderOption={(props, option) => (
-    <li {...props} key={option.engineer_id}> {/* Assign unique key using engineer_id */}
-      <span>{option.title}</span> {/* Display title (name) */}
-    </li>
-  )}
+                      // Render option with custom styling (or whatever you want to show in the dropdown)
+                      renderOption={(props, option) => (
+                        <li {...props} key={option.engineer_id}> {/* Assign unique key using engineer_id */}
+                          <span>{option.title}</span> {/* Display title (name) */}
+                        </li>
+                      )}
 
-  isOptionEqualToValue={(option, value) => option.engineer_id === value.engineer_id} // Use engineer_id to compare values
-  getOptionSelected={(option, value) => option.engineer_id === value.engineer_id} // Ensure option is selected using engineer_id
-/>
+                      isOptionEqualToValue={(option, value) => option.engineer_id === value.engineer_id} // Use engineer_id to compare values
+                      getOptionSelected={(option, value) => option.engineer_id === value.engineer_id} // Ensure option is selected using engineer_id
+                    />
 
 
 
+                  </div>
+
+                  <div className="col-lg-3">
+                    <button
+                      className="btn btn-primary btn-sm"
+                      disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
+                      onClick={AddEngineer}
+                    >
+                      Add
+                    </button>
+                  </div>
                 </div>
+              }
 
-                <div className="col-lg-3">
-                  <button
-                    className="btn btn-primary btn-sm"
-                    disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
-                    onClick={AddEngineer}
-                  >
-                    Add
-                  </button>
-                </div>
-              </div>
 
               {/* Display added engineers */}
               <div className="mt-3">
@@ -2024,7 +2161,7 @@ export function CspTicketView(params) {
                           <button
                             className="btn btn-sm btn-danger"
                             style={{ padding: "0.2rem 0.5rem" }}
-                            disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
+                            disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
                             onClick={() => handleRemoveEngineer(eng.id)}
                           >
                             ✖
@@ -2036,85 +2173,94 @@ export function CspTicketView(params) {
                 </table>
               </div>
 
-              {(complaintview.call_status == 'Closed' || complaintview.group_code != null) && <>
-                <div className="mt-3">
-                  <h4 className="pname" style={{ fontSize: "14px" }}>Defect Group Code:</h4>
-                  <select
-                    name="group_code"
-                    className="form-control"
-                    disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
-                    style={{ fontSize: "14px" }}
-                    value={complaintview.group_code}
-                    onChange={(e) => {
-                      const selectedcode = e.target.value; // Get the id
-                      // const selectedid = groupdefect.find(item => item.Callstatus == selectedname)?.id; // Find the corresponding Callstatus value
-                      getdefecttype(selectedcode); // Send the id to fetch sub-call statuses
-                      getsitecode(selectedcode); // Send the id to fetch sub-call statuses
-                      setgroupstatusid(selectedcode)
-                      handleModelChange(e)
-                    }}
-                  >
-                    <option value="">Select Status</option>
-                    {groupdefect.map((item) => (
-                      <option key={item.id} value={item.defectgroupcode}>
-                        {item.defectgrouptitle}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="mt-3">
-                  <h4 className="pname" style={{ fontSize: "14px" }}>Type of Defect Code:</h4>
-                  <select
-                    name="defect_type"
-                    className="form-control"
-                    disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
-                    style={{ fontSize: "14px" }}
-                    value={complaintview.defect_type}
-                    onChange={handleModelChange}
-                  >
-                    <option value="">Select </option>
-                    {GroupDefecttype.map((item) => (
-                      <option key={item.id} value={item.defect_code}>
-                        {item.defect_title}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="mt-3">
-                  <h4 className="pname" style={{ fontSize: "14px" }}>Site Defect Code:</h4>
-                  <select
-                    name="site_defect"
-                    className="form-control"
-                    disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
-                    style={{ fontSize: "14px" }}
-                    value={complaintview.site_defect}
-                    onChange={handleModelChange}
-                  >
-                    <option value="">Select </option>
-                    {GroupDefectsite.map((item) => (
-                      <option key={item.id} value={item.dsite_code}>
-                        {item.dsite_title}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="mt-3">
-                    <h4 className="pname" style={{ fontSize: "14px" }}>Activity Code</h4>
+              {(complaintview.call_status == 'Closed' || complaintview.group_code != null) &&
+                <>
+                  <div className="mt-3">
+                    <h4 className="pname" style={{ fontSize: "14px" }}>Defect Group Code:</h4>
+                    <select
+                      name="group_code"
+                      className="form-control"
+                      disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
+                      style={{ fontSize: "14px" }}
+                      value={groupstatusid}
+                      onChange={(e) => {
+                        const selectedcode = e.target.value; // Get the id
+                        // const selectedid = groupdefect.find(item => item.Callstatus == selectedname)?.id; // Find the corresponding Callstatus value
+                        getdefecttype(selectedcode); // Send the id to fetch sub-call statuses
+                        getsitecode(selectedcode); // Send the id to fetch sub-call statuses
+                        setgroupstatusid(selectedcode)
+                        handleModelChange(e)
+                      }}
+                    >
+                      <option value="">Select Status</option>
+                      {groupdefect.map((item) => (
+                        <option key={item.id} value={item.defectgroupcode}>
+                          {item.defectgrouptitle}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="mt-3">
+                    <h4 className="pname" style={{ fontSize: "14px" }}>Type of Defect Code:</h4>
+                    <select
+                      name="defect_type"
+                      className="form-control"
+                      disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
+                      style={{ fontSize: "14px" }}
+                      value={complaintview.defect_type}
+                      onChange={handleModelChange}
+                    >
+                      <option value="">Select </option>
+                      {GroupDefecttype.map((item) => (
+                        <option key={item.id} value={item.defect_code}>
+                          {item.defect_title}
+                        </option>
+                      ))}
+                    </select>
+                    {error.defect_type && <span className="text-danger">{error.defect_type}</span>}
+                  </div>
+                  <div className="mt-3">
+                    <h4 className="pname" style={{ fontSize: "14px" }}>Site Defect Code:</h4>
                     <select
                       name="site_defect"
                       className="form-control"
-                      disabled={closestatus == 'Closed'  == 'Fully' || closestatus == 'Cancelled' ? true : false}
+                      disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
                       style={{ fontSize: "14px" }}
+                      value={complaintview.site_defect}
+                      onChange={handleModelChange}
                     >
                       <option value="">Select </option>
+                      {GroupDefectsite.map((item) => (
+                        <option key={item.id} value={item.dsite_code}>
+                          {item.dsite_title}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="mt-3">
+                    <h4 className="pname" style={{ fontSize: "14px" }}>Activity Code</h4>
+                    <select
+                      name="activity_code"
+                      className="form-control"
+                      disabled={
+                        (closestatus === 'Closed' && subclosestatus === 'Fully') || closestatus === 'Cancelled'
+                      }
+                      style={{ fontSize: "14px" }}
+                      value={complaintview.activity_code}
+                      onChange={handleModelChange}
+                    >
+                      <option value="">Select</option>
                       {activity.map((item) => (
-                        <option key={item.id} value={item.title}>
+                        <option key={item.id} value={item.code}>
                           {item.code} - {item.title}
                         </option>
                       ))}
                     </select>
                   </div>
-              </>}
+
+
+                </>
+              }
 
 
 
@@ -2126,11 +2272,12 @@ export function CspTicketView(params) {
                   className="btn btn-primary"
                   style={{ fontSize: "14px", marginTop: '5px' }}
                   onClick={handleSubmitTicketFormData}
-                  disabled={closestatus == 'Closed' || closestatus == 'Cancelled' ? true : false}
+                  disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
                 >
                   Submit
                 </button>
               </div>
+
               {TicketUpdateSuccess.visible && (
                 <div style={successMessageStyle}>
                   {TicketUpdateSuccess.message}
@@ -2144,55 +2291,59 @@ export function CspTicketView(params) {
             <div className="card-body">
 
               <div className="mt-3">
-                <h4 className="pname" style={{ fontSize: "14px" }}>Spare Parts:</h4>
+                {closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? null : <h4 className="pname" style={{ fontSize: "14px" }}>Spare Parts:</h4>}
 
-                <div className="row align-items-center">
-                  <div className="col-lg-6">
-                    <select
-                      className="form-select dropdown-select m-0"
-                      name="spare_part_id"
-                      value={spareid}
-                      disabled={closestatus === "Closed" || closestatus == 'Cancelled'}
-                      onChange={(e) => handlesparechange(e.target.value)}
-                    >
-                      <option value="">Select Spare Part</option>
-                      {Array.isArray(spare) && spare.length > 0 ? (
-                        spare.map((part) => (
-                          <option key={part.id} value={part.id}>
-                            {part.article_code + '-' + part.article_description}
+                {closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? null :
+                  <div className="row align-items-center">
+
+                    <div className="col-lg-6">
+                      <select
+                        className="form-select dropdown-select m-0"
+                        name="spare_part_id"
+                        value={spareid}
+                        disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
+                        onChange={(e) => handlesparechange(e.target.value)}
+                      >
+                        <option value="">Select Spare Part</option>
+                        {Array.isArray(spare) && spare.length > 0 ? (
+                          spare.map((part) => (
+                            <option key={part.id} value={part.id}>
+                              {part.article_code + '-' + part.article_description}
+                            </option>
+                          ))
+                        ) : (
+                          <option value="" disabled>
+                            No spare parts available
                           </option>
-                        ))
-                      ) : (
-                        <option value="" disabled>
-                          No spare parts available
-                        </option>
-                      )}
-                    </select>
-                  </div>
+                        )}
+                      </select>
+                    </div>
 
-                  <div className="col-lg-3">
-                    <input
-                      type="number"
-                      className="form-control"
-                      name="quantity"
-                      placeholder="Qty"
-                      value={quantity}
-                      onChange={(e) => setQuantity(e.target.value)}
-                      disabled={closestatus === "Closed" || closestatus == 'Cancelled'}
-                      min="1"
-                    />
-                  </div>
+                    <div className="col-lg-3">
+                      <input
+                        type="number"
+                        className="form-control"
+                        name="quantity"
+                        placeholder="Qty"
+                        value={quantity}
+                        onChange={(e) => setQuantity(e.target.value)}
+                        disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
+                        min="1"
+                      />
+                    </div>
 
-                  <div className="col-lg-3">
-                    <button
-                      className="btn btn-primary btn-sm"
-                      disabled={closestatus === "Closed" || !quantity || closestatus == 'Cancelled'}
-                      onClick={handleAddSparePart}
-                    >
-                      Add
-                    </button>
+                    <div className="col-lg-3">
+                      <button
+                        className="btn btn-primary btn-sm"
+                        disabled={closestatus == "Closed" && subclosestatus == 'Fully' || !quantity || closestatus == 'Cancelled'}
+                        onClick={handleAddSparePart}
+                      >
+                        Add
+                      </button>
+                    </div>
                   </div>
-                </div>
+                }
+
 
                 {/* Display added spare parts */}
                 <div className="mt-3">
@@ -2206,10 +2357,15 @@ export function CspTicketView(params) {
                       </tr>
                     </thead>
                     <tbody>
-                      {addedSpareParts.map((part) => {
 
 
-
+                      {addedSpareParts.filter(part => {
+                        if (uniqueParts.has(part.article_code)) {
+                          return false; // Skip duplicate
+                        }
+                        uniqueParts.add(part.article_code);
+                        return true; // Include unique
+                      }).map((part) => {
                         return (
                           <tr key={part.id}>
                             <td>{part.article_code} - {part.article_description}</td>
@@ -2218,7 +2374,7 @@ export function CspTicketView(params) {
                               <button
                                 className="btn btn-sm btn-danger"
                                 style={{ padding: "0.2rem 0.5rem" }}
-                                disabled={closestatus === "Closed" || closestatus == 'Cancelled'}
+                                disabled={closestatus === 'Closed' && subclosestatus === 'Fully' || closestatus === 'Cancelled'}
                                 onClick={() => handleRemoveSparePart(part.id)}
                               >
                                 ✖
@@ -2227,6 +2383,7 @@ export function CspTicketView(params) {
                           </tr>
                         );
                       })}
+
 
                     </tbody>
                   </table>
@@ -2238,7 +2395,7 @@ export function CspTicketView(params) {
                     className="btn btn-primary"
                     style={{ fontSize: "14px" }}
                     onClick={GenerateQuotation}
-                    disabled={closestatus === "Closed" || closestatus == 'Cancelled'}
+                    disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
                   >
                     Generate Quotation
                   </button>

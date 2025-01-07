@@ -9566,3 +9566,60 @@ app.get("/getfeedbacklist", authenticateToken, async (req, res) => {
     return res.status(500).json({ error: "Database error occurred" });
   }
 });
+
+app.post('/getcspusers', async (req, res) => {
+  const { licare_code } = req.body;
+
+  try {
+    // Connect to the MSSQL database
+    const pool = await poolPromise;
+
+    // Query to fetch data based on `pageid` and `roleid`
+    const query = `select * from awt_childfranchisemaster where licare_code = @licare_code`;
+
+    const result = await pool.request()
+      .input("licare_code", sql.VarChar, licare_code)
+      .query(query);
+
+    // Return the fetched data
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
+
+
+app.post('/getcallrecorddetails', async (req, res) => {
+  const { uuid, call_to_number, caller_id_number, start_stamp, call_id, billing_circle, customer_no_with_prefix } = req.body;
+
+  const date = new Date();
+
+  try {
+    // Connect to the MSSQL database
+    const pool = await poolPromise;
+
+    // Compact query with all parameters
+    const query = `INSERT INTO awt_call_webhook (uuid, call_to_number, caller_id_number, start_stamp, call_id, billing_circle, customer_no_with_prefix,created_date) 
+                   VALUES (@uuid, @call_to_number, @caller_id_number, @start_stamp, @call_id, @billing_circle, @customer_no_with_prefix)`;
+
+    const result = await pool.request()
+      .input("uuid", uuid)
+      .input("call_to_number", call_to_number)
+      .input("caller_id_number", caller_id_number)
+      .input("start_stamp", start_stamp)
+      .input("call_id", call_id)
+      .input("billing_circle", billing_circle)
+      .input("customer_no_with_prefix", customer_no_with_prefix)
+      .input("created_date", date)
+      .query(query);
+
+    // Return success message
+    return res.json({ success: true, message: "Data inserted successfully", result: result.rowsAffected });
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err.message });
+  }
+});
+
+
