@@ -1,39 +1,13 @@
 import axios from "axios";
+import * as XLSX from "xlsx";
+
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url,secretKey } from "../../Utils/Base_Url";
 import LocationTabs from "./LocationTabs";
 import { useSelector } from 'react-redux';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'datatables.net-bs4/css/dataTables.bootstrap4.min.css';
-import $ from 'jquery';
-import 'datatables.net';
-import 'datatables.net-bs4';
 import { SyncLoader } from 'react-spinners';
 import CryptoJS from 'crypto-js';
-// DataTables Responsive Extension (JS and CSS for Bootstrap 4)
-import 'datatables.net-responsive';
-import 'datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css';
-
-// DataTables Fixed Columns Extension
-import 'datatables.net-fixedcolumns';
-import 'datatables.net-fixedcolumns-bs4/css/fixedColumns.bootstrap4.min.css';
-
-// DataTables Fixed Header Extension
-import 'datatables.net-fixedheader';
-
-// DataTables Buttons Extension
-import 'datatables.net-buttons';
-import 'datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css';
-import 'datatables.net-buttons/js/buttons.html5.min.js';
-
-
-
-// DataTables KeyTable Extension
-import 'datatables.net-keytable';
-
-// DataTables Select Extension
-import 'datatables.net-select';
 import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 import { useDispatch } from "react-redux";
 import { getRoleData } from "../../Store/Role/role-action";
@@ -199,38 +173,25 @@ const Location = () => {
   const indexOfFirstUser = indexOfLastUser - itemsPerPage;
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
-  useEffect(() => {
-    if (currentUsers.length > 0) {
-        // Initialize DataTable after data is fetched
-        const table = $('#example').DataTable({
-            destroy: true, // Destroy any existing DataTable instance before reinitializing
-            paging: true,
-            searching: true,
-            ordering: true,
-            info: true,
-            lengthChange: false,
-            autoWidth: false,
-            responsive: true,
-            fixedHeader: true,
-            fixedColumns: {
-                left: 5,
-            },
-            keys: true,
-            select: true,
-            dom: '<"d-flex justify-content-between"<"table-title"><"search-box"f>>t<"d-flex justify-content-between"ip>',
-            language: {
-              search: '', // Remove the "Search:" label
-              searchPlaceholder: 'Search...', // Add placeholder text
-            },
+  // export to excel 
+  const exportToExcel = () => {
+    // Create a new workbook
+    const workbook = XLSX.utils.book_new();
 
-        });
+    // Convert data to a worksheet
+    const worksheet = XLSX.utils.json_to_sheet(filteredUsers.map(user => ({
+      "Country": user.title, // Add fields you want to export
+    })));
 
-        // Cleanup: Destroy DataTable instance before reinitializing when Productdata changes
-        return () => {
-            table.destroy();
-        };
-    }
-}, [currentUsers]);
+    // Append the worksheet to the workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Countries");
+
+    // Export the workbook
+    XLSX.writeFile(workbook, "Country.xlsx");
+  };
+
+  // export to excel end 
+
    // Role Right 
   
   
@@ -260,187 +221,214 @@ const Location = () => {
 
   return (
     <div className="tab-content">
-      <LocationTabs/>
+      <LocationTabs />
       {loaders && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            zIndex: 999,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
       )}
-   {roleaccess > 1 ?   <div className="row mp0">
-      <div className="col-12">
-        <div className="card mb-3 tab_box">
-          <div
-            className="card-body"
-            style={{ flex: "1 1 auto", padding: "13px 28px" }}
-          >
-            <div className="row mp0">
-              <div className="col-6">
-                <form
-                  onSubmit={handleSubmit}
-                  style={{ width: "50%" }}
-                  className="text-left"
-                >
-                  <div className="mb-3">
-                    <label htmlFor="countryInput" className="input-field">
-                    Country <span className="text-danger">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="title"
-                      id="countryInput"
-                      value={formData.title}
-                      onChange={handleChange}
-                      placeholder="Enter country"
-                    />
-                    {errors.title && (
-                      <small className="text-danger">{errors.title}</small>
-                    )}
-                    {duplicateError && (
-                      <small className="text-danger">{duplicateError}</small>
-                    )}{" "}
-                    {/* Show duplicate error */}
-                  </div>
-                  {roleaccess > 2 ?  <div className="text-right">
-                    <button className="btn btn-liebherr" type="submit">
-                      {isEdit ? "Update" : "Submit"}
-                    </button>
-                  </div> : null } 
-                </form>
-              </div>
-
-              <div className="col-md-6">
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                  <span>
-                    Show
-                    <select
-                      value={itemsPerPage}
-                      onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                      className="form-control d-inline-block"
-                      style={{
-                        width: "51px",
-                        display: "inline-block",
-                        marginLeft: "5px",
-                        marginRight: "5px",
-                      }}
+      {roleaccess > 1 ? (
+        <div className="row mp0">
+          <div className="col-12">
+            <div className="card mb-3 tab_box">
+              <div
+                className="card-body"
+                style={{ flex: "1 1 auto", padding: "13px 28px" }}
+              >
+                <div className="row mp0">
+                  <div className="col-6">
+                    <form
+                      onSubmit={handleSubmit}
+                      style={{ width: "50%" }}
+                      className="text-left"
                     >
-                      <option value={10}>10</option>
-                      <option value={15}>15</option>
-                      <option value={20}>20</option>
-                    </select>
-                    entries
-                  </span>
-
-                  <input
-                    type="text"
-                    placeholder="Search..."
-                    value={searchTerm}
-                    onChange={handleSearch}
-                    className="form-control d-inline-block"
-                    style={{ width: "300px" }}
-                  />
-                </div>
-
-                {/* Adjust table padding and spacing */}
-                <table className="table table-bordered table-hover dt-responsive nowrap w-100">
-                  <thead className="thead-light">
-                    <tr>
-                      <th scope="col" width="10%" className="text-center">
-                        #
-                      </th>
-                      <th scope="col" width="60%" className="text-left">
-                        Title
-                      </th>
-                      <th scope="col" width="15%" className="text-center">
-                        Edit
-                      </th>
-                      <th scope="col" width="15%" className="text-center">
-                        Delete
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {currentUsers.map((item, index) => (
-                      <tr key={item.id}>
-                        <td className="text-center align-middle">
-                          {index + 1 + indexOfFirstUser}
-                        </td>
-                        <td className="align-middle">{item.title}</td>
-                        <td className="text-center align-middle">
-                          <button
-                            className="btn btn-link text-primary"
-                            onClick={() => {
-                              edit(item.id);
-                            }}
-                            disabled={roleaccess > 3 ? false : true}
-                            title="Edit"
-                          >
-                            <FaPencilAlt />
+                      <div className="mb-3">
+                        <label htmlFor="countryInput" className="input-field">
+                          Country <span className="text-danger">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          name="title"
+                          id="countryInput"
+                          value={formData.title}
+                          onChange={handleChange}
+                          placeholder="Enter country"
+                        />
+                        {errors.title && (
+                          <small className="text-danger">{errors.title}</small>
+                        )}
+                        {duplicateError && (
+                          <small className="text-danger">{duplicateError}</small>
+                        )}{" "}
+                        {/* Show duplicate error */}
+                      </div>
+                      {roleaccess > 2 ? (
+                        <div className="text-right">
+                          <button className="btn btn-liebherr" type="submit">
+                            {isEdit ? "Update" : "Submit"}
                           </button>
-                        </td>
-                        <td className="text-center align-middle">
-                          <button
-                            className="btn btn-link text-danger"
-                            onClick={() => deleted(item.id)}
-                            title="Delete"
-                            disabled = {roleaccess > 4 ?false : true}
-                          >
-                            <FaTrash />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-
-                <div
-                  className="d-flex justify-content-between"
-                  style={{ marginTop: "10px" }}
-                >
-                  <div>
-                    Showing {indexOfFirstUser + 1} to{" "}
-                    {Math.min(indexOfLastUser, filteredUsers.length)} of{" "}
-                    {filteredUsers.length} entries
+                        </div>
+                      ) : null}
+                    </form>
                   </div>
 
-                  <div className="pagination" style={{ marginLeft: "auto" }}>
-                    <button
-                      onClick={() => setCurrentPage(currentPage - 1)}
-                      disabled={currentPage === 0}
-                    >
-                      {"<"}
-                    </button>
-                    {Array.from(
-                      {
-                        length: Math.ceil(filteredUsers.length / itemsPerPage),
-                      },
-                      (_, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setCurrentPage(index)}
-                          className={currentPage === index ? "active" : ""}
+                  <div className="col-md-6">
+                    <div className="d-flex justify-content-between align-items-center mb-3">
+                      <span>
+                        Show
+                        <select
+                          value={itemsPerPage}
+                          onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                          className="form-control d-inline-block"
+                          style={{
+                            width: "51px",
+                            display: "inline-block",
+                            marginLeft: "5px",
+                            marginRight: "5px",
+                          }}
                         >
-                          {index + 1}
-                        </button>
-                      )
-                    )}
-                    <button
-                      onClick={() => setCurrentPage(currentPage + 1)}
-                      disabled={
-                        currentPage ===
-                        Math.ceil(filteredUsers.length / itemsPerPage) - 1
-                      }
+                          <option value={10}>10</option>
+                          <option value={15}>15</option>
+                          <option value={20}>20</option>
+                        </select>
+                        entries
+                      </span>
+
+                      <input
+                        type="text"
+                        placeholder="Search..."
+                        value={searchTerm}
+                        onChange={handleSearch}
+                        className="form-control d-inline-block"
+                        style={{ width: "300px" }}
+                      />
+                      <button
+                        className="btn btn-primary"
+                        onClick={exportToExcel}
+                      >
+                        Export to Excel
+                      </button>
+                    </div>
+
+                    {/* Adjust table padding and spacing */}
+                    <table className="table table-bordered table-hover dt-responsive nowrap w-100">
+                      <thead className="thead-light">
+                        <tr>
+                          <th scope="col" width="10%" className="text-center">
+                            #
+                          </th>
+                          <th scope="col" width="60%" className="text-left">
+                            Title
+                          </th>
+                          <th scope="col" width="15%" className="text-center">
+                            Edit
+                          </th>
+                          <th scope="col" width="15%" className="text-center">
+                            Delete
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {currentUsers.map((item, index) => (
+                          <tr key={item.id}>
+                            <td className="text-center align-middle">
+                              {index + 1 + indexOfFirstUser}
+                            </td>
+                            <td className="align-middle">{item.title}</td>
+                            <td className="text-center align-middle">
+                              <button
+                                className="btn btn-link text-primary"
+                                onClick={() => {
+                                  edit(item.id);
+                                }}
+                                disabled={roleaccess > 3 ? false : true}
+                                title="Edit"
+                              >
+                                <FaPencilAlt />
+                              </button>
+                            </td>
+                            <td className="text-center align-middle">
+                              <button
+                                className="btn btn-link text-danger"
+                                onClick={() => deleted(item.id)}
+                                title="Delete"
+                                disabled={roleaccess > 4 ? false : true}
+                              >
+                                <FaTrash />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+
+                    <div
+                      className="d-flex justify-content-between"
+                      style={{ marginTop: "10px" }}
                     >
-                      {">"}
-                    </button>
+                      <div>
+                        Showing {indexOfFirstUser + 1} to{" "}
+                        {Math.min(indexOfLastUser, filteredUsers.length)} of{" "}
+                        {filteredUsers.length} entries
+                      </div>
+
+                      <div className="pagination" style={{ marginLeft: "auto" }}>
+                        <button
+                          onClick={() => setCurrentPage(currentPage - 1)}
+                          disabled={currentPage === 0}
+                        >
+                          {"<"}
+                        </button>
+                        {Array.from(
+                          {
+                            length: Math.ceil(
+                              filteredUsers.length / itemsPerPage
+                            ),
+                          },
+                          (_, index) => (
+                            <button
+                              key={index}
+                              onClick={() => setCurrentPage(index)}
+                              className={
+                                currentPage === index ? "active" : ""
+                              }
+                            >
+                              {index + 1}
+                            </button>
+                          )
+                        )}
+                        <button
+                          onClick={() => setCurrentPage(currentPage + 1)}
+                          disabled={
+                            currentPage ===
+                            Math.ceil(filteredUsers.length / itemsPerPage) - 1
+                          }
+                        >
+                          {">"}
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </div> : null}
+      ) : null}
     </div>
   );
 };

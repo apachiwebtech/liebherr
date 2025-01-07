@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import * as XLSX from "xlsx";
 import axios from "axios";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url,secretKey } from "../../Utils/Base_Url";
@@ -304,6 +305,31 @@ const Pincode = () => {
     </div>
   );
 
+   // export to excel 
+      const exportToExcel = () => {
+        // Create a new workbook
+        const workbook = XLSX.utils.book_new();
+    
+        // Convert data to a worksheet
+        const worksheet = XLSX.utils.json_to_sheet(filteredPincodes.map(user => ({
+          "Country": user.country_title,
+          "Region": user.region_title,
+          "Geo State": user.geostate_title,
+          "District": user.area_title,
+          "Geo City": user.geocity_title,
+          "Pincode":user.pincode
+          // Add fields you want to export
+        })));
+    
+        // Append the worksheet to the workbook
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Pincode");
+    
+        // Export the workbook
+        XLSX.writeFile(workbook, "Pincode.xlsx");
+      };
+    
+      // export to excel end 
+
    // Role Right 
   
   
@@ -347,7 +373,7 @@ const Pincode = () => {
               style={{ flex: "1 1 auto", padding: "13px 28px" }}
             >
               <div className="row mp0">
-                <div className="col-6">
+                <div className="col-4">
                   <form
                     onSubmit={handleSubmit}
                     style={{ width: "50%" }}
@@ -388,7 +414,7 @@ const Pincode = () => {
                   </form>
                 </div>
 
-                <div className="col-6">
+                <div className="col-8">
                   <div className="d-flex justify-content-between align-items-center mb-3">
                     <span>
                       Show
@@ -419,6 +445,12 @@ const Pincode = () => {
                       className="form-control d-inline-block"
                       style={{ width: "300px" }}
                     />
+                     <button
+                      className="btn btn-primary"
+                      onClick={exportToExcel}
+                    >
+                      Export to Excel
+                    </button>
                   </div>
 
                   <table

@@ -1,4 +1,5 @@
 import axios from "axios";
+import * as XLSX from "xlsx";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url,secretKey } from "../../Utils/Base_Url";
@@ -183,6 +184,27 @@ const ProductLine = () => {
   const indexOfLastUser = (currentPage + 1) * itemsPerPage;
   const indexOfFirstUser = indexOfLastUser - itemsPerPage;
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+   // export to excel 
+      const exportToExcel = () => {
+        // Create a new workbook
+        const workbook = XLSX.utils.book_new();
+    
+        // Convert data to a worksheet
+        const worksheet = XLSX.utils.json_to_sheet(filteredUsers.map(user => ({
+          "PLine Code": user.pline_code,
+          "Product Line": user.product_line,
+          
+          // Add fields you want to export
+        })));
+    
+        // Append the worksheet to the workbook
+        XLSX.utils.book_append_sheet(workbook, worksheet, "ProductLine");
+    
+        // Export the workbook
+        XLSX.writeFile(workbook, "ProductLine.xlsx");
+      };
+    
+      // export to excel end 
 
    // Role Right 
   
@@ -227,7 +249,7 @@ const ProductLine = () => {
               style={{ flex: "1 1 auto", padding: "13px 28px" }}
             >
               <div className="row mp0">
-                <div className="col-6">
+                <div className="col-4">
                   <form
                     onSubmit={handleSubmit}
                     style={{ width: "50%" }}
@@ -283,7 +305,7 @@ const ProductLine = () => {
                   </form>
                 </div>
 
-                <div className="col-md-6">
+                <div className="col-md-8">
                   {/* Table and search functionality */}
                   <div className="d-flex justify-content-between align-items-center mb-3">
                     <span>
@@ -314,6 +336,12 @@ const ProductLine = () => {
                       className="form-control d-inline-block"
                       style={{ width: "300px" }}
                     />
+                    <button
+                      className="btn btn-primary"
+                      onClick={exportToExcel}
+                    >
+                      Export to Excel
+                    </button>
                   </div>
 
                   <table className="table table-bordered table-hover table-responsive mt-3">

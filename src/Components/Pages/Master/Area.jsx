@@ -1,7 +1,8 @@
 import axios from "axios";
+import * as XLSX from "xlsx";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
-import { Base_Url,secretKey } from "../../Utils/Base_Url";
+import { Base_Url, secretKey } from "../../Utils/Base_Url";
 import LocationTabs from "./LocationTabs";
 import { SyncLoader } from 'react-spinners';
 import CryptoJS from 'crypto-js';
@@ -20,7 +21,6 @@ const Area = () => {
   // const [geoCities, setGeoCities] = useState([]);
   const [areas, setAreas] = useState([]);
   const [errors, setErrors] = useState({});
-  const [filteredUsers, setFilteredUsers] = useState([]);
   const [filteredAreas, setFilteredAreas] = useState([]);
   const [isEdit, setIsEdit] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
@@ -267,34 +267,58 @@ const Area = () => {
   };
   const indexOfLastUser = (currentPage + 1) * itemsPerPage;
   const indexOfFirstUser = indexOfLastUser - itemsPerPage;
-  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
-  
+  const currentUsers = filteredAreas.slice(indexOfFirstUser, indexOfLastUser);
+
+  // export to excel 
+  const exportToExcel = () => {
+    // Create a new workbook
+    const workbook = XLSX.utils.book_new();
+
+    // Convert data to a worksheet
+    const worksheet = XLSX.utils.json_to_sheet(filteredAreas.map(user => ({
+      "Country": user.country_title,
+      "Region": user.region_title,
+      "Geo State": user.geostate_title,
+      "District": user.title,
+      // Add fields you want to export
+    })));
+
+    // Append the worksheet to the workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, "District");
+
+    // Export the workbook
+    XLSX.writeFile(workbook, "District.xlsx");
+  };
+
+  // export to excel end 
+
+
   // Role Right 
-  
-  
-    const Decrypt = (encrypted) => {
-      encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
-      const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
-      return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
-    };
-  
-    const storedEncryptedRole = localStorage.getItem("Userrole");
-    const decryptedRole = Decrypt(storedEncryptedRole);
-  
-    const roledata = {
-      role: decryptedRole,
-      pageid: String(4)
-    }
-  
-    const dispatch = useDispatch()
-    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
-  
-  
-    useEffect(() => {
-      dispatch(getRoleData(roledata))
-    }, [])
-  
-    // Role Right End 
+
+
+  const Decrypt = (encrypted) => {
+    encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+    const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+    return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+  };
+
+  const storedEncryptedRole = localStorage.getItem("Userrole");
+  const decryptedRole = Decrypt(storedEncryptedRole);
+
+  const roledata = {
+    role: decryptedRole,
+    pageid: String(4)
+  }
+
+  const dispatch = useDispatch()
+  const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+
+
+  useEffect(() => {
+    dispatch(getRoleData(roledata))
+  }, [])
+
+  // Role Right End 
 
   return (
     <div className="tab-content">
@@ -312,7 +336,7 @@ const Area = () => {
               style={{ flex: "1 1 auto", padding: "13px 28px" }}
             >
               <div className="row mp0">
-                <div className="col-6">
+                <div className="col-4">
                   <form
                     onSubmit={handleSubmit}
                     style={{ width: "50%" }}
@@ -445,7 +469,7 @@ const Area = () => {
                         <small className="text-danger">{duplicateError}</small>
                       )}
                     </div>
-                    {roleaccess > 2 ?  <div className="text-right">
+                    {roleaccess > 2 ? <div className="text-right">
                       <button
                         className="btn btn-liebherr"
                         type="submit"
@@ -453,11 +477,11 @@ const Area = () => {
                       >
                         {isEdit ? "Update" : "Submit"}
                       </button>
-                    </div> : null } 
+                    </div> : null}
                   </form>
                 </div>
 
-                <div className="col-md-6">
+                <div className="col-md-8">
                   <div className="d-flex justify-content-between align-items-center mb-3">
                     <span>
                       Show
@@ -487,6 +511,12 @@ const Area = () => {
                       className="form-control d-inline-block"
                       style={{ width: "300px" }}
                     />
+                    <button
+                      className="btn btn-primary"
+                      onClick={exportToExcel}
+                    >
+                      Export to Excel
+                    </button>
                   </div>
 
                   <table className="table table-bordered table-hover dt-responsive nowrap w-100">
@@ -504,7 +534,7 @@ const Area = () => {
                     <tbody>
                       {filteredAreas
                         .slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage)
-                        .map((area, index) => (
+                       .map((area, index) => (
                           <tr key={area.id} className="text-center">
                             <td className='text-center'>{currentPage * itemsPerPage + index + 1}</td>
                             <td className='text-center'>{area.country_title}</td>
@@ -515,7 +545,7 @@ const Area = () => {
                               <FaPencilAlt style={{ cursor: 'pointer', color: 'blue' }} onClick={() => edit(area.id)} disabled={roleaccess > 3 ? false : true} />
                             </td>
                             <td className='text-center'>
-                              <FaTrash style={{ cursor: 'pointer', color: 'red' }} onClick={() => deleted(area.id)}  disabled = {roleaccess > 4 ?false : true} />
+                              <FaTrash style={{ cursor: 'pointer', color: 'red' }} onClick={() => deleted(area.id)} disabled={roleaccess > 4 ? false : true} />
                             </td>
                           </tr>
                         ))}
@@ -523,54 +553,61 @@ const Area = () => {
                   </table>
 
                   <div
-                  className="d-flex justify-content-between"
-                  style={{ marginTop: "10px" }}
-                >
-                  <div>
-                    Showing {indexOfFirstUser + 1} to{" "}
-                    {Math.min(indexOfLastUser, filteredUsers.length)} of{" "}
-                    {filteredUsers.length} entries
-                  </div>
+                    className="d-flex justify-content-between"
+                    style={{ marginTop: "10px" }}
+                  >
+                    <div>
+                      Showing {indexOfFirstUser + 1} to{" "}
+                      {Math.min(indexOfLastUser, filteredAreas.length)} of{" "}
+                      {filteredAreas.length} entries
+                    </div>
 
-                  <div className="pagination" style={{ marginLeft: "auto" }}>
+                    <div className="pagination" style={{ marginLeft: "auto" }}>
                     <button
-                      onClick={() => setCurrentPage(currentPage - 1)}
-                      disabled={currentPage === 0}
-                    >
-                      {"<"}
-                    </button>
-                    {Array.from(
-                      {
-                        length: Math.ceil(filteredUsers.length / itemsPerPage),
-                      },
-                      (_, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setCurrentPage(index)}
-                          className={currentPage === index ? "active" : ""}
-                        >
-                          {index + 1}
-                        </button>
-                      )
-                    )}
-                    <button
-                      onClick={() => setCurrentPage(currentPage + 1)}
-                      disabled={
-                        currentPage ===
-                        Math.ceil(filteredUsers.length / itemsPerPage) - 1
-                      }
-                    >
-                      {">"}
-                    </button>
+                        onClick={() =>
+                          setCurrentPage((prev) => Math.max(prev - 1, 0))
+                        }
+                        disabled={currentPage === 0}
+                      >
+                        &lt;
+                      </button>
+                      {Array.from(
+                        { length: Math.ceil(filteredAreas.length / itemsPerPage) },
+                        (_, index) => (
+                          <button
+                            key={index}
+                            onClick={() => setCurrentPage(index)}
+                            className={currentPage === index ? "active" : ""}
+                          >
+                            {index + 1}
+                          </button>
+                        )
+                      )}
+                      <button
+                        onClick={() =>
+                          setCurrentPage((prev) =>
+                            Math.min(
+                              prev + 1,
+                              Math.ceil(filteredAreas.length / itemsPerPage) - 1
+                            )
+                          )
+                        }
+                        disabled={
+                          currentPage >=
+                          Math.ceil(filteredAreas.length / itemsPerPage) - 1
+                        }
+                      >
+                        &gt;
+                      </button>
+                    </div>
                   </div>
-                </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>: null}
-      </div>
+      </div> : null}
+    </div>
   );
 };
 
