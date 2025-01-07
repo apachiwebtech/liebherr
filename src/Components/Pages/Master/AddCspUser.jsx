@@ -271,6 +271,56 @@ const AddCspUser = () => {
                                          
                                             {/* Show duplicate error */}
                                         </div>
+                                        <div className="mb-3">
+                                            <label htmlFor="EmailInput" className="input-field">
+                                                Email <span className="text-danger">*</span>
+                                            </label>
+                                            <input
+                                                type="email"
+                                                className="form-control"
+                                                name="title"
+                                                id="emailInput"
+                                                value={formData.email}
+                                                onChange={handleChange}
+                                                placeholder="Enter Email"
+                                            />
+                                         
+                                            {/* Show duplicate error */}
+                                        </div>
+                                        <div className="mb-3">
+                                            <label htmlFor="EmailInput" className="input-field">
+                                                Password <span className="text-danger">*</span>
+                                            </label>
+                                            <input
+                                                type="password"
+                                                className="form-control"
+                                                name="email"
+                                                id="email"
+                                                value={formData.password}
+                                                onChange={handleChange}
+                                                placeholder="Enter Password"
+                                            />
+                                         
+                                            {/* Show duplicate error */}
+                                        </div>
+                                        <div className="mb-3">
+                                            <label htmlFor="EmailInput" className="input-field">
+                                                Mobile Number <span className="text-danger">*</span>
+                                            </label>
+                                            <input
+                                                type="tel"
+                                                className="form-control"
+                                                name="email"
+                                                id="email"
+                                                value={formData.mobile_no}
+                                                onChange={handleChange}
+                                                placeholder="Enter Mobile Number"
+                                                pattern="[0-9]{10}"
+                                                maxLength="15"
+                                            />
+                                         
+                                            {/* Show duplicate error */}
+                                        </div>
                                         {roleaccess > 2 ? <div className="text-right">
                                             <button className="btn btn-liebherr" type="submit">
                                                 {isEdit ? "Update" : "Submit"}
