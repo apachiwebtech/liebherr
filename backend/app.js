@@ -7944,8 +7944,6 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
 
     }
 
-    console.log(sql, "$$$")
-
 
 
 
@@ -9599,9 +9597,17 @@ app.post('/getcallrecorddetails', async (req, res) => {
     // Connect to the MSSQL database
     const pool = await poolPromise;
 
+    const checkduplicate = `Select * from awt_call_webhook where uuid = '${uuid}' and caller_id_number = '${caller_id_number}'`
+
+    const duplicateresult = await pool.request().query(checkduplicate)
+
+    if (duplicateresult.recordset.length > 0) {
+      return res.json("Duplicate Record Found")
+    }
+
     // Compact query with all parameters
     const query = `INSERT INTO awt_call_webhook (uuid, call_to_number, caller_id_number, start_stamp, call_id, billing_circle, customer_no_with_prefix,created_date) 
-                   VALUES (@uuid, @call_to_number, @caller_id_number, @start_stamp, @call_id, @billing_circle, @customer_no_with_prefix)`;
+                   VALUES (@uuid, @call_to_number, @caller_id_number, @start_stamp, @call_id, @billing_circle, @customer_no_with_prefix,@created_date)`;
 
     const result = await pool.request()
       .input("uuid", uuid)
@@ -9623,3 +9629,165 @@ app.post('/getcallrecorddetails', async (req, res) => {
 });
 
 
+//Fetch role for csp
+
+app.get("/getcsprole", authenticateToken, async (req, res) => {
+  try {
+    // Access the connection pool using poolPromise
+    const pool = await poolPromise;
+
+    // Direct SQL query
+    const sql = `
+      SELECT *
+      FROM csp_role_master
+      WHERE deleted = 0
+    `;
+
+    // Execute the query
+    const result = await pool.request().query(sql);
+
+    // Return only the recordset from the result
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Error fetching categories:", err); // Log the error for debugging
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+});
+
+
+
+// Fetch role pages 
+
+app.post('/csp_role_pages', async (req, res) => {
+  const role_id = req.body.role_id;
+
+  try {
+    const pool = await poolPromise;
+
+    const sqlSelect = `
+      SELECT * 
+      FROM pagerole AS pg 
+      LEFT JOIN csp_pagemaster AS pm ON pg.pageid = pm.id 
+      WHERE pg.roleid = @role_id 
+      ORDER BY pg.id ASC
+    `;
+
+    const result = await pool.request()
+      .input("role_id", sql.Int, role_id)
+      .query(sqlSelect);
+
+    const data = result.recordset;
+
+    if (data.length === 0) {
+      const fetchPageIds = `
+        SELECT id AS page_id 
+        FROM csp_pagemaster 
+        WHERE deleted = 0
+      `;
+
+      const pageIdsResult = await pool.request().query(fetchPageIds);
+      const pageIds = pageIdsResult.recordset;
+
+      if (pageIds.length > 0) {
+        const transaction = new sql.Transaction(pool);
+        await transaction.begin();
+
+        try {
+          const request = transaction.request();
+          for (const { page_id } of pageIds) {
+            await request.query(`
+                INSERT INTO csp_pagerole (roleid, pageid, accessid) 
+                VALUES (${role_id}, ${page_id},1)
+              `);
+          }
+
+          await transaction.commit();
+
+          const getData = `
+            SELECT * 
+            FROM csp_pagerole AS pg 
+            LEFT JOIN csp_pagemaster AS pm ON pg.pageid = pm.id 
+            WHERE pg.roleid = @role2_id 
+            ORDER BY pg.id ASC
+          `;
+
+          const newData = await pool.request()
+            .input("role2_id", sql.Int, role_id)
+            .query(getData);
+
+          return res.json(newData.recordset);
+        } catch (err) {
+          await transaction.rollback();
+          console.error("Transaction error:", err);
+          return res.status(500).json({ error: "Failed to insert rows", details: err });
+        }
+      }
+    } else {
+      return res.json(data);
+    }
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
+
+// Fetch assign role 
+
+
+app.post('/csp_assign_role', async (req, res) => {
+  const rolePages = req.body;
+
+  // Validate the input
+  if (!Array.isArray(rolePages) || rolePages.length === 0) {
+    return res.status(400).json({ error: "Invalid input: 'rolePages' should be a non-empty array." });
+  }
+
+  const role_id = rolePages[0]?.roleid;
+
+  if (!role_id) {
+    return res.status(400).json({ error: "Invalid input: 'roleid' is required." });
+  }
+
+  try {
+    // Connect to the MSSQL database
+    const pool = await poolPromise;
+
+    // Delete existing roles for the given role_id
+    const deleteSql = "DELETE FROM csp_pagerole WHERE roleid = @roleid";
+    await pool.request()
+      .input("roleid", sql.Int, role_id)
+      .query(deleteSql);
+
+    // Prepare values for bulk insert
+    const insertSql = "INSERT INTO csp_pagerole (roleid, pageid, accessid) VALUES (@roleid, @pageid, @accessid)";
+    const transaction = new sql.Transaction(pool);
+
+    try {
+      await transaction.begin();
+
+      for (const rolePage of rolePages) {
+        await transaction.request()
+          .input("roleid", sql.Int, rolePage.roleid)
+          .input("pageid", sql.Int, rolePage.pageid)
+          .input("accessid", sql.Int, rolePage.accessid)
+          .query(insertSql);
+      }
+
+      await transaction.commit();
+
+      return res.json({
+        message: "Roles assigned successfully",
+        affectedRows: rolePages.length,
+      });
+
+    } catch (err) {
+      await transaction.rollback();
+      console.error("Transaction error:", err);
+      return res.status(500).json({ error: "Failed to insert roles", details: err });
+    }
+
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});

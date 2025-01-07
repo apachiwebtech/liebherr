@@ -272,7 +272,6 @@ const Ratecard = () => {
 
               </div>
 
-              <pre>{JSON.stringify(excelData, null, 2)}</pre>
               <div className="row mp0">
                 <div className="col-6">
                   <form

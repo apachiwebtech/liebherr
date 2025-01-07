@@ -155,10 +155,12 @@ export function CspTicketView(params) {
 
   }
 
-  async function getEngineer(params) {
+
+
+  async function getEngineer(msp,csp,pincode) {
 
     try {
-      const res = await axiosInstance.get(`${Base_Url}/getcvengineer/${complaintview.pincode}/${complaintview.msp}/${complaintview.csp}`, {
+      const res = await axiosInstance.get(`${Base_Url}/getcvengineer/${pincode}/${msp}/${csp}`, {
         headers: {
           Authorization: token, // Send token in headers
         },
@@ -665,7 +667,17 @@ export function CspTicketView(params) {
       }
       );
 
+      if(response.data){
+
+        // getEngineer(response.data[0].msp,response.data[0].csp,response.data[0].pincode)4
+      }
+
+      getEngineer(response.data.msp,response.data.csp , response.data.pincode)
+
+
       setComplaintview(response.data);
+
+
       setgroupstatusid(response.data.group_code)
 
       setCloseStatus(response.data.call_status)
@@ -1044,16 +1056,7 @@ export function CspTicketView(params) {
 
   }, [complaintid, complaintview.ticket_no, complaintview.customer_mobile]);
 
-  useEffect(() => {
-    if (engtype == "Franchisee") {
 
-      getEngineer();
-    } else {
-      setEngineer([])
-    }
-
-
-  }, [engtype])
 
   useEffect(() => {
     getcallstatus()
@@ -2037,7 +2040,7 @@ export function CspTicketView(params) {
 
               {closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? null : <div className="d-flex mb-3">
 
-                <div className="form-check me-3">
+                {/* <div className="form-check me-3">
                   <input
                     type="radio"
                     className="form-check-input"
@@ -2050,9 +2053,9 @@ export function CspTicketView(params) {
                   <label className="form-check-label" htmlFor="lhi" style={{ fontSize: "14px" }}>
                     LHI
                   </label>
-                </div>
+                </div> */}
 
-                <div className="form-check">
+                {/* <div className="form-check">
                   <input
                     type="radio"
                     disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
@@ -2065,7 +2068,7 @@ export function CspTicketView(params) {
                   <label className="form-check-label" htmlFor="franchisee" style={{ fontSize: "14px" }}>
                     Service Partner
                   </label>
-                </div>
+                </div> */}
 
               </div>}
 

@@ -63,8 +63,8 @@ function CspAddtab() {
                   </button></Link>
                 </li>
                 <li className="nav-item">
-                <Link to={`/regions`}> <button
-                    className={`nav-link ${activeTab === '/regions' ? 'active' : ' onClick={() => setActiveTab("regions")}'}`}
+                <Link to={`/csp/roleassign`}> <button
+                    className={`nav-link ${activeTab === '/csp/roleassign' ? 'active' : ' onClick={() => setActiveTab("regions")}'}`}
                   
                   >
                     Role Assign

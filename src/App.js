@@ -113,6 +113,7 @@ import Roleright from './Components/Pages/Master/Roleright';
 import Roleassign from './Components/Pages/Master/Roleassign';
 import { FeedBackreport } from './Components/Pages/Reports/Feedbackreport';
 import AddCspUser from './Components/Pages/Master/AddCspUser';
+import RoleassignCsp from './Components/Pages/Master/RoleAssignCsp';
 
 
 const isAuthenticated = () => {
@@ -224,6 +225,10 @@ const Router = createBrowserRouter([
       {
         path: "/csp/adduser",
         element: <AddCspUser />,
+      },
+      {
+        path: "/csp/roleassign",
+        element: <RoleassignCsp />,
       }
     ],
   },
