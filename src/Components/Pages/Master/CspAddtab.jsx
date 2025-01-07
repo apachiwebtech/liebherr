@@ -45,7 +45,7 @@ function CspAddtab() {
       <div className="container-fluid p-0">
         {/* Top Header */}
         <div className="text-left headings">
-          <span style={{paddingLeft:"20px",color:'#FFFFFF'}}>LOCATION</span>
+          <span style={{paddingLeft:"20px",color:'#FFFFFF'}}>USERS</span>
         </div>
 
         {/* Nav Tabs */}
@@ -56,10 +56,10 @@ function CspAddtab() {
               <ul className="nav nav-tabs ">
                 <li className="nav-item">
                 <Link to={`/csp/adduser`}><button
-                    className={`nav-link ${activeTab === '/csp/adduser' ? 'active' : ' onClick={() => setActiveTab("location")}'}`}
+                    className={`nav-link ${activeTab === '/csp/adduser' ? 'active' : ' onClick={() => setActiveTab("csp/cspadduser")}'}`}
                    
                   >
-                    Add Users
+                   ADD USERS
                   </button></Link>
                 </li>
                 <li className="nav-item">
@@ -67,7 +67,15 @@ function CspAddtab() {
                     className={`nav-link ${activeTab === '/csp/roleassign' ? 'active' : ' onClick={() => setActiveTab("regions")}'}`}
                   
                   >
-                    Role Assign
+                    ROLE ASSIGN
+                  </button></Link>
+                </li>
+                <li className="nav-item">
+                <Link to={`/csp/rolerights`}> <button
+                    className={`nav-link ${activeTab === '/csp/rolerights' ? 'active' : ' onClick={() => setActiveTab("csp/rolerights")}'}`}
+                  
+                  >
+                    ROLE RIGHTS
                   </button></Link>
                 </li>
               
