@@ -49,6 +49,9 @@ const  PostSaleWarrenty = () => {
 
     axios.post(`${Base_Url}/uploadpostwarrentyexcel` , data)
     .then((res) =>{
+      if(res.data){
+        alert("Uploaded")
+      }
       console.log(res)
     })
     .catch((err) =>{

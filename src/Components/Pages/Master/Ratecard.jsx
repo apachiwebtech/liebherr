@@ -11,7 +11,6 @@ import { useDispatch } from "react-redux";
 import { getRoleData } from "../../Store/Role/role-action";
 import * as XLSX from "xlsx";
 
-
 const Ratecard = () => {
   // Step 1: Add this state to track errors
   const { loaders, axiosInstance } = useAxiosLoader();
@@ -214,6 +213,9 @@ const Ratecard = () => {
 
     axios.post(`${Base_Url}/uplaodratecardexcel` , data)
     .then((res) =>{
+      if(res.data){
+        alert("Uploaded")
+      }
       console.log(res)
     })
     .catch((err) =>{

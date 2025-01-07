@@ -17,7 +17,8 @@ const JWT_SECRET = "Lh!_Login_123"; // Replace with a strong, secret key
 const API_KEY = "a8f2b3c4-d5e6-7f8g-h9i0-12345jklmn67";
 
 app.use(cors({ origin: "*" }));
-app.use(express.json());
+app.use(express.json({ limit: '100mb' }));
+app.use(express.urlencoded({ extended: true, limit: '100mb' }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
 

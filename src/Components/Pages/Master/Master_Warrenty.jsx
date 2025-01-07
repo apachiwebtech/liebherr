@@ -50,6 +50,9 @@ const  Master_Warrenty = () => {
   
     axios.post(`${Base_Url}/uploadmasterwarrantyexcel`, data)
       .then((res) => {
+        if(res.data){
+          alert("Uploaded")
+        }
         console.log(res);
       })
       .catch((err) => {

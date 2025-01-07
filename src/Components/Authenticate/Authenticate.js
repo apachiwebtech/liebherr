@@ -1,7 +1,8 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import { App_Url, Base_Url } from '../Utils/Base_Url';
+import { App_Url, Base_Url, secretKey } from '../Utils/Base_Url';
 import { useNavigate } from 'react-router-dom';
+import CryptoJS from 'crypto-js';
 
 const Authenticate = () => {
 
@@ -19,6 +20,13 @@ const Authenticate = () => {
 
     return JSON.parse(jsonPayload);
   }
+
+  const Encrypt = (id) => {
+    id = id.toString();
+    let encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
+    encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    return encrypted; // Return the encrypted value
+  };
 
 
   async function checkuser(params) {
@@ -45,25 +53,31 @@ const Authenticate = () => {
             navigate('/notauthenticate');
             return; // Stop further execution
           }
-      
 
-          
-          
-          
+
+          const role = res.data[0].role
+
+
+
+
           if (res.data[0].userrole == 'lhi_user') {
             localStorage.setItem('licare_code', res.data[0].usercode)
+            localStorage.setItem('Userrole', Encrypt(role))
             setLoading(false)
             window.location.pathname = '/dashboard'
           } else if (res.data[0].userrole == 'awt_franchisemaster') {
             localStorage.setItem('licare_code', res.data[0].usercode)
+            localStorage.setItem('Userrole', Encrypt(role))
             setLoading(false)
             window.location.pathname = '/msp/ticketlistmsp'
           } else if (res.data[0].userrole == 'awt_childfranchisemaster') {
             localStorage.setItem('licare_code', res.data[0].usercode)
+            localStorage.setItem('Userrole', Encrypt(role))
             setLoading(false)
             window.location.pathname = '/csp/ticketlist'
           } else if (res.data[0].userrole == 'awt_engineermaster') {
             localStorage.setItem('engineer_id', res.data[0].usercode)
+            localStorage.setItem('Userrole', Encrypt(role))
             setLoading(false)
             window.location.pathname = '/mobapp/dash'
           }
@@ -73,9 +87,9 @@ const Authenticate = () => {
           console.log(res)
         })
 
-    }else{
-      
-        navigate('/notauthenticate');
+    } else {
+
+      navigate('/notauthenticate');
     }
 
 

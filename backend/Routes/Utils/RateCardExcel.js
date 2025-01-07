@@ -36,7 +36,7 @@ app.post('/uplaodratecardexcel', async (req, res) => {
       pool.config.options.requestTimeout = 600000; 
   
       for (const item of excelData) {
-        await pool.request()
+        const result =  await pool.request()
           .input('call_type', sql.VarChar, item.call_type)
           .input('sub_call_type', sql.VarChar, item.sub_call_type)
           .input('warranty_type', sql.VarChar, item.warranty_type)
@@ -80,6 +80,8 @@ app.post('/uplaodratecardexcel', async (req, res) => {
 
             )
           `);
+
+          console.log(result,"$%%^^")
       }
   
       return res.json({ message: 'Data inserted successfully' });
