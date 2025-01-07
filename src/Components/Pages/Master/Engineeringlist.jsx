@@ -666,7 +666,8 @@ export function Engineeringlist(params) {
 
                     <th>Title</th>
                     <th>Mobile</th>
-                    <th>View</th>
+                    <th>Email</th>
+                    
                   </tr>
                 </thead>
                 <tbody>
@@ -682,6 +683,7 @@ export function Engineeringlist(params) {
 
                         <td style={rowStyle}>{item.title}</td>
                         <td style={rowStyle}>{item.mobile_no}</td>
+                        <td style={rowStyle}>{item.email}</td>
                         {/* <td style={rowStyle}>
                           <button
                             className='btn'
@@ -699,7 +701,7 @@ export function Engineeringlist(params) {
                             <FaPencilAlt />
                           </button>
                         </td> */}
-                        <td style={rowStyle}>
+                        {/* <td style={rowStyle}>
                           <button
                             className='btn'
                             disabled
@@ -718,7 +720,7 @@ export function Engineeringlist(params) {
                           >
                             <FaEye />
                           </button>
-                        </td>
+                        </td> */}
                       </tr>
                     );
                   })}

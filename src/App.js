@@ -71,7 +71,7 @@ import MasterFranchise from './Components/Pages/Master/MasterFranchise';
 import Engineer from './Components/Pages/Master/Engineer';
 import { Engineerlist } from './Components/Pages/Master/Engineerlist';
 import Complaintreporttabs from './Components/Pages/Reports/Complaintreporttabs';
-import { Complaintreport } from './Components/Pages/Reports/Complaintreport';
+import  Complaintreport  from './Components/Pages/Reports/Complaintreport';
 import Claimreporttabs from './Components/Pages/Reports/Claimreporttabs';
 import { Claimreport } from './Components/Pages/Reports/Claimreport';
 import { MSP_Login } from './Components/Authenticate/MSP_Login';
@@ -111,6 +111,7 @@ import Master_Warrenty from './Components/Pages/Master/Master_Warrenty';
 import PostSaleWarrenty from './Components/Pages/Master/PostSaleWarrenty';
 import Roleright from './Components/Pages/Master/Roleright';
 import Roleassign from './Components/Pages/Master/Roleassign';
+import { FeedBackreport } from './Components/Pages/Reports/Feedbackreport';
 
 
 const isAuthenticated = () => {
@@ -643,6 +644,10 @@ const Router = createBrowserRouter([
       {
         path: "claimreport",
         element: <Claimreport />
+      },
+      {
+        path: "Feedbackreportlist",
+        element: <FeedBackreport />
       },
       {
         path: "/datatable",

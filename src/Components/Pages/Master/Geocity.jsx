@@ -259,6 +259,10 @@ const Geocity = () => {
     }
   };
 
+  const indexOfLastUser = (currentPage + 1) * itemsPerPage;
+  const indexOfFirstUser = indexOfLastUser - itemsPerPage;
+  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+
    // Role Right 
   
   
@@ -512,37 +516,46 @@ const Geocity = () => {
                     </tbody>
                   </table>
 
-                <div className="d-flex justify-content-between">
-                  <span className="text-muted">
-                    Showing{" "}
-                    {Math.min(
-                      currentPage * itemsPerPage + 1,
-                      filteredUsers.length
-                    )}{" "}
-                    to{" "}
-                    {Math.min(
-                      (currentPage + 1) * itemsPerPage,
-                      filteredUsers.length
-                    )}{" "}
-                    of {filteredUsers.length} entries
-                  </span>
-                  <div className="pagination">
+                  <div
+                  className="d-flex justify-content-between"
+                  style={{ marginTop: "10px" }}
+                >
+                  <div>
+                    Showing {indexOfFirstUser + 1} to{" "}
+                    {Math.min(indexOfLastUser, filteredUsers.length)} of{" "}
+                    {filteredUsers.length} entries
+                  </div>
+
+                  <div className="pagination" style={{ marginLeft: "auto" }}>
+                    <button
+                      onClick={() => setCurrentPage(currentPage - 1)}
+                      disabled={currentPage === 0}
+                    >
+                      {"<"}
+                    </button>
                     {Array.from(
                       {
                         length: Math.ceil(filteredUsers.length / itemsPerPage),
                       },
-                      (_, i) => (
+                      (_, index) => (
                         <button
-                          key={i}
-                          className={`btn btn-sm ${
-                            i === currentPage ? "btn-primary" : "btn-light"
-                          }`}
-                          onClick={() => setCurrentPage(i)}
+                          key={index}
+                          onClick={() => setCurrentPage(index)}
+                          className={currentPage === index ? "active" : ""}
                         >
-                          {i + 1}
+                          {index + 1}
                         </button>
                       )
                     )}
+                    <button
+                      onClick={() => setCurrentPage(currentPage + 1)}
+                      disabled={
+                        currentPage ===
+                        Math.ceil(filteredUsers.length / itemsPerPage) - 1
+                      }
+                    >
+                      {">"}
+                    </button>
                   </div>
                 </div>
               </div>

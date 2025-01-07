@@ -6882,9 +6882,9 @@ app.get("/requestlhidata/:id", authenticateToken, async (req, res) => {
 // update for Lhiuser
 app.post("/putlhidata", authenticateToken, async (req, res) => {
   const {
-    Lhiuser, id, updated_by, mobile_no, Usercode, password, status, email, remarks,Roles,Designation,Reporting_to
+    Lhiuser, id, updated_by, mobile_no, Usercode, password, status, email, remarks, Roles, Designation, Reporting_to
   } = req.body;
-  
+
 
   try {
     const pool = await poolPromise;
@@ -9529,5 +9529,40 @@ app.post('/assign_role', async (req, res) => {
   } catch (err) {
     console.error("Database error:", err);
     return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
+
+// complete dump of ticket data 
+
+app.get("/getcomplainticketdump", authenticateToken, async (req, res) => {
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+    const result = await pool.request().query("Select TOP 100 id,ticket_no,ticket_date,customer_id,customer_name,customer_mobile,alt_mobile,customer_email,ModelNumber,serial_no, address, region, state, city, area, pincode, sevice_partner, msp, csp, sales_partner, assigned_to, engineer_code, engineer_id, ticket_type, call_type , sub_call_status, call_status, warranty_status, invoice_date, mode_of_contact, customer_class, call_priority, closed_date, created_date, created_by,deleted From complaint_ticket where deleted = 0");
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
+
+// feedback Report listing 
+
+app.get("/getfeedbacklist", authenticateToken, async (req, res) => {
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    // Directly use the query (no parameter binding)
+    const sql = "SELECT * FROM awt_service_contact_form Where Deleted = 0 ";
+
+    // Execute the query
+    const result = await pool.request().query(sql);
+
+    // Return the result as JSON
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred" });
   }
 });

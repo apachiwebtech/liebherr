@@ -265,6 +265,10 @@ const Area = () => {
       console.error("Error editing area:", error);
     }
   };
+  const indexOfLastUser = (currentPage + 1) * itemsPerPage;
+  const indexOfFirstUser = indexOfLastUser - itemsPerPage;
+  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+  
   // Role Right 
   
   
@@ -518,14 +522,48 @@ const Area = () => {
                     </tbody>
                   </table>
 
+                  <div
+                  className="d-flex justify-content-between"
+                  style={{ marginTop: "10px" }}
+                >
                   <div>
-                    Showing {currentPage * itemsPerPage + 1} to{" "}
-                    {Math.min(
-                      (currentPage + 1) * itemsPerPage,
-                      filteredAreas.length
-                    )}{" "}
-                    of {filteredAreas.length} entries
+                    Showing {indexOfFirstUser + 1} to{" "}
+                    {Math.min(indexOfLastUser, filteredUsers.length)} of{" "}
+                    {filteredUsers.length} entries
                   </div>
+
+                  <div className="pagination" style={{ marginLeft: "auto" }}>
+                    <button
+                      onClick={() => setCurrentPage(currentPage - 1)}
+                      disabled={currentPage === 0}
+                    >
+                      {"<"}
+                    </button>
+                    {Array.from(
+                      {
+                        length: Math.ceil(filteredUsers.length / itemsPerPage),
+                      },
+                      (_, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setCurrentPage(index)}
+                          className={currentPage === index ? "active" : ""}
+                        >
+                          {index + 1}
+                        </button>
+                      )
+                    )}
+                    <button
+                      onClick={() => setCurrentPage(currentPage + 1)}
+                      disabled={
+                        currentPage ===
+                        Math.ceil(filteredUsers.length / itemsPerPage) - 1
+                      }
+                    >
+                      {">"}
+                    </button>
+                  </div>
+                </div>
                 </div>
               </div>
             </div>

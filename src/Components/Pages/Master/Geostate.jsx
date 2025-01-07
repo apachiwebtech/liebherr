@@ -355,21 +355,47 @@ const Geostate = () => {
                   </tbody>
                 </table>
 
-                <div className="d-flex justify-content-between align-items-center">
-                  <span>
-                    Showing {currentUsers.length} of {filteredUsers.length} entries
-                  </span>
-                  <nav>
-                    <ul className="pagination">
-                      {Array.from({ length: Math.ceil(filteredUsers.length / itemsPerPage) }, (_, i) => (
-                        <li className={`page-item ${i === currentPage ? 'active' : ''}`} key={i}>
-                          <button className="page-link" onClick={() => setCurrentPage(i)}>
-                            {i + 1}
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  </nav>
+                <div
+                  className="d-flex justify-content-between"
+                  style={{ marginTop: "10px" }}
+                >
+                  <div>
+                    Showing {indexOfFirstUser + 1} to{" "}
+                    {Math.min(indexOfLastUser, filteredUsers.length)} of{" "}
+                    {filteredUsers.length} entries
+                  </div>
+
+                  <div className="pagination" style={{ marginLeft: "auto" }}>
+                    <button
+                      onClick={() => setCurrentPage(currentPage - 1)}
+                      disabled={currentPage === 0}
+                    >
+                      {"<"}
+                    </button>
+                    {Array.from(
+                      {
+                        length: Math.ceil(filteredUsers.length / itemsPerPage),
+                      },
+                      (_, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setCurrentPage(index)}
+                          className={currentPage === index ? "active" : ""}
+                        >
+                          {index + 1}
+                        </button>
+                      )
+                    )}
+                    <button
+                      onClick={() => setCurrentPage(currentPage + 1)}
+                      disabled={
+                        currentPage ===
+                        Math.ceil(filteredUsers.length / itemsPerPage) - 1
+                      }
+                    >
+                      {">"}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

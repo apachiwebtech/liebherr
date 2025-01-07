@@ -1,5 +1,5 @@
 import React from "react";
-import {  useNavigate } from "react-router-dom";
+import {  Router, useNavigate } from "react-router-dom";
 
 export function Claimreport(params) {
     
@@ -23,3 +23,5 @@ export function Claimreport(params) {
     </div>
     )
 }
+
+export default Router

@@ -1,20 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+
 
 import "bootstrap/dist/css/bootstrap.min.css";
-import {Complaintreport} from "./Complaintreport";
+import { Complaintreport } from "./Complaintreport";
+import { Link } from "react-router-dom";
 
 function Complaintreporttabs() {
   const [activeTab, setActiveTab] = useState("Complaintreport");
 
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case "Complaintreport":
-        return <Complaintreport />;
+  useEffect(() => {
 
-      default:
-        return <Complaintreport />;
-    }
-  };
+    setActiveTab(window.location.pathname);
+
+  }, [window.location.pathname]);
 
   return (
     <>
@@ -64,16 +62,14 @@ function Complaintreporttabs() {
                 }}
               >
                 <ul className="nav nav-tabs ">
-                  <li className="nav-item">
+                  <Link to={`/Complaintreport`}><li className="nav-item">
                     <button
-                      className={`nav-link ${
-                        activeTab === "Complaintreport" ? "active" : " onClick={() => setActiveTab('Complaintreport')}"
-                      }`}
-                     
+                      className={`nav-link ${activeTab === '/Complaintreport' ? 'active' : 'onClick={() => setActiveTab("Complaint")}'}`}
+
                     >
-                      COMPLAINT REPORT
+                      CUSTOMER
                     </button>
-                  </li>
+                  </li></Link>
                 </ul>
               </div>
             </div>
@@ -83,7 +79,6 @@ function Complaintreporttabs() {
               className="col-12 col-custom"
               style={{ paddingLeft: "12px", paddingRight: "12px" }}
             >
-              <div className="tab-content">{renderTabContent()}</div>
             </div>
           </div>
         </div>

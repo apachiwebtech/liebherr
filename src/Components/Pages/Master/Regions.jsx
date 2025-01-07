@@ -366,7 +366,11 @@ const Location = () => {
                   </tbody>
                 </table>
 
-                <div style={{ marginTop: "20px" }}>
+                <div
+                  className="d-flex justify-content-between"
+                  style={{ marginTop: "10px" }}
+                >
+                <div >
                   <span>
                     Showing {indexOfFirstUser + 1} to{" "}
                     {Math.min(indexOfLastUser, filteredUsers.length)} of{" "}
@@ -374,7 +378,7 @@ const Location = () => {
                   </span>
                 </div>
 
-                <div className="pagination">
+                <div className="pagination" style={{ marginLeft: "auto" }}>
                   <button
                     onClick={() =>
                       setCurrentPage((prev) => Math.max(prev - 1, 0))
@@ -411,6 +415,7 @@ const Location = () => {
                   >
                        &gt;
                   </button>
+                </div>
                 </div>
               </div>
             </div>
