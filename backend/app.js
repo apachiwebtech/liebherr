@@ -231,6 +231,7 @@ app.post("/csplogin", async (req, res) => {
           id: user.id,
           Lhiuser: user.email,
           licare_code: user.licare_code,
+          Role: user.Role,
         },
       });
     } else {
@@ -9688,6 +9689,8 @@ app.post('/csp_role_pages', async (req, res) => {
       const pageIdsResult = await pool.request().query(fetchPageIds);
       const pageIds = pageIdsResult.recordset;
 
+      console.log(pageIds.length,"$$")
+
       if (pageIds.length > 0) {
         const transaction = new sql.Transaction(pool);
         await transaction.begin();
@@ -9789,6 +9792,30 @@ app.post('/csp_assign_role', async (req, res) => {
   } catch (err) {
     console.error("Database error:", err);
     return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
+
+
+
+app.get("/getmspdata/:licare_code", authenticateToken, async (req, res) => {
+  const { licare_code } = req.params;
+
+  try {
+    // Access the connection pool using poolPromise
+    const pool = await poolPromise;
+
+    // Direct SQL query
+    const sql = `SELECT af.* FROM awt_childfranchisemaster as acf left join awt_franchisemaster as af on af.licarecode = acf.pfranchise_id   WHERE acf.licare_code = '${licare_code}' and acf.deleted = 0
+    `;
+
+    // Execute the query
+    const result = await pool.request().query(sql);
+
+    // Return only the recordset from the result
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Error fetching categories:", err); // Log the error for debugging
+    return res.status(500).json({ message: "Internal Server Error", error: err });
   }
 });
 
@@ -9942,3 +9969,5 @@ app.post("/deletecsprole", authenticateToken, async (req, res) => {
     return res.status(500).json({ message: "Error updating category" });
   }
 });
+
+

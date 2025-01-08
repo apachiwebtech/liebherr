@@ -117,7 +117,7 @@ const Loginheader = (params) => {
             </a>
             <ul className="dropdown-menu text-small" aria-labelledby="dropdownUser1">
               <li className="dropdown-item" role="button">
-                <Link className="dropdown-item" to="/msp/mspdata">MSP Data</Link></li>
+                <Link className="dropdown-item" to="/csp/mspdata">MSP Data</Link></li>
               <li className="dropdown-item" role="button">
                 <Link className="dropdown-item" to="/login" tabIndex="0" onClick={clearLocal}>Sign out</Link></li>
             </ul>

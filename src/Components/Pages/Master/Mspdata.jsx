@@ -9,7 +9,7 @@ const [data, setdata] = useState([])
 const token = localStorage.getItem("token"); // Get token from localStorage
 
   async function getdata() {
-    const licare_code = localStorage.getItem('userId');
+    const licare_code = localStorage.getItem('licare_code');
 
     axios.get(`${Base_Url}/getmspdata/${licare_code}`, {
       headers: {
@@ -20,7 +20,7 @@ const token = localStorage.getItem("token"); // Get token from localStorage
         console.log(res.data);
 
         if (res.data !== 0) {
-          setdata(res.data)
+          setdata(res.data[0])
           // console.log(res.data.i);
 
         }

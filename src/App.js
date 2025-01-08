@@ -71,7 +71,7 @@ import MasterFranchise from './Components/Pages/Master/MasterFranchise';
 import Engineer from './Components/Pages/Master/Engineer';
 import { Engineerlist } from './Components/Pages/Master/Engineerlist';
 import Complaintreporttabs from './Components/Pages/Reports/Complaintreporttabs';
-import  Complaintreport  from './Components/Pages/Reports/Complaintreport';
+import Complaintreport from './Components/Pages/Reports/Complaintreport';
 import Claimreporttabs from './Components/Pages/Reports/Claimreporttabs';
 import { Claimreport } from './Components/Pages/Reports/Claimreport';
 import { MSP_Login } from './Components/Authenticate/MSP_Login';
@@ -164,8 +164,8 @@ const Router = createBrowserRouter([
     element: <Nps />,
   },
   {
-    path:"/query",
-    element:<QueryPage/>
+    path: "/query",
+    element: <QueryPage />
   },
 
 
@@ -181,10 +181,6 @@ const Router = createBrowserRouter([
       {
         path: "/msp/csplist",
         element: <Csplisting />,
-      },
-      {
-        path: "/msp/mspdata",
-        element: <Mspdata />,
       },
       {
         path: "/msp/complaintviewmsp/:complaintid",
@@ -235,7 +231,10 @@ const Router = createBrowserRouter([
         path:"/csp/roleassign",
         element: <RoleassignCsp />,
       },
-
+      {
+        path: "/csp/mspdata",
+        element: <Mspdata />,
+      },
     ],
   },
   {
@@ -781,7 +780,7 @@ function App() {
   return (
     <>
       <Siteheader headerState={headerState} />
-      <Outlet  context={{ setHeaderState }}/>
+      <Outlet context={{ setHeaderState }} />
       <Sitefooter />
     </>
 

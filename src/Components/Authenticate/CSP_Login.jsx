@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Base_Url } from "../Utils/Base_Url";
+import { Base_Url, secretKey } from "../Utils/Base_Url";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import md5 from "js-md5";
@@ -7,14 +7,24 @@ import logo from '../../images/Liebherr-logo-768x432.png'
 import back from '../../images/login.jpeg'
 import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from "../Layout/UseAxiosLoader";
-
+import CryptoJS from 'crypto-js';
 
 export function CSP_Login() {
   const [Lhiuser, setLhiuser] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const { loaders, axiosInstance } = useAxiosLoader();
+
   // Login submit handler
+
+  const Encrypt = (id) => {
+    id = id.toString();
+    let encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
+    encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    return encrypted; // Return the encrypted value
+  };
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -27,7 +37,7 @@ export function CSP_Login() {
         password: hashpass,
       });
 
-      console.log(response ,"%%%")
+      const Userrole = response.data.user.Role
 
 
       if (response.data) {
@@ -35,6 +45,7 @@ export function CSP_Login() {
         localStorage.setItem("Lhiuser", response.data.user.Lhiuser);
         localStorage.setItem("licare_code", response.data.user.licare_code);
         localStorage.setItem("token", response.data.token);
+        localStorage.setItem("Userrole", Encrypt(Userrole));
         // Navigate to the home page
         navigate('/csp/ticketlist');
       } else {
