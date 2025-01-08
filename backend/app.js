@@ -1461,19 +1461,15 @@ app.get("/getpincodes", authenticateToken, async (req, res) => {
 
     // Direct SQL query without parameter binding
     const sql = `
-      SELECT p.*,
+       SELECT p.*,
              c.title as country_title,
-             r.title as region_title,
-             gs.title as geostate_title,
-             gc.title as geocity_title,
-             a.title as area_title
+             p.region_name as region_title,
+             p.geostate_name as geostate_title,
+             p.geocity_name as geocity_title,
+             p.area_name as area_title
       FROM awt_pincode p
       JOIN awt_country c ON p.country_id = c.id
-      JOIN awt_region r ON p.region_id = r.id
-      JOIN awt_geostate gs ON p.geostate_id = gs.id
-      JOIN awt_geocity gc ON p.geocity_id = gc.id
-      JOIN awt_district a ON p.area_id = a.id
-      WHERE p.deleted = 0 ORDER BY p.id DESC
+      WHERE p.deleted = 0 ORDER BY p.id DESC
     `;
 
     // Execute the query and get the results
@@ -3241,19 +3237,25 @@ app.get("/getcvengineer/:pincode/:msp/:csp", authenticateToken, async (req, res)
 
 
     // Direct SQL query without parameter binding
-    const sql = `SELECT em.id, em.title ,em.engineer_id
-   FROM pincode_allocation AS pa
-   LEFT JOIN awt_franchisemaster AS fm
-          ON fm.licarecode = pa.account_manager
-   LEFT JOIN awt_childfranchisemaster AS cfm
-          ON cfm.licare_code = pa.owner
-   LEFT JOIN awt_engineermaster AS em
-          ON em.cfranchise_id =
-             CASE
-               WHEN pa.account_manager = pa.owner THEN RIGHT(pa.account_manager, LEN(pa.account_manager) - 2)
-               ELSE  RIGHT(pa.owner, LEN(pa.owner) - 2)
-             END
-   WHERE  pa.pincode ='${pincode}' and pa.account_manager = '${msp}' and pa.owner ='${csp}'`;
+  //   const sql = `SELECT em.id, em.title ,em.engineer_id
+  //  FROM pincode_allocation AS pa
+  //  LEFT JOIN awt_franchisemaster AS fm
+  //         ON fm.licarecode = pa.account_manager
+  //  LEFT JOIN awt_childfranchisemaster AS cfm
+  //         ON cfm.licare_code = pa.owner
+  //  LEFT JOIN awt_engineermaster AS em
+  //         ON em.cfranchise_id =
+  //            CASE
+  //              WHEN pa.account_manager = pa.owner THEN RIGHT(pa.account_manager, LEN(pa.account_manager) - 2)
+  //              ELSE  RIGHT(pa.owner, LEN(pa.owner) - 2)
+  //            END
+  //  WHERE  pa.pincode ='${pincode}' and pa.account_manager = '${msp}' and pa.owner ='${csp}'`;
+
+  const newmasp = csp.replace(/^SP/, '').trim();
+
+
+
+  const sql = `select * from awt_engineermaster where cfranchise_id = '${newmasp}' and deleted = 0 `
     console.log(sql)
     // Execute the query
     const result = await pool.request().query(sql);
