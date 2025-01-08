@@ -91,6 +91,8 @@ export function Siteheader({ headerState }) {
                 <li>
                   <Link className="dropdown-item" to="/ratecard">Rate card Matrix</Link></li>
                 <li>
+                  <Link className="dropdown-item" to="/enquiry">Enquiry Master</Link></li>
+                <li>
                   <Link className="dropdown-item" to="/productspare">Product & Spare mapping master</Link></li>
               </ul>
             </li>

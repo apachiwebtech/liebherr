@@ -1,4 +1,5 @@
 import axios from "axios";
+import * as XLSX from "xlsx";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url,secretKey } from "../../Utils/Base_Url";
@@ -178,6 +179,27 @@ const Channelpartner = () => {
   const indexOfFirstUser = indexOfLastUser - itemsPerPage;
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
+  // export to excel 
+    const exportToExcel = () => {
+      // Create a new workbook
+      const workbook = XLSX.utils.book_new();
+  
+      // Convert data to a worksheet
+      const worksheet = XLSX.utils.json_to_sheet(filteredUsers.map(user => ({
+        "ChannelPartner": user.Channel_partner, // Add fields you want to export
+      })));
+  
+      // Append the worksheet to the workbook
+      XLSX.utils.book_append_sheet(workbook, worksheet, "ChannelPartner");
+  
+      // Export the workbook
+      XLSX.writeFile(workbook, "ChannelPartner.xlsx");
+    };
+  
+    // export to excel end 
+
+  
+
    // Role Right 
     
     
@@ -291,6 +313,12 @@ const Channelpartner = () => {
                     className="form-control d-inline-block"
                     style={{ width: "300px" }}
                   />
+                    <button
+                        className="btn btn-primary"
+                        onClick={exportToExcel}
+                      >
+                        Export to Excel
+                      </button>
                 </div>
 
                 {/* Adjust table padding and spacing */}

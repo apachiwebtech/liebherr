@@ -1,4 +1,5 @@
 import axios from 'axios';
+import * as XLSX from "xlsx";
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
@@ -148,32 +149,73 @@ export function Franchisemasterlist(params) {
   }, []);
 
   const navigate = useNavigate()
+
+  // export to excel 
+  const exportToExcel = () => {
+    // Create a new workbook
+    const workbook = XLSX.utils.book_new();
+
+    // Convert data to a worksheet
+    const worksheet = XLSX.utils.json_to_sheet(Franchisemasterdata.map(user => ({
+      
+      "Name": user.title,
+      "ContactPerson": user.contact_person,
+      "Email": user.email,
+      "MobileNumber": user.mobile_no,
+      "Address": user.address,
+      "State": user.state, 
+      "District": user.area,
+       "GeoCity": user.city,
+      "Website": user.website,
+      "GST No": user.gst_no,
+      "Pan Number": user.panno,
+      "Bank Name": user.bank_name,
+      "BankAccountNumber": user.bank_acc,
+      "IfscCode": user.bank_ifsc,
+      "WithLiebherr": user.with_liebherr,
+      "LastWorkingDate": user.last_working_date,
+      "ContractActivationdate": user.contract_acti,
+      "ContractExpirationDate": user.contract_expir,
+      "BankAddress": user.bank_address,
+      "LicareCode": user.licarecode,
+      "PartnerName": user.partner_name, // Add fields you want to export
+
+    })));
+
+    // Append the worksheet to the workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, "MasterFranchise");
+
+    // Export the workbook
+    XLSX.writeFile(workbook, "MasterFranchise.xlsx");
+  };
+
+  // export to excel end 
   // Role Right 
-    
-    
-     const Decrypt = (encrypted) => {
-      encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
-      const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
-      return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
-    };
-  
-    const storedEncryptedRole = localStorage.getItem("Userrole");
-    const decryptedRole = Decrypt(storedEncryptedRole);
-  
-    const roledata = {
-      role: decryptedRole,
-      pageid: String(20)
-    }
-  
-    const dispatch = useDispatch()
-    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
-  
-  
-    useEffect(() => {
-      dispatch(getRoleData(roledata))
-    }, [])
-  
-    // Role Right End 
+
+
+  const Decrypt = (encrypted) => {
+    encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+    const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+    return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+  };
+
+  const storedEncryptedRole = localStorage.getItem("Userrole");
+  const decryptedRole = Decrypt(storedEncryptedRole);
+
+  const roledata = {
+    role: decryptedRole,
+    pageid: String(20)
+  }
+
+  const dispatch = useDispatch()
+  const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+
+
+  useEffect(() => {
+    dispatch(getRoleData(roledata))
+  }, [])
+
+  // Role Right End 
 
   return (
     <div className="tab-content">
@@ -183,7 +225,8 @@ export function Franchisemasterlist(params) {
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
       )}
-   {roleaccess > 1 ?      <div className="row mp0" >
+
+      {roleaccess > 1 ? <div className="row mp0" >
         <div className="col-md-12 col-12">
           <div className="card mb-3 tab_box">
 
@@ -195,6 +238,12 @@ export function Franchisemasterlist(params) {
                 >
                   Add  Master Service Partner  </button>
               </div>
+              <button
+                className="btn btn-primary"
+                onClick={exportToExcel}
+              >
+                Export to Excel
+              </button>
               <table className="table">
                 <thead>
                   <tr>

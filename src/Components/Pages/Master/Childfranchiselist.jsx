@@ -1,4 +1,5 @@
 import axios from 'axios';
+import * as XLSX from "xlsx";
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
@@ -146,32 +147,73 @@ export function ChildFranchiselist(params) {
 
     const navigate = useNavigate()
 
+    // export to excel 
+    const exportToExcel = () => {
+        // Create a new workbook
+        const workbook = XLSX.utils.book_new();
+
+        // Convert data to a worksheet
+        const worksheet = XLSX.utils.json_to_sheet(Franchisemasterdata.map(user => ({
+
+            "Name": user.title,
+            "ContactPerson": user.contact_person,
+            "Email": user.email,
+            "MobileNumber": user.mobile_no,
+            "Address": user.address,
+            "Pincode": user.pincode_id,
+            "State": user.state,
+            "pFranchise_id":user.pfranchise_id,
+            "Website": user.website,
+            "GST No": user.gst_number,
+            "Pan Number": user.pan_number,
+            "Bank Name": user.bank_name,
+            "BankAccountNumber": user.bank_account_number,
+            "IfscCode": user.bank_ifsc_code,
+            "WithLiebherr": user.with_liebherr,
+            "LastWorkingDate": user.last_working_date,
+            "ContractActivationdate": user.contract_activation_date,
+            "ContractExpirationDate": user.contract_expiration_date,
+            "BankAddress": user.bank_address,
+            "LicareCode": user.licare_code ,
+            "PartnerName": user.partner_name, // Add fields you want to export
+
+        })));
+
+        // Append the worksheet to the workbook
+        XLSX.utils.book_append_sheet(workbook, worksheet, "ChildFranchise");
+
+        // Export the workbook
+        XLSX.writeFile(workbook, "ChildFranchise.xlsx");
+    };
+
+    // export to excel end 
+
     // Role Right 
-      
-      
-       const Decrypt = (encrypted) => {
+
+
+    const Decrypt = (encrypted) => {
         encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
         const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
         return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
-      };
-    
-      const storedEncryptedRole = localStorage.getItem("Userrole");
-      const decryptedRole = Decrypt(storedEncryptedRole);
-    
-      const roledata = {
+    };
+
+    const storedEncryptedRole = localStorage.getItem("Userrole");
+    const decryptedRole = Decrypt(storedEncryptedRole);
+
+    const roledata = {
         role: decryptedRole,
         pageid: String(21)
-      }
-    
-      const dispatch = useDispatch()
-      const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
-    
-    
-      useEffect(() => {
+    }
+
+    const dispatch = useDispatch()
+    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+
+
+    useEffect(() => {
         dispatch(getRoleData(roledata))
-      }, [])
-    
-      // Role Right End 
+    }, [])
+
+    // Role Right End 
 
     return (
         <div className="tab-content">
@@ -181,59 +223,66 @@ export function ChildFranchiselist(params) {
                     <SyncLoader loading={loaders} color="#FFFFFF" />
                 </div>
             )}
-           {roleaccess > 1 ?  <div className="row mp0" >
+            {roleaccess > 1 ? <div className="row mp0" >
                 <div className="col-md-12 col-12">
                     <div className="card mb-3 tab_box">
 
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
-                            
+
+                            <button
+                                className="btn btn-primary"
+                                onClick={exportToExcel}
+                            >
+                                Export to Excel
+                            </button>
+
                             <div className='table-responsive' >
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <th width="3%">#</th>
-                                        <th width="2%">Parent Franchise Name</th>
-                                        <th width="8%"> Name</th>
-                                        <th width="3%">Email</th>
-                                        <th width="3%">Mobile No</th>
-                                        <th width="8%">Licare Code</th>
-                                        <th width="8%">Partner Name</th>
-                                        <th width="8%">Country</th>
-                                        <th width="8%">Region</th>
-                                        <th width="8%">State</th>
-                                        <th width="5%">District</th>
-                                        <th width="5%">Edit</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th width="3%">#</th>
+                                            <th width="2%">Parent Franchise Name</th>
+                                            <th width="8%"> Name</th>
+                                            <th width="3%">Email</th>
+                                            <th width="3%">Mobile No</th>
+                                            <th width="8%">Licare Code</th>
+                                            <th width="8%">Partner Name</th>
+                                            <th width="8%">Country</th>
+                                            <th width="8%">Region</th>
+                                            <th width="8%">State</th>
+                                            <th width="5%">District</th>
+                                            <th width="5%">Edit</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
 
-                                    {Franchisemasterdata.map((item, index) => {
-                                        return (
-                                            <tr key={item.id}>
-                                                <td >{index + 1}</td>
-                                                <td >{item.parentfranchisetitle}</td>
-                                                <td >{item.title}</td>
-                                                <td width="5%" >{item.email}</td>
-                                                <td >{item.mobile_no}</td>
-                                                <td >{item.licare_code}</td>
-                                                <td >{item.partner_name}</td>
-                                                <td >{item.country_id}</td>
-                                                <td >{item.region_id}</td>
-                                                <td >{item.geostate_id}</td>
-                                                <td >{item.area_id}</td>
+                                        {Franchisemasterdata.map((item, index) => {
+                                            return (
+                                                <tr key={item.id}>
+                                                    <td >{index + 1}</td>
+                                                    <td >{item.parentfranchisetitle}</td>
+                                                    <td >{item.title}</td>
+                                                    <td width="5%" >{item.email}</td>
+                                                    <td >{item.mobile_no}</td>
+                                                    <td >{item.licare_code}</td>
+                                                    <td >{item.partner_name}</td>
+                                                    <td >{item.country_id}</td>
+                                                    <td >{item.region_id}</td>
+                                                    <td >{item.geostate_id}</td>
+                                                    <td >{item.area_id}</td>
 
-                                                <td >
-                                                    <button
-                                                        className='btn'
-                                                        onClick={() => sendtoedit(item.id)}
-                                                        title="Edit"
-                                                        disabled={roleaccess > 3 ? false : true}
-                                                        style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                                                    >
-                                                        <FaEye />
-                                                    </button>
-                                                </td>
-                                                {/* <td >
+                                                    <td >
+                                                        <button
+                                                            className='btn'
+                                                            onClick={() => sendtoedit(item.id)}
+                                                            title="Edit"
+                                                            disabled={roleaccess > 3 ? false : true}
+                                                            style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                                                        >
+                                                            <FaEye />
+                                                        </button>
+                                                    </td>
+                                                    {/* <td >
                                                     <button
                                                         className='btn'
                                                         onClick={() => {
@@ -245,13 +294,13 @@ export function ChildFranchiselist(params) {
                                                         <FaEye />
                                                     </button>
                                                 </td> */}
-                                            </tr>
-                                        )
-                                    })}
+                                                </tr>
+                                            )
+                                        })}
 
-                                </tbody>
-                            </table>
-                            </div>  
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -137,19 +137,24 @@ const Location = () => {
   };
 
   const deleted = async (id) => {
-    try {
-      const response = await axiosInstance.post(`${Base_Url}/deletedata`, { id },{
-        headers: {
-           Authorization: token, // Send token in headers
-         },
-       });
-      setFormData({
-        title: "",
-      });
-      fetchUsers();
-    } catch (error) {
-      console.error("Error deleting user:", error);
+   const confirm =  window.confirm("Are you sure you want to delete this user?");
+
+    if(confirm){
+      try {
+        const response = await axiosInstance.post(`${Base_Url}/deletedata`, { id },{
+          headers: {
+             Authorization: token, // Send token in headers
+           },
+         });
+        setFormData({
+          title: "",
+        });
+        fetchUsers();
+      } catch (error) {
+        console.error("Error deleting user:", error);
+      }
     }
+
   };
 
   const edit = async (id) => {

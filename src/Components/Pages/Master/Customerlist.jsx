@@ -1,4 +1,5 @@
 import axios from 'axios';
+import * as XLSX from "xlsx";
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
@@ -212,6 +213,31 @@ export function Customerlist(params) {
 
     const navigate = useNavigate()
 
+     // export to excel 
+      const exportToExcel = () => {
+        // Create a new workbook
+        const workbook = XLSX.utils.book_new();
+    
+        // Convert data to a worksheet
+        const worksheet = XLSX.utils.json_to_sheet(filteredData.map(user => ({
+          "Salutation": user.salutation,
+          "CustomerName":user.customer_fname,
+          "customerID":user.customer_id,
+          "CustomerType":user.customer_type,
+          "CustomerClassification": user.customer_classification,
+          "MobileNumber": user.mobileno,
+          "Email": user.email, // Add fields you want to export
+        })));
+    
+        // Append the worksheet to the workbook
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Customer");
+    
+        // Export the workbook
+        XLSX.writeFile(workbook, "Customer.xlsx");
+      };
+    
+      // export to excel end 
+
     // Role Right 
 
 
@@ -258,6 +284,12 @@ export function Customerlist(params) {
                             {/* <div className='p-1 text-right'>
                                 <Link to={`/Customer`}><button className='btn btn-primary'>Add Customer</button></Link>
                             </div> */}
+                             <button
+                        className="btn btn-primary"
+                        onClick={exportToExcel}
+                      >
+                        Export to Excel
+                      </button>
                             <div className="row mb-3">
 
                                 <div className="col-md-2">

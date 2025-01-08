@@ -1,4 +1,5 @@
 import axios from "axios";
+import * as XLSX from "xlsx";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url,secretKey } from "../../Utils/Base_Url";
@@ -176,6 +177,25 @@ const Serviceagent = () => {
   const indexOfFirstUser = indexOfLastUser - itemsPerPage;
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
+    // export to excel 
+    const exportToExcel = () => {
+      // Create a new workbook
+      const workbook = XLSX.utils.book_new();
+  
+      // Convert data to a worksheet
+      const worksheet = XLSX.utils.json_to_sheet(filteredUsers.map(user => ({
+        "ServiceAgent": user.serviceagent, // Add fields you want to export
+      })));
+  
+      // Append the worksheet to the workbook
+      XLSX.utils.book_append_sheet(workbook, worksheet, "ServiceAgent");
+  
+      // Export the workbook
+      XLSX.writeFile(workbook, "ServiceAgent.xlsx");
+    };
+  
+    // export to excel end 
+
    // Role Right 
     
     
@@ -285,6 +305,12 @@ const Serviceagent = () => {
                       className="form-control d-inline-block"
                       style={{ width: "300px" }}
                     />
+                     <button
+                        className="btn btn-primary"
+                        onClick={exportToExcel}
+                      >
+                        Export to Excel
+                      </button>
                   </div>
 
                   {/* Adjust table padding and spacing */}
