@@ -1,7 +1,8 @@
 import axios from 'axios';
+import * as XLSX from "xlsx";
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
-import { FaPencilAlt, FaTrash,FaEye } from 'react-icons/fa';
+import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
 import { Base_Url, secretKey } from '../../Utils/Base_Url';
 import CryptoJS from 'crypto-js';
 import { useSelector } from 'react-redux';
@@ -112,67 +113,97 @@ export function FeedBackreport(params) {
             };
         }
     }, [Feedbackdata]);
-      const navigate = useNavigate();
+    const navigate = useNavigate();
 
-       // Role Right 
-            
-            
-             const Decrypt = (encrypted) => {
-              encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
-              const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
-              return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
-            };
-          
-            const storedEncryptedRole = localStorage.getItem("Userrole");
-            const decryptedRole = Decrypt(storedEncryptedRole);
-          
-            const roledata = {
-              role: decryptedRole,
-              pageid: String(1)
-            }
-          
-            const dispatch = useDispatch()
-            const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
-          
-          
-            useEffect(() => {
-              dispatch(getRoleData(roledata))
-            }, [])
-          
-            // Role Right End
+    // export to excel 
+    const exportToExcel = () => {
+        // Create a new workbook
+        const workbook = XLSX.utils.book_new();
+
+        // Convert data to a worksheet
+        const worksheet = XLSX.utils.json_to_sheet(Feedbackdata.map(user => ({
+            "Customer ID": user.customer_id,
+            "Ticket Number": user.ticket_no,
+            "Email": user.email,
+            "Rating 1": user.rating1,
+            "Rating 2": user.rating2,
+            "Remarks": user.remark, // Add fields you want to export
+        })));
+
+        // Append the worksheet to the workbook
+        XLSX.utils.book_append_sheet(workbook, worksheet, "FeedBack Report");
+
+        // Export the workbook
+        XLSX.writeFile(workbook, "FeedBack_Report.xlsx");
+    };
+
+    // export to excel end 
+
+    // Role Right 
+
+
+    const Decrypt = (encrypted) => {
+        encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+        const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+        return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+    };
+
+    const storedEncryptedRole = localStorage.getItem("Userrole");
+    const decryptedRole = Decrypt(storedEncryptedRole);
+
+    const roledata = {
+        role: decryptedRole,
+        pageid: String(1)
+    }
+
+    const dispatch = useDispatch()
+    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+
+
+    useEffect(() => {
+        dispatch(getRoleData(roledata))
+    }, [])
+
+    // Role Right End
 
     return (
         <div className="tab-content">
-        {roleaccess > 1 ?   <div className="row mp0">
-                       <div className="col-md-12 col-12">
-                           <div className="card mb-3 tab_box">
-                               <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
-                                   <div className='table-responsive'>
-                                       <table id="example" className="table table-striped">
-                                           <thead>
-                                               <tr>
-                                                   <th width="3%">#</th>
-                                                   <th width="10%">Customer Id</th>
-                                                   <th width="10%">Ticket Number</th>
-                                                   <th width="10%">Email</th>
-                                                   <th width="10%">Rating 1</th>
-                                                   <th width="10%">Rating 2</th>
-                                                   <th width="10%">Remark</th>
-                                                  
-       
-                                               </tr>
-                                           </thead>
-                                           <tbody>
-                                               {Feedbackdata.map((item, index) => (
-                                                   <tr key={item.id}>
-                                                       <td>{index + 1}</td>
-                                                       <td>{item.customer_id}</td>
-                                                       <td>{item.ticket_no}</td>
-                                                       <td>{item.email}</td>
-                                                       <td>{item.rating1}</td>
-                                                       <td>{item.remark}</td>
-                                                       <td>{item.rating2}</td>
-{/*                                                 
+            {roleaccess > 1 ? <div className="row mp0">
+                <div className="col-md-12 col-12">
+                    <div className="card mb-3 tab_box">
+                        <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
+                            <div className='table-responsive'>
+                                <button
+                                    className="btn btn-primary"
+                                    onClick={exportToExcel}
+                                >
+                                    Export to Excel
+                                </button>
+                                <table id="example" className="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th width="3%">#</th>
+                                            <th width="10%">Customer Id</th>
+                                            <th width="10%">Ticket Number</th>
+                                            <th width="10%">Email</th>
+                                            <th width="10%">Rating 1</th>
+                                            <th width="10%">Rating 2</th>
+                                            <th width="10%">Remark</th>
+
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {Feedbackdata.map((item, index) => (
+                                            <tr key={item.id}>
+                                                <td>{index + 1}</td>
+                                                <td>{item.customer_id}</td>
+                                                <td>{item.ticket_no}</td>
+                                                <td>{item.email}</td>
+                                                <td>{item.rating1}</td>
+                                                <td>{item.remark}</td>
+                                                <td>{item.rating2}</td>
+                                                {/*                                                 
                                                        <td>
        
                                                            <button
@@ -186,16 +217,16 @@ export function FeedBackreport(params) {
                                                            </button>
        
                                                        </td> */}
-                                                   </tr>
-                                               ))}
-                                           </tbody>
-                                       </table>
-                                   </div>
-       
-                               </div>
-                           </div>
-                       </div>
-                   </div> : null}
-          </div>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div> : null}
+        </div>
     )
 }
