@@ -1,5 +1,6 @@
 import CryptoJS from 'crypto-js';
 import axios from "axios";
+import * as XLSX from "xlsx";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash, FaEye } from "react-icons/fa";
 import { Base_Url,secretKey } from "../../Utils/Base_Url";
@@ -295,6 +296,34 @@ const Lhiuser = () => {
   const indexOfLastUser = (currentPage + 1) * itemsPerPage;
   const indexOfFirstUser = indexOfLastUser - itemsPerPage;
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+
+  // export to excel 
+    const exportToExcel = () => {
+      // Create a new workbook
+      const workbook = XLSX.utils.book_new();
+  
+      // Convert data to a worksheet
+      const worksheet = XLSX.utils.json_to_sheet(currentUsers.map(user => ({
+        "Name": user.Lhiuser,
+        "UserCode": user.Usercode, // Add fields you want to export
+        "MobileNumber": user.mobile_no,
+        "Email": user.email,
+        "Remarks": user.remarks,
+        "Designation ": user.designation,
+        "Roles": user.Role,
+        "ReportingTo": user.Reporting_to,
+        "Activation Date": user.activation_date,
+        "DeActivationDate": user.deactivation_date,
+      })));
+  
+      // Append the worksheet to the workbook
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Lhi Users");
+  
+      // Export the workbook
+      XLSX.writeFile(workbook, "LHIUSERS.xlsx");
+    };
+  
+    // export to excel end 
   
   // Role Right 
     
@@ -621,6 +650,12 @@ const Lhiuser = () => {
                       className="form-control d-inline-block"
                       style={{ width: "300px" }}
                     />
+                     <button
+                        className="btn btn-primary"
+                        onClick={exportToExcel}
+                      >
+                        Export to Excel
+                      </button>
                   </div>
 
                   {/* Adjust table padding and spacing */}

@@ -302,74 +302,85 @@ export function Complaintlist(params) {
   };
 
   // export to excel 
-  const exportToExcel = () => {
-    // Create a new workbook
-    const workbook = XLSX.utils.book_new();
+  const exportToExcel = async () => {
+    try {
+        // Fetch all ticket data without pagination
+        const response = await axiosInstance.get(`${Base_Url}/getcomplainlist`, {
+            headers: {
+                Authorization: token,
+            },
+            params: {
+                pageSize: totalCount, // Fetch all data
+                page: 1, // Start from the first page
+            },
+        });
 
-    // Convert data to a worksheet
-    const worksheet = XLSX.utils.json_to_sheet(filteredData.map(user => ({
+        const allTicketData = response.data.data;
 
-      "TicketNo": user.ticket_no,
-      "TicketDate": user.ticket_date,
-      "CustomerId": user.customer_id,
-      "Salutation": user.salutation,
-      "CustomerName": user.customer_name,
-      "CustomerMobile": user.customer_mobile,
-      "CustomerEmail": user.customer_email,
-      "ModelNumber": user.ModelNumber,
-      "SerialNo": user.serial_no,
-      "Address": user.address,
-      "Region": user.region,
-      "State": user.state,
-      "City": user.city,
-      "District": user.area,
-      "Pincode": user.pincode,
-      "ServicePartner": user.service_partner,
-      "msp": user.msp,
-      "csp": user.csp,
-      "SalesPartner": user.sales_partner,
-      "AssignedTo": user.assigned_to,
-      "OldEngineer": user.old_engineer,
-      "EngineerCode": user.engineer_code,
-      "EngineerId": user.engineer_id,
-      "TicketType": user.ticket_type,
-      "CallType": user.call_type,
-      "SubCallStatus": user.sub_call_status,
-      "CallStatus": user.call_status,
-      "WarrantyStatus": user.warranty_status,
-      "InvoiceDate": user.invoice_date,
-      "MOdeofContact": user.mode_of_contact,
-      "CallCharges": user.call_charges,
-      "ContactPerson": user.contact_person,
-      "PurchaseDate": user.purchase_date,
-      "CustomerClass": user.customer_class,
-      "CallPriority": user.call_priority,
-      "SpareDocPath": user.spare_doc_path,
-      "CallRemark": user.call_remark,
-      "SpareDetails": user.spare_detail,
-      "GroupCode": user.group_code,
-      "DefectType": user.defect_type,
-      "SiteDefect": user.site_defect,
-      "SparePartID": user.spare_part_id,
-      "TOTP": user.totp,
-      "RequestedBY": user.requested_by,
-      "RequestedEmail": user.requested_email,
-      "RequestedMobile": user.requested_mobile,
-      "SalesPartner2": user.sales_partner2,
+        // Create a new workbook
+        const workbook = XLSX.utils.book_new();
 
-      
+        // Convert data to a worksheet
+        const worksheet = XLSX.utils.json_to_sheet(allTicketData.map(user => ({
+            "TicketNo": user.ticket_no,
+            "TicketDate": user.ticket_date,
+            "CustomerId": user.customer_id,
+            "Salutation": user.salutation,
+            "CustomerName": user.customer_name,
+            "CustomerMobile": user.customer_mobile,
+            "CustomerEmail": user.customer_email,
+            "ModelNumber": user.ModelNumber,
+            "SerialNo": user.serial_no,
+            "Address": user.address,
+            "Region": user.region,
+            "State": user.state,
+            "City": user.city,
+            "District": user.area,
+            "Pincode": user.pincode,
+            "ServicePartner": user.service_partner,
+            "msp": user.msp,
+            "csp": user.csp,
+            "SalesPartner": user.sales_partner,
+            "AssignedTo": user.assigned_to,
+            "OldEngineer": user.old_engineer,
+            "EngineerCode": user.engineer_code,
+            "EngineerId": user.engineer_id,
+            "TicketType": user.ticket_type,
+            "CallType": user.call_type,
+            "SubCallStatus": user.sub_call_status,
+            "CallStatus": user.call_status,
+            "WarrantyStatus": user.warranty_status,
+            "InvoiceDate": user.invoice_date,
+            "ModeofContact": user.mode_of_contact,
+            "CallCharges": user.call_charges,
+            "ContactPerson": user.contact_person,
+            "PurchaseDate": user.purchase_date,
+            "CustomerClass": user.customer_class,
+            "CallPriority": user.call_priority,
+            "SpareDocPath": user.spare_doc_path,
+            "CallRemark": user.call_remark,
+            "SpareDetails": user.spare_detail,
+            "GroupCode": user.group_code,
+            "DefectType": user.defect_type,
+            "SiteDefect": user.site_defect,
+            "SparePartID": user.spare_part_id,
+            "TOTP": user.totp,
+            "RequestedBY": user.requested_by,
+            "RequestedEmail": user.requested_email,
+            "RequestedMobile": user.requested_mobile,
+            "SalesPartner2": user.sales_partner2,
+        })));
 
+        // Append the worksheet to the workbook
+        XLSX.utils.book_append_sheet(workbook, worksheet, "TicketList");
 
+        // Export the workbook
+        XLSX.writeFile(workbook, "TicketList.xlsx");
+    } catch (error) {
+        console.error("Error exporting data to Excel:", error);
+    }
+};
 
-
-    })))
-
-    // Append the worksheet to the workbook
-    XLSX.utils.book_append_sheet(workbook, worksheet, "TicektList");
-
-    // Export the workbook
-    XLSX.writeFile(workbook, "TicketList.xlsx");
-  };
 
   // export to excel end
 

@@ -213,30 +213,48 @@ export function Customerlist(params) {
 
     const navigate = useNavigate()
 
-     // export to excel 
-      const exportToExcel = () => {
-        // Create a new workbook
-        const workbook = XLSX.utils.book_new();
-    
-        // Convert data to a worksheet
-        const worksheet = XLSX.utils.json_to_sheet(filteredData.map(user => ({
-          "Salutation": user.salutation,
-          "CustomerName":user.customer_fname,
-          "customerID":user.customer_id,
-          "CustomerType":user.customer_type,
-          "CustomerClassification": user.customer_classification,
-          "MobileNumber": user.mobileno,
-          "Email": user.email, // Add fields you want to export
-        })));
-    
-        // Append the worksheet to the workbook
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Customer");
-    
-        // Export the workbook
-        XLSX.writeFile(workbook, "Customer.xlsx");
-      };
-    
-      // export to excel end 
+    // export to excel 
+    const exportToExcel = async () => {
+        try {
+            // Fetch all customer data without pagination
+            const response = await axiosInstance.get(`${Base_Url}/getcustomerlist`, {
+                headers: {
+                    Authorization: token,
+                },
+                params: {
+                    pageSize: totalCount, // Fetch all data
+                    page: 1, // Start from the first page
+                },
+            });
+
+            const allCustomerData = response.data.data;
+
+            // Create a new workbook
+            const workbook = XLSX.utils.book_new();
+
+            // Convert data to a worksheet
+            const worksheet = XLSX.utils.json_to_sheet(allCustomerData.map(user => ({
+                "Salutation": user.salutation,
+                "CustomerName": user.customer_fname,
+                "customerID": user.customer_id,
+                "CustomerType": user.customer_type,
+                "CustomerClassification": user.customer_classification,
+                "MobileNumber": user.mobileno,
+                "Email": user.email, // Add fields you want to export
+            })));
+
+            // Append the worksheet to the workbook
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Customer");
+
+            // Export the workbook
+            XLSX.writeFile(workbook, "Customer.xlsx");
+        } catch (error) {
+            console.error("Error exporting data to Excel:", error);
+        }
+    };
+
+
+    // export to excel end 
 
     // Role Right 
 
@@ -284,12 +302,12 @@ export function Customerlist(params) {
                             {/* <div className='p-1 text-right'>
                                 <Link to={`/Customer`}><button className='btn btn-primary'>Add Customer</button></Link>
                             </div> */}
-                             <button
-                        className="btn btn-primary"
-                        onClick={exportToExcel}
-                      >
-                        Export to Excel
-                      </button>
+                            <button
+                                className="btn btn-primary"
+                                onClick={exportToExcel}
+                            >
+                                Export to Excel
+                            </button>
                             <div className="row mb-3">
 
                                 <div className="col-md-2">
@@ -361,12 +379,15 @@ export function Customerlist(params) {
                                     <div className="form-group">
                                         <label>Customer Mobile</label>
                                         <input
-                                            type="text"
+                                            type="tel"
                                             className="form-control"
                                             name="mobileno"
                                             value={searchFilters.mobileno}
                                             placeholder="Search by customer mobile"
                                             onChange={handleFilterChange}
+                                            pattern="[0-9]{10}"
+                                            maxLength="10"
+                                            minLength="10"
                                         />
                                     </div>
                                 </div>

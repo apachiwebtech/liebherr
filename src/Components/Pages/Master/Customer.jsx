@@ -454,7 +454,7 @@ const Customer = () => {
                       <div className="col-md-3 mb-3">
                         <label htmlFor="mobilenumber" className="form-label">Mobile No.<span className="text-danger">*</span> <input type="checkbox" />Whatsapp </label>
                         <input
-                          type="text"
+                          type="tel"
                           className="form-control"
                           id="mobilenumber"
                           aria-describedby="mobilenumber"
@@ -462,6 +462,9 @@ const Customer = () => {
                           placeholder='Enter Mobile Number'
                           value={formData.mobileno}
                           onChange={handleChange}
+                          pattern="[0-9]{10}"
+                           maxLength="10"
+                           minLength="10"
                         />
                         {errors.mobileno && (
                           <small className="text-danger">{errors.mobileno}</small>
@@ -470,7 +473,7 @@ const Customer = () => {
                       <div className="col-md-3 mb-3">
                         <label htmlFor="Altnumber" className="form-label">Alternate Mobile No.  <input type="checkbox" />Whatsapp</label>
                         <input
-                          type="text"
+                          type="tel"
                           className="form-control"
                           id="Altnumber"
                           aria-describedby="Altnumber"
@@ -478,6 +481,9 @@ const Customer = () => {
                           placeholder='Enter Alternate Mobile No.'
                           value={formData.alt_mobileno}
                           onChange={handleChange}
+                          pattern="[0-9]{10}"
+                           maxLength="10"
+                           minLength="10"
                         />
                         {errors.alt_mobileno && (
                           <small className="text-danger">{errors.alt_mobileno}</small>

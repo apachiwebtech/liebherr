@@ -151,6 +151,14 @@ export function Enquirylist(params) {
                 <div className="col-md-12 col-12">
                     <div className="card mb-3 tab_box">
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
+                        <div className="p-1 text-right">
+                                <button
+                                    className="btn btn-primary"
+                                    onClick={() => navigate("/addenquiry")}
+                                >
+                                    Add Service Contract Registration
+                                </button>
+                            </div>
                             <div className='table-responsive'>
                                 <table id="example" className="table table-striped">
                                     <thead>
