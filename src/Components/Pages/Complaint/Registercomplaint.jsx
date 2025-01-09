@@ -174,46 +174,40 @@ export function Registercomplaint(params) {
 
 
   const getDateAfterOneYear = (value) => {
-
-
     try {
       // Ensure value is in a recognized format
       const purchase_date = new Date(value);
-
+  
       if (isNaN(purchase_date)) {
         throw new Error("Invalid date format");
       }
-
+  
       // Add one year to the date
       purchase_date.setFullYear(purchase_date.getFullYear() + 1);
-
+  
       // Format the date as YYYY-MM-DD
-      // const lastDate = purchase_date;
       const lastDate = purchase_date.toISOString().split('T')[0];
-
-
-
-
-
-      if (lastDate < currentDate) {
-        setWarranty_status_data("OUT OF WARRANTY")
-
-
-        setpurchase_data(value)
-
+  
+      // Get current date and subtract one day
+      const currentDate = new Date();
+      currentDate.setDate(currentDate.getDate() + 1);
+      const currentDateMinusOneDay = currentDate.toISOString().split('T')[0];
+  
+      // Compare lastDate and currentDateMinusOneDay
+      if (lastDate < currentDateMinusOneDay) {
+        setWarranty_status_data("OUT OF WARRANTY");
+        setpurchase_data(value);
       } else {
-        setpurchase_data(value)
-
-        setWarranty_status_data("WARRANTY")
-
+        setpurchase_data(value);
+        setWarranty_status_data("WARRANTY");
       }
-
-
+  
     } catch (error) {
       console.error("Error processing date:", error.message);
       return null; // Return null for invalid dates
     }
   };
+  
 
 
 

@@ -80,15 +80,30 @@ const Roleassign = () => {
 
     const handlesubmit = (e) => {
         e.preventDefault()
-
-
-        axiosInstance.post(`${Base_Url}/assign_role`, rolePages)
+    
+        // Convert all values in rolePages to strings
+        const updatedRolePages = rolePages.map(item => {
+            return {
+                ...item,
+                id: item.id.toString(),
+                roleid: item.roleid.toString(),
+                pageid: item.pageid.toString(),
+                accessid: item.accessid.toString(),
+                deleted : item.deleted.toString()
+                // You can add other properties you want to ensure are strings
+            };
+        });
+    
+        axiosInstance.post(`${Base_Url}/assign_role`, updatedRolePages)
             .then((res) => {
                 if (res.data) {
                     notify()
                 }
             })
     }
+    
+
+
     const Decrypt = (encrypted) => {
         encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
         const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);

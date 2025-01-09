@@ -1529,7 +1529,7 @@ app.get("/requestpincode/:id", authenticateToken, async (req, res) => {
 
 // Insert new pincode with duplicate check (considering country_id)
 app.post("/postpincode", authenticateToken, async (req, res) => {
-  const { pincode, country_id, region_id, geostate_id, geocity_id, area_id } = req.body;
+  const { pincode, country_id, region_id_title, geostate_id_title, geocity_id_title, area_id_title } = req.body;
 
   try {
     // Access the connection pool using poolPromise
@@ -1539,7 +1539,7 @@ app.post("/postpincode", authenticateToken, async (req, res) => {
     const checkDuplicateSql = `
       SELECT * FROM awt_pincode
       WHERE pincode = ${pincode}
-      AND country_id = ${country_id}
+      AND country_id = '${country_id}'
       AND deleted = 0
     `;
     const duplicateResult = await pool.request().query(checkDuplicateSql);
@@ -1552,7 +1552,7 @@ app.post("/postpincode", authenticateToken, async (req, res) => {
       // If no duplicate, insert the new pincode
       const insertSql = `
         INSERT INTO awt_pincode (pincode, country_id, region_name, geostate_name, geocity_name, area_name)
-        VALUES (${pincode}, ${country_id}, ${region_id}, ${geostate_id}, ${geocity_id}, ${area_id})
+        VALUES (${pincode}, ${country_id}, '${region_id_title}', '${geostate_id_title}', '${geocity_id_title}','${area_id_title}')
       `;
       const insertResult = await pool.request().query(insertSql);
 

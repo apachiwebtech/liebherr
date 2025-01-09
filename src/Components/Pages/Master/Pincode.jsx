@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 import axios from "axios";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
-import { Base_Url,secretKey } from "../../Utils/Base_Url";
+import { Base_Url, secretKey } from "../../Utils/Base_Url";
 import LocationTabs from "./LocationTabs";
 import { useSelector } from 'react-redux';
 import { SyncLoader } from 'react-spinners';
@@ -130,11 +130,11 @@ const Pincode = () => {
   const fetchPincodes = async () => {
     try {
       const response = await axiosInstance.get(`${Base_Url}/getpincodes`,
-         {
-        headers: {
-          Authorization: token, // Send token in headers
-        },
-      });
+        {
+          headers: {
+            Authorization: token, // Send token in headers
+          },
+        });
 
       setPincodes(response.data);
       setFilteredPincodes(response.data);
@@ -148,7 +148,6 @@ const Pincode = () => {
 
 
   const handleSubmit = async (e) => {
-
     e.preventDefault();
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
@@ -167,11 +166,11 @@ const Pincode = () => {
           ? `${Base_Url}/putpincode`
           : `${Base_Url}/postpincode`;
         const method = isEdit ? axiosInstance.post : axiosInstance.post;
-        await method(url, formData,{
+        await method(url, formData, {
           headers: {
-             Authorization: token, // Send token in headers
-           },
-         });
+            Authorization: token, // Send token in headers
+          },
+        });
         setFormData({
           title: "",
           pincode: "",
@@ -190,24 +189,9 @@ const Pincode = () => {
         console.error("Error during form submission:", error);
       }
     }
-
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    if (name === "pincode") {
-      const numericValue = value.replace(/[^0-9]/g, "");
-      if (numericValue.length <= 6) {
-        setFormData((prev) => ({ ...prev, [name]: numericValue }));
-      }
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-      if (name === "country_id") fetchRegions(value);
-      if (name === "region_id") fetchGeoStates(value);
-      if (name === "geostate_id") fetchAreas(value);
-      if (name === "area_id") fetchGeoCities(value);
-    }
-  };
+
 
   const handleSearch = (e) => {
     const searchValue = e.target.value.toLowerCase();
@@ -222,44 +206,34 @@ const Pincode = () => {
     );
   };
 
-const validateForm = () => {
-  const newErrors = {};
-  const requiredFields = [
-    "pincode",
-    "country_id",
-    "region_id",
-    "geostate_id",
-    "geocity_id",
-    "area_id",
-  ];
-
-  requiredFields.forEach((field) => {
-    if (!formData[field]) {
-      newErrors[field] = `${field.replace("_id", "").charAt(0).toUpperCase() +
-        field.replace("_id", "").slice(1)
-      } is required.`;
-    }
-  });
-
-  // Add specific validation for pincode
-  if (formData.pincode) {
-    if (!/^\d{6}$/.test(formData.pincode)) {
-      newErrors.pincode = "Pincode must be exactly 6 digits and contain only numbers.";
-    }
-  }
-
-  return newErrors;
-};
-
+  const validateForm = () => {
+    const newErrors = {};
+    const requiredFields = [
+      "pincode",
+      "country_id",
+      "region_id",
+      "geostate_id",
+      "geocity_id",
+      "area_id",
+    ];
+    requiredFields.forEach((field) => {
+      if (!formData[field]) {
+        newErrors[field] = `${field.replace("_id", "").charAt(0).toUpperCase() +
+          field.replace("_id", "").slice(1)
+          } is required.`;
+      }
+    });
+    return newErrors;
+  };
 
   const deleted = async (id) => {
     try {
       if (window.confirm("Are you sure you want to delete this pincode?")) {
-        await axiosInstance.post(`${Base_Url}/deletepincode`, { id },{
+        await axiosInstance.post(`${Base_Url}/deletepincode`, { id }, {
           headers: {
-             Authorization: token, // Send token in headers
-           },
-         });
+            Authorization: token, // Send token in headers
+          },
+        });
         setFormData({
           title: "",
           pincode: "",
@@ -278,11 +252,11 @@ const validateForm = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axiosInstance.get(`${Base_Url}/requestpincode/${id}`,{
+      const response = await axiosInstance.get(`${Base_Url}/requestpincode/${id}`, {
         headers: {
-           Authorization: token, // Send token in headers
-         },
-       });
+          Authorization: token, // Send token in headers
+        },
+      });
       setFormData(response.data);
       fetchRegions(response.data.country_id);
       fetchGeoStates(response.data.region_id);
@@ -317,57 +291,84 @@ const validateForm = () => {
     </div>
   );
 
-   // export to excel 
-      const exportToExcel = () => {
-        // Create a new workbook
-        const workbook = XLSX.utils.book_new();
-    
-        // Convert data to a worksheet
-        const worksheet = XLSX.utils.json_to_sheet(filteredPincodes.map(user => ({
-          "Country": user.country_title,
-          "Region": user.region_title,
-          "Geo State": user.geostate_title,
-          "District": user.area_title,
-          "Geo City": user.geocity_title,
-          "Pincode":user.pincode
-          // Add fields you want to export
-        })));
-    
-        // Append the worksheet to the workbook
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Pincode");
-    
-        // Export the workbook
-        XLSX.writeFile(workbook, "Pincode.xlsx");
-      };
-    
-      // export to excel end 
-
-   // Role Right 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
   
+    if (name === "pincode") {
+      const numericValue = value.replace(/[^0-9]/g, "");
+      if (numericValue.length <= 6) {
+        setFormData((prev) => ({ ...prev, [name]: numericValue }));
+      }
+    } else {
+      const selectedOption = e.target.options[e.target.selectedIndex];
+      const title = selectedOption ? selectedOption.text : "";
   
-    const Decrypt = (encrypted) => {
-      encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
-      const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
-      return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
-    };
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+        [`${name}_title`]: title, // Add the title for the dropdown
+      }));
   
-    const storedEncryptedRole = localStorage.getItem("Userrole");
-    const decryptedRole = Decrypt(storedEncryptedRole);
-  
-    const roledata = {
-      role: decryptedRole,
-      pageid: String(6)
+      // Fetch dependent data based on ID
+      if (name === "country_id") fetchRegions(value);
+      if (name === "region_id") fetchGeoStates(value);
+      if (name === "geostate_id") fetchAreas(value);
+      if (name === "area_id") fetchGeoCities(value);
     }
+  };
   
-    const dispatch = useDispatch()
-    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
-  
-  
-    useEffect(() => {
-      dispatch(getRoleData(roledata))
-    }, [])
-  
-    // Role Right End 
+
+  // export to excel 
+  const exportToExcel = () => {
+    // Create a new workbook
+    const workbook = XLSX.utils.book_new();
+
+    // Convert data to a worksheet
+    const worksheet = XLSX.utils.json_to_sheet(filteredPincodes.map(user => ({
+      "Country": user.country_title,
+      "Region": user.region_title,
+      "Geo State": user.geostate_title,
+      "District": user.area_title,
+      "Geo City": user.geocity_title,
+      "Pincode": user.pincode
+      // Add fields you want to export
+    })));
+
+    // Append the worksheet to the workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Pincode");
+
+    // Export the workbook
+    XLSX.writeFile(workbook, "Pincode.xlsx");
+  };
+
+  // export to excel end 
+
+  // Role Right 
+
+
+  const Decrypt = (encrypted) => {
+    encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+    const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+    return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+  };
+
+  const storedEncryptedRole = localStorage.getItem("Userrole");
+  const decryptedRole = Decrypt(storedEncryptedRole);
+
+  const roledata = {
+    role: decryptedRole,
+    pageid: String(6)
+  }
+
+  const dispatch = useDispatch()
+  const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+
+
+  useEffect(() => {
+    dispatch(getRoleData(roledata))
+  }, [])
+
+  // Role Right End 
 
   return (
     <div className="tab-content">
@@ -377,7 +378,7 @@ const validateForm = () => {
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
       )}
-     {roleaccess > 1 ?   <div className="row mp0">
+      {roleaccess > 1 ? <div className="row mp0">
         <div className="col-12">
           <div className="card mb-3 tab_box">
             <div
@@ -391,6 +392,26 @@ const validateForm = () => {
                     style={{ width: "50%" }}
                     className="text-left"
                   >
+                    {/* <div className="form-group">
+                      <label htmlFor={'country_id'} className="form-label pb-0 dropdown-label">
+                        {'Country'}<span className="text-danger">*</span>
+                      </label>
+
+                      <select
+                        className="form-select dropdown-select"
+                        name={'country_id'}
+                        value={formData['country_id']}
+                        onChange={handleChange}
+                      >
+                        <option value="">Select {'Country'}</option>
+                        {countries.map((option) => (
+                          <option key={option.id} value={option.id}>
+                            {option.title}
+                          </option>
+                        ))}
+                      </select>
+                      {errors['country_id'] && <small className="text-danger">{errors['country_id']}</small>}
+                    </div> */}
                     {renderDropdown("country_id", countries, "Country")}
                     {renderDropdown("region_id", regions, "Region")}
                     {renderDropdown("geostate_id", geoStates, "Geo State")}
@@ -421,8 +442,8 @@ const validateForm = () => {
                     {roleaccess > 2 ? <div className="text-right">
                       <button className="btn btn-liebherr" type="submit">
                         {isEdit ? "Update" : "Submit"}
-                      </button> 
-                    </div> : null } 
+                      </button>
+                    </div> : null}
                   </form>
                 </div>
 
@@ -457,7 +478,7 @@ const validateForm = () => {
                       className="form-control d-inline-block"
                       style={{ width: "300px" }}
                     />
-                     <button
+                    <button
                       className="btn btn-primary"
                       onClick={exportToExcel}
                     >
@@ -518,10 +539,10 @@ const validateForm = () => {
                               {pincode.pincode}
                             </td>
                             <td className='text-center'>
-                              <FaPencilAlt style={{ cursor: 'pointer', color: 'blue' }}  onClick={() => edit(pincode.id)}  disabled={roleaccess > 3 ? false : true} />
+                              <FaPencilAlt style={{ cursor: 'pointer', color: 'blue' }} onClick={() => edit(pincode.id)} disabled={roleaccess > 3 ? false : true} />
                             </td>
                             <td className='text-center'>
-                              <FaTrash style={{ cursor: 'pointer', color: 'red' }} onClick={() => deleted(pincode.id)}  disabled = {roleaccess > 4 ?false : true} />
+                              <FaTrash style={{ cursor: 'pointer', color: 'red' }} onClick={() => deleted(pincode.id)} disabled={roleaccess > 4 ? false : true} />
                             </td>
                           </tr>
                         ))}
@@ -542,7 +563,7 @@ const validateForm = () => {
           </div>
         </div>
       </div> : null}
-      </div>
+    </div>
   );
 };
 
