@@ -148,6 +148,7 @@ const Pincode = () => {
 
 
   const handleSubmit = async (e) => {
+
     e.preventDefault();
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
@@ -189,6 +190,7 @@ const Pincode = () => {
         console.error("Error during form submission:", error);
       }
     }
+
   };
 
   const handleChange = (e) => {
@@ -220,25 +222,35 @@ const Pincode = () => {
     );
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-    const requiredFields = [
-      "pincode",
-      "country_id",
-      "region_id",
-      "geostate_id",
-      "geocity_id",
-      "area_id",
-    ];
-    requiredFields.forEach((field) => {
-      if (!formData[field]) {
-        newErrors[field] = `${field.replace("_id", "").charAt(0).toUpperCase() +
-          field.replace("_id", "").slice(1)
-          } is required.`;
-      }
-    });
-    return newErrors;
-  };
+const validateForm = () => {
+  const newErrors = {};
+  const requiredFields = [
+    "pincode",
+    "country_id",
+    "region_id",
+    "geostate_id",
+    "geocity_id",
+    "area_id",
+  ];
+
+  requiredFields.forEach((field) => {
+    if (!formData[field]) {
+      newErrors[field] = `${field.replace("_id", "").charAt(0).toUpperCase() +
+        field.replace("_id", "").slice(1)
+      } is required.`;
+    }
+  });
+
+  // Add specific validation for pincode
+  if (formData.pincode) {
+    if (!/^\d{6}$/.test(formData.pincode)) {
+      newErrors.pincode = "Pincode must be exactly 6 digits and contain only numbers.";
+    }
+  }
+
+  return newErrors;
+};
+
 
   const deleted = async (id) => {
     try {

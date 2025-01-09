@@ -20,7 +20,7 @@ app.post("/fetchproductmaster", async (req, res) => {
 
 
 
-  const { item_code, ModelNumber, product_model, product_type, product_class_code, product_class, product_line_code, product_line, material, manufacturer, item_type, serialized, size, crmproducttype, colour, handle_type, serial_identification, installation_type, customer_classification, price_group, mrp, service_partner_basic , packed } = req.body;
+  const { item_code, ModelNumber, product_model, product_type, product_class_code, product_class, product_line_code, product_line, material, manufacturer, item_type, serialized, size, crmproducttype, colour, handle_type, serial_identification, installation_type, customer_classification, price_group, mrp, service_partner_basic, packed } = req.body;
 
 
   try {
@@ -75,7 +75,7 @@ VALUES (
       .input('price_group', price_group)
       .input('mrp', mrp)
       .input('service_partner_basic', service_partner_basic)
-      .input('packed', packed );
+      .input('packed', packed);
 
 
 
@@ -92,7 +92,7 @@ VALUES (
 
 app.post("/fetchservicemaster", async (req, res) => {
 
-  
+
   const apiKey = req.header('x-api-key'); // Get API key from request header
 
   if (apiKey !== API_KEY) {
@@ -109,44 +109,44 @@ app.post("/fetchservicemaster", async (req, res) => {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
 
-       // Check if the licarecode already exists in the table
-       const result = await pool.request()
-       .input('licarecode', sql.VarChar, licarecode)
-       .query('SELECT COUNT(*) AS count FROM awt_franchisemaster WHERE licarecode = @licarecode');
-     
-     if (result.recordset[0].count > 0) {
-       return res.status(409).json({ error: 'Duplicate licarecode: This licarecode already exists' });
-     }
+    // Check if the licarecode already exists in the table
+    const result = await pool.request()
+      .input('licarecode', sql.VarChar, licarecode)
+      .query('SELECT COUNT(*) AS count FROM awt_franchisemaster WHERE licarecode = @licarecode');
 
-   
-         // Insert new record using parameterized query
-         await pool.request()
-         .input('title', sql.VarChar, title)
-         .input('licarecode', sql.VarChar, licarecode)
-         .input('partner_name', sql.VarChar, partner_name)
-         .input('contact_person', sql.VarChar, contact_person)
-         .input('email', sql.VarChar, email)
-         .input('mobile_no', sql.VarChar, mobile_no)
-         .input('password', sql.VarChar, password)
-         .input('address', sql.VarChar, address)
-         .input('country_id', sql.VarChar, country_id)
-         .input('region_id', sql.VarChar, region_id)
-         .input('state', sql.VarChar, state)
-         .input('area', sql.VarChar, area)
-         .input('city', sql.VarChar, city)
-         .input('pincode_id', sql.VarChar, pincode_id)
-         .input('website', sql.VarChar, website)
-         .input('gst_no', sql.VarChar, gst_no)
-         .input('panno', sql.VarChar, panno)
-         .input('bank_name', sql.VarChar, bank_name)
-         .input('bank_acc', sql.VarChar, bank_acc)
-         .input('bank_ifsc', sql.VarChar, bank_ifsc)
-         .input('bank_address', sql.VarChar, bank_address)
-         .input('with_liebherr', sql.DateTime, with_liebherr)
-         .input('lastworkindate', sql.DateTime, lastworkindate)
-         .input('contract_acti', sql.DateTime, contract_acti)
-         .input('contract_expir', sql.DateTime, contract_expir)
-         .query(`
+    if (result.recordset[0].count > 0) {
+      return res.status(409).json({ error: 'Duplicate licarecode: This licarecode already exists' });
+    }
+
+
+    // Insert new record using parameterized query
+    await pool.request()
+      .input('title', sql.VarChar, title)
+      .input('licarecode', sql.VarChar, licarecode)
+      .input('partner_name', sql.VarChar, partner_name)
+      .input('contact_person', sql.VarChar, contact_person)
+      .input('email', sql.VarChar, email)
+      .input('mobile_no', sql.VarChar, mobile_no)
+      .input('password', sql.VarChar, password)
+      .input('address', sql.VarChar, address)
+      .input('country_id', sql.VarChar, country_id)
+      .input('region_id', sql.VarChar, region_id)
+      .input('state', sql.VarChar, state)
+      .input('area', sql.VarChar, area)
+      .input('city', sql.VarChar, city)
+      .input('pincode_id', sql.VarChar, pincode_id)
+      .input('website', sql.VarChar, website)
+      .input('gst_no', sql.VarChar, gst_no)
+      .input('panno', sql.VarChar, panno)
+      .input('bank_name', sql.VarChar, bank_name)
+      .input('bank_acc', sql.VarChar, bank_acc)
+      .input('bank_ifsc', sql.VarChar, bank_ifsc)
+      .input('bank_address', sql.VarChar, bank_address)
+      .input('with_liebherr', sql.DateTime, with_liebherr)
+      .input('lastworkindate', sql.DateTime, lastworkindate)
+      .input('contract_acti', sql.DateTime, contract_acti)
+      .input('contract_expir', sql.DateTime, contract_expir)
+      .query(`
            INSERT INTO awt_franchisemaster 
            (title, licarecode, partner_name, contact_person, email, mobile_no, password, address, country_id, region_id, geostate_id, 
             area_id, geocity_id, pincode_id, webste, gstno, panno, bankname, bankacc, bankifsc, bankaddress, withliebher, 
@@ -156,15 +156,15 @@ app.post("/fetchservicemaster", async (req, res) => {
             @region_id, @state, @area, @city, @pincode_id, @website, @gst_no, @panno, @bank_name, @bank_acc, @bank_ifsc, 
             @bank_address, @with_liebherr, @lastworkindate, @contract_acti, @contract_expir)
          `);
- 
- 
-       return res.json({
-         message: "Franchise Master added successfully!",
-       });
+
+
+    return res.json({
+      message: "Franchise Master added successfully!",
+    });
 
 
 
-   
+
 
 
 
@@ -195,8 +195,8 @@ app.post("/fetchsparemaster", async (req, res) => {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
 
-      // Check if the ProductCode already exists
-      const result = await pool.request()
+    // Check if the ProductCode already exists
+    const result = await pool.request()
       .input('ProductCode', sql.VarChar, ProductCode)
       .query(`
         SELECT COUNT(*) AS count FROM Spare_parts WHERE ProductCode = @ProductCode
@@ -444,11 +444,11 @@ app.post("/fetchshipment_fg", async (req, res) => {
         )
       `);
 
-   
 
 
-      const inserintoserial = 'insert into awt_serial_list(serial_no, ModelNumber,ItemNumber,CountryofOrigin,PrimarySalesDealer) values(@serial_no,@ModelNumber,@ItemNumber,@CountryofOrigin,@PrimarySalesDealer)';
-      await pool.request()
+
+    const inserintoserial = 'insert into awt_serial_list(serial_no, ModelNumber,ItemNumber,CountryofOrigin,PrimarySalesDealer) values(@serial_no,@ModelNumber,@ItemNumber,@CountryofOrigin,@PrimarySalesDealer)';
+    await pool.request()
       .input("serial_no", sql.VarChar, Serial_no)
       .input("ModelNumber", sql.VarChar, Item_Description)
       .input("ItemNumber", sql.VarChar, Item_Code)
@@ -522,6 +522,8 @@ app.post("/fetchshipment_Parts", async (req, res) => {
 
     const { count } = duplicateCheck.recordset[0];
 
+    console.log(count, "$$")
+
     if (count > 0) {
       return res.status(409).json({ error: "Duplicate entry: Serial_Indentity and Item_Code already exist" });
     }
@@ -583,6 +585,82 @@ app.post("/fetchshipment_Parts", async (req, res) => {
   }
 });
 
+
+app.post("/fetchspareprice", async (req, res) => {
+  const apiKey = req.header("x-api-key"); // Get API key from request header
+
+  if (apiKey !== API_KEY) {
+    return res.status(403).json({ error: "Forbidden: Invalid API key" });
+  }
+
+  const {
+    Product_code, Product_descV1, Item, item_description, Manufactured, Qty,
+    Price_group, status, Product_type, Model, Index_num,
+    part_nature, warrenty, refundable
+  } = req.body;
+
+  try {
+    // Connect to the database
+    const pool = await poolPromise;
+
+    // Check for duplicate record based on Item and Product_code
+    const duplicateCheckQuery = `
+      SELECT COUNT(*) AS count 
+      FROM Spare_partprice
+      WHERE Item = @Item AND Product_code = @Product_code
+    `;
+
+    const duplicateCheckResult = await pool.request()
+      .input('Item', sql.VarChar(50), Item)
+      .input('Product_code', sql.VarChar(50), Product_code)
+      .query(duplicateCheckQuery);
+
+    console.log("Duplicate Check Result:", duplicateCheckResult.recordset[0].count);
+
+    if (duplicateCheckResult.recordset[0].count > 0) {
+      return res.status(400).json({ error: 'Duplicate record: Product_code and Item combination already exists' });
+    }
+
+    // SQL Insert Query
+    const query = `
+      INSERT INTO Spare_partprice (
+        Product_code, Product_descV1, Item, item_description, Manufactured, Qty,
+        Price_group, status, Product_type, Model, Index_num,
+        part_nature, warrenty, refundable, created_date, created_by
+      )
+      VALUES (
+        @Product_code, @Product_descV1, @Item, @item_description, @Manufactured, @Qty,
+        @Price_group, @status, @Product_type, @Model, @Index_num,
+        @part_nature, @warrenty, @refundable, @created_date, @created_by
+      )
+    `;
+
+    // Execute the query
+    await pool.request()
+      .input('Product_code', sql.VarChar(50), Product_code)
+      .input('Product_descV1', sql.Text, Product_descV1)
+      .input('Item', sql.VarChar(50), Item)
+      .input('item_description', sql.Text, item_description)
+      .input('Manufactured', sql.VarChar(50), Manufactured)
+      .input('Qty', sql.VarChar(50), Qty)
+      .input('Price_group', sql.VarChar(50), Price_group)
+      .input('status', sql.VarChar(50), status)
+      .input('Product_type', sql.VarChar(50), Product_type)
+      .input('Model', sql.VarChar(50), Model)
+      .input('Index_num', sql.VarChar(50), Index_num)
+      .input('part_nature', sql.VarChar(50), part_nature)
+      .input('warrenty', sql.VarChar(50), warrenty)
+      .input('refundable', sql.VarChar(50), refundable)
+      .input('created_date', sql.DateTime, new Date())
+      .input('created_by', sql.VarChar(50), '1') // Assuming '1' is the created_by ID
+      .query(query);
+
+    res.status(201).json({ message: "Record inserted successfully!" });
+  } catch (err) {
+    console.error("Error inserting record:", err);
+    res.status(500).json({ error: "Failed to insert record", details: err.message });
+  }
+});
 
 
 
