@@ -1551,7 +1551,7 @@ app.post("/postpincode", authenticateToken, async (req, res) => {
     } else {
       // If no duplicate, insert the new pincode
       const insertSql = `
-        INSERT INTO awt_pincode (pincode, country_id, region_id, geostate_id, geocity_id, area_id)
+        INSERT INTO awt_pincode (pincode, country_id, region_name, geostate_name, geocity_name, area_name)
         VALUES (${pincode}, ${country_id}, ${region_id}, ${geostate_id}, ${geocity_id}, ${area_id})
       `;
       const insertResult = await pool.request().query(insertSql);
