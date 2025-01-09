@@ -1,7 +1,8 @@
 import axios from "axios";
+import * as XLSX from "xlsx";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
-import { Base_Url,secretKey } from "../../Utils/Base_Url";
+import { Base_Url, secretKey } from "../../Utils/Base_Url";
 import ProMaster from "./ProMaster";
 import { useSelector } from 'react-redux';
 import { SyncLoader } from 'react-spinners';
@@ -31,7 +32,7 @@ const Roleright = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axiosInstance.get(`${Base_Url}/getrole`,{
+      const response = await axiosInstance.get(`${Base_Url}/getrole`, {
         headers: {
           Authorization: token, // Send token in headers
         },
@@ -96,7 +97,7 @@ const Roleright = () => {
             .post(`${Base_Url}/putrole`, {
               ...formData,
               updated_by: updatedBy,
-            },{
+            }, {
               headers: {
                 Authorization: token,
               },
@@ -116,12 +117,12 @@ const Roleright = () => {
               ...formData,
               created_by: createdBy,
 
-            },{
+            }, {
               headers: {
                 Authorization: token,
               },
             }
-          )
+            )
             .then((response) => {
               window.location.reload();
             })
@@ -139,7 +140,7 @@ const Roleright = () => {
 
   const deleted = async (id) => {
     try {
-      const response = await axiosInstance.post(`${Base_Url}/deleterole`, { id },{
+      const response = await axiosInstance.post(`${Base_Url}/deleterole`, { id }, {
         headers: {
           Authorization: token,
         },
@@ -152,12 +153,12 @@ const Roleright = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axiosInstance.get(`${Base_Url}/requestrole/${id}`,{
+      const response = await axiosInstance.get(`${Base_Url}/requestrole/${id}`, {
         headers: {
           Authorization: token,
         },
       }
-);
+      );
       setFormData(response.data);
       setIsEdit(true);
       console.log(response.data);
@@ -170,42 +171,65 @@ const Roleright = () => {
   const indexOfFirstUser = indexOfLastUser - itemsPerPage;
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
-    // Role Right 
-    
-    
-     const Decrypt = (encrypted) => {
-      encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
-      const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
-      return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
-    };
-  
-    const storedEncryptedRole = localStorage.getItem("Userrole");
-    const decryptedRole = Decrypt(storedEncryptedRole);
-  
-    const roledata = {
-      role: decryptedRole,
-      pageid: String(28)
-    }
-  
-    const dispatch = useDispatch()
-    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
-  
-  
-    useEffect(() => {
-      dispatch(getRoleData(roledata))
-    }, [])
-  
-    // Role Right End 
+  // export to excel 
+  const exportToExcel = () => {
+    // Create a new workbook
+    const workbook = XLSX.utils.book_new();
+
+    // Convert data to a worksheet
+    const worksheet = XLSX.utils.json_to_sheet(currentUsers.map(user => ({
+
+      "Roles": user.title,
+      "Description": user.description,
+
+
+    })));
+
+    // Append the worksheet to the workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, "RoleRights");
+
+    // Export the workbook
+    XLSX.writeFile(workbook, "Rolerights.xlsx");
+  };
+
+  // export to excel end 
+
+  // Role Right 
+
+
+  const Decrypt = (encrypted) => {
+    encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+    const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+    return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+  };
+
+  const storedEncryptedRole = localStorage.getItem("Userrole");
+  const decryptedRole = Decrypt(storedEncryptedRole);
+
+  const roledata = {
+    role: decryptedRole,
+    pageid: String(28)
+  }
+
+  const dispatch = useDispatch()
+  const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+
+
+  useEffect(() => {
+    dispatch(getRoleData(roledata))
+  }, [])
+
+  // Role Right End 
 
   return (
     <div className="tab-content">
-          {loaders && (
+      {loaders && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
       )}
       <Lhiusertabs />
-      {roleaccess > 1 ?    <div className="row mp0">
+      {roleaccess > 1 ? <div className="row mp0">
         <div className="col-12">
           <div className="card mb-3 tab_box">
             <div
@@ -241,25 +265,25 @@ const Roleright = () => {
                       {/* Show duplicate error */}
                     </div>
                     <div className="mb-3">
-                    <label htmlFor="DescriptionInput" className="input-field">
-                      Description
-                    </label>
+                      <label htmlFor="DescriptionInput" className="input-field">
+                        Description
+                      </label>
                       <textarea
-                      type="text"
-                      className="form-control"
-                      name="description"
-                      id="description"
-                      value={formData.description}
-                      onChange={handleChange}
-                      placeholder="Enter Description "
+                        type="text"
+                        className="form-control"
+                        name="description"
+                        id="description"
+                        value={formData.description}
+                        onChange={handleChange}
+                        placeholder="Enter Description "
                       />
 
-                  </div>
-                  {roleaccess > 2 ?   <div className="text-right">
+                    </div>
+                    {roleaccess > 2 ? <div className="text-right">
                       <button className="btn btn-liebherr" type="submit">
                         {isEdit ? "Update" : "Submit"}
                       </button>
-                    </div> : null } 
+                    </div> : null}
                   </form>
                 </div>
 
@@ -293,6 +317,12 @@ const Roleright = () => {
                       className="form-control d-inline-block"
                       style={{ width: "300px" }}
                     />
+                    <button
+                      className="btn btn-primary"
+                      onClick={exportToExcel}
+                    >
+                      Export to Excel
+                    </button>
                   </div>
 
                   {/* Adjust table padding and spacing */}
@@ -324,10 +354,10 @@ const Roleright = () => {
                           </td>
                           <td className="text-center">
                             <button
-                             className="btn btn-link text-danger"
+                              className="btn btn-link text-danger"
                               onClick={() => deleted(item.id)}
                               title="Delete"
-                              disabled = {roleaccess > 4 ?false : true}
+                              disabled={roleaccess > 4 ? false : true}
                             >
                               <FaTrash />
                             </button>

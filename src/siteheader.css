@@ -249,3 +249,6 @@ h3.mainheade{
     font-size:14px;
     font-weight: 500;
 }
+.no-margin{
+    margin-left: 0px !important;
+}

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import * as XLSX from "xlsx";
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
@@ -174,6 +175,35 @@ export function Servicecontractlist(params) {
 
     const navigate = useNavigate()
 
+    // export to excel 
+        const exportToExcel = () => {
+            // Create a new workbook
+            const workbook = XLSX.utils.book_new();
+    
+            // Convert data to a worksheet
+            const worksheet = XLSX.utils.json_to_sheet(Servicecontractdata.map(user => ({
+    
+                "Name": user.customerName,
+                "MobileNumber": user.customerMobile,
+                "ContractNumber": user.contractNumber,
+                "ContractType": user.contractType,
+                "ProductName": user.productName,
+                "SerialNumber": user.serialNumber,
+                "StartDate": user.startDate,
+                "EndDate": user.endDate,
+               
+    
+            })));
+    
+            // Append the worksheet to the workbook
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Service Contract Registration");
+    
+            // Export the workbook
+            XLSX.writeFile(workbook, "ServiceContract.xlsx");
+        };
+    
+        // export to excel end 
+
     return (
         <div className="tab-content">
             <Servicecontracttabs />
@@ -187,6 +217,12 @@ export function Servicecontractlist(params) {
                     <div className="card mb-3 tab_box">
 
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
+                        <button
+                                className="btn btn-primary"
+                                onClick={exportToExcel}
+                            >
+                                Export to Excel
+                            </button>
                         <div className="p-1 text-right">
                                 <button
                                     className="btn btn-primary"

@@ -1,7 +1,8 @@
 import axios from 'axios';
+import * as XLSX from "xlsx";
 import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
-import { Base_Url,secretKey } from '../../Utils/Base_Url';
+import { Base_Url, secretKey } from '../../Utils/Base_Url';
 import Complainttabs from './Complainttabs';
 import { useSelector } from 'react-redux';
 import { SyncLoader } from 'react-spinners';
@@ -38,25 +39,25 @@ const ReasonCode = () => {
 
     const fetchGroupDefectCode = async () => {
         try {
-          const response = await axiosInstance.get(`${Base_Url}/getgroupdefectcode`,{
-            headers: {
-                Authorization: token, // Send token in headers
+            const response = await axiosInstance.get(`${Base_Url}/getgroupdefectcode`, {
+                headers: {
+                    Authorization: token, // Send token in headers
                 },
             });
-          console.log(response.data);
-          setGroupdefect_code(response.data);
+            console.log(response.data);
+            setGroupdefect_code(response.data);
         } catch (error) {
-          console.error("Error fetching groupdefect_code:", error);
+            console.error("Error fetching groupdefect_code:", error);
         }
-      };
+    };
 
     const fetchUsers = async () => {
         try {
-            const response = await axiosInstance.get(`${Base_Url}/gettypeofdefect`,{
+            const response = await axiosInstance.get(`${Base_Url}/gettypeofdefect`, {
                 headers: {
                     Authorization: token, // Send token in headers
-                    },
-                });
+                },
+            });
             console.log(response.data);
             setUsers(response.data);
             setFilteredUsers(response.data);
@@ -123,20 +124,20 @@ const ReasonCode = () => {
                         defect_title: formData.defect_title,
                         description: formData.description,
                         updated_by: updated_by
-                    },{
+                    }, {
                         headers: {
                             Authorization: token, // Send token in headers
-                            },
-                        })
+                        },
+                    })
                         .then(response => {
-                           // window.location.reload();
-                           setFormData({
-                            groupdefect_code: '',
-                            defect_code: '',
-                            defect_title: '',
-                            description: ''
-                        })
-                        fetchUsers();
+                            // window.location.reload();
+                            setFormData({
+                                groupdefect_code: '',
+                                defect_code: '',
+                                defect_title: '',
+                                description: ''
+                            })
+                            fetchUsers();
                         })
                         .catch(error => {
                             if (error.response && error.response.status === 409) {
@@ -145,11 +146,11 @@ const ReasonCode = () => {
                         });
                 } else {
                     // For insert, include 'created_by'
-                    await axiosInstance.post(`${Base_Url}/postdatatypeofdefect`, { ...formData, created_by: created_by },{
+                    await axiosInstance.post(`${Base_Url}/postdatatypeofdefect`, { ...formData, created_by: created_by }, {
                         headers: {
                             Authorization: token, // Send token in headers
-                            },
-                        })
+                        },
+                    })
                         .then(response => {
                             //window.location.reload();
                             setFormData({
@@ -176,11 +177,11 @@ const ReasonCode = () => {
 
     const deleted = async (id) => {
         try {
-            const response = await axiosInstance.post(`${Base_Url}/deletetypeofdefect`, { id },{
+            const response = await axiosInstance.post(`${Base_Url}/deletetypeofdefect`, { id }, {
                 headers: {
                     Authorization: token, // Send token in headers
-                    },
-                });
+                },
+            });
             fetchUsers();
         } catch (error) {
             console.error('Error deleting user:', error);
@@ -188,11 +189,11 @@ const ReasonCode = () => {
     };
     const edit = async (id) => {
         try {
-            const response = await axiosInstance.get(`${Base_Url}/requestdatatypeofdefect/${id}`,{
+            const response = await axiosInstance.get(`${Base_Url}/requestdatatypeofdefect/${id}`, {
                 headers: {
                     Authorization: token, // Send token in headers
-                    },
-                });
+                },
+            });
             // Ensure all fields are spread, including potential missing fields
             setFormData({
                 id: id,  // Explicitly set the ID
@@ -213,52 +214,78 @@ const ReasonCode = () => {
     const indexOfLastUser = (currentPage + 1) * itemsPerPage;
     const indexOfFirstUser = indexOfLastUser - itemsPerPage;
     const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+
+    // export to excel 
+      const exportToExcel = () => {
+        // Create a new workbook
+        const workbook = XLSX.utils.book_new();
+    
+        // Convert data to a worksheet
+        const worksheet = XLSX.utils.json_to_sheet(currentUsers.map(user => ({
+    
+          "DefectCode": user.defect_code,
+          "Description": user.description,
+          "DefectTitle": user.defect_title,
+          "GroupDefectcode": user.groupdefect_code,
+          
+    
+        })));
+    
+        // Append the worksheet to the workbook
+        XLSX.utils.book_append_sheet(workbook, worksheet, "TypeofDefect");
+    
+        // Export the workbook
+        XLSX.writeFile(workbook, "TypeofDefect.xlsx");
+      };
+    
+      // export to excel end 
     // Role Right 
-      
-      
-       const Decrypt = (encrypted) => {
+
+
+    const Decrypt = (encrypted) => {
         encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
         const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
         return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
-      };
-    
-      const storedEncryptedRole = localStorage.getItem("Userrole");
-      const decryptedRole = Decrypt(storedEncryptedRole);
-    
-      const roledata = {
+    };
+
+    const storedEncryptedRole = localStorage.getItem("Userrole");
+    const decryptedRole = Decrypt(storedEncryptedRole);
+
+    const roledata = {
         role: decryptedRole,
         pageid: String(34)
-      }
-    
-      const dispatch = useDispatch()
-      const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
-    
-    
-      useEffect(() => {
+    }
+
+    const dispatch = useDispatch()
+    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+
+
+    useEffect(() => {
         dispatch(getRoleData(roledata))
-      }, [])
-    
-      // Role Right End 
-    
+    }, [])
+
+    // Role Right End 
+
 
     return (
         <div className="tab-content">
-        <Complainttabs />
-        {loaders && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <SyncLoader loading={loaders} color="#FFFFFF" />
-        </div>
-      )}
-     {roleaccess > 1 ?      <div className="row mp0" >
-            <div className="col-12">
-                <div className="card mb-3 tab_box">
-                    <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
-                        <div className="row mp0">
-                            <div className="col-6">
-                                <form onSubmit={handleSubmit} style={{ width: "50%" }} className="text-left">
+            <Complainttabs />
+            {loaders && (
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <SyncLoader loading={loaders} color="#FFFFFF" />
+                </div>
+            )}
+            {roleaccess > 1 ? <div className="row mp0" >
+                <div className="col-12">
+                    <div className="card mb-3 tab_box">
+                        <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
+                            <div className="row mp0">
+                                <div className="col-6">
 
-                                <div className="mb-3">
-                                    <label
+                                    <form onSubmit={handleSubmit} style={{ width: "50%" }} className="text-left">
+
+                                        <div className="mb-3">
+                                            <label
                                                 htmlFor="groupdefect_code"
                                                 className="form-label pb-0 dropdown-label"
                                             >
@@ -272,40 +299,40 @@ const ReasonCode = () => {
                                             >
                                                 <option value="">Select</option>
                                                 {groupdefect_code.map((gdc) => (
-                                                <option key={gdc.id} value={gdc.defectgroupcode}>
-                                                    {gdc.defectgrouptitle}
-                                                </option>
+                                                    <option key={gdc.id} value={gdc.defectgroupcode}>
+                                                        {gdc.defectgrouptitle}
+                                                    </option>
                                                 ))}
                                             </select>
                                             {errors.groupdefect_code && (
                                                 <small className="text-danger">{errors.groupdefect_code}</small>
                                             )}
-                                    </div>
+                                        </div>
 
-                                    <div className="mb-3">
-                                        <label htmlFor="defect_code" className="input-field" >Defect Type Code<span className="text-danger">*</span></label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="defect_code"
-                                            id="defect_code"
-                                            value={formData.defect_code}
-                                            onChange={handleChange}
-                                            placeholder="Enter Defect Type Code "
-                                            pattern="[0-9]*"  // This pattern ensures only numbers are allowed
-                                            onInput={(e) => {
-                                                e.target.value = e.target.value.replace(/[^0-9]/g, '');  // Remove any non-numeric characters
-                                            }}
-                                        />
+                                        <div className="mb-3">
+                                            <label htmlFor="defect_code" className="input-field" >Defect Type Code<span className="text-danger">*</span></label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                name="defect_code"
+                                                id="defect_code"
+                                                value={formData.defect_code}
+                                                onChange={handleChange}
+                                                placeholder="Enter Defect Type Code "
+                                                pattern="[0-9]*"  // This pattern ensures only numbers are allowed
+                                                onInput={(e) => {
+                                                    e.target.value = e.target.value.replace(/[^0-9]/g, '');  // Remove any non-numeric characters
+                                                }}
+                                            />
 
-                                        {errors.defect_code && <small className="text-danger">{errors.defect_code}</small>}
-                                        {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
-                                    </div>
+                                            {errors.defect_code && <small className="text-danger">{errors.defect_code}</small>}
+                                            {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
+                                        </div>
 
 
-                                     <div className="mb-3">
+                                        <div className="mb-3">
                                             <label htmlFor="ComplaintcodeInput" className="input-field">
-                                            Defect Title
+                                                Defect Title
                                             </label>
                                             <input
                                                 type="text"
@@ -317,157 +344,163 @@ const ReasonCode = () => {
                                                 placeholder="Enter Defect Title "
                                             />
                                             {errors.defect_title && (
-                                            <small className="text-danger">
-                                                {errors.defect_title}
-                                            </small>
+                                                <small className="text-danger">
+                                                    {errors.defect_title}
+                                                </small>
                                             )}
 
-                                    </div>
+                                        </div>
 
                                         <div className="mb-3">
                                             <label htmlFor="ComplaintcodeInput" className="input-field">
-                                            Description
+                                                Description
                                             </label>
                                             <textarea
-                                            type="text"
-                                            className="form-control"
-                                            name="description"
-                                            id="description"
-                                            value={formData.description}
-                                            onChange={handleChange}
-                                            placeholder="Enter Description "
+                                                type="text"
+                                                className="form-control"
+                                                name="description"
+                                                id="description"
+                                                value={formData.description}
+                                                onChange={handleChange}
+                                                placeholder="Enter Description "
                                             />
 
                                             {errors.description && (
-                                            <small className="text-danger">
-                                                {errors.description}
-                                            </small>
+                                                <small className="text-danger">
+                                                    {errors.description}
+                                                </small>
                                             )}
 
                                         </div>
 
 
-                                        {roleaccess > 2 ?   <div className="text-right">
-                                        <button className="btn btn-liebherr" type="submit">
-                                            {isEdit ? "Update" : "Submit"}
-                                        </button>
-                                    </div> : null }
-                                </form>
-                            </div>
-
-                            <div className="col-md-6">
-                                <div className="d-flex justify-content-between align-items-center mb-3">
-                                    <span>
-                                        Show
-                                        <select
-                                            value={itemsPerPage}
-                                            onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                                            className="form-control d-inline-block"
-                                            style={{ width: '51px', display: 'inline-block', marginLeft: '5px', marginRight: '5px' }}
-                                        >
-                                            <option value={10}>10</option>
-                                            <option value={15}>15</option>
-                                            <option value={20}>20</option>
-                                        </select>
-                                        entries
-                                    </span>
-
-                                    <input
-                                        type="text"
-                                        placeholder="Search..."
-                                        value={searchTerm}
-                                        onChange={handleSearch}
-                                        className="form-control d-inline-block"
-                                        style={{ width: '300px' }}
-                                    />
+                                        {roleaccess > 2 ? <div className="text-right">
+                                            <button className="btn btn-liebherr" type="submit">
+                                                {isEdit ? "Update" : "Submit"}
+                                            </button>
+                                        </div> : null}
+                                    </form>
                                 </div>
 
-                                {/* Adjust table padding and spacing */}
-                                <table className='table table-bordered table dt-responsive nowrap w-100 table-css' style={{ marginTop: '20px', tableLayout: 'fixed' }}>
-                                    <thead>
-                                        <tr>
-                                            <th style={{ padding: '12px 15px', textAlign: 'center' }}>#</th>
-                                            <th style={{ padding: '12px 15px', textAlign: 'center' }}>Defect Group Title</th>
-                                            <th style={{ padding: '12px 15px', textAlign: 'center' }}>Defect Type Code</th>
-                                            <th style={{ padding: '12px 15px', textAlign: 'center' }}>Defect Type Title</th>
-                                            <th style={{ padding: '12px 15px', textAlign: 'center' }}>Description</th>
-                                            <th style={{ padding: '0px 0px', textAlign: 'center' }}>Edit</th>
-                                            <th style={{ padding: '0px 0px', textAlign: 'center' }}>Delete</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {currentUsers.map((item, index) => (
-                                            <tr key={item.id}>
-                                                <td style={{ padding: '2px', textAlign: 'center' }}>{index + 1 + indexOfFirstUser}</td>
-                                                <td style={{ padding: '10px' }}>{item.grouptitle}</td>
-                                                <td style={{ padding: '10px' }}>{item.defect_code}</td>
-                                                <td style={{ padding: '10px' }}>{item.defect_title}</td>
-                                                <td style={{ padding: '10px' }}>{item.description}</td>
-                                                <td style={{ padding: '0px', textAlign: 'center' }}>
-                                                    <button
-                                                        className='btn'
-                                                        onClick={() => {
-                                                            // alert(item.id)
-                                                            edit(item.id)
-                                                        }}
-                                                        reasoncode="Edit"
-                                                        style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                                                        disabled={roleaccess > 3 ? false : true}
-                                                    >
-                                                        <FaPencilAlt />
-                                                    </button>
-                                                </td>
-                                                <td style={{ padding: '0px', textAlign: 'center' }}>
-                                                    <button
-                                                        className='btn'
-                                                        onClick={() => deleted(item.id)}
-                                                        reasoncode="Delete"
-                                                        style={{ backgroundColor: 'transparent', border: 'none', color: 'red', fontSize: '20px' }}
-                                                        disabled = {roleaccess > 4 ?false : true}
-                                                    >
-                                                        <FaTrash />
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                                <div className="col-md-6">
+                                    <div className="d-flex justify-content-between align-items-center mb-3">
+                                        <span>
+                                            Show
+                                            <select
+                                                value={itemsPerPage}
+                                                onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                                                className="form-control d-inline-block"
+                                                style={{ width: '51px', display: 'inline-block', marginLeft: '5px', marginRight: '5px' }}
+                                            >
+                                                <option value={10}>10</option>
+                                                <option value={15}>15</option>
+                                                <option value={20}>20</option>
+                                            </select>
+                                            entries
+                                        </span>
 
-                                <div className="d-flex justify-content-between" style={{ marginTop: '10px' }}>
-                                    <div>
-                                        Showing {indexOfFirstUser + 1} to {Math.min(indexOfLastUser, filteredUsers.length)} of {filteredUsers.length} entries
+                                        <input
+                                            type="text"
+                                            placeholder="Search..."
+                                            value={searchTerm}
+                                            onChange={handleSearch}
+                                            className="form-control d-inline-block"
+                                            style={{ width: '300px' }}
+                                        />
+                                            <button
+                                                className="btn btn-primary"
+                                                onClick={exportToExcel}
+                                            >
+                                                Export to Excel
+                                            </button>
                                     </div>
 
-                                    <div className="pagination" style={{ marginLeft: 'auto' }}>
-                                        <button
-                                            onClick={() => setCurrentPage(currentPage - 1)}
-                                            disabled={currentPage === 0}
-                                        >
-                                            {'<'}
-                                        </button>
-                                        {Array.from({ length: Math.ceil(filteredUsers.length / itemsPerPage) }, (_, index) => (
+                                    {/* Adjust table padding and spacing */}
+                                    <table className='table table-bordered table dt-responsive nowrap w-100 table-css' style={{ marginTop: '20px', tableLayout: 'fixed' }}>
+                                        <thead>
+                                            <tr>
+                                                <th style={{ padding: '12px 15px', textAlign: 'center' }}>#</th>
+                                                <th style={{ padding: '12px 15px', textAlign: 'center' }}>Defect Group Title</th>
+                                                <th style={{ padding: '12px 15px', textAlign: 'center' }}>Defect Type Code</th>
+                                                <th style={{ padding: '12px 15px', textAlign: 'center' }}>Defect Type Title</th>
+                                                <th style={{ padding: '12px 15px', textAlign: 'center' }}>Description</th>
+                                                <th style={{ padding: '0px 0px', textAlign: 'center' }}>Edit</th>
+                                                <th style={{ padding: '0px 0px', textAlign: 'center' }}>Delete</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {currentUsers.map((item, index) => (
+                                                <tr key={item.id}>
+                                                    <td style={{ padding: '2px', textAlign: 'center' }}>{index + 1 + indexOfFirstUser}</td>
+                                                    <td style={{ padding: '10px' }}>{item.grouptitle}</td>
+                                                    <td style={{ padding: '10px' }}>{item.defect_code}</td>
+                                                    <td style={{ padding: '10px' }}>{item.defect_title}</td>
+                                                    <td style={{ padding: '10px' }}>{item.description}</td>
+                                                    <td style={{ padding: '0px', textAlign: 'center' }}>
+                                                        <button
+                                                            className='btn'
+                                                            onClick={() => {
+                                                                // alert(item.id)
+                                                                edit(item.id)
+                                                            }}
+                                                            reasoncode="Edit"
+                                                            style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                                                            disabled={roleaccess > 3 ? false : true}
+                                                        >
+                                                            <FaPencilAlt />
+                                                        </button>
+                                                    </td>
+                                                    <td style={{ padding: '0px', textAlign: 'center' }}>
+                                                        <button
+                                                            className='btn'
+                                                            onClick={() => deleted(item.id)}
+                                                            reasoncode="Delete"
+                                                            style={{ backgroundColor: 'transparent', border: 'none', color: 'red', fontSize: '20px' }}
+                                                            disabled={roleaccess > 4 ? false : true}
+                                                        >
+                                                            <FaTrash />
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+
+                                    <div className="d-flex justify-content-between" style={{ marginTop: '10px' }}>
+                                        <div>
+                                            Showing {indexOfFirstUser + 1} to {Math.min(indexOfLastUser, filteredUsers.length)} of {filteredUsers.length} entries
+                                        </div>
+
+                                        <div className="pagination" style={{ marginLeft: 'auto' }}>
                                             <button
-                                                key={index}
-                                                onClick={() => setCurrentPage(index)}
-                                                className={currentPage === index ? 'active' : ''}
+                                                onClick={() => setCurrentPage(currentPage - 1)}
+                                                disabled={currentPage === 0}
                                             >
-                                                {index + 1}
+                                                {'<'}
                                             </button>
-                                        ))}
-                                        <button
-                                            onClick={() => setCurrentPage(currentPage + 1)}
-                                            disabled={currentPage === Math.ceil(filteredUsers.length / itemsPerPage) - 1}
-                                        >
-                                            {'>'}
-                                        </button>
+                                            {Array.from({ length: Math.ceil(filteredUsers.length / itemsPerPage) }, (_, index) => (
+                                                <button
+                                                    key={index}
+                                                    onClick={() => setCurrentPage(index)}
+                                                    className={currentPage === index ? 'active' : ''}
+                                                >
+                                                    {index + 1}
+                                                </button>
+                                            ))}
+                                            <button
+                                                onClick={() => setCurrentPage(currentPage + 1)}
+                                                disabled={currentPage === Math.ceil(filteredUsers.length / itemsPerPage) - 1}
+                                            >
+                                                {'>'}
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div> : null}
+            </div> : null}
         </div>
 
     );

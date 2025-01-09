@@ -1,7 +1,8 @@
 import axios from 'axios';
+import * as XLSX from "xlsx";
 import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
-import { Base_Url,secretKey } from '../../Utils/Base_Url';
+import { Base_Url, secretKey } from '../../Utils/Base_Url';
 import Complainttabs from './Complainttabs';
 import { useSelector } from 'react-redux';
 import { SyncLoader } from 'react-spinners';
@@ -220,32 +221,57 @@ const ActionCode = () => {
   const indexOfFirstUser = indexOfLastUser - itemsPerPage;
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
+  // export to excel 
+  const exportToExcel = () => {
+    // Create a new workbook
+    const workbook = XLSX.utils.book_new();
+
+    // Convert data to a worksheet
+    const worksheet = XLSX.utils.json_to_sheet(currentUsers.map(user => ({
+
+      "DefectGroupCode": user.defectgroupcode,
+      "SiteDefectCode": user.dsite_code,
+      "SiteDefectTitle": user.dsite_title,
+      "Description": user.description,
+
+
+    })));
+
+    // Append the worksheet to the workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, "SiteDefect");
+
+    // Export the workbook
+    XLSX.writeFile(workbook, "SiteDefect.xlsx");
+  };
+
+  // export to excel end
+
   // Role Right 
-    
-    
-     const Decrypt = (encrypted) => {
-      encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
-      const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
-      return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
-    };
-  
-    const storedEncryptedRole = localStorage.getItem("Userrole");
-    const decryptedRole = Decrypt(storedEncryptedRole);
-  
-    const roledata = {
-      role: decryptedRole,
-      pageid: String(35)
-    }
-  
-    const dispatch = useDispatch()
-    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
-  
-  
-    useEffect(() => {
-      dispatch(getRoleData(roledata))
-    }, [])
-  
-    // Role Right End 
+
+
+  const Decrypt = (encrypted) => {
+    encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+    const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+    return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+  };
+
+  const storedEncryptedRole = localStorage.getItem("Userrole");
+  const decryptedRole = Decrypt(storedEncryptedRole);
+
+  const roledata = {
+    role: decryptedRole,
+    pageid: String(35)
+  }
+
+  const dispatch = useDispatch()
+  const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+
+
+  useEffect(() => {
+    dispatch(getRoleData(roledata))
+  }, [])
+
+  // Role Right End 
 
   return (
     <div className="tab-content">
@@ -255,7 +281,7 @@ const ActionCode = () => {
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
       )}
-     {roleaccess > 1 ?  <div className="row mp0" >
+      {roleaccess > 1 ? <div className="row mp0" >
         <div className="col-12">
           <div className="card mb-3 tab_box">
             <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
@@ -353,11 +379,11 @@ const ActionCode = () => {
                     </div>
 
 
-                    {roleaccess > 2 ?  <div className="text-right">
+                    {roleaccess > 2 ? <div className="text-right">
                       <button className="btn btn-liebherr" type="submit">
                         {isEdit ? "Update" : "Submit"}
                       </button>
-                    </div> : null } 
+                    </div> : null}
                   </form>
                 </div>
 
@@ -386,6 +412,12 @@ const ActionCode = () => {
                       className="form-control d-inline-block"
                       style={{ width: '300px' }}
                     />
+                    <button
+                      className="btn btn-primary"
+                      onClick={exportToExcel}
+                    >
+                      Export to Excel
+                    </button>
                   </div>
 
                   {/* Adjust table padding and spacing */}
@@ -429,7 +461,7 @@ const ActionCode = () => {
                               onClick={() => deleted(item.id)}
                               reasoncode="Delete"
                               style={{ backgroundColor: 'transparent', border: 'none', color: 'red', fontSize: '20px' }}
-                              disabled = {roleaccess > 4 ?false : true}
+                              disabled={roleaccess > 4 ? false : true}
                             >
                               <FaTrash />
                             </button>

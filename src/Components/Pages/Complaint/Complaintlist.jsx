@@ -1,4 +1,5 @@
 import { SyncLoader } from 'react-spinners';
+import * as XLSX from "xlsx";
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -300,6 +301,78 @@ export function Complaintlist(params) {
     navigate(`/complaintview/${encrypted}`)
   };
 
+  // export to excel 
+  const exportToExcel = () => {
+    // Create a new workbook
+    const workbook = XLSX.utils.book_new();
+
+    // Convert data to a worksheet
+    const worksheet = XLSX.utils.json_to_sheet(filteredData.map(user => ({
+
+      "TicketNo": user.ticket_no,
+      "TicketDate": user.ticket_date,
+      "CustomerId": user.customer_id,
+      "Salutation": user.salutation,
+      "CustomerName": user.customer_name,
+      "CustomerMobile": user.customer_mobile,
+      "CustomerEmail": user.customer_email,
+      "ModelNumber": user.ModelNumber,
+      "SerialNo": user.serial_no,
+      "Address": user.address,
+      "Region": user.region,
+      "State": user.state,
+      "City": user.city,
+      "District": user.area,
+      "Pincode": user.pincode,
+      "ServicePartner": user.service_partner,
+      "msp": user.msp,
+      "csp": user.csp,
+      "SalesPartner": user.sales_partner,
+      "AssignedTo": user.assigned_to,
+      "OldEngineer": user.old_engineer,
+      "EngineerCode": user.engineer_code,
+      "EngineerId": user.engineer_id,
+      "TicketType": user.ticket_type,
+      "CallType": user.call_type,
+      "SubCallStatus": user.sub_call_status,
+      "CallStatus": user.call_status,
+      "WarrantyStatus": user.warranty_status,
+      "InvoiceDate": user.invoice_date,
+      "MOdeofContact": user.mode_of_contact,
+      "CallCharges": user.call_charges,
+      "ContactPerson": user.contact_person,
+      "PurchaseDate": user.purchase_date,
+      "CustomerClass": user.customer_class,
+      "CallPriority": user.call_priority,
+      "SpareDocPath": user.spare_doc_path,
+      "CallRemark": user.call_remark,
+      "SpareDetails": user.spare_detail,
+      "GroupCode": user.group_code,
+      "DefectType": user.defect_type,
+      "SiteDefect": user.site_defect,
+      "SparePartID": user.spare_part_id,
+      "TOTP": user.totp,
+      "RequestedBY": user.requested_by,
+      "RequestedEmail": user.requested_email,
+      "RequestedMobile": user.requested_mobile,
+      "SalesPartner2": user.sales_partner2,
+
+      
+
+
+
+
+    })))
+
+    // Append the worksheet to the workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, "TicektList");
+
+    // Export the workbook
+    XLSX.writeFile(workbook, "TicketList.xlsx");
+  };
+
+  // export to excel end
+
   // Role Right 
 
 
@@ -330,7 +403,7 @@ export function Complaintlist(params) {
   return (
 
     <>
-        {roleaccess > 1 ?  <div className="row mp0">
+      {roleaccess > 1 ? <div className="row mp0">
 
         {loaders && (
           <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -631,8 +704,19 @@ export function Complaintlist(params) {
                             </div> */}
 
               {/* Buttons and message at the far-right corner */}
-              <div className="col-md-12 d-flex justify-content-end align-items-center mt-3" >
-                <div className="form-group">
+
+              <div className="col-md-12 d-flex justify-content-end align-items-center mt-3 "  >
+                <div className=' form-group'>
+                 
+                </div>
+                <div className="form-group ">
+                <button
+                    className="btn btn-primary"
+                    onClick={exportToExcel}
+                  >
+                    Export to Excel
+                  </button>
+
                   <button
                     className="btn btn-primary mr-2"
                     onClick={applyFilters}
@@ -726,11 +810,11 @@ export function Complaintlist(params) {
                           <td style={rowStyle}>{item.call_status}</td>
                           <td style={rowStyle}>{item.call_priority}</td>
                           <td style={rowStyle}>
-                           {roleaccess > 3 ? <button
+                            {roleaccess > 3 ? <button
                               className='btn'
                               // onClick={() => navigate(`/registercomaplaint/${item.ticket_no}`)}
                               onClick={() => sendtoedit(item.ticket_no)}
-                              disabled={isActionDisabled(item.call_status) }
+                              disabled={isActionDisabled(item.call_status)}
                               title={isActionDisabled(item.call_status) ? "Cannot edit closed or cancelled ticket" : "Edit"}
                               style={{
                                 backgroundColor: 'transparent',
@@ -739,10 +823,10 @@ export function Complaintlist(params) {
                                 fontSize: '20px',
                                 cursor: isActionDisabled(item.call_status) ? 'not-allowed' : 'pointer'
                               }}
-                              
-                            > 
+
+                            >
                               <FaPencilAlt />
-                            </button>: null } 
+                            </button> : null}
                           </td>
                           <td style={rowStyle}>
                             <button

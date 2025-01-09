@@ -1,4 +1,5 @@
 import axios from 'axios';
+import * as XLSX from "xlsx";
 import { Link, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
@@ -92,7 +93,7 @@ export function Quotationlist(params) {
 
     const sendtoedit = async (id) => {
         id = id.toString()
-        let  encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
+        let encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
         encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
         navigate(`/quotation/${encrypted}`)
     };
@@ -135,32 +136,67 @@ export function Quotationlist(params) {
     }, [Quotationdata]);
 
     const navigate = useNavigate();
+
+    // export to excel 
+    const exportToExcel = () => {
+        // Create a new workbook
+        const workbook = XLSX.utils.book_new();
+
+        // Convert data to a worksheet
+        const worksheet = XLSX.utils.json_to_sheet(Quotationdata.map(user => ({
+
+            "QuotationNumber": user.quotationNumber,
+            "ticketId": user.ticketId,
+            "ticketdate": user.ticketdate,
+            "QuotationDate":user.quotationDate,
+            "EngineerName": user.assignedEngineer,
+            "CustomerName": user.CustomerName,
+            "CustomerID": user.customer_id,
+            "SpareID": user.spareId,
+            "ModelNumber": user.ModelNumber,
+            "State": user.state,
+            "City": user.city,
+            "SpareName": user.title,
+            "Quantity": user.quantity,
+            "Price": user.price,
+            "Status": user.status,
+
+
+        })));
+
+        // Append the worksheet to the workbook
+        XLSX.utils.book_append_sheet(workbook, worksheet, "QuotationList");
+
+        // Export the workbook
+        XLSX.writeFile(workbook, "QuotationList.xlsx");
+    };
+
     // Role Right 
-      
-      
-       const Decrypt = (encrypted) => {
+
+
+    const Decrypt = (encrypted) => {
         encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
         const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
         return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
-      };
-    
-      const storedEncryptedRole = localStorage.getItem("Userrole");
-      const decryptedRole = Decrypt(storedEncryptedRole);
-    
-      const roledata = {
+    };
+
+    const storedEncryptedRole = localStorage.getItem("Userrole");
+    const decryptedRole = Decrypt(storedEncryptedRole);
+
+    const roledata = {
         role: decryptedRole,
         pageid: String(44)
-      }
-    
-      const dispatch = useDispatch()
-      const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
-    
-    
-      useEffect(() => {
+    }
+
+    const dispatch = useDispatch()
+    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+
+
+    useEffect(() => {
         dispatch(getRoleData(roledata))
-      }, [])
-    
-      // Role Right End 
+    }, [])
+
+    // Role Right End 
 
     return (
         <div className="tab-content">
@@ -169,10 +205,16 @@ export function Quotationlist(params) {
                     <SyncLoader loading={loaders} color="#FFFFFF" />
                 </div>
             )}
-           {roleaccess > 1 ?   <div className="row mp0">
+            {roleaccess > 1 ? <div className="row mp0">
                 <div className="col-md-12 col-12">
                     <div className="card mb-3 tab_box">
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
+                            <button
+                                className="btn btn-primary"
+                                onClick={exportToExcel}
+                            >
+                                Export to Excel
+                            </button>
                             <div className='table-responsive'>
                                 <table id="example" className="table table-striped">
                                     <thead>

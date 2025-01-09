@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
-import { Base_Url ,secretKey} from "../../Utils/Base_Url";
+import { Base_Url, secretKey } from "../../Utils/Base_Url";
 import Ratecardtabs from "./Ratecardtabs";
 import { useSelector } from 'react-redux';
 import { SyncLoader } from 'react-spinners';
@@ -204,51 +204,73 @@ const Ratecard = () => {
     reader.readAsBinaryString(file);
   };
 
-  const uploadexcel = () =>{
+  const uploadexcel = () => {
 
-    const data  = {
+    const data = {
       excelData: JSON.stringify(excelData),
-      created_by : localStorage.getItem("licare_code")
+      created_by: localStorage.getItem("licare_code")
     }
 
-    axios.post(`${Base_Url}/uplaodratecardexcel` , data)
-    .then((res) =>{
-      if(res.data){
-        alert("Uploaded")
-      }
-      console.log(res)
-    })
-    .catch((err) =>{
-      console.log(err)
-    })
+    axios.post(`${Base_Url}/uplaodratecardexcel`, data)
+      .then((res) => {
+        if (res.data) {
+          alert("Uploaded")
+        }
+        console.log(res)
+      })
+      .catch((err) => {
+        console.log(err)
+      })
   }
 
-   // Role Right 
-    
-    
-     const Decrypt = (encrypted) => {
-      encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
-      const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
-      return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
-    };
-  
-    const storedEncryptedRole = localStorage.getItem("Userrole");
-    const decryptedRole = Decrypt(storedEncryptedRole);
-  
-    const roledata = {
-      role: decryptedRole,
-      pageid: String(37)
-    }
-  
-    const dispatch = useDispatch()
-    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
-  
-  
-    useEffect(() => {
-      dispatch(getRoleData(roledata))
-    }, [])
-  
-    // Role Right End 
+  // export to excel 
+  const exportToExcel = () => {
+    // Create a new workbook
+    const workbook = XLSX.utils.book_new();
+
+    // Convert data to a worksheet
+    const worksheet = XLSX.utils.json_to_sheet(currentUsers.map(user => ({
+
+      "RateCardMatrix": user.Ratecard,
+
+
+    })));
+
+    // Append the worksheet to the workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, "RateCard");
+
+    // Export the workbook
+    XLSX.writeFile(workbook, "RateCard.xlsx");
+  };
+
+  // export to excel end 
+
+  // Role Right 
+
+
+  const Decrypt = (encrypted) => {
+    encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+    const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+    return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+  };
+
+  const storedEncryptedRole = localStorage.getItem("Userrole");
+  const decryptedRole = Decrypt(storedEncryptedRole);
+
+  const roledata = {
+    role: decryptedRole,
+    pageid: String(37)
+  }
+
+  const dispatch = useDispatch()
+  const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+
+
+  useEffect(() => {
+    dispatch(getRoleData(roledata))
+  }, [])
+
+  // Role Right End 
   return (
     <div className="tab-content">
       <Ratecardtabs />
@@ -257,7 +279,7 @@ const Ratecard = () => {
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
       )}
-    {roleaccess > 1 ?      <div className="row mp0">
+      {roleaccess > 1 ? <div className="row mp0">
         <div className="col-12">
           <div className="card mb-3 tab_box">
             <div
@@ -302,11 +324,11 @@ const Ratecard = () => {
                       )}{" "}
                       {/* Show duplicate error */}
                     </div>
-                    {roleaccess > 2 ?  <div className="text-right">
+                    {roleaccess > 2 ? <div className="text-right">
                       <button className="btn btn-liebherr" type="submit">
                         {isEdit ? "Update" : "Submit"}
                       </button>
-                    </div> : null } 
+                    </div> : null}
                   </form>
                 </div>
 
@@ -340,6 +362,12 @@ const Ratecard = () => {
                       className="form-control d-inline-block"
                       style={{ width: "300px" }}
                     />
+                    <button
+                      className="btn btn-primary"
+                      onClick={exportToExcel}
+                    >
+                      Export to Excel
+                    </button>
                   </div>
 
                   {/* Adjust table padding and spacing */}
@@ -361,7 +389,7 @@ const Ratecard = () => {
                             <button
                               className="btn btn-link text-primary"
                               onClick={() => edit(item.id)}
-                              aria-label="Edit"        
+                              aria-label="Edit"
                               disabled={roleaccess > 3 ? false : true}
                             >
                               <FaPencilAlt />
@@ -372,7 +400,7 @@ const Ratecard = () => {
                               className="btn btn-link text-danger"
                               onClick={() => deleted(item.id)}
                               aria-label="Delete"
-                              disabled = {roleaccess > 4 ?false : true}
+                              disabled={roleaccess > 4 ? false : true}
                             >
                               <FaTrash />
                             </button>
@@ -430,7 +458,7 @@ const Ratecard = () => {
           </div>
         </div>
       </div> : null}
-      </div>
+    </div>
   );
 };
 

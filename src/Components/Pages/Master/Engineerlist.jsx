@@ -1,4 +1,5 @@
 import axios from 'axios';
+import * as XLSX from "xlsx";
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
@@ -150,6 +151,60 @@ export function Engineerlist(params) {
     }, []);
 
     const navigate = useNavigate()
+
+     // export to excel 
+     const exportToExcel = async () => {
+        try {
+            // Fetch all engineer data without pagination
+            const response = await axiosInstance.get(`${Base_Url}/getengineer`, {
+                headers: {
+                    Authorization: token,
+                },
+                params: {
+                    pageSize: totalCount, // Set a large number to fetch all data
+                    page: 1, // Optional: Start from the first page
+                },
+            });
+    
+            const allEngineerData = response.data.data;
+    
+            // Create a new workbook
+            const workbook = XLSX.utils.book_new();
+    
+            // Convert data to a worksheet
+            const worksheet = XLSX.utils.json_to_sheet(allEngineerData.map(user => ({
+                "Name": user.title,
+                "Cfranchise_id": user.cfranchise_id,
+                "EngineerID": user.engineer_id,
+                "Email": user.email,
+                "MobileNumber": user.mobile_no,
+                "Employee Code": user.employee_code,
+                "Personal Email": user.personal_email,
+                "Personal MobileNumber": user.personal_mobile,
+                "Date of Birth": user.dob,
+                "Blood Group": user.blood_group,
+                "Academic Qualification": user.academic_qualification,
+                "Joining Date": user.joining_date,
+                "Passport Picture": user.passport_picture,
+                "Resume": user.resume,
+                "PhotoProof": user.photo_proof,
+                "AddressProof": user.address_proof,
+                "PermanentAddress": user.permanent_address,
+                "CurrentAddress": user.current_address,
+            })));
+    
+            // Append the worksheet to the workbook
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Engineerlist");
+    
+            // Export the workbook
+            XLSX.writeFile(workbook, "Engineerlist.xlsx");
+        } catch (error) {
+            console.error("Error exporting data to Excel:", error);
+        }
+    };
+    
+    
+        // export to excel end 
      // Role Right 
       
       
@@ -190,6 +245,12 @@ export function Engineerlist(params) {
                     <div className="card mb-3 tab_box">
 
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
+                        <button
+                                className="btn btn-primary"
+                                onClick={exportToExcel}
+                            >
+                                Export to Excel
+                            </button>
                         <div className="p-1 text-right">
                                 <button
                                     className="btn btn-primary"

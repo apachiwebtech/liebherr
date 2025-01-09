@@ -1,7 +1,8 @@
 import axios from "axios";
+import * as XLSX from "xlsx";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
-import { Base_Url,secretKey } from "../../Utils/Base_Url";
+import { Base_Url, secretKey } from "../../Utils/Base_Url";
 import DataTable from 'datatables.net-react';
 import DT from 'datatables.net-dt';
 import Complainttabs from './Complainttabs';
@@ -39,7 +40,7 @@ const ComplaintCode = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axiosInstance.get(`${Base_Url}/getcom`,{
+      const response = await axiosInstance.get(`${Base_Url}/getcom`, {
         headers: {
           Authorization: token,
         },
@@ -111,7 +112,7 @@ const ComplaintCode = () => {
             .post(`${Base_Url}/putcomdata`, {
               ...formData,
               updated_by: updated_by,
-            },{
+            }, {
               headers: {
                 Authorization: token,
               },
@@ -138,7 +139,7 @@ const ComplaintCode = () => {
             .post(`${Base_Url}/postdatacom`, {
               ...formData,
               updated_by: created_by,
-            },{
+            }, {
               headers: {
                 Authorization: token,
               },
@@ -170,12 +171,12 @@ const ComplaintCode = () => {
 
   const deleted = async (id) => {
     try {
-      const response = await axiosInstance.post(`${Base_Url}/deletecomdata`, { id },{
+      const response = await axiosInstance.post(`${Base_Url}/deletecomdata`, { id }, {
         headers: {
           Authorization: token,
         },
       }
-);
+      );
       fetchUsers();
     } catch (error) {
       console.error("Error deleting user:", error);
@@ -184,7 +185,7 @@ const ComplaintCode = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axiosInstance.get(`${Base_Url}/requestdatacom/${id}`,{
+      const response = await axiosInstance.get(`${Base_Url}/requestdatacom/${id}`, {
         headers: {
           Authorization: token,
         },
@@ -200,88 +201,112 @@ const ComplaintCode = () => {
   const indexOfLastUser = (currentPage + 1) * itemsPerPage;
   const indexOfFirstUser = indexOfLastUser - itemsPerPage;
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+  // export to excel 
+  const exportToExcel = () => {
+    // Create a new workbook
+    const workbook = XLSX.utils.book_new();
+
+    // Convert data to a worksheet
+    const worksheet = XLSX.utils.json_to_sheet(filteredUsers.map(user => ({
+
+      "DefectGroupCode": user.defectgroupcode,
+      "Description": user.description,
+      "DefectGroupTitle": user.defectgrouptitle,
+      
+
+    })));
+
+    // Append the worksheet to the workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, "DefectGroup");
+
+    // Export the workbook
+    XLSX.writeFile(workbook, "Defect Group.xlsx");
+  };
+
+  // export to excel end 
+
   // Role Right 
-    
-    
-     const Decrypt = (encrypted) => {
-      encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
-      const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
-      return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
-    };
-  
-    const storedEncryptedRole = localStorage.getItem("Userrole");
-    const decryptedRole = Decrypt(storedEncryptedRole);
-  
-    const roledata = {
-      role: decryptedRole,
-      pageid: String(33)
-    }
-  
-    const dispatch = useDispatch()
-    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
-  
-  
-    useEffect(() => {
-      dispatch(getRoleData(roledata))
-    }, [])
-  
-    // Role Right End 
+
+
+  const Decrypt = (encrypted) => {
+    encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+    const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+    return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+  };
+
+  const storedEncryptedRole = localStorage.getItem("Userrole");
+  const decryptedRole = Decrypt(storedEncryptedRole);
+
+  const roledata = {
+    role: decryptedRole,
+    pageid: String(33)
+  }
+
+  const dispatch = useDispatch()
+  const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+
+
+  useEffect(() => {
+    dispatch(getRoleData(roledata))
+  }, [])
+
+  // Role Right End 
 
   return (
     <div className="tab-content">
-          {loaders && (
+      {loaders && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
       )}
-    <Complainttabs />
-    {roleaccess > 1 ?   <div className="row mp0">
-      <div className="col-12">
-        <div className="card mb-3 tab_box">
-          <div
-            className="card-body"
-            style={{ flex: "1 1 auto", padding: "13px 28px" }}
-          >
-            <div className="row mp0">
-              <div className="col-6">
-                <form
-                  onSubmit={handleSubmit}
-                  style={{ width: "50%" }}
-                  className="text-left"
-                >
-                  <div className="mb-3">
-                    <label htmlFor="ComplaintcodeInput" className="input-field">
-                      Defect Group Code<span className="text-danger">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="defectgroupcode"
-                      id="defectgroupcode"
-                      value={formData.defectgroupcode}
-                      onChange={handleChange}
-                      placeholder="Enter Defect Group Code "
-                      pattern="[0-9]*" // This pattern ensures only numbers are allowed
-                      onInput={(e) => {
-                        e.target.value = e.target.value.replace(/[^0-9]/g, ""); // Remove any non-numeric characters
-                      }}
-                    />
-                    {errors.defectgroupcode && (
-                      <small className="text-danger">
-                        {errors.defectgroupcode}
-                      </small>
-                    )}
-                    {duplicateError && (
-                      <small className="text-danger">{duplicateError}</small>
-                    )}{" "}
-                    {/* Show duplicate error */}
-                  </div>
+      <Complainttabs />
+      {roleaccess > 1 ? <div className="row mp0">
+        <div className="col-12">
+          <div className="card mb-3 tab_box">
+            <div
+              className="card-body"
+              style={{ flex: "1 1 auto", padding: "13px 28px" }}
+            >
+              <div className="row mp0">
+                <div className="col-6">
+                  <form
+                    onSubmit={handleSubmit}
+                    style={{ width: "50%" }}
+                    className="text-left"
+                  >
+                    <div className="mb-3">
+                      <label htmlFor="ComplaintcodeInput" className="input-field">
+                        Defect Group Code<span className="text-danger">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="defectgroupcode"
+                        id="defectgroupcode"
+                        value={formData.defectgroupcode}
+                        onChange={handleChange}
+                        placeholder="Enter Defect Group Code "
+                        pattern="[0-9]*" // This pattern ensures only numbers are allowed
+                        onInput={(e) => {
+                          e.target.value = e.target.value.replace(/[^0-9]/g, ""); // Remove any non-numeric characters
+                        }}
+                      />
+                      {errors.defectgroupcode && (
+                        <small className="text-danger">
+                          {errors.defectgroupcode}
+                        </small>
+                      )}
+                      {duplicateError && (
+                        <small className="text-danger">{duplicateError}</small>
+                      )}{" "}
+                      {/* Show duplicate error */}
+                    </div>
 
-                  <div className="mb-3">
-                    <label htmlFor="ComplaintcodeInput" className="input-field">
-                      Defect Group Title<span className="text-danger">*</span>
-                    </label>
-                    <input
+                    <div className="mb-3">
+                      <label htmlFor="ComplaintcodeInput" className="input-field">
+                        Defect Group Title<span className="text-danger">*</span>
+                      </label>
+                      <input
                         type="text"
                         className="form-control"
                         name="defectgrouptitle"
@@ -290,40 +315,48 @@ const ComplaintCode = () => {
                         onChange={handleChange}
                         placeholder="Enter Defect Group Title "
                       />
-                    {errors.defectgrouptitle && (
-                      <small className="text-danger">
-                        {errors.defectgrouptitle}
-                      </small>
-                    )}
+                     
+                      {errors.defectgrouptitle && (
+                        <small className="text-danger">
+                          {errors.defectgrouptitle}
+                        </small>
 
-                  </div>
+                      )}
 
-                  <div className="mb-3">
-                    <label htmlFor="ComplaintcodeInput" className="input-field">
-                      Description
-                    </label>
+                    </div>
+
+                    <div className="mb-3">
+                      <label htmlFor="ComplaintcodeInput" className="input-field">
+                        Description
+                      </label>
                       <textarea
-                      type="text"
-                      className="form-control"
-                      name="description"
-                      id="description"
-                      value={formData.description}
-                      onChange={handleChange}
-                      placeholder="Enter Description "
+                        type="text"
+                        className="form-control"
+                        name="description"
+                        id="description"
+                        value={formData.description}
+                        onChange={handleChange}
+                        placeholder="Enter Description "
                       />
 
-                  </div>
-                  {roleaccess > 2 ?   <div className="text-right">
-                    <button className="btn btn-liebherr" type="submit">
-                      {isEdit ? "Update" : "Submit"}
-                    </button>
-                  </div> : null }
-                </form>
-              </div>
+                    </div>
+                    {roleaccess > 2 ? <div className="text-right">
+                      <button className="btn btn-liebherr" type="submit">
+                        {isEdit ? "Update" : "Submit"}
+                      </button>
+                    </div> : null}
+                  </form>
+                </div>
 
-              <div className="col-md-6">
-                {/* Adjust table padding and spacing */}
-                <table data={filteredUsers} className="table table-bordered table-responsive table-hover mt-3">
+                <div className="col-md-6">
+                <button
+                        className="btn btn-primary"
+                        onClick={exportToExcel}
+                      >
+                        Export to Excel
+                      </button>
+                  {/* Adjust table padding and spacing */}
+                  <table data={filteredUsers} className="table table-bordered table-responsive table-hover mt-3">
                     <thead className="thead-light">
                       <tr>
                         <th className="text-center">#</th>
@@ -335,6 +368,7 @@ const ComplaintCode = () => {
                       </tr>
                     </thead>
                     <tbody>
+                    
                       {filteredUsers.map((item, index) => (
                         <tr key={item.id}>
                           <td className="text-center">{index + 1 + indexOfFirstUser}</td>
@@ -356,7 +390,7 @@ const ComplaintCode = () => {
                               className="btn btn-link text-danger"
                               onClick={() => deleted(item.id)}
                               style={{ fontSize: "20px" }}
-                              disabled = {roleaccess > 4 ?false : true}
+                              disabled={roleaccess > 4 ? false : true}
                             >
                               <FaTrash />
                             </button>
@@ -365,7 +399,7 @@ const ComplaintCode = () => {
                       ))}
                     </tbody>
                   </table>
-                {/* <DataTable
+                  {/* <DataTable
                   data={currentUsers}
                   columns={[
                     { title: '#', data: null, render: (data, type, row, meta) => meta.row + 1 + indexOfFirstUser },
@@ -400,12 +434,12 @@ const ComplaintCode = () => {
 
 
 
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </div> : null}
+      </div> : null}
     </div>
   );
 };

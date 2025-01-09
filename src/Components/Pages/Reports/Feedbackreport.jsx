@@ -201,8 +201,8 @@ export function FeedBackreport(params) {
                                                 <td>{item.ticket_no}</td>
                                                 <td>{item.email}</td>
                                                 <td>{item.rating1}</td>
-                                                <td>{item.remark}</td>
                                                 <td>{item.rating2}</td>
+                                                <td>{item.remark}</td>
                                                 {/*                                                 
                                                        <td>
        
