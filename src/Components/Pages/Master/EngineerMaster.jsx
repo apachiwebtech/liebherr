@@ -506,7 +506,7 @@ const EngineerMaster = () => {
                           }}
                           placeholder="Enter Engineer Mobile No"
                           pattern="[0-9]*"
-                          maxLength="15"
+                          maxLength="10"
                         />
                         {formData.mobile_no && formData.mobile_no.length > 0 && formData.mobile_no.length < 10 && (
                           <small className="text-danger">Mobile number must be at least 10 digits</small>
@@ -533,7 +533,7 @@ const EngineerMaster = () => {
                           }}
                           placeholder="Enter Personal Mobile Number"
                           pattern="[0-9]{10}"
-                          maxLength="15"
+                          maxLength="10"
                         />
                         {formData.personal_mobile && formData.personal_mobile.length > 0 && formData.personal_mobile.length < 10 && (
                           <small className="text-danger">Mobile number must be at least 10 digits</small>

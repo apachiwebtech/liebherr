@@ -357,7 +357,8 @@ const Servicecontract = () => {
                         onChange={handleChange}
                         placeholder="Enter Customer Mobile Number "
                         pattern="[0-9]*"
-                        maxLength="15"
+                        maxLength="10"
+                        minLength="10"
                       />
                       {errors.customerMobile && (
                         <small className="text-danger">

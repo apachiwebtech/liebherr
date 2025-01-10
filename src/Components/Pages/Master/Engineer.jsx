@@ -359,6 +359,7 @@ const Engineer = () => {
                         placeholder="Enter Mobile Number"
                         pattern="[0-9]{10}"
                         maxLength="10"
+                        minLength="10"
                       />
 
 
