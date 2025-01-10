@@ -1529,7 +1529,7 @@ app.get("/requestpincode/:id", authenticateToken, async (req, res) => {
 
 // Insert new pincode with duplicate check (considering country_id)
 app.post("/postpincode", authenticateToken, async (req, res) => {
-  const { pincode, country_id, region_id_title, geostate_id_title, geocity_id_title, area_id_title } = req.body;
+  const { pincode, country_id, region_id_title, geostate_id_title, geocity_id_title, area_id_title , region_id, geostate_id, geocity_id, area_id } = req.body;
 
   try {
     // Access the connection pool using poolPromise
@@ -1551,8 +1551,8 @@ app.post("/postpincode", authenticateToken, async (req, res) => {
     } else {
       // If no duplicate, insert the new pincode
       const insertSql = `
-        INSERT INTO awt_pincode (pincode, country_id, region_name, geostate_name, geocity_name, area_name)
-        VALUES (${pincode}, ${country_id}, '${region_id_title}', '${geostate_id_title}', '${geocity_id_title}','${area_id_title}')
+        INSERT INTO awt_pincode (pincode, country_id, region_name, geostate_name, geocity_name, area_name,region_id,geostate_id,geocity_id , area_id)
+        VALUES (${pincode}, ${country_id}, '${region_id_title}', '${geostate_id_title}', '${geocity_id_title}','${area_id_title}','${region_id}','${geostate_id}','${geocity_id}',${area_id})
       `;
       const insertResult = await pool.request().query(insertSql);
 
@@ -1570,11 +1570,17 @@ app.post("/putpincode", authenticateToken, async (req, res) => {
     pincode,
     id,
     country_id,
+    region_title,
+    geostate_title,
+    geocity_title,
+    area_title,
     region_id,
     geostate_id,
     geocity_id,
     area_id,
   } = req.body;
+
+  console.log(req.body)
 
   try {
     // Access the connection pool using poolPromise
@@ -1600,12 +1606,18 @@ app.post("/putpincode", authenticateToken, async (req, res) => {
         UPDATE awt_pincode
         SET pincode = ${pincode},
             country_id = ${country_id},
-            region_id = ${region_id},
-            geostate_id = ${geostate_id},
+            region_name = '${region_title}',
+            geostate_name = '${geostate_title}',
+            geocity_name = '${geocity_title}',
+            area_name = '${area_title}',
+            area_id = ${area_id},
             geocity_id = ${geocity_id},
-            area_id = ${area_id}
+            geostate_id = ${geostate_id},
+            region_id = ${region_id}
         WHERE id = ${id}
       `;
+
+      console.log(updateSql)
       const updateResult = await pool.request().query(updateSql);
 
       return res.json({ message: "Pincode updated successfully!" });
