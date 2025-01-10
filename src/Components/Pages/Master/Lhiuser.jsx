@@ -458,7 +458,7 @@ const Lhiuser = () => {
                           Mobile Number<span className="text-danger">*</span>
                         </label>
                         <input
-                          type="tel"
+                          type="number"
                           className="form-control"
                           name="mobile_no"
                           id="MobileInput"

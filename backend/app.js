@@ -10004,4 +10004,182 @@ app.get("/getenquirylist", authenticateToken, async (req, res) => {
   }
 });
 
+// fetch enquiry details 
+
+app.get("/getenquiry", authenticateToken, async (req, res) => {
+  try {
+    // Access the connection pool using poolPromise
+    const pool = await poolPromise;
+
+    // Direct SQL query
+    const sql = `
+      SELECT *
+      FROM awt_enquirymaster
+      WHERE deleted = 0
+    `;
+
+    // Execute the query
+    const result = await pool.request().query(sql);
+
+    // Return only the recordset from the result
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Error fetching enquiries:", err); // Log the error for debugging
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+});
+
+// put enquiry data
+
+app.post("/putenquiry", authenticateToken, async (req, res) => {
+  const { name, id,mobile_no,email, address } = req.body;
+
+  try {
+    // Access the connection pool using poolPromise
+    const pool = await poolPromise;
+
+    // Step 1: Direct SQL query to check for duplicates without parameter binding
+    const checkDuplicateSql = `
+      SELECT *
+      FROM awt_enquirymaster
+      WHERE mobile_no = '${mobile_no}'  AND id != ${id} AND deleted = 0
+    `;
+
+    // Execute the duplicate check query
+    const duplicateCheckResult = await pool.request().query(checkDuplicateSql);
+
+    if (duplicateCheckResult.recordset.length > 0) {
+      // If a duplicate title exists (other than the current record)
+      return res.status(409).json({ message: "Duplicate entry, enquiry already exists!" });
+    } else {
+      // Step 2: Update the record if no duplicates are found
+      const updateSql = `
+        UPDATE awt_enquirymaster
+        SET name = '${name}', address ='${address}', mobile_no ='${mobile_no}', email ='${email}'
+        WHERE id = ${id}
+      `;
+
+      // Execute the update query
+      await pool.request().query(updateSql);
+
+      return res.json({ message: "enquiry updated successfully!" });
+    }
+  } catch (err) {
+    console.error("Error updating enquiry:", err); // Log the error for debugging
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+});
+
+// post role data 
+app.post("/postenquiry", authenticateToken, async (req, res) => {
+  const { name,mobile_no,email,address } = req.body;
+
+  try {
+    // Access the connection pool using poolPromise
+    const pool = await poolPromise;
+
+    // Step 1: Check if the same title exists and is not soft-deleted
+    const checkDuplicateSql = `
+      SELECT *
+      FROM awt_enquirymaster
+      WHERE mobile_no = '${mobile_no}' AND deleted = 0
+    `;
+    const duplicateCheckResult = await pool.request().query(checkDuplicateSql);
+
+    if (duplicateCheckResult.recordset.length > 0) {
+      // If duplicate data exists (not soft-deleted)
+      return res.status(409).json({ message: "Duplicate entry, enquiry already exists!" });
+    } else {
+      // Step 2: Check if the same title exists but is soft-deleted
+      const checkSoftDeletedSql = `
+        SELECT *
+        FROM awt_enquirymaster
+        WHERE mobile_no = '${mobile_no}' AND deleted = 1
+      `;
+      const softDeletedCheckResult = await pool.request().query(checkSoftDeletedSql);
+
+      if (softDeletedCheckResult.recordset.length > 0) {
+        // If soft-deleted data exists, restore the entry
+        const restoreSoftDeletedSql = `
+          UPDATE awt_enquirymaster
+          SET deleted = 0
+          WHERE mobile_no = '${mobile_no}'
+        `;
+        await pool.request().query(restoreSoftDeletedSql);
+        return res.json({ message: "Soft-deleted data restored successfully!" });
+      } else {
+        // Step 3: Insert new entry if no duplicates found
+        const insertSql = `
+          INSERT INTO awt_enquirymaster (name,mobile_no,email,address)
+          VALUES ('${name}','${mobile_no}','${email}','${address}')
+        `;
+        await pool.request().query(insertSql);
+        return res.json({ message: "enquiries added successfully!" });
+      }
+    }
+  } catch (err) {
+    console.error("Error adding enquiry:", err); // Log the error for debugging
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+});
+
+// delete role data 
+
+app.post("/deleteenquiry", authenticateToken, async (req, res) => {
+  const { id } = req.body;
+
+  try {
+    // Access the connection pool using poolPromise
+    const pool = await poolPromise;
+
+    // Direct SQL query without parameter binding
+    const sql = `
+      UPDATE awt_enquirymaster
+      SET deleted = 1
+      WHERE id = ${id}
+    `;
+
+    // Execute the update query
+    const result = await pool.request().query(sql);
+
+    // Return the result
+    return res.json(result);
+  } catch (err) {
+    console.error("Error deleting enquiry:", err); // Log error for debugging
+    return res.status(500).json({ message: "Error updating enquiry" });
+  }
+});
+
+//edit role data
+
+app.get("/requestenquiry/:id", authenticateToken, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // Access the connection pool using poolPromise
+    const pool = await poolPromise;
+
+    // Direct SQL query without parameter binding
+    const sql = `
+      SELECT *
+      FROM awt_enquirymaster
+      WHERE id = ${id} AND deleted = 0
+    `;
+
+    // Execute the query and get the results
+    const result = await pool.request().query(sql);
+
+    // Check if the result is empty
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "role not found" });
+    }
+
+    // Return the first record from the result set
+    return res.json(result.recordset[0]);
+  } catch (err) {
+    console.error("Error fetching Role:", err); // Log the error for debugging
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+});
+
 

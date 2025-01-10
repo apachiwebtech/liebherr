@@ -115,7 +115,8 @@ import { FeedBackreport } from './Components/Pages/Reports/Feedbackreport';
 import AddCspUser from './Components/Pages/Master/AddCspUser';
 import RoleassignCsp from './Components/Pages/Master/RoleAssignCsp';
 import CspRoleright from './Components/Pages/Master/CspRoleRights';
-import { Enquirylist } from './Components/Pages/Master/Enquiry';
+import AddEnquiry from './Components/Pages/Master/AddEnquiry';
+import EnquiryTabs from './Components/Pages/Master/EnquiryTabs';
 
 
 const isAuthenticated = () => {
@@ -666,8 +667,12 @@ const Router = createBrowserRouter([
         element: <FeedBackreport />
       },
       {
-        path: "enquiry",
-        element: <Enquirylist />
+        path: "addenquiry",
+        element: <AddEnquiry />
+      },
+      {
+        path: "enuiry",
+        element: <EnquiryTabs />
       },
       {
         path: "/datatable",
