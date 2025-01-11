@@ -563,7 +563,7 @@ const MasterFranchise = (params) => {
                       >
                         Master Service Partner  <span className="text-danger">*</span>
                       </label>
-                      <input
+                      <input disabled
                         type="text"
                         className="form-control"
                         name="title"
@@ -584,7 +584,7 @@ const MasterFranchise = (params) => {
                       <label htmlFor="LicareInput" className="input-field">
                         Licare Code<span className="text-danger">*</span>
                       </label>
-                      <input
+                      <input disabled
                         type="text"
                         className="form-control"
                         name="licarecode"
@@ -609,7 +609,7 @@ const MasterFranchise = (params) => {
                       >
                         Master Service Partner(Contact Person)<span className="text-danger">*</span>
                       </label>
-                      <input
+                      <input disabled
                         type="text"
                         className="form-control"
                         name="contact_person"
@@ -633,7 +633,7 @@ const MasterFranchise = (params) => {
                       >
                         Master Service Partner (Email)<span className="text-danger">*</span>
                       </label>
-                      <input
+                      <input disabled
                         type="email" // Changed type to 'email'
                         className="form-control"
                         name="email"
@@ -657,7 +657,7 @@ const MasterFranchise = (params) => {
                       >
                         Master Service Partner (Mobile Number)<span className="text-danger">*</span>
                       </label>
-                      <input
+                      <input  disabled
                         type="tel" // Changed type to 'tel' for mobile number input
                         className="form-control"
                         name="mobile_no"
@@ -680,7 +680,7 @@ const MasterFranchise = (params) => {
                       <label htmlFor="PartnerNameInput" className="input-field">
                         Partner Name<span className="text-danger">*</span>
                       </label>
-                      <input
+                      <input disabled
                         type="text"
                         className="form-control"
                         name="partner_name"
@@ -705,7 +705,7 @@ const MasterFranchise = (params) => {
                       >
                         Master Service Partner (Password)<span className="text-danger">*</span>
                       </label>
-                      <input
+                      <input disabled
                         type="password" // Changed type to 'password' for secure text input
                         className="form-control"
                         name="password"
@@ -726,7 +726,7 @@ const MasterFranchise = (params) => {
                       <label htmlFor="country" className="input-field">
                         Country<span className="text-danger">*</span>
                       </label>
-                      <select
+                      <select disabled
                         id="country"
                         name="country_id"
                         className="form-select"
@@ -751,7 +751,7 @@ const MasterFranchise = (params) => {
                       <label htmlFor="region" className="input-field">
                         Region<span className="text-danger">*</span>
                       </label>
-                      <select
+                      <select disabled
                         id="region"
                         name="region_id"
                         className="form-select"
@@ -778,7 +778,8 @@ const MasterFranchise = (params) => {
                       <label htmlFor="geostate" className="input-field">
                         Geo State<span className="text-danger">*</span>
                       </label>
-                      <select className="form-select" value={formData.state} name="state" onChange={handleChange}>
+                      <select  disabled
+                      className="form-select" value={formData.state} name="state" onChange={handleChange}>
                         <option value="">Select State</option>
                         {state.map((item) => {
                           return (
@@ -800,7 +801,7 @@ const MasterFranchise = (params) => {
                         District<span className="text-danger">*</span>
                       </label>
 
-                      <select className="form-select" onChange={handleChange} name="area" value={formData.area}>
+                      <select disabled className="form-select" onChange={handleChange} name="area" value={formData.area}>
                         <option value="">Select District</option>
                         {area.map((item) => {
                           return (
@@ -818,7 +819,7 @@ const MasterFranchise = (params) => {
                       <label htmlFor="geocity" className="input-field">
                         Geo City<span className="text-danger">*</span>
                       </label>
-                      <select className="form-select" value={formData.city} name="city" onChange={handleChange}>
+                      <select disabled className="form-select" value={formData.city} name="city" onChange={handleChange}>
                         <option value="">Select City</option>
                         {city.map((item) => {
                           return (
@@ -839,7 +840,7 @@ const MasterFranchise = (params) => {
                       <label htmlFor="area" className="input-field">
                         Pincode<span className="text-danger">*</span>
                       </label>
-                      <select
+                      <select disabled
                         id="pincode"
                         name="pincode_id"
                         className="form-select"
@@ -862,7 +863,7 @@ const MasterFranchise = (params) => {
                       <label htmlFor="WebsiteInput" className="input-field">
                         Website
                       </label>
-                      <input
+                      <input disabled
                         type="url"
                         className="form-control"
                         name="website"
@@ -884,7 +885,7 @@ const MasterFranchise = (params) => {
                       <label htmlFor="GSTNoInput" className="input-field">
                         GST Number
                       </label>
-                      <input
+                      <input disabled
                         type="text"
                         className="form-control"
                         name="gst_no"
@@ -905,7 +906,7 @@ const MasterFranchise = (params) => {
                       <label htmlFor="PannoInput" className="input-field">
                         PAN Number
                       </label>
-                      <input
+                      <input disabled
                         type="text"
                         className="form-control"
                         name="panno"
@@ -926,7 +927,7 @@ const MasterFranchise = (params) => {
                       <label htmlFor="BankNameInput" className="input-field">
                         Bank Name
                       </label>
-                      <input
+                      <input disabled
                         type="text"
                         className="form-control"
                         name="bank_name"
@@ -947,7 +948,7 @@ const MasterFranchise = (params) => {
                       <label htmlFor="BankAccInput" className="input-field">
                         Bank Account Number
                       </label>
-                      <input
+                      <input disabled
                         type="text"
                         className="form-control"
                         name="bank_acc"
@@ -968,7 +969,7 @@ const MasterFranchise = (params) => {
                       <label htmlFor="BankIfscInput" className="input-field">
                         Bank IFSC Code
                       </label>
-                      <input
+                      <input disabled
                         type="text"
                         className="form-control"
                         name="bank_ifsc"
@@ -989,7 +990,7 @@ const MasterFranchise = (params) => {
                       <label htmlFor="WithLiebherrInput" className="input-field">
                         With Liebherr<span className="text-danger">*</span>
                       </label>
-                      <input
+                      <input disabled
                         type="date"
                         className="form-control"
                         name="withliebher"
@@ -1010,7 +1011,7 @@ const MasterFranchise = (params) => {
                       <label htmlFor="LastWorkingDateInput" className="input-field">
                         Last Working Date
                       </label>
-                      <input
+                      <input disabled
                         type="date"
                         className="form-control"
                         name="lastworkinddate"
@@ -1031,7 +1032,7 @@ const MasterFranchise = (params) => {
                       <label htmlFor="ContractActiInput" className="input-field">
                         Contract Activation Date
                       </label>
-                      <input
+                      <input disabled
                         type="date"
                         className="form-control"
                         name="contract_acti"
@@ -1052,7 +1053,7 @@ const MasterFranchise = (params) => {
                       <label htmlFor="ContractExpirInput" className="input-field">
                         Contract Expiration Date
                       </label>
-                      <input
+                      <input disabled
                         type="date"
                         className="form-control"
                         name="contract_expir"
@@ -1076,7 +1077,7 @@ const MasterFranchise = (params) => {
                       <label htmlFor="BankAddressInput" className="input-field">
                         Bank Address
                       </label>
-                      <textarea
+                      <textarea disabled
                         className="form-control"
                         name="bank_address"
                         id="BankAddressInput"
@@ -1102,7 +1103,7 @@ const MasterFranchise = (params) => {
                       >
                         Address<span className="text-danger">*</span>
                       </label>
-                      <textarea
+                      <textarea disabled
                         className="form-control"
                         name="address"
                         id="MasterFranchiseInput"

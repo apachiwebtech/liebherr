@@ -16,6 +16,7 @@ export function Franchisemasterlist(params) {
   const { loaders, axiosInstance } = useAxiosLoader();
   const [Franchisemasterdata, setFranchisemasterdata] = useState([]);
   const [isEdit, setIsEdit] = useState(false);
+  const [filteredData, setFilteredData] = useState([]);
   const token = localStorage.getItem("token");
 
   const [formData, setFormData] = useState({
@@ -46,82 +47,99 @@ export function Franchisemasterlist(params) {
     partner_name: '',
   });
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString); // Parse the date string
-    const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
-    return date.toLocaleDateString('en-GB', options).replace(/\//g, '-'); // Convert to 'DD-MM-YYYY' format
-  };
+  const [searchFilters, setSearchFilters] = useState({
+    title: '',
+    licarecode: '',
+    partner_name: '',
+    mobile_no: '',
+    email: '',
+
+  });
+
+
 
   const fetchFranchisemasterlist = async () => {
     try {
-      const response = await axiosInstance.get(`${Base_Url}/getmasterlist`, {
+      const params = new URLSearchParams();
+
+      // Add all filters to params if they have values
+      Object.entries(searchFilters).forEach(([key, value]) => {
+        if (value) { // Only add if value is not empty
+          params.append(key, value);
+        }
+      });
+      const response = await axiosInstance.get(`${Base_Url}/getmasterfranchiselist`, {
         headers: {
           Authorization: token,
         },
       });
       setFranchisemasterdata(response.data);
+      setFilteredData(response.data);
     } catch (error) {
       console.error('Error fetching franchisemasterdata:', error);
       setFranchisemasterdata([]);
+      setFilteredData([]);
     }
   };
 
-  const handleChangestatus = (e) => {
+  const fetchFilteredData = async () => {
     try {
-      const dataId = e.target.getAttribute('data-id');
+      const params = new URLSearchParams();
 
-      const response = axiosInstance.post(`${Base_Url}/updatestatus`, { dataId: dataId }, {
+      // Add all filters to params
+      Object.entries(searchFilters).forEach(([key, value]) => {
+        if (value) { // Only add if value is not empty
+          params.append(key, value);
+        }
+      });
+
+      console.log('Sending params:', params.toString()); // Debug log
+
+      const response = await axiosInstance.get(`${Base_Url}/getmasterfranchiselist?${params}`, {
         headers: {
           Authorization: token,
         },
-      });
-
+      }
+      );
+      setFranchisemasterdata(response.data);
+      setFilteredData(response.data);
     } catch (error) {
-      console.error("Error editing user:", error);
+      console.error('Error fetching filtered data:', error);
+      setFilteredData([]);
     }
+  };
+
+
+
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+
+    setSearchFilters(prev => ({
+      ...prev,
+      [name]: value
+    }));
 
   };
 
-
-  const deleted = async (id) => {
-    try {
-      const response = await axiosInstance.post(`${Base_Url}/deletemasterlist`, { id }, {
-        headers: {
-          Authorization: token,
-        },
-      });
-      setFormData({
-        title: "",
-        password: "",
-        contact_person: '',
-        email: "",
-        mobile_no: '',
-        address: '',
-        country_id: '',
-        region_id: '',
-        state: '',
-        area: '',
-        city: '',
-        pincode_id: '',
-        website: '',
-        gst_no: '',
-        panno: '',
-        bank_name: '',
-        bank_acc: '',
-        bank_ifsc: '',
-        with_liebherr: '',
-        last_working_date: '',
-        contract_acti: '',
-        contract_expir: '',
-        bank_address: '',
-        licarecode: '',
-        partner_name: '',
-      })
-      fetchFranchisemasterlist();
-    } catch (error) {
-      console.error('Error deleting user:', error);
-    }
+  const applyFilters = () => {
+    console.log('Applying filters:', searchFilters); // Debug log
+    fetchFilteredData();
   };
+
+  const resetFilters = () => {
+    setSearchFilters({
+      title: '',
+      licarecode: '',
+      partner_name: '',
+      mobile_no: '',
+      email: '',
+
+    });
+    fetchFranchisemasterlist(); // Reset to original data
+  };
+
+
+
 
   const sendtoedit = async (id) => {
     id = id.toString()
@@ -131,6 +149,8 @@ export function Franchisemasterlist(params) {
   };
   useEffect(() => {
     fetchFranchisemasterlist();
+
+
   }, []);
 
   const [isOpen, setIsOpen] = useState({}); // State to track which rows are expanded
@@ -138,15 +158,6 @@ export function Franchisemasterlist(params) {
     setIsOpen((prev) => ({ ...prev, [rowId]: !prev[rowId] }));
   };
 
-  useEffect(() => {
-    const $ = window.$; // Access jQuery
-    $(document).ready(function () {
-      $('#myTable').DataTable();
-    });
-    return () => {
-      $('#myTable').DataTable().destroy();
-    };
-  }, []);
 
   const navigate = useNavigate()
 
@@ -157,7 +168,7 @@ export function Franchisemasterlist(params) {
 
     // Convert data to a worksheet
     const worksheet = XLSX.utils.json_to_sheet(Franchisemasterdata.map(user => ({
-      
+
       "Name": user.title,
       "ContactPerson": user.contact_person,
       "Email": user.email,
@@ -166,7 +177,7 @@ export function Franchisemasterlist(params) {
       "Pincode": user.pincode_id,
       "Country": user.country_id,
       "Region": user.region_id,
-      "State": user.geostate_id, 
+      "State": user.geostate_id,
       "District": user.area_id,
       "GeoCity": user.geocity_id,
       "Website": user.webste,
@@ -234,19 +245,126 @@ export function Franchisemasterlist(params) {
           <div className="card mb-3 tab_box">
 
             <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
-              <div className="p-1 text-right">
-                <button hidden
-                  className="btn btn-primary"
-                  onClick={() => navigate("/MasterFranchise")}
-                >
-                  Add  Master Service Partner  </button>
-              </div>
               <button
                 className="btn btn-primary"
                 onClick={exportToExcel}
               >
                 Export to Excel
               </button>
+              <div className="row mb-3">
+
+                <div className="col-md-2">
+                  <div className="form-group">
+                    <label>Name</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="title"
+                      value={searchFilters.title}
+                      placeholder="Search by name"
+                      onChange={handleFilterChange}
+                    />
+                  </div>
+                </div>
+
+
+                <div className="col-md-2">
+                  <div className="form-group">
+                    <label>Licare Code</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="licarecode"
+                      value={searchFilters.licarecode}
+                      placeholder="Search by Licare code"
+                      onChange={handleFilterChange}
+                    />
+                  </div>
+                </div>
+                <div className="col-md-2">
+                  <div className="form-group">
+                    <label>Mobile Number</label>
+                    <input
+                      type="tel"
+                      className="form-control"
+                      name="mobile_no"
+                      value={searchFilters.mobile_no}
+                      placeholder="Search by Mobile Number"
+                      onChange={handleFilterChange}
+                      pattern="[0-9]{10}"
+                      maxLength="10"
+                      minLength="10"
+                    />
+                  </div>
+                </div>
+
+                <div className="col-md-2">
+                  <div className="form-group">
+                    <label>Email</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="email"
+                      value={searchFilters.email}
+                      placeholder="Search by customer email"
+                      onChange={handleFilterChange}
+                    />
+                  </div>
+                </div>
+                <div className="col-md-2">
+                  <div className="form-group">
+                    <label>Partner Name</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="partner_name"
+                      value={searchFilters.partner_name}
+                      placeholder="Search by Partner name"
+                      onChange={handleFilterChange}
+                    />
+                  </div>
+                </div>
+
+
+
+              </div>
+              <div className="row mb-3">
+                <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
+                  <div className="form-group">
+                    <button
+                      className="btn btn-primary mr-2"
+                      onClick={applyFilters}
+                    >
+                      Search
+                    </button>
+                    <button
+                      className="btn btn-secondary"
+                      onClick={resetFilters}
+                      style={{
+                        marginLeft: '5px',
+                      }}
+                    >
+                      Reset
+                    </button>
+                    {filteredData.length === 0 && (
+                      <div
+                        style={{
+                          backgroundColor: '#f8d7da',
+                          color: '#721c24',
+                          padding: '5px 10px',
+                          marginLeft: '10px',
+                          borderRadius: '4px',
+                          border: '1px solid #f5c6cb',
+                          fontSize: '14px',
+                          display: 'inline-block'
+                        }}
+                      >
+                        No Record Found
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
               <table className="table">
                 <thead>
                   <tr>
@@ -290,33 +408,7 @@ export function Franchisemasterlist(params) {
                             <FaEye />
                           </button>
                         </td>
-                        {/* <td >
-                                                    <button
-                                                        className='btn'
-                                                        onClick={() => {
-                                                            navigate(`/complaintview/${item.id}`)
-                                                        }}
-                                                        title="View"
-                                                        style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                                                    >
-                                                        <FaEye />
-                                                    </button>
-                                                </td> */}
-                        {/* <td style={{ padding: "10px" }}>
-                                                    <label class="switch">
-                                                        <input
-                                                            type="checkbox"
-                                                            onChange={handleChangestatus}
-                                                            data-id={item.id}
-                                                            checked={item.status === 1}  // Check if status is 1 (checked)
-                                                            className="status"
-                                                        />
 
-
-                                                        <span class="slider round"></span>
-                                                    </label>
-
-                                                </td> */}
                       </tr>
                     )
                   })}

@@ -4955,12 +4955,21 @@ app.get("/getengineerpopulate/:engineerid", authenticateToken, async (req, res) 
 
 // End Engineer Master
 
-app.get("/getmasterlist", authenticateToken, async (req, res) => {
+app.get("/getmasterfranchiselist", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
+    const {
+      title,
+      licarecode,
+      partner_name,
+      mobile_no,
+      email,
+      page = 1, // Default to page 1 if not provided
+      pageSize = 10, // Default to 10 items per page if not provided
+    } = req.query;
 
     // Modified SQL query with explicit JOIN conditions
-    const sql = `
+    let sql = `
       SELECT m.*,
         c.title as country_name,
         r.title as region_name,
@@ -4975,6 +4984,26 @@ app.get("/getmasterlist", authenticateToken, async (req, res) => {
       LEFT JOIN awt_geocity ct ON m.geocity_id = CAST(ct.id AS VARCHAR)
       WHERE m.deleted = 0
     `;
+
+    if (title) {
+      sql += ` AND m.title LIKE '%${title}%'`;
+    }
+
+    if (licarecode) {
+      sql += ` AND m.licarecode LIKE '%${licarecode}%'`;
+    }
+
+    if (mobile_no) {
+      sql += ` AND m.mobile_no LIKE '%${mobile_no}%'`;
+    }
+
+    if (email) {
+      sql += ` AND m.email LIKE '%${email}%'`;
+    }
+
+    if (partner_name) {
+      sql += ` AND m.partner_name LIKE '%${partner_name}%'`;
+    }
 
     const result = await pool.request().query(sql);
     return res.json(result.recordset);
@@ -9603,7 +9632,7 @@ app.post('/getcspusers',authenticateToken, async (req, res) => {
 });
 
 
-app.post('/getcallrecorddetails',authenticateToken, async (req, res) => {
+app.post('/getcallrecorddetails', async (req, res) => {
   const { uuid, call_to_number, caller_id_number, start_stamp, call_id, billing_circle, customer_no_with_prefix } = req.body;
 
   const date = new Date();
