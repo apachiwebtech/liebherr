@@ -1529,7 +1529,7 @@ app.get("/requestpincode/:id", authenticateToken, async (req, res) => {
 
 // Insert new pincode with duplicate check (considering country_id)
 app.post("/postpincode", authenticateToken, async (req, res) => {
-  const { pincode, country_id, region_id_title, geostate_id_title, geocity_id_title, area_id_title , region_id, geostate_id, geocity_id, area_id } = req.body;
+  const { pincode, country_id, region_id_title, geostate_id_title, geocity_id_title, area_id_title, region_id, geostate_id, geocity_id, area_id } = req.body;
 
   try {
     // Access the connection pool using poolPromise
@@ -3249,25 +3249,25 @@ app.get("/getcvengineer/:pincode/:msp/:csp", authenticateToken, async (req, res)
 
 
     // Direct SQL query without parameter binding
-  //   const sql = `SELECT em.id, em.title ,em.engineer_id
-  //  FROM pincode_allocation AS pa
-  //  LEFT JOIN awt_franchisemaster AS fm
-  //         ON fm.licarecode = pa.account_manager
-  //  LEFT JOIN awt_childfranchisemaster AS cfm
-  //         ON cfm.licare_code = pa.owner
-  //  LEFT JOIN awt_engineermaster AS em
-  //         ON em.cfranchise_id =
-  //            CASE
-  //              WHEN pa.account_manager = pa.owner THEN RIGHT(pa.account_manager, LEN(pa.account_manager) - 2)
-  //              ELSE  RIGHT(pa.owner, LEN(pa.owner) - 2)
-  //            END
-  //  WHERE  pa.pincode ='${pincode}' and pa.account_manager = '${msp}' and pa.owner ='${csp}'`;
+    //   const sql = `SELECT em.id, em.title ,em.engineer_id
+    //  FROM pincode_allocation AS pa
+    //  LEFT JOIN awt_franchisemaster AS fm
+    //         ON fm.licarecode = pa.account_manager
+    //  LEFT JOIN awt_childfranchisemaster AS cfm
+    //         ON cfm.licare_code = pa.owner
+    //  LEFT JOIN awt_engineermaster AS em
+    //         ON em.cfranchise_id =
+    //            CASE
+    //              WHEN pa.account_manager = pa.owner THEN RIGHT(pa.account_manager, LEN(pa.account_manager) - 2)
+    //              ELSE  RIGHT(pa.owner, LEN(pa.owner) - 2)
+    //            END
+    //  WHERE  pa.pincode ='${pincode}' and pa.account_manager = '${msp}' and pa.owner ='${csp}'`;
 
-  const newmasp = csp.replace(/^SP/, '').trim();
+    const newmasp = csp.replace(/^SP/, '').trim();
 
 
 
-  const sql = `select * from awt_engineermaster where cfranchise_id = '${newmasp}' and deleted = 0 `
+    const sql = `select * from awt_engineermaster where cfranchise_id = '${newmasp}' and deleted = 0 `
     console.log(sql)
     // Execute the query
     const result = await pool.request().query(sql);
@@ -9703,7 +9703,7 @@ app.post('/csp_role_pages', async (req, res) => {
       const pageIdsResult = await pool.request().query(fetchPageIds);
       const pageIds = pageIdsResult.recordset;
 
-      console.log(pageIds.length,"$$")
+      console.log(pageIds.length, "$$")
 
       if (pageIds.length > 0) {
         const transaction = new sql.Transaction(pool);
@@ -10032,7 +10032,7 @@ app.get("/getenquiry", authenticateToken, async (req, res) => {
 // put enquiry data
 
 app.post("/putenquiry", authenticateToken, async (req, res) => {
-  const { name, id,mobile_no,email, address } = req.body;
+  const { name, id, mobile_no, email, address } = req.body;
 
   try {
     // Access the connection pool using poolPromise
@@ -10072,7 +10072,7 @@ app.post("/putenquiry", authenticateToken, async (req, res) => {
 
 // post role data 
 app.post("/postenquiry", authenticateToken, async (req, res) => {
-  const { name,mobile_no,email,address } = req.body;
+  const { name, mobile_no, email, address } = req.body;
 
   try {
     // Access the connection pool using poolPromise
@@ -10179,6 +10179,40 @@ app.get("/requestenquiry/:id", authenticateToken, async (req, res) => {
   } catch (err) {
     console.error("Error fetching Role:", err); // Log the error for debugging
     return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+});
+
+app.get('/getheaddata_web', async (req, res) => {
+  try {
+    const pool = await poolPromise;   
+
+    const result = await pool.request()
+      .query(`SELECT * FROM complaint_ticket WHERE YEAR([created_date]) = YEAR(GETDATE());`);
+
+    const result1 = await pool.request()
+      .query(`SELECT * FROM complaint_ticket WHERE YEAR([created_date]) = YEAR(GETDATE()) and call_status = 'Cancelled'`);
+
+    const result2 = await pool.request()
+      .query(`SELECT * FROM complaint_ticket WHERE YEAR([created_date]) = YEAR(GETDATE()) and call_status = 'Closed'`);
+
+    const result3 = await pool.request()
+      .query(`SELECT * FROM complaint_ticket WHERE YEAR([created_date]) = YEAR(GETDATE()) and call_status = 'Open'`);
+
+    const totalTickets = result.recordset.length || 0;
+    const cancelled = result1.recordset.length || 0;
+    const closed = result2.recordset.length || 0;
+    const open = result3.recordset.length || 0;
+
+    res.status(200).json({
+      totalTickets,
+      cancelled,
+      closed,
+      open,
+    });
+
+  } catch (error) {
+    console.error('Database Query Error:', error);
+    res.status(500).json({ message: 'An error occurred during the database query' });
   }
 });
 
