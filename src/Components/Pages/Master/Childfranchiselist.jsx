@@ -18,6 +18,7 @@ export function ChildFranchiselist(params) {
     const token = localStorage.getItem("token");
     const [Franchisemasterdata, setChildfranchisemasterdata] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
+    const [filteredData, setFilteredData] = useState([]);
     const [formData, setFormData] = useState({
         title: "",
         pfranchise_id: "",
@@ -47,78 +48,95 @@ export function ChildFranchiselist(params) {
         partner_name: '',
     });
 
-    const formatDate = (dateString) => {
-        const date = new Date(dateString); // Parse the date string
-        const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
-        return date.toLocaleDateString('en-GB', options).replace(/\//g, '-'); // Convert to 'DD-MM-YYYY' format
-    };
+    const [searchFilters, setSearchFilters] = useState({
+        title: '',
+        licarecode: '',
+        partner_name: '',
+        mobile_no: '',
+        email: '',
+        parentfranchisetitle: '',
+
+
+    });
 
     const fetchChildfranchisemasterlist = async () => {
         try {
+            const params = new URLSearchParams();
+
+            // Add all filters to params if they have values
+            Object.entries(searchFilters).forEach(([key, value]) => {
+                if (value) { // Only add if value is not empty
+                    params.append(key, value);
+                }
+            });
             const response = await axiosInstance.get(`${Base_Url}/getchildFranchiseDetails`, {
                 headers: {
                     Authorization: token,
                 },
             });
             setChildfranchisemasterdata(response.data);
+            setFilteredData(response.data);
         } catch (error) {
-            console.error('Error fetching franchisemasterdata:', error);
+            console.error('Error fetching childfranchisemasterdata:', error);
             setChildfranchisemasterdata([]);
+            setFilteredData([]);
         }
     };
-    const handleChangestatus = (e) => {
-        try {
-            const dataId = e.target.getAttribute('data-id');
 
-            const response = axiosInstance.post(`${Base_Url}/updatestatus`, { dataId: dataId }, {
+    const fetchFilteredData = async () => {
+        try {
+            const params = new URLSearchParams();
+
+            // Add all filters to params
+            Object.entries(searchFilters).forEach(([key, value]) => {
+                if (value) { // Only add if value is not empty
+                    params.append(key, value);
+                }
+            });
+
+            console.log('Sending params:', params.toString()); // Debug log
+
+            const response = await axiosInstance.get(`${Base_Url}/getchildFranchiseDetails?${params}`, {
                 headers: {
                     Authorization: token,
                 },
-            });
-
+            }
+            );
+            setChildfranchisemasterdata(response.data);
+            setFilteredData(response.data);
         } catch (error) {
-            console.error("Error editing user:", error);
-        }
-
-    };
-
-
-    const deleted = async (id) => {
-        try {
-            const response = await axiosInstance.post(`${Base_Url}/deletemasterlist`, { id });
-            setFormData({
-                title: "",
-                password: "",
-                contact_person: '',
-                email: "",
-                mobile_no: '',
-                address: '',
-                country_id: '',
-                region_id: '',
-                state: '',
-                area: '',
-                city: '',
-                pincode_id: '',
-                website: '',
-                gst_no: '',
-                panno: '',
-                bank_name: '',
-                bank_acc: '',
-                bank_ifsc: '',
-                with_liebherr: '',
-                last_working_date: '',
-                contract_acti: '',
-                contract_expir: '',
-                bank_address: '',
-                licarecode: '',
-                partner_name: '',
-            })
-            fetchChildfranchisemasterlist();
-        } catch (error) {
-            console.error('Error deleting user:', error);
+            console.error('Error fetching filtered data:', error);
+            setFilteredData([]);
         }
     };
 
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+
+        setSearchFilters(prev => ({
+            ...prev,
+            [name]: value
+        }));
+
+    };
+
+    const applyFilters = () => {
+        console.log('Applying filters:', searchFilters); // Debug log
+        fetchFilteredData();
+    };
+
+    const resetFilters = () => {
+        setSearchFilters({
+            title: '',
+            licarecode: '',
+            partner_name: '',
+            mobile_no: '',
+            email: '',
+            parentfranchisetitle: '',
+
+        });
+        fetchChildfranchisemasterlist(); // Reset to original data
+    };
     const sendtoedit = async (id) => {
         id = id.toString()
         let encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
@@ -134,16 +152,6 @@ export function ChildFranchiselist(params) {
     const toggleRow = (rowId) => {
         setIsOpen((prev) => ({ ...prev, [rowId]: !prev[rowId] }));
     };
-
-    useEffect(() => {
-        const $ = window.$; // Access jQuery
-        $(document).ready(function () {
-            $('#myTable').DataTable();
-        });
-        return () => {
-            $('#myTable').DataTable().destroy();
-        };
-    }, []);
 
     const navigate = useNavigate()
 
@@ -238,6 +246,133 @@ export function ChildFranchiselist(params) {
                             >
                                 Export to Excel
                             </button>
+                            <div className="row mb-3">
+
+                                <div className="col-md-2">
+                                    <div className="form-group">
+                                        <label>Name</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="title"
+                                            value={searchFilters.title}
+                                            placeholder="Search by name"
+                                            onChange={handleFilterChange}
+                                        />
+                                    </div>
+                                </div>
+
+
+                                <div className="col-md-2">
+                                    <div className="form-group">
+                                        <label>Licare Code</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="licarecode"
+                                            value={searchFilters.licarecode}
+                                            placeholder="Search by Licare code"
+                                            onChange={handleFilterChange}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="col-md-2">
+                                    <div className="form-group">
+                                        <label>Mobile Number</label>
+                                        <input
+                                            type="tel"
+                                            className="form-control"
+                                            name="mobile_no"
+                                            value={searchFilters.mobile_no}
+                                            placeholder="Search by Mobile Number"
+                                            onChange={handleFilterChange}
+                                            pattern="[0-9]{10}"
+                                            maxLength="10"
+                                            minLength="10"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="col-md-2">
+                                    <div className="form-group">
+                                        <label>Email</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="email"
+                                            value={searchFilters.email}
+                                            placeholder="Search by customer email"
+                                            onChange={handleFilterChange}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="col-md-2">
+                                    <div className="form-group">
+                                        <label>Partner Name</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="partner_name"
+                                            value={searchFilters.partner_name}
+                                            placeholder="Search by Partner name"
+                                            onChange={handleFilterChange}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="col-md-2">
+                                    <div className="form-group">
+                                        <label>Parent Franchise Name</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="parentfranchisetitle"
+                                            value={searchFilters.parentfranchisetitle}
+                                            placeholder="Search by Parent Franchise Name"
+                                            onChange={handleFilterChange}
+                                        />
+                                    </div>
+                                </div>
+
+
+
+                            </div>
+                            <div className="row mb-3">
+                                <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
+                                    <div className="form-group">
+                                        <button
+                                            className="btn btn-primary mr-2"
+                                            onClick={applyFilters}
+                                        >
+                                            Search
+                                        </button>
+                                        <button
+                                            className="btn btn-secondary"
+                                            onClick={resetFilters}
+                                            style={{
+                                                marginLeft: '5px',
+                                            }}
+                                        >
+                                            Reset
+                                        </button>
+                                        {filteredData.length === 0 && (
+                                            <div
+                                                style={{
+                                                    backgroundColor: '#f8d7da',
+                                                    color: '#721c24',
+                                                    padding: '5px 10px',
+                                                    marginLeft: '10px',
+                                                    borderRadius: '4px',
+                                                    border: '1px solid #f5c6cb',
+                                                    fontSize: '14px',
+                                                    display: 'inline-block'
+                                                }}
+                                            >
+                                                No Record Found
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
 
                             <div className='table-responsive' >
                                 <table className="table">

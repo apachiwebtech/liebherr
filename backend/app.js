@@ -5309,9 +5309,19 @@ app.get("/getchildFranchiseDetails", authenticateToken, async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
+    const {
+      title,
+      licarecode,
+      partner_name,
+      mobile_no,
+      email,
+      parentfranchisetitle,
+      page = 1, // Default to page 1 if not provided
+      pageSize = 10, // Default to 10 items per page if not provided
+    } = req.query;
 
     // SQL query to fetch data from the master list, customize based on your needs
-    const sql = `
+    let sql = `
  SELECT m.*,
        p.title AS parentfranchisetitle,
        c.title AS country_name,
@@ -5328,6 +5338,30 @@ LEFT JOIN awt_geocity ct ON m.geocity_id = CAST(ct.id AS VARCHAR)
 LEFT JOIN awt_franchisemaster p ON m.pfranchise_id = CAST(p.licarecode AS VARCHAR)
 WHERE m.deleted = 0
     `;
+
+    if (title) {
+      sql += ` AND m.title LIKE '%${title}%'`;
+    }
+
+    if (licarecode) {
+      sql += ` AND m.licare_code LIKE '%${licarecode}%'`;
+    }
+
+    if (mobile_no) {
+      sql += ` AND m.mobile_no LIKE '%${mobile_no}%'`;
+    }
+
+    if (email) {
+      sql += ` AND m.email LIKE '%${email}%'`;
+    }
+
+    if (partner_name) {
+      sql += ` AND m.partner_name LIKE '%${partner_name}%'`;
+    }
+    if (parentfranchisetitle) {
+      sql += ` AND p.title LIKE '%${parentfranchisetitle}%'`;
+    }
+
     // Execute the SQL query
     const result = await pool.request().query(sql);
 
@@ -9164,7 +9198,7 @@ app.post("/getquotationspare", authenticateToken, async (req, res) => {
 
 // const API_KEY = "a8f2b3c4-d5e6-7f8g-h9i0-12345jklmn67";
 
-app.post("/awt_service_contact",authenticateToken, async (req, res) => {
+app.post("/awt_service_contact", authenticateToken, async (req, res) => {
   // Validate API key
   const apiKey = req.header('x-api-key'); // Get API key from request header
 
@@ -9201,7 +9235,7 @@ app.post("/awt_service_contact",authenticateToken, async (req, res) => {
   }
 });
 
-app.post("/query",authenticateToken, async (req, res) => {
+app.post("/query", authenticateToken, async (req, res) => {
   const apiKey = req.header('x-api-key'); // Get API key from request header
 
   if (apiKey !== API_KEY) {
@@ -9414,7 +9448,7 @@ app.get("/requestrole/:id", authenticateToken, async (req, res) => {
 });
 
 
-app.post('/role_pages',authenticateToken, async (req, res) => {
+app.post('/role_pages', authenticateToken, async (req, res) => {
   const role_id = req.body.role_id;
 
   try {
@@ -9489,7 +9523,7 @@ app.post('/role_pages',authenticateToken, async (req, res) => {
 
 
 
-app.post('/getRoleData',authenticateToken, async (req, res) => {
+app.post('/getRoleData', authenticateToken, async (req, res) => {
   const { role, pageid } = req.body;
 
   try {
@@ -9516,7 +9550,7 @@ app.post('/getRoleData',authenticateToken, async (req, res) => {
   }
 });
 
-app.post('/assign_role',authenticateToken, async (req, res) => {
+app.post('/assign_role', authenticateToken, async (req, res) => {
   const rolePages = req.body;
 
   // Validate the input
@@ -9609,7 +9643,7 @@ app.get("/getfeedbacklist", authenticateToken, async (req, res) => {
   }
 });
 
-app.post('/getcspusers',authenticateToken, async (req, res) => {
+app.post('/getcspusers', authenticateToken, async (req, res) => {
   const { licare_code } = req.body;
 
   try {
@@ -9702,7 +9736,7 @@ app.get("/getcsprole", authenticateToken, async (req, res) => {
 
 // Fetch role pages 
 
-app.post('/csp_role_pages',authenticateToken, async (req, res) => {
+app.post('/csp_role_pages', authenticateToken, async (req, res) => {
   const role_id = req.body.role_id;
 
   try {
@@ -9780,7 +9814,7 @@ app.post('/csp_role_pages',authenticateToken, async (req, res) => {
 // Fetch assign role 
 
 
-app.post('/csp_assign_role',authenticateToken, async (req, res) => {
+app.post('/csp_assign_role', authenticateToken, async (req, res) => {
   const rolePages = req.body;
 
   // Validate the input
@@ -10211,9 +10245,9 @@ app.get("/requestenquiry/:id", authenticateToken, async (req, res) => {
   }
 });
 
-app.get('/getheaddata_web',authenticateToken, async (req, res) => {
+app.get('/getheaddata_web', authenticateToken, async (req, res) => {
   try {
-    const pool = await poolPromise;   
+    const pool = await poolPromise;
 
     const result = await pool.request()
       .query(`SELECT * FROM complaint_ticket WHERE YEAR([created_date]) = YEAR(GETDATE());`);
