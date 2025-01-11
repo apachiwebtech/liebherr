@@ -137,7 +137,7 @@ const Location = () => {
   };
 
   const deleted = async (id) => {
-   const confirm =  window.confirm("Are you sure you want to delete this user?");
+   const confirm =  window.confirm("Are you sure you want to delete ?");
 
     if(confirm){
       try {

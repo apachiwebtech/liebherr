@@ -146,6 +146,9 @@ const ProductLine = () => {
   };
 
   const deleted = async (id) => {
+    const confirm =  window.confirm("Are you sure you want to delete ?");
+
+    if(confirm){
     try {
       const response = await axiosInstance.post(`${Base_Url}/deleteproductlinedata`, {
         id,
@@ -162,6 +165,7 @@ const ProductLine = () => {
     } catch (error) {
       console.error("Error deleting user:", error);
     }
+  }
   };
 
   const edit = async (id) => {

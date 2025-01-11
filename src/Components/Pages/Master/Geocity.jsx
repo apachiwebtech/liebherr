@@ -224,6 +224,9 @@ const Geocity = () => {
   };
 
   const deleted = async (id) => {
+    const confirm =  window.confirm("Are you sure you want to delete ?");
+
+    if(confirm){
     try {
       await axiosInstance.post(`${Base_Url}/deletegeocity`, { id }, {
         headers: {
@@ -241,6 +244,7 @@ const Geocity = () => {
     } catch (error) {
       console.error("Error deleting user:", error);
     }
+  }
   };
 
   const edit = async (id) => {

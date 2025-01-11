@@ -115,6 +115,9 @@ export function Customerlist(params) {
 
 
     const deleted = async (id) => {
+        const confirm =  window.confirm("Are you sure you want to delete ?");
+
+    if(confirm){
         try {
             const response = await axiosInstance.post(`${Base_Url}/deletecustomer`, { id }, {
                 headers: {
@@ -137,6 +140,7 @@ export function Customerlist(params) {
         } catch (error) {
             console.error('Error deleting user:', error);
         }
+    }
     };
 
     const fetchFilteredData = async () => {

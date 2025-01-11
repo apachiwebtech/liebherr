@@ -139,6 +139,9 @@ const Roleright = () => {
   };
 
   const deleted = async (id) => {
+    const confirm =  window.confirm("Are you sure you want to delete ?");
+
+    if(confirm){
     try {
       const response = await axiosInstance.post(`${Base_Url}/deleterole`, { id }, {
         headers: {
@@ -149,6 +152,7 @@ const Roleright = () => {
     } catch (error) {
       console.error("Error deleting role:", error);
     }
+  }
   };
 
   const edit = async (id) => {

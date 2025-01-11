@@ -227,6 +227,7 @@ const Pincode = () => {
   };
 
   const deleted = async (id) => {
+    
     try {
       if (window.confirm("Are you sure you want to delete this pincode?")) {
         await axiosInstance.post(`${Base_Url}/deletepincode`, { id }, {

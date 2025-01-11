@@ -227,6 +227,9 @@ const Area = () => {
   };
 
   const deleted = async (id) => {
+    const confirm =  window.confirm("Are you sure you want to delete ?");
+
+    if(confirm){
     try {
       await axiosInstance.post(`${Base_Url}/deletearea`, { id }, {
         headers: {
@@ -245,6 +248,7 @@ const Area = () => {
     } catch (error) {
       console.error("Error deleting area:", error);
     }
+  }
   };
 
   const edit = async (id) => {

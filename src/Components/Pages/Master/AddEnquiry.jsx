@@ -154,6 +154,9 @@ const AddEnquiry = () => {
   };
 
   const deleted = async (id) => {
+    const confirm =  window.confirm("Are you sure you want to delete ?");
+
+    if(confirm){
     try {
       const response = await axiosInstance.post(`${Base_Url}/deleteenquiry`, { id }, {
         headers: {
@@ -163,6 +166,7 @@ const AddEnquiry = () => {
       window.location.reload();
     } catch (error) {
       console.error("Error deleting enquiry:", error);
+    }
     }
   };
 

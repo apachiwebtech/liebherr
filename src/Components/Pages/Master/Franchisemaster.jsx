@@ -7,7 +7,7 @@ import EngineerMaster from './EngineerMaster';
 import { Link } from 'react-router-dom';
 
 function MasterFranchiseTabs() {
-  const [activeTab, setActiveTab] = useState('/MasterFranchise');
+  const [activeTab, setActiveTab] = useState('/Franchisemasterlist');
 
 
   useEffect(() => {

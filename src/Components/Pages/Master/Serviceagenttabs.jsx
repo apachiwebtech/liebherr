@@ -5,7 +5,7 @@ import Serviceagent from "./Serviceagent";
 import { Link } from 'react-router-dom';
 
 function Serviceagenttabs() {
-  const [activeTab, setActiveTab] = useState("Serviceagent");
+  const [activeTab, setActiveTab] = useState("serviceagent");
 
   useEffect(() => {
 
@@ -65,7 +65,7 @@ function Serviceagenttabs() {
                   
                     <button
                       className={`nav-link ${
-                        activeTab === "Serviceagent" ? "active" : "onClick={() => setActiveTab('Serviceagent')}"
+                        activeTab === "serviceagent" ? "active" : "onClick={() => setActiveTab('serviceagent')}"
                       }`}
                       
                     >

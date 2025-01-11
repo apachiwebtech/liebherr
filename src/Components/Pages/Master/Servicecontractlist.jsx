@@ -75,6 +75,7 @@ export function Servicecontractlist(params) {
     };
 
     const deleted = async (id) => {
+        
         try {
             // Add confirmation dialog
             const isConfirmed = window.confirm("Are you sure you want to delete?");

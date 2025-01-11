@@ -145,6 +145,9 @@ const Serviceagent = () => {
   };
 
   const deleted = async (id) => {
+    const confirm =  window.confirm("Are you sure you want to delete ?");
+
+    if(confirm){
     try {
       const response = await axiosInstance.post(`${Base_Url}/deletesdata`, { id },{
         headers: {
@@ -152,10 +155,11 @@ const Serviceagent = () => {
             },
         });
       // alert(response.data[0]);
-      //  window.location.reload();
+        window.location.reload();
     } catch (error) {
       console.error("Error deleting user:", error);
     }
+  }
   };
 
   const edit = async (id) => {

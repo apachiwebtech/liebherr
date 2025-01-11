@@ -74,7 +74,7 @@ export function Siteheader({ headerState }) {
                 <li>
                   <Link className="dropdown-item" to="/channelpartner">Channel Partner Master</Link></li>
                 <li>
-                  <Link className="dropdown-item" to="/MasterFranchise">Franchise Master</Link></li>
+                  <Link className="dropdown-item" to="/Franchisemasterlist">Franchise Master</Link></li>
                 <li>
                   <Link className="dropdown-item" to="/serviceagent">Service Agent Master</Link></li>
                 <li>
