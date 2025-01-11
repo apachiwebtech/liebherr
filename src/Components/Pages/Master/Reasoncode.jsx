@@ -176,20 +176,20 @@ const ReasonCode = () => {
 
 
     const deleted = async (id) => {
-        const confirm =  window.confirm("Are you sure you want to delete ?");
+        const confirm = window.confirm("Are you sure you want to delete ?");
 
-        if(confirm){
-        try {
-            const response = await axiosInstance.post(`${Base_Url}/deletetypeofdefect`, { id }, {
-                headers: {
-                    Authorization: token, // Send token in headers
-                },
-            });
-            fetchUsers();
-        } catch (error) {
-            console.error('Error deleting user:', error);
+        if (confirm) {
+            try {
+                const response = await axiosInstance.post(`${Base_Url}/deletetypeofdefect`, { id }, {
+                    headers: {
+                        Authorization: token, // Send token in headers
+                    },
+                });
+                fetchUsers();
+            } catch (error) {
+                console.error('Error deleting user:', error);
+            }
         }
-    }
     };
     const edit = async (id) => {
         try {
@@ -220,29 +220,29 @@ const ReasonCode = () => {
     const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
     // export to excel 
-      const exportToExcel = () => {
+    const exportToExcel = () => {
         // Create a new workbook
         const workbook = XLSX.utils.book_new();
-    
+
         // Convert data to a worksheet
         const worksheet = XLSX.utils.json_to_sheet(currentUsers.map(user => ({
-    
-          "DefectCode": user.defect_code,
-          "Description": user.description,
-          "DefectTitle": user.defect_title,
-          "GroupDefectcode": user.groupdefect_code,
-          
-    
+
+            "DefectCode": user.defect_code,
+            "Description": user.description,
+            "DefectTitle": user.defect_title,
+            "GroupDefectcode": user.groupdefect_code,
+
+
         })));
-    
+
         // Append the worksheet to the workbook
         XLSX.utils.book_append_sheet(workbook, worksheet, "TypeofDefect");
-    
+
         // Export the workbook
         XLSX.writeFile(workbook, "TypeofDefect.xlsx");
-      };
-    
-      // export to excel end 
+    };
+
+    // export to excel end 
     // Role Right 
 
 
@@ -411,12 +411,12 @@ const ReasonCode = () => {
                                             className="form-control d-inline-block"
                                             style={{ width: '300px' }}
                                         />
-                                            <button
-                                                className="btn btn-primary"
-                                                onClick={exportToExcel}
-                                            >
-                                                Export to Excel
-                                            </button>
+                                        <button
+                                            className="btn btn-primary"
+                                            onClick={exportToExcel}
+                                        >
+                                            Export to Excel
+                                        </button>
                                     </div>
 
                                     {/* Adjust table padding and spacing */}
@@ -475,27 +475,41 @@ const ReasonCode = () => {
                                             Showing {indexOfFirstUser + 1} to {Math.min(indexOfLastUser, filteredUsers.length)} of {filteredUsers.length} entries
                                         </div>
 
-                                        <div className="pagination" style={{ marginLeft: 'auto' }}>
+                                        <div className="pagination" style={{ marginLeft: "auto" }}>
                                             <button
                                                 onClick={() => setCurrentPage(currentPage - 1)}
                                                 disabled={currentPage === 0}
                                             >
-                                                {'<'}
+                                                {"<"}
                                             </button>
-                                            {Array.from({ length: Math.ceil(filteredUsers.length / itemsPerPage) }, (_, index) => (
-                                                <button
-                                                    key={index}
-                                                    onClick={() => setCurrentPage(index)}
-                                                    className={currentPage === index ? 'active' : ''}
-                                                >
-                                                    {index + 1}
-                                                </button>
-                                            ))}
+                                            {Array.from(
+                                                {
+                                                    length: Math.min(3, Math.ceil(filteredUsers.length / itemsPerPage)), // Limit to 3 buttons
+                                                },
+                                                (_, index) => {
+                                                    const pageIndex = Math.max(0, currentPage - 1) + index; // Adjust index for sliding window
+                                                    if (pageIndex >= Math.ceil(filteredUsers.length / itemsPerPage)) return null; // Skip invalid pages
+
+                                                    return (
+                                                        <button
+                                                            key={pageIndex}
+                                                            onClick={() => setCurrentPage(pageIndex)}
+                                                            className={currentPage === pageIndex ? "active" : ""}
+                                                        >
+                                                            {pageIndex + 1}
+                                                        </button>
+                                                    );
+                                                }
+                                            )}
+
                                             <button
                                                 onClick={() => setCurrentPage(currentPage + 1)}
-                                                disabled={currentPage === Math.ceil(filteredUsers.length / itemsPerPage) - 1}
+                                                disabled={
+                                                    currentPage ===
+                                                    Math.ceil(filteredUsers.length / itemsPerPage) - 1
+                                                }
                                             >
-                                                {'>'}
+                                                {">"}
                                             </button>
                                         </div>
                                     </div>

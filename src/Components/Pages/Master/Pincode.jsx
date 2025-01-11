@@ -549,6 +549,10 @@ const Pincode = () => {
                         ))}
                     </tbody>
                   </table>
+                  <div
+                    className="d-flex justify-content-between"
+                    style={{ marginTop: "10px" }}
+                  >
 
                   <div>
                     Showing {currentPage * itemsPerPage + 1} to{" "}
@@ -558,6 +562,44 @@ const Pincode = () => {
                     )}{" "}
                     of {filteredPincodes.length} entries
                   </div>
+                  <div className="pagination" style={{ marginLeft: "auto" }}>
+                      <button
+                        onClick={() => setCurrentPage(currentPage - 1)}
+                        disabled={currentPage === 0}
+                      >
+                        {"<"}
+                      </button>
+                      {Array.from(
+                        {
+                          length: Math.min(3, Math.ceil(filteredPincodes.length / itemsPerPage)), // Limit to 3 buttons
+                        },
+                        (_, index) => {
+                          const pageIndex = Math.max(0, currentPage - 1) + index; // Adjust index for sliding window
+                          if (pageIndex >= Math.ceil(filteredPincodes.length / itemsPerPage)) return null; // Skip invalid pages
+
+                          return (
+                            <button
+                              key={pageIndex}
+                              onClick={() => setCurrentPage(pageIndex)}
+                              className={currentPage === pageIndex ? "active" : ""}
+                            >
+                              {pageIndex + 1}
+                            </button>
+                          );
+                        }
+                      )}
+
+                      <button
+                        onClick={() => setCurrentPage(currentPage + 1)}
+                        disabled={
+                          currentPage ===
+                          Math.ceil(filteredPincodes.length / itemsPerPage) - 1
+                        }
+                      >
+                        {">"}
+                      </button>
+                    </div>
+                    </div>
                 </div>
               </div>
             </div>

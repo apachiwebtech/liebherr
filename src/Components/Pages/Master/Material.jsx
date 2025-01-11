@@ -376,45 +376,39 @@ const Material = () => {
 
                     <div className="pagination" style={{ marginLeft: "auto" }}>
                       <button
-                        onClick={() =>
-                          setCurrentPage(Math.max(currentPage - 1, 0))
-                        }
+                        onClick={() => setCurrentPage(currentPage - 1)}
                         disabled={currentPage === 0}
-                        className="btn btn-sm btn-primary mr-2"
                       >
-                        &lt;
+                        {"<"}
                       </button>
                       {Array.from(
                         {
-                          length: Math.ceil(filteredUsers.length / itemsPerPage),
+                          length: Math.min(3, Math.ceil(filteredUsers.length / itemsPerPage)), // Limit to 3 buttons
                         },
-                        (_, i) => (
-                          <button
-                            key={i}
-                            onClick={() => setCurrentPage(i)}
-                            className={`btn btn-sm ${i === currentPage ? "btn-secondary" : "btn-light"
-                              }`}
-                          >
-                            {i + 1}
-                          </button>
-                        )
-                      )}
-                      <button
-                        onClick={() =>
-                          setCurrentPage(
-                            Math.min(
-                              currentPage + 1,
-                              Math.ceil(filteredUsers.length / itemsPerPage) - 1
-                            )
-                          )
+                        (_, index) => {
+                          const pageIndex = Math.max(0, currentPage - 1) + index; // Adjust index for sliding window
+                          if (pageIndex >= Math.ceil(filteredUsers.length / itemsPerPage)) return null; // Skip invalid pages
+
+                          return (
+                            <button
+                              key={pageIndex}
+                              onClick={() => setCurrentPage(pageIndex)}
+                              className={currentPage === pageIndex ? "active" : ""}
+                            >
+                              {pageIndex + 1}
+                            </button>
+                          );
                         }
+                      )}
+
+                      <button
+                        onClick={() => setCurrentPage(currentPage + 1)}
                         disabled={
                           currentPage ===
                           Math.ceil(filteredUsers.length / itemsPerPage) - 1
                         }
-                        className="btn btn-sm btn-primary ml-2"
                       >
-                         &gt;
+                        {">"}
                       </button>
                     </div>
                   </div>

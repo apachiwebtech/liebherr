@@ -353,12 +353,42 @@ const ComplaintCode = () => {
                 </div>
 
                 <div className="col-md-6">
-                <button
-                        className="btn btn-primary"
-                        onClick={exportToExcel}
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                    <span>
+                      Show
+                      <select
+                        value={itemsPerPage}
+                        onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                        className="form-control d-inline-block"
+                        style={{
+                          width: "51px",
+                          display: "inline-block",
+                          marginLeft: "5px",
+                          marginRight: "5px",
+                        }}
                       >
-                        Export to Excel
-                      </button>
+                        <option value={10}>10</option>
+                        <option value={15}>15</option>
+                        <option value={20}>20</option>
+                      </select>
+                      entries
+                    </span>
+
+                    <input
+                      type="text"
+                      placeholder="Search..."
+                      value={searchTerm}
+                      onChange={handleSearch}
+                      className="form-control d-inline-block"
+                      style={{ width: "300px" }}
+                    />
+                    <button
+                      className="btn btn-primary"
+                      onClick={exportToExcel}
+                    >
+                      Export to Excel
+                    </button>
+                  </div>
                   {/* Adjust table padding and spacing */}
                   <table data={filteredUsers} className="table table-bordered table-responsive table-hover mt-3">
                     <thead className="thead-light">
@@ -403,41 +433,54 @@ const ComplaintCode = () => {
                       ))}
                     </tbody>
                   </table>
-                  {/* <DataTable
-                  data={currentUsers}
-                  columns={[
-                    { title: '#', data: null, render: (data, type, row, meta) => meta.row + 1 + indexOfFirstUser },
-                    { title: 'Complaint Code', data: 'defectgroupcode' },
-                    {
-                      title: 'Edit', data: null, render: (data, type, row) => (
+                  <div
+                    className="d-flex justify-content-between"
+                    style={{ marginTop: "10px" }}
+                  >
+                    <div>
+                      Showing {indexOfFirstUser + 1} to{" "}
+                      {Math.min(indexOfLastUser, filteredUsers.length)} of{" "}
+                      {filteredUsers.length} entries
+                    </div>
 
-                        // <button
-                        //   className="btn btn-link text-primary"
-                        //   onClick={() => edit(row.id)}
-                        //   style={{ fontSize: "20px" }}
-                        // >
-                        // </button>
-                          // <FaPencilAlt />
-                          <div>edit</div>
-                      )
-                    },
-                    {
-                      title: 'Delete', data: null, render: (data, type, row) => (
-                        <button
-                          className="btn btn-link text-danger"
-                          onClick={() => deleted(row.id)}
-                          style={{ fontSize: "20px" }}
-                        >
-                          <FaTrash />
-                        </button>
-                      )
-                    }
-                  ]}
-                  className="table table-bordered table-responsive table-hover mt-3"
-                /> */}
+                    <div className="pagination" style={{ marginLeft: "auto" }}>
+                      <button
+                        onClick={() => setCurrentPage(currentPage - 1)}
+                        disabled={currentPage === 0}
+                      >
+                        {"<"}
+                      </button>
+                      {Array.from(
+                        {
+                          length: Math.min(3, Math.ceil(filteredUsers.length / itemsPerPage)), // Limit to 3 buttons
+                        },
+                        (_, index) => {
+                          const pageIndex = Math.max(0, currentPage - 1) + index; // Adjust index for sliding window
+                          if (pageIndex >= Math.ceil(filteredUsers.length / itemsPerPage)) return null; // Skip invalid pages
 
+                          return (
+                            <button
+                              key={pageIndex}
+                              onClick={() => setCurrentPage(pageIndex)}
+                              className={currentPage === pageIndex ? "active" : ""}
+                            >
+                              {pageIndex + 1}
+                            </button>
+                          );
+                        }
+                      )}
 
-
+                      <button
+                        onClick={() => setCurrentPage(currentPage + 1)}
+                        disabled={
+                          currentPage ===
+                          Math.ceil(filteredUsers.length / itemsPerPage) - 1
+                        }
+                      >
+                        {">"}
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

@@ -146,21 +146,21 @@ const Ratecard = () => {
   };
 
   const deleted = async (id) => {
-    const confirm =  window.confirm("Are you sure you want to delete ?");
+    const confirm = window.confirm("Are you sure you want to delete ?");
 
-    if(confirm){
-    try {
-      const response = await axiosInstance.post(`${Base_Url}/deleteratedata`, { id }, {
-        headers: {
-          Authorization: token, // Send token in headers
-        },
-      });
-      // alert(response.data[0]);
-      window.location.reload();
-    } catch (error) {
-      console.error("Error deleting user:", error);
+    if (confirm) {
+      try {
+        const response = await axiosInstance.post(`${Base_Url}/deleteratedata`, { id }, {
+          headers: {
+            Authorization: token, // Send token in headers
+          },
+        });
+        // alert(response.data[0]);
+        window.location.reload();
+      } catch (error) {
+        console.error("Error deleting user:", error);
+      }
     }
-  }
   };
 
   const edit = async (id) => {
@@ -433,18 +433,24 @@ const Ratecard = () => {
                       </button>
                       {Array.from(
                         {
-                          length: Math.ceil(filteredUsers.length / itemsPerPage),
+                          length: Math.min(3, Math.ceil(filteredUsers.length / itemsPerPage)), // Limit to 3 buttons
                         },
-                        (_, index) => (
-                          <button
-                            key={index}
-                            onClick={() => setCurrentPage(index)}
-                            className={currentPage === index ? "active" : ""}
-                          >
-                            {index + 1}
-                          </button>
-                        )
+                        (_, index) => {
+                          const pageIndex = Math.max(0, currentPage - 1) + index; // Adjust index for sliding window
+                          if (pageIndex >= Math.ceil(filteredUsers.length / itemsPerPage)) return null; // Skip invalid pages
+
+                          return (
+                            <button
+                              key={pageIndex}
+                              onClick={() => setCurrentPage(pageIndex)}
+                              className={currentPage === pageIndex ? "active" : ""}
+                            >
+                              {pageIndex + 1}
+                            </button>
+                          );
+                        }
                       )}
+
                       <button
                         onClick={() => setCurrentPage(currentPage + 1)}
                         disabled={

@@ -420,16 +420,23 @@ const Location = () => {
                         &lt;
                       </button>
                       {Array.from(
-                        { length: Math.ceil(filteredUsers.length / itemsPerPage) },
-                        (_, index) => (
-                          <button
-                            key={index}
-                            onClick={() => setCurrentPage(index)}
-                            className={currentPage === index ? "active" : ""}
-                          >
-                            {index + 1}
-                          </button>
-                        )
+                        {
+                          length: Math.min(3, Math.ceil(filteredUsers.length / itemsPerPage)), // Limit to 3 buttons
+                        },
+                        (_, index) => {
+                          const pageIndex = Math.max(0, currentPage - 1) + index; // Adjust index for sliding window
+                          if (pageIndex >= Math.ceil(filteredUsers.length / itemsPerPage)) return null; // Skip invalid pages
+
+                          return (
+                            <button
+                              key={pageIndex}
+                              onClick={() => setCurrentPage(pageIndex)}
+                              className={currentPage === pageIndex ? "active" : ""}
+                            >
+                              {pageIndex + 1}
+                            </button>
+                          );
+                        }
                       )}
                       <button
                         onClick={() =>

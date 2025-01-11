@@ -1,4 +1,4 @@
- import axios from "axios";
+import axios from "axios";
 import * as XLSX from "xlsx";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
@@ -68,26 +68,26 @@ const AddEnquiry = () => {
   // Step 2: Add form validation function
   const validateForm = () => {
     const newErrors = {}; // Initialize an empty error object
-    
+
     // Check if 'name' is a string and trim it safely
     if (!formData.name || formData.name.trim() === "") {
       newErrors.name = "Name field is required.";
     }
-  
+
     // Check if 'mobile_no' exists and is 10 digits long
     if (!formData.mobile_no || formData.mobile_no.length !== 10) {
       newErrors.mobile_no = "Mobile number must be 10 digits.";
     }
-  
+
     // Check if 'email' is provided and has a valid format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!formData.email || !emailRegex.test(formData.email)) {
       newErrors.email = "Please enter a valid email address.";
     }
-  
+
     return newErrors; // Return the error object
   };
-  
+
 
   //handlesubmit form
   const handleSubmit = async (e) => {
@@ -154,19 +154,19 @@ const AddEnquiry = () => {
   };
 
   const deleted = async (id) => {
-    const confirm =  window.confirm("Are you sure you want to delete ?");
+    const confirm = window.confirm("Are you sure you want to delete ?");
 
-    if(confirm){
-    try {
-      const response = await axiosInstance.post(`${Base_Url}/deleteenquiry`, { id }, {
-        headers: {
-          Authorization: token,
-        },
-      });
-      window.location.reload();
-    } catch (error) {
-      console.error("Error deleting enquiry:", error);
-    }
+    if (confirm) {
+      try {
+        const response = await axiosInstance.post(`${Base_Url}/deleteenquiry`, { id }, {
+          headers: {
+            Authorization: token,
+          },
+        });
+        window.location.reload();
+      } catch (error) {
+        console.error("Error deleting enquiry:", error);
+      }
     }
   };
 
@@ -280,51 +280,51 @@ const AddEnquiry = () => {
                       {errors.name && (
                         <small className="text-danger">{errors.name}</small>
                       )}
-                     
+
                     </div>
                     <div className="mb-3">
-                        <label htmlFor="MobileInput" className="input-field">
-                          Mobile Number<span className="text-danger">*</span>
-                        </label>
-                        <input
-                          type="number"
-                          className="form-control"
-                          name="mobile_no"
-                          id="MobileInput"
-                          value={formData.mobile_no}
-                          onChange={handleChange}
-                          placeholder="Enter Mobile Number"
-                          pattern="[0-9]{10}"
-                          maxLength="10"
-                          minLength="10"
-                        />
+                      <label htmlFor="MobileInput" className="input-field">
+                        Mobile Number<span className="text-danger">*</span>
+                      </label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        name="mobile_no"
+                        id="MobileInput"
+                        value={formData.mobile_no}
+                        onChange={handleChange}
+                        placeholder="Enter Mobile Number"
+                        pattern="[0-9]{10}"
+                        maxLength="10"
+                        minLength="10"
+                      />
 
 
-                        {errors.mobile_no && <small className="text-danger">{errors.mobile_no}</small>}
-                        {/* Show duplicate error */}
-                        {duplicateError && (
-                          <small className="text-danger">{duplicateError}</small>
-                        )}{" "}
-                      </div>
-                      <div className="mb-3">
-                        <label htmlFor="EmailInput" className="input-field">
-                          Email Address<span className="text-danger">*</span>
-                        </label>
-                        <input
-                          type="email"
-                          className="form-control"
-                          name="email"
-                          id="EmailInput"
-                          value={formData.email}
-                          onChange={handleChange}
-                          placeholder="Enter Email Address"
-                        />
-                        {errors.email && (
-                          <small className="text-danger">{errors.email}</small>
-                        )}
-                        
-                        {/* Show duplicate error */}
-                      </div>
+                      {errors.mobile_no && <small className="text-danger">{errors.mobile_no}</small>}
+                      {/* Show duplicate error */}
+                      {duplicateError && (
+                        <small className="text-danger">{duplicateError}</small>
+                      )}{" "}
+                    </div>
+                    <div className="mb-3">
+                      <label htmlFor="EmailInput" className="input-field">
+                        Email Address<span className="text-danger">*</span>
+                      </label>
+                      <input
+                        type="email"
+                        className="form-control"
+                        name="email"
+                        id="EmailInput"
+                        value={formData.email}
+                        onChange={handleChange}
+                        placeholder="Enter Email Address"
+                      />
+                      {errors.email && (
+                        <small className="text-danger">{errors.email}</small>
+                      )}
+
+                      {/* Show duplicate error */}
+                    </div>
                     <div className="mb-3">
                       <label htmlFor="AddressInput" className="input-field">
                         Address
@@ -437,7 +437,6 @@ const AddEnquiry = () => {
                       {Math.min(indexOfLastUser, filteredUsers.length)} of{" "}
                       {filteredUsers.length} entries
                     </div>
-
                     <div className="pagination" style={{ marginLeft: "auto" }}>
                       <button
                         onClick={() => setCurrentPage(currentPage - 1)}
@@ -447,18 +446,24 @@ const AddEnquiry = () => {
                       </button>
                       {Array.from(
                         {
-                          length: Math.ceil(filteredUsers.length / itemsPerPage),
+                          length: Math.min(3, Math.ceil(filteredUsers.length / itemsPerPage)), // Limit to 3 buttons
                         },
-                        (_, index) => (
-                          <button
-                            key={index}
-                            onClick={() => setCurrentPage(index)}
-                            className={currentPage === index ? "active" : ""}
-                          >
-                            {index + 1}
-                          </button>
-                        )
+                        (_, index) => {
+                          const pageIndex = Math.max(0, currentPage - 1) + index; // Adjust index for sliding window
+                          if (pageIndex >= Math.ceil(filteredUsers.length / itemsPerPage)) return null; // Skip invalid pages
+
+                          return (
+                            <button
+                              key={pageIndex}
+                              onClick={() => setCurrentPage(pageIndex)}
+                              className={currentPage === pageIndex ? "active" : ""}
+                            >
+                              {pageIndex + 1}
+                            </button>
+                          );
+                        }
                       )}
+
                       <button
                         onClick={() => setCurrentPage(currentPage + 1)}
                         disabled={
