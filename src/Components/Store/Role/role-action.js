@@ -3,6 +3,7 @@ import { roleActions } from "./roleSilce";
 
 
 export const getRoleData = (data) => {
+    const token = localStorage.getItem("token");
 
 
 
@@ -18,6 +19,7 @@ export const getRoleData = (data) => {
                 }),
                 
                 headers: {
+                    Authorization: token,
                     "Content-type": "application/json"
                 }
             })

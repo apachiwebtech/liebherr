@@ -9135,7 +9135,7 @@ app.post("/getquotationspare", authenticateToken, async (req, res) => {
 
 // const API_KEY = "a8f2b3c4-d5e6-7f8g-h9i0-12345jklmn67";
 
-app.post("/awt_service_contact", async (req, res) => {
+app.post("/awt_service_contact",authenticateToken, async (req, res) => {
   // Validate API key
   const apiKey = req.header('x-api-key'); // Get API key from request header
 
@@ -9172,7 +9172,7 @@ app.post("/awt_service_contact", async (req, res) => {
   }
 });
 
-app.post("/query", async (req, res) => {
+app.post("/query",authenticateToken, async (req, res) => {
   const apiKey = req.header('x-api-key'); // Get API key from request header
 
   if (apiKey !== API_KEY) {
@@ -9385,7 +9385,7 @@ app.get("/requestrole/:id", authenticateToken, async (req, res) => {
 });
 
 
-app.post('/role_pages', async (req, res) => {
+app.post('/role_pages',authenticateToken, async (req, res) => {
   const role_id = req.body.role_id;
 
   try {
@@ -9460,7 +9460,7 @@ app.post('/role_pages', async (req, res) => {
 
 
 
-app.post('/getRoleData', async (req, res) => {
+app.post('/getRoleData',authenticateToken, async (req, res) => {
   const { role, pageid } = req.body;
 
   try {
@@ -9487,7 +9487,7 @@ app.post('/getRoleData', async (req, res) => {
   }
 });
 
-app.post('/assign_role', async (req, res) => {
+app.post('/assign_role',authenticateToken, async (req, res) => {
   const rolePages = req.body;
 
   // Validate the input
@@ -9580,7 +9580,7 @@ app.get("/getfeedbacklist", authenticateToken, async (req, res) => {
   }
 });
 
-app.post('/getcspusers', async (req, res) => {
+app.post('/getcspusers',authenticateToken, async (req, res) => {
   const { licare_code } = req.body;
 
   try {
@@ -9603,7 +9603,7 @@ app.post('/getcspusers', async (req, res) => {
 });
 
 
-app.post('/getcallrecorddetails', async (req, res) => {
+app.post('/getcallrecorddetails',authenticateToken, async (req, res) => {
   const { uuid, call_to_number, caller_id_number, start_stamp, call_id, billing_circle, customer_no_with_prefix } = req.body;
 
   const date = new Date();
@@ -9673,7 +9673,7 @@ app.get("/getcsprole", authenticateToken, async (req, res) => {
 
 // Fetch role pages 
 
-app.post('/csp_role_pages', async (req, res) => {
+app.post('/csp_role_pages',authenticateToken, async (req, res) => {
   const role_id = req.body.role_id;
 
   try {
@@ -9751,7 +9751,7 @@ app.post('/csp_role_pages', async (req, res) => {
 // Fetch assign role 
 
 
-app.post('/csp_assign_role', async (req, res) => {
+app.post('/csp_assign_role',authenticateToken, async (req, res) => {
   const rolePages = req.body;
 
   // Validate the input
@@ -10182,7 +10182,7 @@ app.get("/requestenquiry/:id", authenticateToken, async (req, res) => {
   }
 });
 
-app.get('/getheaddata_web', async (req, res) => {
+app.get('/getheaddata_web',authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;   
 

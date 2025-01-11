@@ -8,6 +8,7 @@ import CryptoJS from 'crypto-js';
 import axios from 'axios';
 
 const ContactForm = () => {
+    const token = localStorage.getItem("token");
     const [formState, setFormState] = useState({
         rating1: 0,
         remark:"",
@@ -82,7 +83,9 @@ const ContactForm = () => {
 
           axios.post(`${Base_Url}/awt_service_contact`, data, {
               headers: {
+                Authorization: token,
                   'x-api-key': 'a8f2b3c4-d5e6-7f8g-h9i0-12345jklmn67' // Include API key here
+                  
               }
           })
           .then((res) => {

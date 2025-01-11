@@ -67,7 +67,11 @@ const Roleassign = () => {
     };
 
     async function getRolePages(rid) {
-        axiosInstance.post(`${Base_Url}/role_pages`, { role_id: rid })
+        axiosInstance.post(`${Base_Url}/role_pages`, { role_id: rid },{
+            headers: {
+                Authorization: token, // Send token in headers
+                },
+            })
             .then((res) => {
                 // console.log(res.data, ">>>>>")
                 setRolePages(res.data)
@@ -94,7 +98,11 @@ const Roleassign = () => {
             };
         });
     
-        axiosInstance.post(`${Base_Url}/assign_role`, updatedRolePages)
+        axiosInstance.post(`${Base_Url}/assign_role`, updatedRolePages,{
+            headers: {
+                Authorization: token, // Send token in headers
+                },
+            })
             .then((res) => {
                 if (res.data) {
                     notify()

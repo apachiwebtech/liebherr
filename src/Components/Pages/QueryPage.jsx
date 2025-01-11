@@ -7,6 +7,7 @@ const QueryPage = ()=>{
     const [query, setQuery] = useState("");
     const [result, setResult] = useState(null);
     const [error, setError] = useState(null)
+    const token = localStorage.getItem("token");
 
     const handleSubmit = async(e)=>{
         e.preventDefault();
@@ -15,6 +16,8 @@ const QueryPage = ()=>{
 
         axios.post(`${Base_Url}/query`,{query},{
             headers: {
+                Authorization: token,
+                
                 'x-api-key': 'a8f2b3c4-d5e6-7f8g-h9i0-12345jklmn67' // Include API key here
             }
         })

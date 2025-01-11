@@ -68,7 +68,11 @@ const RoleassignCsp = () => {
     };
 
     async function getRolePages(rid) {
-        axiosInstance.post(`${Base_Url}/csp_role_pages`, { role_id: rid })
+        axiosInstance.post(`${Base_Url}/csp_role_pages`, { role_id: rid },{
+            headers: {
+                Authorization: token, // Send token in headers
+                },
+            })
             .then((res) => {
                 // console.log(res.data, ">>>>>")
                 setRolePages(res.data)
@@ -83,7 +87,11 @@ const RoleassignCsp = () => {
         e.preventDefault()
 
 
-        axiosInstance.post(`${Base_Url}/csp_assign_role`, rolePages)
+        axiosInstance.post(`${Base_Url}/csp_assign_role`, rolePages,{
+            headers: {
+                Authorization: token, // Send token in headers
+                },
+            })
             .then((res) => {
                 if (res.data) {
                     notify()

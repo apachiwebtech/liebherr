@@ -4,6 +4,7 @@ import {  useNavigate } from "react-router-dom";
 import { BASE_URL } from "../App/Compo/BaseUrl";
 
 export function Dashboard(params) {
+  const token = localStorage.getItem("token");
 
      const [value, setValue] = useState({
         cancelled: 0,
@@ -20,7 +21,11 @@ export function Dashboard(params) {
     async function getdata() {
         
     
-        axios.get(`${BASE_URL}/getheaddata_web`)
+        axios.get(`${BASE_URL}/getheaddata_web`,{
+          headers: {
+              Authorization: token, // Send token in headers
+              },
+          })
           .then((res) => {
             if (res.data !== 0) {
               setValue({
