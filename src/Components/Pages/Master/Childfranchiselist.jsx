@@ -16,9 +16,20 @@ import { getRoleData } from "../../Store/Role/role-action";
 export function ChildFranchiselist(params) {
     const { loaders, axiosInstance } = useAxiosLoader();
     const token = localStorage.getItem("token");
-    const [Franchisemasterdata, setChildfranchisemasterdata] = useState([]);
+    const [ChildFranchisemasterdata, setChildfranchisemasterdata] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
     const [filteredData, setFilteredData] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [totalCount, setTotalCount] = useState(0);
+
+    const totalPages = Math.ceil(totalCount / pageSize);
+
+    const handlePageChange = (page) => {
+
+        setCurrentPage(page);
+        fetchChildfranchisemasterlist(page); // Fetch data for the new page
+    };
     const [formData, setFormData] = useState({
         title: "",
         pfranchise_id: "",
@@ -59,9 +70,13 @@ export function ChildFranchiselist(params) {
 
     });
 
-    const fetchChildfranchisemasterlist = async () => {
+    const fetchChildfranchisemasterlist = async (page) => {
         try {
             const params = new URLSearchParams();
+            // Add the page and pageSize parameters
+            params.append('page', page || 1); // Current page number
+            params.append('pageSize', pageSize); // Page size
+
 
             // Add all filters to params if they have values
             Object.entries(searchFilters).forEach(([key, value]) => {
@@ -69,13 +84,15 @@ export function ChildFranchiselist(params) {
                     params.append(key, value);
                 }
             });
-            const response = await axiosInstance.get(`${Base_Url}/getchildFranchiseDetails`, {
+            const response = await axiosInstance.get(`${Base_Url}/getchildFranchiseDetails?${params.toString()}`, {
                 headers: {
                     Authorization: token,
                 },
             });
-            setChildfranchisemasterdata(response.data);
-            setFilteredData(response.data);
+            setChildfranchisemasterdata(response.data.data);
+            setFilteredData(response.data.data);
+            // Store total count for pagination logic on the frontend
+            setTotalCount(response.data.totalCount);
         } catch (error) {
             console.error('Error fetching childfranchisemasterdata:', error);
             setChildfranchisemasterdata([]);
@@ -102,8 +119,8 @@ export function ChildFranchiselist(params) {
                 },
             }
             );
-            setChildfranchisemasterdata(response.data);
-            setFilteredData(response.data);
+            setChildfranchisemasterdata(response.data.data);
+            setFilteredData(response.data.data);
         } catch (error) {
             console.error('Error fetching filtered data:', error);
             setFilteredData([]);
@@ -161,7 +178,7 @@ export function ChildFranchiselist(params) {
         const workbook = XLSX.utils.book_new();
 
         // Convert data to a worksheet
-        const worksheet = XLSX.utils.json_to_sheet(Franchisemasterdata.map(user => ({
+        const worksheet = XLSX.utils.json_to_sheet(ChildFranchisemasterdata.map(user => ({
 
             "Name": user.title,
             "pFranchise_id": user.pfranchise_id,
@@ -394,10 +411,11 @@ export function ChildFranchiselist(params) {
                                     </thead>
                                     <tbody>
 
-                                        {Franchisemasterdata.map((item, index) => {
+                                        {ChildFranchisemasterdata.map((item, index) => {
+                                            const displayIndex = (currentPage - 1) * pageSize + index + 1;
                                             return (
                                                 <tr key={item.id}>
-                                                    <td >{index + 1}</td>
+                                                    <td >{displayIndex}</td>
                                                     <td >{item.parentfranchisetitle}</td>
                                                     <td >{item.title}</td>
                                                     <td width="5%" >{item.email}</td>
@@ -420,24 +438,50 @@ export function ChildFranchiselist(params) {
                                                             <FaEye />
                                                         </button>
                                                     </td>
-                                                    {/* <td >
-                                                    <button
-                                                        className='btn'
-                                                        onClick={() => {
-                                                            navigate(`/complaintview/${item.id}`)
-                                                        }}
-                                                        title="View"
-                                                        style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                                                    >
-                                                        <FaEye />
-                                                    </button>
-                                                </td> */}
+
                                                 </tr>
                                             )
                                         })}
 
                                     </tbody>
                                 </table>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                                    <button
+                                        onClick={() => handlePageChange(currentPage - 1)}
+                                        disabled={currentPage <= 1}
+                                        style={{
+                                            padding: '8px 15px',
+                                            fontSize: '16px',
+                                            cursor: currentPage <= 1 ? 'not-allowed' : 'pointer',
+                                            backgroundColor: currentPage <= 1 ? '#ccc' : '#007bff',
+                                            color: '#fff',
+                                            border: 'none',
+                                            borderRadius: '5px',
+                                            transition: 'background-color 0.3s',
+                                        }}
+                                    >
+                                        Previous
+                                    </button>
+                                    <span style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                                        Page {currentPage} of {totalPages}
+                                    </span>
+                                    <button
+                                        onClick={() => handlePageChange(currentPage + 1)}
+                                        disabled={currentPage >= totalPages}
+                                        style={{
+                                            padding: '8px 15px',
+                                            fontSize: '16px',
+                                            cursor: currentPage >= totalPages ? 'not-allowed' : 'pointer',
+                                            backgroundColor: currentPage >= totalPages ? '#ccc' : '#007bff',
+                                            color: '#fff',
+                                            border: 'none',
+                                            borderRadius: '5px',
+                                            transition: 'background-color 0.3s',
+                                        }}
+                                    >
+                                        Next
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>

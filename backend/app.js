@@ -4964,6 +4964,10 @@ app.get("/getmasterfranchiselist", authenticateToken, async (req, res) => {
       partner_name,
       mobile_no,
       email,
+      country_name,
+      region_name,
+      state_name,
+      district_name,
       page = 1, // Default to page 1 if not provided
       pageSize = 10, // Default to 10 items per page if not provided
     } = req.query;
@@ -5004,9 +5008,33 @@ app.get("/getmasterfranchiselist", authenticateToken, async (req, res) => {
     if (partner_name) {
       sql += ` AND m.partner_name LIKE '%${partner_name}%'`;
     }
+    // Pagination logic: Calculate offset based on the page number
+    const offset = (page - 1) * pageSize;
+
+    // Add pagination to the SQL query (OFFSET and FETCH NEXT)
+    sql += ` ORDER BY m.id OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
 
     const result = await pool.request().query(sql);
-    return res.json(result.recordset);
+    // Get the total count of records for pagination
+    let countSql = `SELECT COUNT(*) as totalCount FROM awt_franchisemaster WHERE deleted = 0`;
+    if (title) countSql += ` AND title LIKE '%${title}%'`;
+    if (licarecode) countSql += ` AND licarecode LIKE '%${licarecode}%'`;
+    if (mobile_no) countSql += ` AND mobile_no LIKE '%${mobile_no}%'`;
+    if (email) countSql += ` AND email LIKE '%${email}%'`;
+    if (partner_name) countSql += ` AND partner_name LIKE '%${partner_name}%'`;
+    if (country_name) countSql += ` AND country_id LIKE '%${country_name}%'`;
+    if (region_name) countSql += ` AND region_id LIKE '%${region_name}%'`;
+    if (state_name) countSql += ` AND state_id LIKE '%${state_name}%'`;
+    if (district_name) countSql += ` AND district_id LIKE '%${district_name}%'`;
+
+    const countResult = await pool.request().query(countSql);
+    const totalCount = countResult.recordset[0].totalCount;
+    return res.json({
+      data: result.recordset,
+      totalCount: totalCount,
+      page,
+      pageSize,
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'An error occurred while fetching data' });
@@ -5362,11 +5390,31 @@ WHERE m.deleted = 0
       sql += ` AND p.title LIKE '%${parentfranchisetitle}%'`;
     }
 
+    // Pagination logic: Calculate offset based on the page number
+    const offset = (page - 1) * pageSize;
+
+    // Add pagination to the SQL query (OFFSET and FETCH NEXT)
+    sql += ` ORDER BY m.id OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+
+
     // Execute the SQL query
     const result = await pool.request().query(sql);
-
-    // Return the result as JSON
-    return res.json(result.recordset);
+    // Get the total count of records for pagination
+    let countSql = `SELECT COUNT(*) as totalCount FROM awt_franchisemaster WHERE deleted = 0`;
+    if (title) countSql += ` AND title LIKE '%${title}%'`;
+    if (licarecode) countSql += ` AND licare_code LIKE '%${licarecode}%'`;
+    if (mobile_no) countSql += ` AND mobile_no LIKE '%${mobile_no}%'`;
+    if (email) countSql += ` AND email LIKE '%${email}%'`;
+    if (partner_name) countSql += ` AND partner_name LIKE '%${partner_name}%'`;
+   
+    const countResult = await pool.request().query(countSql);
+    const totalCount = countResult.recordset[0].totalCount;
+    return res.json({
+      data: result.recordset,
+      totalCount: totalCount,
+      page,
+      pageSize,
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'An error occurred while fetching data' });

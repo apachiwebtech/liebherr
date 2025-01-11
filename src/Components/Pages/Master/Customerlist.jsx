@@ -413,13 +413,6 @@ export function Customerlist(params) {
 
                             </div>
                             <div className="row mb-3">
-
-
-
-
-
-
-
                                 {/* Buttons and message at the far-right corner */}
                                 <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
                                     <div className="form-group">
