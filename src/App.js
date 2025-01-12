@@ -117,6 +117,8 @@ import RoleassignCsp from './Components/Pages/Master/RoleAssignCsp';
 import CspRoleright from './Components/Pages/Master/CspRoleRights';
 import AddEnquiry from './Components/Pages/Master/AddEnquiry';
 import EnquiryTabs from './Components/Pages/Master/EnquiryTabs';
+import CreateGrn from './Components/Pages/Master/CreateGrn';
+import { Grnlisting } from './Components/Pages/Master/Grnlisting';
 
 
 const isAuthenticated = () => {
@@ -236,6 +238,14 @@ const Router = createBrowserRouter([
       {
         path: "/csp/mspdata",
         element: <Mspdata />,
+      },
+      {
+        path: "/csp/creategrn",
+        element: <CreateGrn />,
+      },
+      {
+        path: "/csp/grnlisting",
+        element: <Grnlisting />
       },
     ],
   },
@@ -678,6 +688,7 @@ const Router = createBrowserRouter([
         path: "/datatable",
         element: <DataTable />
       },
+
       {
         path: "/quotationlist",
         element: (

@@ -221,7 +221,7 @@ app.post("/csplogin", async (req, res) => {
       const token = jwt.sign(
         { id: user.id, email: user.email, licare_code: user.licare_code },
         JWT_SECRET,
-        { expiresIn: "1h" } // Token validity duration
+        { expiresIn: "8h" } // Token validity duration
       );
 
       res.json({
@@ -265,7 +265,7 @@ app.post("/loginmsp", async (req, res) => {
       const token = jwt.sign(
         { id: user.id, email: user.email, licare_code: user.licarecode },
         JWT_SECRET,
-        { expiresIn: "1h" } // Token validity duration
+        { expiresIn: "8h" } // Token validity duration
       );
 
       res.json({
@@ -9175,6 +9175,7 @@ app.get("/getcsp", authenticateToken, async (req, res) => {
     return res.status(500).json({ error: "Database error occurred" });
   }
 })
+
 app.get("/getmsp", authenticateToken, async (req, res) => {
 
   try {
@@ -10326,5 +10327,257 @@ app.get('/getheaddata_web', authenticateToken, async (req, res) => {
     res.status(500).json({ message: 'An error occurred during the database query' });
   }
 });
+
+
+app.post("/getsearchcsp", authenticateToken, async (req, res) => {
+  const { param } = req.body;
+
+  if (!param) {
+    return res.status(400).json({ message: "Invalid parameter" });
+  }
+
+  try {
+    const pool = await poolPromise;
+
+    // Parameterized query with a limit
+    const sql = `
+    SELECT TOP 20 id, title
+    FROM awt_childfranchisemaster
+    WHERE title LIKE @param AND deleted = 0
+    ORDER BY title;
+    `;
+
+    const result = await pool.request()
+      .input('param',  `%${param}%`)
+      .query(sql);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "No results found" });
+    }
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+});
+app.post("/getsearchproduct", authenticateToken, async (req, res) => {
+  const { param } = req.body;
+
+  if (!param) {
+    return res.status(400).json({ message: "Invalid parameter" });
+  }
+
+  try {
+    const pool = await poolPromise;
+
+    // Parameterized query with a limit
+    const sql = `
+    SELECT TOP 20 id, item_description
+    FROM product_master
+    WHERE item_description LIKE @param 
+    ORDER BY id;
+    `;
+
+    const result = await pool.request()
+      .input('param',  `%${param}%`)
+      .query(sql);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "No results found" });
+    }
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+});
+
+
+app.post("/add_grn", authenticateToken, async (req, res) => {
+  const { invoice_number, invoice_date, csp_no, csp_name, created_by } = req.body;
+
+  try {
+    const pool = await poolPromise;
+
+    // Check if the invoice_number already exists
+    const checkInvoiceQuery = `SELECT COUNT(*) AS count FROM awt_grnmaster WHERE invoice_no = @invoice_no`;
+    const checkInvoiceResult = await pool.request()
+      .input('invoice_no', invoice_number)
+      .query(checkInvoiceQuery);
+
+    if (checkInvoiceResult.recordset[0].count > 0) {
+      return res.status(400).json({ message: "Invoice number already exists" });
+    }
+
+    // Query to get the count of rows in awt_grnmaster
+    const creategrnno = `SELECT COUNT(*) AS count FROM awt_grnmaster`;
+    const checkResult = await pool.request().query(creategrnno);
+
+    // Generate the GRN number based on the count
+    const grnCount = checkResult.recordset[0].count || 0;
+    const grn_no = `GRN-${grnCount + 1}`; // Example: GRN-1, GRN-2, etc.
+
+    // Insert the data into awt_grnmaster
+    const sql = `INSERT INTO awt_grnmaster (grn_no, invoice_no, invoice_date, csp_name, csp_code, created_date, created_by) 
+                 VALUES (@grn_no, @invoice_no, @invoice_date, @csp_name, @csp_code, @created_date, @created_by)`;
+
+    const result = await pool.request()
+      .input('grn_no', grn_no)
+      .input('invoice_no', invoice_number)
+      .input('invoice_date', invoice_date)
+      .input('csp_name', csp_name)
+      .input('csp_code', csp_no)  // Assuming you want to insert csp_no as csp_code
+      .input('created_date', new Date())  // Use the current date for created_date
+      .input('created_by', created_by)
+      .query(sql);
+
+    // If the insert was successful, send the result
+    return res.json({ message: "GRN created successfully", grn_no: grn_no, data: result.recordset });
+
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+});
+
+
+
+app.post("/add_grn", authenticateToken, async (req, res) => {
+  const { invoice_number, invoice_date, csp_no, csp_name, created_by } = req.body;
+
+  try {
+    const pool = await poolPromise;
+
+
+
+    // Insert the data into awt_grnmaster
+    const sql = `INSERT INTO awt_grnmaster (grn_no, invoice_no, invoice_date, csp_name, csp_code, created_date, created_by) 
+                 VALUES (@grn_no, @invoice_no, @invoice_date, @csp_name, @csp_code, @created_date, @created_by)`;
+
+    const result = await pool.request()
+      .input('grn_no', grn_no)
+      .input('invoice_no', invoice_number)
+      .input('invoice_date', invoice_date)
+      .input('csp_name', csp_name)
+      .input('csp_code', csp_no)  // Assuming you want to insert csp_no as csp_code
+      .input('created_date', new Date())  // Use the current date for created_date
+      .input('created_by', created_by)
+      .query(sql);
+
+    // If the insert was successful, send the result
+    return res.json({ message: "GRN created successfully", grn_no: grn_no, data: result.recordset });
+
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+});
+
+app.post('/grnspares', async (req, res) => {
+  const spareData = req.body; // Expecting an array of spare objects
+
+  console.log(req.body)
+
+  if (!Array.isArray(spareData)) {
+      return res.status(400).json({ error: 'Invalid payload format. Expected an array.' });
+  }
+
+  try {
+      // Connect to the database
+      const pool = await sql.connect(dbConfig);
+
+      // Prepare the INSERT query
+      const query = `
+          INSERT INTO awt_cspgrnspare (grn_no, spare_no, spare_title, quantity)
+          VALUES (@grn_no, @spare_no, @spare_title, @quantity)
+      `;
+
+      // Use a transaction for bulk inserts
+      const transaction = new sql.Transaction(pool);
+      await transaction.begin();
+
+      const request = new sql.Request(transaction);
+
+      // Loop through spareData and insert each row
+      for (const item of spareData) {
+          request.input('grn_no', sql.VarChar, item.grn_no);
+          request.input('spare_no', sql.VarChar, item.article_code);
+          request.input('spare_title', sql.VarChar, item.article_title);
+          request.input('quantity', sql.Int, item.spare_qty);
+          await request.query(query);
+      }
+
+      // Commit the transaction
+      await transaction.commit();
+
+      res.status(200).json({
+          message: 'Data saved successfully',
+          affectedRows: spareData.length,
+      });
+  } catch (err) {
+      console.error('Error inserting data:', err);
+      res.status(500).json({ error: 'Database error' });
+  } finally {
+      // Close the database connection
+      sql.close();
+  }
+});
+
+app.post("/getselctedspare", authenticateToken, async (req, res) => {
+  const { article_id} = req.body;
+
+
+  try {
+    const pool = await poolPromise;
+
+    // Parameterized query with a limit
+    const sql = `
+   SELECT id, ModelNumber, title as article_code ,ProductCode as spareId, ItemDescription as article_description
+       from Spare_parts where id = '${article_id}' 
+    `;
+
+    const result = await pool.request()
+      .query(sql);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "No results found" });
+    }
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+});
+
+
+app.post("/getgrnlist", authenticateToken, async (req, res) => {
+
+  const { csp_code} = req.body;
+
+
+  try {
+    const pool = await poolPromise;
+
+    // Parameterized query with a limit
+    const sql = `select * from awt_grnmaster where created_by = '${csp_code}' and  deleted = 0
+    `;
+
+    const result = await pool.request()
+      .query(sql);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "No results found" });
+    }
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+});
+
 
 
