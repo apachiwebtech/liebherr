@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom';
 import Header from './Header';
 import axios from 'axios';
-import { BASE_URL } from './BaseUrl';
 import { Base_Url } from '../../Utils/Base_Url';
 
 function Details() {
@@ -67,7 +66,7 @@ function Details() {
 
   async function getactivity() {
     try {
-      const res = await axios.get(`${BASE_URL}/getactivity_app`);
+      const res = await axios.get(`${Base_Url}/getactivity_app`);
 
       if (res.data) {
         setactivity(res.data);
@@ -116,7 +115,7 @@ function Details() {
           formData.append('spare_doc', fileInput.files[0]);
         }
 
-        axios.post(`${BASE_URL}/updatecomplaint`, formData, {
+        axios.post(`${Base_Url}/updatecomplaint`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -149,7 +148,7 @@ function Details() {
 
 
   async function getcomplaintdetails() {
-    axios.get(`${BASE_URL}/getcomplaintdetails?cid=${id}`, {
+    axios.get(`${Base_Url}/getcomplaintdetails?cid=${id}`, {
       headers: {
         Authorization: token, // Send token in headers
       },
@@ -197,7 +196,7 @@ function Details() {
 
   }
   async function getremark(id) {
-    axios.get(`${BASE_URL}/getremark?cid=${id}`)
+    axios.get(`${Base_Url}/getremark?cid=${id}`)
       .then((res) => {
         if (res.data != 0) {
           setremark(res.data.data[0])
@@ -215,7 +214,7 @@ function Details() {
     if (params) {
 
       try {
-        const res = await axios.post(`${BASE_URL}/appgetDefectCodewisetype`, { defect_code: params }, {
+        const res = await axios.post(`${Base_Url}/appgetDefectCodewisetype`, { defect_code: params }, {
           // headers: {
           //   Authorization: token, // Send token in headers
           // },
@@ -241,7 +240,7 @@ function Details() {
     } else {
 
       try {
-        const res = await axios.get(`${BASE_URL}/getsitedefect`);
+        const res = await axios.get(`${Base_Url}/getsitedefect`);
 
 
 
@@ -278,7 +277,7 @@ function Details() {
     }
     // console.log(data);
 
-    axios.post(`${BASE_URL}/addspareapp`, eata)
+    axios.post(`${Base_Url}/addspareapp`, eata)
       .then((res) => {
         console.log(res.data.message);
 
@@ -289,7 +288,7 @@ function Details() {
       })
   }
   async function subcat() {
-    axios.get(`${BASE_URL}/awt_subcat`)
+    axios.get(`${Base_Url}/awt_subcat`)
       .then((res) => {
         if (res.data != 0) {
           setsubcatcode(res.data.data)
@@ -301,7 +300,7 @@ function Details() {
       })
   }
   async function CallStatus() {
-    axios.get(`${BASE_URL}/CallStatus`)
+    axios.get(`${Base_Url}/CallStatus`)
       .then((res) => {
         if (res.data != 0) {
           setcallstatus(res.data.data)
@@ -313,7 +312,7 @@ function Details() {
       })
   }
   async function CallType() {
-    axios.get(`${BASE_URL}/CallType`)
+    axios.get(`${Base_Url}/CallType`)
       .then((res) => {
         if (res.data != 0) {
           setcalltype(res.data.data)
@@ -325,7 +324,7 @@ function Details() {
       })
   }
   async function getcom_app() {
-    axios.get(`${BASE_URL}/getcom_app`)
+    axios.get(`${Base_Url}/getcom_app`)
       .then((res) => {
         if (res.data != 0) {
           setsymptomsode(res.data)
@@ -337,7 +336,7 @@ function Details() {
   }
   async function getDefectCodewisetype_app(data) {
 
-    axios.post(`${BASE_URL}/getDefectCodewisetype_app12`, { defect_code: data })
+    axios.post(`${Base_Url}/getDefectCodewisetype_app12`, { defect_code: data })
       .then((res) => {
         if (res.data != 0) {
           setcausecode(res.data)
@@ -349,7 +348,7 @@ function Details() {
   }
   async function getDefectCodewisesite_app(data) {
 
-    axios.post(`${BASE_URL}/getDefectCodewisesite_app`, { defect_code: data })
+    axios.post(`${Base_Url}/getDefectCodewisesite_app`, { defect_code: data })
       .then((res) => {
         if (res.data != 0) {
           setactioncode(res.data)
@@ -361,7 +360,7 @@ function Details() {
   }
 
   async function getspare(data) {
-    axios.get(`${BASE_URL}/getSpareParts_app/${data}`)
+    axios.get(`${Base_Url}/getSpareParts_app/${data}`)
       .then((res) => {
         if (res.data != 0) {
           // setactioncode(res.data)
@@ -375,7 +374,7 @@ function Details() {
 
   async function getsparelistapp(ticket) {
 
-    axios.post(`${BASE_URL}/getsparelistapp`, { ticket: ticket })
+    axios.post(`${Base_Url}/getsparelistapp`, { ticket: ticket })
       .then((res) => {
         if (res.data != 0) {
           console.log(res.data);
@@ -408,7 +407,7 @@ function Details() {
       otp: otp,
       orderid: data.id
     }
-    axios.post(`${BASE_URL}/getotpapp`, eata)
+    axios.post(`${Base_Url}/getotpapp`, eata)
       .then((res) => {
         console.log(res.data.message);
 

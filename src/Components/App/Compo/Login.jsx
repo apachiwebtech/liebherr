@@ -3,9 +3,9 @@ import axios from 'axios';
 import '../App.css';
 import CryptoJS from 'crypto-js';
 import React, { useEffect, useState } from "react";
-import { BASE_URL } from './BaseUrl';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { Network } from '@capacitor/network';
+import { Base_Url } from '../../Utils/Base_Url';
 
 
 function AppLogin() {
@@ -82,7 +82,7 @@ function AppLogin() {
       password: passwordMd5
     }
 
-    axios.post(`${BASE_URL}/login`, data)
+    axios.post(`${Base_Url}/login`, data)
       .then((res) => {
         console.log(res)
         setValue({

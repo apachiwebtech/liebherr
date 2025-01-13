@@ -5406,7 +5406,7 @@ WHERE m.deleted = 0
     if (mobile_no) countSql += ` AND mobile_no LIKE '%${mobile_no}%'`;
     if (email) countSql += ` AND email LIKE '%${email}%'`;
     if (partner_name) countSql += ` AND partner_name LIKE '%${partner_name}%'`;
-   
+
     const countResult = await pool.request().query(countSql);
     const totalCount = countResult.recordset[0].totalCount;
     return res.json({
@@ -10348,7 +10348,7 @@ app.post("/getsearchcsp", authenticateToken, async (req, res) => {
     `;
 
     const result = await pool.request()
-      .input('param',  `%${param}%`)
+      .input('param', `%${param}%`)
       .query(sql);
 
     if (result.recordset.length === 0) {
@@ -10380,7 +10380,7 @@ app.post("/getsearchproduct", authenticateToken, async (req, res) => {
     `;
 
     const result = await pool.request()
-      .input('param',  `%${param}%`)
+      .input('param', `%${param}%`)
       .query(sql);
 
     if (result.recordset.length === 0) {
@@ -10475,58 +10475,57 @@ app.post("/add_grn", authenticateToken, async (req, res) => {
   }
 });
 
-app.post('/grnspares', async (req, res) => {
+app.post('/updategrnspares', async (req, res) => {
   const spareData = req.body; // Expecting an array of spare objects
 
-  console.log(req.body)
+  console.log(req.body);
 
   if (!Array.isArray(spareData)) {
-      return res.status(400).json({ error: 'Invalid payload format. Expected an array.' });
+    return res.status(400).json({ error: 'Invalid payload format. Expected an array.' });
   }
 
   try {
-      // Connect to the database
-      const pool = await sql.connect(dbConfig);
+    // Connect to the database
+    const pool = await sql.connect(dbConfig);
 
-      // Prepare the INSERT query
+    // Use a transaction for bulk updates
+    const transaction = new sql.Transaction(pool);
+    await transaction.begin();
+
+    // Loop through spareData and update each row
+    for (const item of spareData) {
+      const request = new sql.Request(transaction); // Create a new request for each iteration
       const query = `
-          INSERT INTO awt_cspgrnspare (grn_no, spare_no, spare_title, quantity)
-          VALUES (@grn_no, @spare_no, @spare_title, @quantity)
+        UPDATE awt_cspgrnspare
+        SET quantity = @quantity
+        WHERE grn_no = @grn_no AND spare_no = @spare_no
       `;
+      request.input('grn_no', sql.VarChar, item.grn_no);
+      request.input('spare_no', sql.VarChar, item.article_code);
+      request.input('quantity', sql.Int, item.quantity);
+      await request.query(query);
+    }
 
-      // Use a transaction for bulk inserts
-      const transaction = new sql.Transaction(pool);
-      await transaction.begin();
+    // Commit the transaction
+    await transaction.commit();
 
-      const request = new sql.Request(transaction);
-
-      // Loop through spareData and insert each row
-      for (const item of spareData) {
-          request.input('grn_no', sql.VarChar, item.grn_no);
-          request.input('spare_no', sql.VarChar, item.article_code);
-          request.input('spare_title', sql.VarChar, item.article_title);
-          request.input('quantity', sql.Int, item.spare_qty);
-          await request.query(query);
-      }
-
-      // Commit the transaction
-      await transaction.commit();
-
-      res.status(200).json({
-          message: 'Data saved successfully',
-          affectedRows: spareData.length,
-      });
+    res.status(200).json({
+      message: 'Data updated successfully',
+      affectedRows: spareData.length,
+    });
   } catch (err) {
-      console.error('Error inserting data:', err);
-      res.status(500).json({ error: 'Database error' });
+    console.error('Error updating data:', err);
+    res.status(500).json({ error: 'Database error' });
   } finally {
-      // Close the database connection
-      sql.close();
+    // Close the database connection
+    sql.close();
   }
 });
 
+
+
 app.post("/getselctedspare", authenticateToken, async (req, res) => {
-  const { article_id} = req.body;
+  const { article_id } = req.body;
 
 
   try {
@@ -10555,14 +10554,14 @@ app.post("/getselctedspare", authenticateToken, async (req, res) => {
 
 app.post("/getgrnlist", authenticateToken, async (req, res) => {
 
-  const { csp_code} = req.body;
+  const { csp_code } = req.body;
 
 
   try {
     const pool = await poolPromise;
 
     // Parameterized query with a limit
-    const sql = `select * from awt_grnmaster where created_by = '${csp_code}' and  deleted = 0
+    const sql = `select * from awt_grnmaster where created_by = '${csp_code}' and  deleted = 0 order by id desc
     `;
 
     const result = await pool.request()
@@ -10578,6 +10577,149 @@ app.post("/getgrnlist", authenticateToken, async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error", error: err });
   }
 });
+
+
+app.post('/addgrnspares', async (req, res) => {
+  const { spare_id, grn_no, created_by } = req.body; // Expecting required fields in the request body
+
+  try {
+    // Connect to the database
+    const pool = await sql.connect(dbConfig);
+
+    // Fetch spare parts data
+    const getspare = `
+      SELECT id, ModelNumber, title as article_code, ProductCode as spareId, ItemDescription as article_description
+      FROM Spare_parts WHERE id = @spare_id
+    `;
+    const result = await pool.request()
+      .input('spare_id', sql.VarChar, spare_id)
+      .query(getspare);
+
+    const spareData = result.recordset.map(record => ({
+      grn_no,
+      article_code: record.article_code,
+      article_title: record.article_description,
+      spare_qty: 0,
+      created_by,
+      created_date: new Date()
+    }));
+
+    console.log(spareData, "%%");
+
+    // Use a transaction for bulk inserts
+    const transaction = new sql.Transaction(pool);
+    await transaction.begin();
+
+    const bulkQuery = `
+      INSERT INTO awt_cspgrnspare (grn_no, spare_no, spare_title, quantity, created_by, created_date)
+      VALUES (@grn_no, @article_code, @article_title, @spare_qty, @created_by, @created_date)
+    `;
+
+    const duplicateCheckQuery = `
+      SELECT COUNT(*) as count
+      FROM awt_cspgrnspare
+      WHERE spare_no = @article_code_d AND grn_no = @grn_no_d
+    `;
+
+    let affectedRows = 0; // To count how many rows are actually inserted
+
+    for (const item of spareData) {
+      // Create a new request instance for each iteration to avoid reusing parameters
+      const bulkRequest = new sql.Request(transaction);
+
+      // Check if the spare_id already exists in the table
+      const duplicateCheck = await bulkRequest
+        .input('article_code_d', sql.VarChar, item.article_code) // Renamed parameter
+        .input('grn_no_d', sql.VarChar, item.grn_no) // Correct parameter names
+        .query(duplicateCheckQuery);
+
+      if (duplicateCheck.recordset[0].count === 0) {
+        // If not a duplicate, insert the new record with correct parameters
+        await bulkRequest
+          .input('grn_no', sql.VarChar, item.grn_no) // Correct parameter names
+          .input('article_code', sql.VarChar, item.article_code) // Correct parameter names
+          .input('article_title', sql.VarChar, item.article_title)
+          .input('spare_qty', sql.Int, item.spare_qty)
+          .input('created_by', sql.VarChar, item.created_by)
+          .input('created_date', sql.DateTime, item.created_date)
+          .query(bulkQuery);
+        affectedRows++; // Increment affected rows
+      } else {
+        // If duplicate, skip the insert
+        console.log(`Duplicate entry found for spare_id: ${item.article_code} and grn_no: ${item.grn_no}`);
+      }
+    }
+
+    // Commit the transaction
+    await transaction.commit();
+
+    res.status(200).json({
+      message: 'Data saved successfully (duplicates skipped)',
+      affectedRows, // Send the actual count of affected rows
+    });
+  } catch (err) {
+    console.error('Error inserting data:', err);
+    res.status(500).json({ error: 'Database error', details: err.message });
+  } finally {
+    // Close the database connection
+    sql.close();
+  }
+});
+
+
+
+app.post("/getgrnsparelist", authenticateToken, async (req, res) => {
+
+  const { grn_no } = req.body;
+
+
+  try {
+    const pool = await poolPromise;
+
+    // Parameterized query with a limit
+    const sql = `select * from awt_cspgrnspare where grn_no = '${grn_no}'`;
+
+    const result = await pool.request()
+      .query(sql);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "No results found" });
+    }
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+});
+
+app.post('/getgrndetails' , authenticateToken , async (req, res) =>{
+  const { grn_no } = req.body;
+
+
+  try {
+    const pool = await poolPromise;
+
+    // Parameterized query with a limit
+    const sql = `select * from awt_grnmaster where grn_no = '${grn_no}'`;
+
+    const result = await pool.request()
+      .query(sql);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "No results found" });
+    }
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+
+
+})
+
+
 
 
 

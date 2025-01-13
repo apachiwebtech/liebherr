@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react'
 import Header from './Header'
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import { BASE_URL } from './BaseUrl';
 import { SyncLoader } from 'react-spinners';
 import Modalbox from './Modalbox';
+import { Base_Url } from '../../Utils/Base_Url';
 
 function History() {
   const { id } = useParams();
@@ -15,7 +15,7 @@ function History() {
 
   async function getcomplaintlist(id) {
     setloaders(true)
-    axios.get(`${BASE_URL}/getcomplaintlist/${id}`)
+    axios.get(`${Base_Url}/getcomplaintlist/${id}`)
       .then((res) => {
         if (res.data != 0) {
           setcomplaints(res.data)
@@ -37,7 +37,7 @@ function History() {
 
   const getviewdata = (id) => {
     console.log(id)
-    axios.get(`${BASE_URL}/getcompdata/${id}`)
+    axios.get(`${Base_Url}/getcompdata/${id}`)
       .then((res) => {
         if (res.data != 0) {
           setComplaintdata(res.data)

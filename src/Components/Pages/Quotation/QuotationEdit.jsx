@@ -6,6 +6,7 @@ import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 import CryptoJS from 'crypto-js';
 import { error } from 'jquery';
+import { IoArrowBack } from 'react-icons/io5';
 
 const QuotationEdit = () => {
     const token = localStorage.getItem("token"); // Get token from localStorage
@@ -132,6 +133,15 @@ const QuotationEdit = () => {
                     <SyncLoader loading={loaders} color="#FFFFFF" />
                 </div>
             )}
+            <div className="row mt-1 mp0">
+                <div className="col-12">
+                    <div className="card mb-3 tab_box">
+                        <div className="card-body">
+                            <IoArrowBack onClick={() => navigate(-1)} style={{ fontSize: "25px" }} />
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div className="row mp0">
                 <div className="col-12">
                     <div className="card mb-3 tab_box">
@@ -246,7 +256,7 @@ const QuotationEdit = () => {
                                                                     />
                                                                 </td>
                                                                 <td>
-                                                                <input
+                                                                    <input
                                                                         type="text"
                                                                         name="serial_no"
                                                                         value={item.price}

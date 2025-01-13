@@ -2,7 +2,7 @@ import axios from 'axios';
 import * as XLSX from "xlsx";
 import { Link, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
-import { FaPencilAlt, FaTrash } from 'react-icons/fa';
+import { FaEye, FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { Base_Url, secretKey } from '../../Utils/Base_Url';
 import CryptoJS from 'crypto-js';
 import { useSelector } from 'react-redux';
@@ -11,28 +11,20 @@ import 'datatables.net-bs4/css/dataTables.bootstrap4.min.css';
 import $ from 'jquery';
 import 'datatables.net';
 import 'datatables.net-bs4';
-
 // DataTables Responsive Extension (JS and CSS for Bootstrap 4)
 import 'datatables.net-responsive';
 import 'datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css';
-
 // DataTables Fixed Columns Extension
 import 'datatables.net-fixedcolumns';
 import 'datatables.net-fixedcolumns-bs4/css/fixedColumns.bootstrap4.min.css';
-
 // DataTables Fixed Header Extension
 import 'datatables.net-fixedheader';
-
 // DataTables Buttons Extension
 import 'datatables.net-buttons';
 import 'datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css';
 import 'datatables.net-buttons/js/buttons.html5.min.js';
-
-
-
 // DataTables KeyTable Extension
 import 'datatables.net-keytable';
-
 // DataTables Select Extension
 import 'datatables.net-select';
 import { SyncLoader } from 'react-spinners';
@@ -72,7 +64,7 @@ export function Grnlisting(params) {
         id = id.toString()
         let encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
         encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-        navigate(`/quotation/${encrypted}`)
+        navigate(`/csp/grnview/${encrypted}`)
     };
 
     useEffect(() => {
@@ -158,11 +150,12 @@ export function Grnlisting(params) {
                                 <table id="example" className="table table-striped">
                                     <thead>
                                         <tr>
-                                            <th width="10%">#</th>
+                                            <th width="5%">#</th>
                                             <th width="20%">Grn_No</th>
                                             <th width="30%">Csp Name</th>
-                                            <th width="20%">Invoice No</th>
-                                            <th width="20%">Invoice Date</th>
+                                            <th width="15%">Invoice No</th>
+                                            <th width="15%">Invoice Date</th>
+                                            <th width="15%">Action</th>
 
                                         </tr>
                                     </thead>
@@ -180,7 +173,17 @@ export function Grnlisting(params) {
                                                         year: 'numeric',
                                                     })}
                                                 </td>
-
+                                                <td>
+                                                    <button
+                                                        className='btn'
+                                                        onClick={() => sendtoedit(item.grn_no)}
+                                                        title="Edit"
+                                                        style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                                                        disabled={roleaccess > 3 ? false : true}
+                                                    >
+                                                        <FaEye />
+                                                    </button>
+                                                </td>
 
                                             </tr>
                                         ))}

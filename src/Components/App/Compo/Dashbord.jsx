@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import Header from './Header';
-import { BASE_URL } from './BaseUrl';
 import axios from 'axios';
 import { Base_Url } from '../../Utils/Base_Url';
 
@@ -22,7 +21,7 @@ function Dashbord() {
   async function getdata() {
     const en_id = localStorage.getItem('userid');
 
-    axios.get(`${BASE_URL}/getheaddata?en_id=${en_id}`)
+    axios.get(`${Base_Url}/getheaddata?en_id=${en_id}`)
       .then((res) => {
         if (res.data !== 0) {
           setValue({

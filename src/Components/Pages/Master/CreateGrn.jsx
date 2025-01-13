@@ -19,12 +19,14 @@ import _debounce from 'lodash.debounce';
 const CreateGrn = () => {
 
 
-
+    const [selectedEngineerType, setSelectedEngineerType] = useState("LHI");;
     const [errors, setErrors] = useState({});
+    const [spareerrors, setSpareErrors] = useState({});
     const [hide, setHide] = useState(false);
     const [hidelist, setHidelist] = useState(false);
     const [cspdata, setData] = useState([]);
     const [spare, setSpare] = useState([]);
+    const [SpareId, setSpareId] = useState([]);
     const [selectedspare, setselectedSpare] = useState([]);
     const [productdata, setProduct] = useState([]);
     const [selectcsp, setselectedCsp] = useState(null);
@@ -34,11 +36,13 @@ const CreateGrn = () => {
     const [producttext, setProductText] = useState("");
     const token = localStorage.getItem("token"); // Get token from localStorage
     const created_by = localStorage.getItem("licare_code"); // Get token from localStorage
+    const GRN_NO = localStorage.getItem("grn_no"); // Get token from localStorage
     const [formData, setFormData] = useState({
         received_from: "",
         invoice_number: "",
         invoice_date: "",
-        spare: ""
+        spare: "",
+        remark: ''
     });
 
     const fetchCsp = async () => {
@@ -67,6 +71,24 @@ const CreateGrn = () => {
             console.error("Error fetching users:", error);
         }
     };
+    const fetchsparelist = async () => {
+
+        try {
+            const response = await axios.post(`${Base_Url}/getgrnsparelist`, { grn_no: GRN_NO }, {
+                headers: {
+                    Authorization: token, // Send token in headers
+                },
+            });
+
+            const updatedSpare = response.data.map((item) => ({
+                ...item,
+            }));
+            setselectedSpare(updatedSpare)
+
+        } catch (error) {
+            console.error("Error fetching users:", error);
+        }
+    };
 
 
     const handleChange = (e) => {
@@ -79,54 +101,121 @@ const CreateGrn = () => {
     // Step 2: Add form validation function
     const validateForm = () => {
         const newErrors = {}; // Initialize an empty error object
-        if (!formData.title.trim()) {
-            // Check if the title is empty
-            newErrors.title = "Country Field is required."; // Set error message if title is empty
+
+        if (!formData.invoice_date) {
+            // Check if the invoice date is empty
+            newErrors.invoice_date = "This is required."; // Set error message for invoice_date
         }
+
+        if (!formData.invoice_number) {
+            // Check if the invoice number is empty
+            newErrors.invoice_number = "This is required."; // Set error message for invoice_no
+        }
+
+        if (!selectcsp) {
+            // Check if the CSP selection is empty
+            newErrors.selectcsp = "This is required."; // Set error message for selectcsp
+        }
+
+        setErrors(newErrors)
         return newErrors; // Return the error object
     };
+    const SparevalidateForm = () => {
+        const newErrors = {}; // Initialize an empty error object
+
+        if (!selectproduct) {
+            // Check if the invoice date is empty
+            newErrors.selectproduct = "This is required."; // Set error message for invoice_date
+        }
+        if (!SpareId) {
+            // Check if the invoice date is empty
+            newErrors.spare = "This is required."; // Set error message for invoice_date
+        }
+
+
+        setSpareErrors(newErrors)
+        return newErrors; // Return the error object
+    };
+
+
+
+    const handleAddSpare = async () => {
+
+        const serrors = SparevalidateForm(); // Call validateForm to get validation errors
+
+        if (Object.keys(serrors).length === 0) {
+            const data = {
+                spare_id: SpareId,
+                grn_no: localStorage.getItem('grn_no'),
+                created_by: created_by
+            };
+
+            try {
+                const response = await axios.post(`${Base_Url}/addgrnspares`, JSON.stringify(data), {
+                    headers: {
+                        Authorization: token, // Send token in headers
+                        "Content-Type": "application/json", // Explicitly set Content-Type
+                    },
+                });
+                setHide(true)
+                fetchsparelist()
+
+            } catch (error) {
+                console.error("Error fetching users:", error);
+            }
+        }
+    };
+
 
     //handlesubmit form
 
     const handlesubmit = (e) => {
         e.preventDefault()
 
-        const data = {
-            invoice_number: formData.invoice_number,
-            invoice_date: formData.invoice_date,
-            csp_no: selectcsp.id,
-            csp_name: selectcsp.title,
-            created_by: created_by
+        const errors = validateForm(); // Call validateForm to get validation errors
+
+        if (Object.keys(errors).length === 0) {
+            const data = {
+                invoice_number: formData.invoice_number,
+                invoice_date: formData.invoice_date,
+                csp_no: selectcsp.id,
+                csp_name: selectcsp.title,
+                created_by: created_by,
+                remark: formData.remark
+            }
+
+            axios.post(`${Base_Url}/add_grn`, data, {
+                headers: {
+                    Authorization: token, // Send token in headers
+                },
+            })
+                .then((res) => {
+                    alert(res.data.message)
+
+                    if (res.data.grn_no) {
+                        localStorage.setItem('grn_no', res.data.grn_no)
+
+                        setHidelist(true)
+                    }
+
+                })
+                .catch((err) => {
+                    alert(err.response.data.message)
+                })
         }
 
-        axios.post(`${Base_Url}/add_grn`, data, {
-            headers: {
-                Authorization: token, // Send token in headers
-            },
-        })
-            .then((res) => {
-                alert(res.data.message)
 
-                if (res.data.grn_no) {
-                    localStorage.setItem('grn_no', res.data.grn_no)
 
-                    setHidelist(true)
-                }
-
-            })
-            .catch((err) => {
-                alert(err.response.data.message)
-            })
     }
 
     const handleSpareSend = async () => {
         try {
             // Map the `spare` array to construct the payload with additional `spare_qty`
-            const payload = spare.map((item) => ({
+            const payload = selectedspare.map((item) => ({
                 id: String(item.id),
-                article_code: item.article_code,
-                article_title: item.article_description,
-                spare_qty: String(item.spare_qty) || String(0), // Use the updated `spare_qty`, default to 0 if empty
+                article_code: item.spare_no,
+                article_title: item.spare_title,
+                quantity: String(item.quantity) || String(0), // Use the updated `spare_qty`, default to 0 if empty
                 grn_no: localStorage.getItem('grn_no')
             }));
 
@@ -135,7 +224,7 @@ const CreateGrn = () => {
             const stringifiedPayload = JSON.stringify(payload);
 
             // Send stringified payload to the server
-            const response = await axios.post(`${Base_Url}/grnspares`, stringifiedPayload, {
+            const response = await axios.post(`${Base_Url}/updategrnspares`, stringifiedPayload, {
                 headers: {
                     'Content-Type': 'application/json'
                 }
@@ -156,13 +245,17 @@ const CreateGrn = () => {
 
     // Handle change for `spare_qty`
     const handleQuantityChange = (index, value) => {
-        const updatedSpare = [...spare];
-        updatedSpare[index].spare_qty = value; // Update `spare_qty` for the specific item
+
+        const updatedSpare = [...selectedspare];
+        updatedSpare[index].quantity = value; // Update `spare_qty` for the specific item
+        console.log(updatedSpare)
         setselectedSpare(updatedSpare); // Update the state
     };
 
 
     const handlespareChange = async (article_id) => {
+
+        setSpareId(article_id)
 
         try {
             const response = await axios.post(`${Base_Url}/getselctedspare`, { article_id: article_id }, {
@@ -171,11 +264,7 @@ const CreateGrn = () => {
                 },
             });
 
-            const updatedSpare = response.data.map((item) => ({
-                ...item,
-                spare_qty: "", // Initialize with an empty string or default value
-            }));
-            setselectedSpare(updatedSpare)
+
         } catch (error) {
             console.error("Error fetching users:", error);
         }
@@ -204,7 +293,7 @@ const CreateGrn = () => {
         setselectedproduct(newValue);
         console.log("Selected:", newValue);
 
-        setHide(true)
+
 
         try {
             const response = await axios.get(`${Base_Url}/getSpareParts/${newValue.item_description}`, {
@@ -212,7 +301,7 @@ const CreateGrn = () => {
                     Authorization: token, // Send token in headers
                 },
             });
-  
+
 
             setSpare(response.data); // Update the state
         } catch (error) {
@@ -239,6 +328,11 @@ const CreateGrn = () => {
     const handleSearchChange = (newValue) => {
         setselectedCsp(newValue);
         console.log("Selected:", newValue);
+    };
+
+    const handleEngineerTypeChange = (event) => {
+        setSelectedEngineerType(event.target.value);
+        console.log("Selected Engineer Type:", event.target.value);
     };
 
 
@@ -287,7 +381,6 @@ const CreateGrn = () => {
                                 className="row"
                             >
                                 <div className="d-flex mb-3 col-lg-12">
-
                                     <div className="form-check me-3">
                                         <input
                                             type="radio"
@@ -295,7 +388,8 @@ const CreateGrn = () => {
                                             id="lhi"
                                             name="engineer_type"
                                             value="LHI"
-
+                                            onChange={handleEngineerTypeChange}
+                                            checked={selectedEngineerType === "LHI"} // Set "checked" dynamically
                                         />
                                         <label className="form-check-label" htmlFor="lhi" style={{ fontSize: "14px" }}>
                                             LHI
@@ -309,19 +403,20 @@ const CreateGrn = () => {
                                             id="franchisee"
                                             name="engineer_type"
                                             value="Franchisee"
-
+                                            onChange={handleEngineerTypeChange}
+                                            checked={selectedEngineerType === "Franchisee"}
                                         />
                                         <label className="form-check-label" htmlFor="franchisee" style={{ fontSize: "14px" }}>
                                             Service Partner
                                         </label>
                                     </div>
-
                                 </div>
+
                                 <div className="mb-3 col-lg-3">
                                     <label htmlFor="EmailInput" className="input-field">
                                         Received from <span className="text-danger">*</span>
                                     </label>
-                                    <Autocomplete
+                                    {selectedEngineerType === "Franchisee" ? <Autocomplete
                                         size="small"
                                         disablePortal
                                         options={cspdata}
@@ -330,8 +425,10 @@ const CreateGrn = () => {
                                         onChange={(e, newValue) => handleSearchChange(newValue)}
                                         onInputChange={(e, newInputValue) => handleInputChange(newInputValue)}
                                         renderInput={(params) => <TextField {...params} label="Enter.." variant="outlined" />}
-                                    />
+                                    /> : <p>LIEBHERR</p>}
+                                    {errors.selectcsp && <span className="text-danger">{errors.selectcsp}</span>}
                                 </div>
+
                                 <div className="mb-3 col-lg-3">
                                     <label htmlFor="EmailInput" className="input-field">
                                         Invoice Number  <span className="text-danger">*</span>
@@ -344,24 +441,40 @@ const CreateGrn = () => {
                                         onChange={handleChange}
                                         placeholder="Enter Invoice No."
                                     />
-
+                                    {errors.invoice_number && <span className="text-danger">{errors.invoice_number}</span>}
                                     {/* Show duplicate error */}
                                 </div>
                                 <div className="mb-3 col-lg-3">
                                     <label htmlFor="EmailInput" className="input-field">
-                                        invoice Date  <span className="text-danger">*</span>
+                                        Invoice Date  <span className="text-danger">*</span>
                                     </label>
                                     <input
                                         type="date"
                                         className="form-control"
                                         name="invoice_date"
-
                                         value={formData.invoice_date}
                                         onChange={handleChange}
+                                        max={new Date().toISOString().split("T")[0]} // Set max to today's date
                                         placeholder="Enter Invoice No."
                                     />
+                                    {errors.invoice_date && <span className="text-danger">{errors.invoice_date}</span>}
 
-                                    {/* Show duplicate error */}
+
+                                </div>
+                                <div className="mb-3 col-lg-3">
+                                    <label htmlFor="EmailInput" className="input-field">
+                                        Remark
+                                    </label>
+
+                                    <textarea className="form-control"
+                                        name="remark"
+                                        value={formData.remark}
+                                        onChange={handleChange}>
+
+                                    </textarea>
+
+
+
                                 </div>
 
                                 <div className="">
@@ -384,8 +497,8 @@ const CreateGrn = () => {
                             className="card-body"
                             style={{ flex: "1 1 auto", padding: "13px 28px" }}
                         >
-                            <h5 style={{fontSize : "15px",fontWeight:"800"}}>GRN NO : {localStorage.getItem('grn_no')}</h5>
-                            <div className="row">
+                            <h5 style={{ fontSize: "15px", fontWeight: "800" }}>GRN NO : {localStorage.getItem('grn_no')}</h5>
+                            <div className="row align-items-center">
                                 <div className="mb-3 col-lg-3">
                                     <label htmlFor="EmailInput" className="input-field">
                                         Product <span className="text-danger">*</span>
@@ -400,12 +513,13 @@ const CreateGrn = () => {
                                         onInputChange={(e, newInputValue) => handleProductInputChange(newInputValue)}
                                         renderInput={(params) => <TextField {...params} label="Enter.." variant="outlined" />}
                                     />
+                                    {spareerrors.selectproduct && <span className="text-danger">{spareerrors.selectproduct}</span>}
                                 </div>
                                 <div className="mb-3 col-lg-3">
-                                <label htmlFor="EmailInput" className="input-field">
+                                    <label htmlFor="EmailInput" className="input-field">
                                         Spare <span className="text-danger">*</span>
                                     </label>
-                                    <select value={formData.spare} name='spare' className="form-control" style={{ fontSize: "14px" }} onChange={(e) =>handlespareChange(e.target.value)}>
+                                    <select value={SpareId} name='spare' className="form-control" style={{ fontSize: "14px" }} onChange={(e) => handlespareChange(e.target.value)}>
                                         <option value="" >Select Spare</option>
                                         {spare.map((item) => {
                                             return (
@@ -415,12 +529,17 @@ const CreateGrn = () => {
                                         })}
 
                                     </select>
+                                    {spareerrors.spare && <span className="text-danger">{spareerrors.spare}</span>}
+                                </div>
+                                <div className="mb-3 col-lg-3">
+                                    <p></p>
+                                    <button type="button" onClick={() => handleAddSpare()} className="btn btn-primary">Add Spare</button>
                                 </div>
 
                                 {hide ?
                                     <div className="col-lg-12">
                                         <table className="w-100 table table-striped table-bordered">
-                                            <thead >
+                                            <thead>
                                                 <th className="py-2" width="20%" scope="col">#</th>
                                                 <th className="py-2" width="30%" scope="col">Spare Code</th>
                                                 <th className="py-2" width="30%" scope="col">Spare Name</th>
@@ -431,8 +550,8 @@ const CreateGrn = () => {
                                                     return (
                                                         <tr>
                                                             <td>{index + 1}</td>
-                                                            <td>{item.article_code}</td>
-                                                            <td>{item.article_description}</td>
+                                                            <td>{item.spare_no}</td>
+                                                            <td>{item.spare_title}</td>
                                                             <td>
                                                                 <div className="">
 
@@ -440,7 +559,7 @@ const CreateGrn = () => {
                                                                         type="text"
                                                                         className="form-control"
                                                                         placeholder="Enter Qty"
-                                                                        value={item.spare_qty || ""} // Bind to `spare_qty`
+                                                                        value={item.quantity || ""} // Bind to `spare_qty`
                                                                         onChange={(e) => handleQuantityChange(index, e.target.value)}
                                                                     />
 
@@ -457,9 +576,7 @@ const CreateGrn = () => {
                                         <div className="">
                                             <button className="btn btn-primary" onClick={() => handleSpareSend()} type="">Save</button>
                                         </div>
-                                        <div className="" onClick={() => window.location.reload()}>
-                                            <button className="btn btn-primary" type="">Cancel</button>
-                                        </div>
+
                                     </div>
                                     : null}
 
