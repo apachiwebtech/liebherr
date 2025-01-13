@@ -164,6 +164,7 @@ export function Customerlist(params) {
             );
             setCustomerdata(response.data.data);
             setFilteredData(response.data.data);
+            setTotalCount(response.data.totalCount);
         } catch (error) {
             console.error('Error fetching filtered data:', error);
             setFilteredData([]);
@@ -244,7 +245,33 @@ export function Customerlist(params) {
                 "CustomerType": user.customer_type,
                 "CustomerClassification": user.customer_classification,
                 "MobileNumber": user.mobileno,
-                "Email": user.email, // Add fields you want to export
+                // "Email": user.email, 
+                // "Address": user.address,
+                // "Country": user.country_name,
+                // "Region": user.region_name,
+                // "State": user.geostate_name,
+                // "City": user.geocity_name,
+                // "District": user.district_name,                
+                // "Pincode": user.pincode,
+                // "CCperson": user.cc_person,
+                // "CCNumber": user.ccnumber,
+                // "ModelNumber": user.ModelNumber,
+                // "SerialNumber": user.serial_no,
+                // "ModelName": user.Modelname,
+                // "PurchaseDate": user.purchase_date,
+                // "WarrantyStartDate": user.warranty_sdate,
+                // "WarrantyEndDate": user.warranty_edate,
+                // "Invoicedate": user.InvoiceDate,
+                // "InvoiceNumber": user.InvoiceNumber,
+                // "Short_model_no": user.Short_model_no,
+                // "SerialStatus": user.SerialStatus,
+                // "Notes": user.Notes,
+                // "BranchName": user.BranchName,
+                // "CurrentAccountStatus": user.CurrentAccountStatus,
+                // "SalesDealer": user.SalesDealer,
+                // "SubDealer": user.SubDealer,
+
+                
             })));
 
             // Append the worksheet to the workbook
@@ -424,7 +451,9 @@ export function Customerlist(params) {
                                         </button>
                                         <button
                                             className="btn btn-secondary"
-                                            onClick={resetFilters}
+                                            onClick={() => {
+                                                window.location.reload()
+                                              }}
                                             style={{
                                                 marginLeft: '5px',
                                             }}

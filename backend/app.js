@@ -668,7 +668,7 @@ app.get("/getgeostates",
       FROM awt_geostate gs
       JOIN awt_country c ON gs.country_id = c.id
       JOIN awt_region r ON gs.region_id = r.id
-      WHERE gs.deleted = 0 ORDER BY gs.id DESC
+      WHERE gs.deleted = 0 ORDER BY gs.id ASC
     `;
 
       // Execute the query
@@ -5400,7 +5400,7 @@ WHERE m.deleted = 0
     // Execute the SQL query
     const result = await pool.request().query(sql);
     // Get the total count of records for pagination
-    let countSql = `SELECT COUNT(*) as totalCount FROM awt_franchisemaster WHERE deleted = 0`;
+    let countSql = `SELECT COUNT(*) as totalCount FROM awt_childfranchisemaster WHERE deleted = 0`;
     if (title) countSql += ` AND title LIKE '%${title}%'`;
     if (licarecode) countSql += ` AND licare_code LIKE '%${licarecode}%'`;
     if (mobile_no) countSql += ` AND mobile_no LIKE '%${mobile_no}%'`;

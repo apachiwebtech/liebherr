@@ -303,7 +303,7 @@ const Lhiuser = () => {
       const workbook = XLSX.utils.book_new();
   
       // Convert data to a worksheet
-      const worksheet = XLSX.utils.json_to_sheet(currentUsers.map(user => ({
+      const worksheet = XLSX.utils.json_to_sheet(filteredUsers.map(user => ({
         "Name": user.Lhiuser,
         "UserCode": user.Usercode, // Add fields you want to export
         "MobileNumber": user.mobile_no,

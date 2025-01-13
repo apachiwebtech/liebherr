@@ -121,6 +121,7 @@ export function ChildFranchiselist(params) {
             );
             setChildfranchisemasterdata(response.data.data);
             setFilteredData(response.data.data);
+            setTotalCount(response.data.totalCount);
         } catch (error) {
             console.error('Error fetching filtered data:', error);
             setFilteredData([]);
@@ -173,12 +174,25 @@ export function ChildFranchiselist(params) {
     const navigate = useNavigate()
 
     // export to excel 
-    const exportToExcel = () => {
+    const exportToExcel = async () => {
+         try {
+              // Fetch all customer data without pagination
+              const response = await axiosInstance.get(`${Base_Url}/getchildFranchiseDetails`, {
+                headers: {
+                  Authorization: token,
+                },
+                params: {
+                  pageSize: totalCount, // Fetch all data
+                  page: 1, // Start from the first page
+                },
+              });
+              const allChildFranchiseData = response.data.data;
+              
         // Create a new workbook
         const workbook = XLSX.utils.book_new();
 
         // Convert data to a worksheet
-        const worksheet = XLSX.utils.json_to_sheet(ChildFranchisemasterdata.map(user => ({
+        const worksheet = XLSX.utils.json_to_sheet(allChildFranchiseData.map(user => ({
 
             "Name": user.title,
             "pFranchise_id": user.pfranchise_id,
@@ -212,7 +226,10 @@ export function ChildFranchiselist(params) {
 
         // Export the workbook
         XLSX.writeFile(workbook, "ChildFranchise.xlsx");
-    };
+    }catch (error) {
+        console.error("Error exporting data to Excel:", error);
+    }
+      };
 
     // export to excel end 
 
@@ -364,7 +381,9 @@ export function ChildFranchiselist(params) {
                                         </button>
                                         <button
                                             className="btn btn-secondary"
-                                            onClick={resetFilters}
+                                            onClick={() => {
+                                                window.location.reload()
+                                              }}
                                             style={{
                                                 marginLeft: '5px',
                                             }}

@@ -120,6 +120,7 @@ export function Franchisemasterlist(params) {
       );
       setFranchisemasterdata(response.data.data);
       setFilteredData(response.data);
+      setTotalCount(response.data.totalCount);
     } catch (error) {
       console.error('Error fetching filtered data:', error);
       setFilteredData([]);
@@ -179,61 +180,61 @@ export function Franchisemasterlist(params) {
   const navigate = useNavigate()
 
   // export to excel 
-  // const exportToExcel = () => {
-  //   try {
-  //     // Fetch all customer data without pagination
-  //     const response = await axiosInstance.get(`${Base_Url}/getmasterfranchiselist`, {
-  //       headers: {
-  //         Authorization: token,
-  //       },
-  //       params: {
-  //         pageSize: totalCount, // Fetch all data
-  //         page: 1, // Start from the first page
-  //       },
-  //     });
-  //     const allMasterFranchiseData = response.data.data;
-  //     // Create a new workbook
-  //     const workbook = XLSX.utils.book_new();
+  const exportToExcel = async () => {
+    try {
+      // Fetch all customer data without pagination
+      const response = await axiosInstance.get(`${Base_Url}/getmasterfranchiselist`, {
+        headers: {
+          Authorization: token,
+        },
+        params: {
+          pageSize: totalCount, // Fetch all data
+          page: 1, // Start from the first page
+        },
+      });
+      const allMasterFranchiseData = response.data.data;
+      // Create a new workbook
+      const workbook = XLSX.utils.book_new();
 
-  //     // Convert data to a worksheet
-  //     const worksheet = XLSX.utils.json_to_sheet(allMasterFranchiseData.map(user => ({
+      // Convert data to a worksheet
+      const worksheet = XLSX.utils.json_to_sheet(allMasterFranchiseData.map(user => ({
 
-  //       "Name": user.title,
-  //       "ContactPerson": user.contact_person,
-  //       "Email": user.email,
-  //       "MobileNumber": user.mobile_no,
-  //       "Address": user.address,
-  //       "Pincode": user.pincode_id,
-  //       "Country": user.country_id,
-  //       "Region": user.region_id,
-  //       "State": user.geostate_id,
-  //       "District": user.area_id,
-  //       "GeoCity": user.geocity_id,
-  //       "Website": user.webste,
-  //       "GST No": user.gstno,
-  //       "Pan Number": user.panno,
-  //       "Bank Name": user.bankname,
-  //       "BankAccountNumber": user.bankacc,
-  //       "IfscCode": user.bankifsc,
-  //       "WithLiebherr": user.withliebher,
-  //       "LastWorkingDate": user.lastworkinddate,
-  //       "ContractActivationdate": user.contractacti,
-  //       "ContractExpirationDate": user.contractexpir,
-  //       "BankAddress": user.bankaddress,
-  //       "LicareCode": user.licarecode,
-  //       "PartnerName": user.partner_name, // Add fields you want to export
+        "Name": user.title,
+        "ContactPerson": user.contact_person,
+        "Email": user.email,
+        "MobileNumber": user.mobile_no,
+        "Address": user.address,
+        "Pincode": user.pincode_id,
+        "Country": user.country_id,
+        "Region": user.region_id,
+        "State": user.geostate_id,
+        "District": user.area_id,
+        "GeoCity": user.geocity_id,
+        "Website": user.webste,
+        "GST No": user.gstno,
+        "Pan Number": user.panno,
+        "Bank Name": user.bankname,
+        "BankAccountNumber": user.bankacc,
+        "IfscCode": user.bankifsc,
+        "WithLiebherr": user.withliebher,
+        "LastWorkingDate": user.lastworkinddate,
+        "ContractActivationdate": user.contractacti,
+        "ContractExpirationDate": user.contractexpir,
+        "BankAddress": user.bankaddress,
+        "LicareCode": user.licarecode,
+        "PartnerName": user.partner_name, // Add fields you want to export
 
-  //     })));
+      })));
 
-  //     // Append the worksheet to the workbook
-  //     XLSX.utils.book_append_sheet(workbook, worksheet, "MasterFranchise");
+      // Append the worksheet to the workbook
+      XLSX.utils.book_append_sheet(workbook, worksheet, "MasterFranchise");
 
-  //     // Export the workbook
-  //     XLSX.writeFile(workbook, "MasterFranchise.xlsx");
-  //   }catch (error) {
-  //     console.error("Error exporting data to Excel:", error);
-  // }
-  //   };
+      // Export the workbook
+      XLSX.writeFile(workbook, "MasterFranchise.xlsx");
+    }catch (error) {
+      console.error("Error exporting data to Excel:", error);
+  }
+    };
 
     // export to excel end 
     // Role Right 
@@ -277,12 +278,12 @@ export function Franchisemasterlist(params) {
             <div className="card mb-3 tab_box">
 
               <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
-                {/* <button
+                <button
                   className="btn btn-primary"
                   onClick={exportToExcel}
                 >
                   Export to Excel
-                </button> */}
+                </button>
                 <div className="row mb-3">
 
                   <div className="col-md-2">
@@ -371,7 +372,9 @@ export function Franchisemasterlist(params) {
                       </button>
                       <button
                         className="btn btn-secondary"
-                        onClick={resetFilters}
+                        onClick={() => {
+                          window.location.reload()
+                        }}
                         style={{
                           marginLeft: '5px',
                         }}
