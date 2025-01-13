@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import {  useNavigate } from "react-router-dom";
-import { BASE_URL } from "../App/Compo/BaseUrl";
+import {Base_Url} from '../Utils/Base_Url'
 
 export function Dashboard(params) {
   const token = localStorage.getItem("token");
@@ -21,7 +21,7 @@ export function Dashboard(params) {
     async function getdata() {
         
     
-        axios.get(`${BASE_URL}/getheaddata_web`,{
+        axios.get(`${Base_Url}/getheaddata_web`,{
           headers: {
               Authorization: token, // Send token in headers
               },
