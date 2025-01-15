@@ -115,32 +115,32 @@ export function Customerlist(params) {
 
 
     const deleted = async (id) => {
-        const confirm =  window.confirm("Are you sure you want to delete ?");
+        const confirm = window.confirm("Are you sure you want to delete ?");
 
-    if(confirm){
-        try {
-            const response = await axiosInstance.post(`${Base_Url}/deletecustomer`, { id }, {
-                headers: {
-                    Authorization: token,
-                },
-            });
-            setFormData({
-                customer_fname: '',
-                customer_lname: '',
-                customer_type: '',
-                customer_classification: '',
-                mobileno: '',
-                dateofbirth: '',
-                email: '',
-                alt_mobileno: '',
-                anniversary_date: '',
-                salutation: ''
-            })
-            fetchCustomerlist();
-        } catch (error) {
-            console.error('Error deleting user:', error);
+        if (confirm) {
+            try {
+                const response = await axiosInstance.post(`${Base_Url}/deletecustomer`, { id }, {
+                    headers: {
+                        Authorization: token,
+                    },
+                });
+                setFormData({
+                    customer_fname: '',
+                    customer_lname: '',
+                    customer_type: '',
+                    customer_classification: '',
+                    mobileno: '',
+                    dateofbirth: '',
+                    email: '',
+                    alt_mobileno: '',
+                    anniversary_date: '',
+                    salutation: ''
+                })
+                fetchCustomerlist();
+            } catch (error) {
+                console.error('Error deleting user:', error);
+            }
         }
-    }
     };
 
     const fetchFilteredData = async () => {
@@ -271,7 +271,7 @@ export function Customerlist(params) {
                 // "SalesDealer": user.SalesDealer,
                 // "SubDealer": user.SubDealer,
 
-                
+
             })));
 
             // Append the worksheet to the workbook
@@ -333,12 +333,7 @@ export function Customerlist(params) {
                             {/* <div className='p-1 text-right'>
                                 <Link to={`/Customer`}><button className='btn btn-primary'>Add Customer</button></Link>
                             </div> */}
-                            <button
-                                className="btn btn-primary"
-                                onClick={exportToExcel}
-                            >
-                                Export to Excel
-                            </button>
+
                             <div className="row mb-3">
 
                                 <div className="col-md-2">
@@ -444,8 +439,17 @@ export function Customerlist(params) {
                                 <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
                                     <div className="form-group">
                                         <button
+                                            className="btn btn-primary"
+                                            onClick={exportToExcel}
+                                        >
+                                            Export to Excel
+                                        </button>
+                                        <button
                                             className="btn btn-primary mr-2"
                                             onClick={applyFilters}
+                                            style={{
+                                                marginLeft: '5px',
+                                            }}
                                         >
                                             Search
                                         </button>
@@ -453,7 +457,7 @@ export function Customerlist(params) {
                                             className="btn btn-secondary"
                                             onClick={() => {
                                                 window.location.reload()
-                                              }}
+                                            }}
                                             style={{
                                                 marginLeft: '5px',
                                             }}

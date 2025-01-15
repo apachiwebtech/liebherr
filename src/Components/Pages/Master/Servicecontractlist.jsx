@@ -9,6 +9,8 @@ import Servicecontract from './Servicecontract';
 import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 import CryptoJS from 'crypto-js';
+import { useDispatch } from "react-redux";
+import { getRoleData } from "../../Store/Role/role-action";
 
 export function Servicecontractlist(params) {
     const { loaders, axiosInstance } = useAxiosLoader();
@@ -16,6 +18,17 @@ export function Servicecontractlist(params) {
     const [isEdit, setIsEdit] = useState(false);
     const [filteredData, setFilteredData] = useState([]);
     const token = localStorage.getItem("token"); // Get token from localStorage
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [totalCount, setTotalCount] = useState(0);
+
+    const totalPages = Math.ceil(totalCount / pageSize);
+
+    const handlePageChange = (page) => {
+
+        setCurrentPage(page);
+        fetchServicecontractlist(page); // Fetch data for the new page
+    };
     const [formData, setFormData] = useState({
         customerName: "",
         customerMobile: "",
@@ -41,21 +54,76 @@ export function Servicecontractlist(params) {
         return date.toLocaleDateString('en-GB', options).replace(/\//g, '-'); // Convert to 'DD-MM-YYYY' format
     };
 
-    const fetchServicecontractlist = async () => {
+    const fetchServicecontractlist = async (page) => {
         try {
-            const response = await axiosInstance.get(`${Base_Url}/getservicecontractlist`, {
+            const params = new URLSearchParams();
+            // Add the page and pageSize parameters
+            params.append('page', page || 1); // Current page number
+            params.append('pageSize', pageSize); // Page size
+            // Add all filters to params if they have values
+            Object.entries(searchFilters).forEach(([key, value]) => {
+                if (value) { // Only add if value is not empty
+                    params.append(key, value);
+                }
+            });
+            const response = await axiosInstance.get(`${Base_Url}/getservicecontractlist?${params.toString()}`, {
                 headers: {
                     Authorization: token, // Send token in headers
                 },
             });
 
-            setServicecontractdata(response.data);
-            setFilteredData(response.data);
+            setServicecontractdata(response.data.data);
+            setFilteredData(response.data.data);
+            // Store total count for pagination logic on the frontend
+            setTotalCount(response.data.totalCount);
         } catch (error) {
             console.error('Error fetching servicecontractdata:', error);
             setServicecontractdata([]);
             setFilteredData([]);
         }
+    };
+
+
+    const fetchFilteredData = async () => {
+        try {
+            const params = new URLSearchParams();
+
+            // Add all filters to params
+            Object.entries(searchFilters).forEach(([key, value]) => {
+                if (value) { // Only add if value is not empty
+                    params.append(key, value);
+                }
+            });
+
+            console.log('Sending params:', params.toString()); // Debug log
+
+            const response = await axiosInstance.get(`${Base_Url}/getservicecontractlist?${params}`, {
+                headers: {
+                    Authorization: token, // Send token in headers
+                },
+            });
+            setServicecontractdata(response.data.data);
+            setFilteredData(response.data.data);
+            setTotalCount(response.data.totalCount);
+
+        } catch (error) {
+            console.error('Error fetching filtered data:', error);
+            setFilteredData([]);
+        }
+    };
+
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+
+        setSearchFilters(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const applyFilters = () => {
+        console.log('Applying filters:', searchFilters); // Debug log
+        fetchFilteredData();
     };
 
     const handleChangestatus = (e) => {
@@ -75,7 +143,7 @@ export function Servicecontractlist(params) {
     };
 
     const deleted = async (id) => {
-        
+
         try {
             // Add confirmation dialog
             const isConfirmed = window.confirm("Are you sure you want to delete?");
@@ -94,7 +162,7 @@ export function Servicecontractlist(params) {
         }
     };
 
-    const sendtoedit = async (id,view) => {
+    const sendtoedit = async (id, view) => {
         id = id.toString()
         let encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
         encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
@@ -103,57 +171,10 @@ export function Servicecontractlist(params) {
 
 
 
-    const fetchFilteredData = async () => {
-        try {
-            const params = new URLSearchParams();
 
-            // Add all filters to params
-            Object.entries(searchFilters).forEach(([key, value]) => {
-                if (value) { // Only add if value is not empty
-                    params.append(key, value);
-                }
-            });
 
-            console.log('Sending params:', params.toString()); // Debug log
 
-            const response = await axiosInstance.get(`${Base_Url}/getservicecontractlist?${params}`,{
-                headers: {
-                   Authorization: token, // Send token in headers
-                 },
-               });
-            setServicecontractdata(response.data);
-            setFilteredData(response.data);
 
-        } catch (error) {
-            console.error('Error fetching filtered data:', error);
-            setFilteredData([]);
-        }
-    };
-
-    const handleFilterChange = (e) => {
-        const { name, value } = e.target;
-        console.log('Filter changed:', name, value); // Debug log
-        setSearchFilters(prev => ({
-            ...prev,
-            [name]: value
-        }));
-    };
-
-    const applyFilters = () => {
-        console.log('Applying filters:', searchFilters); // Debug log
-        fetchFilteredData();
-    };
-
-    const resetFilters = () => {
-        setSearchFilters({
-            customerName: '',
-            contractNumber: '',
-            productName: '',
-            serialNumber: '',
-
-        });
-        fetchServicecontractlist(); // Reset to original data
-    };
 
     const [isOpen, setIsOpen] = useState({}); // State to track which rows are expanded
     const toggleRow = (rowId) => {
@@ -164,46 +185,38 @@ export function Servicecontractlist(params) {
         fetchServicecontractlist();
     }, []);
 
-    useEffect(() => {
-        const $ = window.$; // Access jQuery
-        $(document).ready(function () {
-            $('#myTable').DataTable();
-        });
-        return () => {
-            $('#myTable').DataTable().destroy();
-        };
-    }, []);
+
 
     const navigate = useNavigate()
 
     // export to excel 
-        const exportToExcel = () => {
-            // Create a new workbook
-            const workbook = XLSX.utils.book_new();
-    
-            // Convert data to a worksheet
-            const worksheet = XLSX.utils.json_to_sheet(Servicecontractdata.map(user => ({
-    
-                "Name": user.customerName,
-                "MobileNumber": user.customerMobile,
-                "ContractNumber": user.contractNumber,
-                "ContractType": user.contractType,
-                "ProductName": user.productName,
-                "SerialNumber": user.serialNumber,
-                "StartDate": user.startDate,
-                "EndDate": user.endDate,
-               
-    
-            })));
-    
-            // Append the worksheet to the workbook
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Service Contract Registration");
-    
-            // Export the workbook
-            XLSX.writeFile(workbook, "ServiceContract.xlsx");
-        };
-    
-        // export to excel end 
+    const exportToExcel = () => {
+        // Create a new workbook
+        const workbook = XLSX.utils.book_new();
+
+        // Convert data to a worksheet
+        const worksheet = XLSX.utils.json_to_sheet(Servicecontractdata.map(user => ({
+
+            "Name": user.customerName,
+            "MobileNumber": user.customerMobile,
+            "ContractNumber": user.contractNumber,
+            "ContractType": user.contractType,
+            "ProductName": user.productName,
+            "SerialNumber": user.serialNumber,
+            "StartDate": user.startDate,
+            "EndDate": user.endDate,
+
+
+        })));
+
+        // Append the worksheet to the workbook
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Service Contract Registration");
+
+        // Export the workbook
+        XLSX.writeFile(workbook, "ServiceContract.xlsx");
+    };
+
+    // export to excel end 
 
     return (
         <div className="tab-content">
@@ -218,13 +231,8 @@ export function Servicecontractlist(params) {
                     <div className="card mb-3 tab_box">
 
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
-                        <button
-                                className="btn btn-primary"
-                                onClick={exportToExcel}
-                            >
-                                Export to Excel
-                            </button>
-                        <div className="p-1 text-right">
+
+                            <div className="p-1 text-right">
                                 <button
                                     className="btn btn-primary"
                                     onClick={() => navigate("/Servicecontract")}
@@ -296,14 +304,25 @@ export function Servicecontractlist(params) {
                                 <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
                                     <div className="form-group">
                                         <button
+                                            className="btn btn-primary"
+                                            onClick={exportToExcel}
+                                        >
+                                            Export to Excel
+                                        </button>
+                                        <button
                                             className="btn btn-primary mr-2"
                                             onClick={applyFilters}
+                                            style={{
+                                                marginLeft: '5px',
+                                            }}
                                         >
                                             Search
                                         </button>
                                         <button
                                             className="btn btn-secondary"
-                                            onClick={resetFilters}
+                                            onClick={() => {
+                                                window.location.reload()
+                                            }}
                                             style={{
                                                 marginLeft: '5px',
                                             }}
@@ -349,9 +368,10 @@ export function Servicecontractlist(params) {
                                 <tbody>
 
                                     {Servicecontractdata.map((item, index) => {
+                                        const displayIndex = (currentPage - 1) * pageSize + index + 1;
                                         return (
                                             <tr key={item.id}>
-                                                <td >{index + 1}</td>
+                                                <td >{displayIndex}</td>
                                                 <td >{item.customerName}</td>
                                                 <td>{item.contractNumber}</td>
                                                 <td >{item.productName}</td>
@@ -379,7 +399,7 @@ export function Servicecontractlist(params) {
                                                 <td >
                                                     <button
                                                         className='btn'
-                                                        onClick={() => sendtoedit(item.id,0)}
+                                                        onClick={() => sendtoedit(item.id, 0)}
                                                         title="Edit"
                                                         style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
                                                     >
@@ -389,7 +409,7 @@ export function Servicecontractlist(params) {
                                                 <td >
                                                     <button
                                                         className='btn'
-                                                        onClick={() => sendtoedit(item.id,1)}
+                                                        onClick={() => sendtoedit(item.id, 1)}
                                                         title="View"
                                                         style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
                                                     >
@@ -413,6 +433,43 @@ export function Servicecontractlist(params) {
 
                                 </tbody>
                             </table>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                                <button
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    disabled={currentPage <= 1}
+                                    style={{
+                                        padding: '8px 15px',
+                                        fontSize: '16px',
+                                        cursor: currentPage <= 1 ? 'not-allowed' : 'pointer',
+                                        backgroundColor: currentPage <= 1 ? '#ccc' : '#007bff',
+                                        color: '#fff',
+                                        border: 'none',
+                                        borderRadius: '5px',
+                                        transition: 'background-color 0.3s',
+                                    }}
+                                >
+                                    Previous
+                                </button>
+                                <span style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                                    Page {currentPage} of {totalPages}
+                                </span>
+                                <button
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    disabled={currentPage >= totalPages}
+                                    style={{
+                                        padding: '8px 15px',
+                                        fontSize: '16px',
+                                        cursor: currentPage >= totalPages ? 'not-allowed' : 'pointer',
+                                        backgroundColor: currentPage >= totalPages ? '#ccc' : '#007bff',
+                                        color: '#fff',
+                                        border: 'none',
+                                        borderRadius: '5px',
+                                        transition: 'background-color 0.3s',
+                                    }}
+                                >
+                                    Next
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

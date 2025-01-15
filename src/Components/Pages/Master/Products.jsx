@@ -143,36 +143,52 @@ export function Products(params) {
         fetchProductlist();
     }, []);
 
-      const [isOpen, setIsOpen] = useState({}); // State to track which rows are expanded
-        const toggleRow = (rowId) => {
-            setIsOpen((prev) => ({ ...prev, [rowId]: !prev[rowId] }));
-        };
+    const [isOpen, setIsOpen] = useState({}); // State to track which rows are expanded
+    const toggleRow = (rowId) => {
+        setIsOpen((prev) => ({ ...prev, [rowId]: !prev[rowId] }));
+    };
 
     const navigate = useNavigate();
 
     // export to excel 
-    const exportToExcel = () => {
-        // Create a new workbook
-        const workbook = XLSX.utils.book_new();
+    const exportToExcel = async () => {
+        try {
+            // Fetch all customer data without pagination
+            const response = await axiosInstance.get(`${Base_Url}/getproductlist`, {
+                headers: {
+                    Authorization: token,
+                },
+                params: {
+                    pageSize: totalCount, // Fetch all data
+                    page: 1, // Start from the first page
+                },
+            });
+            const allProductDate = response.data.data;
 
-        // Convert data to a worksheet
-        const worksheet = XLSX.utils.json_to_sheet(Productdata.map(user => ({
-            "Serial_No": user.serial_no,
-            "Item Code": user.item_code,
-            "Product Name": user.product_model,
-            "Product Description": user.item_description,
-            "Product Type": user.productType,
-            "Product Line": user.productLine,
-            "Material": user.material,
-            "Manufacturer": user.manufacturer
-            // Add fields you want to export
-        })));
+            // Create a new workbook
+            const workbook = XLSX.utils.book_new();
 
-        // Append the worksheet to the workbook
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Products List");
+            // Convert data to a worksheet
+            const worksheet = XLSX.utils.json_to_sheet(allProductDate.map(user => ({
+                "Serial_No": user.serial_no,
+                "Item Code": user.item_code,
+                "Product Name": user.product_model,
+                "Product Description": user.item_description,
+                "Product Type": user.productType,
+                "Product Line": user.productLine,
+                "Material": user.material,
+                "Manufacturer": user.manufacturer
+                // Add fields you want to export
+            })));
 
-        // Export the workbook
-        XLSX.writeFile(workbook, "Products List.xlsx");
+            // Append the worksheet to the workbook
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Products List");
+
+            // Export the workbook
+            XLSX.writeFile(workbook, "Products List.xlsx");
+        } catch (error) {
+            console.error("Error exporting data to Excel:", error);
+        }
     };
 
     // export to excel end 
@@ -219,12 +235,7 @@ export function Products(params) {
                             <div className='p-1 text-right'>
                                 <Link to={`/addproduct/:productid`}><button hidden className='btn btn-primary'>Add Product</button></Link>
                             </div>
-                            <button
-                                className="btn btn-primary"
-                                onClick={exportToExcel}
-                            >
-                                Export to Excel
-                            </button>
+
                             <div className="row mb-3">
 
                                 <div className="col-md-2">
@@ -316,8 +327,20 @@ export function Products(params) {
                                 <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
                                     <div className="form-group">
                                         <button
+                                            className="btn btn-primary"
+                                            onClick={exportToExcel}
+                                            style={{
+                                                marginLeft: '5px',
+                                            }}
+                                        >
+                                            Export to Excel
+                                        </button>
+                                        <button
                                             className="btn btn-primary mr-2"
                                             onClick={applyFilters}
+                                            style={{
+                                                marginLeft: '5px',
+                                            }}
                                         >
                                             Search
                                         </button>

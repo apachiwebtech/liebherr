@@ -257,12 +257,7 @@ export function Engineerlist(params) {
                     <div className="card mb-3 tab_box">
 
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
-                            <button
-                                className="btn btn-primary"
-                                onClick={exportToExcel}
-                            >
-                                Export to Excel
-                            </button>
+
                             <div className="p-1 text-right">
                                 <button
                                     className="btn btn-primary"
@@ -340,8 +335,17 @@ export function Engineerlist(params) {
                                 <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
                                     <div className="form-group">
                                         <button
+                                            className="btn btn-primary"
+                                            onClick={exportToExcel}
+                                        >
+                                            Export to Excel
+                                        </button>
+                                        <button
                                             className="btn btn-primary mr-2"
                                             onClick={applyFilters}
+                                            style={{
+                                                marginLeft: '5px',
+                                            }}
                                         >
                                             Search
                                         </button>

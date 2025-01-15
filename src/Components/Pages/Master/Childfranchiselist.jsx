@@ -143,7 +143,7 @@ export function ChildFranchiselist(params) {
         fetchFilteredData();
     };
 
-    
+
     const sendtoedit = async (id) => {
         id = id.toString()
         let encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
@@ -164,61 +164,61 @@ export function ChildFranchiselist(params) {
 
     // export to excel 
     const exportToExcel = async () => {
-         try {
-              // Fetch all customer data without pagination
-              const response = await axiosInstance.get(`${Base_Url}/getchildFranchiseDetails`, {
+        try {
+            // Fetch all customer data without pagination
+            const response = await axiosInstance.get(`${Base_Url}/getchildFranchiseDetails`, {
                 headers: {
-                  Authorization: token,
+                    Authorization: token,
                 },
                 params: {
-                  pageSize: totalCount, // Fetch all data
-                  page: 1, // Start from the first page
+                    pageSize: totalCount, // Fetch all data
+                    page: 1, // Start from the first page
                 },
-              });
-              const allChildFranchiseData = response.data.data;
-              
-        // Create a new workbook
-        const workbook = XLSX.utils.book_new();
+            });
+            const allChildFranchiseData = response.data.data;
 
-        // Convert data to a worksheet
-        const worksheet = XLSX.utils.json_to_sheet(allChildFranchiseData.map(user => ({
+            // Create a new workbook
+            const workbook = XLSX.utils.book_new();
 
-            "Name": user.title,
-            "pFranchise_id": user.pfranchise_id,
-            "ContactPerson": user.contact_person,
-            "Email": user.email,
-            "MobileNumber": user.mobile_no,
-            "Address": user.address,
-            "Pincode": user.pincode_id,
-            "Country": user.country_id,
-            "Region": user.region_id,
-            "State": user.geostate_id,
-            "Website": user.webste,
-            "GST No": user.gstno,
-            "Pan Number": user.panno,
-            "Bank Name": user.bankname,
-            "BankAccountNumber": user.bankacc,
-            "IfscCode": user.bankifsc,
-            "WithLiebherr": user.with_liebher,
-            "LastWorkingDate": user.lastworkinddate,
-            "ContractActivationdate": user.contractacti,
-            "ContractExpirationDate": user.contractexpir,
-            "BankAddress": user.bankaddress,
-            "LicareCode": user.licare_code,
-            "PartnerName": user.partner_name,
-            "Roles": user.Role // Add fields you want to export
+            // Convert data to a worksheet
+            const worksheet = XLSX.utils.json_to_sheet(allChildFranchiseData.map(user => ({
 
-        })));
+                "Name": user.title,
+                "pFranchise_id": user.pfranchise_id,
+                "ContactPerson": user.contact_person,
+                "Email": user.email,
+                "MobileNumber": user.mobile_no,
+                "Address": user.address,
+                "Pincode": user.pincode_id,
+                "Country": user.country_id,
+                "Region": user.region_id,
+                "State": user.geostate_id,
+                "Website": user.webste,
+                "GST No": user.gstno,
+                "Pan Number": user.panno,
+                "Bank Name": user.bankname,
+                "BankAccountNumber": user.bankacc,
+                "IfscCode": user.bankifsc,
+                "WithLiebherr": user.with_liebher,
+                "LastWorkingDate": user.lastworkinddate,
+                "ContractActivationdate": user.contractacti,
+                "ContractExpirationDate": user.contractexpir,
+                "BankAddress": user.bankaddress,
+                "LicareCode": user.licare_code,
+                "PartnerName": user.partner_name,
+                "Roles": user.Role // Add fields you want to export
 
-        // Append the worksheet to the workbook
-        XLSX.utils.book_append_sheet(workbook, worksheet, "ChildFranchise");
+            })));
 
-        // Export the workbook
-        XLSX.writeFile(workbook, "ChildFranchise.xlsx");
-    }catch (error) {
-        console.error("Error exporting data to Excel:", error);
-    }
-      };
+            // Append the worksheet to the workbook
+            XLSX.utils.book_append_sheet(workbook, worksheet, "ChildFranchise");
+
+            // Export the workbook
+            XLSX.writeFile(workbook, "ChildFranchise.xlsx");
+        } catch (error) {
+            console.error("Error exporting data to Excel:", error);
+        }
+    };
 
     // export to excel end 
 
@@ -263,12 +263,7 @@ export function ChildFranchiselist(params) {
 
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
 
-                            <button
-                                className="btn btn-primary"
-                                onClick={exportToExcel}
-                            >
-                                Export to Excel
-                            </button>
+
                             <div className="row mb-3">
 
                                 <div className="col-md-2">
@@ -363,8 +358,17 @@ export function ChildFranchiselist(params) {
                                 <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
                                     <div className="form-group">
                                         <button
+                                            className="btn btn-primary"
+                                            onClick={exportToExcel}
+                                        >
+                                            Export to Excel
+                                        </button>
+                                        <button
                                             className="btn btn-primary mr-2"
                                             onClick={applyFilters}
+                                            style={{
+                                                marginLeft: '5px',
+                                            }}
                                         >
                                             Search
                                         </button>
@@ -372,7 +376,7 @@ export function ChildFranchiselist(params) {
                                             className="btn btn-secondary"
                                             onClick={() => {
                                                 window.location.reload()
-                                              }}
+                                            }}
                                             style={{
                                                 marginLeft: '5px',
                                             }}

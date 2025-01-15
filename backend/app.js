@@ -6885,13 +6885,13 @@ app.get("/getservicecontractlist", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
     const {
       customerName,
-      customerMobile,
       contractNumber,
-      contractType,
       startDate,
       endDate,
       productName,
       serialNumber,
+      page = 1, 
+      pageSize = 10,
 
     } = req.query;
 
@@ -6910,10 +6910,6 @@ app.get("/getservicecontractlist", authenticateToken, async (req, res) => {
       sql += ` AND s.contractNumber LIKE '%${contractNumber}%'`;
     }
 
-    if (customerMobile) {
-      sql += ` AND s.c.customer_mobile LIKE '%${customerMobile}%'`;
-    }
-
     if (serialNumber) {
       sql += ` AND s.serialNumber LIKE '%${serialNumber}%'`;
     }
@@ -6922,10 +6918,32 @@ app.get("/getservicecontractlist", authenticateToken, async (req, res) => {
       sql += ` AND s.productName LIKE '%${productName}%'`;
     }
 
-    console.log('SQL Query:', sql); // Debug log
+     // Pagination logic: Calculate offset based on the page number
+     const offset = (page - 1) * pageSize;
+
+     // Add pagination to the SQL query (OFFSET and FETCH NEXT)
+    sql += ` ORDER BY s.id OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+
     const result = await pool.request().query(sql);
 
-    return res.json(result.recordset);
+   // Get the total count of records for pagination
+   let countSql = `SELECT COUNT(*) as totalCount FROM awt_servicecontract WHERE deleted = 0`;
+   if (customerName) countSql += ` AND customerName LIKE '%${customerName}%'`;
+   if (contractNumber) countSql += ` AND contractNumber LIKE '%${contractNumber}%'`;
+   if (productName) countSql += ` AND productName LIKE '%${productName}%'`;
+   if (serialNumber) countSql += ` AND serialNumber LIKE '%${serialNumber}%'`;
+   if (startDate) countSql += ` AND startDate LIKE '%${startDate}%'`;
+   if (endDate) countSql += ` AND endDate LIKE '%${endDate}%'`;
+  
+
+   const countResult = await pool.request().query(countSql);
+   const totalCount = countResult.recordset[0].totalCount;
+   return res.json({
+     data: result.recordset,
+     totalCount: totalCount,
+     page,
+     pageSize,
+   });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "An error occurred while fetching the complaint list" });

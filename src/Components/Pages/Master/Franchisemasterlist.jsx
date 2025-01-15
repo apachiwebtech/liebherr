@@ -231,267 +231,271 @@ export function Franchisemasterlist(params) {
 
       // Export the workbook
       XLSX.writeFile(workbook, "MasterFranchise.xlsx");
-    }catch (error) {
+    } catch (error) {
       console.error("Error exporting data to Excel:", error);
-  }
-    };
-
-    // export to excel end 
-    // Role Right 
-
-
-    const Decrypt = (encrypted) => {
-      encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
-      const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
-      return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
-    };
-
-    const storedEncryptedRole = localStorage.getItem("Userrole");
-    const decryptedRole = Decrypt(storedEncryptedRole);
-
-    const roledata = {
-      role: decryptedRole,
-      pageid: String(20)
     }
+  };
 
-    const dispatch = useDispatch()
-    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+  // export to excel end 
+  // Role Right 
 
 
-    useEffect(() => {
-      dispatch(getRoleData(roledata))
-    }, [])
+  const Decrypt = (encrypted) => {
+    encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+    const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+    return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+  };
 
-    // Role Right End 
+  const storedEncryptedRole = localStorage.getItem("Userrole");
+  const decryptedRole = Decrypt(storedEncryptedRole);
 
-    return (
-      <div className="tab-content">
-        <Franchisemaster />
-        {loaders && (
-          <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <SyncLoader loading={loaders} color="#FFFFFF" />
-          </div>
-        )}
+  const roledata = {
+    role: decryptedRole,
+    pageid: String(20)
+  }
 
-        {roleaccess > 1 ? <div className="row mp0" >
-          <div className="col-md-12 col-12">
-            <div className="card mb-3 tab_box">
+  const dispatch = useDispatch()
+  const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
 
-              <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
-                <button
-                  className="btn btn-primary"
-                  onClick={exportToExcel}
-                >
-                  Export to Excel
-                </button>
-                <div className="row mb-3">
 
-                  <div className="col-md-2">
-                    <div className="form-group">
-                      <label>Name</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        name="title"
-                        value={searchFilters.title}
-                        placeholder="Search by name"
-                        onChange={handleFilterChange}
-                      />
-                    </div>
+  useEffect(() => {
+    dispatch(getRoleData(roledata))
+  }, [])
+
+  // Role Right End 
+
+  return (
+    <div className="tab-content">
+      <Franchisemaster />
+      {loaders && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SyncLoader loading={loaders} color="#FFFFFF" />
+        </div>
+      )}
+
+      {roleaccess > 1 ? <div className="row mp0" >
+        <div className="col-md-12 col-12">
+          <div className="card mb-3 tab_box">
+
+            <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
+
+              <div className="row mb-3">
+
+                <div className="col-md-2">
+                  <div className="form-group">
+                    <label>Name</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="title"
+                      value={searchFilters.title}
+                      placeholder="Search by name"
+                      onChange={handleFilterChange}
+                    />
                   </div>
-
-
-                  <div className="col-md-2">
-                    <div className="form-group">
-                      <label>Licare Code</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        name="licarecode"
-                        value={searchFilters.licarecode}
-                        placeholder="Search by Licare code"
-                        onChange={handleFilterChange}
-                      />
-                    </div>
-                  </div>
-                  <div className="col-md-2">
-                    <div className="form-group">
-                      <label>Mobile Number</label>
-                      <input
-                        type="tel"
-                        className="form-control"
-                        name="mobile_no"
-                        value={searchFilters.mobile_no}
-                        placeholder="Search by Mobile Number"
-                        onChange={handleFilterChange}
-                        pattern="[0-9]{10}"
-                        maxLength="10"
-                        minLength="10"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="col-md-2">
-                    <div className="form-group">
-                      <label>Email</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        name="email"
-                        value={searchFilters.email}
-                        placeholder="Search by customer email"
-                        onChange={handleFilterChange}
-                      />
-                    </div>
-                  </div>
-                  <div className="col-md-2">
-                    <div className="form-group">
-                      <label>Partner Name</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        name="partner_name"
-                        value={searchFilters.partner_name}
-                        placeholder="Search by Partner name"
-                        onChange={handleFilterChange}
-                      />
-                    </div>
-                  </div>
-
-
-
                 </div>
-                <div className="row mb-3">
-                  <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
-                    <div className="form-group">
-                      <button
-                        className="btn btn-primary mr-2"
-                        onClick={applyFilters}
-                      >
-                        Search
-                      </button>
-                      <button
-                        className="btn btn-secondary"
-                        onClick={() => {
-                          window.location.reload()
-                        }}
+
+
+                <div className="col-md-2">
+                  <div className="form-group">
+                    <label>Licare Code</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="licarecode"
+                      value={searchFilters.licarecode}
+                      placeholder="Search by Licare code"
+                      onChange={handleFilterChange}
+                    />
+                  </div>
+                </div>
+                <div className="col-md-2">
+                  <div className="form-group">
+                    <label>Mobile Number</label>
+                    <input
+                      type="tel"
+                      className="form-control"
+                      name="mobile_no"
+                      value={searchFilters.mobile_no}
+                      placeholder="Search by Mobile Number"
+                      onChange={handleFilterChange}
+                      pattern="[0-9]{10}"
+                      maxLength="10"
+                      minLength="10"
+                    />
+                  </div>
+                </div>
+
+                <div className="col-md-2">
+                  <div className="form-group">
+                    <label>Email</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="email"
+                      value={searchFilters.email}
+                      placeholder="Search by customer email"
+                      onChange={handleFilterChange}
+                    />
+                  </div>
+                </div>
+                <div className="col-md-2">
+                  <div className="form-group">
+                    <label>Partner Name</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="partner_name"
+                      value={searchFilters.partner_name}
+                      placeholder="Search by Partner name"
+                      onChange={handleFilterChange}
+                    />
+                  </div>
+                </div>
+
+
+
+              </div>
+              <div className="row mb-3">
+                <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
+                  <div className="form-group">
+                    <button
+                      className="btn btn-primary"
+                      onClick={exportToExcel}
+                    >
+                      Export to Excel
+                    </button>
+                    <button
+                      className="btn btn-primary mr-2"
+                      onClick={applyFilters}
+                      style={{
+                        marginLeft: '5px',
+                      }}
+                    >
+                      Search
+                    </button>
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() => {
+                        window.location.reload()
+                      }}
+                      style={{
+                        marginLeft: '5px',
+                      }}
+                    >
+                      Reset
+                    </button>
+                    {filteredData.length === 0 && (
+                      <div
                         style={{
-                          marginLeft: '5px',
+                          backgroundColor: '#f8d7da',
+                          color: '#721c24',
+                          padding: '5px 10px',
+                          marginLeft: '10px',
+                          borderRadius: '4px',
+                          border: '1px solid #f5c6cb',
+                          fontSize: '14px',
+                          display: 'inline-block'
                         }}
                       >
-                        Reset
-                      </button>
-                      {filteredData.length === 0 && (
-                        <div
-                          style={{
-                            backgroundColor: '#f8d7da',
-                            color: '#721c24',
-                            padding: '5px 10px',
-                            marginLeft: '10px',
-                            borderRadius: '4px',
-                            border: '1px solid #f5c6cb',
-                            fontSize: '14px',
-                            display: 'inline-block'
-                          }}
-                        >
-                          No Record Found
-                        </div>
-                      )}
-                    </div>
+                        No Record Found
+                      </div>
+                    )}
                   </div>
                 </div>
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th width="3%">#</th>
-                      <th width="2%">Name</th>
-                      <th width="8%">Email</th>
-                      <th width="8%">Mobile Number</th>
-                      <th width="10%">Licare Code</th>
-                      <th width="8%">Partner Name</th>
-                      <th width="8%">Country</th>
-                      <th width="8%">Region</th>
-                      <th width="8%">State</th>
-                      <th width="8%">District</th>
-                      <th width="5%">Edit</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+              </div>
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th width="3%">#</th>
+                    <th width="2%">Name</th>
+                    <th width="8%">Email</th>
+                    <th width="8%">Mobile Number</th>
+                    <th width="10%">Licare Code</th>
+                    <th width="8%">Partner Name</th>
+                    <th width="8%">Country</th>
+                    <th width="8%">Region</th>
+                    <th width="8%">State</th>
+                    <th width="8%">District</th>
+                    <th width="5%">Edit</th>
+                  </tr>
+                </thead>
+                <tbody>
 
-                    {Franchisemasterdata.map((item, index) => {
-                      const displayIndex = (currentPage - 1) * pageSize + index + 1;
-                      return (
-                        <tr key={item.id}>
-                          <td >{displayIndex}</td>
-                          <td >{item.title}</td>
-                          <td >{item.email}</td>
-                          <td >{item.mobile_no}</td>
-                          <td >{item.licarecode}</td>
-                          <td >{item.partner_name}</td>
-                          <td >{item.country_name}</td>
-                          <td >{item.region_name}</td>
-                          <td >{item.state_name}</td>
-                          <td >{item.district_name}</td>
+                  {Franchisemasterdata.map((item, index) => {
+                    const displayIndex = (currentPage - 1) * pageSize + index + 1;
+                    return (
+                      <tr key={item.id}>
+                        <td >{displayIndex}</td>
+                        <td >{item.title}</td>
+                        <td >{item.email}</td>
+                        <td >{item.mobile_no}</td>
+                        <td >{item.licarecode}</td>
+                        <td >{item.partner_name}</td>
+                        <td >{item.country_name}</td>
+                        <td >{item.region_name}</td>
+                        <td >{item.state_name}</td>
+                        <td >{item.district_name}</td>
 
-                          <td >
-                            <button
-                              className='btn'
-                              onClick={() => sendtoedit(item.id)}
-                              title="Edit"
-                              style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                              disabled={roleaccess > 3 ? false : true}
-                            >
-                              <FaEye />
-                            </button>
-                          </td>
+                        <td >
+                          <button
+                            className='btn'
+                            onClick={() => sendtoedit(item.id)}
+                            title="Edit"
+                            style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                            disabled={roleaccess > 3 ? false : true}
+                          >
+                            <FaEye />
+                          </button>
+                        </td>
 
-                        </tr>
-                      )
-                    })}
+                      </tr>
+                    )
+                  })}
 
-                  </tbody>
-                </table>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-                  <button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage <= 1}
-                    style={{
-                      padding: '8px 15px',
-                      fontSize: '16px',
-                      cursor: currentPage <= 1 ? 'not-allowed' : 'pointer',
-                      backgroundColor: currentPage <= 1 ? '#ccc' : '#007bff',
-                      color: '#fff',
-                      border: 'none',
-                      borderRadius: '5px',
-                      transition: 'background-color 0.3s',
-                    }}
-                  >
-                    Previous
-                  </button>
-                  <span style={{ fontSize: '16px', fontWeight: 'bold' }}>
-                    Page {currentPage} of {totalPages}
-                  </span>
-                  <button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage >= totalPages}
-                    style={{
-                      padding: '8px 15px',
-                      fontSize: '16px',
-                      cursor: currentPage >= totalPages ? 'not-allowed' : 'pointer',
-                      backgroundColor: currentPage >= totalPages ? '#ccc' : '#007bff',
-                      color: '#fff',
-                      border: 'none',
-                      borderRadius: '5px',
-                      transition: 'background-color 0.3s',
-                    }}
-                  >
-                    Next
-                  </button>
-                </div>
+                </tbody>
+              </table>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage <= 1}
+                  style={{
+                    padding: '8px 15px',
+                    fontSize: '16px',
+                    cursor: currentPage <= 1 ? 'not-allowed' : 'pointer',
+                    backgroundColor: currentPage <= 1 ? '#ccc' : '#007bff',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '5px',
+                    transition: 'background-color 0.3s',
+                  }}
+                >
+                  Previous
+                </button>
+                <span style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                  Page {currentPage} of {totalPages}
+                </span>
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage >= totalPages}
+                  style={{
+                    padding: '8px 15px',
+                    fontSize: '16px',
+                    cursor: currentPage >= totalPages ? 'not-allowed' : 'pointer',
+                    backgroundColor: currentPage >= totalPages ? '#ccc' : '#007bff',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '5px',
+                    transition: 'background-color 0.3s',
+                  }}
+                >
+                  Next
+                </button>
               </div>
             </div>
           </div>
-        </div> : null}
-      </div>
-    )
-  }
+        </div>
+      </div> : null}
+    </div>
+  )
+}

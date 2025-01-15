@@ -731,7 +731,9 @@ export function Complaintlist(params) {
                   <button
                     className="btn btn-primary mr-2"
                     onClick={applyFilters}
-
+                    style={{
+                      marginLeft: '5px',
+                  }}
                   >
                     Search
                   </button>
