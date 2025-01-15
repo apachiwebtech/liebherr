@@ -143,18 +143,7 @@ export function ChildFranchiselist(params) {
         fetchFilteredData();
     };
 
-    const resetFilters = () => {
-        setSearchFilters({
-            title: '',
-            licarecode: '',
-            partner_name: '',
-            mobile_no: '',
-            email: '',
-            parentfranchisetitle: '',
-
-        });
-        fetchChildfranchisemasterlist(); // Reset to original data
-    };
+    
     const sendtoedit = async (id) => {
         id = id.toString()
         let encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();

@@ -3,7 +3,7 @@ import * as XLSX from "xlsx";
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
-import { Base_Url,secretKey } from '../../Utils/Base_Url';
+import { Base_Url, secretKey } from '../../Utils/Base_Url';
 import Franchisemaster from './Franchisemaster';
 import { useSelector } from 'react-redux';
 import { SyncLoader } from 'react-spinners';
@@ -12,9 +12,10 @@ import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 import { useDispatch } from "react-redux";
 import { getRoleData } from "../../Store/Role/role-action";
 export function Engineerlist(params) {
-  const { loaders, axiosInstance } = useAxiosLoader();
-  const [Engineerdata, setEngineerdata] = useState([]);
+    const { loaders, axiosInstance } = useAxiosLoader();
+    const [Engineerdata, setEngineerdata] = useState([]);
     const token = localStorage.getItem("token");
+    const [filteredData, setFilteredData] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
@@ -44,32 +45,87 @@ export function Engineerlist(params) {
         manufacturer: '',
     });
 
-    const formatDate = (dateString) => {
-        const date = new Date(dateString); // Parse the date string
-        const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
-        return date.toLocaleDateString('en-GB', options).replace(/\//g, '-'); // Convert to 'DD-MM-YYYY' format
-    };
+    const [searchFilters, setSearchFilters] = useState({
+        title: '',
+        employee_code: '',
+        partner_name: '',
+        mobile_no: '',
+        email: '',
+
+
+    });
 
     const fetchEngineerlist = async (page) => {
         try {
-            const response = await axiosInstance.get(`${Base_Url}/getengineer`, {
+            const params = new URLSearchParams();
+            // Add the page and pageSize parameters
+            params.append('page', page || 1); // Current page number
+            params.append('pageSize', pageSize); // Page size
+
+            // Add all filters to params if they have values
+            Object.entries(searchFilters).forEach(([key, value]) => {
+                if (value) { // Only add if value is not empty
+                    params.append(key, value);
+                }
+            });
+
+            const response = await axiosInstance.get(`${Base_Url}/getengineer?${params.toString()}`, {
                 headers: {
                     Authorization: token,
-                },
-                params: {
-                    // You can add any additional filter parameters here if needed
-                    page: page, // current page number
-                    pageSize: pageSize, // page size
                 },
             }
             );
             setEngineerdata(response.data.data);
+            setFilteredData(response.data.data);
             setTotalCount(response.data.totalCount);
         } catch (error) {
             console.error('Error fetching Engineerdata:', error);
             setEngineerdata([]);
-        }   
+            setFilteredData([]);
+        }
     };
+
+    const fetchFilteredData = async () => {
+        try {
+            const params = new URLSearchParams();
+
+            // Add all filters to params
+            Object.entries(searchFilters).forEach(([key, value]) => {
+                if (value) { // Only add if value is not empty
+                    params.append(key, value);
+                }
+            });
+
+            console.log('Sending params:', params.toString()); // Debug log
+
+            const response = await axiosInstance.get(`${Base_Url}/getengineer?${params}`, {
+                headers: {
+                    Authorization: token,
+                },
+            }
+            );
+            setEngineerdata(response.data.data);
+            setFilteredData(response.data.data);
+            setTotalCount(response.data.totalCount);
+        } catch (error) {
+            console.error('Error fetching filtered data:', error);
+            setFilteredData([]);
+        }
+    };
+    const applyFilters = () => {
+        console.log('Applying filters:', searchFilters); // Debug log
+        fetchFilteredData();
+    };
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+
+        setSearchFilters(prev => ({
+            ...prev,
+            [name]: value
+        }));
+
+    };
+
     const handleChangestatus = (e) => {
         try {
             const dataId = e.target.getAttribute('data-id');
@@ -88,48 +144,13 @@ export function Engineerlist(params) {
     };
 
 
-    const deleted = async (id) => {
-        try {
-            const response = await axiosInstance.post(`${Base_Url}/deleteengineer`, { id }, {
-                headers: {
-                    Authorization: token,
-                },
-            }
-            );
-            setFormData({
-                title: '',
-                email: '',
-                mobile_no: '',
-                employee_code: '',
 
-                cfranchise_id: '',
-                productLineCode: '',
-                productLine: '',
-                productClassCode: '',
-                productClass: '',
-                material: '',
-                manufacturer: '',
-            })
-            fetchEngineerlist();
-        } catch (error) {
-            console.error('Error deleting user:', error);
-        }
-    };
 
-    const edit = async (id) => {
-        try {
-            const response = await axiosInstance.get(`${Base_Url}/requestengineer/${id}`, {
-                headers: {
-                    Authorization: token,
-                },
-            }
-            );
-            setFormData(response.data)
-            setIsEdit(true);
-            console.log(response.data);
-        } catch (error) {
-            console.error('Error editing user:', error);
-        }
+    const sendtoedit = async (id) => {
+        id = id.toString()
+        let encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
+        encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        navigate(`/EngineerMaster/${encrypted}`)
     };
     useEffect(() => {
         fetchEngineerlist();
@@ -140,20 +161,11 @@ export function Engineerlist(params) {
         setIsOpen((prev) => ({ ...prev, [rowId]: !prev[rowId] }));
     };
 
-    useEffect(() => {
-        const $ = window.$; // Access jQuery
-        $(document).ready(function () {
-            $('#myTable').DataTable();
-        });
-        return () => {
-            $('#myTable').DataTable().destroy();
-        };
-    }, []);
 
     const navigate = useNavigate()
 
-     // export to excel 
-     const exportToExcel = async () => {
+    // export to excel 
+    const exportToExcel = async () => {
         try {
             // Fetch all engineer data without pagination
             const response = await axiosInstance.get(`${Base_Url}/getengineer`, {
@@ -165,12 +177,12 @@ export function Engineerlist(params) {
                     page: 1, // Optional: Start from the first page
                 },
             });
-    
+
             const allEngineerData = response.data.data;
-    
+
             // Create a new workbook
             const workbook = XLSX.utils.book_new();
-    
+
             // Convert data to a worksheet
             const worksheet = XLSX.utils.json_to_sheet(allEngineerData.map(user => ({
                 "Name": user.title,
@@ -192,72 +204,176 @@ export function Engineerlist(params) {
                 "PermanentAddress": user.permanent_address,
                 "CurrentAddress": user.current_address,
             })));
-    
+
             // Append the worksheet to the workbook
             XLSX.utils.book_append_sheet(workbook, worksheet, "Engineerlist");
-    
+
             // Export the workbook
             XLSX.writeFile(workbook, "Engineerlist.xlsx");
         } catch (error) {
             console.error("Error exporting data to Excel:", error);
         }
     };
-    
-    
-        // export to excel end 
-     // Role Right 
-      
-      
-       const Decrypt = (encrypted) => {
+
+
+    // export to excel end 
+    // Role Right 
+
+
+    const Decrypt = (encrypted) => {
         encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
         const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
         return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
-      };
-    
-      const storedEncryptedRole = localStorage.getItem("Userrole");
-      const decryptedRole = Decrypt(storedEncryptedRole);
-    
-      const roledata = {
+    };
+
+    const storedEncryptedRole = localStorage.getItem("Userrole");
+    const decryptedRole = Decrypt(storedEncryptedRole);
+
+    const roledata = {
         role: decryptedRole,
         pageid: String(24)
-      }
-    
-      const dispatch = useDispatch()
-      const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
-    
-    
-      useEffect(() => {
+    }
+
+    const dispatch = useDispatch()
+    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+
+
+    useEffect(() => {
         dispatch(getRoleData(roledata))
-      }, [])
-    
-      // Role Right End 
+    }, [])
+
+    // Role Right End 
 
     return (
         <div className="tab-content">
             <Franchisemaster />
             {loaders && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <SyncLoader loading={loaders} color="#FFFFFF" />
-        </div>
-      )}
-         {roleaccess > 1 ?      <div className="row mp0" >
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <SyncLoader loading={loaders} color="#FFFFFF" />
+                </div>
+            )}
+            {roleaccess > 1 ? <div className="row mp0" >
                 <div className="col-md-12 col-12">
                     <div className="card mb-3 tab_box">
 
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
-                        <button
+                            <button
                                 className="btn btn-primary"
                                 onClick={exportToExcel}
                             >
                                 Export to Excel
                             </button>
-                        <div className="p-1 text-right">
+                            <div className="p-1 text-right">
                                 <button
                                     className="btn btn-primary"
                                     onClick={() => navigate("/EngineerMaster")}
                                 >
                                     Add Engineer
                                 </button>
+                            </div>
+                            <div className="row mb-3">
+
+                                <div className="col-md-2">
+                                    <div className="form-group">
+                                        <label>Name</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="title"
+                                            value={searchFilters.title}
+                                            placeholder="Search by name"
+                                            onChange={handleFilterChange}
+                                        />
+                                    </div>
+                                </div>
+
+
+                                <div className="col-md-2">
+                                    <div className="form-group">
+                                        <label>Employee Code</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="employee_code"
+                                            value={searchFilters.employee_code}
+                                            placeholder="Search by Employee code"
+                                            onChange={handleFilterChange}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="col-md-2">
+                                    <div className="form-group">
+                                        <label>Mobile Number</label>
+                                        <input
+                                            type="tel"
+                                            className="form-control"
+                                            name="mobile_no"
+                                            value={searchFilters.mobile_no}
+                                            placeholder="Search by Mobile Number"
+                                            onChange={handleFilterChange}
+                                            pattern="[0-9]{10}"
+                                            maxLength="10"
+                                            minLength="10"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="col-md-2">
+                                    <div className="form-group">
+                                        <label>Email</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="email"
+                                            value={searchFilters.email}
+                                            placeholder="Search by customer email"
+                                            onChange={handleFilterChange}
+                                        />
+                                    </div>
+                                </div>
+
+
+
+
+                            </div>
+                            <div className="row mb-3">
+                                <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
+                                    <div className="form-group">
+                                        <button
+                                            className="btn btn-primary mr-2"
+                                            onClick={applyFilters}
+                                        >
+                                            Search
+                                        </button>
+                                        <button
+                                            className="btn btn-secondary"
+                                            onClick={() => {
+                                                window.location.reload()
+                                            }}
+                                            style={{
+                                                marginLeft: '5px',
+                                            }}
+                                        >
+                                            Reset
+                                        </button>
+                                        {filteredData.length === 0 && (
+                                            <div
+                                                style={{
+                                                    backgroundColor: '#f8d7da',
+                                                    color: '#721c24',
+                                                    padding: '5px 10px',
+                                                    marginLeft: '10px',
+                                                    borderRadius: '4px',
+                                                    border: '1px solid #f5c6cb',
+                                                    fontSize: '14px',
+                                                    display: 'inline-block'
+                                                }}
+                                            >
+                                                No Record Found
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
                             <table className="table">
                                 <thead>
@@ -275,9 +391,10 @@ export function Engineerlist(params) {
                                 <tbody>
 
                                     {Engineerdata.map((item, index) => {
+                                        const displayIndex = (currentPage - 1) * pageSize + index + 1;
                                         return (
                                             <tr key={item.id}>
-                                                <td >{index + 1}</td>
+                                                <td >{displayIndex}</td>
                                                 <td >{item.title}</td>
                                                 <td >{item.email}</td>
                                                 <td >{item.mobile_no}</td>
@@ -293,18 +410,6 @@ export function Engineerlist(params) {
                                                         <FaPencilAlt />
                                                     </button></Link>
                                                 </td>
-                                                {/* <td >
-                                                    <button
-                                                        className='btn'
-                                                        onClick={() => {
-                                                            navigate(`/complaintview/${item.id}`)
-                                                        }}
-                                                        title="View"
-                                                        style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                                                    >
-                                                        <FaEye />
-                                                    </button>
-                                                </td> */}
                                                 <td style={{ padding: "10px" }}>
                                                     <label class="switch">
                                                         <input

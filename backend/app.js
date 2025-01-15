@@ -1660,15 +1660,70 @@ app.get("/getproductlist", authenticateToken, async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
+    const {
+      serial_no,
+      item_code,
+      item_description,
+      productType,
+      productLine,
+      material,
+      manufacturer,
+      page = 1, // Default to page 1 if not provided
+      pageSize = 10, // Default to 10 items per page if not provided
+    } = req.query;
 
     // Directly use the query (no parameter binding)
-    const sql = "SELECT * FROM product_master ORDER BY id ASC";
+    let sql = `SELECT m.* FROM product_master as m WHERE 1= 1 `;
 
-    // Execute the query
+    if (serial_no) {
+      sql += ` AND m.serial_no LIKE '%${serial_no}%'`;
+    }
+
+    if (item_code) {
+      sql += ` AND m.item_code LIKE '%${item_code}%'`;
+    }
+
+    if (productType) {
+      sql += ` AND m.productType LIKE '%${productType}%'`;
+    }
+
+    if (productLine) {
+      sql += ` AND m.productLine LIKE '%${productLine}%'`;
+    }
+
+    if (material) {
+      sql += ` AND m.material LIKE '%${material}%'`;
+    }
+    if (manufacturer) {
+      sql += ` AND m.manufacturer LIKE '%${manufacturer}%'`;
+    }
+
+    // Pagination logic: Calculate offset based on the page number
+    const offset = (page - 1) * pageSize;
+
+    // Add pagination to the SQL query (OFFSET and FETCH NEXT)
+    sql += ` ORDER BY m.id OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+
     const result = await pool.request().query(sql);
+    // Get the total count of records for pagination
+    let countSql = `SELECT COUNT(*) as totalCount FROM product_master where 1=1 `;
+    if (serial_no) countSql += ` AND serial_no LIKE '%${serial_no}%'`;
+    if (item_code) countSql += ` AND item_code LIKE '%${item_code}%'`;
+   
+    if (item_description) countSql += ` AND item_description LIKE '%${item_description}%'`;
+    if (productType) countSql += ` AND productType LIKE '%${productType}%'`;
+    if (productLine) countSql += ` AND productLine LIKE '%${productLine}%'`;
+    if (material) countSql += ` AND material LIKE '%${material}%'`;
+    if (manufacturer) countSql += ` AND manufacturer LIKE '%${manufacturer}%'`;
 
-    // Return the result as JSON
-    return res.json(result.recordset);
+    const countResult = await pool.request().query(countSql);
+    const totalCount = countResult.recordset[0].totalCount;
+    return res.json({
+      data: result.recordset,
+      totalCount: totalCount,
+      page,
+      pageSize,
+    });
   } catch (err) {
     console.error("Database error:", err);
     return res.status(500).json({ error: "Database error occurred" });
@@ -4113,25 +4168,6 @@ app.get("/getgroupmengineer/:cfranchise_id", authenticateToken, async (req, res)
 });
 //Group Master End
 
-//Start Product List
-app.get("/getproductlist", authenticateToken, async (req, res) => {
-  try {
-    // Use the poolPromise to get the connection pool
-    const pool = await poolPromise;
-
-    // Directly use the query (no parameter binding)
-    const sql = "SELECT * FROM product_master ORDER BY id ASC";
-
-    // Execute the query
-    const result = await pool.request().query(sql);
-
-    // Return the result as JSON
-    return res.json(result.recordset);
-  } catch (err) {
-    console.error("Database error:", err);
-    return res.status(500).json({ error: "Database error occurred" });
-  }
-});
 
 
 //Customer Master Start
@@ -4742,64 +4778,85 @@ app.get("/getchildfranchise/:mfranchise_id",
       return res.status(500).json({ error: 'An error occurred while fetching data' });
     }
   });
-app.get("/getengineer", authenticateToken, async (req, res) => {
-  try {
-    // Use the poolPromise to get the connection pool
-    const pool = await poolPromise;
-    const {
-
-      page = 1,
-      pageSize = 10,
-
-    } = req.query;
-
-    const offset = (page - 1) * pageSize;
-
-    // SQL query to fetch data from the database with an INNER JOIN
-    let sql = `
-      SELECT r.*, c.title as childfranchise_title
-      FROM awt_engineermaster r
-      INNER JOIN awt_childfranchisemaster c ON r.cfranchise_id =  RIGHT(c.licare_code, LEN(c.licare_code) - 2)
-      WHERE r.deleted = 0
-    `;
-
-    const countSql = `
-    SELECT COUNT(*) AS totalCount
-    FROM awt_engineermaster AS t
-    WHERE t.deleted = 0`;
-
-    let params = [];
-
-    sql += ` ORDER BY r.engineer_id DESC OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY`;
-    params.push(
-      { name: "offset", value: offset },
-      { name: "pageSize", value: parseInt(pageSize) }
-    );
-
-    // console.log(sql, "$$$$");
-
-    // Execute the SQL query
-    const request = pool.request();
-    params.forEach((param) => request.input(param.name, param.value));
-    const result = await request.query(sql);
-
-    const countRequest = pool.request();
-    params.forEach((param) => countRequest.input(param.name, param.value));
-    const countResult = await countRequest.query(countSql);
-
-    const totalCount = countResult.recordset[0].totalCount;
-
-    return res.json({
-      data: result.recordset,
-      totalCount,
-      page: parseInt(page),
-      pageSize: parseInt(pageSize),
-    });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'An error occurred while fetching data' });
-  }
-});
+  app.get("/getengineer", authenticateToken, async (req, res) => {
+    try {
+      // Use the poolPromise to get the connection pool
+      const pool = await poolPromise;
+      const {
+        title,
+        employee_code,
+        mobile_no,
+        email,
+        page = 1, // Default to page 1 if not provided
+        pageSize = 10, // Default to 10 items per page if not provided
+      } = req.query;
+  
+      // SQL query to fetch data with INNER JOIN
+      let sql = `
+        SELECT r.*, c.title AS childfranchise_title
+        FROM awt_engineermaster r
+        INNER JOIN awt_childfranchisemaster c 
+        ON r.cfranchise_id = RIGHT(c.licare_code, LEN(c.licare_code) - 2)
+        WHERE r.deleted = 0
+      `;
+  
+      if (title) {
+        sql += ` AND r.title LIKE '%${title}%'`;
+      }
+      if (employee_code) {
+        sql += ` AND r.engineer_id LIKE '%${employee_code}%'`;
+      }
+      if (mobile_no) {
+        sql += ` AND r.mobile_no LIKE '%${mobile_no}%'`;
+      }
+      if (email) {
+        sql += ` AND r.email LIKE '%${email}%'`;
+      }
+  
+      // Pagination logic
+      const offset = (page - 1) * pageSize;
+      sql += ` ORDER BY r.id OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+  
+      // Execute the main SQL query
+      const result = await pool.request().query(sql);
+  
+      // SQL query to get the total count
+      let countSql = `
+        SELECT COUNT(*) AS totalCount
+        FROM awt_engineermaster r
+        INNER JOIN awt_childfranchisemaster c 
+        ON r.cfranchise_id = RIGHT(c.licare_code, LEN(c.licare_code) - 2)
+        WHERE r.deleted = 0
+      `;
+      if (title) {
+        countSql += ` AND r.title LIKE '%${title}%'`;
+      }
+      if (employee_code) {
+        countSql += ` AND r.engineer_id LIKE '%${employee_code}%'`;
+      }
+      if (mobile_no) {
+        countSql += ` AND r.mobile_no LIKE '%${mobile_no}%'`;
+      }
+      if (email) {
+        countSql += ` AND r.email LIKE '%${email}%'`;
+      }
+  
+      // Execute the count query
+      const countResult = await pool.request().query(countSql);
+      const totalCount = countResult.recordset[0].totalCount;
+  
+      return res.json({
+        data: result.recordset,
+        totalCount,
+        page,
+        pageSize,
+      });
+    } catch (err) {
+      console.error("Error fetching engineer data:", err);
+      return res.status(500).json({ error: "An error occurred while fetching data" });
+    }
+  });
+  
 
 app.get("/requestengineer/:id", authenticateToken,
   authenticateToken, async (req, res) => {
