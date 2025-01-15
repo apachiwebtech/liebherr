@@ -38,24 +38,93 @@ export function Grnlisting(params) {
 
     const { loaders, axiosInstance } = useAxiosLoader();
     const [Grn, setGrn] = useState([]);
-    const [isEdit, setIsEdit] = useState(false);
     const token = localStorage.getItem("token");
     const licare_code = localStorage.getItem('licare_code')
 
+    const [searchFilters, setSearchFilters] = useState({
+        fromDate: "",
+        toDate: "",
+        received_from: "",
+        invoice_number: "",
+        product_code: "",
+        product_name: ""
+    })
 
 
-    const fetchQuotationlist = async () => {
+
+    const fetchgrnListing = async () => {
         try {
-            const response = await axiosInstance.post(`${Base_Url}/getgrnlist`, { csp_code: licare_code }, {
+            const data = {
+                csp_code: licare_code,
+            };
+
+
+            const response = await axiosInstance.post(`${Base_Url}/getgrnlist`, data, {
                 headers: {
                     Authorization: token,
                 },
             });
+
+            // console.log('API Response:', response.data);
             setGrn(response.data);
         } catch (error) {
-            console.error('Error fetching Quotationdata:', error);
+            console.error('Error fetching GRN data:', error.response?.data || error.message);
             setGrn([]);
         }
+    };
+
+    const fetchfiltergrnListing = async () => {
+
+        try {
+            const data = {
+                csp_code: licare_code,
+                fromDate: searchFilters.fromDate || '',
+                toDate: searchFilters.toDate || '',
+                received_from: searchFilters.received_from || '',
+                invoice_number: searchFilters.invoice_number || '',
+                product_code: searchFilters.product_code || '',
+                product_name: searchFilters.product_name || ''
+            };
+
+            const response = await axiosInstance.post(`${Base_Url}/getgrnlist`, data, {
+                headers: {
+                    Authorization: token,
+                },
+            });
+
+            setGrn(response.data);
+        } catch (error) {
+            console.error('Error fetching GRN data:', error.response?.data || error.message);
+        }
+
+    };
+
+    useEffect(() => {
+        fetchgrnListing();
+    }, []); // Memoize fetchgrnListing
+    
+
+
+
+
+    const updategrnstatus = async (grn_no) => {
+        const confirm = window.confirm("Are you sure?")
+
+        if (confirm) {
+            try {
+                const response = await axiosInstance.post(`${Base_Url}/updategrnapprovestatus`, { grn_no: grn_no }, {
+                    headers: {
+                        Authorization: token,
+                    },
+                });
+                alert(response.data)
+                fetchgrnListing()
+            } catch (error) {
+                console.error('Error fetching Quotationdata:', error);
+                setGrn([]);
+            }
+        }
+
     };
 
 
@@ -67,9 +136,7 @@ export function Grnlisting(params) {
         navigate(`/csp/grnview/${encrypted}`)
     };
 
-    useEffect(() => {
-        fetchQuotationlist();
-    }, []);
+
 
     useEffect(() => {
         if (Grn.length > 0) {
@@ -133,6 +200,23 @@ export function Grnlisting(params) {
 
     // Role Right End 
 
+
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+        setSearchFilters(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+
+
+    const exportToExcel = () => {
+
+    }
+
+
+
     return (
         <div className="tab-content">
             <GrnTab />
@@ -142,6 +226,160 @@ export function Grnlisting(params) {
                 </div>
             )}
             {roleaccess > 1 ? <div className="row mp0">
+
+                <div className="searchFilter" >
+
+                    <div className='m-3'>
+
+                        <div className="row mb-3">
+                            <div className="col-md-2">
+                                <div className="form-group">
+                                    <label>From Date</label>
+                                    <input
+                                        type="date"
+                                        className="form-control"
+                                        name="fromDate"
+                                        value={searchFilters.fromDate}
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
+                            <div className="col-md-2">
+                                <div className="form-group">
+                                    <label>To Date</label>
+                                    <input
+                                        type="date"
+                                        className="form-control"
+                                        name="toDate"
+                                        value={searchFilters.toDate}
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
+
+
+                            <div className="col-md-2">
+                                <div className="form-group">
+                                    <label>Received From</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="received_from"
+                                        value={searchFilters.received_from}
+                                        placeholder="Search by Received From"
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="col-md-2">
+                                <div className="form-group">
+                                    <label>Invoice Number</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="invoice_number"
+                                        value={searchFilters.invoice_number}
+                                        placeholder="Search by Invoice Number"
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
+                            <div className="col-md-2">
+                                <div className="form-group">
+                                    <label>Product Code</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="product_code"
+                                        value={searchFilters.product_code}
+                                        placeholder="Search by Product Code"
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
+                            <div className="col-md-2 ">
+                                <div className="form-group">
+                                    <label>Product Name</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="product_name"
+                                        value={searchFilters.product_name}
+                                        placeholder="Search by Product Name"
+                                        onChange={handleFilterChange}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="col-md-12 d-flex justify-content-end align-items-center mt-3 "  >
+                                <div className=' form-group'>
+
+                                </div>
+                                <div className="form-group ">
+                                    <button
+                                        className="btn btn-primary mx-1"
+                                        onClick={exportToExcel}
+                                    >
+                                        Export to Excel
+                                    </button>
+
+                                    <button
+                                        className="btn btn-primary mr-2"
+                                        onClick={() => fetchfiltergrnListing()}
+
+                                    >
+                                        Search
+                                    </button>
+                                    <button
+                                        className="btn btn-secondary"
+                                        onClick={() => {
+                                            window.location.reload()
+                                        }}
+                                        style={{
+                                            marginLeft: '5px',
+                                        }}
+                                    >
+                                        Reset
+                                    </button>
+                                    {/* {filteredData.length === 0 && (
+                                        <div
+                                            style={{
+                                                backgroundColor: '#f8d7da',
+                                                color: '#721c24',
+                                                padding: '5px 10px',
+                                                marginLeft: '10px',
+                                                borderRadius: '4px',
+                                                border: '1px solid #f5c6cb',
+                                                fontSize: '14px',
+                                                display: 'inline-block'
+                                            }}
+                                        >
+                                            No Record Found
+                                        </div>
+                                    )} */}
+                                </div>
+                            </div>
+
+
+                        </div>
+
+                        {/* second row of filter */}
+
+                        <div className="row mb-3">
+
+
+                            {/* Buttons and message at the far-right corner */}
+
+
+                        </div>
+
+                        {/* No Record Found Message */}
+
+
+                        {/* Table */}
+                    </div>
+                </div>
                 <div className="col-md-12 col-12">
                     <div className="card mb-3 tab_box">
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
@@ -151,42 +389,57 @@ export function Grnlisting(params) {
                                     <thead>
                                         <tr>
                                             <th width="5%">#</th>
-                                            <th width="20%">Grn_No</th>
-                                            <th width="30%">Csp Name</th>
+                                            <th width="15%">Grn_No</th>
+                                            <th width="20%">Received From</th>
                                             <th width="15%">Invoice No</th>
                                             <th width="15%">Invoice Date</th>
-                                            <th width="15%">Action</th>
+                                            <th width="10%">Product Count</th>
+                                            <th width="20%">Status</th>
+                                            <th width="20%">Action</th>
 
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {Grn.map((item, index) => (
-                                            <tr key={item.id}>
-                                                <td>{index + 1}</td>
-                                                <td>{item.grn_no}</td>
-                                                <td>{item.csp_name}</td>
-                                                <td>{item.invoice_no}</td>
-                                                <td>
-                                                    {new Date(item.invoice_date).toLocaleDateString('en-GB', {
-                                                        day: '2-digit',
-                                                        month: '2-digit',
-                                                        year: 'numeric',
-                                                    })}
-                                                </td>
-                                                <td>
-                                                    <button
-                                                        className='btn'
-                                                        onClick={() => sendtoedit(item.grn_no)}
-                                                        title="Edit"
-                                                        style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                                                        disabled={roleaccess > 3 ? false : true}
-                                                    >
-                                                        <FaEye />
-                                                    </button>
-                                                </td>
+                                        {Grn.map((item, index) => {
 
-                                            </tr>
-                                        ))}
+
+                                            return (
+
+                                                <tr key={index}>
+                                                    <td>{index + 1}</td>
+                                                    <td>{item.grn_no}</td>
+                                                    <td>{item.csp_name}</td>
+                                                    <td>{item.invoice_no}</td>
+                                                    <td>
+                                                        {new Date(item.invoice_date).toLocaleDateString('en-GB', {
+                                                            day: '2-digit',
+                                                            month: '2-digit',
+                                                            year: 'numeric',
+                                                        })}
+                                                    </td>
+                                                    <td>3</td>
+                                                    <td> {item.status == '1' ? "Approved" : <button className='btn btn-success' onClick={() => updategrnstatus(item.grn_no)}>Approve</button>}</td>
+                                                    <td>
+                                                        <button
+                                                            className='btn'
+                                                            onClick={() => sendtoedit(item.grn_no)}
+                                                            title="Edit"
+                                                            style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                                                            disabled={roleaccess > 3 ? false : true}
+                                                        >
+                                                            <FaEye />
+                                                        </button>
+
+
+                                                    </td>
+
+
+                                                </tr>
+                                            )
+
+                                        })}
+                                        
+                                        
                                     </tbody>
                                 </table>
                             </div>

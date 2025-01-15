@@ -10553,7 +10553,7 @@ app.post("/add_grn", authenticateToken, async (req, res) => {
 app.post('/updategrnspares', async (req, res) => {
   const spareData = req.body; // Expecting an array of spare objects
 
-  console.log(req.body);
+  // console.log(req.body);
 
   if (!Array.isArray(spareData)) {
     return res.status(400).json({ error: 'Invalid payload format. Expected an array.' });
@@ -10572,12 +10572,15 @@ app.post('/updategrnspares', async (req, res) => {
       const request = new sql.Request(transaction); // Create a new request for each iteration
       const query = `
         UPDATE awt_cspgrnspare
-        SET quantity = @quantity
+        SET quantity = @quantity , actual_received = @actual_received , pending_quantity = @pending_quantity
         WHERE grn_no = @grn_no AND spare_no = @spare_no
       `;
+
       request.input('grn_no', sql.VarChar, item.grn_no);
       request.input('spare_no', sql.VarChar, item.article_code);
       request.input('quantity', sql.Int, item.quantity);
+      request.input('actual_received', sql.Int, item.actual_received);
+      request.input('pending_quantity', sql.Int, item.pending_quantity);
       await request.query(query);
     }
 
@@ -10629,15 +10632,36 @@ app.post("/getselctedspare", authenticateToken, async (req, res) => {
 
 app.post("/getgrnlist", authenticateToken, async (req, res) => {
 
-  const { csp_code } = req.body;
+  const { csp_code ,fromDate,toDate,received_from,invoice_number,product_code,product_name} = req.body;
+
+  let sql;
 
 
   try {
     const pool = await poolPromise;
 
     // Parameterized query with a limit
-    const sql = `select * from awt_grnmaster where created_by = '${csp_code}' and  deleted = 0 order by id desc
+     sql = `select * from awt_grnmaster where created_by = '${csp_code}' and  deleted = 0 
     `;
+
+    if (fromDate && toDate) {
+      sql += ` AND CAST(invoice_date AS DATE) BETWEEN '${fromDate}' AND '${toDate}'`;
+    }
+
+    if(received_from){
+      sql += ` AND csp_name LIKE '%${received_from}%'`;
+    }
+    
+    if(invoice_number){
+      sql += ` AND invoice_no LIKE '%${invoice_number}%'`;
+
+    }
+
+
+    sql += ' order by id desc'
+
+
+
 
     const result = await pool.request()
       .query(sql);
@@ -10786,6 +10810,31 @@ app.post('/getgrndetails' , authenticateToken , async (req, res) =>{
     }
 
     return res.json(result.recordset);
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+
+
+})
+app.post('/updategrnapprovestatus' , authenticateToken , async (req, res) =>{
+
+  const { grn_no } = req.body;
+
+
+  try {
+    const pool = await poolPromise;
+
+    // Parameterized query with a limit
+    const sql = `update awt_grnmaster set status = 1 where grn_no = '${grn_no}'`;
+
+    console.log(sql)
+
+     await pool.request()
+      .query(sql);
+
+
+    return res.json("Status Updated");
   } catch (err) {
     console.error("Error fetching data:", err);
     return res.status(500).json({ message: "Internal Server Error", error: err });

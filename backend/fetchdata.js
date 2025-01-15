@@ -142,10 +142,10 @@ app.post("/fetchservicemaster", async (req, res) => {
       .input('bank_acc', sql.VarChar, bank_acc)
       .input('bank_ifsc', sql.VarChar, bank_ifsc)
       .input('bank_address', sql.VarChar, bank_address)
-      .input('with_liebherr', sql.DateTime, with_liebherr)
-      .input('lastworkindate', sql.DateTime, lastworkindate)
-      .input('contract_acti', sql.DateTime, contract_acti)
-      .input('contract_expir', sql.DateTime, contract_expir)
+      .input('with_liebherr', sql.VarChar, with_liebherr)
+      .input('lastworkindate', sql.VarChar, lastworkindate)
+      .input('contract_acti', sql.VarChar, contract_acti)
+      .input('contract_expir', sql.VarChar, contract_expir)
       .query(`
            INSERT INTO awt_franchisemaster 
            (title, licarecode, partner_name, contact_person, email, mobile_no, password, address, country_id, region_id, geostate_id, 
@@ -223,7 +223,7 @@ app.post("/fetchsparemaster", async (req, res) => {
       .input('HSN', sql.VarChar, HSN)
       .input('Packed', sql.VarChar, Packed)
       .input('Returnable', sql.VarChar, Returnable)
-      .input('created_date', sql.DateTime, date) // Set the current date and time
+      .input('created_date', sql.VarChar, date) // Set the current date and time
       .query(`
         INSERT INTO Spare_parts 
         (ProductCode, ModelNumber, title, ItemDescription, Manufactured, BOMQty, PriceGroup, Status, ProductType, Model, Index1, 
@@ -306,8 +306,8 @@ app.post("/fetchbussiness_partner", async (req, res) => {
       .input("email", sql.VarChar, email)
       .input("gstno", sql.VarChar, gstno)
       .input("panno", sql.VarChar, panno)
-      .input("created_date", sql.DateTime, created_date)
-      .input("updated_date", sql.DateTime, updated_date)
+      .input("created_date", sql.VarChar, created_date)
+      .input("updated_date", sql.VarChar, updated_date)
       .input("partner_status", sql.VarChar, partner_status)
       .input("bankname", sql.VarChar, bankname)
       .input("bankacc", sql.VarChar, bankacc)
@@ -317,9 +317,9 @@ app.post("/fetchbussiness_partner", async (req, res) => {
       .input("Licare_code", sql.VarChar, Licare_code)
       .input("Vendor_Name", sql.VarChar, Vendor_Name)
       .input("withliebher", sql.VarChar, withliebher)
-      .input("lastworkingdate", sql.DateTime, lastworkingdate)
+      .input("lastworkingdate", sql.VarChar, lastworkingdate)
       .input("contractactive", sql.VarChar, contractactive)
-      .input("contractexpire", sql.DateTime, contractexpire)
+      .input("contractexpire", sql.VarChar, contractexpire)
       .query(`
         INSERT INTO bussiness_partner (
           Bp_code, title, address, pincode_id, geostate_id, partner_name, mobile_no, email, 
@@ -404,7 +404,7 @@ app.post("/fetchshipment_fg", async (req, res) => {
     // Insert new record
     await pool.request()
       .input("InvoiceNumber", sql.VarChar, InvoiceNumber)
-      .input("InvoiceDate", sql.DateTime, InvoiceDate)
+      .input("InvoiceDate", sql.VarChar, InvoiceDate)
       .input("Invoice_bpcode", sql.VarChar, Invoice_bpcode)
       .input("Invoice_bpName", sql.VarChar, Invoice_bpName)
       .input("Invoice_city", sql.VarChar, Invoice_city)
@@ -416,19 +416,19 @@ app.post("/fetchshipment_fg", async (req, res) => {
       .input("Invoice_qty", sql.VarChar, Invoice_qty)
       .input("Serial_no", sql.VarChar, Serial_no)
       .input("compressor_bar", sql.VarChar, compressor_bar)
-      .input("Manufacture_date", sql.DateTime, Manufacture_date)
+      .input("Manufacture_date", sql.VarChar, Manufacture_date)
       .input("Vehicle_no", sql.VarChar, Vehicle_no)
       .input("Vehicale_Type", sql.VarChar, Vehicale_Type)
       .input("Transporter_name", sql.VarChar, Transporter_name)
       .input("Lr_number", sql.VarChar, Lr_number)
-      .input("Lr_date", sql.DateTime, Lr_date)
+      .input("Lr_date", sql.VarChar, Lr_date)
       .input("Address_code", sql.VarChar, Address_code)
       .input("Address", sql.VarChar, Address)
       .input("Pincode", sql.VarChar, Pincode)
       .input("Shipment_id", sql.VarChar, Shipment_id)
-      .input("Ship_date", sql.DateTime, Ship_date)
+      .input("Ship_date", sql.VarChar, Ship_date)
       .input("Transaction_Type", sql.VarChar, Transaction_Type)
-      .input("created_date", sql.DateTime, created_date)
+      .input("created_date", sql.VarChar, created_date)
       .input("customer_classification", sql.VarChar, customer_classification)
       .query(`
         INSERT INTO Shipment_Fg (
@@ -461,7 +461,7 @@ app.post("/fetchshipment_fg", async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: "Internal server error", details: err });
+    return res.json(err)
   }
 });
 
@@ -531,7 +531,7 @@ app.post("/fetchshipment_Parts", async (req, res) => {
     // Insert new record
     await pool.request()
       .input("InvoiceNumber", sql.VarChar, InvoiceNumber)
-      .input("InvoiceDate", sql.DateTime, InvoiceDate)
+      .input("InvoiceDate", sql.VarChar, InvoiceDate)
       .input("Invoice_bpcode", sql.VarChar, Invoice_bpcode)
       .input("Invoice_bpName", sql.VarChar, Invoice_bpName)
       .input("Invoice_city", sql.VarChar, Invoice_city)
@@ -548,14 +548,14 @@ app.post("/fetchshipment_Parts", async (req, res) => {
       .input("Vehicale_Type", sql.VarChar, Vehicale_Type)
       .input("Transporter_name", sql.VarChar, Transporter_name)
       .input("Lr_number", sql.VarChar, Lr_number)
-      .input("Lr_date", sql.DateTime, Lr_date)
+      .input("Lr_date", sql.VarChar, Lr_date)
       .input("Address_code", sql.VarChar, Address_code)
       .input("Address", sql.VarChar, Address)
       .input("Pincode", sql.VarChar, Pincode)
       .input("Licare_code", sql.VarChar, Licare_code)
       .input("Licare_Address", sql.VarChar, Licare_Address)
       .input("Shipment_id", sql.Int, Shipment_id)
-      .input("Ship_date", sql.DateTime, Ship_date)
+      .input("Ship_date", sql.VarChar, Ship_date)
       .input("Transaction_Type", sql.VarChar, Transaction_Type)
       .input("Product_Choice", sql.VarChar, Product_Choice)
       .input("Serial_Indentity", sql.VarChar, Serial_Indentity)
@@ -651,7 +651,7 @@ app.post("/fetchspareprice", async (req, res) => {
       .input('part_nature', sql.VarChar(50), part_nature)
       .input('warrenty', sql.VarChar(50), warrenty)
       .input('refundable', sql.VarChar(50), refundable)
-      .input('created_date', sql.DateTime, new Date())
+      .input('created_date', sql.VarChar, new Date())
       .input('created_by', sql.VarChar(50), '1') // Assuming '1' is the created_by ID
       .query(query);
 

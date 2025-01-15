@@ -149,7 +149,7 @@ export function Complaintlist(params) {
         }
       });
 
-      console.log('Sending params:', params.toString()); // Debug log
+
 
       const response = await axiosInstance.get(`${Base_Url}/getcomplainlist?${params}`, {
         headers: {
@@ -581,43 +581,8 @@ export function Complaintlist(params) {
                   />
                 </div>
               </div>
-
-              {/* Buttons and message at the far-right corner */}
-              {/* <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
-                                <div className="form-group">
-                                    <button
-                                        className="btn btn-primary mr-2"
-                                        onClick={applyFilters}
-                                    >
-                                        Search
-                                    </button>
-                                    <button
-                                        className="btn btn-secondary"
-                                        onClick={resetFilters}
-                                        style={{
-                                            marginLeft: '5px',
-                                        }}
-                                    >
-                                        Reset
-                                    </button>
-                                    {filteredData.length === 0 && (
-                                        <div
-                                            style={{
-                                                backgroundColor: '#f8d7da',
-                                                color: '#721c24',
-                                                padding: '5px 10px',
-                                                marginLeft: '10px',
-                                                borderRadius: '4px',
-                                                border: '1px solid #f5c6cb',
-                                                fontSize: '14px',
-                                                display: 'inline-block'
-                                            }}
-                                        >
-                                            No Record Found
-                                        </div>
-                                    )}
-                                </div>
-                            </div> */}
+=
+  
             </div>
 
             {/* Third row of filter */}

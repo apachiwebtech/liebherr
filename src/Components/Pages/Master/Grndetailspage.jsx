@@ -38,7 +38,7 @@ const Grndetailspage = () => {
         grn_no: '',
         invoice_date: '',
         invoice_no: '',
-
+        status: ''
     })
 
 
@@ -105,12 +105,36 @@ const Grndetailspage = () => {
 
 
     const handleQuantityChange = (index, value) => {
-
         const updatedSpare = [...selectedspare];
-        updatedSpare[index].quantity = value; // Update `spare_qty` for the specific item
-        console.log(updatedSpare)
+        updatedSpare[index].quantity = value; // Update `quantity` for the specific item
+
+        // Update `pending_quantity` if actual_received is already defined
+        updatedSpare[index].pending_quantity =
+            updatedSpare[index].actual_received !== undefined
+                ? value - updatedSpare[index].actual_received
+                : value;
+
         setselectedSpare(updatedSpare); // Update the state
     };
+
+    const handleActualQtyChange = (index, value) => {
+        const updatedSpare = [...selectedspare];
+        updatedSpare[index].actual_received = value; // Update `actual_received` for the specific item
+
+        // Compute and update `pending_quantity`
+        updatedSpare[index].pending_quantity = updatedSpare[index].quantity - value;
+
+        setselectedSpare(updatedSpare); // Update the state
+    };
+
+
+    // const handlePendingChange = (index, value) => {
+
+    //     const updatedSpare = [...selectedspare];
+    //     updatedSpare[index].pending_quantity = value; // Update `spare_qty` for the specific item
+    //     setselectedSpare(updatedSpare); // Update the state
+
+    // };
 
 
     const handleSpareSend = async () => {
@@ -120,8 +144,10 @@ const Grndetailspage = () => {
                 id: String(item.id),
                 article_code: item.spare_no,
                 article_title: item.spare_title,
-                quantity: String(item.quantity) || String(0), // Use the updated `spare_qty`, default to 0 if empty
-                grn_no: localStorage.getItem('grn_no')
+                quantity: String(item.quantity) || String(0),
+                actual_received: String(item.actual_received) || String(0),
+                pending_quantity: String(item.pending_quantity) || String(0),
+                grn_no: value.grn_no
             }));
 
 
@@ -160,7 +186,7 @@ const Grndetailspage = () => {
                 <div className="col-12">
                     <div className="card mb-3 tab_box">
                         <div className="card-body">
-                        <IoArrowBack onClick={() => navigate(-1)}  style={{fontSize : "25px"}}/>
+                            <IoArrowBack onClick={() => navigate(-1)} style={{ fontSize: "25px" }} />
                         </div>
                     </div>
                 </div>
@@ -224,10 +250,12 @@ const Grndetailspage = () => {
                                     <div className="col-lg-12">
                                         <table className="w-100 table table-striped table-bordered">
                                             <thead>
-                                                <th className="py-2" width="20%" scope="col">#</th>
-                                                <th className="py-2" width="30%" scope="col">Spare Code</th>
-                                                <th className="py-2" width="30%" scope="col">Spare Name</th>
+                                                <th className="py-2" width="5%" scope="col">#</th>
+                                                <th className="py-2" width="15%" scope="col">Spare Code</th>
+                                                <th className="py-2" width="20%" scope="col">Spare Name</th>
                                                 <th className="py-2" width="20%" scope="col">Quantity</th>
+                                                <th className="py-2" width="20%" scope="col">Actucal Received</th>
+                                                <th className="py-2" width="20%" scope="col">Pending Quantity</th>
                                             </thead>
                                             <tbody>
                                                 {selectedspare.map((item, index) => {
@@ -240,11 +268,51 @@ const Grndetailspage = () => {
                                                                 <div className="">
 
                                                                     <input
-                                                                        type="text"
+                                                                        type="number"
                                                                         className="form-control"
                                                                         placeholder="Enter Qty"
+                                                                        disabled={value.status == '1' ? true : false}
                                                                         value={item.quantity || ""} // Bind to `spare_qty`
                                                                         onChange={(e) => handleQuantityChange(index, e.target.value)}
+                                                                    />
+
+                                                                    {/* Show duplicate error */}
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div className="">
+
+                                                                    <input
+                                                                        type="number"
+                                                                        className="form-control"
+                                                                        placeholder="Enter Qty"
+                                                                        disabled={value.status == '1' ? true : false}
+                                                                        value={item.actual_received || ""} // Bind to `spare_qty`
+                                                                        onChange={(e) => {
+                                                                            const newValue = e.target.value;
+                                                                            if (Number(newValue) > Number(item.quantity)) {
+                                                                                // alert("Actual received quantity cannot be greater than total quantity.");
+                                                                                return;
+                                                                            }
+                                                                            handleActualQtyChange(index, newValue);
+                                                                        }}
+                                                                    />
+                                                               
+
+
+                                                                    {/* Show duplicate error */}
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div className="">
+
+                                                                    <input
+                                                                        type="number"
+                                                                        className="form-control"
+                                                                        disabled={value.status == '1' ? true : false}
+                                                                        value={item.pending_quantity || 0} // Bind to `spare_qty`
+                                                                    // onChange={(e) => handlePendingChange(index, e.target.value)}
+
                                                                     />
 
                                                                     {/* Show duplicate error */}
@@ -258,7 +326,7 @@ const Grndetailspage = () => {
                                             </tbody>
                                         </table>
                                         <div className="float-end">
-                                            <button className="btn btn-primary" onClick={() => handleSpareSend()} type="">Save</button>
+                                            <button className="btn btn-primary" disabled={value.status == '1' ? true : false} onClick={() => handleSpareSend()} type="">Save</button>
                                         </div>
 
                                     </div>
