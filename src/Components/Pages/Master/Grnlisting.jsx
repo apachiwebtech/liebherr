@@ -11,6 +11,7 @@ import 'datatables.net-bs4/css/dataTables.bootstrap4.min.css';
 import $ from 'jquery';
 import 'datatables.net';
 import 'datatables.net-bs4';
+import { MdOutlineDelete } from "react-icons/md";
 // DataTables Responsive Extension (JS and CSS for Bootstrap 4)
 import 'datatables.net-responsive';
 import 'datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css';
@@ -102,7 +103,7 @@ export function Grnlisting(params) {
     useEffect(() => {
         fetchgrnListing();
     }, []); // Memoize fetchgrnListing
-    
+
 
 
 
@@ -209,6 +210,19 @@ export function Grnlisting(params) {
         }));
     };
 
+    const handledelete = (grn_no) => {
+
+
+        axios.post(`${Base_Url}/deletedgrn`, { grn_no: grn_no }, {
+            headers: {
+                Authorization: token
+            }
+        })
+        .then((res) =>{
+            alert(res.data)
+            fetchgrnListing()
+        })
+    }
 
 
     const exportToExcel = () => {
@@ -420,15 +434,27 @@ export function Grnlisting(params) {
                                                     <td>3</td>
                                                     <td> {item.status == '1' ? "Approved" : <button className='btn btn-success' onClick={() => updategrnstatus(item.grn_no)}>Approve</button>}</td>
                                                     <td>
-                                                        <button
-                                                            className='btn'
-                                                            onClick={() => sendtoedit(item.grn_no)}
-                                                            title="Edit"
-                                                            style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                                                            disabled={roleaccess > 3 ? false : true}
-                                                        >
-                                                            <FaEye />
-                                                        </button>
+                                                        <div className='d-flex'>
+                                                            <button
+                                                                className='btn'
+                                                                onClick={() => sendtoedit(item.grn_no)}
+                                                                title="Edit"
+                                                                style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                                                                disabled={roleaccess > 3 ? false : true}
+                                                            >
+                                                                <FaEye />
+                                                            </button>
+                                                            <button
+                                                                className='btn'
+                                                                onClick={() => handledelete(item.grn_no)}
+                                                                title="Edit"
+                                                                style={{ backgroundColor: 'transparent', border: 'none', color: 'red', fontSize: '20px' }}
+                                                                disabled={roleaccess > 3 ? false : true}
+                                                            >
+                                                                <MdOutlineDelete />
+                                                            </button>
+                                                        </div>
+
 
 
                                                     </td>
@@ -438,8 +464,8 @@ export function Grnlisting(params) {
                                             )
 
                                         })}
-                                        
-                                        
+
+
                                     </tbody>
                                 </table>
                             </div>

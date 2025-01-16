@@ -392,7 +392,7 @@ app.post("/fetchshipment_fg", async (req, res) => {
       .query(`
         SELECT COUNT(*) AS count 
         FROM Shipment_Fg 
-        WHERE Serial_no = @Serial_no AND Item_Code = @Item_Code
+        WHERE Serial_no = @Serial_no AND Item_Code = @Item_Code AND  InvoiceNumber = @InvoiceNumber
       `);
 
     if (checkDuplicate.recordset[0].count > 0) {

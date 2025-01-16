@@ -10843,6 +10843,32 @@ app.post('/updategrnapprovestatus' , authenticateToken , async (req, res) =>{
 
 })
 
+app.post('/deletedgrn' , authenticateToken , async (req, res) =>{
+
+  const { grn_no } = req.body;
+
+
+  try {
+    const pool = await poolPromise;
+
+    // Parameterized query with a limit
+    const sql = `update awt_grnmaster set deleted = 1 where grn_no = '${grn_no}'`;
+
+    console.log(sql)
+
+     await pool.request()
+      .query(sql);
+
+
+    return res.json("Grn deleted successfully");
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+
+
+})
+
 
 
 

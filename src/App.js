@@ -118,8 +118,10 @@ import CspRoleright from './Components/Pages/Master/CspRoleRights';
 import AddEnquiry from './Components/Pages/Master/AddEnquiry';
 import EnquiryTabs from './Components/Pages/Master/EnquiryTabs';
 import CreateGrn from './Components/Pages/Master/CreateGrn';
-import { Grnlisting } from './Components/Pages/Master/Grnlisting';
+
 import Grndetailspage from './Components/Pages/Master/Grndetailspage';
+import { GrnList } from './Components/Pages/Master/GrnList';
+
 
 
 const isAuthenticated = () => {
@@ -246,7 +248,7 @@ const Router = createBrowserRouter([
       },
       {
         path: "/csp/grnlisting",
-        element: <Grnlisting />
+        element: <GrnList />
       },
       {
         path: "/csp/grnview/:grn_no",
