@@ -504,7 +504,14 @@ app.post("/fetchshipment_Parts", async (req, res) => {
     Transaction_Type,
     Product_Choice,
     Serial_Indentity,
+    Serial_no,
+    Lot_Number,
+    Order_Number,
+    Order_Line_Number,
+    Warehouse,
+    Service_Type,
     created_date,
+    Manufactured_Date,
   } = req.body;
 
   try {
@@ -514,10 +521,11 @@ app.post("/fetchshipment_Parts", async (req, res) => {
     const duplicateCheck = await pool.request()
       .input("Serial_Indentity", sql.VarChar, Serial_Indentity)
       .input("Item_Code", sql.VarChar, Item_Code)
+      .input("Serial_no", sql.VarChar, Serial_no)
       .query(`
         SELECT COUNT(*) AS count 
         FROM Shipment_parts 
-        WHERE Serial_Indentity = @Serial_Indentity AND Item_Code = @Item_Code
+        WHERE Serial_Indentity = @Serial_Indentity AND Item_Code = @Item_Code AND Serial_no = @Serial_no
       `);
 
     const { count } = duplicateCheck.recordset[0];
@@ -559,22 +567,31 @@ app.post("/fetchshipment_Parts", async (req, res) => {
       .input("Transaction_Type", sql.VarChar, Transaction_Type)
       .input("Product_Choice", sql.VarChar, Product_Choice)
       .input("Serial_Indentity", sql.VarChar, Serial_Indentity)
+      .input("Serial_no", sql.VarChar, Serial_no)
+      .input("Lot_Number", sql.VarChar, Lot_Number)
+      .input("Order_Number", sql.VarChar, Order_Number)
+      .input("Order_Line_Number", sql.VarChar, Order_Line_Number)
+      .input("Warehouse", sql.VarChar, Warehouse)
+      .input("Service_Type", sql.VarChar, Service_Type)
+      .input("Manufactured_Date", sql.VarChar, Manufactured_Date)
       .input("created_date", sql.VarChar, created_date)
       .query(`
         INSERT INTO Shipment_parts (
           InvoiceNumber, InvoiceDate, Invoice_bpcode, Invoice_bpName, 
           Invoice_city, Invoice_state, orderType_desc, Customer_Po, Item_Code,
-          Item_Description, Invoice_qty, hsn_code, Basic_rate, compressor_bar,
+          Item_Description, Invoice_qty,Serial_no, hsn_code, Basic_rate,Manufactured_Date, compressor_bar,
           Vehicle_no, Vehicale_Type, Transporter_name, Lr_number, Lr_date,
           Address_code, Address, Pincode, Licare_code, Licare_Address,
-          Shipment_id, Ship_date, Transaction_Type, Product_Choice, Serial_Indentity, created_date
+          Shipment_id, Ship_date, Transaction_Type, Product_Choice, Serial_Indentity,Lot_Number,Order_Number,Order_Line_Number,
+          Warehouse, Service_Type, created_date
         ) VALUES (
           @InvoiceNumber, @InvoiceDate, @Invoice_bpcode, @Invoice_bpName,
           @Invoice_city, @Invoice_state, @orderType_desc, @Customer_Po, @Item_Code,
-          @Item_Description, @Invoice_qty, @hsn_code, @Basic_rate, @compressor_bar,
+          @Item_Description, @Invoice_qty,@Serial_no, @hsn_code, @Basic_rate,@Manufactured_Date, @compressor_bar,
           @Vehicle_no, @Vehicale_Type, @Transporter_name, @Lr_number, @Lr_date,
           @Address_code, @Address, @Pincode, @Licare_code, @Licare_Address,
-          @Shipment_id, @Ship_date, @Transaction_Type, @Product_Choice, @Serial_Indentity, @created_date
+          @Shipment_id, @Ship_date, @Transaction_Type, @Product_Choice, @Serial_Indentity,@Lot_Number,@Order_Number,@Order_Line_Number,
+           @Warehouse, @Service_Type, @created_date
         )
       `);
 
