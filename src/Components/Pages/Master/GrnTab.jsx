@@ -89,6 +89,14 @@ function GrnTab() {
                     GRN OUTWARD LISTING
                   </button></Link>
                 </li>
+                <li className="nav-item">
+                <Link to={`/csp/cspstock`}> <button
+                    className={`nav-link ${activeTab === '/csp/cspstock' ? 'active' : ' onClick={() => setActiveTab("cspstock")}'}`}
+                  
+                  >
+                    Stock
+                  </button></Link>
+                </li>
              
                 {/* Add other tabs like GEO STATE, GEO CITY, AREA */}
               </ul>

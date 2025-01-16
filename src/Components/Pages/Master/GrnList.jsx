@@ -93,8 +93,8 @@ export function GrnList(params) {
                     Authorization: token,
                 },
             });
-             setGrn([])
-            setnewgrn(response.data);
+             setGrn(response.data)
+
         } catch (error) {
             console.error('Error fetching GRN data:', error.response?.data || error.message);
         }
@@ -400,7 +400,7 @@ export function GrnList(params) {
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
 
                             <div className='table-responsive'>
-                                <table id="example" className="table table-striped">
+                                <table id="" className="table table-striped">
                                     <thead>
                                         <tr>
                                             <th width="5%">#</th>

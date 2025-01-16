@@ -638,7 +638,7 @@ app.post("/fetchshipment_fg", async (req, res) => {
         IF EXISTS (
           SELECT 1 
           FROM Shipment_Fg 
-          WHERE Serial_no = @Serial_no AND Item_Code = @Item_Code AND InvoiceNumber = @InvoiceNumber
+          WHERE Serial_no = @S AND Item_Code = @Item_Code AND InvoiceNumber = @InvoiceNumber
         )
         BEGIN
           UPDATE Shipment_Fg
