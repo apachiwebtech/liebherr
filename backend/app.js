@@ -8941,17 +8941,76 @@ app.post("/getDefectCodewisesite", authenticateToken,
 // Quotation Listing
 app.get("/getquotationlist", authenticateToken, async (req, res) => {
   try {
+    const {
+      ticketId,
+      spareId,
+      ModelNumber,
+      title,
+      quantity,
+      price,
+      quotationNumber,
+      assignedEngineer,
+      CustomerName,
+      page = 1, // Default to page 1 if not provided
+      pageSize = 10, // Default to 10 items per page if not provided
+    } = req.query;
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
 
     // Directly use the query (no parameter binding)
-    const sql = "SELECT * FROM awt_quotation ORDER BY id ASC";
+    let sql = `SELECT q.* FROM awt_quotation as q WHERE 1=1`;
+
+    if (CustomerName) {
+      sql += ` AND q.CustomerName LIKE '%${CustomerName}%'`;
+    }
+
+    if (quotationNumber) {
+      sql += ` AND q.quotationNumber LIKE '%${quotationNumber}%'`;
+    }
+
+    if (ModelNumber) {
+      sql += ` AND q.ModelNumber LIKE '%${ModelNumber}%'`;
+    }
+
+    if (title) {
+      sql += ` AND q.title LIKE '%${title}%'`;
+    }
+
+    if (quantity) {
+      sql += ` AND q.quantity LIKE '%${quantity}%'`;
+    }
+    if (price) {
+      sql += ` AND q.price LIKE '%${price}%'`;
+    }
+     // Pagination logic: Calculate offset based on the page number
+     const offset = (page - 1) * pageSize;
+      // Add pagination to the SQL query (OFFSET and FETCH NEXT)
+    sql += ` ORDER BY q.quotationNumber OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
 
     // Execute the query
     const result = await pool.request().query(sql);
+    // Get the total count of records for pagination
+    let countSql = `SELECT COUNT(*) as totalCount FROM awt_quotation where 1=1 `;
+    if (quotationNumber) countSql += ` AND quotationNumber LIKE '%${quotationNumber}%'`;
+    if (assignedEngineer) countSql += ` AND assignedEngineer LIKE '%${assignedEngineer}%'`;
+   
+    if (CustomerName) countSql += ` AND CustomerName LIKE '%${CustomerName}%'`;
+    if (spareId) countSql += ` AND spareId LIKE '%${spareId}%'`;
+    if (ModelNumber) countSql += ` AND ModelNumber LIKE '%${ModelNumber}%'`;
+    if (title) countSql += ` AND title LIKE '%${title}%'`;
+    if (quantity) countSql += ` AND quantity LIKE '%${quantity}%'`;
+    if (price) countSql += ` AND price LIKE '%${price}%'`;
 
-    // Return the result as JSON
-    return res.json(result.recordset);
+    const countResult = await pool.request().query(countSql);
+    const totalCount = countResult.recordset[0].totalCount;
+    return res.json({
+      data: result.recordset,
+      totalCount: totalCount,
+      page,
+      pageSize,
+    });
+
+   
   } catch (err) {
     console.error("Database error:", err);
     return res.status(500).json({ error: "Database error occurred" });

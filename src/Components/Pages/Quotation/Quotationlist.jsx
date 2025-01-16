@@ -6,35 +6,6 @@ import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { Base_Url, secretKey } from '../../Utils/Base_Url';
 import CryptoJS from 'crypto-js';
 import { useSelector } from 'react-redux';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'datatables.net-bs4/css/dataTables.bootstrap4.min.css';
-import $ from 'jquery';
-import 'datatables.net';
-import 'datatables.net-bs4';
-
-// DataTables Responsive Extension (JS and CSS for Bootstrap 4)
-import 'datatables.net-responsive';
-import 'datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css';
-
-// DataTables Fixed Columns Extension
-import 'datatables.net-fixedcolumns';
-import 'datatables.net-fixedcolumns-bs4/css/fixedColumns.bootstrap4.min.css';
-
-// DataTables Fixed Header Extension
-import 'datatables.net-fixedheader';
-
-// DataTables Buttons Extension
-import 'datatables.net-buttons';
-import 'datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css';
-import 'datatables.net-buttons/js/buttons.html5.min.js';
-
-
-
-// DataTables KeyTable Extension
-import 'datatables.net-keytable';
-
-// DataTables Select Extension
-import 'datatables.net-select';
 import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 import { useDispatch } from "react-redux";
@@ -45,6 +16,18 @@ export function Quotationlist(params) {
     const [Quotationdata, setQuotationdata] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
     const token = localStorage.getItem("token");
+    const [filteredData, setFilteredData] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [totalCount, setTotalCount] = useState(0);
+
+    const totalPages = Math.ceil(totalCount / pageSize);
+
+    const handlePageChange = (page) => {
+
+        setCurrentPage(page);
+        fetchQuotationlist(page); // Fetch data for the new page
+    };
     const [formData, setFormData] = useState({
         ticketId: '',
         customer: '',
@@ -53,42 +36,90 @@ export function Quotationlist(params) {
         title: '',
         quantity: '',
         price: '',
+        CustomerName: '',
     });
 
-    const fetchQuotationlist = async () => {
+    const [searchFilters, setSearchFilters] = useState({
+        ticketId: '',
+        CustomerName: '',
+        spareId: '',
+        ModelNumber: '',
+        title: '',
+        quantity: '',
+        price: '',
+    });
+
+    const fetchQuotationlist = async (page) => {
         try {
-            const response = await axiosInstance.get(`${Base_Url}/getquotationlist`, {
+            const params = new URLSearchParams();
+            // Add the page and pageSize parameters
+            params.append('page', page || 1); // Current page number
+            params.append('pageSize', pageSize); // Page size
+
+
+            // Add all filters to params if they have values
+            Object.entries(searchFilters).forEach(([key, value]) => {
+                if (value) { // Only add if value is not empty
+                    params.append(key, value);
+                }
+            });
+            const response = await axiosInstance.get(`${Base_Url}/getquotationlist?${params.toString()}`, {
                 headers: {
                     Authorization: token,
                 },
             });
-            setQuotationdata(response.data);
+            setQuotationdata(response.data.data);
+            setFilteredData(response.data.data);
+            // Store total count for pagination logic on the frontend
+            setTotalCount(response.data.totalCount);
         } catch (error) {
             console.error('Error fetching Quotationdata:', error);
             setQuotationdata([]);
+            setFilteredData([]);
         }
     };
 
-    const deleted = async (id) => {
+    const fetchFilteredData = async () => {
         try {
-            const response = await axiosInstance.post(`${Base_Url}/deletequotationlist`, { id }, {
+            const params = new URLSearchParams();
+
+            // Add all filters to params
+            Object.entries(searchFilters).forEach(([key, value]) => {
+                if (value) { // Only add if value is not empty
+                    params.append(key, value);
+                }
+            });
+
+            console.log('Sending params:', params.toString()); // Debug log
+
+            const response = await axiosInstance.get(`${Base_Url}/getquotationlist?${params}`, {
                 headers: {
                     Authorization: token,
                 },
-            });
-            setFormData({
-                ticketId: '',
-                customer: '',
-                spareId: '',
-                ModelNumber: '',
-                title: '',
-                quantity: '',
-                price: '',
-            });
-            fetchQuotationlist();
+            }
+            );
+            setQuotationdata(response.data.data);
+            setFilteredData(response.data.data);
+            setTotalCount(response.data.totalCount);
         } catch (error) {
-            console.error('Error deleting user:', error);
+            console.error('Error fetching filtered data:', error);
+            setFilteredData([]);
         }
+    };
+
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+
+        setSearchFilters(prev => ({
+            ...prev,
+            [name]: value
+        }));
+
+    };
+
+    const applyFilters = () => {
+        console.log('Applying filters:', searchFilters); // Debug log
+        fetchFilteredData();
     };
 
     const sendtoedit = async (id) => {
@@ -102,73 +133,57 @@ export function Quotationlist(params) {
         fetchQuotationlist();
     }, []);
 
-    useEffect(() => {
-        if (Quotationdata.length > 0) {
-            // Initialize DataTable after data is fetched
-            const table = $('#example').DataTable({
-                destroy: true, // Destroy any existing DataTable instance before reinitializing
-                paging: true,
-                searching: true,
-                ordering: false,
-                info: true,
-                lengthChange: false,
-                autoWidth: false,
-                responsive: true,
-                fixedHeader: true,
-                fixedColumns: {
-                    left: 5,
-                },
-                keys: true,
-                select: true,
-                dom: '<"d-flex justify-content-between"<"table-title"><"search-box"f>>t<"d-flex justify-content-between"ip>',
-                language: {
-                    search: '', // Remove the "Search:" label
-                    searchPlaceholder: 'Search...', // Add placeholder text
-                },
 
-            });
-
-            // Cleanup: Destroy DataTable instance before reinitializing when Quotationdata changes
-            return () => {
-                table.destroy();
-            };
-        }
-    }, [Quotationdata]);
 
     const navigate = useNavigate();
 
     // export to excel 
-    const exportToExcel = () => {
-        // Create a new workbook
-        const workbook = XLSX.utils.book_new();
+    const exportToExcel = async () => {
+        try {
+            // Fetch all customer data without pagination
+            const response = await axiosInstance.get(`${Base_Url}/getchildFranchiseDetails`, {
+                headers: {
+                    Authorization: token,
+                },
+                params: {
+                    pageSize: totalCount, // Fetch all data
+                    page: 1, // Start from the first page
+                },
+            });
+            const allQuotationdata = response.data.data;
+            // Create a new workbook
+            const workbook = XLSX.utils.book_new();
 
-        // Convert data to a worksheet
-        const worksheet = XLSX.utils.json_to_sheet(Quotationdata.map(user => ({
+            // Convert data to a worksheet
+            const worksheet = XLSX.utils.json_to_sheet(allQuotationdata.map(user => ({
 
-            "QuotationNumber": user.quotationNumber,
-            "ticketId": user.ticketId,
-            "ticketdate": user.ticketdate,
-            "QuotationDate":user.quotationDate,
-            "EngineerName": user.assignedEngineer,
-            "CustomerName": user.CustomerName,
-            "CustomerID": user.customer_id,
-            "SpareID": user.spareId,
-            "ModelNumber": user.ModelNumber,
-            "State": user.state,
-            "City": user.city,
-            "SpareName": user.title,
-            "Quantity": user.quantity,
-            "Price": user.price,
-            "Status": user.status,
+                "QuotationNumber": user.quotationNumber,
+                "ticketId": user.ticketId,
+                "ticketdate": user.ticketdate,
+                "QuotationDate": user.quotationDate,
+                "EngineerName": user.assignedEngineer,
+                "CustomerName": user.CustomerName,
+                "CustomerID": user.customer_id,
+                "SpareID": user.spareId,
+                "ModelNumber": user.ModelNumber,
+                "State": user.state,
+                "City": user.city,
+                "SpareName": user.title,
+                "Quantity": user.quantity,
+                "Price": user.price,
+                "Status": user.status,
 
 
-        })));
+            })));
 
-        // Append the worksheet to the workbook
-        XLSX.utils.book_append_sheet(workbook, worksheet, "QuotationList");
+            // Append the worksheet to the workbook
+            XLSX.utils.book_append_sheet(workbook, worksheet, "QuotationList");
 
-        // Export the workbook
-        XLSX.writeFile(workbook, "QuotationList.xlsx");
+            // Export the workbook
+            XLSX.writeFile(workbook, "QuotationList.xlsx");
+        } catch (error) {
+            console.error("Error exporting data to Excel:", error);
+        }
     };
 
     // Role Right 
@@ -209,12 +224,145 @@ export function Quotationlist(params) {
                 <div className="col-md-12 col-12">
                     <div className="card mb-3 tab_box">
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
-                            <button
-                                className="btn btn-primary"
-                                onClick={exportToExcel}
-                            >
-                                Export to Excel
-                            </button>
+
+
+                            <div className="row mb-3">
+
+                                <div className="col-md-2">
+                                    <div className="form-group">
+                                        <label>Quotation Number</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="quotationNumber"
+                                            value={searchFilters.quotationNumber}
+                                            placeholder="Search by QuotationNumber"
+                                            onChange={handleFilterChange}
+                                        />
+                                    </div>
+                                </div>
+
+
+                                <div className="col-md-2">
+                                    <div className="form-group">
+                                        <label>Engineer</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="assignedEngineer"
+                                            value={searchFilters.assignedEngineer}
+                                            placeholder="Search by Engineer"
+                                            onChange={handleFilterChange}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="col-md-2">
+                                    <div className="form-group">
+                                        <label>Customer Name</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="CustomerName"
+                                            value={searchFilters.CustomerName}
+                                            placeholder="Search by CustomerName"
+                                            onChange={handleFilterChange}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="col-md-2">
+                                    <div className="form-group">
+                                        <label>Spare Name</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="title"
+                                            value={searchFilters.title}
+                                            placeholder="Search by Spare Name"
+                                            onChange={handleFilterChange}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="col-md-2">
+                                    <div className="form-group">
+                                        <label>Price</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="price"
+                                            value={searchFilters.price}
+                                            placeholder="Search by Price name"
+                                            onChange={handleFilterChange}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="col-md-2">
+                                    <div className="form-group">
+                                        <label>Status</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="status"
+                                            value={searchFilters.status}
+                                            placeholder="Search by Status"
+                                            onChange={handleFilterChange}
+                                        />
+                                    </div>
+                                </div>
+
+
+
+                            </div>
+                            <div className="row mb-3">
+                                <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
+                                    <div className="form-group">
+                                        <button
+                                            className="btn btn-primary"
+                                            onClick={exportToExcel}
+                                        >
+                                            Export to Excel
+                                        </button>
+                                        <button
+                                            className="btn btn-primary mr-2"
+                                            onClick={applyFilters}
+                                            style={{
+                                                marginLeft: '5px',
+                                            }}
+                                        >
+                                            Search
+                                        </button>
+                                        <button
+                                            className="btn btn-secondary"
+                                            onClick={() => {
+                                                window.location.reload()
+                                            }}
+                                            style={{
+                                                marginLeft: '5px',
+                                            }}
+                                        >
+                                            Reset
+                                        </button>
+                                        {filteredData.length === 0 && (
+                                            <div
+                                                style={{
+                                                    backgroundColor: '#f8d7da',
+                                                    color: '#721c24',
+                                                    padding: '5px 10px',
+                                                    marginLeft: '10px',
+                                                    borderRadius: '4px',
+                                                    border: '1px solid #f5c6cb',
+                                                    fontSize: '14px',
+                                                    display: 'inline-block'
+                                                }}
+                                            >
+                                                No Record Found
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
                             <div className='table-responsive'>
                                 <table id="example" className="table table-striped">
                                     <thead>
@@ -234,9 +382,11 @@ export function Quotationlist(params) {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {Quotationdata.map((item, index) => (
+                                        {Quotationdata.map((item, index) => {
+                                             const displayIndex = (currentPage - 1) * pageSize + index + 1;
+                                             return (
                                             <tr key={item.id}>
-                                                <td>{index + 1}</td>
+                                               <td >{displayIndex}</td>
                                                 <td>{item.quotationNumber}</td>
                                                 <td>{item.assignedEngineer}</td>
                                                 <td>{item.CustomerName}</td>
@@ -263,9 +413,47 @@ export function Quotationlist(params) {
 
                                                 </td>
                                             </tr>
-                                        ))}
+                                        )
+                                    })}
                                     </tbody>
                                 </table>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                                    <button
+                                        onClick={() => handlePageChange(currentPage - 1)}
+                                        disabled={currentPage <= 1}
+                                        style={{
+                                            padding: '8px 15px',
+                                            fontSize: '16px',
+                                            cursor: currentPage <= 1 ? 'not-allowed' : 'pointer',
+                                            backgroundColor: currentPage <= 1 ? '#ccc' : '#007bff',
+                                            color: '#fff',
+                                            border: 'none',
+                                            borderRadius: '5px',
+                                            transition: 'background-color 0.3s',
+                                        }}
+                                    >
+                                        Previous
+                                    </button>
+                                    <span style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                                        Page {currentPage} of {totalPages}
+                                    </span>
+                                    <button
+                                        onClick={() => handlePageChange(currentPage + 1)}
+                                        disabled={currentPage >= totalPages}
+                                        style={{
+                                            padding: '8px 15px',
+                                            fontSize: '16px',
+                                            cursor: currentPage >= totalPages ? 'not-allowed' : 'pointer',
+                                            backgroundColor: currentPage >= totalPages ? '#ccc' : '#007bff',
+                                            color: '#fff',
+                                            border: 'none',
+                                            borderRadius: '5px',
+                                            transition: 'background-color 0.3s',
+                                        }}
+                                    >
+                                        Next
+                                    </button>
+                                </div>
                             </div>
 
                         </div>

@@ -66,8 +66,6 @@ export function ChildFranchiselist(params) {
         mobile_no: '',
         email: '',
         parentfranchisetitle: '',
-
-
     });
 
     const fetchChildfranchisemasterlist = async (page) => {
