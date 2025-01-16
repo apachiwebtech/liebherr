@@ -102,7 +102,8 @@ app.post("/fetchservicemaster", async (req, res) => {
   const {
     title, contact_person, email, mobile_no, password, address, country_id, region_id, state, area, city,
     pincode_id, website, gst_no, panno, bank_name, bank_acc, bank_ifsc, bank_address, with_liebherr,
-    lastworkindate, contract_acti, contract_expir, licarecode, partner_name
+    lastworkindate, contract_acti, contract_expir, licarecode, partner_name,BP_code,lastmodificationdate,BP_status,
+    branch,Licare_Ac_Id,Vendor_Name_licare,work_with_liebherr,
   } = req.body;
 
   try {
@@ -111,11 +112,11 @@ app.post("/fetchservicemaster", async (req, res) => {
 
     // Check if the licarecode already exists in the table
     const result = await pool.request()
-      .input('licarecode', sql.VarChar, licarecode)
-      .query('SELECT COUNT(*) AS count FROM awt_franchisemaster WHERE licarecode = @licarecode');
+      .input('BP_code', sql.VarChar, BP_code)
+      .query('SELECT COUNT(*) AS count FROM awt_franchisemaster WHERE BP_code = @Bp_code');
 
     if (result.recordset[0].count > 0) {
-      return res.status(409).json({ error: 'Duplicate licarecode: This licarecode already exists' });
+      return res.status(409).json({ error: 'Duplicate BP_code: This BP_code already exists' });
     }
 
 
@@ -146,15 +147,23 @@ app.post("/fetchservicemaster", async (req, res) => {
       .input('lastworkindate', sql.VarChar, lastworkindate)
       .input('contract_acti', sql.VarChar, contract_acti)
       .input('contract_expir', sql.VarChar, contract_expir)
+      .input('BP_code', sql.VarChar, BP_code)
+      .input('lastmodificationdate', sql.VarChar, lastmodificationdate)
+      .input('BP_status', sql.VarChar, BP_status)
+      .input('branch', sql.VarChar, branch)
+      .input('Licare_Ac_Id', sql.VarChar, Licare_Ac_Id)
+      .input('Vendor_Name_licare', sql.VarChar, Vendor_Name_licare)
+      .input('work_with_liebherr', sql.VarChar, work_with_liebherr)
       .query(`
            INSERT INTO awt_franchisemaster 
            (title, licarecode, partner_name, contact_person, email, mobile_no, password, address, country_id, region_id, geostate_id, 
             area_id, geocity_id, pincode_id, webste, gstno, panno, bankname, bankacc, bankifsc, bankaddress, withliebher, 
-            lastworkinddate, contractacti, contractexpir)
+            lastworkinddate, contractacti, contractexpir,BP_code,lastmodificationdate,BP_status,branch,Licare_Ac_Id,Vendor_Name_licare,work_with_liebherr)
            VALUES 
            (@title, @licarecode, @partner_name, @contact_person, @email, @mobile_no, @password, @address, @country_id, 
             @region_id, @state, @area, @city, @pincode_id, @website, @gst_no, @panno, @bank_name, @bank_acc, @bank_ifsc, 
-            @bank_address, @with_liebherr, @lastworkindate, @contract_acti, @contract_expir)
+            @bank_address, @with_liebherr, @lastworkindate, @contract_acti, @contract_expir,@BP_code,@lastmodificationdate,
+            @BP_status,@branch,@Licare_Ac_Id,@Vendor_Name_licare,@work_with_liebherr)
          `);
 
 
