@@ -10578,8 +10578,8 @@ app.post("/add_grn", authenticateToken, async (req, res) => {
 
 
 
-app.post("/add_grn", authenticateToken, async (req, res) => {
-  const { invoice_number, invoice_date, csp_no, csp_name, created_by } = req.body;
+app.post("/add_spareoutward", authenticateToken, async (req, res) => {
+  const { grn_no,invoice_number, invoice_date, csp_no, csp_name, created_by } = req.body;
 
   try {
     const pool = await poolPromise;
@@ -10587,7 +10587,7 @@ app.post("/add_grn", authenticateToken, async (req, res) => {
 
 
     // Insert the data into awt_grnmaster
-    const sql = `INSERT INTO awt_grnmaster (grn_no, invoice_no, invoice_date, csp_name, csp_code, created_date, created_by) 
+    const sql = `INSERT INTO awt_spareoutward (grn_no, invoice_no, invoice_date, csp_name, csp_code, created_date, created_by) 
                  VALUES (@grn_no, @invoice_no, @invoice_date, @csp_name, @csp_code, @created_date, @created_by)`;
 
     const result = await pool.request()

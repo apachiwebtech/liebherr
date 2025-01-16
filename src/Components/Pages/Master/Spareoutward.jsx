@@ -184,7 +184,7 @@ const Spareoutward = () => {
                 remark: formData.remark
             }
 
-            axios.post(`${Base_Url}/add_grn`, data, {
+            axios.post(`${Base_Url}/add_spareoutward`, data, {
                 headers: {
                     Authorization: token, // Send token in headers
                 },
@@ -392,7 +392,7 @@ const Spareoutward = () => {
                                             checked={selectedEngineerType === "ENGINEER"} // Set "checked" dynamically
                                         />
                                         <label className="form-check-label" htmlFor="ENGINEER" style={{ fontSize: "14px" }}>
-                                        ENGINEER
+                                            ENGINEER
                                         </label>
                                     </div>
 
@@ -425,7 +425,16 @@ const Spareoutward = () => {
                                         onChange={(e, newValue) => handleSearchChange(newValue)}
                                         onInputChange={(e, newInputValue) => handleInputChange(newInputValue)}
                                         renderInput={(params) => <TextField {...params} label="Enter.." variant="outlined" />}
-                                    /> : <p>LIEBHERR</p>}
+                                    /> : <Autocomplete
+                                        size="small"
+                                        disablePortal
+                                        options={cspdata}
+                                        value={selectcsp}
+                                        getOptionLabel={(option) => option.title}
+                                        onChange={(e, newValue) => handleSearchChange(newValue)}
+                                        onInputChange={(e, newInputValue) => handleInputChange(newInputValue)}
+                                        renderInput={(params) => <TextField {...params} label="Enter.." variant="outlined" />}
+                                    />}
                                     {errors.selectcsp && <span className="text-danger">{errors.selectcsp}</span>}
                                 </div>
 
