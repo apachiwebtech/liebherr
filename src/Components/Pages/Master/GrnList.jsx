@@ -38,7 +38,7 @@ export function GrnList(params) {
 
 
     const { loaders, axiosInstance } = useAxiosLoader();
-    const [Grn, setGrn] = useState();
+    const [Grn, setGrn] = useState([]);
     const [Grnnew, setnewgrn] = useState([]);
     const token = localStorage.getItem("token");
     const licare_code = localStorage.getItem('licare_code')

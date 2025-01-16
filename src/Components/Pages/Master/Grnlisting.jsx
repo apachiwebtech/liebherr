@@ -218,10 +218,9 @@ export function Grnlisting(params) {
                 Authorization: token
             }
         })
-        .then((res) =>{
             alert(res.data)
             fetchgrnListing()
-        })
+        
     }
 
 
