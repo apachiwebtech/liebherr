@@ -46,7 +46,7 @@ function GrnTab() {
       <div className="container-fluid p-0">
         {/* Top Header */}
         <div className="text-left headings">
-          <span style={{paddingLeft:"20px",color:'#FFFFFF'}}>USERS</span>
+          <span style={{paddingLeft:"20px",color:'#FFFFFF'}}>GRN</span>
         </div>
 
         {/* Nav Tabs */}
@@ -69,7 +69,24 @@ function GrnTab() {
                     className={`nav-link ${activeTab === '/csp/grnlisting' ? 'active' : ' onClick={() => setActiveTab("grnlisting")}'}`}
                   
                   >
-                    GRN LISTING
+                    GRN INWARD LISTING
+                  </button></Link>
+                </li>
+
+                <li className="nav-item">
+                <Link to={`/csp/spareoutward`}> <button
+                    className={`nav-link ${activeTab === '/csp/spareoutward' ? 'active' : ' onClick={() => setActiveTab("spareoutward")}'}`}
+                  
+                  >
+                    SPARE OUTWARD
+                  </button></Link>
+                </li>
+                <li className="nav-item">
+                <Link to={`/csp/grnoutward`}> <button
+                    className={`nav-link ${activeTab === '/csp/grnoutward' ? 'active' : ' onClick={() => setActiveTab("grnoutward")}'}`}
+                  
+                  >
+                    GRN OUTWARD LISTING
                   </button></Link>
                 </li>
              

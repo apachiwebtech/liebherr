@@ -121,6 +121,8 @@ import CreateGrn from './Components/Pages/Master/CreateGrn';
 
 import Grndetailspage from './Components/Pages/Master/Grndetailspage';
 import { GrnList } from './Components/Pages/Master/GrnList';
+import { Grnoutward } from './Components/Pages/Master/Grnoutward';
+import Spareoutward from './Components/Pages/Master/Spareoutward';
 
 
 
@@ -253,6 +255,14 @@ const Router = createBrowserRouter([
       {
         path: "/csp/grnview/:grn_no",
         element: <Grndetailspage />
+      },
+      {
+        path: "/csp/spareoutward",
+        element: <Spareoutward />
+      },
+      {
+        path: "/csp/grnoutward",
+        element: <Grnoutward />
       },
     ],
   },
