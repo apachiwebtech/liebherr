@@ -211,10 +211,10 @@ export function Grnoutward(params) {
         }));
     };
 
-    const handledelete = (grn_no) => {
+    const handledelete = (issue_no) => {
 
 
-        axios.post(`${Base_Url}/deletedgrn`, { grn_no: grn_no }, {
+        axios.post(`${Base_Url}/deletespareoutward`, { issue_no: issue_no }, {
             headers: {
                 Authorization: token
             }
@@ -400,16 +400,14 @@ export function Grnoutward(params) {
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
 
                             <div className='table-responsive'>
-                                <table  className="table-striped">
+                                <table  className="table">
                                     <thead>
                                         <tr>
                                             <th width="5%">#</th>
-                                            <th width="15%">Grn_No</th>
-                                            <th width="20%">Received From</th>
-                                            <th width="15%">Invoice No</th>
-                                            <th width="15%">Invoice Date</th>
+                                            <th width="15%">Issue_No</th>
+                                            <th width="20%">Received To</th>
+                                            <th width="15%">Issue Date</th>
                                             <th width="10%">Product Count</th>
-                                            <th width="20%">Status</th>
                                             <th width="20%">Action</th>
 
                                         </tr>
@@ -424,23 +422,21 @@ export function Grnoutward(params) {
 
                                                 <tr key={index}>
                                                     <td>{index + 1}</td>
-                                                    <td>{item.grn_no}</td>
+                                                    <td>{item.issue_no}</td>
                                                     <td>{item.csp_name}</td>
-                                                    <td>{item.invoice_no}</td>
                                                     <td>
-                                                        {new Date(item.invoice_date).toLocaleDateString('en-GB', {
+                                                        {new Date(item.issue_date).toLocaleDateString('en-GB', {
                                                             day: '2-digit',
                                                             month: '2-digit',
                                                             year: 'numeric',
                                                         })}
                                                     </td>
                                                     <td>3</td>
-                                                    <td> {item.status == '1' ? "Approved" : <button className='btn btn-success' onClick={() => updategrnstatus(item.grn_no)}>Approve</button>}</td>
                                                     <td>
                                                         <div className='d-flex'>
                                                             <button
                                                                 className='btn'
-                                                                onClick={() => sendtoedit(item.grn_no)}
+                                                                onClick={() => sendtoedit(item.issue_no)}
                                                                 title="Edit"
                                                                 style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
                                                                 disabled={roleaccess > 3 ? false : true}
@@ -449,7 +445,7 @@ export function Grnoutward(params) {
                                                             </button>
                                                             <button
                                                                 className='btn'
-                                                                onClick={() => handledelete(item.grn_no)}
+                                                                onClick={() => handledelete(item.issue_no)}
                                                                 title="Edit"
                                                                 style={{ backgroundColor: 'transparent', border: 'none', color: 'red', fontSize: '20px' }}
                                                                 disabled={roleaccess > 3 ? false : true}

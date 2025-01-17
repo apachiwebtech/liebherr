@@ -11141,6 +11141,32 @@ app.post('/deletedgrn' , authenticateToken , async (req, res) =>{
 
 })
 
+app.post('/deletespareoutward' , authenticateToken , async (req, res) =>{
+
+  const { issue_no } = req.body;
+
+
+  try {
+    const pool = await poolPromise;
+
+    // Parameterized query with a limit
+    const sql = `update awt_spareoutward set deleted = 1 where issue_no = '${issue_no}'`;
+
+    console.log(sql)
+
+     await pool.request()
+      .query(sql);
+
+
+    return res.json("Grn deleted successfully");
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+
+
+})
+
 
 
 
