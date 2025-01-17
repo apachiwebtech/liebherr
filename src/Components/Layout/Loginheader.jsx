@@ -7,7 +7,7 @@ import { App_Url } from '../Utils/Base_Url';
 
 const Loginheader = (params) => {
   const [Name, setName] = useState([])
-    const location = useLocation(); // Get current route
+  const location = useLocation(); // Get current route
 
 
   const redirect = () => {
@@ -42,7 +42,20 @@ const Loginheader = (params) => {
 
           <ul className="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0 ml-5">
 
-
+            <li
+              className={`nav-item dropdown ${location.pathname === "/csp/ticketlist" ? "active-class" : ""}`}
+              style={location.pathname === "/csp/ticketlist" ? { background: '#0d6efd', borderRadius: '5px' } : {}}
+            >
+              <Link
+                to={`/csp/dashboard`}
+                className={`nav-link site ${location.pathname === "/csp/dashboard" ? "text-light" : ""}`}
+                id="navbarDropdown"
+                role="button"
+                aria-expanded="false"
+              >
+                Dashboard
+              </Link>
+            </li>
 
 
 

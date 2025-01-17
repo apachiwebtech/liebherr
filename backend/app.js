@@ -11174,6 +11174,41 @@ app.post('/deletespareoutward' , authenticateToken , async (req, res) =>{
 })
 
 
+app.get('/cspgetheaddata_web', authenticateToken, async (req, res) => {
+  try {
+    const pool = await poolPromise;
+
+    const result = await pool.request()
+      .query(`SELECT * FROM complaint_ticket WHERE YEAR([created_date]) = YEAR(GETDATE());`);
+
+    const result1 = await pool.request()
+      .query(`SELECT * FROM complaint_ticket WHERE YEAR([created_date]) = YEAR(GETDATE()) and call_status = 'Cancelled'`);
+
+    const result2 = await pool.request()
+      .query(`SELECT * FROM complaint_ticket WHERE YEAR([created_date]) = YEAR(GETDATE()) and call_status = 'Closed'`);
+
+    const result3 = await pool.request()
+      .query(`SELECT * FROM complaint_ticket WHERE YEAR([created_date]) = YEAR(GETDATE()) and call_status = 'Open'`);
+
+    const totalTickets = result.recordset.length || 0;
+    const cancelled = result1.recordset.length || 0;
+    const closed = result2.recordset.length || 0;
+    const open = result3.recordset.length || 0;
+
+    res.status(200).json({
+      totalTickets,
+      cancelled,
+      closed,
+      open,
+    });
+
+  } catch (error) {
+    console.error('Database Query Error:', error);
+    res.status(500).json({ message: 'An error occurred during the database query' });
+  }
+});
+
+
 
 
 

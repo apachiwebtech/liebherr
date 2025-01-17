@@ -124,6 +124,7 @@ import { GrnList } from './Components/Pages/Master/GrnList';
 import { Grnoutward } from './Components/Pages/Master/Grnoutward';
 import Spareoutward from './Components/Pages/Master/Spareoutward';
 import { CspStock } from './Components/Pages/Master/CspStock';
+import { CspDashboard } from './Components/Pages/Master/CspDashboard';
 
 
 
@@ -268,6 +269,10 @@ const Router = createBrowserRouter([
       {
         path: "/csp/cspstock",
         element: <CspStock />
+      },
+      {
+        path: "/csp/dashboard",
+        element: <CspDashboard />
       },
     ],
   },
