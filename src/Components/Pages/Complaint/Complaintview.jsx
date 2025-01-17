@@ -1676,7 +1676,7 @@ export function Complaintview(params) {
 
               <div className="col-md-2">
                 <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Purchase Date</p>
-                <p style={{ fontSize: "14px" }}>{complaintview.purchase_date == null ? null : formatDate(complaintview.purchase_date)}</p>
+                <p style={{ fontSize: "14px" }}>{complaintview.purchase_date == (null || '') ? "N/A" : formatDate(complaintview.purchase_date)}</p>
               </div>
               <div className="col-md-4">
                 <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Warranty Status</p>

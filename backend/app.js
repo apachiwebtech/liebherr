@@ -1709,7 +1709,7 @@ app.get("/getproductlist", authenticateToken, async (req, res) => {
     let countSql = `SELECT COUNT(*) as totalCount FROM product_master where 1=1 `;
     if (serial_no) countSql += ` AND serial_no LIKE '%${serial_no}%'`;
     if (item_code) countSql += ` AND item_code LIKE '%${item_code}%'`;
-   
+
     if (item_description) countSql += ` AND item_description LIKE '%${item_description}%'`;
     if (productType) countSql += ` AND productType LIKE '%${productType}%'`;
     if (productLine) countSql += ` AND productLine LIKE '%${productLine}%'`;
@@ -3669,9 +3669,13 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
     // Insert into awt_uniqueproductmaster using insertedCustomerId as customer_id
 
-    if (cust_id == "") {
 
-      console.log(purchase_date, "Purchase")
+
+
+
+    if (cust_id == "" && model != "") {
+
+
 
       const productSQL = `INSERT INTO awt_uniqueproductmaster (
         CustomerID, ModelNumber, serial_no,  pincode ,address,state,city,district ,purchase_date, created_date, created_by,customer_classification
@@ -3696,19 +3700,18 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
         .input('city', city)
         .input('customer_classification', classification)
         .query(productSQL);
+    }
 
-      console.log(Unique, "Unique")
-
-
+    if (cust_id == "" ) {
       // Insert into awt_customerlocation using insertedCustomerId as customer_id
       const customerLocationSQL = `
-    INSERT INTO awt_customerlocation (
+        INSERT INTO awt_customerlocation (
       customer_id, geostate_id, geocity_id, district_id, pincode_id,
-      created_date, created_by, ccperson, ccnumber, address
+      created_date, created_by, ccperson, ccnumber, address , deleted
     )
     VALUES (
       @customer_id, @state, @city, @area, @pincode,
-      @formattedDate, @created_by, @customer_name, @mobile, @address
+      @formattedDate, @created_by, @customer_name, @mobile, @address, @deleted
     )`;
 
 
@@ -3724,10 +3727,10 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
         .input('customer_name', customer_name)
         .input('mobile', mobile)
         .input('address', address)
+        .input('deleted', '0')
         .query(customerLocationSQL);
+
     }
-
-
 
 
 
@@ -3745,7 +3748,6 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
         ORDER BY ticket_no Desc`
 
 
-    console.log(test, "EEE")
 
 
 
@@ -3765,7 +3767,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
     const count = checkResult.recordset[0] ? checkResult.recordset[0].ticket_no : 'H0000';
 
-    console.log(count)
+
 
 
 
@@ -4450,18 +4452,22 @@ app.get("/getcustomerlocation/:customer_id", authenticateToken, async (req, res)
   try {
     const pool = await poolPromise;
 
+
+
     // Use parameterized query to avoid SQL injection and ensure valid input
     const sql = `
-      SELECT * FROM awt_customerlocation WHERE customer_id = @customer_id AND Deleted = 0;
+      SELECT * FROM awt_customerlocation WHERE customer_id = '${customer_id}' AND deleted = 0;
     `;
 
-    console.log(customer_id, "$$")
+    console.log(sql)
+
 
     const result = await pool
       .request()
       .input("customer_id", customer_id)  // Binding the parameter
       .query(sql);
 
+    console.log(result)
     return res.json(result.recordset);
   } catch (err) {
     console.error("Database error:", err);
@@ -4778,85 +4784,85 @@ app.get("/getchildfranchise/:mfranchise_id",
       return res.status(500).json({ error: 'An error occurred while fetching data' });
     }
   });
-  app.get("/getengineer", authenticateToken, async (req, res) => {
-    try {
-      // Use the poolPromise to get the connection pool
-      const pool = await poolPromise;
-      const {
-        title,
-        employee_code,
-        mobile_no,
-        email,
-        page = 1, // Default to page 1 if not provided
-        pageSize = 10, // Default to 10 items per page if not provided
-      } = req.query;
-  
-      // SQL query to fetch data with INNER JOIN
-      let sql = `
+app.get("/getengineer", authenticateToken, async (req, res) => {
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+    const {
+      title,
+      employee_code,
+      mobile_no,
+      email,
+      page = 1, // Default to page 1 if not provided
+      pageSize = 10, // Default to 10 items per page if not provided
+    } = req.query;
+
+    // SQL query to fetch data with INNER JOIN
+    let sql = `
         SELECT r.*, c.title AS childfranchise_title
         FROM awt_engineermaster r
         INNER JOIN awt_childfranchisemaster c 
         ON r.cfranchise_id = RIGHT(c.licare_code, LEN(c.licare_code) - 2)
         WHERE r.deleted = 0
       `;
-  
-      if (title) {
-        sql += ` AND r.title LIKE '%${title}%'`;
-      }
-      if (employee_code) {
-        sql += ` AND r.engineer_id LIKE '%${employee_code}%'`;
-      }
-      if (mobile_no) {
-        sql += ` AND r.mobile_no LIKE '%${mobile_no}%'`;
-      }
-      if (email) {
-        sql += ` AND r.email LIKE '%${email}%'`;
-      }
-  
-      // Pagination logic
-      const offset = (page - 1) * pageSize;
-      sql += ` ORDER BY r.id OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
-  
-      // Execute the main SQL query
-      const result = await pool.request().query(sql);
-  
-      // SQL query to get the total count
-      let countSql = `
+
+    if (title) {
+      sql += ` AND r.title LIKE '%${title}%'`;
+    }
+    if (employee_code) {
+      sql += ` AND r.engineer_id LIKE '%${employee_code}%'`;
+    }
+    if (mobile_no) {
+      sql += ` AND r.mobile_no LIKE '%${mobile_no}%'`;
+    }
+    if (email) {
+      sql += ` AND r.email LIKE '%${email}%'`;
+    }
+
+    // Pagination logic
+    const offset = (page - 1) * pageSize;
+    sql += ` ORDER BY r.id OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+
+    // Execute the main SQL query
+    const result = await pool.request().query(sql);
+
+    // SQL query to get the total count
+    let countSql = `
         SELECT COUNT(*) AS totalCount
         FROM awt_engineermaster r
         INNER JOIN awt_childfranchisemaster c 
         ON r.cfranchise_id = RIGHT(c.licare_code, LEN(c.licare_code) - 2)
         WHERE r.deleted = 0
       `;
-      if (title) {
-        countSql += ` AND r.title LIKE '%${title}%'`;
-      }
-      if (employee_code) {
-        countSql += ` AND r.engineer_id LIKE '%${employee_code}%'`;
-      }
-      if (mobile_no) {
-        countSql += ` AND r.mobile_no LIKE '%${mobile_no}%'`;
-      }
-      if (email) {
-        countSql += ` AND r.email LIKE '%${email}%'`;
-      }
-  
-      // Execute the count query
-      const countResult = await pool.request().query(countSql);
-      const totalCount = countResult.recordset[0].totalCount;
-  
-      return res.json({
-        data: result.recordset,
-        totalCount,
-        page,
-        pageSize,
-      });
-    } catch (err) {
-      console.error("Error fetching engineer data:", err);
-      return res.status(500).json({ error: "An error occurred while fetching data" });
+    if (title) {
+      countSql += ` AND r.title LIKE '%${title}%'`;
     }
-  });
-  
+    if (employee_code) {
+      countSql += ` AND r.engineer_id LIKE '%${employee_code}%'`;
+    }
+    if (mobile_no) {
+      countSql += ` AND r.mobile_no LIKE '%${mobile_no}%'`;
+    }
+    if (email) {
+      countSql += ` AND r.email LIKE '%${email}%'`;
+    }
+
+    // Execute the count query
+    const countResult = await pool.request().query(countSql);
+    const totalCount = countResult.recordset[0].totalCount;
+
+    return res.json({
+      data: result.recordset,
+      totalCount,
+      page,
+      pageSize,
+    });
+  } catch (err) {
+    console.error("Error fetching engineer data:", err);
+    return res.status(500).json({ error: "An error occurred while fetching data" });
+  }
+});
+
 
 app.get("/requestengineer/:id", authenticateToken,
   authenticateToken, async (req, res) => {
@@ -6890,7 +6896,7 @@ app.get("/getservicecontractlist", authenticateToken, async (req, res) => {
       endDate,
       productName,
       serialNumber,
-      page = 1, 
+      page = 1,
       pageSize = 10,
 
     } = req.query;
@@ -6918,32 +6924,32 @@ app.get("/getservicecontractlist", authenticateToken, async (req, res) => {
       sql += ` AND s.productName LIKE '%${productName}%'`;
     }
 
-     // Pagination logic: Calculate offset based on the page number
-     const offset = (page - 1) * pageSize;
+    // Pagination logic: Calculate offset based on the page number
+    const offset = (page - 1) * pageSize;
 
-     // Add pagination to the SQL query (OFFSET and FETCH NEXT)
+    // Add pagination to the SQL query (OFFSET and FETCH NEXT)
     sql += ` ORDER BY s.id OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
 
     const result = await pool.request().query(sql);
 
-   // Get the total count of records for pagination
-   let countSql = `SELECT COUNT(*) as totalCount FROM awt_servicecontract WHERE deleted = 0`;
-   if (customerName) countSql += ` AND customerName LIKE '%${customerName}%'`;
-   if (contractNumber) countSql += ` AND contractNumber LIKE '%${contractNumber}%'`;
-   if (productName) countSql += ` AND productName LIKE '%${productName}%'`;
-   if (serialNumber) countSql += ` AND serialNumber LIKE '%${serialNumber}%'`;
-   if (startDate) countSql += ` AND startDate LIKE '%${startDate}%'`;
-   if (endDate) countSql += ` AND endDate LIKE '%${endDate}%'`;
-  
+    // Get the total count of records for pagination
+    let countSql = `SELECT COUNT(*) as totalCount FROM awt_servicecontract WHERE deleted = 0`;
+    if (customerName) countSql += ` AND customerName LIKE '%${customerName}%'`;
+    if (contractNumber) countSql += ` AND contractNumber LIKE '%${contractNumber}%'`;
+    if (productName) countSql += ` AND productName LIKE '%${productName}%'`;
+    if (serialNumber) countSql += ` AND serialNumber LIKE '%${serialNumber}%'`;
+    if (startDate) countSql += ` AND startDate LIKE '%${startDate}%'`;
+    if (endDate) countSql += ` AND endDate LIKE '%${endDate}%'`;
 
-   const countResult = await pool.request().query(countSql);
-   const totalCount = countResult.recordset[0].totalCount;
-   return res.json({
-     data: result.recordset,
-     totalCount: totalCount,
-     page,
-     pageSize,
-   });
+
+    const countResult = await pool.request().query(countSql);
+    const totalCount = countResult.recordset[0].totalCount;
+    return res.json({
+      data: result.recordset,
+      totalCount: totalCount,
+      page,
+      pageSize,
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "An error occurred while fetching the complaint list" });
@@ -8982,9 +8988,9 @@ app.get("/getquotationlist", authenticateToken, async (req, res) => {
     if (price) {
       sql += ` AND q.price LIKE '%${price}%'`;
     }
-     // Pagination logic: Calculate offset based on the page number
-     const offset = (page - 1) * pageSize;
-      // Add pagination to the SQL query (OFFSET and FETCH NEXT)
+    // Pagination logic: Calculate offset based on the page number
+    const offset = (page - 1) * pageSize;
+    // Add pagination to the SQL query (OFFSET and FETCH NEXT)
     sql += ` ORDER BY q.quotationNumber OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
 
     // Execute the query
@@ -8993,7 +8999,7 @@ app.get("/getquotationlist", authenticateToken, async (req, res) => {
     let countSql = `SELECT COUNT(*) as totalCount FROM awt_quotation where 1=1 `;
     if (quotationNumber) countSql += ` AND quotationNumber LIKE '%${quotationNumber}%'`;
     if (assignedEngineer) countSql += ` AND assignedEngineer LIKE '%${assignedEngineer}%'`;
-   
+
     if (CustomerName) countSql += ` AND CustomerName LIKE '%${CustomerName}%'`;
     if (spareId) countSql += ` AND spareId LIKE '%${spareId}%'`;
     if (ModelNumber) countSql += ` AND ModelNumber LIKE '%${ModelNumber}%'`;
@@ -9010,7 +9016,7 @@ app.get("/getquotationlist", authenticateToken, async (req, res) => {
       pageSize,
     });
 
-   
+
   } catch (err) {
     console.error("Database error:", err);
     return res.status(500).json({ error: "Database error occurred" });
@@ -10579,19 +10585,19 @@ app.post("/add_grn", authenticateToken, async (req, res) => {
 
 
 app.post("/add_spareoutward", authenticateToken, async (req, res) => {
-  const {  issue_date, lhi_code, lhi_name, remark, created_by } = req.body;
+  const { issue_date, lhi_code, lhi_name, remark, created_by } = req.body;
 
   try {
     const pool = await poolPromise;
 
 
-      // Query to get the count of rows in awt_grnmaster
-      const creategrnno = `SELECT COUNT(*) AS count FROM awt_spareoutward`;
-      const checkResult = await pool.request().query(creategrnno);
-  
-      // Generate the GRN number based on the count
-      const issueCount = checkResult.recordset[0].count || 0;
-      const issue_no = `Issue-${issueCount + 1}`; // Example: GRN-1, GRN-2, etc.
+    // Query to get the count of rows in awt_grnmaster
+    const creategrnno = `SELECT COUNT(*) AS count FROM awt_spareoutward`;
+    const checkResult = await pool.request().query(creategrnno);
+
+    // Generate the GRN number based on the count
+    const issueCount = checkResult.recordset[0].count || 0;
+    const issue_no = `Issue-${issueCount + 1}`; // Example: GRN-1, GRN-2, etc.
 
 
     // Insert the data into awt_grnmaster
@@ -10747,7 +10753,7 @@ app.post("/getselctedspare", authenticateToken, async (req, res) => {
 
 app.post("/getgrnlist", authenticateToken, async (req, res) => {
 
-  const { csp_code ,fromDate,toDate,received_from,invoice_number,product_code,product_name} = req.body;
+  const { csp_code, fromDate, toDate, received_from, invoice_number, product_code, product_name } = req.body;
 
   let sql;
 
@@ -10756,18 +10762,18 @@ app.post("/getgrnlist", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
 
     // Parameterized query with a limit
-     sql = `select * from awt_grnmaster where created_by = '${csp_code}' and  deleted = 0 
+    sql = `select * from awt_grnmaster where created_by = '${csp_code}' and  deleted = 0 
     `;
 
     if (fromDate && toDate) {
       sql += ` AND CAST(invoice_date AS DATE) BETWEEN '${fromDate}' AND '${toDate}'`;
     }
 
-    if(received_from){
+    if (received_from) {
       sql += ` AND csp_name LIKE '%${received_from}%'`;
     }
-    
-    if(invoice_number){
+
+    if (invoice_number) {
       sql += ` AND invoice_no LIKE '%${invoice_number}%'`;
 
     }
@@ -10794,7 +10800,7 @@ app.post("/getgrnlist", authenticateToken, async (req, res) => {
 
 app.post("/getoutwardlisting", authenticateToken, async (req, res) => {
 
-  const {issue_no, csp_code ,fromDate,toDate,lhi_name,product_code,product_name} = req.body;
+  const { issue_no, csp_code, fromDate, toDate, lhi_name, product_code, product_name } = req.body;
 
   let sql;
 
@@ -10803,18 +10809,18 @@ app.post("/getoutwardlisting", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
 
     // Parameterized query with a limit
-     sql = `select * from awt_spareoutward where created_by = '${csp_code}' and  deleted = 0 
+    sql = `select * from awt_spareoutward where created_by = '${csp_code}' and  deleted = 0 
     `;
 
     if (fromDate && toDate) {
       sql += ` AND CAST(issue_date AS DATE) BETWEEN '${fromDate}' AND '${toDate}'`;
     }
 
-    if(lhi_name){
+    if (lhi_name) {
       sql += ` AND lhi_name LIKE '%${lhi_name}%'`;
     }
-    
-    if(issue_no){
+
+    if (issue_no) {
       sql += ` AND issue_no LIKE '%${issue_no}%'`;
 
     }
@@ -11064,7 +11070,7 @@ app.post("/getissuesparelist", authenticateToken, async (req, res) => {
   }
 });
 
-app.post('/getgrndetails' , authenticateToken , async (req, res) =>{
+app.post('/getgrndetails', authenticateToken, async (req, res) => {
   const { grn_no } = req.body;
 
 
@@ -11089,7 +11095,7 @@ app.post('/getgrndetails' , authenticateToken , async (req, res) =>{
 
 
 })
-app.post('/updategrnapprovestatus' , authenticateToken , async (req, res) =>{
+app.post('/updategrnapprovestatus', authenticateToken, async (req, res) => {
 
   const { grn_no } = req.body;
 
@@ -11102,7 +11108,7 @@ app.post('/updategrnapprovestatus' , authenticateToken , async (req, res) =>{
 
     console.log(sql)
 
-     await pool.request()
+    await pool.request()
       .query(sql);
 
 
@@ -11115,7 +11121,7 @@ app.post('/updategrnapprovestatus' , authenticateToken , async (req, res) =>{
 
 })
 
-app.post('/deletedgrn' , authenticateToken , async (req, res) =>{
+app.post('/deletedgrn', authenticateToken, async (req, res) => {
 
   const { grn_no } = req.body;
 
@@ -11128,7 +11134,7 @@ app.post('/deletedgrn' , authenticateToken , async (req, res) =>{
 
     console.log(sql)
 
-     await pool.request()
+    await pool.request()
       .query(sql);
 
 
@@ -11166,6 +11172,8 @@ app.post('/deletespareoutward' , authenticateToken , async (req, res) =>{
 
 
 })
+
+
 
 
 

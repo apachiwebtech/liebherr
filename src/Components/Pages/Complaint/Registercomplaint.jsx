@@ -223,7 +223,7 @@ export function Registercomplaint(params) {
     //     isValid = false;
     //     newErrors.complaint_date = "Date is required";
     // }
-    if (!value.customer_name && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
+    if (!value.customer_name && value.ticket_type !== 'VISIT' && value.ticket_type !== 'HELPDESK') {
       isValid = false;
       newErrors.customer_name = "Name is required";
     }
@@ -244,11 +244,11 @@ export function Registercomplaint(params) {
     //   isValid = false;
     //   newErrors.warrenty_status = "Status is required";
     // }
-    if (!value.salutation && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
+    if (!value.salutation && value.ticket_type !== 'VISIT' && value.ticket_type !== 'HELPDESK') {
       isValid = false;
       newErrors.salutation = "Salutation is required";
     }
-    if (!value.contact_person && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
+    if (!value.contact_person && value.ticket_type !== 'VISIT' && value.ticket_type !== 'HELPDESK') {
       isValid = false;
       newErrors.contact_person = "Contact Person is required";
     }
@@ -256,7 +256,7 @@ export function Registercomplaint(params) {
 
     const validateMobile = (mobile) => mobileRegex.test(mobile);
 
-    if (!value.mobile && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
+    if (!value.mobile && value.ticket_type !== 'VISIT' && value.ticket_type !== 'HELPDESK') {
       isValid = false;
       newErrors.mobile = "Mobile is required";
     } else if (value.mobile && !validateMobile(value.mobile)) {
@@ -275,23 +275,23 @@ export function Registercomplaint(params) {
     }
 
 
-    if (!value.address && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
+    if (!value.address && value.ticket_type !== 'VISIT' && value.ticket_type !== 'HELPDESK') {
       isValid = false;
       newErrors.address = "Address is required";
     }
-    if (!value.pincode && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
+    if (!value.pincode && value.ticket_type !== 'VISIT' && value.ticket_type !== 'HELPDESK') {
       isValid = false;
       newErrors.pincode = "Pincode is required";
     }
-    if (!value.mode_of_contact && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
+    if (!value.mode_of_contact && value.ticket_type !== 'VISIT' && value.ticket_type !== 'HELPDESK') {
       isValid = false;
       newErrors.mode_of_contact = "This is required";
     }
-    if (!value.ticket_type && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
+    if (!value.ticket_type && value.ticket_type !== 'VISIT' && value.ticket_type !== 'HELPDESK') {
       isValid = false;
       newErrors.ticket_type = "Ticket is required";
     }
-    if (!value.cust_type && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
+    if (!value.cust_type && value.ticket_type !== 'VISIT' && value.ticket_type !== 'HELPDESK') {
       isValid = false;
       newErrors.cust_type = "Type is required";
     }
@@ -308,16 +308,16 @@ export function Registercomplaint(params) {
       newErrors.requested_mobile = "Please enter a valid 10-digit mobile number.";
     }
 
-    if (!value.classification && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
+    if (!value.classification && value.ticket_type !== 'VISIT' && value.ticket_type !== 'HELPDESK') {
       isValid = false;
       newErrors.classification = "Classification is required";
     }
-    if (!value.specification && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
+    if (!value.specification && value.ticket_type !== 'VISIT' && value.ticket_type !== 'HELPDESK') {
       isValid = false;
       newErrors.specification = "Description is required";
     }
 
-    if (!value.additional_remarks && value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk') {
+    if (!value.additional_remarks && value.ticket_type == 'VISIT' || value.ticket_type == 'HELPDESK') {
       isValid = false;
       newErrors.additional_remarks = "Remark is required";
     }
@@ -620,7 +620,7 @@ export function Registercomplaint(params) {
           setValue({
             ...value,
             complaint_date: res.data[0].ticket_date || currentDate,
-            contact_person: res.data[0].customer_mobile,
+            contact_person: res.data[0].contact_person,
             customer_name: res.data[0].customer_name,
             email: res.data[0].customer_email,
             mobile: res.data[0].customer_mobile,
@@ -1541,7 +1541,7 @@ export function Registercomplaint(params) {
 
                     <div className="col-md-4">
                       <div className="mb-3">
-                        <label className="form-label">Ticket Type{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
+                        <label className="form-label">Ticket Type{value.ticket_type == 'VISIT' || value.ticket_type == 'HELPDESK' ? null : <span className="text-danger">*</span>}</label>
                         <select className="form-control" onChange={onHandleChange} disabled={Comp_id ? true : false} value={value.ticket_type} name="ticket_type">
                           <option value="">Select</option>
                           <option value="INSTALLATION">Installation</option>
@@ -1557,14 +1557,14 @@ export function Registercomplaint(params) {
 
                     <div className="col-md-3">
                       <div className="mb-3">
-                        <label className="form-label">Ticket Date{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
+                        <label className="form-label">Ticket Date{value.ticket_type == 'VISIT' || value.ticket_type == 'HELPDESK' ? null : <span className="text-danger">*</span>}</label>
                         <input type="date" name="complaint_date" onChange={onHandleChange} value={value.complaint_date || new Date().toISOString().split('T')[0]} className="form-control" disabled={Comp_id ? true : false} min={new Date().toISOString().split('T')[0]} />
                         {errors.complaint_date && <span style={{ fontSize: "12px" }} className="text-danger">{errors.complaint_date}</span>}
                       </div>
                     </div>
                     <div className="col-md-2">
                       <div className="mb-3">
-                        <label className="form-label">Salutation{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
+                        <label className="form-label">Salutation{value.ticket_type == 'VISIT' || value.ticket_type == 'HELPDESK' ? null : <span className="text-danger">*</span>}</label>
                         <select className="form-control" onChange={onHandleChange} value={value.salutation} name="salutation">
                           <option value="">Salutation</option>
                           <option value="Mr">Mr</option>
@@ -1580,14 +1580,14 @@ export function Registercomplaint(params) {
 
                     <div className="col-md-3">
                       <div className="mb-3">
-                        <label htmlFor="exampleFormControlInput1" className="form-label">Customer Name{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
+                        <label htmlFor="exampleFormControlInput1" className="form-label">Customer Name{value.ticket_type == 'VISIT' || value.ticket_type == 'HELPDESK' ? null : <span className="text-danger">*</span>}</label>
                         <input type="text" name="customer_name" onChange={onHandleChange} value={value.customer_name} className="form-control" placeholder="Enter Customer Name" />
                         {errors.customer_name && <span style={{ fontSize: "12px" }} className="text-danger">{errors.customer_name}</span>}
                       </div>
                     </div>
                     <div className="col-md-4">
                       <div className="mb-3">
-                        <label htmlFor="exampleFormControlInput1" className="form-label">Contact Person{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
+                        <label htmlFor="exampleFormControlInput1" className="form-label">Contact Person{value.ticket_type == 'VISIT' || value.ticket_type == 'HELPDESK' ? null : <span className="text-danger">*</span>}</label>
                         <input type="text" className="form-control" name="contact_person" value={value.contact_person} onChange={onHandleChange} placeholder="Enter Contact Person Name" />
                         {errors.contact_person && <span style={{ fontSize: "12px" }} className="text-danger">{errors.contact_person}</span>}
                       </div>
@@ -1601,7 +1601,7 @@ export function Registercomplaint(params) {
                     </div>
                     <div className="col-md-4">
                       <div className="mb-3">
-                        <label htmlFor="exampleFormControlInput1" className="form-label">Mobile No. {value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}<input type="checkbox" name='mwhatsapp' onChange={oncheckchange} checked={checkboxes.mwhatsapp === 1} />Whatsapp</label>
+                        <label htmlFor="exampleFormControlInput1" className="form-label">Mobile No. {value.ticket_type == 'VISIT' || value.ticket_type == 'HELPDESK' ? null : <span className="text-danger">*</span>}<input type="checkbox" name='mwhatsapp' onChange={oncheckchange} checked={checkboxes.mwhatsapp === 1} />Whatsapp</label>
                         <input type="number" onKeyDown={handleKeyDown} value={value.mobile} name="mobile" onChange={(e) => {
                           if (e.target.value.length <= 10) {
                             onHandleChange(e);
@@ -1707,7 +1707,7 @@ export function Registercomplaint(params) {
 
                       <div className="col-md-12">
                         <div className="mb-3">
-                          <label htmlFor="exampleFormControlInput1" className="form-label">Address {value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
+                          <label htmlFor="exampleFormControlInput1" className="form-label">Address {value.ticket_type == 'VISIT' || value.ticket_type == 'HELPDESK' ? null : <span className="text-danger">*</span>}</label>
                           <button onClick={openPopup} type="button" className="addressbtn">Add Address</button>
                           <textarea
                             className="form-control"
@@ -1753,7 +1753,7 @@ export function Registercomplaint(params) {
                     {!duplicate ? <>
                       <div className="col-md-3">
                         <div className="mb-3">
-                          <label className="form-label">Pincode{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
+                          <label className="form-label">Pincode{value.ticket_type == 'VISIT' || value.ticket_type == 'HELPDESK' ? null : <span className="text-danger">*</span>}</label>
                           <select className="form-control" value={value.pincode} name="pincode" onChange={onHandleChange}>
                             <option value="">Select Pincode</option>
                             {pincode.map((item) => {
@@ -1818,7 +1818,7 @@ export function Registercomplaint(params) {
 
                       <div className="col-md-3">
                         <div className="mb-3">
-                          <label htmlFor="exampleFormControlInput1" className="form-label">Pincode {value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
+                          <label htmlFor="exampleFormControlInput1" className="form-label">Pincode {value.ticket_type == 'VISIT' || value.ticket_type == 'HELPDESK' ? null : <span className="text-danger">*</span>}</label>
                           <input type="number" className="form-control" value={value.pincode} name="pincode" onChange={onHandleChange} placeholder="" />
                           {errors.pincode && <span style={{ fontSize: "12px" }} className="text-danger">{errors.pincode}</span>}
                         </div>
@@ -1878,7 +1878,7 @@ export function Registercomplaint(params) {
 
                     <div className="col-md-4">
                       <div className="mb-3">
-                        <label className="form-label">Mode of Contact{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
+                        <label className="form-label">Mode of Contact{value.ticket_type == 'VISIT' || value.ticket_type == 'HELPDESK' ? null : <span className="text-danger">*</span>}</label>
                         <select className="form-control" onChange={onHandleChange} value={value.mode_of_contact} name="mode_of_contact">
                           <option value="">Select</option>
                           <option value="Call">Call</option>
@@ -1893,7 +1893,7 @@ export function Registercomplaint(params) {
 
                     <div className="col-md-4">
                       <div className="mb-3">
-                        <label className="form-label">Customer Type{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
+                        <label className="form-label">Customer Type{value.ticket_type == 'VISIT' || value.ticket_type == 'HELPDESK' ? null : <span className="text-danger">*</span>}</label>
                         <select className="form-control" onChange={onHandleChange} value={value.cust_type} name="cust_type">
                           <option value="">Select </option>
                           <option value="END CUSTOMER">END CUSTOMER</option>
@@ -1924,7 +1924,7 @@ export function Registercomplaint(params) {
 
                     <div className="col-md-4">
                       <div className="mb-3">
-                        <label className="form-label">Call Chargeable{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
+                        <label className="form-label">Call Chargeable{value.ticket_type == 'VISIT' || value.ticket_type == 'HELPDESK' ? null : <span className="text-danger">*</span>}</label>
                         <select className="form-control" onChange={onHandleChange} value={value.call_charge} name="call_charge">
                           <option value="">Select</option>
                           <option value="Yes">Yes</option>
@@ -1936,7 +1936,7 @@ export function Registercomplaint(params) {
 
                     <div className="col-md-4">
                       <div className="mb-3">
-                        <label className="form-label">Customer Classification{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
+                        <label className="form-label">Customer Classification{value.ticket_type == 'VISIT' || value.ticket_type == 'HELPDESK' ? null : <span className="text-danger">*</span>}</label>
                         <select className="form-control" onChange={onHandleChange} value={value.classification} name="classification" disabled={value.serial == undefined || value.serial == '' ? false : true}>
                           <option value="">Select</option>
                           <option value="Consumer">Consumer</option>
@@ -1947,7 +1947,7 @@ export function Registercomplaint(params) {
                     </div>
                     <div className="col-md-4">
                       <div className="mb-3">
-                        <label className="form-label">Priority{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</label>
+                        <label className="form-label">Priority{value.ticket_type == 'VISIT' || value.ticket_type == 'HELPDESK' ? null : <span className="text-danger">*</span>}</label>
                         <select className="form-control" onChange={onHandleChange} value={value.Priority || "REGULAR"} name="Priority">
                           <option value="">Select</option>
                           <option value="REGULAR">Regular</option>
@@ -2009,7 +2009,7 @@ export function Registercomplaint(params) {
 
                 <div className="card mb-3" id="engineerInfo">
                   <div className="card-body">
-                    <h4 className="pname">Fault Description{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? null : <span className="text-danger">*</span>}</h4>
+                    <h4 className="pname">Fault Description{value.ticket_type == 'VISIT' || value.ticket_type == 'HELPDESK' ? null : <span className="text-danger">*</span>}</h4>
                     <div className="mb-3">
                       <textarea
                         className="form-control"
@@ -2025,7 +2025,7 @@ export function Registercomplaint(params) {
 
                 <div className="card mb-3" id="engineerInfo">
                   <div className="card-body">
-                    <h4 className="pname">Additional Info{value.ticket_type == 'Visit' || value.ticket_type == 'Helpdesk' ? <span className="text-danger">*</span> : null}</h4>
+                    <h4 className="pname">Additional Info{value.ticket_type == 'VISIT' || value.ticket_type == 'HELPDESK' ? <span className="text-danger">*</span> : null}</h4>
                     <div className="mb-3">
                       <textarea
                         className="form-control"

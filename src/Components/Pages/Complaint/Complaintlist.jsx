@@ -581,7 +581,7 @@ export function Complaintlist(params) {
                   />
                 </div>
               </div>
-=
+
   
             </div>
 

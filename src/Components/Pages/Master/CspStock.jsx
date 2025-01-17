@@ -46,7 +46,7 @@ export function CspStock(params) {
 
             <div className="row mp0">
 
-                <div className="col-md-12 col-12">
+                <div className="col-md-6 col-12">
                     <div className="card mb-3 tab_box">
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
 
@@ -55,24 +55,16 @@ export function CspStock(params) {
                                     <thead>
                                         <tr>
                                             <th width="5%">#</th>
-                                            <th width="15%">Grn_No</th>
-                                            <th width="20%">Received From</th>
-                                            <th width="15%">Invoice No</th>
-                                            <th width="15%">Invoice Date</th>
-                                            <th width="10%">Product Count</th>
-                                            <th width="20%">Status</th>
-                                            <th width="20%">Action</th>
-
+                                            <th width="15%">Product Name</th>
+                                            <th width="20%">Stock</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-
-
-
-
-
-
-
+                                        <tr>
+                                            <td>1</td>
+                                            <td>test</td>
+                                            <td>3</td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
