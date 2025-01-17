@@ -10794,7 +10794,7 @@ app.post("/getgrnlist", authenticateToken, async (req, res) => {
 
 app.post("/getoutwardlisting", authenticateToken, async (req, res) => {
 
-  const { csp_code ,fromDate,toDate,l,invoice_number,product_code,product_name} = req.body;
+  const {issue_no, csp_code ,fromDate,toDate,lhi_name,product_code,product_name} = req.body;
 
   let sql;
 
@@ -10810,12 +10810,12 @@ app.post("/getoutwardlisting", authenticateToken, async (req, res) => {
       sql += ` AND CAST(issue_date AS DATE) BETWEEN '${fromDate}' AND '${toDate}'`;
     }
 
-    if(received_from){
-      sql += ` AND lhi_name LIKE '%${received_from}%'`;
+    if(lhi_name){
+      sql += ` AND lhi_name LIKE '%${lhi_name}%'`;
     }
     
-    if(invoice_number){
-      sql += ` AND issue_no LIKE '%${invoice_number}%'`;
+    if(issue_no){
+      sql += ` AND issue_no LIKE '%${issue_no}%'`;
 
     }
 

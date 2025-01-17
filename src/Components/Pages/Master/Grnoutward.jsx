@@ -61,7 +61,7 @@ export function Grnoutward(params) {
             };
 
 
-            const response = await axiosInstance.post(`${Base_Url}/getgrnlist`, data, {
+            const response = await axiosInstance.post(`${Base_Url}/getoutwardlisting`, data, {
                 headers: {
                     Authorization: token,
                 },
@@ -88,7 +88,7 @@ export function Grnoutward(params) {
                 product_name: searchFilters.product_name || ''
             };
 
-            const response = await axiosInstance.post(`${Base_Url}/getgrnlist`, data, {
+            const response = await axiosInstance.post(`${Base_Url}/getoutwardlisting`, data, {
                 headers: {
                     Authorization: token,
                 },
@@ -400,7 +400,7 @@ export function Grnoutward(params) {
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
 
                             <div className='table-responsive'>
-                                <table id="example" className="table table-striped">
+                                <table  className="table-striped">
                                     <thead>
                                         <tr>
                                             <th width="5%">#</th>
@@ -416,14 +416,7 @@ export function Grnoutward(params) {
                                     </thead>
                                     <tbody>
 
-                                        {Grnnew.map((item,index) =>{
-                                            return(
-                                                <tr key={index}>
-                                                {item.id}
-                                              </tr>
-                                            )
-                                            
-                                        })}
+                             
                                         {Grn.map((item, index) => {
 
 
