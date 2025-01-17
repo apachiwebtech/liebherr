@@ -36,11 +36,10 @@ const Spareoutward = () => {
     const [producttext, setProductText] = useState("");
     const token = localStorage.getItem("token"); // Get token from localStorage
     const created_by = localStorage.getItem("licare_code"); // Get token from localStorage
-    const GRN_NO = localStorage.getItem("grn_no"); // Get token from localStorage
+    const Issue_No = localStorage.getItem("issue_no"); // Get token from localStorage
     const [formData, setFormData] = useState({
-        received_from: "",
-        invoice_number: "",
-        invoice_date: "",
+        issue_to: "",
+        issue_date: "",
         spare: "",
         remark: ''
     });
@@ -74,7 +73,7 @@ const Spareoutward = () => {
     const fetchsparelist = async () => {
 
         try {
-            const response = await axios.post(`${Base_Url}/getgrnsparelist`, { grn_no: GRN_NO }, {
+            const response = await axios.post(`${Base_Url}/getissuesparelist`, { Issue_No: Issue_No }, {
                 headers: {
                     Authorization: token, // Send token in headers
                 },
@@ -102,15 +101,11 @@ const Spareoutward = () => {
     const validateForm = () => {
         const newErrors = {}; // Initialize an empty error object
 
-        if (!formData.invoice_date) {
+        if (!formData.issue_date) {
             // Check if the invoice date is empty
-            newErrors.invoice_date = "This is required."; // Set error message for invoice_date
+            newErrors.issue_date = "This is required."; // Set error message for invoice_date
         }
 
-        if (!formData.invoice_number) {
-            // Check if the invoice number is empty
-            newErrors.invoice_number = "This is required."; // Set error message for invoice_no
-        }
 
         if (!selectcsp) {
             // Check if the CSP selection is empty
@@ -146,12 +141,12 @@ const Spareoutward = () => {
         if (Object.keys(serrors).length === 0) {
             const data = {
                 spare_id: SpareId,
-                grn_no: localStorage.getItem('grn_no'),
+                issue_no: localStorage.getItem('issue_no'),
                 created_by: created_by
             };
 
             try {
-                const response = await axios.post(`${Base_Url}/addgrnspares`, JSON.stringify(data), {
+                const response = await axios.post(`${Base_Url}/addissuespares`, JSON.stringify(data), {
                     headers: {
                         Authorization: token, // Send token in headers
                         "Content-Type": "application/json", // Explicitly set Content-Type
@@ -176,10 +171,9 @@ const Spareoutward = () => {
 
         if (Object.keys(errors).length === 0) {
             const data = {
-                invoice_number: formData.invoice_number,
-                invoice_date: formData.invoice_date,
-                csp_no: selectcsp.id,
-                csp_name: selectcsp.title,
+                issue_date: formData.issue_date,
+                lhi_code: selectcsp.id,
+                lhi_name: selectcsp.title,
                 created_by: created_by,
                 remark: formData.remark
             }
@@ -192,8 +186,8 @@ const Spareoutward = () => {
                 .then((res) => {
                     alert(res.data.message)
 
-                    if (res.data.grn_no) {
-                        localStorage.setItem('grn_no', res.data.grn_no)
+                    if (res.data.issue_no) {
+                        localStorage.setItem('issue_no', res.data.issue_no)
 
                         setHidelist(true)
                     }
@@ -216,7 +210,7 @@ const Spareoutward = () => {
                 article_code: item.spare_no,
                 article_title: item.spare_title,
                 quantity: String(item.quantity) || String(0), // Use the updated `spare_qty`, default to 0 if empty
-                grn_no: localStorage.getItem('grn_no')
+                issue_no: localStorage.getItem('issue_no')
             }));
 
 
@@ -224,7 +218,7 @@ const Spareoutward = () => {
             const stringifiedPayload = JSON.stringify(payload);
 
             // Send stringified payload to the server
-            const response = await axios.post(`${Base_Url}/updategrnspares`, stringifiedPayload, {
+            const response = await axios.post(`${Base_Url}/updateissuespares`, stringifiedPayload, {
                 headers: {
                     'Content-Type': 'application/json'
                 }
@@ -414,7 +408,7 @@ const Spareoutward = () => {
 
                                 <div className="mb-3 col-lg-3">
                                     <label htmlFor="EmailInput" className="input-field">
-                                        Received from <span className="text-danger">*</span>
+                                        Issue to <span className="text-danger">*</span>
                                     </label>
                                     {selectedEngineerType === "Franchisee" ? <Autocomplete
                                         size="small"
@@ -440,33 +434,18 @@ const Spareoutward = () => {
 
                                 <div className="mb-3 col-lg-3">
                                     <label htmlFor="EmailInput" className="input-field">
-                                        Invoice Number  <span className="text-danger">*</span>
-                                    </label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        name="invoice_number"
-                                        value={formData.invoice_number}
-                                        onChange={handleChange}
-                                        placeholder="Enter Invoice No."
-                                    />
-                                    {errors.invoice_number && <span className="text-danger">{errors.invoice_number}</span>}
-                                    {/* Show duplicate error */}
-                                </div>
-                                <div className="mb-3 col-lg-3">
-                                    <label htmlFor="EmailInput" className="input-field">
-                                        Invoice Date  <span className="text-danger">*</span>
+                                        Issue Date  <span className="text-danger">*</span>
                                     </label>
                                     <input
                                         type="date"
-                                        className="form-control"
-                                        name="invoice_date"
-                                        value={formData.invoice_date}
+                                        class="form-control"
+                                        name="issue_date"
+                                        value={formData.issue_date}
                                         onChange={handleChange}
                                         max={new Date().toISOString().split("T")[0]} // Set max to today's date
                                         placeholder="Enter Invoice No."
                                     />
-                                    {errors.invoice_date && <span className="text-danger">{errors.invoice_date}</span>}
+                                    {errors.issue_date && <span className="text-danger">{errors.issue_date}</span>}
 
 
                                 </div>
@@ -506,7 +485,7 @@ const Spareoutward = () => {
                             className="card-body"
                             style={{ flex: "1 1 auto", padding: "13px 28px" }}
                         >
-                            <h5 style={{ fontSize: "15px", fontWeight: "800" }}>GRN NO : {localStorage.getItem('grn_no')}</h5>
+                            <h5 style={{ fontSize: "15px", fontWeight: "800" }}>ISSUE NO : {localStorage.getItem('issue_no')}</h5>
                             <div className="row align-items-center">
                                 <div className="mb-3 col-lg-3">
                                     <label htmlFor="EmailInput" className="input-field">

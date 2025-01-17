@@ -10579,29 +10579,36 @@ app.post("/add_grn", authenticateToken, async (req, res) => {
 
 
 app.post("/add_spareoutward", authenticateToken, async (req, res) => {
-  const { grn_no,invoice_number, invoice_date, csp_no, csp_name, created_by } = req.body;
+  const {  issue_date, lhi_code, lhi_name, remark, created_by } = req.body;
 
   try {
     const pool = await poolPromise;
 
 
+      // Query to get the count of rows in awt_grnmaster
+      const creategrnno = `SELECT COUNT(*) AS count FROM awt_spareoutward`;
+      const checkResult = await pool.request().query(creategrnno);
+  
+      // Generate the GRN number based on the count
+      const issueCount = checkResult.recordset[0].count || 0;
+      const issue_no = `Issue-${issueCount + 1}`; // Example: GRN-1, GRN-2, etc.
+
 
     // Insert the data into awt_grnmaster
-    const sql = `INSERT INTO awt_spareoutward (grn_no, invoice_no, invoice_date, csp_name, csp_code, created_date, created_by) 
-                 VALUES (@grn_no, @invoice_no, @invoice_date, @csp_name, @csp_code, @created_date, @created_by)`;
+    const sql = `INSERT INTO awt_spareoutward (issue_no, issue_date, lhi_name, lhi_code, created_date, created_by) 
+                 VALUES (@issue_no, @issue_date, @lhi_name, @lhi_code, @created_date, @created_by)`;
 
     const result = await pool.request()
-      .input('grn_no', grn_no)
-      .input('invoice_no', invoice_number)
-      .input('invoice_date', invoice_date)
-      .input('csp_name', csp_name)
-      .input('csp_code', csp_no)  // Assuming you want to insert csp_no as csp_code
+      .input('issue_no', issue_no)
+      .input('issue_date', issue_date)
+      .input('lhi_name', lhi_name)
+      .input('lhi_code', lhi_code)  // Assuming you want to insert csp_no as csp_code
       .input('created_date', new Date())  // Use the current date for created_date
       .input('created_by', created_by)
       .query(sql);
 
     // If the insert was successful, send the result
-    return res.json({ message: "GRN created successfully", grn_no: grn_no, data: result.recordset });
+    return res.json({ message: "Issue created successfully", issue_no: issue_no, data: result.recordset });
 
   } catch (err) {
     console.error("Error fetching data:", err);
@@ -10640,6 +10647,55 @@ app.post('/updategrnspares', async (req, res) => {
       request.input('quantity', sql.Int, item.quantity);
       request.input('actual_received', sql.Int, item.actual_received);
       request.input('pending_quantity', sql.Int, item.pending_quantity);
+      await request.query(query);
+    }
+
+    // Commit the transaction
+    await transaction.commit();
+
+    res.status(200).json({
+      message: 'Data updated successfully',
+      affectedRows: spareData.length,
+    });
+  } catch (err) {
+    console.error('Error updating data:', err);
+    res.status(500).json({ error: 'Database error' });
+  } finally {
+    // Close the database connection
+    sql.close();
+  }
+});
+
+
+app.post('/updateissuespares', async (req, res) => {
+  const spareData = req.body; // Expecting an array of spare objects
+
+  // console.log(req.body);
+
+  if (!Array.isArray(spareData)) {
+    return res.status(400).json({ error: 'Invalid payload format. Expected an array.' });
+  }
+
+  try {
+    // Connect to the database
+    const pool = await sql.connect(dbConfig);
+
+    // Use a transaction for bulk updates
+    const transaction = new sql.Transaction(pool);
+    await transaction.begin();
+
+    // Loop through spareData and update each row
+    for (const item of spareData) {
+      const request = new sql.Request(transaction); // Create a new request for each iteration
+      const query = `
+        UPDATE awt_cspissuespare
+        SET quantity = @quantity 
+        WHERE issue_no = @issue_no AND spare_no = @spare_no
+      `;
+
+      request.input('issue_no', sql.VarChar, item.issue_no);
+      request.input('spare_no', sql.VarChar, item.article_code);
+      request.input('quantity', sql.Int, item.quantity);
       await request.query(query);
     }
 
@@ -10713,6 +10769,53 @@ app.post("/getgrnlist", authenticateToken, async (req, res) => {
     
     if(invoice_number){
       sql += ` AND invoice_no LIKE '%${invoice_number}%'`;
+
+    }
+
+
+    sql += ' order by id desc'
+
+
+
+
+    const result = await pool.request()
+      .query(sql);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "No results found" });
+    }
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+});
+
+app.post("/getoutwardlisting", authenticateToken, async (req, res) => {
+
+  const { csp_code ,fromDate,toDate,l,invoice_number,product_code,product_name} = req.body;
+
+  let sql;
+
+
+  try {
+    const pool = await poolPromise;
+
+    // Parameterized query with a limit
+     sql = `select * from awt_spareoutward where created_by = '${csp_code}' and  deleted = 0 
+    `;
+
+    if (fromDate && toDate) {
+      sql += ` AND CAST(issue_date AS DATE) BETWEEN '${fromDate}' AND '${toDate}'`;
+    }
+
+    if(received_from){
+      sql += ` AND lhi_name LIKE '%${received_from}%'`;
+    }
+    
+    if(invoice_number){
+      sql += ` AND issue_no LIKE '%${invoice_number}%'`;
 
     }
 
@@ -10823,6 +10926,91 @@ app.post('/addgrnspares', async (req, res) => {
     sql.close();
   }
 });
+app.post('/addissuespares', async (req, res) => {
+  const { spare_id, issue_no, created_by } = req.body; // Expecting required fields in the request body
+
+  try {
+    // Connect to the database
+    const pool = await sql.connect(dbConfig);
+
+    // Fetch spare parts data
+    const getspare = `
+      SELECT id, ModelNumber, title as article_code, ProductCode as spareId, ItemDescription as article_description
+      FROM Spare_parts WHERE id = @spare_id
+    `;
+    const result = await pool.request()
+      .input('spare_id', sql.VarChar, spare_id)
+      .query(getspare);
+
+    const spareData = result.recordset.map(record => ({
+      issue_no,
+      article_code: record.article_code,
+      article_title: record.article_description,
+      spare_qty: 0,
+      created_by,
+      created_date: new Date()
+    }));
+
+
+    // Use a transaction for bulk inserts
+    const transaction = new sql.Transaction(pool);
+    await transaction.begin();
+
+    const bulkQuery = `
+      INSERT INTO awt_cspissuespare (issue_no, spare_no, spare_title, quantity, created_by, created_date)
+      VALUES (@issue_no, @article_code, @article_title, @spare_qty, @created_by, @created_date)
+    `;
+
+    const duplicateCheckQuery = `
+      SELECT COUNT(*) as count
+      FROM awt_cspissuespare
+      WHERE spare_no = @article_code_d AND issue_no = @issue_no_d
+    `;
+
+    let affectedRows = 0; // To count how many rows are actually inserted
+
+    for (const item of spareData) {
+      // Create a new request instance for each iteration to avoid reusing parameters
+      const bulkRequest = new sql.Request(transaction);
+
+      // Check if the spare_id already exists in the table
+      const duplicateCheck = await bulkRequest
+        .input('article_code_d', sql.VarChar, item.article_code) // Renamed parameter
+        .input('issue_no_d', sql.VarChar, item.issue_no) // Correct parameter names
+        .query(duplicateCheckQuery);
+
+      if (duplicateCheck.recordset[0].count === 0) {
+        // If not a duplicate, insert the new record with correct parameters
+        await bulkRequest
+          .input('issue_no', sql.VarChar, item.issue_no) // Correct parameter names
+          .input('article_code', sql.VarChar, item.article_code) // Correct parameter names
+          .input('article_title', sql.VarChar, item.article_title)
+          .input('spare_qty', sql.Int, item.spare_qty)
+          .input('created_by', sql.VarChar, item.created_by)
+          .input('created_date', sql.DateTime, item.created_date)
+          .query(bulkQuery);
+        affectedRows++; // Increment affected rows
+      } else {
+        // If duplicate, skip the insert
+        console.log(`Duplicate entry found for spare_id: ${item.article_code} and issue_no: ${item.issue_no}`);
+      }
+    }
+
+    // Commit the transaction
+    await transaction.commit();
+
+    res.status(200).json({
+      message: 'Data saved successfully (duplicates skipped)',
+      affectedRows, // Send the actual count of affected rows
+    });
+  } catch (err) {
+    console.error('Error inserting data:', err);
+    res.status(500).json({ error: 'Database error', details: err.message });
+  } finally {
+    // Close the database connection
+    sql.close();
+  }
+});
 
 
 
@@ -10836,6 +11024,31 @@ app.post("/getgrnsparelist", authenticateToken, async (req, res) => {
 
     // Parameterized query with a limit
     const sql = `select * from awt_cspgrnspare where grn_no = '${grn_no}'`;
+
+    const result = await pool.request()
+      .query(sql);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "No results found" });
+    }
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+});
+
+app.post("/getissuesparelist", authenticateToken, async (req, res) => {
+
+  const { Issue_No } = req.body;
+
+
+  try {
+    const pool = await poolPromise;
+
+    // Parameterized query with a limit
+    const sql = `select * from awt_cspissuespare where issue_no = '${Issue_No}'`;
 
     const result = await pool.request()
       .query(sql);
