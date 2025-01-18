@@ -6,28 +6,6 @@ import { FaEye, FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { Base_Url, secretKey } from '../../Utils/Base_Url';
 import CryptoJS from 'crypto-js';
 import { useSelector } from 'react-redux';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'datatables.net-bs4/css/dataTables.bootstrap4.min.css';
-import $ from 'jquery';
-import 'datatables.net';
-import 'datatables.net-bs4';
-import { MdOutlineDelete } from "react-icons/md";
-// DataTables Responsive Extension (JS and CSS for Bootstrap 4)
-import 'datatables.net-responsive';
-import 'datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css';
-// DataTables Fixed Columns Extension
-import 'datatables.net-fixedcolumns';
-import 'datatables.net-fixedcolumns-bs4/css/fixedColumns.bootstrap4.min.css';
-// DataTables Fixed Header Extension
-import 'datatables.net-fixedheader';
-// DataTables Buttons Extension
-import 'datatables.net-buttons';
-import 'datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css';
-import 'datatables.net-buttons/js/buttons.html5.min.js';
-// DataTables KeyTable Extension
-import 'datatables.net-keytable';
-// DataTables Select Extension
-import 'datatables.net-select';
 import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 import { useDispatch } from "react-redux";
@@ -35,6 +13,36 @@ import { getRoleData } from "../../Store/Role/role-action";
 import GrnTab from './GrnTab';
 
 export function CspStock(params) {
+    const { loaders, axiosInstance } = useAxiosLoader();
+    const token = localStorage.getItem("token");
+    const [Stockdata, setStockdata] = useState([]);
+
+    
+        const [formData, setFormData] = useState({
+            productname: '',
+            stock_quantity: '',
+          
+        });
+
+
+    const fetchStock = async (page) => {
+        try {
+
+            const response = await axiosInstance.get(`${Base_Url}/getstock `, {
+                headers: {
+                    Authorization: token,
+                },
+            }
+            );
+            setStockdata(response.data);
+        } catch (error) {
+            console.error('Error fetching Stockdata:', error);
+            setStockdata([]);
+        }
+    };
+    useEffect(() => {
+        fetchStock();
+    }, []);
 
 
 
@@ -60,11 +68,17 @@ export function CspStock(params) {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td>1</td>
-                                            <td>test</td>
-                                            <td>3</td>
-                                        </tr>
+
+                                        {Stockdata.map((item, index) => {
+                                            return (
+                                            <tr key={item.id}>
+                                                <td>{index+1}</td>
+                                                <td>{item.productname}</td>
+                                                <td>{item.stock_quantity}</td>
+                                            </tr>
+                                            )
+                                        })}
+
                                     </tbody>
                                 </table>
                             </div>
