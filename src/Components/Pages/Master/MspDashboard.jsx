@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Base_Url } from "../../Utils/Base_Url";
 
-export function CspDashboard(params) {
+export function MspDashboard(params) {
   const token = localStorage.getItem("token");
 
   const [value, setValue] = useState({
@@ -24,7 +24,7 @@ export function CspDashboard(params) {
     const data = {
       "licare_code": localStorage.getItem('licare_code')
     }
-    axios.get(`${Base_Url}/cspgetheaddata_web`, {
+    axios.get(`${Base_Url}/mspgetheaddata_web`, {
       params: data, // Pass query parameters here
       headers: {
         Authorization: token, // Send token in headers

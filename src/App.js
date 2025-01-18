@@ -125,6 +125,7 @@ import { Grnoutward } from './Components/Pages/Master/Grnoutward';
 import Spareoutward from './Components/Pages/Master/Spareoutward';
 import { CspStock } from './Components/Pages/Master/CspStock';
 import { CspDashboard } from './Components/Pages/Master/CspDashboard';
+import { MspDashboard } from './Components/Pages/Master/MspDashboard';
 
 
 
@@ -197,6 +198,11 @@ const Router = createBrowserRouter([
         path: "/msp/complaintviewmsp/:complaintid",
         element: <Complaintviewmsp />,
       },
+      {
+        path: "/msp/dashboard",
+        element: <MspDashboard />,
+      },
+     
 
     ]
   },

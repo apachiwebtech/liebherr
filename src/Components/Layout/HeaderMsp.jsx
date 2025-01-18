@@ -39,7 +39,20 @@ const HeaderMsp = (params) => {
           <ul className="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0 ml-5">
 
 
-
+            <li
+              className={`nav-item dropdown ${location.pathname === "/msp/ticketlistmsp" ? "active-class" : ""}`}
+              style={location.pathname === "/msp/dashboard" ? { background: '#0d6efd', borderRadius: '5px' } : {}}
+            >
+              <Link
+                to={`/msp/dashboard`}
+                className={`nav-link site ${location.pathname === "/msp/dashboard" ? "text-light" : ""}`}
+                id="navbarDropdown"
+                role="button"
+                aria-expanded="false"
+              >
+                Dashboard
+              </Link>
+            </li>
 
 
 

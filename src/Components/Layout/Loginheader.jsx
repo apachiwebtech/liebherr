@@ -44,7 +44,7 @@ const Loginheader = (params) => {
 
             <li
               className={`nav-item dropdown ${location.pathname === "/csp/ticketlist" ? "active-class" : ""}`}
-              style={location.pathname === "/csp/ticketlist" ? { background: '#0d6efd', borderRadius: '5px' } : {}}
+              style={location.pathname === "/csp/dashboard" ? { background: '#0d6efd', borderRadius: '5px' } : {}}
             >
               <Link
                 to={`/csp/dashboard`}
