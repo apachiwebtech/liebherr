@@ -11337,6 +11337,38 @@ app.get("/getstock", authenticateToken, async (req, res) => {
   }
 });
 
+app.post("/getsearchengineer", authenticateToken, async (req, res) => {
+  const { param } = req.body;
+
+  if (!param) {
+    return res.status(400).json({ message: "Invalid parameter" });
+  }
+
+  try {
+    const pool = await poolPromise;
+
+    // Parameterized query with a limit
+    const sql = `
+    SELECT TOP 20 id, title
+    FROM awt_engineermaster
+    WHERE title LIKE @param AND deleted = 0
+    ORDER BY title;
+    `;
+
+    const result = await pool.request()
+      .input('param', `%${param}%`)
+      .query(sql);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "No results found" });
+    }
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+});
 
 
 

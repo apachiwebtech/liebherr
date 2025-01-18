@@ -25,11 +25,13 @@ const CreateGrn = () => {
     const [hide, setHide] = useState(false);
     const [hidelist, setHidelist] = useState(false);
     const [cspdata, setData] = useState([]);
+    const [engineerdata, setEngineerdata] = useState([]);
     const [spare, setSpare] = useState([]);
     const [SpareId, setSpareId] = useState([]);
     const [selectedspare, setselectedSpare] = useState([]);
     const [productdata, setProduct] = useState([]);
     const [selectcsp, setselectedCsp] = useState(null);
+    const [selectengineer, setselectedEngineer] = useState(null);
     const [csp_no, setcsp_no] = useState(null);
     const [selectproduct, setselectedproduct] = useState(null);
     const [text, setText] = useState("");
@@ -58,6 +60,20 @@ const CreateGrn = () => {
             console.error("Error fetching users:", error);
         }
     };
+
+    const fetchengineer = async () => {
+        try {
+            const response = await axios.post(`${Base_Url}/getsearchengineer` ,{param: text},{
+                headers: {
+                    Authorization: token, // Send token in headers
+                    },
+            });
+            setEngineerdata(response.data)
+        }
+            catch (error) {
+                console.error("Error fetching users:", error);
+            }
+        };
     const fetchproduct = async () => {
 
         try {
@@ -324,9 +340,21 @@ const CreateGrn = () => {
         fetchCsp();
     }, 200);
 
+    const handleEngineerInputChange = _debounce((newValue) => {
+        console.log(newValue);
+
+        setText(newValue);
+
+        fetchengineer();
+    },200);
+
 
     const handleSearchChange = (newValue) => {
         setselectedCsp(newValue);
+        console.log("Selected:", newValue);
+    };
+    const handleSearchEngineerChange = (newValue) => {
+        setselectedEngineer(newValue);
         console.log("Selected:", newValue);
     };
 
@@ -396,7 +424,7 @@ const CreateGrn = () => {
                                         </label>
                                     </div>
 
-                                    <div className="form-check col-lg-3">
+                                    <div className="form-check me-3">
                                         <input
                                             type="radio"
                                             className="form-check-input"
@@ -410,23 +438,55 @@ const CreateGrn = () => {
                                             Service Partner
                                         </label>
                                     </div>
+                                    <div className="form-check col-lg-3">
+                                        <input
+                                            type="radio"
+                                            className="form-check-input"
+                                            id="engineer"
+                                            name="engineer_type"
+                                            value="Engineer"
+                                            onChange={handleEngineerTypeChange}
+                                            checked={selectedEngineerType === "Engineer"} // Set "checked" dynamically
+                                        />
+                                        <label className="form-check-label" htmlFor="engineer" style={{ fontSize: "14px" }}>
+                                            ENGINEER
+                                        </label>
+                                    </div>
+
                                 </div>
+
 
                                 <div className="mb-3 col-lg-3">
                                     <label htmlFor="EmailInput" className="input-field">
                                         Received from <span className="text-danger">*</span>
                                     </label>
-                                    {selectedEngineerType === "Franchisee" ? <Autocomplete
-                                        size="small"
-                                        disablePortal
-                                        options={cspdata}
-                                        value={selectcsp}
-                                        getOptionLabel={(option) => option.title}
-                                        onChange={(e, newValue) => handleSearchChange(newValue)}
-                                        onInputChange={(e, newInputValue) => handleInputChange(newInputValue)}
-                                        renderInput={(params) => <TextField {...params} label="Enter.." variant="outlined" />}
-                                    /> : <p>LIEBHERR</p>}
+                                    {selectedEngineerType === "Franchisee" ? (
+                                        <Autocomplete
+                                            size="small"
+                                            disablePortal
+                                            options={cspdata}
+                                            value={selectcsp}
+                                            getOptionLabel={(option) => option.title}
+                                            onChange={(e, newValue) => handleSearchChange(newValue)}
+                                            onInputChange={(e, newInputValue) => handleInputChange(newInputValue)}
+                                            renderInput={(params) => <TextField {...params} label="Enter.." variant="outlined" />}
+                                        />
+                                    ) : selectedEngineerType === "Engineer" ? (
+                                        <Autocomplete
+                                            size="small"
+                                            disablePortal
+                                            options={engineerdata}
+                                            value={selectengineer}
+                                            getOptionLabel={(option) => option.title}
+                                            onChange={(e, newValue) => handleSearchEngineerChange(newValue)}
+                                            onInputChange={(e, newInputValue) => handleInputChange(newInputValue)}
+                                            renderInput={(params) => <TextField {...params} label="Enter.." variant="outlined" />}
+                                        />
+                                    ) : (
+                                        <p>Liebherr</p>
+                                    )}
                                     {errors.selectcsp && <span className="text-danger">{errors.selectcsp}</span>}
+
                                 </div>
 
                                 <div className="mb-3 col-lg-3">
