@@ -3702,7 +3702,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
         .query(productSQL);
     }
 
-    if (cust_id == "" ) {
+    if (cust_id == "") {
       // Insert into awt_customerlocation using insertedCustomerId as customer_id
       const customerLocationSQL = `
         INSERT INTO awt_customerlocation (
@@ -10654,6 +10654,7 @@ app.post('/updategrnspares', async (req, res) => {
       request.input('actual_received', sql.Int, item.actual_received);
       request.input('pending_quantity', sql.Int, item.pending_quantity);
       await request.query(query);
+
     }
 
     // Commit the transaction
@@ -10871,7 +10872,6 @@ app.post('/addgrnspares', async (req, res) => {
       created_date: new Date()
     }));
 
-    console.log(spareData, "%%");
 
     // Use a transaction for bulk inserts
     const transaction = new sql.Transaction(pool);
@@ -10881,11 +10881,20 @@ app.post('/addgrnspares', async (req, res) => {
       INSERT INTO awt_cspgrnspare (grn_no, spare_no, spare_title, quantity, created_by, created_date)
       VALUES (@grn_no, @article_code, @article_title, @spare_qty, @created_by, @created_date)
     `;
+    const Stockadd = `
+      INSERT INTO csp_stock (product_code, productname, stock_quantity, created_by, created_date)
+      VALUES (@product_code, @productname, @stock_quantity, @created_by, @created_date)
+    `;
 
     const duplicateCheckQuery = `
       SELECT COUNT(*) as count
       FROM awt_cspgrnspare
       WHERE spare_no = @article_code_d AND grn_no = @grn_no_d
+    `;
+    const duplicatespareQuery = `
+      SELECT COUNT(*) as count
+      FROM awt_cspgrnspare
+      WHERE spare_no = @article_code_d 
     `;
 
     let affectedRows = 0; // To count how many rows are actually inserted
@@ -10893,12 +10902,17 @@ app.post('/addgrnspares', async (req, res) => {
     for (const item of spareData) {
       // Create a new request instance for each iteration to avoid reusing parameters
       const bulkRequest = new sql.Request(transaction);
+      const bulkInstock = new sql.Request(transaction);
 
       // Check if the spare_id already exists in the table
       const duplicateCheck = await bulkRequest
         .input('article_code_d', sql.VarChar, item.article_code) // Renamed parameter
         .input('grn_no_d', sql.VarChar, item.grn_no) // Correct parameter names
         .query(duplicateCheckQuery);
+
+      const duplicatespareCheck = await bulkInstock
+        .input('article_code_d', sql.VarChar, item.article_code) // Renamed parameter
+        .query(duplicatespareQuery);
 
       if (duplicateCheck.recordset[0].count === 0) {
         // If not a duplicate, insert the new record with correct parameters
@@ -10910,6 +10924,30 @@ app.post('/addgrnspares', async (req, res) => {
           .input('created_by', sql.VarChar, item.created_by)
           .input('created_date', sql.DateTime, item.created_date)
           .query(bulkQuery);
+
+
+
+        affectedRows++; // Increment affected rows
+      } else {
+        // If duplicate, skip the insert
+        console.log(`Duplicate entry found for spare_id: ${item.article_code} and grn_no: ${item.grn_no}`);
+      }
+
+
+      if (duplicatespareCheck.recordset[0].count === 0) {
+        // If not a duplicate, insert the new record with correct parameters
+        await bulkInstock
+          .input('product_code', sql.VarChar, item.article_code) // Correct parameter names
+          .input('productname', sql.VarChar, item.article_title) // 
+          .input('stock_quantity', sql.Int, item.spare_qty)
+          .input('created_by', sql.VarChar, item.created_by)
+          .input('created_date', sql.DateTime, item.created_date)
+          .query(Stockadd);
+
+
+
+
+
         affectedRows++; // Increment affected rows
       } else {
         // If duplicate, skip the insert
@@ -11095,31 +11133,72 @@ app.post('/getgrndetails', authenticateToken, async (req, res) => {
 
 
 })
-app.post('/updategrnapprovestatus', authenticateToken, async (req, res) => {
 
+
+app.post('/updategrnapprovestatus', authenticateToken, async (req, res) => {
   const { grn_no } = req.body;
 
+  if (!grn_no) {
+    return res.status(400).json({ message: "GRN number is required" });
+  }
 
   try {
     const pool = await poolPromise;
 
-    // Parameterized query with a limit
-    const sql = `update awt_grnmaster set status = 1 where grn_no = '${grn_no}'`;
+    // Fetch spare data for the given GRN number
+    const getgrnspareQuery = `SELECT spare_no, actual_received FROM awt_cspgrnspare WHERE grn_no = @grn_no`;
+    const grnSpares = await pool.request()
+      .input('grn_no', sql.VarChar, grn_no)
+      .query(getgrnspareQuery);
 
-    console.log(sql)
+    const spareresult = grnSpares.recordset;
 
+    for (const item of spareresult) {
+      // Fetch current stock for the spare
+      const getPreviousStockQuery = `
+        SELECT product_code, stock_quantity 
+        FROM csp_stock 
+        WHERE product_code = @spare_no
+      `;
+      const previousStockResult = await pool.request()
+        .input('spare_no', sql.VarChar, item.spare_no)
+        .query(getPreviousStockQuery);
+
+      if (previousStockResult.recordset.length > 0) {
+        const { product_code, stock_quantity } = previousStockResult.recordset[0];
+        const finalQty = Number(stock_quantity) + Number(item.actual_received);
+
+        // Update the stock quantity
+        const updateStockQuery = `
+          UPDATE csp_stock
+          SET stock_quantity = @finalQty
+          WHERE product_code = @product_code
+        `;
+        await pool.request()
+          .input('finalQty', sql.Int, finalQty)
+          .input('product_code', sql.VarChar, product_code)
+          .query(updateStockQuery);
+      }
+    }
+
+    // Update GRN master status
+    const updateGrnMasterQuery = `
+      UPDATE awt_grnmaster
+      SET status = 1
+      WHERE grn_no = @grn_no
+    `;
     await pool.request()
-      .query(sql);
-
+      .input('grn_no', sql.VarChar, grn_no)
+      .query(updateGrnMasterQuery);
 
     return res.json("Status Updated");
   } catch (err) {
-    console.error("Error fetching data:", err);
+    console.error("Error updating GRN status:", err);
     return res.status(500).json({ message: "Internal Server Error", error: err });
   }
+});
 
 
-})
 
 app.post('/deletedgrn', authenticateToken, async (req, res) => {
 
@@ -11147,7 +11226,7 @@ app.post('/deletedgrn', authenticateToken, async (req, res) => {
 
 })
 
-app.post('/deletespareoutward' , authenticateToken , async (req, res) =>{
+app.post('/deletespareoutward', authenticateToken, async (req, res) => {
 
   const { issue_no } = req.body;
 
@@ -11160,7 +11239,7 @@ app.post('/deletespareoutward' , authenticateToken , async (req, res) =>{
 
     console.log(sql)
 
-     await pool.request()
+    await pool.request()
       .query(sql);
 
 

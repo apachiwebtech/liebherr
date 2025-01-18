@@ -416,14 +416,7 @@ export function GrnList(params) {
                                     </thead>
                                     <tbody>
 
-                                        {Grnnew.map((item,index) =>{
-                                            return(
-                                                <tr key={index}>
-                                                {item.id}
-                                              </tr>
-                                            )
-                                            
-                                        })}
+                                    
                                         {Grn.map((item, index) => {
 
 
