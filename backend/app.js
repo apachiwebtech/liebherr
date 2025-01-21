@@ -5016,6 +5016,55 @@ app.get("/getengineerpopulate/:engineerid", authenticateToken, async (req, res) 
 
 });
 
+app.post("/updateengineerstatus", authenticateToken, async (req, res) => {
+  const { dataId ,} = req.body;
+  try {
+    const pool = await poolPromise;
+    const sql = `SELECT * FROM awt_engineermaster WHERE id = @dataId`;
+
+    // Execute the query to get the user
+    const request = await pool.request()
+      .input('dataId', dataId)
+      .query(sql);
+
+    // Check if records exist
+    if (request.recordset.length > 0) {
+      const status = request.recordset[0].status;
+      console.log(request.recordset[0].status);
+      let query;
+      let seen ;
+      if (status == 1) {
+        // If status is 1, deactivate and set activation date
+        query = `UPDATE awt_engineermaster
+                 SET status = 0
+                 WHERE id = @dataId`;
+                 seen = 0;
+                } else {
+                  // If status is not 1, deactivate and set deactivation date
+                  query = `UPDATE awt_engineermaster
+                  SET status = 1
+                  WHERE id = @dataId`;
+                  seen = 1;
+      }
+
+      // Execute the update query
+      const update = await pool.request()
+        .input('dataId', dataId)
+        .query(query);
+
+      // Send the response back with rows affected
+      return res.json({ num_row_aff: update.rowsAffected[0] , seen : seen });
+    } else {
+      // If no user found with the provided dataId
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+  } catch (err) {
+    console.error("Error updating status:", err);
+    return res.status(500).json({ message: 'Error updating status' });
+  }
+});
+
 
 
 // End Engineer Master
@@ -6853,6 +6902,55 @@ app.post("/deleteservicecontract", authenticateToken, async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "Error updating Service Contract" });
+  }
+});
+
+app.post("/updateservicestatus", authenticateToken, async (req, res) => {
+  const { dataId } = req.body;
+  try {
+    const pool = await poolPromise;
+    const sql = `SELECT * FROM awt_servicecontract WHERE id = @dataId`;
+
+    // Execute the query to get the user
+    const request = await pool.request()
+      .input('dataId', dataId)
+      .query(sql);
+
+    // Check if records exist
+    if (request.recordset.length > 0) {
+      const status = request.recordset[0].status;
+      console.log(request.recordset[0].status);
+      let query;
+      let seen ;
+      if (status == 1) {
+        // If status is 1, deactivate and set activation date
+        query = `UPDATE awt_servicecontract
+                 SET status = 0
+                 WHERE id = @dataId`;
+                 seen = 0;
+                } else {
+                  // If status is not 1, deactivate and set deactivation date
+                  query = `UPDATE awt_servicecontract
+                  SET status = 1
+                  WHERE id = @dataId`;
+                  seen = 1;
+      }
+
+      // Execute the update query
+      const update = await pool.request()
+        .input('dataId', dataId)
+        .query(query);
+
+      // Send the response back with rows affected
+      return res.json({ num_row_aff: update.rowsAffected[0] , seen : seen });
+    } else {
+      // If no user found with the provided dataId
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+  } catch (err) {
+    console.error("Error updating status:", err);
+    return res.status(500).json({ message: 'Error updating status' });
   }
 });
 
@@ -10573,7 +10671,7 @@ app.post("/getsearchproduct", authenticateToken, async (req, res) => {
 
 
 app.post("/add_grn", authenticateToken, async (req, res) => {
-  const { invoice_number, invoice_date, csp_no, csp_name, created_by,remark } = req.body;
+  const { invoice_number, invoice_date, csp_no, csp_name, created_by, remark } = req.body;
 
   try {
     const pool = await poolPromise;

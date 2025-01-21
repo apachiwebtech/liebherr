@@ -126,15 +126,17 @@ export function Servicecontractlist(params) {
         fetchFilteredData();
     };
 
-    const handleChangestatus = (e) => {
+    const handleChangestatus = async (e) => {
         try {
             const dataId = e.target.getAttribute('data-id');
 
-            const response = axiosInstance.post(`${Base_Url}/updatestatus`, { dataId: dataId }, {
+            const response = await axiosInstance.post(`${Base_Url}/updateservicestatus`, { dataId: dataId }, {
                 headers: {
                     Authorization: token, // Send token in headers
                 },
             });
+
+            fetchServicecontractlist();
 
         } catch (error) {
             console.error("Error editing user:", error);
@@ -386,7 +388,7 @@ export function Servicecontractlist(params) {
                                                             type="checkbox"
                                                             onChange={handleChangestatus}
                                                             data-id={item.id}
-                                                            checked={item.status === 1}  // Check if status is 1 (checked)
+                                                            checked = {item.status == 1 ? 'checked' : '' }
                                                             className="status"
                                                         />
 

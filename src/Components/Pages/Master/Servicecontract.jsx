@@ -25,14 +25,14 @@ const Servicecontract = () => {
   const createdBy = 1; // Static value for created_by
   const updatedBy = 2; // Static value for updated_by
 
-    try {
-      serviceid = serviceid.replace(/-/g, '+').replace(/_/g, '/');
-          const bytes = CryptoJS.AES.decrypt(serviceid, secretKey);
-          const decrypted = bytes.toString(CryptoJS.enc.Utf8);
-          serviceid = parseInt(decrypted, 10)
-      } catch (error) {
-          console.log("Error".error)
-      }
+  try {
+    serviceid = serviceid.replace(/-/g, '+').replace(/_/g, '/');
+    const bytes = CryptoJS.AES.decrypt(serviceid, secretKey);
+    const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+    serviceid = parseInt(decrypted, 10)
+  } catch (error) {
+    console.log("Error".error)
+  }
 
   const [formData, setFormData] = useState({
     customerName: "",
@@ -48,11 +48,11 @@ const Servicecontract = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axiosInstance.get(`${Base_Url}/getservicecontract`,{
+      const response = await axiosInstance.get(`${Base_Url}/getservicecontract`, {
         headers: {
-            Authorization: token, // Send token in headers
-            },
-        });
+          Authorization: token, // Send token in headers
+        },
+      });
       console.log(response.data);
       setUsers(response.data);
       setFilteredUsers(response.data);
@@ -63,11 +63,11 @@ const Servicecontract = () => {
   const fetchservicecontractpopulate = async (serviceid) => {
 
     try {
-      const response = await axiosInstance.get(`${Base_Url}/getservicecontractpopulate/${serviceid}`,{
+      const response = await axiosInstance.get(`${Base_Url}/getservicecontractpopulate/${serviceid}`, {
         headers: {
-            Authorization: token, // Send token in headers
-            },
-        });
+          Authorization: token, // Send token in headers
+        },
+      });
       setFormData({
         ...response.data[0],
         // Rename keys to match your formData structure
@@ -162,11 +162,11 @@ const Servicecontract = () => {
             .post(`${Base_Url}/putservicecontract`, {
               ...formData,
               updated_by: updatedBy,
-            },{
+            }, {
               headers: {
-                  Authorization: token, // Send token in headers
-                  },
-              })
+                Authorization: token, // Send token in headers
+              },
+            })
             .then((response) => {
               //window.location.reload();
               setSuccessMessage('Customer Updated Successfully!');
@@ -199,11 +199,11 @@ const Servicecontract = () => {
             .post(`${Base_Url}/postservicecontract`, {
               ...formData,
               created_by: createdBy,
-            },{
+            }, {
               headers: {
-                  Authorization: token, // Send token in headers
-                  },
-              })
+                Authorization: token, // Send token in headers
+              },
+            })
             .then((response) => {
               // window.location.reload();
               setFormData({
@@ -237,30 +237,30 @@ const Servicecontract = () => {
 
   const deleted = async (id) => {
     try {
-        // Add confirmation dialog
-        const isConfirmed = window.confirm("Are you sure you want to delete?");
+      // Add confirmation dialog
+      const isConfirmed = window.confirm("Are you sure you want to delete?");
 
-        // Only proceed with deletion if user clicks "OK"
-        if (isConfirmed) {
-            const response = await axiosInstance.post(`${Base_Url}/deleteservicecontract`, { id },{
-              headers: {
-                  Authorization: token, // Send token in headers
-                  },
-              });
-            window.location.reload();
-        }
+      // Only proceed with deletion if user clicks "OK"
+      if (isConfirmed) {
+        const response = await axiosInstance.post(`${Base_Url}/deleteservicecontract`, { id }, {
+          headers: {
+            Authorization: token, // Send token in headers
+          },
+        });
+        window.location.reload();
+      }
     } catch (error) {
-        console.error('Error deleting user:', error);
+      console.error('Error deleting user:', error);
     }
-};
+  };
 
   const edit = async (id) => {
     try {
-      const response = await axiosInstance.get(`${Base_Url}/requestservicecontract/${id}`,{
+      const response = await axiosInstance.get(`${Base_Url}/requestservicecontract/${id}`, {
         headers: {
-            Authorization: token, // Send token in headers
-            },
-        });
+          Authorization: token, // Send token in headers
+        },
+      });
       setFormData(response.data);
       setIsEdit(true);
       console.log(response.data);
@@ -297,7 +297,7 @@ const Servicecontract = () => {
                   onSubmit={handleSubmit}
                 >
                   <div className="row">
-                  <div className="col-3 mb-3">
+                    <div className="col-3 mb-3">
                       <label
                         htmlFor="CustomernameInput"
                         className="input-field"
@@ -346,7 +346,7 @@ const Servicecontract = () => {
                         htmlFor="CustomerMobileInput"
                         className="input-field"
                       >
-                       Customer Mobile No<span className="text-danger">*</span> <input type="checkbox" />Whatsapp
+                        Customer Mobile No<span className="text-danger">*</span> <input type="checkbox" />Whatsapp
                       </label>
                       <input
                         type="tel"
@@ -395,7 +395,7 @@ const Servicecontract = () => {
 
                   </div>
                   <div className="row">
-                  <div className="col-3 mb-3">
+                    <div className="col-3 mb-3">
                       <label htmlFor="contracttypeInput" className="input-field">
                         Contract Type<span className="text-danger">*</span>
                       </label>
@@ -487,149 +487,6 @@ const Servicecontract = () => {
                 </form>
 
 
-                {/* <div className="col-md-6">
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                  <span>
-                    Show
-                    <select
-                      value={itemsPerPage}
-                      onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                      className="form-control d-inline-block"
-                      style={{
-                        width: "51px",
-                        display: "inline-block",
-                        marginLeft: "5px",
-                        marginRight: "5px",
-                      }}
-                    >
-                      <option value={10}>10</option>
-                      <option value={15}>15</option>
-                      <option value={20}>20</option>
-                    </select>
-                    entries
-                  </span>
-
-                  <input
-                    type="text"
-                    placeholder="Search..."
-                    value={searchTerm}
-                    onChange={handleSearch}
-                    className="form-control d-inline-block"
-                    style={{ width: "300px" }}
-                  />
-                </div>
-
-                {/* Adjust table padding and spacing
-                <table
-                  className="table table-bordered table dt-responsive nowrap w-100 table-css"
-                  style={{ marginTop: "20px", tableLayout: "fixed" }}
-                >
-                  <thead>
-                    <tr>
-                      <th style={{ padding: "12px 15px", textAlign: "center" }}>
-                        #
-                      </th>
-                      <th style={{ padding: "12px 15px", textAlign: "center" }}>
-                        Service Product
-                      </th>
-                      <th style={{ padding: "0px 0px", textAlign: "center" }}>
-                        Edit
-                      </th>
-                      <th style={{ padding: "0px 0px", textAlign: "center" }}>
-                        Delete
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {currentUsers.map((item, index) => (
-                      <tr key={item.id}>
-                        <td style={{ padding: "2px", textAlign: "center" }}>
-                          {index + 1 + indexOfFirstUser}
-                        </td>
-                        <td style={{ padding: "10px" }}>
-                          {item.Serviceproduct}
-                        </td>
-                        <td style={{ padding: "0px", textAlign: "center" }}>
-                          <button
-                            className="btn"
-                            onClick={() => {
-                              // alert(item.id)
-                              edit(item.id);
-                            }}
-                            Serviceproduct="Edit"
-                            style={{
-                              backgroundColor: "transparent",
-                              border: "none",
-                              color: "blue",
-                              fontSize: "20px",
-                            }}
-                          >
-                            <FaPencilAlt />
-                          </button>
-                        </td>
-                        <td style={{ padding: "0px", textAlign: "center" }}>
-                          <button
-                            className="btn"
-                            onClick={() => deleted(item.id)}
-                            Serviceproduct="Delete"
-                            style={{
-                              backgroundColor: "transparent",
-                              border: "none",
-                              color: "red",
-                              fontSize: "20px",
-                            }}
-                          >
-                            <FaTrash />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-
-                <div
-                  className="d-flex justify-content-between"
-                  style={{ marginTop: "10px" }}
-                >
-                  <div>
-                    Showing {indexOfFirstUser + 1} to{" "}
-                    {Math.min(indexOfLastUser, filteredUsers.length)} of{" "}
-                    {filteredUsers.length} entries
-                  </div>
-
-                  <div className="pagination" style={{ marginLeft: "auto" }}>
-                    <button
-                      onClick={() => setCurrentPage(currentPage - 1)}
-                      disabled={currentPage === 0}
-                    >
-                      {"<"}
-                    </button>
-                    {Array.from(
-                      {
-                        length: Math.ceil(filteredUsers.length / itemsPerPage),
-                      },
-                      (_, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setCurrentPage(index)}
-                          className={currentPage === index ? "active" : ""}
-                        >
-                          {index + 1}
-                        </button>
-                      )
-                    )}
-                    <button
-                      onClick={() => setCurrentPage(currentPage + 1)}
-                      disabled={
-                        currentPage ===
-                        Math.ceil(filteredUsers.length / itemsPerPage) - 1
-                      }
-                    >
-                      {">"}
-                    </button>
-                  </div>
-                </div>
-              </div> */}
               </div>
             </div>
           </div>
