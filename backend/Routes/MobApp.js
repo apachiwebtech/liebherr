@@ -9,6 +9,26 @@ const upload = multer({ dest: 'uploads/' });
 const JWT_SECRET = "Lh!_Login_123";
 
 
+const authenticateToken = (req, res, next) => {
+
+  const token = req.headers["authorization"];
+
+  if (!token) {
+    return res.status(403).json({ message: "Token required" });
+  }
+
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) {
+      return res.status(401).json({ message: "Invalid token" });
+    }
+
+    req.user = user; // Attach user info to request
+    next();
+  });
+
+};
+
+
 app.post('/applogin', async (req, res) => {
   const { username, password } = req.body;
 
@@ -56,7 +76,7 @@ app.post('/applogin', async (req, res) => {
   }
 });
 
-app.get('/getheaddata', async (req, res) => {
+app.get('/getheaddata', authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
@@ -84,7 +104,7 @@ app.get('/getheaddata', async (req, res) => {
   }
 });
 
-app.get('/getcomplaint/:en_id/:page/:limit', async (req, res) => {
+app.get('/getcomplaint/:en_id/:page/:limit', authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
@@ -126,7 +146,7 @@ console.log(`SELECT t.*, c.alt_mobileno FROM ( SELECT * FROM complaint_ticket WH
 
 
 
-app.get('/awt_subcat', async (req, res) => {
+app.get('/awt_subcat', authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
@@ -148,7 +168,7 @@ app.get('/awt_subcat', async (req, res) => {
 
 
 
-app.get('/CallType', async (req, res) => {
+app.get('/CallType', authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
@@ -166,7 +186,7 @@ app.get('/CallType', async (req, res) => {
     res.status(500).json({ message: 'An error occurred during the database query' });
   }
 });
-app.get('/CallStatus', async (req, res) => {
+app.get('/CallStatus', authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
@@ -186,7 +206,7 @@ app.get('/CallStatus', async (req, res) => {
 });
 
 
-app.get('/getcomplaintdetails', async (req, res) => {
+app.get('/getcomplaintdetails', authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
@@ -208,7 +228,7 @@ app.get('/getcomplaintdetails', async (req, res) => {
 });
 
 
-app.get('/getremark', async (req, res) => {
+app.get('/getremark', authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
@@ -232,7 +252,7 @@ app.get('/getremark', async (req, res) => {
 
 
 
-app.post('/updatecomplaint', upload.single('spare_doc'), async (req, res) => {
+app.post('/updatecomplaint', authenticateToken, upload.single('spare_doc'), async (req, res) => {
   const { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode,activitycode, com_id, warranty_status, spare_detail, ticket_no, user_id } = req.body;
 
 
@@ -289,7 +309,7 @@ app.post('/updatecomplaint', upload.single('spare_doc'), async (req, res) => {
 });
 
 
-app.post("/appgetDefectCodewisetype",
+app.post("/appgetDefectCodewisetype", authenticateToken,
   async (req, res) => {
 
     const { defect_code } = req.body;
@@ -309,7 +329,7 @@ app.post("/appgetDefectCodewisetype",
   });
 
 
-app.get("/getsitedefect", async (req, res) => {
+app.get("/getsitedefect", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
     const sql = `
@@ -331,7 +351,7 @@ app.get("/getsitedefect", async (req, res) => {
 
 // Defect Group Code start
 
-app.get("/getcom_app", async (req, res) => {
+app.get("/getcom_app", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
@@ -350,7 +370,7 @@ app.get("/getcom_app", async (req, res) => {
   }
 });
 
-app.post("/getDefectCodewisetype_app12", async (req, res) => {
+app.post("/getDefectCodewisetype_app12", authenticateToken, async (req, res) => {
 
   const { defect_code } = req.body;
 
@@ -369,7 +389,7 @@ app.post("/getDefectCodewisetype_app12", async (req, res) => {
 });
 
 
-app.post("/getDefectCodewisesite_app", async (req, res) => {
+app.post("/getDefectCodewisesite_app", authenticateToken, async (req, res) => {
 
   const { defect_code } = req.body;
 
@@ -388,7 +408,7 @@ app.post("/getDefectCodewisesite_app", async (req, res) => {
 });
 
 
-app.post("/getsparelistapp", async (req, res) => {
+app.post("/getsparelistapp", authenticateToken, async (req, res) => {
   const { ticket } = req.body;
   try {
     const pool = await poolPromise;
@@ -405,7 +425,7 @@ app.post("/getsparelistapp", async (req, res) => {
 });
 
 
-app.get("/getSpareParts_app/:model", async (req, res) => {
+app.get("/getSpareParts_app/:model", authenticateToken, async (req, res) => {
   const { model } = req.params;
 
   try {
@@ -429,7 +449,7 @@ app.get("/getSpareParts_app/:model", async (req, res) => {
 });
 
 
-app.post("/addspareapp", async (req, res) => {
+app.post("/addspareapp", authenticateToken, async (req, res) => {
   const { ItemDescription, title, product_code, ticket_no } = req.body;
 
   try {
@@ -449,7 +469,7 @@ app.post("/addspareapp", async (req, res) => {
   }
 });
 
-app.post("/getotpapp", async (req, res) => {
+app.post("/getotpapp", authenticateToken, async (req, res) => {
   const { otp, orderid } = req.body;
 
   try {
@@ -468,7 +488,7 @@ app.post("/getotpapp", async (req, res) => {
   }
 });
 
-app.get("/getcomplaintlist/:customer_id", async (req, res) => {
+app.get("/getcomplaintlist/:customer_id", authenticateToken, async (req, res) => {
   const { customer_id } = req.params;
 
   try {
@@ -489,7 +509,7 @@ app.get("/getcomplaintlist/:customer_id", async (req, res) => {
 
 
 
-app.get("/checkstatus_app/:e_id", async (req, res) => {
+app.get("/checkstatus_app/:e_id", authenticateToken, async (req, res) => {
   const { e_id } = req.params;
 
   try {
@@ -508,7 +528,7 @@ app.get("/checkstatus_app/:e_id", async (req, res) => {
 
 
 
-app.get("/getcompdata/:ticket_no", async (req, res) => {
+app.get("/getcompdata/:ticket_no", authenticateToken, async (req, res) => {
   const { ticket_no } = req.params;
 
   try {
@@ -529,7 +549,7 @@ app.get("/getcompdata/:ticket_no", async (req, res) => {
 
 
 
-app.get("/getactivity_app", async (req, res) => {
+app.get("/getactivity_app", authenticateToken, async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
@@ -545,7 +565,7 @@ app.get("/getactivity_app", async (req, res) => {
   }
 });
 
-app.post("/getuniquesparelist", async (req, res) => {
+app.post("/getuniquesparelist", authenticateToken, async (req, res) => {
 
   let {ticket_no} = req.body;
 
@@ -564,7 +584,7 @@ app.post("/getuniquesparelist", async (req, res) => {
   }
 });
 
-app.post("/removeappsparepart", async (req, res) => {
+app.post("/removeappsparepart", authenticateToken, async (req, res) => {
 
   let {spare_id} = req.body;
 

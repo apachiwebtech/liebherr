@@ -7,6 +7,7 @@ function Dashbord() {
   const [list, setList] = useState([]);
   const [filteredList, setFilteredList] = useState([]);
   const [serach, setserach] = useState(false);
+  const token = localStorage.getItem("token"); // Get token from localStorage
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -21,7 +22,11 @@ function Dashbord() {
   async function getdata() {
     const en_id = localStorage.getItem('userid');
 
-    axios.get(`${Base_Url}/getheaddata?en_id=${en_id}`)
+    axios.get(`${Base_Url}/getheaddata?en_id=${en_id}`, {
+      headers: {
+        Authorization: token, // Send token in headers
+      },
+    })
       .then((res) => {
         if (res.data !== 0) {
           setValue({
@@ -44,23 +49,27 @@ function Dashbord() {
     try {
       console.log(page, "page");
 
-      const res = await axios.get(`${Base_Url}/getcomplaint/${en_id}/${page}/10`);
-console.log("message",res.data.message);
-if (res.data.message != "No records found") {
-      if (res.data.data !== 0 || res.data.data.length !== 0) {
+      const res = await axios.get(`${Base_Url}/getcomplaint/${en_id}/${page}/10`, {
+        headers: {
+            Authorization: token, // Send token in headers
+        },
+    });
+      console.log("message", res.data.message);
+      if (res.data.message != "No records found") {
+        if (res.data.data !== 0 || res.data.data.length !== 0) {
 
-        setList((prev) => [...prev, ...res.data.data]); // Append new data
-        setFilteredList((prev) => [...prev, ...res.data.data]);
-        // Increment the page using the functional update form
-        setPage((prevPage) => prevPage + 1);
+          setList((prev) => [...prev, ...res.data.data]); // Append new data
+          setFilteredList((prev) => [...prev, ...res.data.data]);
+          // Increment the page using the functional update form
+          setPage((prevPage) => prevPage + 1);
 
 
+        } else {
+          setHasMore(false); // No more data to load
+        }
       } else {
         setHasMore(false); // No more data to load
       }
-    }else {
-      setHasMore(false); // No more data to load
-    }
     } catch (err) {
       console.error(err);
     }
@@ -69,7 +78,7 @@ if (res.data.message != "No records found") {
 
   useEffect(() => {
 
-      getComplaints();
+    getComplaints();
 
     console.log('i fire once');
   }, []);

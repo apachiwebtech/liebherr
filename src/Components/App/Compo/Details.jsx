@@ -40,7 +40,7 @@ function Details() {
     site_defect: '',
     otps: '',
     otps_error: '',
-    call_status : ''
+    call_status: ''
   })
   const [GroupDefectsite, setGroupDefectsite] = useState([]);
 
@@ -70,7 +70,11 @@ function Details() {
 
   async function getactivity() {
     try {
-      const res = await axios.get(`${Base_Url}/getactivity_app`);
+      const res = await axios.get(`${Base_Url}/getactivity_app`, {
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      });
 
       if (res.data) {
         setactivity(res.data);
@@ -111,7 +115,7 @@ function Details() {
     e.preventDefault();
 
 
-   
+
 
     const formData = new FormData();
 
@@ -141,6 +145,7 @@ function Details() {
     axios.post(`${Base_Url}/updatecomplaint`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
+        Authorization: token,
       },
     })
       .then((res) => {
@@ -183,7 +188,7 @@ function Details() {
             call_type: res.data.data[0].ticket_type,
             warranty_status: res.data.data[0].warranty_status,
             call_status: res.data.data[0].call_status,
-            
+
           })
           getsparelistapp(res.data.data[0].ticket_no)
 
@@ -209,7 +214,11 @@ function Details() {
 
   }
   async function getremark(id) {
-    axios.get(`${Base_Url}/getremark?cid=${id}`)
+    axios.get(`${Base_Url}/getremark?cid=${id}`, {
+      headers: {
+        Authorization: token, // Send token in headers
+      },
+    })
       .then((res) => {
         if (res.data != 0) {
           setremark(res.data.data[0])
@@ -228,9 +237,9 @@ function Details() {
 
       try {
         const res = await axios.post(`${Base_Url}/appgetDefectCodewisetype`, { defect_code: params }, {
-          // headers: {
-          //   Authorization: token, // Send token in headers
-          // },
+          headers: {
+            Authorization: token, // Send token in headers
+          },
         });
 
 
@@ -290,7 +299,11 @@ function Details() {
     }
     // console.log(data);
 
-    axios.post(`${Base_Url}/addspareapp`, eata)
+    axios.post(`${Base_Url}/addspareapp`, eata, {
+      headers: {
+        Authorization: token, // Send token in headers
+      },
+    })
       .then((res) => {
         console.log(res.data.message);
 
@@ -309,7 +322,11 @@ function Details() {
     }
     // console.log(data);
 
-    axios.post(`${Base_Url}/getuniquesparelist`, eata)
+    axios.post(`${Base_Url}/getuniquesparelist`, eata, {
+      headers: {
+        Authorization: token, // Send token in headers
+      },
+    })
       .then((res) => {
 
         setSparelist(res.data)
@@ -322,7 +339,11 @@ function Details() {
 
 
   async function subcat() {
-    axios.get(`${Base_Url}/awt_subcat`)
+    axios.get(`${Base_Url}/awt_subcat`, {
+      headers: {
+        Authorization: token, // Send token in headers
+      },
+    })
       .then((res) => {
         if (res.data != 0) {
           setsubcatcode(res.data.data)
@@ -334,7 +355,11 @@ function Details() {
       })
   }
   async function CallStatus() {
-    axios.get(`${Base_Url}/CallStatus`)
+    axios.get(`${Base_Url}/CallStatus`, {
+      headers: {
+        Authorization: token, // Send token in headers
+      },
+    })
       .then((res) => {
         if (res.data != 0) {
           setcallstatus(res.data.data)
@@ -346,7 +371,11 @@ function Details() {
       })
   }
   async function CallType() {
-    axios.get(`${Base_Url}/CallType`)
+    axios.get(`${Base_Url}/CallType`, {
+      headers: {
+        Authorization: token, // Send token in headers
+      },
+    })
       .then((res) => {
         if (res.data != 0) {
           setcalltype(res.data.data)
@@ -358,7 +387,11 @@ function Details() {
       })
   }
   async function getcom_app() {
-    axios.get(`${Base_Url}/getcom_app`)
+    axios.get(`${Base_Url}/getcom_app`, {
+      headers: {
+        Authorization: token, // Send token in headers
+      },
+    })
       .then((res) => {
         if (res.data != 0) {
           setsymptomsode(res.data)
@@ -370,7 +403,11 @@ function Details() {
   }
   async function getDefectCodewisetype_app(data) {
 
-    axios.post(`${Base_Url}/getDefectCodewisetype_app12`, { defect_code: data })
+    axios.post(`${Base_Url}/getDefectCodewisetype_app12`, { defect_code: data }, {
+      headers: {
+        Authorization: token, // Send token in headers
+      },
+    })
       .then((res) => {
         if (res.data != 0) {
           setcausecode(res.data)
@@ -382,7 +419,11 @@ function Details() {
   }
   async function getDefectCodewisesite_app(data) {
 
-    axios.post(`${Base_Url}/getDefectCodewisesite_app`, { defect_code: data })
+    axios.post(`${Base_Url}/getDefectCodewisesite_app`, { defect_code: data }, {
+      headers: {
+        Authorization: token, // Send token in headers
+      },
+    })
       .then((res) => {
         if (res.data != 0) {
           setactioncode(res.data)
@@ -394,7 +435,11 @@ function Details() {
   }
 
   async function getspare(data) {
-    axios.get(`${Base_Url}/getSpareParts_app/${data}`)
+    axios.get(`${Base_Url}/getSpareParts_app/${data}`, {
+      headers: {
+        Authorization: token, // Send token in headers
+      },
+    })
       .then((res) => {
         if (res.data != 0) {
           // setactioncode(res.data)
@@ -408,7 +453,11 @@ function Details() {
 
   async function getsparelistapp(ticket) {
 
-    axios.post(`${Base_Url}/getsparelistapp`, { ticket: ticket })
+    axios.post(`${Base_Url}/getsparelistapp`, { ticket: ticket }, {
+      headers: {
+        Authorization: token, // Send token in headers
+      },
+    })
       .then((res) => {
         if (res.data != 0) {
           console.log(res.data);
@@ -638,13 +687,13 @@ function Details() {
                     </div>
                   </div>
 
-                  {data.call_charges == 'Yes'?    <div class="mb-3">
+                  {data.call_charges == 'Yes' ? <div class="mb-3">
                     <div class="form-group">
                       <label for="val-actioncode">Service Charges</label>
                       <input type="text" onChange={handleChange} class="form-control" name="service_charges" id="service_charges" />
                     </div>
                   </div> : null}
-              
+
 
                   <div class="mb-3" hidden>
                     <div class="form-group">

@@ -9,13 +9,18 @@ import { Base_Url } from '../../Utils/Base_Url';
 function History() {
   const { id } = useParams();
   const [complaints, setcomplaints] = useState([]);
+  const token = localStorage.getItem("token"); // Get token from localStorage
   const [complaintdata, setComplaintdata] = useState([])
   const [loaders, setloaders] = useState(true)
   const [modals, setModals] = useState(false)
 
   async function getcomplaintlist(id) {
     setloaders(true)
-    axios.get(`${Base_Url}/getcomplaintlist/${id}`)
+    axios.get(`${Base_Url}/getcomplaintlist/${id}`, {
+      headers: {
+        Authorization: token, // Send token in headers
+      },
+    })
       .then((res) => {
         if (res.data != 0) {
           setcomplaints(res.data)
@@ -37,7 +42,11 @@ function History() {
 
   const getviewdata = (id) => {
     console.log(id)
-    axios.get(`${Base_Url}/getcompdata/${id}`)
+    axios.get(`${Base_Url}/getcompdata/${id}`, {
+      headers: {
+        Authorization: token, // Send token in headers
+      },
+    })
       .then((res) => {
         if (res.data != 0) {
           setComplaintdata(res.data)
