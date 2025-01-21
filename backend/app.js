@@ -3519,7 +3519,7 @@ app.post("/getticketendcustomer", authenticateToken, async (req, res) => {
         FROM awt_customer AS c
         LEFT JOIN awt_customerlocation AS l ON c.customer_id = l.customer_id
         WHERE c.deleted = 0
-          AND (c.email LIKE @searchparam OR c.mobileno LIKE @searchparam)
+          AND (c.email LIKE @searchparam OR c.mobileno LIKE @searchparam OR c.customer_fname LIKE @searchparam OR c.customer_id LIKE @searchparam )
       `;
 
       const customerResult = await pool
@@ -3835,6 +3835,8 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
           requested_mobile = @requested_mobile,
           requested_email = @requested_email,
           requested_by = @requested_by,
+          msp = @msp,
+          csp =  @csp,
           sales_partner = @sales_partner,
           sales_partner2 = @sales_partner2,
           salutation = @salutation,
@@ -4773,7 +4775,7 @@ app.get("/getchildfranchise/:mfranchise_id",
       const pool = await poolPromise;
 
       // SQL query to fetch data from the database
-      const sql = `SELECT * FROM awt_childfranchisemaster WHERE pfranchise_id = ${mfranchise_id} AND deleted = 0`;
+      const sql = `SELECT * FROM awt_childfranchisemaster WHERE pfranchise_id = '${mfranchise_id}' AND deleted = 0`;
 
       // Execute the SQL query
       const result = await pool.request().query(sql);
@@ -10501,6 +10503,41 @@ app.post("/getsearchcsp", authenticateToken, async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error", error: err });
   }
 });
+
+app.post("/getsearcheng", authenticateToken, async (req, res) => {
+  const { param } = req.body;
+
+  if (!param) {
+    return res.status(400).json({ message: "Invalid parameter" });
+  }
+
+  try {
+    const pool = await poolPromise;
+
+    // Parameterized query with a limit
+    const sql = `
+    SELECT TOP 20 id, title
+    FROM awt_engineermaster
+    WHERE title LIKE @param AND deleted = 0
+    ORDER BY title;
+    `;
+
+    const result = await pool.request()
+      .input('param', `%${param}%`)
+      .query(sql);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "No results found" });
+    }
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+});
+
+
 app.post("/getsearchproduct", authenticateToken, async (req, res) => {
   const { param } = req.body;
 
@@ -10536,7 +10573,7 @@ app.post("/getsearchproduct", authenticateToken, async (req, res) => {
 
 
 app.post("/add_grn", authenticateToken, async (req, res) => {
-  const { invoice_number, invoice_date, csp_no, csp_name, created_by } = req.body;
+  const { invoice_number, invoice_date, csp_no, csp_name, created_by,remark } = req.body;
 
   try {
     const pool = await poolPromise;
@@ -10560,8 +10597,8 @@ app.post("/add_grn", authenticateToken, async (req, res) => {
     const grn_no = `GRN-${grnCount + 1}`; // Example: GRN-1, GRN-2, etc.
 
     // Insert the data into awt_grnmaster
-    const sql = `INSERT INTO awt_grnmaster (grn_no, invoice_no, invoice_date, csp_name, csp_code, created_date, created_by) 
-                 VALUES (@grn_no, @invoice_no, @invoice_date, @csp_name, @csp_code, @created_date, @created_by)`;
+    const sql = `INSERT INTO awt_grnmaster (grn_no, invoice_no, invoice_date, csp_name, csp_code,remark, created_date, created_by) 
+                 VALUES (@grn_no, @invoice_no, @invoice_date, @csp_name, @csp_code, @remark, @created_date, @created_by)`;
 
     const result = await pool.request()
       .input('grn_no', grn_no)
@@ -10569,6 +10606,7 @@ app.post("/add_grn", authenticateToken, async (req, res) => {
       .input('invoice_date', invoice_date)
       .input('csp_name', csp_name)
       .input('csp_code', csp_no)  // Assuming you want to insert csp_no as csp_code
+      .input('remark', remark)  // Assuming you want to insert csp_no as csp_code
       .input('created_date', new Date())  // Use the current date for created_date
       .input('created_by', created_by)
       .query(sql);
@@ -10601,14 +10639,15 @@ app.post("/add_spareoutward", authenticateToken, async (req, res) => {
 
 
     // Insert the data into awt_grnmaster
-    const sql = `INSERT INTO awt_spareoutward (issue_no, issue_date, lhi_name, lhi_code, created_date, created_by) 
-                 VALUES (@issue_no, @issue_date, @lhi_name, @lhi_code, @created_date, @created_by)`;
+    const sql = `INSERT INTO awt_spareoutward (issue_no, issue_date, lhi_name, lhi_code,remark, created_date, created_by) 
+                 VALUES (@issue_no, @issue_date, @lhi_name, @lhi_code,@remark,@created_date, @created_by)`;
 
     const result = await pool.request()
       .input('issue_no', issue_no)
       .input('issue_date', issue_date)
       .input('lhi_name', lhi_name)
       .input('lhi_code', lhi_code)  // Assuming you want to insert csp_no as csp_code
+      .input('remark', remark)  // Assuming you want to insert csp_no as csp_code
       .input('created_date', new Date())  // Use the current date for created_date
       .input('created_by', created_by)
       .query(sql);
@@ -10677,36 +10716,60 @@ app.post('/updategrnspares', async (req, res) => {
 app.post('/updateissuespares', async (req, res) => {
   const spareData = req.body; // Expecting an array of spare objects
 
-  // console.log(req.body);
-
   if (!Array.isArray(spareData)) {
     return res.status(400).json({ error: 'Invalid payload format. Expected an array.' });
   }
 
   try {
-    // Connect to the database
     const pool = await sql.connect(dbConfig);
 
-    // Use a transaction for bulk updates
+    // Start a transaction
     const transaction = new sql.Transaction(pool);
     await transaction.begin();
 
-    // Loop through spareData and update each row
     for (const item of spareData) {
-      const request = new sql.Request(transaction); // Create a new request for each iteration
-      const query = `
+      if (!item.issue_no || !item.article_code || !item.quantity || !item.licare_code) {
+        return res.status(400).json({ error: 'Missing required fields in spare data.' });
+      }
+
+      const request = new sql.Request(transaction);
+
+      // Update quantity in `awt_cspissuespare`
+      const updateIssueQuery = `
         UPDATE awt_cspissuespare
         SET quantity = @quantity 
         WHERE issue_no = @issue_no AND spare_no = @spare_no
       `;
-
       request.input('issue_no', sql.VarChar, item.issue_no);
       request.input('spare_no', sql.VarChar, item.article_code);
       request.input('quantity', sql.Int, item.quantity);
-      await request.query(query);
+      await request.query(updateIssueQuery);
+
+      // Get previous stock
+      const getStockQuery = `
+        SELECT stock_quantity 
+        FROM csp_stock 
+        WHERE product_code = @spare_no AND created_by = @licare_code
+      `;
+      request.input('licare_code', sql.VarChar, item.licare_code);
+      const stockResult = await request.query(getStockQuery);
+
+      if (stockResult.recordset.length > 0) {
+        const spare = stockResult.recordset[0];
+        const final_qty = Number(spare.stock_quantity) - Number(item.quantity);
+
+        // Update stock in `csp_stock`
+        const updateStockQuery = `
+          UPDATE csp_stock 
+          SET stock_quantity = @final_quantity 
+          WHERE product_code = @spare_no AND created_by = @licare_code
+        `;
+        request.input('final_quantity', sql.Int, final_qty);
+        await request.query(updateStockQuery);
+      }
     }
 
-    // Commit the transaction
+    // Commit transaction
     await transaction.commit();
 
     res.status(200).json({
@@ -10716,11 +10779,12 @@ app.post('/updateissuespares', async (req, res) => {
   } catch (err) {
     console.error('Error updating data:', err);
     res.status(500).json({ error: 'Database error' });
+    if (transaction) await transaction.rollback();
   } finally {
-    // Close the database connection
     sql.close();
   }
 });
+
 
 
 
@@ -11133,10 +11197,35 @@ app.post('/getgrndetails', authenticateToken, async (req, res) => {
 
 
 })
+app.post('/getissuedetails', authenticateToken, async (req, res) => {
+  const { issue_no } = req.body;
+
+
+  try {
+    const pool = await poolPromise;
+
+    // Parameterized query with a limit
+    const sql = `select * from awt_spareoutward where issue_no = '${issue_no}'`;
+
+    const result = await pool.request()
+      .query(sql);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "No results found" });
+    }
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+
+
+})
 
 
 app.post('/updategrnapprovestatus', authenticateToken, async (req, res) => {
-  const { grn_no } = req.body;
+  const { grn_no, licare_code } = req.body;
 
   if (!grn_no) {
     return res.status(400).json({ message: "GRN number is required" });
@@ -11158,10 +11247,11 @@ app.post('/updategrnapprovestatus', authenticateToken, async (req, res) => {
       const getPreviousStockQuery = `
         SELECT product_code, stock_quantity 
         FROM csp_stock 
-        WHERE product_code = @spare_no
+        WHERE product_code = @spare_no and created_by = @licare_code
       `;
       const previousStockResult = await pool.request()
         .input('spare_no', sql.VarChar, item.spare_no)
+        .input('licare_code', sql.VarChar, licare_code)
         .query(getPreviousStockQuery);
 
       if (previousStockResult.recordset.length > 0) {
@@ -11172,11 +11262,12 @@ app.post('/updategrnapprovestatus', authenticateToken, async (req, res) => {
         const updateStockQuery = `
           UPDATE csp_stock
           SET stock_quantity = @finalQty
-          WHERE product_code = @product_code
+          WHERE product_code = @product_code and created_by = @licare_code
         `;
         await pool.request()
           .input('finalQty', sql.Int, finalQty)
           .input('product_code', sql.VarChar, product_code)
+          .input('licare_code', sql.VarChar, licare_code)
           .query(updateStockQuery);
       }
     }

@@ -82,7 +82,7 @@ function AppLogin() {
       password: passwordMd5
     }
 
-    axios.post(`${Base_Url}/login`, data)
+    axios.post(`${Base_Url}/applogin`, data)
       .then((res) => {
         console.log(res)
         setValue({

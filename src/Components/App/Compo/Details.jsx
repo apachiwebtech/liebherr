@@ -9,6 +9,7 @@ function Details() {
   const [done, setdone] = useState(true)
   const [data, setdata] = useState([])
   const [spare, setspare] = useState(false);
+  const [sparelist, setSparelist] = useState([])
   const [sparedata, setsparedata] = useState([]);
   const [symptomsode, setsymptomsode] = useState([])
   const [causecode, setcausecode] = useState([])
@@ -30,6 +31,7 @@ function Details() {
     symptomcode: '',
     causecode: '',
     actioncode: '',
+    activity_code: '',
     spare: '',
     other_charge: '',
     service_charges: '',
@@ -38,9 +40,9 @@ function Details() {
     site_defect: '',
     otps: '',
     otps_error: '',
+    call_status : ''
   })
   const [GroupDefectsite, setGroupDefectsite] = useState([]);
-  const [GroupDefecttype, setGroupDefecttype] = useState([]);
 
 
   const handleChange = (e) => {
@@ -54,6 +56,8 @@ function Details() {
       getDefectCodewisetype_app(e.target.value)
       getDefectCodewisesite_app(e.target.value)
     }
+
+
     if (e.target.value == 'Completed') {
       setIscomplate(true)
     } else if (e.target.value === 'Closed' || e.target.value === 'Cancelled' || e.target.value === 'Spares') {
@@ -81,69 +85,74 @@ function Details() {
     }
   }
 
+  const handleRemoveSparePart = (id) => {
+
+    const confirm = window.confirm("Are you sure?")
+
+    if (confirm) {
+      axios.post(`${Base_Url}/removeappsparepart`, { spare_id: id }, {
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      })
+        .then((res) => {
+
+          getuniquespare(data.ticket_no)
+
+        })
+    }
+
+
+
+  };
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (Value.call_status == 'Closed' || Value.call_status == 'Cancelled') {
 
+   
 
+    const formData = new FormData();
 
-
-      if (otp == Value.otps) {
-        const formData = new FormData();
-        formData.append('actioncode', Value.actioncode);
-
-        formData.append('otp', Value.otps);
-        formData.append('symptomcode', Value.symptomcode);
-        formData.append('causecode', Value.causecode);
-        formData.append('service_charges', Value.service_charges);
-        formData.append('call_status', Value.call_status);
-        formData.append('call_type', Value.call_type);
-        formData.append('other_charge', Value.other_charge);
-        formData.append('warranty_status', Value.warranty_status);
-        formData.append('com_id', data.id);
-        formData.append('call_remark', Value.call_remark);
-        formData.append('ticket_no', data.ticket_no);
-        formData.append('user_id', localStorage.getItem('userid'));
-        if (Value.spare_required) {
-          formData.append('spare_detail', Value.spare_detail);
-        }
-        // Append the file if it exists
-        const fileInput = document.getElementById('spare_doc');
-        if (fileInput.files[0]) {
-          formData.append('spare_doc', fileInput.files[0]);
-        }
-
-        axios.post(`${Base_Url}/updatecomplaint`, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        })
-          .then((res) => {
-            console.log(res);
-            navigate('/dashboard');
-          })
-          .catch((err) => {
-            console.log(err);
-          });
-
-      } else {
-        setValue((prev) => ({ ...prev, 'otps_error': 'Incorrect OTP' }));
-
-        // Clear the error message after 5 seconds
-        setTimeout(() => {
-          setValue((prev) => ({ ...prev, 'otps_error': '' }));
-        }, 5000);
-      }
-    } else {
-      setValue((prev) => ({ ...prev, 'status_error': 'Select the status' }));
-
-      // Clear the error message after 5 seconds
-      setTimeout(() => {
-        setValue((prev) => ({ ...prev, 'status_error': '' }));
-      }, 5000);
+    formData.append('otp', Value.otps);
+    formData.append('symptomcode', Value.symptomcode);
+    formData.append('causecode', Value.causecode);
+    formData.append('actioncode', Value.actioncode);
+    formData.append('activitycode', Value.activity_code);
+    formData.append('service_charges', Value.service_charges);
+    formData.append('call_status', Value.call_status);
+    formData.append('call_type', Value.call_type);
+    formData.append('other_charge', Value.other_charge);
+    formData.append('warranty_status', Value.warranty_status);
+    formData.append('com_id', data.id);
+    formData.append('call_remark', Value.call_remark);
+    formData.append('ticket_no', data.ticket_no);
+    formData.append('user_id', localStorage.getItem('userid'));
+    if (Value.spare_required) {
+      formData.append('spare_detail', Value.spare_detail);
     }
+    // Append the file if it exists
+    const fileInput = document.getElementById('spare_doc');
+    if (fileInput.files[0]) {
+      formData.append('spare_doc', fileInput.files[0]);
+    }
+
+    axios.post(`${Base_Url}/updatecomplaint`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+      .then((res) => {
+        console.log(res);
+        navigate('/mobapp/dash');
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+
+
   }
 
 
@@ -158,6 +167,7 @@ function Details() {
 
           setdata(res.data.data[0])
           getremark(res.data.data[0].ticket_no)
+          getuniquespare(res.data.data[0].ticket_no)
           getspare(res.data.data[0].ModelNumber)
           // console.log(Value.symptomcode);
           if (res.data.data[0].group_code != "") {
@@ -169,8 +179,11 @@ function Details() {
             symptomcode: res.data.data[0].group_code,
             causecode: res.data.data[0].defect_type,
             actioncode: res.data.data[0].site_defect,
+            activity_code: res.data.data[0].activity_code,
             call_type: res.data.data[0].ticket_type,
             warranty_status: res.data.data[0].warranty_status,
+            call_status: res.data.data[0].call_status,
+            
           })
           getsparelistapp(res.data.data[0].ticket_no)
 
@@ -281,12 +294,33 @@ function Details() {
       .then((res) => {
         console.log(res.data.message);
 
+        getuniquespare(data.ticket_no)
+
         setspareadd(false)
       })
       .catch((err) => {
         console.log(err)
       })
   }
+
+  async function getuniquespare(ticket_no) {
+    const eata = {
+      ticket_no: ticket_no,
+    }
+    // console.log(data);
+
+    axios.post(`${Base_Url}/getuniquesparelist`, eata)
+      .then((res) => {
+
+        setSparelist(res.data)
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+  }
+
+
+
   async function subcat() {
     axios.get(`${Base_Url}/awt_subcat`)
       .then((res) => {
@@ -560,10 +594,10 @@ function Details() {
                   </div>
                   <div class="mb-3">
                     <label for="geostate" class="form-label">Activity Code</label>
-                    <select id="geostate" value={Value.actioncode} onChange={handleChange} name="actioncode" class="form-select" aria-label=".form-select-lg example">
+                    <select id="geostate" value={Value.activity_code} onChange={handleChange} name="activity_code" class="form-select" aria-label=".form-select-lg example">
                       <option value="">Select Site Defect Code</option>
                       {activity.map((item) => (
-                        <option key={item.id} value={item.title}>
+                        <option key={item.id} value={item.id}>
                           {item.code} - {item.title}
                         </option>
                       ))}
@@ -582,7 +616,7 @@ function Details() {
                   <div class="mb-3" hidden>
                     <div class="form-group">
                       <label for="val-actioncode">Ticket Type</label>
-                      <select required name="call_type" onChange={handleChange} value={Value.call_type} class="form-control" id="val_call_type">
+                      <select name="call_type" onChange={handleChange} value={Value.call_type} class="form-control" id="val_call_type">
                         <option value="">Select Ticket Type</option>
                         <option value="Installation">Installation</option>
                         <option value="Breakdown">Breakdown</option>
@@ -604,12 +638,13 @@ function Details() {
                     </div>
                   </div>
 
-                  <div class="mb-3">
+                  {data.call_charges == 'Yes'?    <div class="mb-3">
                     <div class="form-group">
                       <label for="val-actioncode">Service Charges</label>
                       <input type="text" onChange={handleChange} class="form-control" name="service_charges" id="service_charges" />
                     </div>
-                  </div>
+                  </div> : null}
+              
 
                   <div class="mb-3" hidden>
                     <div class="form-group">
@@ -648,14 +683,45 @@ function Details() {
 
 
 
-                      {spareadd ? (
-                        <div >
-                          <button type='button' onClick={addspare} className='btn btn-primary mt-3 '>ADD</button>
-                        </div>
-                      ) : null}
+
+                      <div >
+                        <button type='button' onClick={addspare} className='btn btn-primary mt-3 '>ADD</button>
+                      </div>
+
                     </div>
-                  ) : null
-                  }
+                  ) : null}
+
+                  <div className='card'>
+                    <table className='table'>
+                      <thead>
+                        <tr>
+                          <td>Spare Part</td>
+                          <td>Qty</td>
+                          <td>Action</td>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {sparelist.map((item) => {
+                          return (
+                            <tr>
+                              <td>{item.article_description}</td>
+                              <td>{item.quantity}</td>
+                              <td>
+                                <button
+                                  className="btn btn-sm btn-danger"
+                                  style={{ padding: "0.2rem 0.5rem" }}
+                                  onClick={() => handleRemoveSparePart(item.id)}
+                                >
+                                  ✖
+                                </button>
+                              </td>
+                            </tr>
+                          )
+                        })}
+
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
                 <table hidden className="table table-striped table-bordered">
                   <thead className="table-light">
@@ -698,15 +764,20 @@ function Details() {
                       <div class="mb-3">
                         <div class="form-group">
                           <label for="val-spare_status">Call Status</label>
-                          <select required name="call_status" onChange={handleChange} id="val-spare_status" class="form-control select2-hidden-accessible" >
+                          <select required name="call_status" value={Value.call_status} onChange={handleChange} id="val-spare_status" class="form-control select2-hidden-accessible" >
                             <option value="2">Select Status</option>
-                            {callstatus
+                            {/* {callstatus
                               .filter((item) => item.Callstatus === 'Closed' || item.Callstatus === 'Cancelled' || item.Callstatus === 'Spares' || item.Callstatus === 'Completed') // Filter items
                               .map((item) => (
                                 <option key={item.Callstatus} value={item.Callstatus}>
                                   {item.Callstatus}
                                 </option>
-                              ))}
+                              ))} */}
+
+                            <option value='Closed'>Completed</option>
+                            <option value='Spares'>Spares</option>
+                            <option value='Approval'>Approval / Customer / Quotation</option>
+                            <option value='Approval'>Approval /Internal</option>
 
                           </select>
                           <p className='text-danger' >{Value.status_error}</p>
@@ -714,7 +785,7 @@ function Details() {
                       </div>
                       {otppart ? (
                         <div class="mb-3">
-                          <button type="button" onClick={iscomplate ? gogootp : null} name="spare_submit" class="btn btn-primary float-right">{iscomplate ? "Send OTP" : "Submit"}</button>
+                          <button type="submit" name="spare_submit" class="btn btn-primary float-right">{iscomplate ? "Send OTP" : "Submit"}</button>
                         </div>
 
                       ) : (

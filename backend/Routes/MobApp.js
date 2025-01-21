@@ -9,7 +9,7 @@ const upload = multer({ dest: 'uploads/' });
 const JWT_SECRET = "Lh!_Login_123";
 
 
-app.post('/login', async (req, res) => {
+app.post('/applogin', async (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
@@ -231,37 +231,9 @@ app.get('/getremark', async (req, res) => {
 
 
 
-// app.post('/updatecomplaint', async (req, res) => {
-//   const { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode, com_id ,warranty_status} = req.body;
-
-//   try {
-//     const pool = await poolPromise;
-//     const result = await pool.request()
-//       .input('actioncode', sql.VarChar, actioncode)
-//       .input('symptomcode', sql.VarChar, symptomcode)
-//       .input('causecode', sql.VarChar, causecode)
-//       .input('service_charges', sql.VarChar, service_charges)
-//       .input('call_status', sql.VarChar, call_status)
-//       .input('call_type', sql.VarChar, call_type)
-//       .input('other_charge', sql.VarChar, other_charge)
-//       .input('warranty_status', sql.VarChar, warranty_status)
-//       .input('com_id', sql.VarChar, com_id)
-//       .query('UPDATE complaint_ticket SET warranty_status = @warranty_status, symptom_code = @symptomcode, cause_code = @causecode, action_code = @actioncode, service_charges = @service_charges, call_status = @call_status, call_type = @call_type, other_charges = @other_charge WHERE id = @com_id');
-
-//     // Check if any rows were updated
-//     if (result.rowsAffected[0] > 0) {
-//       res.status(200).json({ message: 'Update successful' });
-//     } else {
-//       res.status(400).json({ message: 'Failed to update: No rows affected' });
-//     }
-//   } catch (error) {
-//     console.error('Database Query Error:', error);
-//     res.status(500).json({ message: 'An error occurred during the update' });
-//   }
-// });
 
 app.post('/updatecomplaint', upload.single('spare_doc'), async (req, res) => {
-  const { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode, com_id, warranty_status, spare_detail, ticket_no, user_id } = req.body;
+  const { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode,activitycode, com_id, warranty_status, spare_detail, ticket_no, user_id } = req.body;
 
 
 
@@ -277,6 +249,7 @@ app.post('/updatecomplaint', upload.single('spare_doc'), async (req, res) => {
       .input('actioncode', sql.VarChar, actioncode != 'undefined' ? actioncode : null)
       .input('symptomcode', sql.VarChar, symptomcode != 'undefined' ? symptomcode : null)
       .input('causecode', sql.VarChar, causecode != 'undefined' ? causecode : null)
+      .input('activitycode', sql.VarChar, activitycode != 'undefined' ? activitycode : null)
       .input('service_charges', sql.VarChar, service_charges != 'undefined' ? service_charges : null)
       .input('call_status', sql.VarChar, call_status != 'undefined' ? call_status : null)
       .input('call_type', sql.VarChar, call_type != 'undefined' ? call_type : null)
@@ -286,7 +259,7 @@ app.post('/updatecomplaint', upload.single('spare_doc'), async (req, res) => {
       .input('spare_doc_path', sql.VarChar, file ? file.path : null)
       .input('call_remark', sql.VarChar, call_remark != 'undefined' ? call_remark : null) // Add call_remark
       .input('spare_detail', sql.VarChar, spare_detail != 'undefined' ? spare_detail : null)
-      .query('UPDATE complaint_ticket SET warranty_status = @warranty_status, group_code = @symptomcode, defect_type = @causecode, site_defect = @actioncode, service_charges = @service_charges, call_status = @call_status, call_type = @call_type, other_charges = @other_charge, spare_doc_path = @spare_doc_path, call_remark = @call_remark, spare_detail = @spare_detail WHERE id = @com_id');
+      .query('UPDATE complaint_ticket SET warranty_status = @warranty_status, group_code = @symptomcode, defect_type = @causecode, site_defect = @actioncode,activity_code = @activitycode,service_charges = @service_charges, call_status = @call_status, call_type = @call_type, other_charges = @other_charge, spare_doc_path = @spare_doc_path, call_remark = @call_remark, spare_detail = @spare_detail WHERE id = @com_id');
 
     // Check if any rows were updated
     if (result.rowsAffected[0] > 0) {
@@ -564,6 +537,46 @@ app.get("/getactivity_app", async (req, res) => {
     const sql = "select * from awt_activity WHERE deleted = 0";
 
     const result = await pool.request().query(sql);
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json(err);
+  }
+});
+
+app.post("/getuniquesparelist", async (req, res) => {
+
+  let {ticket_no} = req.body;
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    const sql = `select * from awt_uniquespare WHERE deleted = 0 and ticketId = '${ticket_no}'`;
+
+    const result = await pool.request().query(sql);
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json(err);
+  }
+});
+
+app.post("/removeappsparepart", async (req, res) => {
+
+  let {spare_id} = req.body;
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    const sql = `update awt_uniquespare set deleted = 1 where id = '${spare_id}'`;
+
+    const result = await pool.request().query(sql);
+
+    
 
     return res.json(result.recordset);
   } catch (err) {

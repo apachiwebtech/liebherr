@@ -126,6 +126,7 @@ import Spareoutward from './Components/Pages/Master/Spareoutward';
 import { CspStock } from './Components/Pages/Master/CspStock';
 import { CspDashboard } from './Components/Pages/Master/CspDashboard';
 import { MspDashboard } from './Components/Pages/Master/MspDashboard';
+import Sparedetailpage from './Components/Pages/Master/Sparedetailpage';
 
 
 
@@ -265,8 +266,12 @@ const Router = createBrowserRouter([
         element: <Grndetailspage />
       },
       {
+        path: "/csp/issueview/:issue_no",
+        element: <Sparedetailpage />
+      },
+      {
         path: "/csp/spareoutward",
-        element: <Spareoutward />
+        element: <Spareoutward /> 
       },
       {
         path: "/csp/grnoutward",

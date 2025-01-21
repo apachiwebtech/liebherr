@@ -24,15 +24,18 @@ const Spareoutward = () => {
     const [spareerrors, setSpareErrors] = useState({});
     const [hide, setHide] = useState(false);
     const [hidelist, setHidelist] = useState(false);
-    const [cspdata, setData] = useState([]);
     const [spare, setSpare] = useState([]);
     const [SpareId, setSpareId] = useState([]);
     const [selectedspare, setselectedSpare] = useState([]);
     const [productdata, setProduct] = useState([]);
+    const [cspdata, setData] = useState([]);
     const [selectcsp, setselectedCsp] = useState(null);
+    const [engdata, setEngData] = useState([]);
+    const [selecteng, setselectedEng] = useState(null);
     const [csp_no, setcsp_no] = useState(null);
     const [selectproduct, setselectedproduct] = useState(null);
     const [text, setText] = useState("");
+    const [engtext, setEngText] = useState("");
     const [producttext, setProductText] = useState("");
     const token = localStorage.getItem("token"); // Get token from localStorage
     const created_by = localStorage.getItem("licare_code"); // Get token from localStorage
@@ -53,6 +56,19 @@ const Spareoutward = () => {
                 },
             });
             setData(response.data)
+        } catch (error) {
+            console.error("Error fetching users:", error);
+        }
+    };
+    const fetchEng = async () => {
+
+        try {
+            const response = await axios.post(`${Base_Url}/getsearcheng`, { param: engtext }, {
+                headers: {
+                    Authorization: token, // Send token in headers
+                },
+            });
+            setEngData(response.data)
         } catch (error) {
             console.error("Error fetching users:", error);
         }
@@ -107,10 +123,14 @@ const Spareoutward = () => {
         }
 
 
-        if (!selectcsp) {
-            // Check if the CSP selection is empty
-            newErrors.selectcsp = "This is required."; // Set error message for selectcsp
-        }
+        // if (!selectcsp && !selecteng) {
+        //     // Check if both selections are empty
+        //     newErrors.selectcsp = "This is required."; // Set error message for selectcsp
+        // } else {
+        //     // Clear the error if at least one is selected
+        //     newErrors.selectcsp = ""; 
+        // }
+        
 
         setErrors(newErrors)
         return newErrors; // Return the error object
@@ -172,11 +192,12 @@ const Spareoutward = () => {
         if (Object.keys(errors).length === 0) {
             const data = {
                 issue_date: formData.issue_date,
-                lhi_code: selectcsp.id,
-                lhi_name: selectcsp.title,
+                lhi_code: selectcsp?.id || selecteng?.id, // Safely access id
+                lhi_name: selectcsp?.title || selecteng?.title, // Safely access title
                 created_by: created_by,
-                remark: formData.remark
-            }
+                remark: formData.remark,
+            };
+            
 
             axios.post(`${Base_Url}/add_spareoutward`, data, {
                 headers: {
@@ -210,7 +231,8 @@ const Spareoutward = () => {
                 article_code: item.spare_no,
                 article_title: item.spare_title,
                 quantity: String(item.quantity) || String(0), // Use the updated `spare_qty`, default to 0 if empty
-                issue_no: localStorage.getItem('issue_no')
+                issue_no: localStorage.getItem('issue_no'),
+                licare_code : created_by
             }));
 
 
@@ -317,10 +339,25 @@ const Spareoutward = () => {
 
         fetchCsp();
     }, 200);
+    
+    const handleInputEngChange = _debounce((newValue) => {
+        console.log(newValue);
+
+        // Update the text state
+        setEngText(newValue);
+
+        // Check if newValue is not blank and has more than 4 words
+
+        fetchEng();
+    }, 200);
 
 
     const handleSearchChange = (newValue) => {
         setselectedCsp(newValue);
+        console.log("Selected:", newValue);
+    };
+    const handleSearchEngChange = (newValue) => {
+        setselectedEng(newValue);
         console.log("Selected:", newValue);
     };
 
@@ -422,11 +459,11 @@ const Spareoutward = () => {
                                     /> : <Autocomplete
                                         size="small"
                                         disablePortal
-                                        options={cspdata}
-                                        value={selectcsp}
+                                        options={engdata}
+                                        value={selecteng}
                                         getOptionLabel={(option) => option.title}
-                                        onChange={(e, newValue) => handleSearchChange(newValue)}
-                                        onInputChange={(e, newInputValue) => handleInputChange(newInputValue)}
+                                        onChange={(e, newValue) => handleSearchEngChange(newValue)}
+                                        onInputChange={(e, newInputValue) => handleInputEngChange(newInputValue)}
                                         renderInput={(params) => <TextField {...params} label="Enter.." variant="outlined" />}
                                     />}
                                     {errors.selectcsp && <span className="text-danger">{errors.selectcsp}</span>}

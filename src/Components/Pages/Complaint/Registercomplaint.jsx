@@ -177,22 +177,22 @@ export function Registercomplaint(params) {
     try {
       // Ensure value is in a recognized format
       const purchase_date = new Date(value);
-  
+
       if (isNaN(purchase_date)) {
         throw new Error("Invalid date format");
       }
-  
+
       // Add one year to the date
       purchase_date.setFullYear(purchase_date.getFullYear() + 1);
-  
+
       // Format the date as YYYY-MM-DD
       const lastDate = purchase_date.toISOString().split('T')[0];
-  
+
       // Get current date and subtract one day
       const currentDate = new Date();
       currentDate.setDate(currentDate.getDate() + 1);
       const currentDateMinusOneDay = currentDate.toISOString().split('T')[0];
-  
+
       // Compare lastDate and currentDateMinusOneDay
       if (lastDate < currentDateMinusOneDay) {
         setWarranty_status_data("OUT OF WARRANTY");
@@ -201,13 +201,13 @@ export function Registercomplaint(params) {
         setpurchase_data(value);
         setWarranty_status_data("WARRANTY");
       }
-  
+
     } catch (error) {
       console.error("Error processing date:", error.message);
       return null; // Return null for invalid dates
     }
   };
-  
+
 
 
 
@@ -1292,7 +1292,7 @@ export function Registercomplaint(params) {
                       />
                     </div>
                     <div className="col-4">
-                    {roleaccess > 1 ? <button
+                      {roleaccess > 1 ? <button
                         id="inputSearch"
                         name="inputSearch"
                         type="submit"
@@ -1300,7 +1300,7 @@ export function Registercomplaint(params) {
                         onClick={searchResult}
                       >
                         Search
-                      </button>:null }  
+                      </button> : null}
                     </div>
                   </div>
                 </div>
@@ -1373,23 +1373,23 @@ export function Registercomplaint(params) {
                         <table className="table table-striped">
                           <tbody>
 
-                            {ProductCustomer.length == 0 ? <> 
-                            <tr>
-                              <td>
-                                <div className="pb-2">
-                                  {roleaccess > 2 ? <button className="btn btn-sm btn-primary generateTicket" onClick={() => getcustomerinfo(searchdata.customer_id)}>New Ticket</button>:null}
-                                </div>
-                              </td>
-                            </tr> </> : <> {ProductCustomer.map((item, index) => (
-                              <tr key={index}>
-                                <td><div>{item.ModelNumber}</div></td>
+                            {ProductCustomer.length == 0 ? <>
+                              <tr>
                                 <td>
-                                  <div className="text-right pb-2">
-                                   {roleaccess > 2 ? <button onClick={() => addnewticket(item.ModelNumber)} className="btn btn-sm btn-primary generateTicket">New Ticket</button> :null} 
+                                  <div className="pb-2">
+                                    {roleaccess > 2 ? <button className="btn btn-sm btn-primary generateTicket" onClick={() => getcustomerinfo(searchdata.customer_id)}>New Ticket</button> : null}
                                   </div>
                                 </td>
-                              </tr>
-                            ))}</>}
+                              </tr> </> : <> {ProductCustomer.map((item, index) => (
+                                <tr key={index}>
+                                  <td><div>{item.ModelNumber}</div></td>
+                                  <td>
+                                    <div className="text-right pb-2">
+                                      {roleaccess > 2 ? <button onClick={() => addnewticket(item.ModelNumber)} className="btn btn-sm btn-primary generateTicket">New Ticket</button> : null}
+                                    </div>
+                                  </td>
+                                </tr>
+                              ))}</>}
 
 
                           </tbody>
@@ -1399,46 +1399,49 @@ export function Registercomplaint(params) {
                   </>
                 ) : null}
 
+                {searchdata.ticket_no ? <>
+                  <ul className="nav nav-tabs" id="myTab" role="tablist">
+                    <li className="nav-item">
+                      <a className="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">Previous Ticket</a>
+                    </li>
+                  </ul>
 
-                <ul className="nav nav-tabs" id="myTab" role="tablist">
-                  <li className="nav-item">
-                    <a className="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">Previous Ticket</a>
-                  </li>
-                </ul>
+                  <div className="tab-content">
+                    <div className="tab-pane active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                      <table className="table table-striped">
+                        <tbody>
+                          {duplicate.map((item, index) => (
+                            <tr key={index}>
+                              <td>
+                                <div style={{ fontSize: "14px" }}>{item.ticket_no}</div>
+                                <span style={{ fontSize: "14px" }}>{formatDate(item.ticket_date)}</span>
+                              </td>
+                              <td style={{ fontSize: "14px" }}>{item.ModelNumber}</td>
+                              <td>
+                                <div style={{ fontSize: "14px" }}>{item.call_status}</div>
+                                <span style={{ fontSize: "14px" }}><button
+                                  className='btn'
+                                  onClick={() => {
+                                    navigate(`/complaintview/${item.id}`)
+                                    addInTab(item.ticket_no, item.id)
+                                    sendtoedit123(item.id)
+                                  }}
+                                  title="View Info"
+                                  style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                                >
+                                  <FaEye />
+                                </button></span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
 
-                <div className="tab-content">
-                  <div className="tab-pane active" id="home" role="tabpanel" aria-labelledby="home-tab">
-                    <table className="table table-striped">
-                      <tbody>
-                        {duplicate.map((item, index) => (
-                          <tr key={index}>
-                            <td>
-                              <div style={{ fontSize: "14px" }}>{item.ticket_no}</div>
-                              <span style={{ fontSize: "14px" }}>{formatDate(item.ticket_date)}</span>
-                            </td>
-                            <td style={{ fontSize: "14px" }}>{item.ModelNumber}</td>
-                            <td>
-                              <div style={{ fontSize: "14px" }}>{item.call_status}</div>
-                              <span style={{ fontSize: "14px" }}><button
-                                className='btn'
-                                onClick={() => {
-                                  navigate(`/complaintview/${item.id}`)
-                                  addInTab(item.ticket_no, item.id)
-                                  sendtoedit123(item.id)
-                                }}
-                                title="View Info"
-                                style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                              >
-                                <FaEye />
-                              </button></span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-
-                    </table>
+                      </table>
+                    </div>
                   </div>
-                </div>
+                </> : null}
+
+
 
               </div>
 
@@ -1960,8 +1963,8 @@ export function Registercomplaint(params) {
 
 
                     <div className="col-md-12">
-                      {Comp_id ? <button style={{ float: "right" }} type="button" disabled = {roleaccess > 3 ? false : true} onClick={() => updatecomplaint()} className="btn btn-liebherr">Submit</button>
-                        : <button style={{ float: "right" }} className="btn btn-liebherr" disabled = {roleaccess > 2 ? false : true}>Submit</button>}
+                      {Comp_id ? <button style={{ float: "right" }} type="button" disabled={roleaccess > 3 ? false : true} onClick={() => updatecomplaint()} className="btn btn-liebherr">Submit</button>
+                        : <button style={{ float: "right" }} className="btn btn-liebherr" disabled={roleaccess > 2 ? false : true}>Submit</button>}
                     </div>
                   </form>
                 </div>
@@ -2053,7 +2056,7 @@ export function Registercomplaint(params) {
                       />
                     </div>
                     <div className="d-flex justify-content-end mb-3">
-                      {roleaccess > 2 ?  <button
+                      {roleaccess > 2 ? <button
                         type="button"
                         className="btn btn-primary"
                         onClick={handleAttachment2Submit}
@@ -2061,7 +2064,7 @@ export function Registercomplaint(params) {
                       >
                         Upload
                       </button> : null}
-                      
+
                     </div>
 
 

@@ -135,7 +135,7 @@ export function Grnoutward(params) {
         id = id.toString()
         let encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
         encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-        navigate(`/csp/grnview/${encrypted}`)
+        navigate(`/csp/issueview/${encrypted}`)
     };
 
 
@@ -404,10 +404,10 @@ export function Grnoutward(params) {
                                     <thead>
                                         <tr>
                                             <th width="5%">#</th>
-                                            <th width="15%">Issue_No</th>
-                                            <th width="20%">Received To</th>
+                                            <th width="20%">Issue No</th>
+                                            <th width="30%">Issue To</th>
                                             <th width="15%">Issue Date</th>
-                                            <th width="10%">Product Count</th>
+                                            <th width="20%">Product Count</th>
                                             <th width="20%">Action</th>
 
                                         </tr>
@@ -423,7 +423,7 @@ export function Grnoutward(params) {
                                                 <tr key={index}>
                                                     <td>{index + 1}</td>
                                                     <td>{item.issue_no}</td>
-                                                    <td>{item.csp_name}</td>
+                                                    <td>{item.lhi_name}</td>
                                                     <td>
                                                         {new Date(item.issue_date).toLocaleDateString('en-GB', {
                                                             day: '2-digit',

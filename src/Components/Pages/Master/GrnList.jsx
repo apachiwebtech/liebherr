@@ -114,7 +114,7 @@ export function GrnList(params) {
 
         if (confirm) {
             try {
-                const response = await axiosInstance.post(`${Base_Url}/updategrnapprovestatus`, { grn_no: grn_no }, {
+                const response = await axiosInstance.post(`${Base_Url}/updategrnapprovestatus`, { grn_no: grn_no , licare_code : licare_code }, {
                     headers: {
                         Authorization: token,
                     },

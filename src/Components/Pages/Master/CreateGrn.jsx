@@ -128,10 +128,10 @@ const CreateGrn = () => {
             newErrors.invoice_number = "This is required."; // Set error message for invoice_no
         }
 
-        if (!selectcsp) {
-            // Check if the CSP selection is empty
-            newErrors.selectcsp = "This is required."; // Set error message for selectcsp
-        }
+        // if (!selectcsp || ) {
+        //     // Check if the CSP selection is empty
+        //     newErrors.selectcsp = "This is required."; // Set error message for selectcsp
+        // }
 
         setErrors(newErrors)
         return newErrors; // Return the error object
@@ -194,8 +194,8 @@ const CreateGrn = () => {
             const data = {
                 invoice_number: formData.invoice_number,
                 invoice_date: formData.invoice_date,
-                csp_no: selectcsp.id,
-                csp_name: selectcsp.title,
+                csp_no: selectcsp?.id || 'LIEBHERR',
+                csp_name: selectcsp?.title || 'LIEBHERR',
                 created_by: created_by,
                 remark: formData.remark
             }
