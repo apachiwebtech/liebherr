@@ -10,6 +10,8 @@ import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 import { useDispatch } from "react-redux";
 import { getRoleData } from "../../Store/Role/role-action";
 import CryptoJS from 'crypto-js';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const Customer = () => {
   const { loaders, axiosInstance } = useAxiosLoader();
@@ -21,8 +23,24 @@ const Customer = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [duplicateError, setDuplicateError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [selectedDate, setSelectedDate] = useState(null);
+
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Ensure two digits
+    const day = String(date.getDate()).padStart(2, "0"); // Ensure two digits
+    return `${year}-${month}-${day}`;
+  };
+
+  const handleDateChange = (date) => {
 
 
+    if (date) {
+      const formattedDate = formatDate(date);
+      setSelectedDate(formattedDate)
+    }
+
+  };
 
   try {
     customerid = customerid.replace(/-/g, '+').replace(/_/g, '/');
@@ -69,6 +87,8 @@ const Customer = () => {
           Authorization: token,
         },
       });
+
+      setSelectedDate(response.data[0].dateofbirth)
       setFormData({
         ...response.data[0],
         // Rename keys to match your formData structure
@@ -180,7 +200,7 @@ const Customer = () => {
       if (confirmSubmission) {
         if (isEdit) {
           // For update, include duplicate check
-          await axiosInstance.post(`${Base_Url}/putcustomer`, { ...formData }, {
+          await axiosInstance.post(`${Base_Url}/putcustomer`, { ...formData, dateofbirth : selectedDate  }, {
             headers: {
               Authorization: token,
             },
@@ -287,31 +307,31 @@ const Customer = () => {
   };
 
   // Role Right 
-    
-    
-     const Decrypt = (encrypted) => {
-      encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
-      const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
-      return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
-    };
-  
-    const storedEncryptedRole = localStorage.getItem("Userrole");
-    const decryptedRole = Decrypt(storedEncryptedRole);
-  
-    const roledata = {
-      role: decryptedRole,
-      pageid: String(15)
-    }
-  
-    const dispatch = useDispatch()
-    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
-  
-  
-    useEffect(() => {
-      dispatch(getRoleData(roledata))
-    }, [])
-  
-    // Role Right End 
+
+
+  const Decrypt = (encrypted) => {
+    encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+    const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+    return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+  };
+
+  const storedEncryptedRole = localStorage.getItem("Userrole");
+  const decryptedRole = Decrypt(storedEncryptedRole);
+
+  const roledata = {
+    role: decryptedRole,
+    pageid: String(15)
+  }
+
+  const dispatch = useDispatch()
+  const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+
+
+  useEffect(() => {
+    dispatch(getRoleData(roledata))
+  }, [])
+
+  // Role Right End 
 
 
   return (
@@ -322,7 +342,7 @@ const Customer = () => {
         </div>
       )}
       <Endcustomertabs></Endcustomertabs>
-      {roleaccess > 1 ?    <div className="row mp0">
+      {roleaccess > 1 ? <div className="row mp0">
         <div className="col-12">
           <div className="card mb-3 tab_box">
             <div className="card-body">
@@ -463,8 +483,8 @@ const Customer = () => {
                           value={formData.mobileno}
                           onChange={handleChange}
                           pattern="[0-9]{10}"
-                           maxLength="10"
-                           minLength="10"
+                          maxLength="10"
+                          minLength="10"
                         />
                         {errors.mobileno && (
                           <small className="text-danger">{errors.mobileno}</small>
@@ -482,8 +502,8 @@ const Customer = () => {
                           value={formData.alt_mobileno}
                           onChange={handleChange}
                           pattern="[0-9]{10}"
-                           maxLength="10"
-                           minLength="10"
+                          maxLength="10"
+                          minLength="10"
                         />
                         {errors.alt_mobileno && (
                           <small className="text-danger">{errors.alt_mobileno}</small>
@@ -491,6 +511,15 @@ const Customer = () => {
                       </div>
                       <div className="col-md-2 mb-3">
                         <label htmlFor="dbirth" className="form-label">Date of Birth</label>
+                        <DatePicker
+                          selected={selectedDate}
+                          onChange={handleDateChange}
+                          dateFormat="dd-MM-yyyy"
+                          placeholderText="DD-MM-YYYY"
+                          className='form-control'
+                          name="dateofbirth"
+                          aria-describedby="dbirth"
+                        />
                         <input
                           type="date"
                           className="form-control"
@@ -520,9 +549,9 @@ const Customer = () => {
                         )}
                       </div>
 
-                      {roleaccess > 2 ?    <div className="col-md-12 text-right">
+                      {roleaccess > 2 ? <div className="col-md-12 text-right">
                         <button type="submit" className="btn btn-liebherr">{isEdit ? "Update" : "Submit"}</button>
-                      </div> : null } 
+                      </div> : null}
                     </div>
                   </form>
                 </div>
@@ -531,7 +560,7 @@ const Customer = () => {
           </div>
         </div>
       </div> : null}
-      </div>
+    </div>
 
   );
 };
