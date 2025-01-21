@@ -76,7 +76,8 @@ const Authenticate = () => {
             setLoading(false)
             window.location.pathname = '/csp/ticketlist'
           } else if (res.data[0].userrole == 'awt_engineermaster') {
-            localStorage.setItem('engineer_id', res.data[0].usercode)
+            localStorage.setItem('userid', res.data[0].usercode)
+            localStorage.setItem('Name', res.data[0].title)
             localStorage.setItem('Userrole', Encrypt(role))
             setLoading(false)
             window.location.pathname = '/mobapp/dash'
