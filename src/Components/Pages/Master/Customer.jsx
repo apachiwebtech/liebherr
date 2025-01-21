@@ -24,6 +24,7 @@ const Customer = () => {
   const [duplicateError, setDuplicateError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [selectedDate, setSelectedDate] = useState(null);
+  const [anniversary_date, setAnniversaryDate] = useState(null);
 
   const formatDate = (date) => {
     const year = date.getFullYear();
@@ -38,6 +39,15 @@ const Customer = () => {
     if (date) {
       const formattedDate = formatDate(date);
       setSelectedDate(formattedDate)
+    }
+
+  };
+  const handleDateChange2 = (date) => {
+
+
+    if (date) {
+      const formattedDate = formatDate(date);
+      setAnniversaryDate(formattedDate)
     }
 
   };
@@ -89,6 +99,7 @@ const Customer = () => {
       });
 
       setSelectedDate(response.data[0].dateofbirth)
+      setAnniversaryDate(response.data[0].anniversary_date)
       setFormData({
         ...response.data[0],
         // Rename keys to match your formData structure
@@ -161,24 +172,6 @@ const Customer = () => {
     }
 
 
-
-    // if (!formData.alt_mobileno) {
-    //   newErrors.alt_mobileno = "Alternate Mobile Number Field is required.";
-    // }
-
-    // if (!formData.dateofbirth) {
-    //   newErrors.dateofbirth = "Date Of Birth Field is required.";
-    // }
-
-    // if (!formData.anniversary_date) {
-    //   newErrors.anniversary_date = "Anniversary Date Field is required.";
-    // }
-
-    // if (!formData.email) {
-    //   newErrors.email = "Email Field is required.";
-    // }
-
-
     return newErrors;
   };
 
@@ -200,7 +193,7 @@ const Customer = () => {
       if (confirmSubmission) {
         if (isEdit) {
           // For update, include duplicate check
-          await axiosInstance.post(`${Base_Url}/putcustomer`, { ...formData, dateofbirth : selectedDate  }, {
+          await axiosInstance.post(`${Base_Url}/putcustomer`, { ...formData, dateofbirth : selectedDate,anniversary_date : anniversary_date  }, {
             headers: {
               Authorization: token,
             },
@@ -230,7 +223,7 @@ const Customer = () => {
             });
         } else {
           // For insert, include duplicate check
-          await axiosInstance.post(`${Base_Url}/postcustomer`, { ...formData }, {
+          await axiosInstance.post(`${Base_Url}/postcustomer`, { ...formData, dateofbirth : selectedDate,anniversary_date : anniversary_date }, {
             headers: {
               Authorization: token,
             },
@@ -291,20 +284,6 @@ const Customer = () => {
     }
   };
 
-  const edit = async (id) => {
-    try {
-      const response = await axiosInstance.get(`${Base_Url}/requestcustomer/${id}`, {
-        headers: {
-          Authorization: token, // Send token in headers
-        },
-      });
-      setFormData(response.data)
-      setIsEdit(true);
-      console.log(response.data);
-    } catch (error) {
-      console.error('Error editing user:', error);
-    }
-  };
 
   // Role Right 
 
@@ -520,22 +499,31 @@ const Customer = () => {
                           name="dateofbirth"
                           aria-describedby="dbirth"
                         />
-                        <input
-                          type="date"
-                          className="form-control"
-                          id="dbirth"
-                          aria-describedby="dbirth"
-                          name="dateofbirth"
-                          value={formData.dateofbirth}
-                          onChange={handleChange}
-                        />
+                          {/* <input
+                            type="date"
+                            className="form-control"
+                            id="dbirth"
+                            aria-describedby="dbirth"
+                            name="dateofbirth"
+                            value={formData.dateofbirth}
+                            onChange={handleChange}
+                          /> */}
                         {errors.dateofbirth && (
                           <small className="text-danger">{errors.dateofbirth}</small>
                         )}
                       </div>
                       <div className="col-md-2 mb-3">
                         <label htmlFor="Anidate" className="form-label">Anniversary Date</label>
-                        <input
+                        <DatePicker
+                          selected={anniversary_date}
+                          onChange={handleDateChange2}
+                          dateFormat="dd-MM-yyyy"
+                          placeholderText="DD-MM-YYYY"
+                          className='form-control'
+                          name="anniversary_date"
+                          aria-describedby="Anidate"
+                        />
+                        {/* <input
                           type="date"
                           className="form-control"
                           id="Anidate"
@@ -543,7 +531,7 @@ const Customer = () => {
                           name="anniversary_date"
                           value={formData.anniversary_date}
                           onChange={handleChange}
-                        />
+                        /> */}
                         {errors.anniversary_date && (
                           <small className="text-danger">{errors.anniversary_date}</small>
                         )}

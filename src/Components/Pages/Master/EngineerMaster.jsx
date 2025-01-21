@@ -1,7 +1,7 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
-import { Base_Url,secretKey } from '../../Utils/Base_Url';
+import { Base_Url, secretKey } from '../../Utils/Base_Url';
 import { useParams } from "react-router-dom";
 import { useSelector } from 'react-redux';
 import Franchisemaster from '../Master/Franchisemaster';
@@ -11,6 +11,8 @@ import CryptoJS from 'crypto-js';
 import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 import { useDispatch } from "react-redux";
 import { getRoleData } from "../../Store/Role/role-action";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 const EngineerMaster = () => {
   // Step 1: Add this state to track errors
   const { loaders, axiosInstance } = useAxiosLoader();
@@ -26,9 +28,36 @@ const EngineerMaster = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const [duplicateError, setDuplicateError] = useState('');
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [joining_date, setJoiningDate] = useState(null);
   const created_by = localStorage.getItem("userId"); // Get user ID from localStorage
   const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
 
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Ensure two digits
+    const day = String(date.getDate()).padStart(2, "0"); // Ensure two digits
+    return `${year}-${month}-${day}`;
+  };
+
+  const handleDateChange = (date) => {
+
+
+    if (date) {
+      const formattedDate = formatDate(date);
+      setSelectedDate(formattedDate)
+    }
+
+  };
+  const handleDateChange2 = (date) => {
+
+
+    if (date) {
+      const formattedDate = formatDate(date);
+      setJoiningDate(formattedDate)
+    }
+
+  };
 
   const [formData, setFormData] = useState({
     title: '',
@@ -60,6 +89,9 @@ const EngineerMaster = () => {
           Authorization: token, // Send token in headers
         },
       });
+
+      setSelectedDate(response.data[0].dob)
+      setJoiningDate(response.data[0].joining_date)
       setFormData({
         ...response.data[0],
         // Rename keys to match your formData structure
@@ -226,12 +258,12 @@ const EngineerMaster = () => {
         };
         if (isEdit) {
           // For update, include duplicate check
-          await axiosInstance.post(`${Base_Url}/putengineer`, { ...hashedFormData, created_by }
+          await axiosInstance.post(`${Base_Url}/putengineer`, { ...hashedFormData, created_by,dob : selectedDate,joining_date_date : joining_date }
             , {
               headers: {
                 Authorization: token,
               },
-            }          )
+            })
             .then(response => {
               console.log(response.data)
               setFormData({
@@ -264,7 +296,7 @@ const EngineerMaster = () => {
             });
         } else {
           // For insert, include duplicate check
-          await axiosInstance.post(`${Base_Url}/postengineer`, { ...hashedFormData ,created_by}
+          await axiosInstance.post(`${Base_Url}/postengineer`, { ...hashedFormData, created_by,dob : selectedDate,joining_date_date : joining_date }
             , {
               headers: {
                 Authorization: token,
@@ -345,32 +377,32 @@ const EngineerMaster = () => {
   const indexOfFirstUser = indexOfLastUser - itemsPerPage;
   // const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
-   // Role Right 
-    
-    
-     const Decrypt = (encrypted) => {
-      encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
-      const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
-      return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
-    };
-  
-    const storedEncryptedRole = localStorage.getItem("Userrole");
-    const decryptedRole = Decrypt(storedEncryptedRole);
-  
-    const roledata = {
-      role: decryptedRole,
-      pageid: String(23)
-    }
-  
-    const dispatch = useDispatch()
-    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
-  
-  
-    useEffect(() => {
-      dispatch(getRoleData(roledata))
-    }, [])
-  
-    // Role Right End
+  // Role Right 
+
+
+  const Decrypt = (encrypted) => {
+    encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+    const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+    return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+  };
+
+  const storedEncryptedRole = localStorage.getItem("Userrole");
+  const decryptedRole = Decrypt(storedEncryptedRole);
+
+  const roledata = {
+    role: decryptedRole,
+    pageid: String(23)
+  }
+
+  const dispatch = useDispatch()
+  const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+
+
+  useEffect(() => {
+    dispatch(getRoleData(roledata))
+  }, [])
+
+  // Role Right End
 
   return (
     <div className="tab-content">
@@ -380,7 +412,7 @@ const EngineerMaster = () => {
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
       )}
-     {roleaccess > 1 ?   <div className="row mp0" >
+      {roleaccess > 1 ? <div className="row mp0" >
         <div className="col-12">
           <div className="card mb-3 tab_box">
             <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
@@ -543,7 +575,16 @@ const EngineerMaster = () => {
 
                       <div className="col-md-3">
                         <label htmlFor="dobInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>Date of Birth</label>
-                        <input
+                        <DatePicker
+                          selected={selectedDate}
+                          onChange={handleDateChange}
+                          dateFormat="dd-MM-yyyy"
+                          placeholderText="DD-MM-YYYY"
+                          className='form-control'
+                          name="dob"
+                          aria-describedby="dbirth"
+                        />
+                        {/* <input
                           type="date"  // Changed to "date" for Date of Birth
                           className="form-control"
                           name="dob"
@@ -551,7 +592,7 @@ const EngineerMaster = () => {
                           value={formData.dob}  // Updated value to match "dob"
                           onChange={handleChange}
                           placeholder="Enter Date of Birth"
-                        />
+                        /> */}
                         {errors.dob && <small className="text-danger">{errors.dob}</small>}
                         {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
                       </div>
@@ -595,7 +636,16 @@ const EngineerMaster = () => {
                       </div>
                       <div className="col-md-3">
                         <label htmlFor="joiningDateInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>Joining Date</label>
-                        <input
+                        <DatePicker
+                          selected={joining_date}
+                          onChange={handleDateChange2}
+                          dateFormat="dd-MM-yyyy"
+                          placeholderText="DD-MM-YYYY"
+                          className='form-control'
+                          name="joining_date"
+                          aria-describedby="joiningDateInput"
+                        />
+                        {/* <input
                           type="date"  // Changed to "date" for Joining Date
                           className="form-control"
                           name="joining_date"
@@ -603,7 +653,7 @@ const EngineerMaster = () => {
                           value={formData.joining_date}  // Updated value to match "joiningDate"
                           onChange={handleChange}
                           placeholder="Enter Joining Date"
-                        />
+                        /> */}
                         {errors.joining_date && <small className="text-danger">{errors.joining_date}</small>}
                         {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
                       </div>
@@ -694,11 +744,11 @@ const EngineerMaster = () => {
                         {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
                       </div>
                     </div>
-                    {roleaccess > 2 ?   <div className="text-right">
+                    {roleaccess > 2 ? <div className="text-right">
                       <button className="btn btn-liebherr" type="submit" style={{ marginTop: '15px' }}>
                         {isEdit ? "Update" : "Submit"}
                       </button>
-                    </div> : null } 
+                    </div> : null}
                   </form>
                 </div>
               </div>
@@ -706,7 +756,7 @@ const EngineerMaster = () => {
           </div>
         </div>
       </div> : null}
-      </div>
+    </div>
   );
 };
 

@@ -7,6 +7,8 @@ import Servicecontracttabs from "./Servicecontracttabs";
 import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 import CryptoJS from 'crypto-js';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 const Servicecontract = () => {
   // Step 1: Add this state to track errors
   const { loaders, axiosInstance } = useAxiosLoader();
@@ -22,8 +24,40 @@ const Servicecontract = () => {
   const [duplicateError, setDuplicateError] = useState(""); // State to track duplicate error
   const token = localStorage.getItem("token"); // Get token from localStorage
   const [successMessage, setSuccessMessage] = useState('');
+  const [startDate, setStartDate] = useState(null);
+  const [enddate, setEndDate] = useState(null);
   const createdBy = 1; // Static value for created_by
   const updatedBy = 2; // Static value for updated_by
+
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Ensure two digits
+    const day = String(date.getDate()).padStart(2, "0"); // Ensure two digits
+    return `${year}-${month}-${day}`;
+  };
+
+
+  const handleDateChange = (date) => {
+
+
+    if (date) {
+      const formattedDate = formatDate(date);
+      setStartDate(formattedDate)
+    }
+
+
+  };
+
+  const handleDateChange2 = (date) => {
+
+
+    if (date) {
+      const formattedDate = formatDate(date);
+      setEndDate(formattedDate)
+    }
+    
+
+  };
 
   try {
     serviceid = serviceid.replace(/-/g, '+').replace(/_/g, '/');
@@ -68,6 +102,8 @@ const Servicecontract = () => {
           Authorization: token, // Send token in headers
         },
       });
+      setStartDate(response.data[0].startDate)
+      setEndDate(response.data[0].endDate)
       setFormData({
         ...response.data[0],
         // Rename keys to match your formData structure
@@ -162,6 +198,8 @@ const Servicecontract = () => {
             .post(`${Base_Url}/putservicecontract`, {
               ...formData,
               updated_by: updatedBy,
+              startDate : startDate,
+              endDate : enddate,
             }, {
               headers: {
                 Authorization: token, // Send token in headers
@@ -199,6 +237,8 @@ const Servicecontract = () => {
             .post(`${Base_Url}/postservicecontract`, {
               ...formData,
               created_by: createdBy,
+              startDate : startDate,
+              endDate : enddate,
             }, {
               headers: {
                 Authorization: token, // Send token in headers
@@ -447,7 +487,16 @@ const Servicecontract = () => {
                       <label htmlFor="StartDateInput" className="input-field">
                         Start Date
                       </label>
-                      <input
+                      <DatePicker
+                        selected={startDate}
+                        onChange={handleDateChange}
+                        dateFormat="dd-MM-yyyy"
+                        placeholderText="DD-MM-YYYY"
+                        className='form-control'
+                        name="startDate"
+                        aria-describedby="StartDateInput"
+                      />
+                      {/* <input
                         type="date"
                         className="form-control"
                         name="startDate"
@@ -455,7 +504,7 @@ const Servicecontract = () => {
                         value={formData.startDate}
                         onChange={handleChange}
                         placeholder="Select Start Date"
-                      />
+                      /> */}
                       {errors.startDate && (
                         <small className="text-danger">{errors.startDate}</small>
                       )}
@@ -464,7 +513,16 @@ const Servicecontract = () => {
                       <label htmlFor="EndDateInput" className="input-field">
                         End Date
                       </label>
-                      <input
+                      <DatePicker
+                        selected={enddate}
+                        onChange={handleDateChange2}
+                        dateFormat="dd-MM-yyyy"
+                        placeholderText="DD-MM-YYYY"
+                        className='form-control'
+                        name="endDate"
+                        aria-describedby="EndDateInput"
+                      />
+                      {/* <input
                         type="date"
                         className="form-control"
                         name="endDate"
@@ -472,7 +530,7 @@ const Servicecontract = () => {
                         value={formData.endDate}
                         onChange={handleChange}
                         placeholder="Select End Date"
-                      />
+                      /> */}
                       {errors.endDate && (
                         <small className="text-danger">{errors.endDate}</small>
                       )}
