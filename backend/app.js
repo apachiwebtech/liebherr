@@ -11622,7 +11622,39 @@ app.get("/getsparelisting", authenticateToken, async (req, res) => {
 
 
 
-
+app.get("/getshipmentfg", authenticateToken, async (req, res) => {
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+    const result = await pool.request().query("SELECT * FROM Shipment_Fg WHERE deleted = 0 ORDER BY id DESC");
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
+app.get("/getshipmentparts", authenticateToken, async (req, res) => {
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+    const result = await pool.request().query("SELECT * FROM Shipment_Parts WHERE deleted = 0 ORDER BY id DESC");
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
+app.get("/getbussinesspartner", authenticateToken, async (req, res) => {
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+    const result = await pool.request().query("SELECT * FROM bussiness_partner WHERE deleted = 0 ORDER BY id DESC");
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
 
 
 

@@ -128,6 +128,7 @@ import { CspDashboard } from './Components/Pages/Master/CspDashboard';
 import { MspDashboard } from './Components/Pages/Master/MspDashboard';
 import Sparedetailpage from './Components/Pages/Master/Sparedetailpage';
 import PincodeAllocation from './Components/Pages/Master/PincodeAllocation';
+import { Shipment_fg } from './Components/Pages/Master/Shipment_fg';
 
 
 
@@ -286,6 +287,7 @@ const Router = createBrowserRouter([
         path: "/csp/dashboard",
         element: <CspDashboard />
       },
+      
     ],
   },
   {
@@ -744,7 +746,11 @@ const Router = createBrowserRouter([
       {
         path: "/quotation/:qid",
         element: <QuotationEdit />
-      }
+      },
+      {
+        path: "shipment_fg",
+        element: <Shipment_fg />
+      },
 
 
 
