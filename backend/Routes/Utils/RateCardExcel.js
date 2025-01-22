@@ -192,6 +192,76 @@ app.post('/uplaodratecardexcel', async (req, res) => {
       res.status(500).json({ error: 'An error occurred while inserting data' });
     }
   });
+
+  app.post('/uplaodpincodeexcel', async (req, res) => {
+    let { excelData  } = req.body;
+
+    excelData = JSON.parse(excelData)
+
+  
+    try {
+      const pool = await poolPromise;
+      pool.config.options.requestTimeout = 600000; 
+  
+      for (const item of excelData) {
+        const result =  await pool.request()
+          .input('pincode', sql.Int, item.pincode)
+          .input('account_manager', sql.VarChar, item.account_manager)
+          .input('owner', sql.VarChar, item.owner)
+          .input('country', sql.VarChar, item.country)
+          .input('region', sql.VarChar, item.region)
+          .input('state', sql.VarChar, item.state)
+          .input('city', sql.VarChar, item.city)
+          .input('mother_branch', sql.VarChar, item.mother_branch)
+          .input('resident_branch', sql.VarChar, item.resident_branch)
+          .input('area_manager', sql.VarChar, item.area_manager)
+          .input('local_manager', sql.VarChar, item.local_manager)
+          .input('customer_classification', sql.VarChar, item.customer_classification)
+          .input('class_city', sql.VarChar, item.class_city)
+          .input('csp_name', sql.VarChar, item.csp_name)
+          .input('msp_name', sql.VarChar, item.msp_name)
+          .input('call_type', sql.VarChar, item.call_type)
+          .input('ProductType', sql.VarChar, item.ProductType)
+          .input('ProductLine', sql.VarChar, item.ProductLine)
+          .input('msp_code', sql.VarChar, item.msp_code)
+          .input('csp_code', sql.VarChar, item.csp_code)
+          .query(`
+            INSERT INTO pincode_allocation 
+            (pincode,account_manager, owner, country, region, state, city, mother_branch, resident_branch, area_manager, local_manager, customer_classification, class_city, csp_name, msp_name,call_type,ProductType,ProductLine,msp_code,csp_code) 
+            VALUES (
+              @pincode, 
+              @account_manager, 
+              @owner, 
+              @country, 
+              @region, 
+              @state, 
+              @city, 
+              @mother_branch, 
+              @resident_branch, 
+              @area_manager, 
+              @local_manager, 
+              @customer_classification, 
+              @class_city, 
+              @csp_name, 
+              @msp_name, 
+              @call_type,
+              @ProductType,
+              @ProductLine,
+              @msp_code,
+              @csp_code,
+
+            )
+          `);
+
+          console.log(result,"$%%^^")
+      }
+  
+      return res.json({ message: 'Data inserted successfully' });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'An error occurred while inserting data' });
+    }
+  });
   
   
   

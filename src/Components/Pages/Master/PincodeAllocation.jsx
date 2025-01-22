@@ -26,118 +26,9 @@ const PincodeAllocation = () => {
   const updatedBy = 2; // Static value for updated_by
 
   const [formData, setFormData] = useState({
-    Ratecard: "",
+    Pincode: "",
   });
 
-
-
-
-
-
-
-
-  //handlesubmit form
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-
-
-    setDuplicateError(""); // Clear duplicate error before submitting
-
-    try {
-      const confirmSubmission = window.confirm(
-        "Do you want to submit the data?"
-      );
-      if (confirmSubmission) {
-        if (isEdit) {
-          // For update, include 'updated_by'
-          await axios
-            .post(`${Base_Url}/putratedata`, {
-              ...formData,
-              updated_by: updatedBy,
-            }, {
-              headers: {
-                Authorization: token, // Send token in headers
-              },
-            })
-            .then((response) => {
-              //window.location.reload();
-              setFormData({
-                Ratecard: "",
-              });
-  
-            })
-            .catch((error) => {
-              if (error.response && error.response.status === 409) {
-                setDuplicateError("Duplicate entry, Ratecard already exists!"); // Show duplicate error for update
-              }
-            });
-        } else {
-          // For insert, include 'created_by'
-          await axios
-            .post(`${Base_Url}/postratedata`, {
-              ...formData,
-              created_by: createdBy,
-            }, {
-              headers: {
-                Authorization: token, // Send token in headers
-              },
-            })
-            .then((response) => {
-              // window.location.reload();
-              setFormData({
-                Ratecard: "",
-              });
-
-            })
-            .catch((error) => {
-              if (error.response && error.response.status === 409) {
-                setDuplicateError("Duplicate entry, Ratecard already exists!"); // Show duplicate error for insert
-              }
-            });
-        }
-      }
-    } catch (error) {
-      console.error("Error during form submission:", error);
-    }
-  };
-
-  const deleted = async (id) => {
-    const confirm = window.confirm("Are you sure you want to delete ?");
-
-    if (confirm) {
-      try {
-        const response = await axiosInstance.post(`${Base_Url}/deleteratedata`, { id }, {
-          headers: {
-            Authorization: token, // Send token in headers
-          },
-        });
-        // alert(response.data[0]);
-        window.location.reload();
-      } catch (error) {
-        console.error("Error deleting user:", error);
-      }
-    }
-  };
-
-  const edit = async (id) => {
-    try {
-      const response = await axiosInstance.get(`${Base_Url}/requestratedata/${id}`, {
-        headers: {
-          Authorization: token, // Send token in headers
-        },
-      });
-      setFormData(response.data);
-      setIsEdit(true);
-      console.log(response.data);
-    } catch (error) {
-      console.error("Error editing user:", error);
-    }
-  };
-
-  const indexOfLastUser = (currentPage + 1) * itemsPerPage;
-  const indexOfFirstUser = indexOfLastUser - itemsPerPage;
-  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
 
   const importexcel = (event) => {
@@ -172,7 +63,7 @@ const PincodeAllocation = () => {
       created_by: localStorage.getItem("licare_code")
     }
 
-    axios.post(`${Base_Url}/uplaodratecardexcel`, data)
+    axios.post(`${Base_Url}/uplaodpincodeexcel`, data)
       .then((res) => {
         if (res.data) {
           alert("Uploaded")
@@ -184,27 +75,6 @@ const PincodeAllocation = () => {
       })
   }
 
-  // export to excel 
-  const exportToExcel = () => {
-    // Create a new workbook
-    const workbook = XLSX.utils.book_new();
-
-    // Convert data to a worksheet
-    const worksheet = XLSX.utils.json_to_sheet(currentUsers.map(user => ({
-
-      "RateCardMatrix": user.Ratecard,
-
-
-    })));
-
-    // Append the worksheet to the workbook
-    XLSX.utils.book_append_sheet(workbook, worksheet, "RateCard");
-
-    // Export the workbook
-    XLSX.writeFile(workbook, "RateCard.xlsx");
-  };
-
-  // export to excel end 
 
   // Role Right 
 
@@ -250,7 +120,7 @@ const PincodeAllocation = () => {
               <div>
                 <input type="file" accept=".xlsx, .xls" onChange={importexcel} />
                 <button className="btn btn-primary" onClick={uploadexcel}>
-                  Import Rate Card
+                  Import Pincode Allocation
                 </button>
 
               </div>
