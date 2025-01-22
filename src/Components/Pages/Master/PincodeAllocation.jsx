@@ -64,7 +64,7 @@ const PincodeAllocation = () => {
       created_by: localStorage.getItem("licare_code")
     }
 
-    axios.post(`${Base_Url}/uplaodpincodeexcel`, data)
+    axios.post(`${Base_Url}/uplaodpincodeexcel`, excelData)
       .then((res) => {
         if (res.data) {
           alert("Uploaded")
