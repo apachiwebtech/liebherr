@@ -154,7 +154,7 @@ app.post("/lhilogin", async (req, res) => {
     if (!lhiemail || !lhiemail.includes("@")) {
       return res.status(400).json({ error: "Invalid email provided" });
     }
-    const sql = `SELECT top 1  id, Lhiuser, email FROM lhilogin WHERE email = '${lhiemail}' and deleted = 0 `;
+    const sql = `SELECT top 1  id, Lhiuser, email FROM lhilogin WHERE email = '${lhiemail}' `;
 
     const result = await pool.request().query(sql);
     

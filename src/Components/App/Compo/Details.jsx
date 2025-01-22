@@ -141,6 +141,14 @@ function Details() {
     if (fileInput.files[0]) {
       formData.append('spare_doc', fileInput.files[0]);
     }
+    const fileInput2 = document.getElementById('spare_doc_two');
+    if (fileInput2.files[0]) {
+      formData.append('spare_doc_two', fileInput2.files[0]);
+    }
+    const fileInput3 = document.getElementById('spare_doc_three');
+    if (fileInput3.files[0]) {
+      formData.append('spare_doc_three', fileInput3.files[0]);
+    }
 
     axios.post(`${Base_Url}/updatecomplaint`, formData, {
       headers: {
@@ -706,6 +714,18 @@ function Details() {
                     <div class="form-group">
                       <label for="val-actioncode">Attachment</label>
                       <input type="file" class="form-control" name="spare_doc" id="spare_doc" />
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <div class="form-group">
+                      <label for="val-actioncode">Attachment2</label>
+                      <input type="file" class="form-control" name="spare_doc_two" id="spare_doc_two" />
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <div class="form-group">
+                      <label for="val-actioncode">Attachment3</label>
+                      <input type="file" class="form-control" name="spare_doc_three" id="spare_doc_three" />
                     </div>
                   </div>
 

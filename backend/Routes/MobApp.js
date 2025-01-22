@@ -252,7 +252,11 @@ app.get('/getremark', authenticateToken, async (req, res) => {
 
 
 
-app.post('/updatecomplaint', authenticateToken, upload.single('spare_doc'), async (req, res) => {
+app.post('/updatecomplaint', authenticateToken, upload.fields([
+  { name: 'spare_doc', maxCount: 1 },
+  { name: 'spare_doc_two', maxCount: 1 },
+  { name: 'spare_doc_three', maxCount: 1 },
+]), async (req, res) => {
   const { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode,activitycode, com_id, warranty_status, spare_detail, ticket_no, user_id } = req.body;
 
 
@@ -262,6 +266,10 @@ app.post('/updatecomplaint', authenticateToken, upload.single('spare_doc'), asyn
 
   // If you want to get the file information
   const file = req.file;
+
+  const spareDoc = req.files['spare_doc'] ? req.files['spare_doc'][0].filename : null;
+  const spareDocTwo = req.files['spare_doc_two'] ? req.files['spare_doc_two'][0].filename : null;
+  const spareDocThree = req.files['spare_doc_three'] ? req.files['spare_doc_three'][0].filename : null;
 
   try {
     const pool = await poolPromise;
@@ -276,7 +284,7 @@ app.post('/updatecomplaint', authenticateToken, upload.single('spare_doc'), asyn
       .input('other_charge', sql.VarChar, other_charge != 'undefined' ? other_charge : null)
       .input('warranty_status', sql.VarChar, warranty_status != 'undefined' ? warranty_status : null)
       .input('com_id', sql.VarChar, com_id != 'undefined' ? com_id : null)
-      .input('spare_doc_path', sql.VarChar, file ? file.path : null)
+      .input('spare_doc_path', sql.VarChar, spareDoc)
       .input('call_remark', sql.VarChar, call_remark != 'undefined' ? call_remark : null) // Add call_remark
       .input('spare_detail', sql.VarChar, spare_detail != 'undefined' ? spare_detail : null)
       .query('UPDATE complaint_ticket SET warranty_status = @warranty_status, group_code = @symptomcode, defect_type = @causecode, site_defect = @actioncode,activity_code = @activitycode,service_charges = @service_charges, call_status = @call_status, call_type = @call_type, other_charges = @other_charge, spare_doc_path = @spare_doc_path, call_remark = @call_remark, spare_detail = @spare_detail WHERE id = @com_id');
