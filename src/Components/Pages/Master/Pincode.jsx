@@ -27,6 +27,7 @@ const Pincode = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [duplicateError, setDuplicateError] = useState("");
   const token = localStorage.getItem("token"); // Get token from localStorage
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     pincode: "",
     country_id: "",
@@ -41,14 +42,7 @@ const Pincode = () => {
     fetchPincodes();
   }, []);
 
-  const fetchData = async (url, setStateFunction, errorMessage) => {
-    try {
-      const response = await axiosInstance.get(url);
-      setStateFunction(response.data);
-    } catch (error) {
-      console.error(errorMessage, error);
-    }
-  };
+
 
 
 
@@ -128,21 +122,21 @@ const Pincode = () => {
   };
 
   const fetchPincodes = async () => {
+    setLoading(true);  // Start loader before API call
     try {
-      const response = await axiosInstance.get(`${Base_Url}/getpincodes`,
-        {
-          headers: {
-            Authorization: token, // Send token in headers
-          },
-        });
-
+      const response = await axiosInstance.get(`${Base_Url}/getpincodes`, {
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      });
+  
       setPincodes(response.data);
       setFilteredPincodes(response.data);
-
-
     } catch (error) {
       console.error("Error fetching pincodes:", error.message);
-      // Optionally, handle errors in a user-friendly way, e.g., show a message
+      // Optionally, handle errors in a user-friendly way
+    } finally {
+      setLoading(false);  // Stop loader after data is loaded or in case of error
     }
   };
 
@@ -374,9 +368,9 @@ const Pincode = () => {
   return (
     <div className="tab-content">
       <LocationTabs />
-      {loaders && (
+      {(loaders || loading) && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <SyncLoader loading={loaders} color="#FFFFFF" />
+          <SyncLoader loading={loaders || loading} color="#FFFFFF" />
         </div>
       )}
       {roleaccess > 1 ? <div className="row mp0">

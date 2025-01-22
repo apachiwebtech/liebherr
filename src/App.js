@@ -127,6 +127,7 @@ import { CspStock } from './Components/Pages/Master/CspStock';
 import { CspDashboard } from './Components/Pages/Master/CspDashboard';
 import { MspDashboard } from './Components/Pages/Master/MspDashboard';
 import Sparedetailpage from './Components/Pages/Master/Sparedetailpage';
+import PincodeAllocation from './Components/Pages/Master/PincodeAllocation';
 
 
 
@@ -373,6 +374,11 @@ const Router = createBrowserRouter([
       {
         path: "/location",
         element: <Location />,
+
+      },
+      {
+        path: "/pincode_allocation",
+        element: <PincodeAllocation />,
 
       },
       {

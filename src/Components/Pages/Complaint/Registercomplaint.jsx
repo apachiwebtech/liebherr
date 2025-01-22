@@ -11,6 +11,7 @@ import { useDispatch } from "react-redux";
 import { getRoleData } from "../../Store/Role/role-action";
 import CryptoJS from 'crypto-js';
 import { useOutletContext } from 'react-router-dom';
+import DatePicker from "react-datepicker";
 
 
 export function Registercomplaint(params) {
@@ -115,6 +116,13 @@ export function Registercomplaint(params) {
     return `${year}-${month}-${day}`;
   };
 
+
+
+  const formatpurDate = (dateString) => {
+    const [year, month, day] = dateString.split('-');
+    return `${day}-${month}-${year}`;
+  };
+
   const sendtoedit123 = async (id) => {
     // alert(id)
     id = id.toString()
@@ -171,6 +179,29 @@ export function Registercomplaint(params) {
     requested_mobile: "",
 
   })
+
+  const handleDateChange = (date) => {
+
+
+    if (date) {
+      const formattedDate = formatDate(date);
+      setpurchase_data(formattedDate)
+    }
+
+  };
+
+  const handleDateChange2 = (date) => {
+    if (date) {
+      const formattedDate = formatDate(date);
+  
+      setValue((prevState) => ({
+        ...prevState, // Preserve existing values
+        complaint_date: formattedDate  // Update only complaint_date
+      }));
+  
+      setDate(formattedDate);  // Set formatted date correctly
+    }
+  };
 
 
   const getDateAfterOneYear = (value) => {
@@ -806,7 +837,7 @@ export function Registercomplaint(params) {
         additional_remarks: value.additional_remarks || '',
         specification: value.specification || '',
         salutation: value.salutation || '',
-        created_by: value.created_by || '',
+        created_by: created_by || '',
         classification: value.classification || '',
         priority: value.Priority || '',
         callType: value.callType || '',
@@ -1191,9 +1222,11 @@ export function Registercomplaint(params) {
 
           setValue((prevState) => ({
             ...prevState, // Spread existing state
-            customer_name: customerInfo.customer_name,
+            mobile: customerInfo.mobileno,
+            cust_type: customerInfo.customer_type
 
           }));
+
         } else {
           console.error("No customer information found in response.");
         }
@@ -1373,23 +1406,26 @@ export function Registercomplaint(params) {
                         <table className="table table-striped">
                           <tbody>
 
-                            {ProductCustomer.length == 0 ? <>
-                              <tr>
+
+                            <tr>
+                              <td>New Product</td>
+                              <td>
+                                <div className="text-right pb-2">
+                                  {roleaccess > 2 ? <button className="btn btn-sm btn-primary generateTicket" onClick={() => getcustomerinfo(searchdata.customer_id)}>New Ticket</button> : null}
+                                </div>
+                              </td>
+                            </tr>
+
+                            {ProductCustomer.map((item, index) => (
+                              <tr key={index}>
+                                <td><div>{item.ModelNumber}</div></td>
                                 <td>
-                                  <div className="pb-2">
-                                    {roleaccess > 2 ? <button className="btn btn-sm btn-primary generateTicket" onClick={() => getcustomerinfo(searchdata.customer_id)}>New Ticket</button> : null}
+                                  <div className="text-right pb-2">
+                                    {roleaccess > 2 ? <button onClick={() => addnewticket(item.ModelNumber)} className="btn btn-sm btn-primary generateTicket">New Ticket</button> : null}
                                   </div>
                                 </td>
-                              </tr> </> : <> {ProductCustomer.map((item, index) => (
-                                <tr key={index}>
-                                  <td><div>{item.ModelNumber}</div></td>
-                                  <td>
-                                    <div className="text-right pb-2">
-                                      {roleaccess > 2 ? <button onClick={() => addnewticket(item.ModelNumber)} className="btn btn-sm btn-primary generateTicket">New Ticket</button> : null}
-                                    </div>
-                                  </td>
-                                </tr>
-                              ))}</>}
+                              </tr>
+                            ))}
 
 
                           </tbody>
@@ -1501,7 +1537,7 @@ export function Registercomplaint(params) {
                     <div className="col-md-3">
                       <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Purchase Date</p>
 
-                      {!p_date ?
+                      {/* {!p_date ?
                         <div className="mb-3">
                           <input
                             type="date"
@@ -1516,7 +1552,29 @@ export function Registercomplaint(params) {
                             disabled={purchasehide == '' ? false : true}
                           />
                           {errors.purchase_date && <span style={{ fontSize: "12px" }} className="text-danger">{errors.purchase_date}</span>}
-                        </div> : <div>{purchase_data}</div>}
+                        </div> : <div>{purchase_data == (null || '') ? null : formatpurDate(purchase_data)}</div>} */}
+
+                        {!p_date ? 
+                        <div className="mb-3">
+                        <DatePicker
+                          selected={purchase_data}
+                          onChange={(date) =>{
+                            handleDateChange(date)
+                            getDateAfterOneYear(date);
+                           }}
+                          dateFormat="dd-MM-yyyy"
+                          placeholderText="DD-MM-YYYY"
+                          className='form-control'
+                          name="purchase_date"
+                          aria-describedby="Anidate"
+                          disabled={purchasehide == '' ? false : true}
+                          maxDate={new Date().toISOString().split("T")[0]}
+                        /> 
+                           {errors.purchase_date && <span style={{ fontSize: "12px" }} className="text-danger">{errors.purchase_date}</span>}
+                        </div>: <div>{purchase_data == (null || '') ? null : formatpurDate(purchase_data)}</div>}
+                        
+
+
                     </div>
 
                     {/* Add Warranty Status field */}
@@ -1561,7 +1619,20 @@ export function Registercomplaint(params) {
                     <div className="col-md-3">
                       <div className="mb-3">
                         <label className="form-label">Ticket Date{value.ticket_type == 'VISIT' || value.ticket_type == 'HELPDESK' ? null : <span className="text-danger">*</span>}</label>
-                        <input type="date" name="complaint_date" onChange={onHandleChange} value={value.complaint_date || new Date().toISOString().split('T')[0]} className="form-control" disabled={Comp_id ? true : false} min={new Date().toISOString().split('T')[0]} />
+                        {/* <input type="date" name="complaint_date" onChange={onHandleChange} value={value.complaint_date || new Date().toISOString().split('T')[0]} className="form-control" disabled={Comp_id ? true : false} min={new Date().toISOString().split('T')[0]} /> */}
+
+                        <DatePicker
+                          selected={value.complaint_date || new Date().toISOString().split('T')[0]}
+                          onChange={handleDateChange2}
+                          dateFormat="dd-MM-yyyy"
+                          placeholderText="DD-MM-YYYY"
+                          className='form-control'
+                          name="complaint_date"
+                          aria-describedby="Anidate"
+                          disabled={Comp_id ? true : false}
+                          minDate={new Date().toISOString().split('T')[0]}
+                        />
+
                         {errors.complaint_date && <span style={{ fontSize: "12px" }} className="text-danger">{errors.complaint_date}</span>}
                       </div>
                     </div>

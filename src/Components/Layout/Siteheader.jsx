@@ -7,7 +7,7 @@ import { App_Url } from '../Utils/Base_Url';
 
 
 
-export function Siteheader({ headerState }) {
+export function Siteheader() {
   const [Name, setName] = useState([])
 
   const navigate = useNavigate();
@@ -67,6 +67,7 @@ export function Siteheader({ headerState }) {
               <ul className="dropdown-menu site" aria-labelledby="navbarDropdown">
                 <li >
                   <Link className="dropdown-item" to="/location">Location</Link></li>
+                <li><Link className="dropdown-item" to="/pincode_allocation">Pincode Allocation</Link></li>
                 <li>
                   <Link className="dropdown-item" to="/category">Product Master</Link></li>
                 <li>
@@ -133,7 +134,7 @@ export function Siteheader({ headerState }) {
                   <Link className="dropdown-item" to="/complaintreport">Ticket Report</Link></li>
                 <li>
                   <Link className="dropdown-item" to="/claimreport">Claim Report</Link></li>
-                  <li>
+                <li>
                   <Link className="dropdown-item" to="/feedbackreportlist">FeedBack Report</Link></li>
               </ul>
             </li>
@@ -144,7 +145,7 @@ export function Siteheader({ headerState }) {
 
 
           <div className="dropdown text-end d-flex align-content-center justify-content-center">
-           {headerState ? null: <Link className="btn btn-primary mr-2 newcomplaint text-light" onClick={redirect}>New Ticket</Link>}
+            <Link className="btn btn-primary mr-2 newcomplaint text-light" onClick={redirect}>New Ticket</Link>
 
 
             <a href="#" className="link-dark d-flex align-content-center justify-content-center text-decoration-none " id="dropdownUser1" role="button" data-bs-toggle="dropdown" aria-expanded="false">

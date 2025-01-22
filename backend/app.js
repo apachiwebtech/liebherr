@@ -154,9 +154,10 @@ app.post("/lhilogin", async (req, res) => {
     if (!lhiemail || !lhiemail.includes("@")) {
       return res.status(400).json({ error: "Invalid email provided" });
     }
-    const sql = `SELECT top 1  id, Lhiuser, email FROM lhi_user WHERE email = '${lhiemail}' and deleted = 0 and status = 1 `;
+    const sql = `SELECT top 1  id, Lhiuser, email FROM lhilogin WHERE email = '${lhiemail}' and deleted = 0 `;
 
     const result = await pool.request().query(sql);
+    
     if (result.recordset.length > 0) {
       const user = result.recordset[0];
       // Generate JWT token

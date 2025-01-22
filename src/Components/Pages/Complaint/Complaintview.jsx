@@ -1508,6 +1508,7 @@ export function Complaintview(params) {
                             {attachmentArray.map((item, idx) => {
                               const fileExtension = item.split('.').pop(); // Extract file extension
                               const fileName = item.trim();
+                              const result = fileName.substring(fileName.indexOf('-') + 1);
 
                               return (
                                 <div className="d-flex align-items-center">
@@ -1522,7 +1523,7 @@ export function Complaintview(params) {
                                     }}
                                     onClick={() => handleAttachment2Click(fileName)}
                                   >
-                                    {`File${idx + 1}.${fileExtension}`}
+                                    {result}
                                   </span>
 
                                   <a
@@ -1602,28 +1603,12 @@ export function Complaintview(params) {
                 </iframe>
               ) : currentAttachment2.toLowerCase().endsWith(".doc") ||
                 currentAttachment2.toLowerCase().endsWith(".docx") || currentAttachment2.toLowerCase().endsWith(".eml") ? (
-                <iframe
-                  src={`https://docs.google.com/gview?url=${Base_Url}/uploads/${currentAttachment2}&embedded=true`}
-                  style={{ width: "100%", height: "500px" }}
-                  title="Word Document"
-                >
-                  Your browser does not support Word documents.{" "}
-                  <a href={`${Base_Url}/uploads/${currentAttachment2}`}>
-                    Download the Word document
-                  </a>
-                </iframe>
+         
+                <></>
               ) : currentAttachment2.toLowerCase().endsWith(".xls") ||
                 currentAttachment2.toLowerCase().endsWith(".xlsx") ? (
-                <iframe
-                  src={`https://docs.google.com/gview?url=${Base_Url}/uploads/${currentAttachment2}&embedded=true`}
-                  style={{ width: "100%", height: "500px" }}
-                  title="Excel Document"
-                >
-                  Your browser does not support Excel documents.{" "}
-                  <a href={`${Base_Url}/uploads/${currentAttachment2}`}>
-                    Download the Excel document
-                  </a>
-                </iframe>
+       
+                <></>
               ) : (
                 <p style={{ fontSize: "14px" }}>Unsupported file type.</p>
               )}
@@ -1857,8 +1842,9 @@ export function Complaintview(params) {
 
                                 {fileNames.map((fileName, fileIndex) => {
                                   const trimmedFileName = fileName.trim();
-                                  const fileExtension = trimmedFileName.split('.').pop();
-                                  const newFileName = `File${index * fileNames.length + fileIndex + 1}.${fileExtension}`;
+
+                                  const result = fileName.substring(fileName.indexOf('-') + 1);
+                                  
 
                                   return (
                                     <div
@@ -1880,7 +1866,7 @@ export function Complaintview(params) {
                                           setIsModalOpen(true); // Open the modal
                                         }}
                                       >
-                                        {newFileName} {/* Display the new file name */}
+                                        {result} {/* Display the new file name */}
                                       </span>
                                       <a
                                         onClick={() => downloadFile(trimmedFileName)}
@@ -1959,28 +1945,11 @@ export function Complaintview(params) {
                 ) : currentAttachment.toLowerCase().endsWith(".doc") ||
                   currentAttachment.toLowerCase().endsWith(".docx") || currentAttachment.toLowerCase().endsWith(".eml") ? (
 
-                  <iframe
-                    src={`https://docs.google.com/gview?url=${Base_Url}/uploads/${currentAttachment}&embedded=true`}
-                    style={{ width: "100%", height: "500px" }} // Adjust height as needed
-                    title="Word Document"
-                  >
-                    Your browser does not support Word documents.{" "}
-                    <a href={`${Base_Url}/uploads/${currentAttachment}`}>
-                      Download the Word document
-                    </a>
-                  </iframe>
+                  <></>
                 ) : currentAttachment.toLowerCase().endsWith(".xls") ||
                   currentAttachment.toLowerCase().endsWith(".xlsx") ? (
-                  <iframe
-                    src={`https://docs.google.com/gview?url=${Base_Url}/uploads/${currentAttachment}&embedded=true`}
-                    style={{ width: "100%", height: "500px" }} // Adjust height as needed
-                    title="Excel Document"
-                  >
-                    Your browser does not support Excel documents.{" "}
-                    <a href={`${Base_Url}/uploads/${currentAttachment}`}>
-                      Download the Excel document
-                    </a>
-                  </iframe>
+           
+                  <></>
                 ) : (
                   <p>Unsupported file type.</p>
                 )}
@@ -2196,7 +2165,7 @@ export function Complaintview(params) {
                     <option value="">Select Status</option>
                     {groupdefect.map((item) => (
                       <option key={item.id} value={item.defectgroupcode}>
-                        {item.defectgrouptitle}
+                       {item.defectgroupcode} - {item.defectgrouptitle}
                       </option>
                     ))}
                   </select>
@@ -2214,7 +2183,7 @@ export function Complaintview(params) {
                     <option value="">Select </option>
                     {GroupDefecttype.map((item) => (
                       <option key={item.id} value={item.defect_code}>
-                        {item.defect_title}
+                       {item.defect_code} - {item.defect_title}
                       </option>
                     ))}
                   </select>
@@ -2233,7 +2202,7 @@ export function Complaintview(params) {
                     <option value="">Select </option>
                     {GroupDefectsite.map((item) => (
                       <option key={item.id} value={item.dsite_code}>
-                        {item.dsite_title}
+                       {item.dsite_code} - {item.dsite_title}
                       </option>
                     ))}
                   </select>
