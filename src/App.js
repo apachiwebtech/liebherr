@@ -129,6 +129,7 @@ import { MspDashboard } from './Components/Pages/Master/MspDashboard';
 import Sparedetailpage from './Components/Pages/Master/Sparedetailpage';
 import PincodeAllocation from './Components/Pages/Master/PincodeAllocation';
 import { Shipment_fg } from './Components/Pages/Master/Shipment_fg';
+import { Shipment_parts } from './Components/Pages/Master/Shipment_parts';
 
 
 
@@ -750,6 +751,10 @@ const Router = createBrowserRouter([
       {
         path: "shipment_fg",
         element: <Shipment_fg />
+      },
+      {
+        path: "shipmentparts",
+        element: <Shipment_parts />
       },
 
 

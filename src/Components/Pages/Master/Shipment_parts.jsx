@@ -12,9 +12,9 @@ import { useDispatch } from "react-redux";
 import { getRoleData } from "../../Store/Role/role-action";
 import AllocationTab from './AllocationTab';
 
-export function Shipment_fg(params) {
+export function Shipment_parts(params) {
     const { loaders, axiosInstance } = useAxiosLoader();
-    const [Shipmentfgdata, setShipmentFg] = useState([]);
+    const [Shipmentpartsdata, setShipmentpartsdata] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
     const token = localStorage.getItem("token");
     const [formData, setFormData] = useState({
@@ -31,7 +31,7 @@ export function Shipment_fg(params) {
         Invoice_qty: '',
         Serial_no: '',
         compressor_bar: '',
-        Manufacture_date: '',
+        Manufactured_Date: '',
         Vehicle_no: '',
         Vehicale_Type: '',
         Transporter_name: '',
@@ -47,30 +47,30 @@ export function Shipment_fg(params) {
         customer_classification: '',
         hsn_code: '',
         basic_rate: '',
-        licarecode: '',
-        licare_address: '',
-        product_choice: '',
-        serial_identification: '',
-        lot_number: '',
-        order_number: '',
-        order_line_number: '',
-        wearhouse: '',
-        service_type: '',
+        Licare_code: '',
+        Licare_Address: '',
+        Product_Choice: '',
+        Serial_Indentity: '',
+        Lot_Number: '',
+        Order_Number: '',
+        Order_Line_Number: '',
+        Warehouse: '',
+        Service_Type: '',
 
 
     });
 
     const fetchShipmentFg = async () => {
         try {
-            const response = await axiosInstance.get(`${Base_Url}/getshipmentfg`, {
+            const response = await axiosInstance.get(`${Base_Url}/getshipmentparts`, {
                 headers: {
                     Authorization: token,
                 },
             });
-            setShipmentFg(response.data);
+            setShipmentpartsdata(response.data);
         } catch (error) {
             console.error('Error fetching ShipmentFG data:', error);
-            setShipmentFg([]);
+            setShipmentpartsdata([]);
         }
     };
 
@@ -93,7 +93,7 @@ export function Shipment_fg(params) {
         const workbook = XLSX.utils.book_new();
 
         // Convert data to a worksheet
-        const worksheet = XLSX.utils.json_to_sheet(Shipmentfgdata.map(user => ({
+        const worksheet = XLSX.utils.json_to_sheet(Shipmentpartsdata.map(user => ({
            
             "InvoiceNumber": user.InvoiceNumber,
             "InvoiceDate": user.InvoiceDate,
@@ -108,7 +108,7 @@ export function Shipment_fg(params) {
             "Invoice_qty": user.Invoice_qty,
             "Serial_no": user.Serial_no,
             "compressor_bar": user.compressor_bar,
-            "Manufacture_date": user.Manufacture_date,
+            "Manufactured_Date": user.Manufactured_Date,
             "Vehicle_no": user.Vehicle_no,
             "Vehicale_Type": user.Vehicale_Type,
             "Transporter_name": user.Transporter_name,
@@ -123,23 +123,23 @@ export function Shipment_fg(params) {
             "customer_classification": user.customer_classification,
             "hsn_code": user.hsn_code,
             "basic_rate": user.basic_rate,
-            "licarecode": user.licarecode,
-            "licare_address": user.licare_address,
-            "product_choice": user.product_choice,
-           "serial_identification": user. serial_identification,
-           "lot_number": user.lot_number,
-            "order_number": user.order_number,
-            "order_line_number": user.order_line_number,
-            "wearhouse": user.wearhouse,
-            "service_type": user.service_type,
+            "Licare_code": user.Licare_code,
+            "Licare_Address": user.Licare_Address,
+            "Product_Choice": user.Product_Choice,
+           "Serial_Indentity": user. Serial_Indentity,
+           "Lot_Number": user.Lot_Number,
+            "Order_Number": user.Order_Number,
+            "Order_Line_Number": user.Order_Line_Number,
+            "Warehouse": user.Warehouse,
+            "Service_Type": user.Service_Type,
        
         })));
 
         // Append the worksheet to the workbook
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Shipment FG");
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Shipment Parts");
 
         // Export the workbook
-        XLSX.writeFile(workbook, "Shipment_fg.xlsx");
+        XLSX.writeFile(workbook, "Shipment_parts.xlsx");
     };
 
     // export to excel end 
@@ -173,7 +173,7 @@ export function Shipment_fg(params) {
 
     return (
         <div className="tab-content">
-               < AllocationTab  />
+            < AllocationTab  />
             {roleaccess > 1 ? <div className="row mp0">
                 <div className="col-md-12 col-12">
                     <div className="card mb-3 tab_box">
@@ -202,7 +202,7 @@ export function Shipment_fg(params) {
                                             <th width="10%">Invoice_qty</th>
                                             <th width="10%">Serial_no</th>
                                             <th width="10%">compressor_bar</th>
-                                            <th width="10%">Manufacture_date</th>
+                                            <th width="10%">Manufactured_Date</th>
                                             <th width="10%">Vehicle_no</th>
                                             <th width="10%">Vehicale_Type</th>
                                             <th width="10%">Transporter_name</th>
@@ -215,22 +215,22 @@ export function Shipment_fg(params) {
                                             <th width="10%">Transaction_Type</th>
                                             <th width="10%">hsn_code</th>
                                             <th width="10%">basic_rate</th>
-                                            <th width="10%">licarecode</th>
-                                            <th width="10%">licare_address</th>
-                                            <th width="10%">product_choice</th>
-                                            <th width="10%">serial_identification</th>
-                                            <th width="10%">lot_number</th>
+                                            <th width="10%">Licare_code</th>
+                                            <th width="10%">Licare_Address</th>
+                                            <th width="10%">Product_Choice</th>
+                                            <th width="10%">Serial_Indentity</th>
+                                            <th width="10%">Lot_Number</th>
                                             <th width="10%">Lr_date</th>
-                                            <th width="10%">order_number</th>
-                                            <th width="10%">order_line_number</th>
-                                            <th width="10%">wearhouse</th>
-                                            <th width="10%">service_type</th>
+                                            <th width="10%">Order_Number</th>
+                                            <th width="10%">Order_Line_Number</th>
+                                            <th width="10%">Warehouse</th>
+                                            <th width="10%">Service_Type</th>
 
 
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {Shipmentfgdata.map((item, index) => (
+                                        {Shipmentpartsdata.map((item, index) => (
                                             <tr key={item.id}>
                                                 <td>{index + 1}</td>
                                                 <td>{item.InvoiceNumber}</td>
@@ -246,7 +246,7 @@ export function Shipment_fg(params) {
                                                 <td>{item.Invoice_qty}</td>
                                                 <td>{item.Serial_no}</td>
                                                 <td>{item.compressor_bar}</td>
-                                                <td>{item.Manufacture_date}</td>
+                                                <td>{item.Manufactured_Date}</td>
                                                 <td>{item.Vehicle_no}</td>
                                                 <td>{item.Vehicale_Type}</td>
                                                 <td>{item.Transporter_name}</td>
@@ -261,14 +261,14 @@ export function Shipment_fg(params) {
                                                 <td>{item.customer_classification}</td>
                                                 <td>{item.hsn_code}</td>
                                                 <td>{item.basic_rate}</td>
-                                                <td>{item.licarecode}</td>
-                                                <td>{item.licare_address}</td>
-                                                <td>{item.serial_identification}</td>
-                                                <td>{item.lot_number}</td>
-                                                <td>{item.order_number}</td>
-                                                <td>{item.order_line_number}</td>
-                                                <td>{item.wearhouse}</td>
-                                                <td>{item.service_type}</td>
+                                                <td>{item.Licare_code}</td>
+                                                <td>{item.Licare_Address}</td>
+                                                <td>{item.Serial_Indentity}</td>
+                                                <td>{item.Lot_Number}</td>
+                                                <td>{item.Order_Number}</td>
+                                                <td>{item.Order_Line_Number}</td>
+                                                <td>{item.Warehouse}</td>
+                                                <td>{item.Service_Type}</td>
                                             </tr>
                                         ))}
                                     </tbody>
