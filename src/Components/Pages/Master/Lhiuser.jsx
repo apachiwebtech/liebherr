@@ -192,7 +192,7 @@ const Lhiuser = () => {
                   email: "",
                   status: "",
                   remarks: "",
-                  Roles: "",
+                  Role: "",
                   Designation: "",
                   Reporting_to:"",
 
@@ -226,7 +226,7 @@ const Lhiuser = () => {
                   email: "",
                   status: "",
                   remarks: "",
-                  Roles: "",
+                  Role: "",
                   Designation: "",
                   Reporting_to:"",
                 });

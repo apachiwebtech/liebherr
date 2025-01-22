@@ -11559,6 +11559,68 @@ app.post("/getsearchengineer", authenticateToken, async (req, res) => {
   }
 });
 
+app.post("/getmodelno", authenticateToken, async (req, res) => {
+  const { param } = req.body;
+
+  if (!param) {
+    return res.status(400).json({ message: "Invalid parameter" });
+  }
+
+  try {
+    const pool = await poolPromise;
+
+    // Parameterized query with a limit
+    const sql = `
+    SELECT TOP 20 id, ModelNumber
+    FROM Spare_parts
+    WHERE ModelNumber LIKE @param AND deleted = 0
+    ORDER BY ModelNumber;
+    `;
+
+    const result = await pool.request()
+      .input('param', `%${param}%`)
+      .query(sql);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "No results found" });
+    }
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+});
+
+
+app.get("/getsparelisting", authenticateToken, async (req, res) => {
+  const { ModelNumber } = req.query; // Get ModelNumber from query parameters
+  console.log("Received request with ModelNumber:", ModelNumber);
+
+  try {
+    if (!ModelNumber) {
+      console.error("Model number is missing.");
+      return res.status(400).json({ error: "Model number is required." });
+    }
+
+    const pool = await poolPromise;
+    const result = await pool
+      .request()
+      .input("ModelNumber", ModelNumber)
+      .query(
+        "SELECT * FROM Spare_parts WHERE ModelNumber = @modelNumber AND deleted = 0"
+      );
+
+    console.log("Query result:", result.recordset);
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Error in /getsparelisting API:", err);
+    return res.status(500).json({ error: "An error occurred while fetching data." });
+  }
+});
+
+
+
 
 
 

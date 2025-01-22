@@ -75,17 +75,17 @@ export function Siteheader({ headerState }) {
                   <Link className="dropdown-item" to="/channelpartner">Channel Partner Master</Link></li>
                 <li>
                   <Link className="dropdown-item" to="/Franchisemasterlist">Franchise Master</Link></li>
-                <li>
-                  <Link className="dropdown-item" to="/serviceagent">Service Agent Master</Link></li>
+                {/* <li>
+                  <Link className="dropdown-item" to="/serviceagent">Service Agent Master</Link></li> */}
                 <li>
                   <Link className="dropdown-item" to="/callstatus">Call Status Code Master</Link></li>
                 <li>
                   <Link className="dropdown-item" to="/Lhiuser">LHI User Master</Link></li>
                 <li>
                   <Link className="dropdown-item" to="/servicecontract">Service Contract Registration</Link></li>
-                <li>
+                {/* <li>
 
-                  <Link className="dropdown-item" to="/serviceproduct">Service Product Master</Link></li>
+                  <Link className="dropdown-item" to="/serviceproduct">Service Product Master</Link></li> */}
                 <li>
                   <Link className="dropdown-item" to="/DefectGroup">Fault Code</Link></li>
                 <li>
