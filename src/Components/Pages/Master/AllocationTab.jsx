@@ -57,6 +57,36 @@ function AllocationTab() {
                       </button>
                     </Link>
                   </li>
+                  <li className="nav-item">
+                    <Link to="/shipment_fg">
+                      <button
+                        className={`nav-link ${activeTab === '/shipment_fg' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('/shipment_fg')}
+                      >
+                       Shipment FG
+                      </button>
+                    </Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link to="/shipmentparts">
+                      <button
+                        className={`nav-link ${activeTab === '/shipmentparts' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('/shipmentparts')}
+                      >
+                       Shipment Parts
+                      </button>
+                    </Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link to="/business_partner">
+                      <button
+                        className={`nav-link ${activeTab === '/business_partner' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('/business_partner')}
+                      >
+                       Business Partner
+                      </button>
+                    </Link>
+                  </li>
 
                   {/* Add other tabs like GEO STATE, GEO CITY, AREA */}
                 </ul>
