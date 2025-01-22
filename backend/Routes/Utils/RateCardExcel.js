@@ -227,7 +227,7 @@ app.post('/uplaodratecardexcel', async (req, res) => {
           .input('csp_code', sql.VarChar, item.csp_code)
           .query(`
             INSERT INTO pincode_allocation 
-            (pincode,account_manager, owner, country, region, state, city, mother_branch, resident_branch, area_manager, local_manager, customer_classification, class_city, csp_name, msp_name,call_type,ProductType,ProductLine,msp_code,csp_code) 
+            (pincode, account_manager, owner, country, region, state, city, mother_branch, resident_branch, area_manager, local_manager, customer_classification, class_city, csp_name, msp_name, call_type, ProductType, ProductLine, msp_code, csp_code) 
             VALUES (
               @pincode, 
               @account_manager, 
@@ -248,10 +248,10 @@ app.post('/uplaodratecardexcel', async (req, res) => {
               @ProductType,
               @ProductLine,
               @msp_code,
-              @csp_code,
-
+              @csp_code
             )
           `);
+          
 
           console.log(result,"$%%^^")
       }

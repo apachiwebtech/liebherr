@@ -55,6 +55,7 @@ const PincodeAllocation = () => {
 
     reader.readAsBinaryString(file);
   };
+  
 
   const uploadexcel = () => {
 
@@ -74,6 +75,7 @@ const PincodeAllocation = () => {
         console.log(err)
       })
   }
+  
 
 
   // Role Right 
