@@ -282,15 +282,16 @@ const Lhiuser = () => {
     }
   };
 
-  const handleChangestatus = (e) => {
+  const handleChangestatus = async (e) => {
     try {
       const dataId = e.target.getAttribute('data-id');
 
-      const response = axiosInstance.post(`${Base_Url}/updatestatus`, { dataId: dataId }, {
+      const response = await axiosInstance.post(`${Base_Url}/updatestatus`, { dataId: dataId }, {
         headers: {
           Authorization: token, // Send token in headers
         },
       });
+      fetchUsers();
 
     } catch (error) {
       console.error("Error editing user:", error);

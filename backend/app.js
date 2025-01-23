@@ -8026,9 +8026,9 @@ app.post("/updatestatus", authenticateToken, async (req, res) => {
   const { dataId } = req.body;
   try {
     const pool = await poolPromise;
-    const sql = `SELECT * FROM lhi_user WHERE id = @dataId`;
 
-    // Execute the query to get the user
+    // Query to fetch the user by dataId
+    const sql = `SELECT * FROM lhi_user WHERE id = @dataId`;
     const request = await pool.request()
       .input('dataId', dataId)
       .query(sql);
@@ -8036,20 +8036,22 @@ app.post("/updatestatus", authenticateToken, async (req, res) => {
     // Check if records exist
     if (request.recordset.length > 0) {
       const status = request.recordset[0].status;
-      console.log(request.recordset[0].status);
+      console.log("Current status:", status);
+
       let query;
       let seen;
+
       if (status == 1) {
-        // If status is 1, deactivate and set activation date
+        // If status is 1, deactivate and set deactivation date
         query = `UPDATE lhi_user
-                 SET status = 0
+                 SET status = 0, deactivation_date = GETDATE(), activation_date = NULL
                  WHERE id = @dataId`;
         seen = 0;
       } else {
-        // If status is not 1, deactivate and set deactivation date
+        // If status is not 1, activate and set activation date
         query = `UPDATE lhi_user
-                  SET status = 1
-                  WHERE id = @dataId`;
+                 SET status = 1, activation_date = GETDATE(), deactivation_date = NULL
+                 WHERE id = @dataId`;
         seen = 1;
       }
 
@@ -8070,6 +8072,7 @@ app.post("/updatestatus", authenticateToken, async (req, res) => {
     return res.status(500).json({ message: 'Error updating status' });
   }
 });
+
 
 
 
