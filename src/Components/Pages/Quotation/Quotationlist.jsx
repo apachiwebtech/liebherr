@@ -44,7 +44,7 @@ export function Quotationlist(params) {
         CustomerName: '',
         spareId: '',
         ModelNumber: '',
-        title: '',
+        ticket_no: '',
         quantity: '',
         price: '',
     });
@@ -164,7 +164,6 @@ export function Quotationlist(params) {
                 "EngineerName": user.assignedEngineer,
                 "CustomerName": user.CustomerName,
                 "CustomerID": user.customer_id,
-                "SpareID": user.spareId,
                 "ModelNumber": user.ModelNumber,
                 "State": user.state,
                 "City": user.city,
@@ -210,6 +209,16 @@ export function Quotationlist(params) {
     useEffect(() => {
         dispatch(getRoleData(roledata))
     }, [])
+
+    function formatDate(dateStr) {
+        const dateObj = new Date(dateStr);
+        
+        const day = dateObj.getUTCDate().toString().padStart(2, '0');
+        const month = (dateObj.getUTCMonth() + 1).toString().padStart(2, '0');
+        const year = dateObj.getUTCFullYear();
+        
+        return `${day}-${month}-${year}`;
+      }
 
     // Role Right End 
 
@@ -273,13 +282,13 @@ export function Quotationlist(params) {
 
                                 <div className="col-md-2">
                                     <div className="form-group">
-                                        <label>Spare Name</label>
+                                        <label>Ticket No.</label>
                                         <input
                                             type="text"
                                             className="form-control"
-                                            name="title"
-                                            value={searchFilters.title}
-                                            placeholder="Search by Spare Name"
+                                            name="ticket_no"
+                                            value={searchFilters.ticket_no}
+                                            placeholder="Search by Ticket No"
                                             onChange={handleFilterChange}
                                         />
                                     </div>
@@ -368,12 +377,14 @@ export function Quotationlist(params) {
                                     <thead>
                                         <tr>
                                             <th width="3%">#</th>
-                                            <th width="7%">Quotation Number</th>
+                                            <th width="13%">Quotation Number</th>
+                                            <th width="7%">Ticket No.</th>
+                                            <th width="10%">Ticket Date</th>
                                             <th width="20%">Engineer</th>
                                             <th width="10%">Customer Name</th>
-                                            <th width="8%">Spare ID</th>
+            
                                             <th width="15%">ModelNumber</th>
-                                            <th width="10%">Spare Name</th>
+                         
                                             <th width="10%">Quantity</th>
                                             <th width="15%">Price</th>
                                             <th width="10%">Status</th>
@@ -388,11 +399,13 @@ export function Quotationlist(params) {
                                             <tr key={item.id}>
                                                <td >{displayIndex}</td>
                                                 <td>{item.quotationNumber}</td>
+                                                <td>{item.ticketId}</td>
+                                                <td>{formatDate(item.ticketdate)}</td>
                                                 <td>{item.assignedEngineer}</td>
                                                 <td>{item.CustomerName}</td>
-                                                <td>{item.spareId}</td>
+                                       
                                                 <td>{item.ModelNumber}</td>
-                                                <td>{item.title}</td>
+                                               
                                                 <td>{item.quantity}</td>
                                                 <td>{item.price}</td>
 

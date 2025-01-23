@@ -348,10 +348,10 @@ export function Registercomplaint(params) {
       newErrors.specification = "Description is required";
     }
 
-    if (!value.additional_remarks && (value.ticket_type == 'VISIT' || value.ticket_type == 'HELPDESK')) {
-      isValid = false;
-      newErrors.additional_remarks = "Remark is required";
-    }
+    // if (!value.additional_remarks && (value.ticket_type == 'VISIT' || value.ticket_type == 'HELPDESK')) {
+    //   isValid = false;
+    //   newErrors.additional_remarks = "Remark is required";
+    // }
 
     // if (!value.Priority) {
     //     isValid = false;
@@ -1092,6 +1092,7 @@ export function Registercomplaint(params) {
 
 
   const fetchserial = async (serial) => {
+    setpurchseHide('')
     try {
       const response = await axiosInstance.get(
         `${Base_Url}/getserial/${serial || value.serial}`, {
@@ -1102,6 +1103,7 @@ export function Registercomplaint(params) {
       );
 
       setClassification(response.data[0].customerClassification)
+      setpurchseHide(response.data[0].purchase_date)
 
       const purchase_date = response.data[0].purchase_date
       const date = new Date(purchase_date);
@@ -1200,6 +1202,8 @@ export function Registercomplaint(params) {
         console.log(err)
       })
   }
+
+  console.log(purchasehide , "setpurch")
 
 
   const getcustomerinfo = (cust_id) => {
@@ -2099,7 +2103,7 @@ export function Registercomplaint(params) {
 
                 <div className="card mb-3" id="engineerInfo">
                   <div className="card-body">
-                    <h4 className="pname">Additional Info{value.ticket_type == 'VISIT' || value.ticket_type == 'HELPDESK' ? <span className="text-danger">*</span> : null}</h4>
+                    <h4 className="pname">Additional Info</h4>
                     <div className="mb-3">
                       <textarea
                         className="form-control"

@@ -48,5 +48,5 @@ export function useAxiosLoader() {
     // };
   }, []); // Empty dependency array ensures that interceptors are only set once on mount
 
-  return { loaders, axiosInstance };
+  return { loaders, axiosInstance  };
 }
