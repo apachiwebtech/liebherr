@@ -191,11 +191,22 @@ const Customer = () => {
   try {
     const confirmSubmission = window.confirm("Do you want to submit the data?");
     if (confirmSubmission) {
-      const payload = JSON.stringify({
-        ...formData,
-        dateofbirth: selectedDate,
-        anniversary_date: anniversary_date,
-      });
+      const payload ={
+        customer_fname : String(formData.customer_fname) || '',
+        customer_type: String(formData.customer_type),
+        customer_classification: '',
+        mobileno: '',
+        alt_mobileno: '',
+        dateofbirth: '',
+        anniversary_date: '',
+        email: '',
+        salutation: '',
+        customer_id: '',
+        dateofbirth: String(selectedDate) || '',
+        anniversary_date: String(anniversary_date) || '',
+      }
+
+
 
       const config = {
         headers: {

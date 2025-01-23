@@ -221,7 +221,7 @@ export function Registercomplaint(params) {
 
       // Get current date and subtract one day
       const currentDate = new Date();
-      currentDate.setDate(currentDate.getDate() + 1);
+      currentDate.setDate(currentDate.getDate() );
       const currentDateMinusOneDay = currentDate.toISOString().split('T')[0];
 
       // Compare lastDate and currentDateMinusOneDay
@@ -348,7 +348,7 @@ export function Registercomplaint(params) {
       newErrors.specification = "Description is required";
     }
 
-    if (!value.additional_remarks && value.ticket_type == 'VISIT' || value.ticket_type == 'HELPDESK') {
+    if (!value.additional_remarks && (value.ticket_type == 'VISIT' || value.ticket_type == 'HELPDESK')) {
       isValid = false;
       newErrors.additional_remarks = "Remark is required";
     }
@@ -870,7 +870,7 @@ export function Registercomplaint(params) {
               notify();
               setTimeout(() => {
                 navigate('/complaintlist');
-              }, 500);
+              }, 300);
             }
           })
           .catch(error => {

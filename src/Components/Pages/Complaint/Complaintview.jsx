@@ -832,7 +832,7 @@ export function Complaintview(params) {
             call_status: '',
           });
           fetchComplaintview(complaintid);
-
+          fetchComplaintDetails()
           setTicketUpdateSuccess({
             message: 'Ticket updated successfully!',
             visible: true,

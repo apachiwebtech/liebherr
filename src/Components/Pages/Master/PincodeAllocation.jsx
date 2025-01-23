@@ -15,47 +15,89 @@ import AllocationTab from "./AllocationTab";
 const PincodeAllocation = () => {
   // Step 1: Add this state to track errors
   const { loaders, axiosInstance } = useAxiosLoader();
-  const [filteredUsers, setFilteredUsers] = useState([]);
-  const [isEdit, setIsEdit] = useState(false);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [excelData, setExcelData] = useState([]);
-  const [duplicateError, setDuplicateError] = useState(""); // State to track duplicate error
   const token = localStorage.getItem("token"); // Get token from localStorage
-  const createdBy = 1; // Static value for created_by
-  const updatedBy = 2; // Static value for updated_by
-
-  const [formData, setFormData] = useState({
-    Pincode: "",
-  });
 
 
 
-  const importexcel = (event) => {
-    // If triggered by file input
-    const file = event?.target?.files ? event.target.files[0] : null;
+  const handleFileUpload = async (event) => {
+  const file = event.target.files[0];
+  if (!file) {
+    alert("Please select an Excel file.");
+    return;
+  }
 
-    // If triggered by button click, use the file uploaded
-    if (!file) {
-      alert("Please upload an Excel file first!");
-      return;
-    }
+  const formData = new FormData();
+  formData.append("file", file);
 
-    const reader = new FileReader();
+  try {
+    const response = await fetch("http://localhost:5000/upload", {
+      method: "POST",
+      body: formData,
+    });
 
-    reader.onload = (e) => {
-      const binaryStr = e.target.result;
-      const workbook = XLSX.read(binaryStr, { type: "binary" });
-      const sheetName = workbook.SheetNames[0]; // Get the first sheet
-      const sheet = workbook.Sheets[sheetName];
-      const jsonData = XLSX.utils.sheet_to_json(sheet); // Convert to JSON
-      setExcelData(jsonData);
-      console.log("Excel Data Imported:", jsonData);
+    const result = await response.json();
+    console.log("Processed Rows:", result.totalRows);
+  } catch (error) {
+    console.error("Upload failed", error);
+  }
+};
+
+const importexcel = (event) => {
+  const file = event?.target?.files ? event.target.files[0] : null;
+
+  if (!file) {
+    alert("Please upload an Excel file first!");
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = async (e) => {
+    const data = new Uint8Array(e.target.result);
+    const workbook = XLSX.read(data, { type: "array" });
+
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+
+    console.log("Sheet Loaded:", sheet);
+
+    const chunkSize = 70000; // Process in smaller chunks to avoid memory issues
+    const jsonData = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+    console.log("Total Rows:", jsonData.length);
+
+    // Column mapping function
+    const mapKeys = (obj) => {
+      const keyMapping = {
+        "RESIDENT BRANCH": "resident_branch",
+      };
+
+      return Object.fromEntries(
+        Object.entries(obj).map(([key, value]) => [
+          keyMapping[key] || key.toLowerCase().replace(/\s+/g, "_"),
+          value,
+        ])
+      );
     };
 
-    reader.readAsBinaryString(file);
+    let processedData = [];
+    for (let i = 0; i < jsonData.length; i += chunkSize) {
+      const chunk = jsonData.slice(i, i + chunkSize).map(mapKeys);
+      console.log(`Processing chunk ${i / chunkSize + 1}`);
+      processedData.push(...chunk);
+      
+      // Simulate async processing to avoid UI freeze
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+
+    setExcelData(processedData);
+    console.log(processedData);
   };
-  
+
+  reader.readAsArrayBuffer(file);
+};
+
 
   const uploadexcel = () => {
 
