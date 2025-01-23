@@ -157,7 +157,7 @@ app.post("/lhilogin", async (req, res) => {
     const sql = `SELECT top 1  id, Lhiuser, email FROM lhilogin WHERE email = '${lhiemail}' `;
 
     const result = await pool.request().query(sql);
-    
+
     if (result.recordset.length > 0) {
       const user = result.recordset[0];
       // Generate JWT token
@@ -5018,7 +5018,7 @@ app.get("/getengineerpopulate/:engineerid", authenticateToken, async (req, res) 
 });
 
 app.post("/updateengineerstatus", authenticateToken, async (req, res) => {
-  const { dataId ,} = req.body;
+  const { dataId, } = req.body;
   try {
     const pool = await poolPromise;
     const sql = `SELECT * FROM awt_engineermaster WHERE id = @dataId`;
@@ -5033,19 +5033,19 @@ app.post("/updateengineerstatus", authenticateToken, async (req, res) => {
       const status = request.recordset[0].status;
       console.log(request.recordset[0].status);
       let query;
-      let seen ;
+      let seen;
       if (status == 1) {
         // If status is 1, deactivate and set activation date
         query = `UPDATE awt_engineermaster
                  SET status = 0
                  WHERE id = @dataId`;
-                 seen = 0;
-                } else {
-                  // If status is not 1, deactivate and set deactivation date
-                  query = `UPDATE awt_engineermaster
+        seen = 0;
+      } else {
+        // If status is not 1, deactivate and set deactivation date
+        query = `UPDATE awt_engineermaster
                   SET status = 1
                   WHERE id = @dataId`;
-                  seen = 1;
+        seen = 1;
       }
 
       // Execute the update query
@@ -5054,7 +5054,7 @@ app.post("/updateengineerstatus", authenticateToken, async (req, res) => {
         .query(query);
 
       // Send the response back with rows affected
-      return res.json({ num_row_aff: update.rowsAffected[0] , seen : seen });
+      return res.json({ num_row_aff: update.rowsAffected[0], seen: seen });
     } else {
       // If no user found with the provided dataId
       return res.status(404).json({ message: 'User not found' });
@@ -6922,19 +6922,19 @@ app.post("/updateservicestatus", authenticateToken, async (req, res) => {
       const status = request.recordset[0].status;
       console.log(request.recordset[0].status);
       let query;
-      let seen ;
+      let seen;
       if (status == 1) {
         // If status is 1, deactivate and set activation date
         query = `UPDATE awt_servicecontract
                  SET status = 0
                  WHERE id = @dataId`;
-                 seen = 0;
-                } else {
-                  // If status is not 1, deactivate and set deactivation date
-                  query = `UPDATE awt_servicecontract
+        seen = 0;
+      } else {
+        // If status is not 1, deactivate and set deactivation date
+        query = `UPDATE awt_servicecontract
                   SET status = 1
                   WHERE id = @dataId`;
-                  seen = 1;
+        seen = 1;
       }
 
       // Execute the update query
@@ -6943,7 +6943,7 @@ app.post("/updateservicestatus", authenticateToken, async (req, res) => {
         .query(query);
 
       // Send the response back with rows affected
-      return res.json({ num_row_aff: update.rowsAffected[0] , seen : seen });
+      return res.json({ num_row_aff: update.rowsAffected[0], seen: seen });
     } else {
       // If no user found with the provided dataId
       return res.status(404).json({ message: 'User not found' });
@@ -7118,12 +7118,12 @@ app.get("/getreport", authenticateToken, async (req, res) => {
 app.post("/postlhidata", authenticateToken, async (req, res) => {
   const { Lhiuser,
     mobile_no,
-    Password,
+    password,
     UserCode,
     email,
     remarks,
     status,
-    Roles,
+    Role,
     Reporting_to,
     Designation,
 
@@ -7155,7 +7155,7 @@ app.post("/postlhidata", authenticateToken, async (req, res) => {
         return res.json({ message: "Soft-deleted data restored successfully!" });
       } else {
         // Step 3: Insert new entry if no duplicates found
-        sql = `INSERT INTO lhi_user (Lhiuser,password,remarks,Usercode,mobile_no,email,status,Role,Reporting_to,Designation) VALUES ('${Lhiuser}','${Password}','${remarks}','${UserCode}','${mobile_no}','${email}','${status}','${Roles}','${Reporting_to}','${Designation}')`
+        sql = `INSERT INTO lhi_user (Lhiuser,password,remarks,Usercode,mobile_no,email,status,Role,Reporting_to,Designation) VALUES ('${Lhiuser}','${password}','${remarks}','${UserCode}','${mobile_no}','${email}','${status}','${Role}','${Reporting_to}','${Designation}')`
         await pool.request().query(sql);
 
         return res.json({ message: "Lhiuser added successfully!" });
@@ -7190,7 +7190,7 @@ app.get("/requestlhidata/:id", authenticateToken, async (req, res) => {
 // update for Lhiuser
 app.post("/putlhidata", authenticateToken, async (req, res) => {
   const {
-    Lhiuser, id, updated_by, mobile_no, Usercode, password, status, email, remarks, Roles, Designation, Reporting_to
+    Lhiuser, id, updated_by, mobile_no, Usercode, password, status, email, remarks, Role, Designation, Reporting_to
   } = req.body;
 
 
@@ -7223,7 +7223,7 @@ app.post("/putlhidata", authenticateToken, async (req, res) => {
           status = ${status},
           email = '${email}',
           remarks = '${remarks}',
-          Role = '${Roles}',
+          Role = '${Role}',
           Designation = '${Designation}',
           Reporting_to = '${Reporting_to}'
         WHERE id = '${id}'
@@ -8038,16 +8038,19 @@ app.post("/updatestatus", authenticateToken, async (req, res) => {
       const status = request.recordset[0].status;
       console.log(request.recordset[0].status);
       let query;
+      let seen;
       if (status == 1) {
         // If status is 1, deactivate and set activation date
         query = `UPDATE lhi_user
-                 SET status = 0, deactivation_date = GETDATE()
+                 SET status = 0
                  WHERE id = @dataId`;
+        seen = 0;
       } else {
         // If status is not 1, deactivate and set deactivation date
         query = `UPDATE lhi_user
-                 SET status = 1, activation_date = GETDATE()
-                 WHERE id = @dataId`;
+                  SET status = 1
+                  WHERE id = @dataId`;
+        seen = 1;
       }
 
       // Execute the update query
@@ -8056,7 +8059,7 @@ app.post("/updatestatus", authenticateToken, async (req, res) => {
         .query(query);
 
       // Send the response back with rows affected
-      return res.json({ status: update.rowsAffected[0] });
+      return res.json({ num_row_aff: update.rowsAffected[0], seen: seen });
     } else {
       // If no user found with the provided dataId
       return res.status(404).json({ message: 'User not found' });

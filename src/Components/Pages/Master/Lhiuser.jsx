@@ -1,9 +1,10 @@
 import CryptoJS from 'crypto-js';
 import axios from "axios";
 import * as XLSX from "xlsx";
+import md5 from 'js-md5';
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash, FaEye } from "react-icons/fa";
-import { Base_Url,secretKey } from "../../Utils/Base_Url";
+import { Base_Url, secretKey } from "../../Utils/Base_Url";
 import { Navigate } from "react-router-dom";
 import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
@@ -15,8 +16,8 @@ import { getRoleData } from "../../Store/Role/role-action";
 const Lhiuser = () => {
   // Step 1: Add this state to track errors
   const { loaders, axiosInstance } = useAxiosLoader();
-  const [roles,setRoles] = useState([]);
-  const [Reporting_to,setReporting] = useState([]);
+  const [roles, setRoles] = useState([]);
+  const [Reporting_to, setReporting] = useState([]);
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -32,47 +33,47 @@ const Lhiuser = () => {
   const [formData, setFormData] = useState({
     Lhiuser: "",
     Usercode: "",
-    passwordmd5: "",
+    password: "",
     mobile_no: "",
     email: "",
     status: "",
     remarks: "",
     Role: "",
     Designation: "",
-    Reporting_to:"",
+    Reporting_to: "",
   });
 
- 
 
-    const fetchRoles = async () => {
-      try {
-        const response = await axiosInstance.get(`${Base_Url}/getrole`,{
-          headers: {
-             Authorization: token, // Send token in headers
-           },
-         });
-        console.log(response.data);
-        
-        setRoles(response.data);
-      } catch (error) {
-        console.error("Error fetching countries:", error);
-      }
-    };
-    
 
-    const fetchReporting = async () => {
-      try {
-        const response = await axiosInstance.get(`${Base_Url}/getreport`, {
-          headers: {
-            Authorization: token, // Send token in headers
-          },
-        });
-        console.log(response.data);
-        setReporting(response.data);
-      } catch (error) {
-        console.error("Error fetching users:", error);
-      }
-    };
+  const fetchRoles = async () => {
+    try {
+      const response = await axiosInstance.get(`${Base_Url}/getrole`, {
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      });
+      console.log(response.data);
+
+      setRoles(response.data);
+    } catch (error) {
+      console.error("Error fetching countries:", error);
+    }
+  };
+
+
+  const fetchReporting = async () => {
+    try {
+      const response = await axiosInstance.get(`${Base_Url}/getreport`, {
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      });
+      console.log(response.data);
+      setReporting(response.data);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
   const fetchUsers = async () => {
     try {
       const response = await axiosInstance.get(`${Base_Url}/getlhidata`, {
@@ -95,24 +96,11 @@ const Lhiuser = () => {
   }, []);
 
   const handleChange = (e) => {
-    let { name, value } = e.target;
-
-    // If the field is Password, hash the value
-    if (name === 'Password') {
-      // Hash the password before setting the state
-      const hashedPassword = CryptoJS.MD5(value).toString();
-      setFormData({
-        ...formData,
-        [name]: value,  // Update the password field itself
-        passwordmd5: hashedPassword,  // Update the hashed password
-      });
-    } else {
-      // Update other fields normally
-      setFormData({
-        ...formData,
-        [name]: value,
-      });
-    }
+    const { name, value } = e.target;
+    setFormData(prevState => ({
+     ...prevState,
+     [name]: value
+   }));
   };
 
 
@@ -126,6 +114,8 @@ const Lhiuser = () => {
     setCurrentPage(0);
   };
 
+
+
   // Step 2: Add form validation function
   const validateForm = () => {
     const newErrors = {};  // Initialize the errors object
@@ -133,15 +123,21 @@ const Lhiuser = () => {
     if (!formData.Lhiuser || !formData.Lhiuser.trim()) {
       newErrors.Lhiuser = "Lhiuser Field is required.";
     }
-  
-    if (!formData.Password || !formData.passwordmd5.trim()) {
-      newErrors.Password = "Password Field is required.";
+
+    if (!formData.password || !formData.password.trim()) {
+      newErrors.password = "password Field is required.";
     }
     if (!formData.mobile_no || !formData.mobile_no.trim()) {
       newErrors.mobile_no = "Mobile Number Field is required.";
     }
     if (!formData.email || !formData.email.trim()) {
       newErrors.email = "Email Field is required.";
+    }
+    if (!formData.Role || !formData.Role.trim()) {
+      newErrors.Role = "Role Field is required.";
+    }
+    if (!formData.Designation || !formData.Designation.trim()) {
+      newErrors.Designation = "Designation is required.";
     }
 
 
@@ -161,6 +157,13 @@ const Lhiuser = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+        const validationErrors = validateForm();
+    const newErrors = {};
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
     if (validateForm()) {
 
 
@@ -171,13 +174,14 @@ const Lhiuser = () => {
           "Do you want to submit the data?"
         );
         if (confirmSubmission) {
+          const hashedFormData = {
+            ...formData,
+            password: md5(formData.password) // Hash the password using MD5
+          };
           if (isEdit) {
             // For update, include 'updated_by'
             await axios
-              .post(`${Base_Url}/putlhidata`, {
-                ...formData,
-                updated_by: updatedBy,
-              },
+              .post(`${Base_Url}/putlhidata`, { ...hashedFormData,updated_by:updatedBy },
                 {
                   headers: {
                     Authorization: token, // Send token in headers
@@ -187,18 +191,19 @@ const Lhiuser = () => {
                 setFormData({
                   Lhiuser: "",
                   Usercode: "",
-                  Password: "",
+                  password: "",
                   mobile_no: "",
                   email: "",
                   status: "",
                   remarks: "",
                   Role: "",
                   Designation: "",
-                  Reporting_to:"",
+                  Reporting_to: "",
 
 
                 });
                 fetchUsers();
+                setIsEdit(false);
               })
               .catch((error) => {
                 if (error.response && error.response.status === 409) {
@@ -221,14 +226,14 @@ const Lhiuser = () => {
                 setFormData({
                   Lhiuser: "",
                   Usercode: "",
-                  Password: "",
+                  password: "",
                   mobile_no: "",
                   email: "",
                   status: "",
                   remarks: "",
                   Role: "",
                   Designation: "",
-                  Reporting_to:"",
+                  Reporting_to: "",
                 });
                 fetchUsers();
 
@@ -268,10 +273,10 @@ const Lhiuser = () => {
         },
       });
       setFormData(response.data);
-      
+
       setIsEdit(true);
       console.log(response.data);
-     
+
     } catch (error) {
       console.error("Error editing user:", error);
     }
@@ -298,64 +303,64 @@ const Lhiuser = () => {
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
   // export to excel 
-    const exportToExcel = () => {
-      // Create a new workbook
-      const workbook = XLSX.utils.book_new();
-  
-      // Convert data to a worksheet
-      const worksheet = XLSX.utils.json_to_sheet(filteredUsers.map(user => ({
-        "Name": user.Lhiuser,
-        "UserCode": user.Usercode, // Add fields you want to export
-        "MobileNumber": user.mobile_no,
-        "Email": user.email,
-        "Remarks": user.remarks,
-        "Designation ": user.designation,
-        "Roles": user.Role,
-        "ReportingTo": user.Reporting_to,
-        "Activation Date": user.activation_date,
-        "DeActivationDate": user.deactivation_date,
-      })));
-  
-      // Append the worksheet to the workbook
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Lhi Users");
-  
-      // Export the workbook
-      XLSX.writeFile(workbook, "LHIUSERS.xlsx");
-    };
-  
-    // export to excel end 
-  
+  const exportToExcel = () => {
+    // Create a new workbook
+    const workbook = XLSX.utils.book_new();
+
+    // Convert data to a worksheet
+    const worksheet = XLSX.utils.json_to_sheet(filteredUsers.map(user => ({
+      "Name": user.Lhiuser,
+      "UserCode": user.Usercode, // Add fields you want to export
+      "MobileNumber": user.mobile_no,
+      "Email": user.email,
+      "Remarks": user.remarks,
+      "Designation ": user.designation,
+      "Roles": user.Role,
+      "ReportingTo": user.Reporting_to,
+      "Activation Date": user.activation_date,
+      "DeActivationDate": user.deactivation_date,
+    })));
+
+    // Append the worksheet to the workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Lhi Users");
+
+    // Export the workbook
+    XLSX.writeFile(workbook, "LHIUSERS.xlsx");
+  };
+
+  // export to excel end 
+
   // Role Right 
-    
-    
-     const Decrypt = (encrypted) => {
-      encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
-      const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
-      return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
-    };
-  
-    const storedEncryptedRole = localStorage.getItem("Userrole");
-    const decryptedRole = Decrypt(storedEncryptedRole);
-  
-    const roledata = {
-      role: decryptedRole,
-      pageid: String(27)
-    }
-  
-    const dispatch = useDispatch()
-    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
-  
-  
-    useEffect(() => {
-      dispatch(getRoleData(roledata))
-    }, [])
-  
-    // Role Right End 
-  
+
+
+  const Decrypt = (encrypted) => {
+    encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+    const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+    return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+  };
+
+  const storedEncryptedRole = localStorage.getItem("Userrole");
+  const decryptedRole = Decrypt(storedEncryptedRole);
+
+  const roledata = {
+    role: decryptedRole,
+    pageid: String(27)
+  }
+
+  const dispatch = useDispatch()
+  const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+
+
+  useEffect(() => {
+    dispatch(getRoleData(roledata))
+  }, [])
+
+  // Role Right End 
+
 
   return (
     <div className="tab-content">
-     {roleaccess > 1 ?  <div className="row mp0">
+      {roleaccess > 1 ? <div className="row mp0">
         {loaders && (
           <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <SyncLoader loading={loaders} color="#FFFFFF" />
@@ -429,19 +434,19 @@ const Lhiuser = () => {
                     <div className="col-4">
                       <div className="mb-3">
                         <label htmlFor="PassInput" className="input-field">
-                          Password<span className="text-danger">*</span>
+                          password<span className="text-danger">*</span>
                         </label>
                         <input
                           type="password"
                           className="form-control"
-                          name="Password"
+                          name="password"
                           id="PassInput"
-                          value={formData.Password}
+                          value={formData.password}
                           onChange={handleChange}
-                          placeholder="Enter Password "
+                          placeholder="Enter password "
                         />
-                        {errors.Password && (
-                          <small className="text-danger">{errors.Password}</small>
+                        {errors.password && (
+                          <small className="text-danger">{errors.password}</small>
                         )}
                         {duplicateError && (
                           <small className="text-danger">{duplicateError}</small>
@@ -458,7 +463,7 @@ const Lhiuser = () => {
                           Mobile Number<span className="text-danger">*</span>
                         </label>
                         <input
-                          type="number"
+                          type="tel"
                           className="form-control"
                           name="mobile_no"
                           id="MobileInput"
@@ -519,55 +524,55 @@ const Lhiuser = () => {
                   </div>
                   <div className="row ">
                     <div className="col-4">
-                    <div className="mb-3">
-                    <label htmlFor="Role" className="form-label pb-0 dropdown-label"
-                    > Roles<span className="text-danger">*</span>
-                    </label>
-                    <select
-                      className="form-select dropdown-select"
-                      name="Role"
-                      value={formData.Role}
-                      onChange={handleChange}
-                    >
-                      <option value="">Select Role</option>
-                      {roles.map((Role) => (
-                        <option key={Role.id} value={Role.id}>
-                          {Role.title}
-                        </option>
-                      ))}
-                    </select>
-                    
-                    {errors.Role && (
-                      <small className="text-danger">{errors.Role}</small>
-                    )}
-                  </div>
+                      <div className="mb-3">
+                        <label htmlFor="Role" className="form-label pb-0 dropdown-label"
+                        > Roles<span className="text-danger">*</span>
+                        </label>
+                        <select
+                          className="form-select dropdown-select"
+                          name="Role"
+                          value={formData.Role}
+                          onChange={handleChange}
+                        >
+                          <option value="">Select Role</option>
+                          {roles.map((Role) => (
+                            <option key={Role.id} value={Role.id}>
+                              {Role.title}
+                            </option>
+                          ))}
+                        </select>
+
+                        {errors.Role && (
+                          <small className="text-danger">{errors.Role}</small>
+                        )}
+                      </div>
                     </div>
                     <div className="col-4">
-                    <div className="mb-3">
-                    <label htmlFor="Reporting_to" className="form-label pb-0 dropdown-label"
-                    > Reporting To<span className="text-danger"></span>
-                    </label>
-                    <select
-                      className="form-select dropdown-select"
-                      name="Reporting_to"
-                      value={formData.Reporting_to}
-                      onChange={handleChange}
-                    >
-                      <option value="">Reporting To</option>
-                      {Reporting_to.map((Reporting_to) => (
-                        <option key={Reporting_to.id} value={Reporting_to.id}>
-                          {Reporting_to.Lhiuser}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.Repoting_to && (
-                      <small className="text-danger">{errors.Reporting_to}</small>
-                    )}
-                  </div>
+                      <div className="mb-3">
+                        <label htmlFor="Reporting_to" className="form-label pb-0 dropdown-label"
+                        > Reporting To<span className="text-danger"></span>
+                        </label>
+                        <select
+                          className="form-select dropdown-select"
+                          name="Reporting_to"
+                          value={formData.Reporting_to}
+                          onChange={handleChange}
+                        >
+                          <option value="">Reporting To</option>
+                          {Reporting_to.map((Reporting_to) => (
+                            <option key={Reporting_to.id} value={Reporting_to.id}>
+                              {Reporting_to.Lhiuser}
+                            </option>
+                          ))}
+                        </select>
+                        {errors.Repoting_to && (
+                          <small className="text-danger">{errors.Reporting_to}</small>
+                        )}
+                      </div>
                     </div>
-                    
+
                     <div className="col-4">
-                        <div className="mb-3">
+                      <div className="mb-3">
                         <label htmlFor="DesignationInput" className="input-field">
                           Designation<span className="text-danger">*</span>
                         </label>
@@ -590,8 +595,8 @@ const Lhiuser = () => {
                       </div>
 
                     </div>
-                    </div>
-                    <div className='row'>
+                  </div>
+                  <div className='row'>
                     <div className="col-12">
                       <div className="mb-3">
                         <label htmlFor="RemarksInput" className="input-field">
@@ -609,11 +614,11 @@ const Lhiuser = () => {
                       </div>
                     </div>
                   </div>
-                  {roleaccess > 2 ?   <div className="text-right">
+                  {roleaccess > 2 ? <div className="text-right">
                     <button className="btn btn-liebherr" type="submit">
                       {isEdit ? "Update" : "Submit"}
                     </button>
-                  </div> : null } 
+                  </div> : null}
                 </form>
 
 
@@ -651,12 +656,12 @@ const Lhiuser = () => {
                       className="form-control d-inline-block"
                       style={{ width: "300px" }}
                     />
-                     <button
-                        className="btn btn-primary"
-                        onClick={exportToExcel}
-                      >
-                        Export to Excel
-                      </button>
+                    <button
+                      className="btn btn-primary"
+                      onClick={exportToExcel}
+                    >
+                      Export to Excel
+                    </button>
                   </div>
 
                   {/* Adjust table padding and spacing */}
@@ -708,7 +713,7 @@ const Lhiuser = () => {
                                 type="checkbox"
                                 onChange={handleChangestatus}
                                 data-id={item.id}
-                                checked={item.status === 1}  // Check if status is 1 (checked)
+                                checked={item.status == 1 ? 'checked' : ''}
                                 className="status"
                               />
 

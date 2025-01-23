@@ -283,15 +283,7 @@ const MasterFranchise = (params) => {
     }
   };
 
-  const handleSearch = (e) => {
-    const value = e.target.value.toLowerCase();
-    setSearchTerm(value);
-    const filtered = users.filter(
-      (user) => user.title && user.title.toLowerCase().includes(value)
-    );
-    setFilteredUsers(filtered);
-    setCurrentPage(0);
-  };
+
 
   // Step 2: Add form validation function
   const validateForm = () => {
@@ -462,42 +454,6 @@ const MasterFranchise = (params) => {
       }
     } catch (error) {
       console.error("Error during form submission:", error);
-    }
-  };
-
-  const deleted = async (id) => {
-    try {
-      const response = await axiosInstance.post(`${Base_Url}/deletefranchisedata`, {
-        id,
-      },{
-        headers: {
-           Authorization: token, // Send token in headers
-         },
-       });
-
-      setFormData({
-        title: "",
-      });
-      fetchUsers();
-    } catch (error) {
-      console.error("Error deleting user:", error);
-    }
-  };
-
-  const edit = async (id) => {
-    try {
-      const response = await axiosInstance.get(
-        `${Base_Url}/requestfranchisedata/${id}`
-        ,{
-          headers: {
-             Authorization: token, // Send token in headers
-           },
-         });
-      setFormData(response.data);
-      setIsEdit(true);
-      console.log(response.data);
-    } catch (error) {
-      console.error("Error editing user:", error);
     }
   };
 
