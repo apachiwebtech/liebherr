@@ -14,6 +14,7 @@ import AllocationTab from './AllocationTab';
 
 export function BussinePartner(params) {
     const { loaders, axiosInstance } = useAxiosLoader();
+      const [loading, setLoading] = useState(false);
     const [Feedbackdata, setFeedbackdata] = useState([]);
     const token = localStorage.getItem("token");
 
@@ -29,7 +30,9 @@ export function BussinePartner(params) {
         } catch (error) {
             console.error('Error fetching Feedbackdata:', error);
             setFeedbackdata([]);
-        }
+        }finally {
+            setLoading(false);  // Stop loader after data is loaded or in case of error
+          }
     };
 
     const sendtoedit = async (id) => {
@@ -116,6 +119,12 @@ export function BussinePartner(params) {
     return (
         <div className="tab-content">
             <AllocationTab/>
+                   {(loaders || loading) && (
+                         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                           <SyncLoader loading={loaders || loading} color="#FFFFFF" />
+                         </div>
+                       )}
+            
             {roleaccess > 1 ? <div className="row mp0">
                 <div className="col-md-12 col-12">
                     <div className="card mb-3 tab_box">
