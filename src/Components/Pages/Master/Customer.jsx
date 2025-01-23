@@ -104,7 +104,6 @@ const Customer = () => {
         ...response.data[0],
         // Rename keys to match your formData structure
         customer_fname: response.data[0].customer_fname,
-        // customer_lname: response.data[0].customer_lname,
         email: response.data[0].email,
         customer_type: response.data[0].customer_type,
         customer_classification: response.data[0].customer_classification,
@@ -154,11 +153,6 @@ const Customer = () => {
       newErrors.customer_fname = "Customer First Name Field is required.";
     }
 
-
-    //  if (!formData.customer_lname?.trim()) {
-    //    newErrors.customer_lname = "Customer Last Name Field is required.";
-    //  }
-
     if (!formData.customer_type || formData.customer_type === 'selected') {
       newErrors.customer_type = "Customer Type Dropdown is required.";
     }
@@ -177,118 +171,121 @@ const Customer = () => {
 
 
   //handlesubmit form
- const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  const validationErrors = validateForm();
-  if (Object.keys(validationErrors).length > 0) {
-    setErrors(validationErrors);
-    return;
-  }
-
-  setDuplicateError(''); // Clear duplicate error before submitting
-
-  try {
-    const confirmSubmission = window.confirm("Do you want to submit the data?");
-    if (confirmSubmission) {
-      const payload = JSON.stringify({
-        ...formData,
-        dateofbirth: selectedDate,
-        anniversary_date: anniversary_date,
-      });
-
-      const config = {
-        headers: {
-          Authorization: token,
-          'Content-Type': 'application/json',
-        },
-      };
-
-      if (isEdit) {
-        // For update, include duplicate check
-        await axiosInstance.post(`${Base_Url}/putcustomer`, payload, config)
-          .then(response => {
-            setFormData({
-              customer_fname: '',
-              // customer_lname: '',
-              customer_type: '',
-              customer_classification: '',
-              mobileno: '',
-              alt_mobileno: '',
-              dateofbirth: '',
-              anniversary_date: '',
-              email: '',
-              salutation: '',
-              customer_id: '',
-            });
-            setSuccessMessage('Customer Updated Successfully!');
-            setTimeout(() => setSuccessMessage(''), 3000);
-            fetchCustomerData();
-          })
-          .catch(error => {
-            if (error.response && error.response.status === 409) {
-              setDuplicateError('Duplicate entry, Customer already exists!'); // Show duplicate error for update
-            }
-          });
-      } else {
-        // For insert, include duplicate check
-        await axiosInstance.post(`${Base_Url}/postcustomer`, payload, config)
-          .then(response => {
-            setFormData({
-              customer_fname: '',
-              // customer_lname: '',
-              customer_type: '',
-              customer_classification: '',
-              mobileno: '',
-              alt_mobileno: '',
-              dateofbirth: '',
-              anniversary_date: '',
-              email: '',
-              salutation: '',
-              customer_id: '',
-            });
-            setSuccessMessage('Customer Submitted Successfully!');
-            setTimeout(() => setSuccessMessage(''), 3000);
-            fetchCustomerData();
-          })
-          .catch(error => {
-            if (error.response && error.response.status === 409) {
-              setDuplicateError('Duplicate entry, Customer already exists!'); // Show duplicate error for insert
-            }
-          });
-      }
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
     }
-  } catch (error) {
-    console.error('Error during form submission:', error);
-  }
-};
 
+    setDuplicateError(''); // Clear duplicate error before submitting
 
-
-  const deleted = async (id) => {
     try {
-      const response = await axiosInstance.post(`${Base_Url}/deletecustomer`, { id }, {
-        headers: {
-          Authorization: token,
-        },
-      });
-      setFormData({
-        customer_fname: '',
-        // customer_lname: '',
-        customer_type: '',
-        customer_classification: '',
-        mobileno: '',
-        alt_mobileno: '',
-        dateofbirth: '',
-        anniversary_date: '',
-        email: '',
-        customer_id: '',
-      })
-      fetchCustomerData();
+      const confirmSubmission = window.confirm("Do you want to submit the data?");
+      if (confirmSubmission) {
+        if (isEdit) {
+          // For update, include duplicate check
+          await axiosInstance.post(`${Base_Url}/putcustomer`, {
+            ...formData,
+            dateofbirth: selectedDate,
+            anniversary_date: anniversary_date,
+          }, {
+            headers: {
+              Authorization: token, // Send token in headers
+            },
+          })
+            .then(response => {
+              setFormData({
+                customer_fname: '',
+                // customer_lname: '',
+                customer_type: '',
+                customer_classification: '',
+                mobileno: '',
+                alt_mobileno: '',
+                dateofbirth: '',
+                anniversary_date: '',
+                email: '',
+                salutation: '',
+                customer_id: '',
+              });
+              setSuccessMessage('Customer Updated Successfully!');
+              setTimeout(() => setSuccessMessage(''), 3000);
+              fetchCustomerData();
+            })
+            .catch(error => {
+              if (error.response && error.response.status === 409) {
+                setDuplicateError('Duplicate entry, Customer already exists!'); // Show duplicate error for update
+              }
+            });
+        } else {
+          // For insert, include duplicate check
+          await axiosInstance.post(`${Base_Url}/postcustomer`, {
+            ...formData,
+            dateofbirth: selectedDate,
+            anniversary_date: anniversary_date,
+          }, {
+            headers: {
+              Authorization: token, // Send token in headers
+            },
+          })
+            .then(response => {
+              setFormData({
+                customer_fname: '',
+                // customer_lname: '',
+                customer_type: '',
+                customer_classification: '',
+                mobileno: '',
+                alt_mobileno: '',
+                dateofbirth: '',
+                anniversary_date: '',
+                email: '',
+                salutation: '',
+                customer_id: '',
+              });
+              setSuccessMessage('Customer Submitted Successfully!');
+              setTimeout(() => setSuccessMessage(''), 3000);
+              fetchCustomerData();
+            })
+            .catch(error => {
+              if (error.response && error.response.status === 409) {
+                setDuplicateError('Duplicate entry, Customer already exists!'); // Show duplicate error for insert
+              }
+            });
+        }
+      }
     } catch (error) {
-      console.error('Error deleting user:', error);
+      console.error('Error during form submission:', error);
     }
   };
+
+
+
+  // const deleted = async (id) => {
+  //   try {
+  //     const response = await axiosInstance.post(`${Base_Url}/deletecustomer`, { id }, {
+  //       headers: {
+  //         Authorization: token,
+  //       },
+  //     });
+  //     setFormData({
+  //       customer_fname: '',
+  //       // customer_lname: '',
+  //       customer_type: '',
+  //       customer_classification: '',
+  //       mobileno: '',
+  //       alt_mobileno: '',
+  //       dateofbirth: '',
+  //       anniversary_date: '',
+  //       email: '',
+  //       customer_id: '',
+  //     })
+  //     fetchCustomerData();
+  //   } catch (error) {
+  //     console.error('Error deleting user:', error);
+  //   }
+  // };
 
 
   // Role Right 
@@ -505,7 +502,7 @@ const Customer = () => {
                           name="dateofbirth"
                           aria-describedby="dbirth"
                         />
-                          {/* <input
+                        {/* <input
                             type="date"
                             className="form-control"
                             id="dbirth"
