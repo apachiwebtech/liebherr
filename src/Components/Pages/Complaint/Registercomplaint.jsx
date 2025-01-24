@@ -343,7 +343,7 @@ export function Registercomplaint(params) {
       isValid = false;
       newErrors.classification = "Classification is required";
     }
-    if (!value.specification && value.ticket_type !== 'VISIT' && value.ticket_type !== 'HELPDESK') {
+    if (!value.specification) {
       isValid = false;
       newErrors.specification = "Description is required";
     }
@@ -996,6 +996,8 @@ export function Registercomplaint(params) {
   const onHandleChange = (e) => {
     const { name, value: inputValue } = e.target;
 
+    console.log(value);
+
 
     setValue(prevState => ({
       ...prevState,
@@ -1034,6 +1036,9 @@ export function Registercomplaint(params) {
         break;
       case "complaint_date":
         setDate(e.target.value);
+        break;
+      case "mobile":
+        fetchfrommobile(inputValue)
         break;
     }
 
@@ -1112,8 +1117,6 @@ export function Registercomplaint(params) {
 
       setpurchase_data(formattedDate)
 
-
-
       if (response.data && response.data[0]) {
 
         console.log("serial")
@@ -1132,7 +1135,48 @@ export function Registercomplaint(params) {
           email: data.email || "",
           address: data.address || "",
           customer_id: data.CustomerID || "",
+          pincode : data.pincode || ''
         });
+      }
+
+
+    } catch (error) {
+      console.error("Error fetching serial details:", error);
+    }
+  };
+
+
+  const fetchfrommobile = async (mobile) => {
+
+    setpurchseHide('')
+    try {
+      const response = await axiosInstance.get(
+        `${Base_Url}/fetchfrommobile/${mobile || value.mobile}`, {
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      }
+      );
+
+
+      if (response.data && response.data[0]) {
+
+        console.log("serial")
+        const data = response.data[0];
+        setValue((prevValue) => ({
+          ...prevValue,
+          classification: data.customer_classification || "",
+          salutation: data.salutation || "",
+          customer_name: data.customer_fname || "",
+          cust_type: data.customer_type || "",
+          mobile: data.mobileno || "",
+          alt_mobile: data.alt_mobileno || "",
+          email: data.email || "",
+          address: data.address || "",
+          customer_id: data.customer_id || "",
+          pincode : data.pincode || '',
+          
+      }));
       }
 
 
@@ -1203,7 +1247,6 @@ export function Registercomplaint(params) {
       })
   }
 
-  console.log(purchasehide , "setpurch")
 
 
   const getcustomerinfo = (cust_id) => {
@@ -1679,7 +1722,8 @@ export function Registercomplaint(params) {
                     </div>
                     <div className="col-md-4">
                       <div className="mb-3">
-                        <label htmlFor="exampleFormControlInput1" className="form-label">Mobile No. {value.ticket_type == 'VISIT' || value.ticket_type == 'HELPDESK' ? null : <span className="text-danger">*</span>}<input type="checkbox" name='mwhatsapp' onChange={oncheckchange} checked={checkboxes.mwhatsapp === 1} />Whatsapp</label>
+                        <label htmlFor="exampleFormControlInput1" className="form-label">Mobile No. {value.ticket_type == 'VISIT' || value.ticket_type == 'HELPDESK' ? null : <span className="text-danger">*</span>}
+                        <input type="checkbox" name='mwhatsapp' onChange={oncheckchange} checked={checkboxes.mwhatsapp === 1} />Whatsapp</label>
                         <input type="number" onKeyDown={handleKeyDown} value={value.mobile} name="mobile" onChange={(e) => {
                           if (e.target.value.length <= 10) {
                             onHandleChange(e);
@@ -2087,7 +2131,7 @@ export function Registercomplaint(params) {
 
                 <div className="card mb-3" id="engineerInfo">
                   <div className="card-body">
-                    <h4 className="pname">Fault Description{value.ticket_type == 'VISIT' || value.ticket_type == 'HELPDESK' ? null : <span className="text-danger">*</span>}</h4>
+                    <h4 className="pname">Fault Description <span className="text-danger">*</span></h4>
                     <div className="mb-3">
                       <textarea
                         className="form-control"

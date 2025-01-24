@@ -11,11 +11,11 @@ const jwt = require("jsonwebtoken");
 const MobApp = require('./Routes/MobApp')
 const fetchdata = require('./fetchdata')
 const RateCardExcel = require('./Routes/Utils/RateCardExcel')
-
+const CryptoJS = require('crypto-js');
 // Secret key for JWT
 const JWT_SECRET = "Lh!_Login_123"; // Replace with a strong, secret key
 const API_KEY = "a8f2b3c4-d5e6-7f8g-h9i0-12345jklmn67";
-
+const secretKey = 'licare'
 app.use(cors({ origin: "*" }));
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ extended: true, limit: '100mb' }));
@@ -3063,11 +3063,30 @@ app.get("/getcomplaintview/:complaintid", authenticateToken, async (req, res) =>
 });
 
 app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
-  const { ticket_no, note, created_by } = req.body;
+  const { ticket_no, note, created_by, call_status, sub_call_status, group_code, site_defect, defect_type, activity_code } = req.body;
+
+
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+  const concatremark = `Call Status: ${call_status} , Sub Call Status: ${sub_call_status} , Group Code: ${group_code} , Site Defect: ${site_defect} , Defect Type: ${defect_type} , Remark: ${note}`;
+
 
   try {
     const pool = await poolPromise;
+
+
+
+    const updateSql = `
+    UPDATE complaint_ticket
+    SET call_status = '${call_status}' , updated_by = '${created_by}', updated_date = '${formattedDate}' , sub_call_status  = '${sub_call_status}' ,group_code = '${group_code}' , defect_type = '${defect_type}'
+     , site_defect = '${site_defect}' ,activity_code = '${activity_code}'   WHERE ticket_no = '${ticket_no}'`;
+
+    await pool.request().query(updateSql);
+
+
+
+
+
 
     // Use parameterized queries to prevent SQL injection
     const sql = `
@@ -3078,12 +3097,19 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
 
     const result = await pool.request()
       .input("ticket_no", ticket_no)
-      .input("note", note)
+      .input("note", concatremark)
       .input("created_by", created_by)
       .input("created_date", formattedDate)
       .query(sql);
 
     const remark_id = result.recordset[0]?.remark_id;
+
+
+    //End
+
+
+
+
 
     return res.json({
       message: "Remark added successfully!",
@@ -7837,7 +7863,7 @@ app.post("/updateProduct", authenticateToken,
 //Complaint view Insert TicketFormData start
 
 app.post("/ticketFormData", authenticateToken, async (req, res) => {
-  const { ticket_no, serial_no, ModelNumber, engineerdata, call_status, sub_call_status, updated_by, group_code, site_defect, defect_type, engineername, activity_code } = req.body;
+  const { ticket_no, engineerdata, call_status, sub_call_status, updated_by, group_code, site_defect, defect_type, engineername, activity_code } = req.body;
 
 
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
@@ -9583,27 +9609,31 @@ app.post("/query", authenticateToken, async (req, res) => {
   }
 
   try {
-    const { query, params } = req.body; // Extract query and parameters from the body
+    let { encryptedQuery } = req.body; // Extract query and parameters from the body
 
-    if (!query) {
-      return res.status(400).json({ error: 'Bad Request: Missing query' });
+
+
+
+
+    // Decrypt the encrypted query
+    const bytes = CryptoJS.AES.decrypt(encryptedQuery, secretKey);
+    const decryptedQuery = bytes.toString(CryptoJS.enc.Utf8);
+
+
+
+    if (!decryptedQuery) {
+      return res.status(400).json({ error: 'Bad Request: Failed to decrypt query' });
     }
 
     const pool = await poolPromise;
     const request = pool.request();
 
-    // Add parameters if provided
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        request.input(key, value.type, value.value); // Assumes params is structured { key: { type, value } }
-      });
-    }
 
-    const result = await request.query(query);
-    res.json(result.recordsets);
+    const result = await request.query(decryptedQuery);
+    res.json(result);
   } catch (error) {
     console.error("Error in /query", error);
-    res.status(500).json({ error: "An internal server error occurred" });
+    return res.json(error)
   }
 });
 
@@ -11676,7 +11706,7 @@ app.get("/getshipmentfg", authenticateToken, async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
-    const result = await pool.request().query("SELECT Top 1000 * FROM Shipment_Fg WHERE deleted = 0 ORDER BY id DESC");
+    const result = await pool.request().query("SELECT  * FROM Shipment_Fg WHERE deleted = 0 ORDER BY id DESC");
     return res.json(result.recordset);
   } catch (err) {
     console.error(err);
@@ -11687,7 +11717,7 @@ app.get("/getshipmentparts", authenticateToken, async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
-    const result = await pool.request().query("SELECT Top 1000 * FROM Shipment_Parts WHERE deleted = 0 ORDER BY id DESC");
+    const result = await pool.request().query("SELECT  * FROM Shipment_Parts WHERE deleted = 0 ORDER BY id DESC");
     return res.json(result.recordset);
   } catch (err) {
     console.error(err);
@@ -11698,7 +11728,34 @@ app.get("/getbussinesspartner", authenticateToken, async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
-    const result = await pool.request().query("SELECT Top 1000 * FROM bussiness_partner WHERE deleted = 0 ORDER BY id DESC");
+    const result = await pool
+      .request()
+      .query("SELECT  * FROM bussiness_partner WHERE deleted = 0 ORDER BY id DESC");
+
+    // Convert result to string and encrypt it
+    const jsonString = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonString, secretKey).toString();
+
+    return res.json({ data: encryptedData });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
+
+app.get("/fetchfrommobile/:mobile", authenticateToken, async (req, res) => {
+  try {
+
+    let { mobile } = req.params;
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+    const result = await pool
+      .request()
+      .query(`SELECT TOP 1 ac.* , acl.address ,acl.pincode_id FROM awt_customer as ac left join awt_customerlocation as acl on ac.customer_id = acl.customer_id WHERE ac.deleted = 0 and ac.mobileno = '${mobile}'`);
+
+    // Convert result to string and encrypt it
+
+
     return res.json(result.recordset);
   } catch (err) {
     console.error(err);

@@ -1,7 +1,8 @@
 import React from "react";
 import { useState } from "react";
 import axios from "axios";
-import { Base_Url } from "../Utils/Base_Url";
+import { Base_Url, secretKey } from "../Utils/Base_Url";
+import CryptoJS from 'crypto-js';
 
 const QueryPage = ()=>{
     const [query, setQuery] = useState("");
@@ -13,8 +14,11 @@ const QueryPage = ()=>{
         e.preventDefault();
         setResult(null)
         setError(null)
+        
+        const encryptedQuery = CryptoJS.AES.encrypt(query, secretKey).toString();
 
-        axios.post(`${Base_Url}/query`,{query},{
+        axios.post(`${Base_Url}/query`,{encryptedQuery},{
+
             headers: {
                 Authorization: token,
                 
@@ -28,6 +32,8 @@ const QueryPage = ()=>{
             if(err.response){
                 setError(err.response.data);
             }
+
+            console.log(err)
         })
     }
 
