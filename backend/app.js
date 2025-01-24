@@ -11,11 +11,10 @@ const jwt = require("jsonwebtoken");
 const MobApp = require('./Routes/MobApp')
 const fetchdata = require('./fetchdata')
 const RateCardExcel = require('./Routes/Utils/RateCardExcel')
-const CryptoJS = require('crypto-js');
+
 // Secret key for JWT
 const JWT_SECRET = "Lh!_Login_123"; // Replace with a strong, secret key
 const API_KEY = "a8f2b3c4-d5e6-7f8g-h9i0-12345jklmn67";
-const secretKey = "licare"; // Replace with a secure key
 
 app.use(cors({ origin: "*" }));
 app.use(express.json({ limit: '100mb' }));
@@ -3676,6 +3675,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
 
     if (cust_id == "" && model != "") {
+
 
 
       const productSQL = `INSERT INTO awt_uniqueproductmaster (
@@ -9058,7 +9058,7 @@ app.get("/getquotationlist", authenticateToken, async (req, res) => {
       ticketId,
       spareId,
       ModelNumber,
-      ticket_no,
+      title,
       quantity,
       price,
       quotationNumber,
@@ -9085,8 +9085,8 @@ app.get("/getquotationlist", authenticateToken, async (req, res) => {
       sql += ` AND q.ModelNumber LIKE '%${ModelNumber}%'`;
     }
 
-    if (ticket_no) {
-      sql += ` AND q.ticketId LIKE '%${ticket_no}%'`;
+    if (title) {
+      sql += ` AND q.title LIKE '%${title}%'`;
     }
 
     if (quantity) {
@@ -9098,7 +9098,7 @@ app.get("/getquotationlist", authenticateToken, async (req, res) => {
     // Pagination logic: Calculate offset based on the page number
     const offset = (page - 1) * pageSize;
     // Add pagination to the SQL query (OFFSET and FETCH NEXT)
-    sql += ` ORDER BY q.quotationNumber desc OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+    sql += ` ORDER BY q.quotationNumber OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
 
     // Execute the query
     const result = await pool.request().query(sql);
@@ -9110,7 +9110,7 @@ app.get("/getquotationlist", authenticateToken, async (req, res) => {
     if (CustomerName) countSql += ` AND CustomerName LIKE '%${CustomerName}%'`;
     if (spareId) countSql += ` AND spareId LIKE '%${spareId}%'`;
     if (ModelNumber) countSql += ` AND ModelNumber LIKE '%${ModelNumber}%'`;
-    if (ticket_no) countSql += ` AND ticketId LIKE '%${ticket_no}%'`;
+    if (title) countSql += ` AND title LIKE '%${title}%'`;
     if (quantity) countSql += ` AND quantity LIKE '%${quantity}%'`;
     if (price) countSql += ` AND price LIKE '%${price}%'`;
 
@@ -9507,6 +9507,24 @@ app.post("/awt_service_contact", authenticateToken, async (req, res) => {
 
     const pool = await poolPromise;
 
+    // Check if the entry already exists
+    const checkSql = `
+      SELECT COUNT(*) AS count
+      FROM awt_service_contact_form
+      WHERE customer_id = @customerId AND ticket_no = @ticketNo
+    `;
+
+    const checkRequest = pool.request()
+      .input('customerId', customerId)
+      .input('ticketNo', ticketNo);
+
+    const result = await checkRequest.query(checkSql);
+
+    if (result.recordset[0].count > 0) {
+      return res.status(400).json({ message: "Response already submitted" });
+    }
+
+    // Insert new entry
     const insertSql = `
       INSERT INTO awt_service_contact_form (
         customer_id, ticket_no, email, rating1, remark, rating2, created_date
@@ -9530,6 +9548,32 @@ app.post("/awt_service_contact", authenticateToken, async (req, res) => {
     res.status(500).send({ error: "Error occurred", details: err.message });
   }
 });
+
+app.get("/awt_service_contact/check", authenticateToken, async (req, res) => {
+  const { customerId, ticketNo } = req.query;
+
+  try {
+    const pool = await poolPromise;
+
+    const checkSql = `
+      SELECT COUNT(*) AS count
+      FROM awt_service_contact_form
+      WHERE customer_id = @customerId AND ticket_no = @ticketNo
+    `;
+
+    const request = pool.request()
+      .input('customerId', customerId)
+      .input('ticketNo', ticketNo);
+
+    const result = await request.query(checkSql);
+
+    res.send({ exists: result.recordset[0].count > 0 });
+  } catch (err) {
+    console.log("Error /awt_service_contact/check", err);
+    res.status(500).send({ error: "Error occurred", details: err.message });
+  }
+});
+
 
 app.post("/query", authenticateToken, async (req, res) => {
   const apiKey = req.header('x-api-key'); // Get API key from request header
@@ -11654,15 +11698,8 @@ app.get("/getbussinesspartner", authenticateToken, async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
-    const result = await pool
-      .request()
-      .query("SELECT TOP 1000 * FROM bussiness_partner WHERE deleted = 0 ORDER BY id DESC");
-
-    // Convert result to string and encrypt it
-    const jsonString = JSON.stringify(result.recordset);
-    const encryptedData = CryptoJS.AES.encrypt(jsonString, secretKey).toString();
-
-    return res.json({ data: encryptedData });
+    const result = await pool.request().query("SELECT Top 1000 * FROM bussiness_partner WHERE deleted = 0 ORDER BY id DESC");
+    return res.json(result.recordset);
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'An error occurred while fetching data' });
