@@ -5,7 +5,7 @@ import Channelpartner from "./Channelpartner";
 import { Link } from 'react-router-dom';
 
 function Channelpartnertabs() {
-  const [activeTab, setActiveTab] = useState("Channelpartner");
+  const [activeTab, setActiveTab] = useState("business_partner");
 
   useEffect(() => {
 
@@ -44,7 +44,7 @@ function Channelpartnertabs() {
       <div className="container-fluid p-0">
         {/* Top Header */}
         <div className="text-left headings">
-          <span style={{ paddingLeft: "20px",color:'#FFFFFF' }}>Channel Partner Master </span>
+          <span style={{ paddingLeft: "20px", color: '#FFFFFF' }}>Business Partner Master </span>
         </div>
 
         {/* Nav Tabs */}
@@ -61,16 +61,26 @@ function Channelpartnertabs() {
                 }}
               >
                 <ul className="nav nav-tabs ">
-                <Link to={`/channelpartner`}> <li className="nav-item">
-                    <button
-                      className={`nav-link ${
-                        activeTab === "Channelpartner" ? "active" : " onClick={() => setActiveTab('Channelpartner')}"
-                      }`}
-                     
-                    >
-                      CHANNEL PARTNER
-                    </button>
-                  </li></Link>
+                  {/* <li className="nav-item">
+                    <Link to="/channelpartner">
+                      <button
+                        className={`nav-link ${activeTab === '/channelpartner' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('/channelpartner')}
+                      >
+                        Channel Partner
+                      </button>
+                    </Link>
+                  </li> */}
+                  <li className="nav-item">
+                    <Link to="/business_partner">
+                      <button
+                        className={`nav-link ${activeTab === '/business_partner' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('/business_partner')}
+                      >
+                        Business Partner
+                      </button>
+                    </Link>
+                  </li>
                 </ul>
               </div>
             </div>
@@ -82,7 +92,7 @@ function Channelpartnertabs() {
             >
               <div className="tab-content">
                 {/* {renderTabContent()} */}
-                </div>
+              </div>
             </div>
           </div>
         </div>

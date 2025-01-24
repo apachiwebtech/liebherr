@@ -77,7 +77,7 @@ function AllocationTab() {
                       </button>
                     </Link>
                   </li>
-                  <li className="nav-item">
+                  {/* <li className="nav-item">
                     <Link to="/business_partner">
                       <button
                         className={`nav-link ${activeTab === '/business_partner' ? 'active' : ''}`}
@@ -86,7 +86,7 @@ function AllocationTab() {
                        Business Partner
                       </button>
                     </Link>
-                  </li>
+                  </li> */}
 
                   {/* Add other tabs like GEO STATE, GEO CITY, AREA */}
                 </ul>
