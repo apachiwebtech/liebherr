@@ -9391,7 +9391,7 @@ app.get("/getapproveEng", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
 
     // Directly use the query (no parameter binding)
-    const sql = `select * from awt_engineermaster where status != 1`;
+    const sql = `select * from awt_engineermaster where status != 1 AND deleted = 0`;
 
     // Execute the query
     const result = await pool.request().query(sql);
@@ -9443,7 +9443,7 @@ app.get("/getmsp", authenticateToken, async (req, res) => {
   }
 })
 
-app.get("/finalapproveenginner", authenticateToken, async (req, res) => {
+app.post("/finalapproveenginner", authenticateToken, async (req, res) => {
 
   const { eng_id } = req.body;
 

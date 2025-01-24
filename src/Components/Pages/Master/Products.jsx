@@ -170,14 +170,31 @@ export function Products(params) {
 
             // Convert data to a worksheet
             const worksheet = XLSX.utils.json_to_sheet(allProductDate.map(user => ({
-                "Serial_No": user.serial_no,
                 "Item Code": user.item_code,
+                "Item Description": user.item_description,
                 "Product Name": user.product_model,
                 "Product Description": user.item_description,
                 "Product Type": user.productType,
                 "Product Line": user.productLine,
+                "Product LineCode": user.productLineCode,
+                "Product Class": user.productClass,
+                "Product ClassCode": user.productClassCode,
                 "Material": user.material,
-                "Manufacturer": user.manufacturer
+                "Manufacturer": user.manufacturer,
+                "Item Type": user.itemType,
+                "Serialized": user.serialized,
+                "Product Size": user.sizeProduct,
+                "CRM_ Product Type": user.crm_productType,
+                "Short Model": user.shortModel,
+                "Installation Type ": user.installationType,
+                "Handle type ": user.handleType,
+                "warranty": user.warranty,
+                "Returnable": user.returnable,
+                "Color": user.color,
+                "mrp": user.mrp,
+                "Packed": user.packed,
+                "Price Group": user.price_group,
+                "Service Basic Partner": user.service_partner_basic,
                 // Add fields you want to export
             })));
 
@@ -238,7 +255,7 @@ export function Products(params) {
 
                             <div className="row mb-3">
 
-                                <div className="col-md-2">
+                                {/* <div className="col-md-2">
                                     <div className="form-group">
                                         <label>Serial No</label>
                                         <input
@@ -250,7 +267,7 @@ export function Products(params) {
                                             onChange={handleFilterChange}
                                         />
                                     </div>
-                                </div>
+                                </div> */}
 
 
                                 <div className="col-md-2">
@@ -379,7 +396,6 @@ export function Products(params) {
                                     <thead>
                                         <tr>
                                             <th width="3%">#</th>
-                                            <th width="7%">Serial No.</th>
                                             <th width="8%">Item Code</th>
                                             <th width="20%">Product Name</th>
                                             <th width="20%">Product Type</th>
@@ -395,7 +411,6 @@ export function Products(params) {
                                             const displayIndex = (currentPage - 1) * pageSize + index + 1;
                                             return (<tr key={item.id}>
                                                 <td >{displayIndex}</td>
-                                                <td>{item.serial_no}</td>
                                                 <td>{item.item_code}</td>
                                                 <td>{item.product_model}<br />{item.item_description}</td>
                                                 <td>{item.productType}</td>
