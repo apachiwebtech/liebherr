@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { Base_Url ,secretKey} from "../../Utils/Base_Url";
+import { Base_Url, secretKey } from "../../Utils/Base_Url";
 import Ratecardtabs from "./Ratecardtabs";
 import { useSelector } from 'react-redux';
 import { SyncLoader } from 'react-spinners';
@@ -11,10 +11,34 @@ import { useDispatch } from "react-redux";
 import { getRoleData } from "../../Store/Role/role-action";
 
 
-const  Master_Warrenty = () => {
+
+
+
+const Master_Warrenty = () => {
 
   const [excelData, setExcelData] = useState([]);
   const { loaders, axiosInstance } = useAxiosLoader();
+  const token = localStorage.getItem("token"); // Get token from localStorage
+  const [users, setUsers] = useState([]);
+
+
+  const fetchUsers = async () => {
+    try {
+      const response = await axiosInstance.get(`${Base_Url}/getmasterwarrenty`, {
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      });
+      console.log(response.data);
+      setUsers(response.data);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   const importexcel = (event) => {
     // If triggered by file input
@@ -44,13 +68,13 @@ const  Master_Warrenty = () => {
   const uploadexcel = () => {
     // Convert excelData to a string (assuming it's an array or object)
     const data = {
-      excelData: JSON.stringify(excelData) ,
-      created_by : localStorage.getItem("licare_code")
+      excelData: JSON.stringify(excelData),
+      created_by: localStorage.getItem("licare_code")
     };
-  
+
     axios.post(`${Base_Url}/uploadmasterwarrantyexcel`, data)
       .then((res) => {
-        if(res.data){
+        if (res.data) {
           alert("Uploaded")
         }
         console.log(res);
@@ -61,32 +85,32 @@ const  Master_Warrenty = () => {
   }
 
   // Role Right 
-    
-    
-     const Decrypt = (encrypted) => {
-      encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
-      const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
-      return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
-    };
-  
-    const storedEncryptedRole = localStorage.getItem("Userrole");
-    const decryptedRole = Decrypt(storedEncryptedRole);
-  
-    const roledata = {
-      role: decryptedRole,
-      pageid: String(38)
-    }
-  
-    const dispatch = useDispatch()
-    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
-  
-  
-    useEffect(() => {
-      dispatch(getRoleData(roledata))
-    }, [])
-  
-    // Role Right End 
-  
+
+
+  const Decrypt = (encrypted) => {
+    encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+    const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+    return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+  };
+
+  const storedEncryptedRole = localStorage.getItem("Userrole");
+  const decryptedRole = Decrypt(storedEncryptedRole);
+
+  const roledata = {
+    role: decryptedRole,
+    pageid: String(38)
+  }
+
+  const dispatch = useDispatch()
+  const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+
+
+  useEffect(() => {
+    dispatch(getRoleData(roledata))
+  }, [])
+
+  // Role Right End 
+
 
   return (
     <div className="tab-content">
@@ -96,14 +120,14 @@ const  Master_Warrenty = () => {
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
       )}
-    {roleaccess > 1 ?    <div className="row mp0">
+      {roleaccess > 1 ? <div className="row mp0">
         <div className="col-12">
           <div className="card mb-3 tab_box">
             <div
               className="card-body"
               style={{ flex: "1 1 auto", padding: "13px 28px" }}
             >
-                    <div>
+              <div>
                 <input type="file" accept=".xlsx, .xls" onChange={importexcel} />
                 <button className="btn btn-primary" onClick={uploadexcel}>
                   Import Rate Card
@@ -112,13 +136,57 @@ const  Master_Warrenty = () => {
               </div>
 
               <pre>{JSON.stringify(excelData, null, 2)}</pre>
-             
+              <div className='table-responsive'>
+                <table id="example" className="table table-striped">
+                  <thead>
+                    <tr>
+                      <th width="3%">#</th>
+                      <th width="10%">Csp_Code</th>
+                      <th width="10%">Item_code</th>
+                      <th width="10%">Product_Type</th>
+                      <th width="10%">Product_Line</th>
+                      <th width="10%">Product_Class</th>
+                      <th width="10%">Service_Type</th>
+                      <th width="10%">Warrenty_year</th>
+                      <th width="10%">Compressor_Warrenty</th>
+                      <th width="10%">Warrenty_amount</th>
+                      <th width="10%">Is_Scheme</th>
+                      <th width="10%">Scheme_Name</th>
+
+
+
+
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {users.map((item, index) => (
+                      <tr key={item.id}>
+                        <td>{index + 1}</td>
+                        <td>{item.csp_code}</td>
+                        <td>{item.item_code}</td>
+                        <td>{item.Product_Type}</td>
+                        <td>{item.Product_Line}</td>
+                        <td>{item.Product_Class}</td>
+                        <td>{item.Service_Type}</td>
+                        <td>{item.warrenty_year}</td>
+                        <td>{item.compressor_warrenty}</td>
+                        <td>{item.warrenty_amount}</td>
+                        <td>{item.is_scheme}</td>
+                        <td>{item.scheme_name}</td>
+
+
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
             </div>
           </div>
         </div>
       </div> : null}
-      </div>
+    </div>
   );
 };
 
-export default  Master_Warrenty;
+export default Master_Warrenty;

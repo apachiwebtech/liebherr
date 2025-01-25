@@ -11763,6 +11763,21 @@ app.get("/fetchfrommobile/:mobile", authenticateToken, async (req, res) => {
   }
 });
 
+app.get("/getmasterwarrenty", authenticateToken, async (req, res) => {
+  try {
+    const pool = await poolPromise;
+
+    // SQL query to fetch rate data where deleted is 0
+    const sql = "SELECT * FROM master_warrenty WHERE deleted = 0";
+    const result = await pool.request().query(sql);
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "An error occurred while fetching masterWarrenty data" });
+  }
+});
+
 
 
 
