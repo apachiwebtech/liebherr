@@ -233,9 +233,25 @@ const Ratecard = () => {
     const workbook = XLSX.utils.book_new();
 
     // Convert data to a worksheet
-    const worksheet = XLSX.utils.json_to_sheet(currentUsers.map(user => ({
+    const worksheet = XLSX.utils.json_to_sheet(filteredUsers.map(user => ({
 
       "RateCardMatrix": user.Ratecard,
+      "CspCode": user.csp_code,
+      "Sub_Call_Type": user.sub_call_type,
+      "Warranty_Type": user.warranty_type,
+      "ItemCode": user.item_code,
+      "Class_city": user.class_city,
+      "Engineer_Level": user.engineer_level,
+      "ProductType": user.ProductType,
+      "ProductLine": user.ProductLine,
+      "ProductClass": user.ProductClass,
+      "Within_24_Hours": user.Within_24_Hours,
+      "Within_48_Hours": user.Within_48_Hours,
+      "Within_96_Hours": user.Within_96_Hours,
+      "MoreThan96_Hours": user.MoreThan96_Hours,
+      "gas_charging": user.gas_charging,
+      "transportation": user.transportation,
+
 
 
     })));
@@ -284,7 +300,7 @@ const Ratecard = () => {
         </div>
       )}
       {roleaccess > 1 ? <div className="row mp0">
-        <div className="col-12">
+        <div className="col-md-12 col-12">
           <div className="card mb-3 tab_box">
             <div
               className="card-body"
@@ -297,173 +313,48 @@ const Ratecard = () => {
                 </button>
 
               </div>
+              <div className='table-responsive'>
+                <button
+                  className="btn btn-primary"
+                  onClick={exportToExcel}
+                >
+                  Export to Excel
+                </button>
+                <table id="example" className="table table-striped">
+                  <thead>
+                    <tr>
+                      <th width="3%">#</th>
+                      <th width="10%">Rate Card</th>
+                      <th width="10%">Call_Type</th>
+                      <th width="10%">Call_City</th>
+                      <th width="10%">Product_Type</th>
+                      <th width="10%">Product_Line</th>
+                      <th width="10%">Product_Class</th>
 
-              <div className="row mp0">
-                <div className="col-6">
-                  <form
-                    onSubmit={handleSubmit}
-                    style={{ width: "50%" }}
-                    className="text-left"
-                  >
-                    <div className="mb-3">
 
-                      <label htmlFor="RatecardInput" className="input-field">
-                        Rate Card Matrix<span className="text-danger">*</span>
-                      </label>
 
-                      <input
-                        type="text"
-                        className="form-control"
-                        name="Ratecard"
-                        id="RatecardInput"
-                        value={formData.Ratecard}
-                        onChange={handleChange}
-                        placeholder="Enter Rate Card Matrix "
-                      />
-                      {errors.Ratecard && (
-                        <small className="text-danger">{errors.Ratecard}</small>
-                      )}
-                      {duplicateError && (
-                        <small className="text-danger">{duplicateError}</small>
-                      )}{" "}
-                      {/* Show duplicate error */}
-                    </div>
-                    {roleaccess > 2 ? <div className="text-right">
-                      <button className="btn btn-liebherr" type="submit">
-                        {isEdit ? "Update" : "Submit"}
-                      </button>
-                    </div> : null}
-                  </form>
-                </div>
 
-                <div className="col-md-6">
-                  <div className="d-flex justify-content-between align-items-center mb-3">
-                    <span>
-                      Show
-                      <select
-                        value={itemsPerPage}
-                        onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                        className="form-control d-inline-block"
-                        style={{
-                          width: "51px",
-                          display: "inline-block",
-                          marginLeft: "5px",
-                          marginRight: "5px",
-                        }}
-                      >
-                        <option value={10}>10</option>
-                        <option value={15}>15</option>
-                        <option value={20}>20</option>
-                      </select>
-                      entries
-                    </span>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredUsers.map((item, index) => (
+                      <tr key={item.id}>
+                        <td>{index + 1}</td>
+                        <td>{item.ratecard}</td>
+                        <td>{item.call_type}</td>
+                        <td>{item.call_city}</td>
+                        <td>{item.ProductType}</td>
+                        <td>{item.ProductLine}</td>
+                        <td>{item.ProductClass}</td>
 
-                    <input
-                      type="text"
-                      placeholder="Search..."
-                      value={searchTerm}
-                      onChange={handleSearch}
-                      className="form-control d-inline-block"
-                      style={{ width: "300px" }}
-                    />
-                    <button
-                      className="btn btn-primary"
-                      onClick={exportToExcel}
-                    >
-                      Export to Excel
-                    </button>
-                  </div>
 
-                  {/* Adjust table padding and spacing */}
-                  <table className="table table-bordered table-hover table-responsive mt-3">
-                    <thead className="thead-light">
-                      <tr>
-                        <th width="10%" className="text-center">#</th>
-                        <th width="60%" className="text-left">Rate Card Matrix</th>
-                        <th width="15%" className="text-center">Edit</th>
-                        <th width="15%" className="text-center">Delete</th>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {currentUsers.map((item, index) => (
-                        <tr key={item.id}>
-                          <td className="text-center">{index + 1 + indexOfFirstUser}</td>
-                          <td>{item.Ratecard}</td>
-                          <td className="text-center">
-                            <button
-                              className="btn btn-link text-primary"
-                              onClick={() => edit(item.id)}
-                              aria-label="Edit"
-                              disabled={roleaccess > 3 ? false : true}
-                            >
-                              <FaPencilAlt />
-                            </button>
-                          </td>
-                          <td className="text-center">
-                            <button
-                              className="btn btn-link text-danger"
-                              onClick={() => deleted(item.id)}
-                              aria-label="Delete"
-                              disabled={roleaccess > 4 ? false : true}
-                            >
-                              <FaTrash />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-
-                  <div
-                    className="d-flex justify-content-between"
-                    style={{ marginTop: "10px" }}
-                  >
-                    <div>
-                      Showing {indexOfFirstUser + 1} to{" "}
-                      {Math.min(indexOfLastUser, filteredUsers.length)} of{" "}
-                      {filteredUsers.length} entries
-                    </div>
-
-                    <div className="pagination" style={{ marginLeft: "auto" }}>
-                      <button
-                        onClick={() => setCurrentPage(currentPage - 1)}
-                        disabled={currentPage === 0}
-                      >
-                        {"<"}
-                      </button>
-                      {Array.from(
-                        {
-                          length: Math.min(3, Math.ceil(filteredUsers.length / itemsPerPage)), // Limit to 3 buttons
-                        },
-                        (_, index) => {
-                          const pageIndex = Math.max(0, currentPage - 1) + index; // Adjust index for sliding window
-                          if (pageIndex >= Math.ceil(filteredUsers.length / itemsPerPage)) return null; // Skip invalid pages
-
-                          return (
-                            <button
-                              key={pageIndex}
-                              onClick={() => setCurrentPage(pageIndex)}
-                              className={currentPage === pageIndex ? "active" : ""}
-                            >
-                              {pageIndex + 1}
-                            </button>
-                          );
-                        }
-                      )}
-
-                      <button
-                        onClick={() => setCurrentPage(currentPage + 1)}
-                        disabled={
-                          currentPage ===
-                          Math.ceil(filteredUsers.length / itemsPerPage) - 1
-                        }
-                      >
-                        {">"}
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                    ))}
+                  </tbody>
+                </table>
               </div>
+
+
             </div>
           </div>
         </div>
