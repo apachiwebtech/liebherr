@@ -12,6 +12,7 @@ const MobApp = require('./Routes/MobApp')
 const fetchdata = require('./fetchdata')
 const RateCardExcel = require('./Routes/Utils/RateCardExcel')
 const CryptoJS = require('crypto-js');
+const nodemailer = require('nodemailer');
 // Secret key for JWT
 const JWT_SECRET = "Lh!_Login_123"; // Replace with a strong, secret key
 const API_KEY = "a8f2b3c4-d5e6-7f8g-h9i0-12345jklmn67";
@@ -87,8 +88,45 @@ const poolPromise = new sql.ConnectionPool(dbConfig).connect()
 
 
 app.listen(8081, () => {
-
   console.log('Server is running on http://localhost:8081');
+});
+
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'zeliant997@gmail.com', // Replace with your email
+    pass: 'zazb zhkl khsn jehv', // Replace with your email password or app password
+  },
+});
+
+
+app.get('/send-otp', async (req, res) => {
+  // const { email, otp } = req.body;
+
+
+
+  const mailOptions = {
+    from: 'zeliant997@gmail.com',
+    to: 'satyamsatkr875@gmail.com',
+    subject: 'Welcome to Our Platform!',
+    text: `Thank you for registering. Your OTP is 1234`,
+  };
+
+  try {
+    // Verify the transporter connection
+    await transporter.verify();
+    const info = await transporter.sendMail(mailOptions);
+
+
+    res.status(200).json({ message: 'OTP sent successfully', info });
+
+
+  } catch (error) {
+    console.error('Error sending email:', error);
+    res.status(500).json({ error: 'Failed to send OTP' });
+  }
+
 
 });
 
@@ -3063,28 +3101,47 @@ app.get("/getcomplaintview/:complaintid", authenticateToken, async (req, res) =>
 });
 
 app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
-  const { ticket_no, note, created_by, call_status, sub_call_status, group_code, site_defect, defect_type, activity_code } = req.body;
+  const { ticket_no, note, created_by, call_status, sub_call_status, group_code, site_defect, defect_type, activity_code, serial_no, ModelNumber } = req.body;
 
 
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
-  const concatremark = `Call Status: ${call_status} , Sub Call Status: ${sub_call_status} , Group Code: ${group_code} , Site Defect: ${site_defect} , Defect Type: ${defect_type} , Remark: ${note}`;
+  const concatremark = [
+    call_status ? `Call Status: ${call_status}` : '',
+    sub_call_status ? `Sub Call Status: ${sub_call_status}` : '',
+    group_code ? `Group Code: ${group_code}` : '',
+    site_defect ? `Site Defect: ${site_defect}` : '',
+    defect_type ? `Defect Type: ${defect_type}` : '',
+    activity_code ? `Activity Code : ${activity_code}` : '',
+    serial_no ? `Serial No: ${serial_no}` : '',
+    ModelNumber ? `Model Number: ${ModelNumber}` : '',
+    note ? `<b>Remark:</b> ${note}` : ''
+  ].filter(Boolean).join(' , ');
+
 
 
   try {
     const pool = await poolPromise;
 
 
+    if (call_status == 'Closed' && sub_call_status == 'Fully') {
+      const updateSql = `
+      UPDATE complaint_ticket
+      SET closed_date = GETDATE()   WHERE ticket_no = '${ticket_no}'`;
+
+      await pool.request().query(updateSql);
+    }
+
+
+
+
+
 
     const updateSql = `
     UPDATE complaint_ticket
-    SET call_status = '${call_status}' , updated_by = '${created_by}', updated_date = '${formattedDate}' , sub_call_status  = '${sub_call_status}' ,group_code = '${group_code}' , defect_type = '${defect_type}'
-     , site_defect = '${site_defect}' ,activity_code = '${activity_code}'   WHERE ticket_no = '${ticket_no}'`;
+    SET call_status = '${call_status}' , updated_by = '${created_by}', updated_date = '${formattedDate}' , sub_call_status  = '${sub_call_status}' ,group_code = '${group_code}' , defect_type = '${defect_type}' , ModelNumber = '${ModelNumber}',serial_no = '${serial_no}' , site_defect = '${site_defect}' ,activity_code = '${activity_code}'   WHERE ticket_no = '${ticket_no}'`;
 
     await pool.request().query(updateSql);
-
-
-
 
 
 
@@ -3106,9 +3163,6 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
 
 
     //End
-
-
-
 
 
     return res.json({
@@ -3615,6 +3669,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
 
 
+
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
   let t_type;
@@ -3895,7 +3950,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
       .input('model', model)
       .input('ticket_type', ticket_type)
       .input('cust_type', cust_type)
-      .input('warranty_status', sql.NVarChar, warrenty_status || "WARRANTY")
+      .input('warranty_status', sql.NVarChar, warrenty_status || "OUT OF WARRENTY")
       .input('invoice_date', invoice_date)
       .input('call_charge', call_charge)
       .input('mode_of_contact', mode_of_contact)
@@ -3968,7 +4023,22 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
 
 
-    return res.json({ message: 'Complaint added successfully!', ticket_no, cust_id });
+    const mailOptions = {
+      from: 'zeliant997@gmail.com',
+      to: email,
+      subject: 'Welcome to Our Platform!',
+      html: `<a href='http://localhost:3000/nps/${email}/${ticket_no}/${cust_id == '' ? newcustid : cust_id}'>Click here to give us feedback</a>`,
+    };
+
+
+
+    await transporter.verify();
+    const info = await transporter.sendMail(mailOptions);
+
+
+
+
+    return res.json({ message: 'Complaint added successfully!', ticket_no, cust_id, info });
   } catch (err) {
     console.error("Error inserting complaint:", err.stack);
     return res.status(500).json({ error: 'An error occurred while adding the complaint', details: err.message });
@@ -7859,6 +7929,7 @@ app.post("/updateProduct", authenticateToken,
       console.error("Error updating product:", err);
       return res.status(500).json({ error: "Database error", details: err.message });
     }
+
   });
 //Complaint view Insert TicketFormData start
 
@@ -7878,7 +7949,15 @@ app.post("/ticketFormData", authenticateToken, async (req, res) => {
   engineer_name = engineername.join(',');
 
 
-  const concatremark = `Call Status: ${call_status} , Engineer Name : ${engineer_name} , Sub Call Stutus : ${sub_call_status} ,Group Code : ${group_code} , Site Defect : ${site_defect} , Defect Type : ${defect_type} `
+  const concatremark = [
+    call_status ? `Call Status: ${call_status}` : '',
+    engineer_name ? `Engineer Name: ${engineer_name}` : '',
+    sub_call_status ? `Sub Call Status: ${sub_call_status}` : '',
+    group_code ? `Group Code: ${group_code}` : '',
+    site_defect ? `Site Defect: ${site_defect}` : '',
+    defect_type ? `Defect Type: ${defect_type}` : ''
+  ].filter(Boolean).join(' , ');
+
 
 
 
@@ -8228,8 +8307,12 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
       countSql += ` AND c.call_status = @status`;
       params.push({ name: "status", value: status });
     } else {
-      sql += ` AND c.call_status != 'Closed' AND c.call_status != 'Cancelled'`;
-      countSql += ` AND c.call_status != 'Closed' AND c.call_status != 'Cancelled'`;
+      // Check if any filter is applied
+      if (!customerName && !customerEmail && !serialNo && !productCode && !customerMobile &&
+        !ticketno && !customerID && !csp && !msp && !mode_of_contact && !customer_class) {
+        sql += ` AND c.call_status != 'Closed' AND c.call_status != 'Cancelled'`;
+        countSql += ` AND c.call_status != 'Closed' AND c.call_status != 'Cancelled'`;
+      }
     }
 
     if (upcoming == 'current') {
@@ -8256,7 +8339,7 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
           WHEN c.call_priority = 'Regular' THEN 2
           ELSE 3
         END,
-        c.ticket_date DESC
+        c.created_date DESC
       OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY`;
 
 
@@ -11376,6 +11459,7 @@ app.post('/getgrndetails', authenticateToken, async (req, res) => {
 
 
 })
+
 app.post('/getissuedetails', authenticateToken, async (req, res) => {
   const { issue_no } = req.body;
 

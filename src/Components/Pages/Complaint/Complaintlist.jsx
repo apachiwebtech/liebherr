@@ -108,7 +108,6 @@ export function Complaintlist(params) {
         }
       });
 
-      console.log('Sending params:', params); // Debug log
 
       // Send the request with the built params
       const response = await axiosInstance.get(`${Base_Url}/getcomplainlist`, {
@@ -123,7 +122,7 @@ export function Complaintlist(params) {
         !['Cancelled'].includes(complaint.call_status)
       );
 
-      console.log(filteredComplaints); // Debug log for filtered complaints
+
 
       // Update state
       setComplaintdata(response.data.data); // Full data

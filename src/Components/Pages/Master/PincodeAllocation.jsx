@@ -16,100 +16,96 @@ const PincodeAllocation = () => {
   // Step 1: Add this state to track errors
   const { loaders, axiosInstance } = useAxiosLoader();
   const [excelData, setExcelData] = useState([]);
+  const [loader, setLoader] = useState(false);
   const token = localStorage.getItem("token"); // Get token from localStorage
 
 
 
-  const handleFileUpload = async (event) => {
-  const file = event.target.files[0];
-  if (!file) {
-    alert("Please select an Excel file.");
-    return;
-  }
 
-  const formData = new FormData();
-  formData.append("file", file);
 
-  try {
-    const response = await fetch("http://localhost:5000/upload", {
-      method: "POST",
-      body: formData,
-    });
-
-    const result = await response.json();
-    console.log("Processed Rows:", result.totalRows);
-  } catch (error) {
-    console.error("Upload failed", error);
-  }
-};
-
-const importexcel = (event) => {
-  const file = event?.target?.files ? event.target.files[0] : null;
-
-  if (!file) {
-    alert("Please upload an Excel file first!");
-    return;
-  }
-
-  const reader = new FileReader();
-
-  reader.onload = async (e) => {
-    const data = new Uint8Array(e.target.result);
-    const workbook = XLSX.read(data, { type: "array" });
-
-    const sheetName = workbook.SheetNames[0];
-    const sheet = workbook.Sheets[sheetName];
-
-    console.log("Sheet Loaded:", sheet);
-
-    const chunkSize = 70000; // Process in smaller chunks to avoid memory issues
-    const jsonData = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-
-    console.log("Total Rows:", jsonData.length);
-
-    // Column mapping function
-    const mapKeys = (obj) => {
-      const keyMapping = {
-        "RESIDENT BRANCH": "resident_branch",
-      };
-
-      return Object.fromEntries(
-        Object.entries(obj).map(([key, value]) => [
-          keyMapping[key] || key.toLowerCase().replace(/\s+/g, "_"),
-          value,
-        ])
-      );
-    };
-
-    let processedData = [];
-    for (let i = 0; i < jsonData.length; i += chunkSize) {
-      const chunk = jsonData.slice(i, i + chunkSize).map(mapKeys);
-      console.log(`Processing chunk ${i / chunkSize + 1}`);
-      processedData.push(...chunk);
-      
-      // Simulate async processing to avoid UI freeze
-      await new Promise((resolve) => setTimeout(resolve, 10));
+  const importexcel = (event) => {
+    setLoader(true);
+    const file = event?.target?.files ? event.target.files[0] : null;
+  
+    if (!file) {
+      alert("Please upload an Excel file first!");
+      setLoader(false);  // Stop loader if no file is selected
+      return;
     }
-
-    setExcelData(processedData);
-    console.log(processedData);
+  
+    const reader = new FileReader();
+  
+    reader.onload = async (e) => {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
+  
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+  
+        console.log("Sheet Loaded:", sheet);
+  
+        const chunkSize = 70000; // Process in smaller chunks to avoid memory issues
+        const jsonData = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+  
+        console.log("Total Rows:", jsonData.length);
+  
+        // Column mapping function
+        const mapKeys = (obj) => {
+          const keyMapping = {
+            "RESIDENT BRANCH": "resident_branch",
+          };
+  
+          return Object.fromEntries(
+            Object.entries(obj).map(([key, value]) => [
+              keyMapping[key] || key.toLowerCase().replace(/\s+/g, "_"),
+              value,
+            ])
+          );
+        };
+  
+        let processedData = [];
+        for (let i = 0; i < jsonData.length; i += chunkSize) {
+          const chunk = jsonData.slice(i, i + chunkSize).map(mapKeys);
+          console.log(`Processing chunk ${i / chunkSize + 1}`);
+          processedData.push(...chunk);
+  
+          // Simulate async processing to avoid UI freeze
+          await new Promise((resolve) => setTimeout(resolve, 10));
+        }
+  
+        setExcelData(processedData);
+        console.log("Processed Data:", processedData);
+      } catch (error) {
+        console.error("Error processing Excel file:", error);
+        alert("An error occurred while processing the file.");
+      } finally {
+        setLoader(false);  // Stop loader after processing completes or if an error occurs
+      }
+    };
+  
+    reader.onerror = () => {
+      alert("Failed to read file!");
+      setLoader(false);  // Stop loader if file reading fails
+    };
+  
+    reader.readAsArrayBuffer(file);
   };
-
-  reader.readAsArrayBuffer(file);
-};
+  
 
 
   const uploadexcel = () => {
 
-    const data = {
-      excelData: JSON.stringify(excelData),
-      created_by: localStorage.getItem("licare_code")
-    }
+    setLoader(true)
 
-    axios.post(`${Base_Url}/uplaodpincodeexcel`, excelData)
+   const excelData2  = JSON.stringify(excelData)
+
+
+    axios.post(`${Base_Url}/uplaodpincodeexcel`, {excelData : excelData2 } )
       .then((res) => {
         if (res.data) {
           alert("Uploaded")
+          setLoader(false)
         }
         console.log(res)
       })
@@ -117,7 +113,7 @@ const importexcel = (event) => {
         console.log(err)
       })
   }
-  
+
 
 
   // Role Right 
@@ -149,9 +145,9 @@ const importexcel = (event) => {
   return (
     <div className="tab-content">
       <AllocationTab />
-      {loaders && (
+      {(loaders || loader) && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <SyncLoader loading={loaders} color="#FFFFFF" />
+          <SyncLoader loading={loaders || loader} color="#FFFFFF" />
         </div>
       )}
       {roleaccess > 1 ? <div className="row mp0">
@@ -169,7 +165,7 @@ const importexcel = (event) => {
 
               </div>
 
-        
+
             </div>
           </div>
         </div>

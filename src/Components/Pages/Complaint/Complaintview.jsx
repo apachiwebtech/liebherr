@@ -18,6 +18,7 @@ import { error } from "jquery";
 import { useDispatch, useSelector } from "react-redux";
 import { getRoleData } from "../../Store/Role/role-action";
 
+
 export function Complaintview(params) {
 
   const token = localStorage.getItem("token");
@@ -25,6 +26,7 @@ export function Complaintview(params) {
   const [addedSpareParts, setAddedSpareParts] = useState([]);
   const [quotation, setQuotation] = useState([]);
   const [activity, setactivity] = useState([]);
+  const [model, setModel] = useState('');
   let { complaintid } = useParams();
   const uniqueParts = new Set();
   try {
@@ -120,6 +122,8 @@ export function Complaintview(params) {
       })
 
   }
+
+
 
   async function getEngineer(params) {
 
@@ -785,7 +789,45 @@ export function Complaintview(params) {
     const { name, value } = e.target;
 
     setComplaintview(prev => ({ ...prev, [name]: value }));
+
+
+    if (name == 'serial_no') {
+      handlegetmodel(value)
+    }
+
   };
+
+
+  const handlegetmodel = async (value) => {
+
+    try {
+      const response = await axiosInstance.get(
+        `${Base_Url}/getserial/${value || value.serial_no}`, {
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      }
+      );
+      setComplaintview((prevstate) => ({
+
+        ...prevstate,
+        ModelNumber: response.data[0].ModelNumber
+
+      }))
+
+
+
+
+
+
+
+
+    } catch (error) {
+      console.error("Error fetching serial details:", error);
+    }
+  }
+
+
 
   //handlesubmitticketdata strat for serial no,model number, engineer_id and call_status and form data
   const handleSubmitTicketFormData = (e) => {
@@ -833,6 +875,7 @@ export function Complaintview(params) {
             call_status: '',
           });
           fetchComplaintview(complaintid);
+          fetchComplaintDetails(complaintid)
 
           setTicketUpdateSuccess({
             message: 'Ticket updated successfully!',
@@ -910,22 +953,24 @@ export function Complaintview(params) {
         : true) // For other statuses, skip defect_type and site_defect validation
     ) {
 
-      
-    // Check only for note being empty
-    if (!note) {
-      setErrorMessage("Please fill the field.");
-      return;
-    }
+
+      // Check only for note being empty
+      if (!note) {
+        setErrorMessage("Please fill the field.");
+        return;
+      }
 
       try {
         const complaintRemarkData = {
           ticket_no: complaintview.ticket_no,
-          call_status : callstatusid || '',
-          sub_call_status : complaintview.sub_call_status || '',
-          group_code : groupstatusid || '',
-          site_defect : complaintview.site_defect || '',
-          defect_type  :complaintview.defect_type || '',
-          activity_code  :complaintview.activity_code || '',
+          call_status: callstatusid || '',
+          sub_call_status: complaintview.sub_call_status || '',
+          group_code: groupstatusid || '',
+          site_defect: complaintview.site_defect || '',
+          defect_type: complaintview.defect_type || '',
+          activity_code: complaintview.activity_code || '',
+          serial_no: complaintview.serial_no,
+          ModelNumber: complaintview.ModelNumber,
           note,
           created_by,
         };
@@ -1321,7 +1366,7 @@ export function Complaintview(params) {
               <div className="row">
                 <div className="col-md-3">
                   <label className="breadMain">
-                    <span style={{ fontSize: "14px" }}>Ticket : {complaintview.ticket_no}</span>
+                    <span style={{ fontSize: "14px" }}>Ticket : {complaintview.ticket_no} </span>
                   </label>
                 </div>
                 <div className="col-md-9 text-right pt-2" style={{ overflowX: "auto", whiteSpace: "nowrap" }}>
@@ -1499,7 +1544,7 @@ export function Complaintview(params) {
                         ref={fileInputRef} // Attach the ref to the input
                       />
                     </div>
-                    <div className="d-flex justify-content-end mb-3">
+                    {/* <div className="d-flex justify-content-end mb-3">
                       {roleaccess > 2 ? <button
                         type="button"
                         className="btn btn-primary"
@@ -1510,7 +1555,7 @@ export function Complaintview(params) {
                         Upload
                       </button> : null}
 
-                    </div>
+                    </div> */}
                   </div>}
 
 
@@ -1670,6 +1715,7 @@ export function Complaintview(params) {
                       ) : (
                         <input
                           type="text"
+                          className="form-control"
                           name="serial_no"
                           value={complaintview.serial_no || ''}
                           placeholder="Enter Serial No"
@@ -1681,7 +1727,7 @@ export function Complaintview(params) {
 
 
                     <div className="col-md-4">
-                      <h4 className="pname" style={{ fontSize: "11px" }}>Model</h4>
+                      <h4 className="pname" style={{ fontSize: "11px" }}>Model </h4>
 
                       {complaintview.ModelNumber ? <p>{complaintview.ModelNumber}</p> : null}
 
@@ -1958,7 +2004,7 @@ export function Complaintview(params) {
                           <div className="d-flex justify-content-between">
                             {/* Remarks Section - 80% */}
                             <div style={{ flex: "0 0 80%", paddingRight: '10px' }}>
-                              <p style={{ fontSize: "14px", margin: 0 }}>{remark.remark}</p>
+                              <p style={{ fontSize: "14px", margin: 0 }} dangerouslySetInnerHTML={{ __html: remark.remark }}></p>
 
                             </div>
 
@@ -2160,10 +2206,10 @@ export function Complaintview(params) {
 
                   <h4 className="pname" style={{ fontSize: "14px" }}>Sub Call Status</h4>
                   <div className="mb-3">
-                    <select name="sub_call_status" value={complaintview.sub_call_status} 
-                    // disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false} 
-                    disabled
-                    className="form-control" style={{ fontSize: "14px" }} onChange={handleModelChange}>
+                    <select name="sub_call_status" value={complaintview.sub_call_status}
+                      // disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false} 
+                      disabled
+                      className="form-control" style={{ fontSize: "14px" }} onChange={handleModelChange}>
                       <option value="" >Select Status</option>
                       {subcallstatus.map((item) => {
                         return (
@@ -2295,6 +2341,21 @@ export function Complaintview(params) {
                       </tbody>
                     </table>
                   </div>
+                  <div className="d-flex justify-content-end py-2">
+
+                    {roleaccess > 2 ?
+                      <button
+                        type="submit"
+                        className="btn btn-primary"
+                        style={{ fontSize: "14px", marginTop: '5px' }}
+                        onClick={handleSubmitTicketFormData}
+                        disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
+                      >
+                        Submit
+                      </button> : null}
+
+
+                  </div>
 
                   {(complaintview.call_status == 'Closed' || (complaintview.group_code != null && complaintview.group_code != "")) &&
                     <>
@@ -2393,21 +2454,7 @@ export function Complaintview(params) {
 
 
 
-                  <div className="d-flex justify-content-end py-2">
 
-                    {roleaccess > 2 ?
-                      <button
-                        type="submit"
-                        className="btn btn-primary"
-                        style={{ fontSize: "14px", marginTop: '5px' }}
-                        onClick={handleSubmitTicketFormData}
-                        disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
-                      >
-                        Submit
-                      </button> : null}
-
-
-                  </div>
 
                   {TicketUpdateSuccess.visible && (
                     <div style={successMessageStyle}>

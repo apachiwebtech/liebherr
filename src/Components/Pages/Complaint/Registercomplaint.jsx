@@ -571,14 +571,12 @@ export function Registercomplaint(params) {
     }
   };
 
-  const handleAttachment2Submit = async (e) => {
-    e.preventDefault();
-
+  const handleAttachment2Submit = async (ticket_no) => {
 
     try {
       if (files2.length > 0) {
         const formData = new FormData();
-        formData.append("ticket_no", Comp_id);
+        formData.append("ticket_no", ticket_no);
         formData.append("created_by", created_by);
 
         Array.from(files2).forEach((file) => {
@@ -867,6 +865,9 @@ export function Registercomplaint(params) {
         )
           .then((res) => {
             if (res.data) {
+
+
+              handleAttachment2Submit(res.data.ticket_no)
               notify();
               setTimeout(() => {
                 navigate('/complaintlist');
@@ -1165,7 +1166,6 @@ export function Registercomplaint(params) {
         const data = response.data[0];
         setValue((prevValue) => ({
           ...prevValue,
-          classification: data.customer_classification || "",
           salutation: data.salutation || "",
           customer_name: data.customer_fname || "",
           cust_type: data.customer_type || "",
@@ -2174,7 +2174,7 @@ export function Registercomplaint(params) {
                         ref={fileInputRef} // Attach the ref to the input
                       />
                     </div>
-                    <div className="d-flex justify-content-end mb-3">
+                    {/* <div className="d-flex justify-content-end mb-3">
                       {roleaccess > 2 ? <button
                         type="button"
                         className="btn btn-primary"
@@ -2184,7 +2184,7 @@ export function Registercomplaint(params) {
                         Upload
                       </button> : null}
 
-                    </div>
+                    </div> */}
 
 
                   </div>

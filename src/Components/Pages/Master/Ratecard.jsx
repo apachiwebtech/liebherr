@@ -324,12 +324,11 @@ const Ratecard = () => {
                   <thead>
                     <tr>
                       <th width="3%">#</th>
-                      <th width="10%">Rate Card</th>
-                      <th width="10%">Call_Type</th>
-                      <th width="10%">Call_City</th>
-                      <th width="10%">Product_Type</th>
-                      <th width="10%">Product_Line</th>
-                      <th width="10%">Product_Class</th>
+                      <th width="10%">Call Type</th>
+                      <th width="10%">Class city</th>
+                      <th width="10%">Product Type</th>
+                      <th width="10%">Product Line</th>
+                      <th width="10%">Product Class</th>
 
 
 
@@ -340,9 +339,8 @@ const Ratecard = () => {
                     {filteredUsers.map((item, index) => (
                       <tr key={item.id}>
                         <td>{index + 1}</td>
-                        <td>{item.ratecard}</td>
                         <td>{item.call_type}</td>
-                        <td>{item.call_city}</td>
+                        <td>{item.class_city}</td>
                         <td>{item.ProductType}</td>
                         <td>{item.ProductLine}</td>
                         <td>{item.ProductClass}</td>
