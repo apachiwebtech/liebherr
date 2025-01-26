@@ -1002,6 +1002,8 @@ export function Complaintview(params) {
           activity_code: complaintview.activity_code || '',
           serial_no: complaintview.serial_no,
           ModelNumber: complaintview.ModelNumber,
+          purchase_date : complaintview.purchase_date || purchase_data,
+          warrenty_status : complaintview.warranty_status || warranty_status_data,
           note,
           created_by,
         };
@@ -1787,7 +1789,7 @@ export function Complaintview(params) {
                     </div>
                     <div className="col-md-4">
                       <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Warranty Status</p>
-                      <p style={{ fontSize: "14px" }}>{complaintview.warranty_status} {warranty_status_data}</p>
+                      <p style={{ fontSize: "14px" }}>{complaintview.warranty_status ?  complaintview.warranty_status : warranty_status_data} </p>
                     </div>
 
                     {/* <div className="col-md-12">
