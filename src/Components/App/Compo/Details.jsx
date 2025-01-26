@@ -575,7 +575,7 @@ function Details() {
       }
       );
 
-      if (response.data[0].ModelNumber) {
+      if ( response.data && response.data[0].ModelNumber) {
 
         setModelNumber(response.data[0].ModelNumber)
 
