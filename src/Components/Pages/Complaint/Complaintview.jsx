@@ -1016,7 +1016,9 @@ export function Complaintview(params) {
               Authorization: token, // Send token in headers
             },
           });
-
+         if(remarkResponse.data){
+          fetchComplaintview(complaintid)
+         }
 
         const remarkId = remarkResponse.data.remark_id;
 
