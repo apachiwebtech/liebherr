@@ -3101,10 +3101,18 @@ app.get("/getcomplaintview/:complaintid", authenticateToken, async (req, res) =>
 });
 
 app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
-  const { ticket_no, note, created_by, call_status, sub_call_status, group_code, site_defect, defect_type, activity_code, serial_no, ModelNumber,purchase_date,warrenty_status } = req.body;
+  const { ticket_no, note, created_by, call_status, sub_call_status, group_code, site_defect, defect_type, activity_code, serial_no, ModelNumber,purchase_date,warrenty_status ,engineerdata, engineername} = req.body;
 
 
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+  let engineer_id;
+
+  engineer_id = engineerdata.join(','); // Join the engineer IDs into a comma-separated string
+
+  let engineer_name;
+
+  engineer_name = engineername.join(',');
 
   const concatremark = [
     call_status ? `Call Status: ${call_status}` : '',
@@ -3113,9 +3121,11 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
     site_defect ? `Site Defect: ${site_defect}` : '',
     defect_type ? `Defect Type: ${defect_type}` : '',
     activity_code ? `Activity Code : ${activity_code}` : '',
+    engineer_name ? `Engineer Name: ${engineer_name}` : '',
     serial_no ? `Serial No: ${serial_no}` : '',
     ModelNumber ? `Model Number: ${ModelNumber}` : '',
     note ? `<b>Remark:</b> ${note}` : ''
+
   ].filter(Boolean).join(' , ');
 
 
@@ -3139,7 +3149,7 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
 
     const updateSql = `
     UPDATE complaint_ticket
-    SET call_status = '${call_status}' , updated_by = '${created_by}', updated_date = '${formattedDate}' , sub_call_status  = '${sub_call_status}' ,group_code = '${group_code}' , defect_type = '${defect_type}' , ModelNumber = '${ModelNumber}',serial_no = '${serial_no}' , site_defect = '${site_defect}' ,activity_code = '${activity_code}' , purchase_date = '${purchase_date}' , warranty_status = '${warrenty_status}'   WHERE ticket_no = '${ticket_no}'`;
+    SET call_status = '${call_status}' , updated_by = '${created_by}', updated_date = '${formattedDate}' , sub_call_status  = '${sub_call_status}' ,group_code = '${group_code}' , defect_type = '${defect_type}' , ModelNumber = '${ModelNumber}',serial_no = '${serial_no}' , site_defect = '${site_defect}' ,activity_code = '${activity_code}' , purchase_date = '${purchase_date}' , warranty_status = '${warrenty_status}' ,engineer_id = '${engineer_id}' , assigned_to = '${engineer_name}'  WHERE ticket_no = '${ticket_no}'`;
 
     await pool.request().query(updateSql);
 

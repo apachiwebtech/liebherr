@@ -31,7 +31,7 @@ export function Complaintview(params) {
   let { complaintid } = useParams();
   const [warranty_status_data, setWarranty_status_data] = useState('OUT OF WARRANTY')
   const uniqueParts = new Set();
-  const [purchase_data, setpurchase_data] = useState('')
+  const [purchase_date, setpurchase_date] = useState('')
   try {
     complaintid = complaintid.replace(/-/g, '+').replace(/_/g, '/');
     const bytes = CryptoJS.AES.decrypt(complaintid, secretKey);
@@ -149,9 +149,15 @@ export function Complaintview(params) {
       // Compare lastDate and currentDateMinusOneDay
       if (lastDate < currentDateMinusOneDay) {
         setWarranty_status_data("OUT OF WARRANTY");
-        setpurchase_data(value);
+        setComplaintview((prev) =>({
+         ...prev,
+         purchase_date : value
+        }))
       } else {
-        setpurchase_data(value);
+        setComplaintview((prev) =>({
+          ...prev,
+          purchase_date : value
+         }))
         setWarranty_status_data("WARRANTY");
       }
 
@@ -671,6 +677,8 @@ export function Complaintview(params) {
       }
       );
 
+      setpurchase_date(response.data.purchase_date)
+
       setComplaintview(response.data);
       setgroupstatusid(response.data.group_code)
 
@@ -976,11 +984,12 @@ export function Complaintview(params) {
     const isValidValue = (value) => value !== null && value !== 'null' && value !== '';
 
 
+    console.log("complaintview.purchase_date:", complaintview.purchase_date);
 
     if (
 
       (complaintview.call_status === 'Closed'
-        ? isValidValue(complaintview.defect_type) && isValidValue(complaintview.site_defect) && groupstatusid
+        ? isValidValue(complaintview.defect_type) && isValidValue(complaintview.site_defect) && groupstatusid && isValidValue(complaintview.serial_no) &&  ( isValidValue(complaintview.purchase_date) ) && addedEngineers.length > 0
         : true) // For other statuses, skip defect_type and site_defect validation
     ) {
 
@@ -1002,8 +1011,10 @@ export function Complaintview(params) {
           activity_code: complaintview.activity_code || '',
           serial_no: complaintview.serial_no,
           ModelNumber: complaintview.ModelNumber,
-          purchase_date : complaintview.purchase_date || purchase_data,
+          purchase_date : complaintview.purchase_date ,
           warrenty_status : complaintview.warranty_status || warranty_status_data,
+          engineerdata: addedEngineers.map((item) => item.engineer_id),
+          engineername: addedEngineers.map((item) => item.title),
           note,
           created_by,
         };
@@ -1027,12 +1038,7 @@ export function Complaintview(params) {
           formData.append("ticket_no", complaintview.ticket_no);
           formData.append("remark_id", remarkId);
           formData.append("created_by", created_by);
-          // formData.append("call_status", callstatusid);
-          // formData.append("sub_call_status", complaintview.sub_call_status);
-          // formData.append("group_code", groupstatusid);
-          // formData.append("site_defect", complaintview.site_defect);
-          // formData.append("defect_type", complaintview.defect_type);
-          // formData.append("activity_code", complaintview.activity_code);
+
 
           Array.from(files).forEach((file) => {
             formData.append("attachment", file);
@@ -1078,6 +1084,12 @@ export function Complaintview(params) {
           alert('Please select the Defect type');
         } else if (isInvalidValue(complaintview.site_defect)) {
           alert('Please select the site defect');
+        } else if(isInvalidValue(complaintview.serial_no)){
+          alert('Please select the Serial No');
+        } else if(!complaintview.purchase_date){
+          alert('Please select the Purchase Date');
+        } else if (addedEngineers.length === 0) {  // Fixed validation here
+          alert('Please add the engineer');
         }
       }
     }
@@ -1774,8 +1786,8 @@ export function Complaintview(params) {
 
                     <div className="col-md-2">
                       <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Purchase Date</p>
-                      <p style={{ fontSize: "14px" }}>{complaintview.purchase_date == (null || '') ? <DatePicker
-                        selected={purchase_data}
+                      <p style={{ fontSize: "14px" }}>{purchase_date == (null || '') ? <DatePicker
+                        selected={complaintview.purchase_date}
                         onChange={(date) => {
 
                           getDateAfterOneYear(date);
@@ -1789,6 +1801,7 @@ export function Complaintview(params) {
                         maxDate={new Date().toISOString().split("T")[0]}
                       /> : formatDate(complaintview.purchase_date)}</p>
                     </div>
+
                     <div className="col-md-4">
                       <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Warranty Status</p>
                       <p style={{ fontSize: "14px" }}>{complaintview.warranty_status ?  complaintview.warranty_status : warranty_status_data} </p>
