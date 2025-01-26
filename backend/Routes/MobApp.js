@@ -122,7 +122,7 @@ app.get('/getcomplaint/:en_id/:page/:limit', authenticateToken, async (req, res)
     const offset = (page - 1) * limit;
 
 
-console.log(`SELECT t.*, c.alt_mobileno FROM ( SELECT * FROM complaint_ticket WHERE engineer_id LIKE '${en_id}' ) AS t LEFT JOIN awt_customer AS c ON t.customer_id = c.customer_id CROSS APPLY STRING_SPLIT(t.engineer_id, ',') AS split_values WHERE split_values.value = '${en_id}' ORDER BY t.id DESC OFFSET ${offset} ROWS FETCH NEXT ${limit} ROWS ONLY;`);
+    console.log(`SELECT t.*, c.alt_mobileno FROM ( SELECT * FROM complaint_ticket WHERE engineer_id LIKE '${en_id}' ) AS t LEFT JOIN awt_customer AS c ON t.customer_id = c.customer_id CROSS APPLY STRING_SPLIT(t.engineer_id, ',') AS split_values WHERE split_values.value = '${en_id}' ORDER BY t.id DESC OFFSET ${offset} ROWS FETCH NEXT ${limit} ROWS ONLY;`);
 
 
     const result = await pool.request()
@@ -257,15 +257,25 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
   { name: 'spare_doc_two', maxCount: 1 },
   { name: 'spare_doc_three', maxCount: 1 },
 ]), async (req, res) => {
-  const { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode,activitycode, com_id, warranty_status, spare_detail, ticket_no, user_id } = req.body;
+  const { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode, activitycode, com_id, warranty_status, spare_detail, ticket_no, user_id , serial_no,ModelNumber } = req.body;
+
+
+  const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+
+  const finalremark = [
+    call_remark && call_remark !== 'undefined' ? `Remark: ${call_remark}` : '',
+    call_type && call_type !== 'undefined' ? `Call Type: ${call_type}` : '',
+    `Warranty Status: ${warranty_status ? warranty_status : "NA"}`,
+    call_status && call_status !== 'undefined' ? `Call Status: ${call_status}` : '',
+    service_charges && service_charges !== 'undefined' ? `Price: ${service_charges}` : '',
+    other_charge && other_charge !== 'undefined' ? `Other Charges: ${other_charge}` : '',
+    serial_no && serial_no !== 'undefined'? `Serial No: ${serial_no}` : '',
+    ModelNumber && ModelNumber !== 'undefined' ? `Model Number: ${ModelNumber}` : ''
+  ].filter(Boolean).join(', ');
 
 
 
-  const finalremark = `Remark :${call_remark},Call Type:${call_type},Warranty Status :${warranty_status ? warranty_status : "NA"},Call Status: ${call_status} , Price : ${service_charges} and Other Charges ${other_charge}`;
-
-
-  // If you want to get the file information
-  const file = req.file;
 
   const spareDoc = req.files['spare_doc'] ? req.files['spare_doc'][0].filename : null;
   const spareDocTwo = req.files['spare_doc_two'] ? req.files['spare_doc_two'][0].filename : null;
@@ -287,22 +297,50 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
       .input('spare_doc_path', sql.VarChar, spareDoc)
       .input('call_remark', sql.VarChar, call_remark != 'undefined' ? call_remark : null) // Add call_remark
       .input('spare_detail', sql.VarChar, spare_detail != 'undefined' ? spare_detail : null)
-      .query('UPDATE complaint_ticket SET warranty_status = @warranty_status, group_code = @symptomcode, defect_type = @causecode, site_defect = @actioncode,activity_code = @activitycode,service_charges = @service_charges, call_status = @call_status, call_type = @call_type, other_charges = @other_charge, spare_doc_path = @spare_doc_path, call_remark = @call_remark, spare_detail = @spare_detail WHERE id = @com_id');
+      .input('serial_no', sql.VarChar, serial_no != 'undefined' ? serial_no : null)
+      .input('ModelNumber', sql.VarChar, ModelNumber != 'undefined' ? ModelNumber : null)
+      .query('UPDATE complaint_ticket SET warranty_status = @warranty_status, group_code = @symptomcode, defect_type = @causecode, site_defect = @actioncode,activity_code = @activitycode,service_charges = @service_charges, call_status = @call_status, call_type = @call_type, other_charges = @other_charge, spare_doc_path = @spare_doc_path, call_remark = @call_remark, spare_detail = @spare_detail , ModelNumber = @ModelNumber , serial_no = @serial_no WHERE id = @com_id');
 
     // Check if any rows were updated
     if (result.rowsAffected[0] > 0) {
 
 
-      const updateremarkQuery = `
-        INSERT INTO awt_complaintremark (ticket_no, remark, created_by, created_date)
-          VALUES (@ticket_no, @remark, @created_by, GETDATE())
-      `;
 
-      await pool.request()
+
+      const updateremarkQuery = `
+      INSERT INTO awt_complaintremark (ticket_no, remark, created_by, created_date)
+      VALUES (@ticket_no, @remark, @created_by, GETDATE());
+      SELECT SCOPE_IDENTITY() AS remark_id;
+  `;
+
+      const result = await pool.request()
         .input('ticket_no', sql.VarChar, ticket_no)
         .input('remark', sql.VarChar, finalremark)
         .input('created_by', sql.VarChar, user_id)
         .query(updateremarkQuery);
+
+      const remark_id = result.recordset[0].remark_id;
+
+      // Array of documents
+      const spareDocs = [spareDoc, spareDocTwo, spareDocThree];
+
+      for (const doc of spareDocs) {
+        if (doc) {
+          const updateAttachQuery = `
+          INSERT INTO awt_complaintattachment (remark_id, ticket_no, attachment, created_by, created_date)
+          VALUES (@remark_id, @ticket_no, @attachment, @created_by, @created_date);
+        `;
+
+          await pool.request()
+            .input('remark_id', sql.Int, remark_id)
+            .input('ticket_no', sql.VarChar, ticket_no)
+            .input('attachment', sql.VarChar, doc)
+            .input('created_by', sql.VarChar, user_id)
+            .input('created_date', sql.DateTime, formattedDate)
+            .query(updateAttachQuery);
+        }
+      }
+
 
       res.status(200).json({ message: 'Update successful' });
 
@@ -575,7 +613,7 @@ app.get("/getactivity_app", authenticateToken, async (req, res) => {
 
 app.post("/getuniquesparelist", authenticateToken, async (req, res) => {
 
-  let {ticket_no} = req.body;
+  let { ticket_no } = req.body;
 
   try {
     // Use the poolPromise to get the connection pool
@@ -594,7 +632,7 @@ app.post("/getuniquesparelist", authenticateToken, async (req, res) => {
 
 app.post("/removeappsparepart", authenticateToken, async (req, res) => {
 
-  let {spare_id} = req.body;
+  let { spare_id } = req.body;
 
   try {
     // Use the poolPromise to get the connection pool
@@ -604,7 +642,7 @@ app.post("/removeappsparepart", authenticateToken, async (req, res) => {
 
     const result = await pool.request().query(sql);
 
-    
+
 
     return res.json(result.recordset);
   } catch (err) {

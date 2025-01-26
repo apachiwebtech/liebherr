@@ -17,6 +17,7 @@ import CryptoJS from 'crypto-js';
 import { error } from "jquery";
 import { useDispatch, useSelector } from "react-redux";
 import { getRoleData } from "../../Store/Role/role-action";
+import DatePicker from "react-datepicker";
 
 
 export function Complaintview(params) {
@@ -28,7 +29,9 @@ export function Complaintview(params) {
   const [activity, setactivity] = useState([]);
   const [model, setModel] = useState('');
   let { complaintid } = useParams();
+  const [warranty_status_data, setWarranty_status_data] = useState('OUT OF WARRANTY')
   const uniqueParts = new Set();
+  const [purchase_data, setpurchase_data] = useState('')
   try {
     complaintid = complaintid.replace(/-/g, '+').replace(/_/g, '/');
     const bytes = CryptoJS.AES.decrypt(complaintid, secretKey);
@@ -123,7 +126,40 @@ export function Complaintview(params) {
 
   }
 
+  const getDateAfterOneYear = (value) => {
+    try {
+      // Ensure value is in a recognized format
+      const purchase_date = new Date(value);
 
+      if (isNaN(purchase_date)) {
+        throw new Error("Invalid date format");
+      }
+
+      // Add one year to the date
+      purchase_date.setFullYear(purchase_date.getFullYear() + 1);
+
+      // Format the date as YYYY-MM-DD
+      const lastDate = purchase_date.toISOString().split('T')[0];
+
+      // Get current date and subtract one day
+      const currentDate = new Date();
+      currentDate.setDate(currentDate.getDate());
+      const currentDateMinusOneDay = currentDate.toISOString().split('T')[0];
+
+      // Compare lastDate and currentDateMinusOneDay
+      if (lastDate < currentDateMinusOneDay) {
+        setWarranty_status_data("OUT OF WARRANTY");
+        setpurchase_data(value);
+      } else {
+        setpurchase_data(value);
+        setWarranty_status_data("WARRANTY");
+      }
+
+    } catch (error) {
+      console.error("Error processing date:", error.message);
+      return null; // Return null for invalid dates
+    }
+  };
 
   async function getEngineer(params) {
 
@@ -814,11 +850,6 @@ export function Complaintview(params) {
         ModelNumber: response.data[0].ModelNumber
 
       }))
-
-
-
-
-
 
 
 
@@ -1739,11 +1770,24 @@ export function Complaintview(params) {
 
                     <div className="col-md-2">
                       <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Purchase Date</p>
-                      <p style={{ fontSize: "14px" }}>{complaintview.purchase_date == (null || '') ? "N/A" : formatDate(complaintview.purchase_date)}</p>
+                      <p style={{ fontSize: "14px" }}>{complaintview.purchase_date == (null || '') ? <DatePicker
+                        selected={purchase_data}
+                        onChange={(date) => {
+
+                          getDateAfterOneYear(date);
+                        }}
+                        dateFormat="dd-MM-yyyy"
+                        placeholderText="DD-MM-YYYY"
+                        className='form-control'
+                        name="purchase_date"
+                        aria-describedby="Anidate"
+
+                        maxDate={new Date().toISOString().split("T")[0]}
+                      /> : formatDate(complaintview.purchase_date)}</p>
                     </div>
                     <div className="col-md-4">
                       <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Warranty Status</p>
-                      <p style={{ fontSize: "14px" }}>{complaintview.warranty_status}</p>
+                      <p style={{ fontSize: "14px" }}>{complaintview.warranty_status} {warranty_status_data}</p>
                     </div>
 
                     {/* <div className="col-md-12">

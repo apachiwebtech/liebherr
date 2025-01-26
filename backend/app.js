@@ -3198,7 +3198,7 @@ app.post("/uploadcomplaintattachments", authenticateToken, upload.array("attachm
       INSERT INTO awt_complaintattachment (remark_id, ticket_no, attachment, created_by, created_date)
       VALUES (${remark_id}, '${ticket_no}', '${attachmentString}', '${created_by}', '${formattedDate}')
     `;
-    console.log("SQL Query:", sql);
+
 
     await pool.request().query(sql);
 
@@ -3753,8 +3753,6 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
 
 
-
-
     if (cust_id == "" && model != "") {
 
 
@@ -3950,7 +3948,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
       .input('model', model)
       .input('ticket_type', ticket_type)
       .input('cust_type', cust_type)
-      .input('warranty_status', sql.NVarChar, warrenty_status || "OUT OF WARRENTY")
+      .input('warranty_status', sql.NVarChar, warrenty_status )
       .input('invoice_date', invoice_date)
       .input('call_charge', call_charge)
       .input('mode_of_contact', mode_of_contact)
@@ -10063,11 +10061,19 @@ app.post('/assign_role', authenticateToken, async (req, res) => {
 
 // complete dump of ticket data 
 
-app.get("/getcomplainticketdump", authenticateToken, async (req, res) => {
+app.post("/getcomplainticketdump", authenticateToken, async (req, res) => {
+
+  const {startDate , endDate} = req.body;
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
-    const result = await pool.request().query("Select TOP 100 id,ticket_no,ticket_date,customer_id,customer_name,customer_mobile,alt_mobile,customer_email,ModelNumber,serial_no, address, region, state, city, area, pincode, sevice_partner, msp, csp, sales_partner, assigned_to, engineer_code, engineer_id, ticket_type, call_type , sub_call_status, call_status, warranty_status, invoice_date, mode_of_contact, customer_class, call_priority, closed_date, created_date, created_by,deleted From complaint_ticket where deleted = 0");
+
+    const sql = `Select id,ticket_no,ticket_date,customer_id,customer_name,customer_mobile,alt_mobile,customer_email,ModelNumber,serial_no, address, region, state, city, area, pincode, sevice_partner, msp, csp, sales_partner, assigned_to, engineer_code, engineer_id, ticket_type, call_type , sub_call_status, call_status, warranty_status, invoice_date, mode_of_contact, customer_class, call_priority, closed_date, created_date, created_by,deleted From complaint_ticket where deleted = 0  AND ticket_date >= '${startDate}' AND ticket_date <= '${endDate}'`
+
+    console.log(sql , "$$$")
+
+
+    const result = await pool.request().query(sql);
     return res.json(result.recordset);
   } catch (err) {
     console.error(err);

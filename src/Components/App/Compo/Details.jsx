@@ -25,6 +25,21 @@ function Details() {
   const [iscomplate, setIscomplate] = useState(false)
   const token = localStorage.getItem("token"); // Get token from localStorage
   const [otp, setotp] = useState([]);
+  const [serial_no, setserial] = useState('');
+  const [modelno, setModelNumber] = useState('');
+  const [files, setFiles] = useState({
+    spare_doc: null,
+    spare_doc_two: null,
+    spare_doc_three: null,
+  });
+
+  const handleFileChange = (e) => {
+    const { name, files } = e.target;
+    setFiles((prevState) => ({
+      ...prevState,
+      [name]: files[0], // Store the first selected file
+    }));
+  };
 
   const [Value, setValue] = useState({
     com_id: id,
@@ -40,9 +55,15 @@ function Details() {
     site_defect: '',
     otps: '',
     otps_error: '',
-    call_status: ''
+    call_status: '',
+    serial_no: '',
+    ModelNumber: ''
   })
+
   const [GroupDefectsite, setGroupDefectsite] = useState([]);
+
+
+
 
 
   const handleChange = (e) => {
@@ -58,11 +79,9 @@ function Details() {
     }
 
 
-    if (e.target.value == 'Completed') {
-      setIscomplate(true)
-    } else if (e.target.value === 'Closed' || e.target.value === 'Cancelled' || e.target.value === 'Spares') {
+    if (e.target.value == 'Completed' || e.target.value === 'Approve' || e.target.value === 'Spares') {
       setIscomplate(false)
-      setotppart(true)
+      setotppart(false)
     }
   }
 
@@ -132,23 +151,40 @@ function Details() {
     formData.append('com_id', data.id);
     formData.append('call_remark', Value.call_remark);
     formData.append('ticket_no', data.ticket_no);
+    formData.append('ModelNumber', modelno || data.ModelNumber);
+    formData.append('serial_no', serial_no || data.serial_no);
     formData.append('user_id', localStorage.getItem('userid'));
     if (Value.spare_required) {
       formData.append('spare_detail', Value.spare_detail);
     }
     // Append the file if it exists
-    const fileInput = document.getElementById('spare_doc');
-    if (fileInput.files[0]) {
-      formData.append('spare_doc', fileInput.files[0]);
+
+
+    if (files.spare_doc) {
+      formData.append('spare_doc', files.spare_doc);
     }
-    const fileInput2 = document.getElementById('spare_doc_two');
-    if (fileInput2.files[0]) {
-      formData.append('spare_doc_two', fileInput2.files[0]);
+
+    if (files.spare_doc_two) {
+      formData.append('spare_doc_two', files.spare_doc_two);
     }
-    const fileInput3 = document.getElementById('spare_doc_three');
-    if (fileInput3.files[0]) {
-      formData.append('spare_doc_three', fileInput3.files[0]);
+
+    if (files.spare_doc_three) {
+      formData.append('spare_doc_three', files.spare_doc_three);
     }
+
+    // const fileInput = document.getElementById('spare_doc');
+    // console.log(fileInput,'file')
+    // if (fileInput.files[0]) {
+    //   formData.append('spare_doc', fileInput.files[0]);
+    // }
+    // const fileInput2 = document.getElementById('spare_doc_two');
+    // if (fileInput2.files[0]) {
+    //   formData.append('spare_doc_two', fileInput2.files[0]);
+    // }
+    // const fileInput3 = document.getElementById('spare_doc_three');
+    // if (fileInput3.files[0]) {
+    //   formData.append('spare_doc_three', fileInput3.files[0]);
+    // }
 
     axios.post(`${Base_Url}/updatecomplaint`, formData, {
       headers: {
@@ -163,7 +199,6 @@ function Details() {
       .catch((err) => {
         console.log(err);
       });
-
 
 
   }
@@ -526,6 +561,35 @@ function Details() {
   };
 
 
+  const handlegetmodel = async (value) => {
+
+    setserial(value)
+
+
+    try {
+      const response = await axios.get(
+        `${Base_Url}/getserial/${value || value.serial_no}`, {
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      }
+      );
+
+      if (response.data[0].ModelNumber) {
+
+        setModelNumber(response.data[0].ModelNumber)
+
+      }
+
+
+
+
+    } catch (error) {
+      console.error("Error fetching serial details:", error);
+    }
+  }
+
+
   return (
     <>
       <Header />
@@ -555,12 +619,12 @@ function Details() {
 
                 {/* Name Section */}
                 <h6 className=" mb-3">
-                  <strong>Name:</strong> {data.customer_name}
+                  <strong>Name:</strong> <span style={{ textTransform: "capitalize" }}> {data.customer_name}</span>
                 </h6>
 
                 {/* Model Number */}
                 <h6 className="text-dark mb-3" style={{ fontWeight: 600 }}>
-                  Model Number: <span>{data.ModelNumber}</span>
+                  Model Number: <span>{data.ModelNumber || modelno}</span>
                 </h6>
 
                 {/* Address Section */}
@@ -570,9 +634,16 @@ function Details() {
                 </h6>
                 {/* Details Section */}
                 <div className=" mb-2">
-                  <p className="mb-2 small">
+
+                  {data.serial_no ? <p className="mb-2 small">
                     <strong>Serial No:</strong> {data.serial_no}
-                  </p>
+                  </p> : <div class="mb-3">
+                    <div class="form-group">
+                      <label for="val-actioncode"><strong>Serial No</strong></label>
+                      <input type="number" class="form-control" onChange={(e) => handlegetmodel(e.target.value)} name="spare_doc" id="spare_doc" />
+                    </div>
+                  </div>}
+
                   <p className="mb-0 small">
                     <strong>Ticket Type:</strong> {data.ticket_type}
                   </p>
@@ -583,7 +654,7 @@ function Details() {
                     <strong>Call Type:</strong> {data.call_type}
                   </p>
                   <p className="mb-0 small">
-                    <strong>Customer Class:</strong> {data.customer_class}
+                    <strong>Customer Class:</strong> <span style={{ textTransform: "uppercase" }}> {data.customer_class}</span>
                   </p>
                 </div>
 
@@ -698,7 +769,7 @@ function Details() {
                   {data.call_charges == 'Yes' ? <div class="mb-3">
                     <div class="form-group">
                       <label for="val-actioncode">Service Charges</label>
-                      <input type="text" onChange={handleChange} class="form-control" name="service_charges" id="service_charges" />
+                      <input type="text" onChange={handleChange} class="form-control" name="service_charges" id="service_charges" disabled />
                     </div>
                   </div> : null}
 
@@ -713,19 +784,19 @@ function Details() {
                   <div class="mb-3">
                     <div class="form-group">
                       <label for="val-actioncode">Attachment</label>
-                      <input type="file" class="form-control" name="spare_doc" id="spare_doc" />
+                      <input type="file" class="form-control" name="spare_doc" id="spare_doc" onChange={handleFileChange} />
                     </div>
                   </div>
                   <div class="mb-3">
                     <div class="form-group">
                       <label for="val-actioncode">Attachment2</label>
-                      <input type="file" class="form-control" name="spare_doc_two" id="spare_doc_two" />
+                      <input type="file" class="form-control" name="spare_doc_two" id="spare_doc_two" onChange={handleFileChange} />
                     </div>
                   </div>
                   <div class="mb-3">
                     <div class="form-group">
                       <label for="val-actioncode">Attachment3</label>
-                      <input type="file" class="form-control" name="spare_doc_three" id="spare_doc_three" />
+                      <input type="file" class="form-control" name="spare_doc_three" id="spare_doc_three" onChange={handleFileChange} />
                     </div>
                   </div>
 
