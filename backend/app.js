@@ -7987,8 +7987,7 @@ app.post("/ticketFormData", authenticateToken, async (req, res) => {
 
     const updateSql = `
       UPDATE complaint_ticket
-      SET engineer_id = '${engineer_id}', updated_by = '${updated_by}', updated_date = '${formattedDate}'  ,group_code = '${group_code}' , defect_type = '${defect_type}'
-       , site_defect = '${site_defect}' ,assigned_to = '${engineer_name}',activity_code = '${activity_code}'   WHERE ticket_no = '${ticket_no}'`;
+      SET engineer_id = '${engineer_id}', updated_by = '${updated_by}', updated_date = '${formattedDate}' ,assigned_to = '${engineer_name}'  WHERE ticket_no = '${ticket_no}'`;
 
     await pool.request().query(updateSql);
 
