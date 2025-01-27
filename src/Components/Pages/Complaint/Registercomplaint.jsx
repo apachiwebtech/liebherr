@@ -826,7 +826,7 @@ export function Registercomplaint(params) {
         warrenty_status: value.warrenty_status || '',
         invoice_date: value.invoice_date || '',
         call_charge: value.call_charge || '',
-        cust_id: value.customer_id || "", // Fix customer ID handling
+        cust_id: String(value.customer_id) || "", // Fix customer ID handling
         model: value.model || '',
         serial: value.serial || '',
         purchase_date: purchase_data || value.purchase_date || '',
