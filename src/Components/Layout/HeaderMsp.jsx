@@ -85,6 +85,20 @@ const HeaderMsp = (params) => {
                 CSP Listing
               </Link>
             </li>
+            <li
+              className={`nav-item dropdown ${location.pathname === "/msp/addusers" ? "active-class" : ""}`}
+              style={location.pathname === "/msp/addusers" ? { background: '#0d6efd', borderRadius: '5px' } : {}}
+            >
+              <Link
+                to={`/msp/addusers`}
+                className={`nav-link site ${location.pathname === "/msp/addusers" ? "text-light" : ""}`}
+                id="navbarDropdown"
+                role="button"
+                aria-expanded="false"
+              >
+                Add Users
+              </Link>
+            </li>
 
 
 

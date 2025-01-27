@@ -13,7 +13,7 @@ import { getRoleData } from "../../Store/Role/role-action";
 import CspAddtab from "./CspAddtab";
 
 
-const AddCspUser = () => {
+const AddMspUser = () => {
 
 
     // Step 1: Add this state to track errors
@@ -38,7 +38,7 @@ const AddCspUser = () => {
             licare_code : localStorage.getItem("licare_code")
         }
         try {
-            const response = await axiosInstance.post(`${Base_Url}/getcspusers`, data, {
+            const response = await axiosInstance.post(`${Base_Url}/getmspusers`, data, {
                 headers: {
                     Authorization: token, // Send token in headers
                 },
@@ -266,7 +266,7 @@ const AddCspUser = () => {
                                                 id="countryInput"
                                                 value={formData.title}
                                                 onChange={handleChange}
-                                                placeholder="Enter Name"
+                                                placeholder="Enter country"
                                             />
                                          
                                             {/* Show duplicate error */}
@@ -278,7 +278,7 @@ const AddCspUser = () => {
                                             <input
                                                 type="email"
                                                 className="form-control"
-                                                name="email"
+                                                name="title"
                                                 id="emailInput"
                                                 value={formData.email}
                                                 onChange={handleChange}
@@ -288,14 +288,14 @@ const AddCspUser = () => {
                                             {/* Show duplicate error */}
                                         </div>
                                         <div className="mb-3">
-                                            <label htmlFor="PasswordInput" className="input-field">
+                                            <label htmlFor="EmailInput" className="input-field">
                                                 Password <span className="text-danger">*</span>
                                             </label>
                                             <input
                                                 type="password"
                                                 className="form-control"
-                                                name="password"
-                                                id="password"
+                                                name="email"
+                                                id="email"
                                                 value={formData.password}
                                                 onChange={handleChange}
                                                 placeholder="Enter Password"
@@ -304,13 +304,13 @@ const AddCspUser = () => {
                                             {/* Show duplicate error */}
                                         </div>
                                         <div className="mb-3">
-                                            <label htmlFor="MobileInput" className="input-field">
+                                            <label htmlFor="EmailInput" className="input-field">
                                                 Mobile Number <span className="text-danger">*</span>
                                             </label>
                                             <input
                                                 type="tel"
                                                 className="form-control"
-                                                name="mobile_no"
+                                                name="email"
                                                 id="email"
                                                 value={formData.mobile_no}
                                                 onChange={handleChange}
@@ -465,4 +465,4 @@ const AddCspUser = () => {
     );
 };
 
-export default AddCspUser;
+export default AddMspUser;

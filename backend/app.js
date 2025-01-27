@@ -10169,6 +10169,46 @@ app.post('/getcallrecorddetails', async (req, res) => {
   }
 });
 
+// put for add users
+
+app.post("/putdata", authenticateToken, async (req, res) => {
+  const { title, id } = req.body;
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    // Step 1: Check if the same title exists for another record (other than the current one) and is not soft-deleted
+    const checkDuplicateSql = `
+      SELECT * FROM awt_country
+      WHERE title = '${title}'
+        AND id != ${id}
+        AND deleted = 0
+    `;
+    const result = await pool.request().query(checkDuplicateSql);
+
+    if (result.recordset.length > 0) {
+      // If a duplicate exists (other than the current record)
+      return res.status(409).json({ message: "Duplicate entry, title already exists!" });
+    } else {
+      // Step 2: Update the record if no duplicates are found
+      const updateSql = `
+        UPDATE awt_country
+        SET title = '${title}'
+        WHERE id = ${id}
+      `;
+      await pool.request().query(updateSql);
+
+      return res.json({ message: "Country updated successfully!" });
+    }
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Database error", error: err });
+  }
+});
+
+
+
 
 //Fetch role for csp
 
@@ -11888,6 +11928,91 @@ app.get("/getpostsalewarrenty", authenticateToken, async (req, res) => {
     return res.status(500).json({ message: "An error occurred while fetching masterWarrenty data" });
   }
 });
+
+// Get Msp users \
+app.post('/getmspusers', authenticateToken, async (req, res) => {
+  const { licare_code } = req.body;
+
+  try {
+    // Connect to the MSSQL database
+    const pool = await poolPromise;
+
+    // Query to fetch data based on `pageid` and `roleid`
+    const query = `select * from awt_franchisemaster where licare_code = @licare_code`;
+
+    const result = await pool.request()
+      .input("licare_code", sql.VarChar, licare_code)
+      .query(query);
+
+    // Return the fetched data
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
+
+// get data for quotation
+
+app.post('/getprintinfo',  async (req, res) => {
+  const { id } = req.body;
+
+  try {
+    // Connect to the MSSQL database
+    const pool = await poolPromise;
+
+    // Query to fetch data based on the `id`
+    const query = `
+      SELECT * 
+      FROM awt_quotation AS a
+      LEFT JOIN awt_customer AS o 
+      ON a.customer_id = o.customer_id
+      WHERE a.deleted = 0 AND a.id = @id
+    `;
+
+    const result = await pool.request()
+      .input("id", sql.Int, id) // Assuming `id` is an integer
+      .query(query);
+
+    // Return the fetched data
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
+
+// get job card data 
+
+app.post('/getjobcard',  async (req, res) => {
+  const { id } = req.body;
+
+  try {
+    // Connect to the MSSQL database
+    const pool = await poolPromise;
+
+    // Query to fetch data based on the `id`
+    const query = `
+      SELECT * 
+      FROM complaint_ticket AS a
+      LEFT JOIN awt_customer AS o 
+      ON a.customer_id = o.customer_id
+      WHERE a.deleted = 0 AND a.id = @id
+    `;
+
+    const result = await pool.request()
+      .input("id", sql.Int, id) // Assuming `id` is an integer
+      .query(query);
+
+    // Return the fetched data
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
+
+
 
 
 

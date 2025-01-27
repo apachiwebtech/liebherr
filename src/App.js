@@ -131,6 +131,8 @@ import PincodeAllocation from './Components/Pages/Master/PincodeAllocation';
 import { Shipment_fg } from './Components/Pages/Master/Shipment_fg';
 import { Shipment_parts } from './Components/Pages/Master/Shipment_parts';
 import { BussinePartner } from './Components/Pages/Master/BussinePartner';
+import MspAddtab from './Components/Pages/Master/MspAddtab';
+import AddMspUser from './Components/Pages/Master/AddMspUser';
 
 
 
@@ -207,6 +209,22 @@ const Router = createBrowserRouter([
       {
         path: "/msp/dashboard",
         element: <MspDashboard />,
+      },
+      {
+        path: "/msp/addusertab",
+        element: <MspAddtab />,
+      },
+      {
+        path: "/msp/addusers",
+        element: <AddMspUser />,
+      },
+      {
+        path: "/msp/roleassign",
+        element: <MspAddtab />,
+      },
+      {
+        path: "/msp/roleright",
+        element: <MspAddtab />,
       },
      
 
