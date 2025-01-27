@@ -877,16 +877,7 @@ export function Complaintview(params) {
     e.preventDefault();
 
 
-    const isValidValue = (value) => value !== null && value !== 'null' && value !== '';
-
-
-
-    if (
-
-      (complaintview.call_status === 'Closed'
-        ? isValidValue(complaintview.defect_type) && isValidValue(complaintview.site_defect) && groupstatusid
-        : true) // For other statuses, skip defect_type and site_defect validation
-    ) {
+    if (addedEngineers.length > 0) { 
 
       const data = {
         serial_no: String(complaintview.serial_no) || '',
@@ -921,7 +912,7 @@ export function Complaintview(params) {
           fetchComplaintDetails(complaintid)
 
           setTicketUpdateSuccess({
-            message: 'Ticket updated successfully!',
+            message: 'Enginerer added successfully!',
             visible: true,
             type: 'success',
           });
@@ -952,16 +943,10 @@ export function Complaintview(params) {
           }, 3000);
         });
     } else {
-      const isInvalidValue = (value) => !value || value === 'null';
 
-      if (!groupstatusid) {
-        alert('Please select the group code');
-      } else if (complaintview.call_status === 'Closed') {
-        if (isInvalidValue(complaintview.defect_type)) {
-          alert('Please select the Defect type');
-        } else if (isInvalidValue(complaintview.site_defect)) {
-          alert('Please select the site defect');
-        }
+
+      if (addedEngineers.length === 0) {
+        alert('Please Add the Engineer');
       }
     }
 

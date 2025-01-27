@@ -4031,22 +4031,22 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
 
 
-    const mailOptions = {
-      from: 'zeliant997@gmail.com',
-      to: email,
-      subject: 'Welcome to Our Platform!',
-      html: `<a href='http://localhost:3000/nps/${email}/${ticket_no}/${cust_id == '' ? newcustid : cust_id}'>Click here to give us feedback</a>`,
-    };
+    // const mailOptions = {
+    //   from: 'zeliant997@gmail.com',
+    //   to: email,
+    //   subject: 'Welcome to Our Platform!',
+    //   html: `<a href='http://localhost:3000/nps/${email}/${ticket_no}/${cust_id == '' ? newcustid : cust_id}'>Click here to give us feedback</a>`,
+    // };
 
 
 
-    await transporter.verify();
-    const info = await transporter.sendMail(mailOptions);
+    // await transporter.verify();
+    // const info = await transporter.sendMail(mailOptions);
 
 
 
 
-    return res.json({ message: 'Complaint added successfully!', ticket_no, cust_id, info });
+    return res.json({ message: 'Complaint added successfully!', ticket_no, cust_id });
   } catch (err) {
     console.error("Error inserting complaint:", err.stack);
     return res.status(500).json({ error: 'An error occurred while adding the complaint', details: err.message });
@@ -7958,12 +7958,7 @@ app.post("/ticketFormData", authenticateToken, async (req, res) => {
 
 
   const concatremark = [
-    call_status ? `Call Status: ${call_status}` : '',
-    engineer_name ? `Engineer Name: ${engineer_name}` : '',
-    sub_call_status ? `Sub Call Status: ${sub_call_status}` : '',
-    group_code ? `Group Code: ${group_code}` : '',
-    site_defect ? `Site Defect: ${site_defect}` : '',
-    defect_type ? `Defect Type: ${defect_type}` : ''
+    engineer_name ? `Engineer Name: ${engineer_name}` : ''
   ].filter(Boolean).join(' , ');
 
 
@@ -7992,7 +7987,7 @@ app.post("/ticketFormData", authenticateToken, async (req, res) => {
 
     const updateSql = `
       UPDATE complaint_ticket
-      SET engineer_id = '${engineer_id}',call_status = '${call_status}' , updated_by = '${updated_by}', updated_date = '${formattedDate}' , sub_call_status  = '${sub_call_status}' ,group_code = '${group_code}' , defect_type = '${defect_type}'
+      SET engineer_id = '${engineer_id}', updated_by = '${updated_by}', updated_date = '${formattedDate}'  ,group_code = '${group_code}' , defect_type = '${defect_type}'
        , site_defect = '${site_defect}' ,assigned_to = '${engineer_name}',activity_code = '${activity_code}'   WHERE ticket_no = '${ticket_no}'`;
 
     await pool.request().query(updateSql);

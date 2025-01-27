@@ -1149,7 +1149,6 @@ export function Registercomplaint(params) {
 
   const fetchfrommobile = async (mobile) => {
 
-    setpurchseHide('')
     try {
       const response = await axiosInstance.get(
         `${Base_Url}/fetchfrommobile/${mobile || value.mobile}`, {
