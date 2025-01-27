@@ -1,6 +1,6 @@
 // DocumentComponent.jsx
 import { Document, Page, Text, View, StyleSheet, PDFDownloadLink, Image, Font } from '@react-pdf/renderer';
-// import Liebherrlogo from '../assets/images/Liebherrlogo.png'
+import Liebherrlogo from '../../../images/Liebherr-logo-768x432.png';
 
 import axios from 'axios';
 // Create styles
@@ -111,7 +111,7 @@ const MyDocument8 = ({ data }) => {
         <Document>
             <Page size="A4" style={styles.page}>
                 <View style={styles.header}>
-                    {/* <Image src={Liebherrlogo} style={styles.image} /> */}
+                    <Image src={Liebherrlogo} style={styles.image} />
                     <View style={styles.headerRight}>
                         <Text style={{ fontSize: '16px', marginTop: 15, marginLeft: 40, fontWeight: '800', color: "#000" }}>Quotation Contract</Text>
                     </View>

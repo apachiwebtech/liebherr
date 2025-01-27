@@ -7,11 +7,14 @@ import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 import CryptoJS from 'crypto-js';
 import { error } from 'jquery';
 import { IoArrowBack } from 'react-icons/io5';
+import MyDocument8 from  '../Reports/MyDocument8';
+import { pdf } from '@react-pdf/renderer';
 
 const QuotationEdit = () => {
     const token = localStorage.getItem("token"); // Get token from localStorage
     const { loaders, axiosInstance } = useAxiosLoader();
     const [spare, setSpare] = useState([])
+    const [data, setData] = useState([])
     let { qid } = useParams()
 
     try {
@@ -125,6 +128,37 @@ const QuotationEdit = () => {
         return `${day}-${month}-${year}`;
     };
 
+    // code for pdf 
+
+    async function downloadPDF(id) {
+
+
+        axios.post(`${Base_Url }/getprintinfo`, { id: id })
+          .then((res) => {
+            console.log(res.data[0], "DDD")
+            setData(res.data[0])
+    
+            Blob(res.data[0])
+    
+          })
+          .catch((err) => {
+            console.log(err)
+          })
+      }
+
+      
+  const Blob = async (data) => {
+
+    try {
+   const blob = await pdf(<MyDocument8 data={data} />).toBlob();
+      const url = URL.createObjectURL(blob);      
+      window.open(url);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Error generating PDF:', err);
+    }  
+  };
+
 
     return (
         <div className="tab-content">
@@ -138,6 +172,7 @@ const QuotationEdit = () => {
                     <div className="card mb-3 tab_box">
                         <div className="card-body">
                             <IoArrowBack onClick={() => navigate(-1)} style={{ fontSize: "25px" }} />
+                            <button type="submit" class="btn btn-primary mr-2"  style={{marginLeft:'82%'}} onClick={() => downloadPDF()}>Download Quotation Details </button>
                         </div>
                     </div>
                 </div>
