@@ -3101,7 +3101,7 @@ app.get("/getcomplaintview/:complaintid", authenticateToken, async (req, res) =>
 });
 
 app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
-  const { ticket_no, note, created_by, call_status, sub_call_status, group_code, site_defect, defect_type, activity_code, serial_no, ModelNumber,purchase_date,warrenty_status ,engineerdata, engineername} = req.body;
+  const { ticket_no, note, created_by, call_status, sub_call_status, group_code, site_defect, defect_type, activity_code, serial_no, ModelNumber, purchase_date, warrenty_status, engineerdata, engineername } = req.body;
 
 
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
@@ -3958,7 +3958,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
       .input('model', model)
       .input('ticket_type', ticket_type)
       .input('cust_type', cust_type)
-      .input('warranty_status', sql.NVarChar, warrenty_status )
+      .input('warranty_status', sql.NVarChar, warrenty_status)
       .input('invoice_date', invoice_date)
       .input('call_charge', call_charge)
       .input('mode_of_contact', mode_of_contact)
@@ -10067,14 +10067,14 @@ app.post('/assign_role', authenticateToken, async (req, res) => {
 
 app.post("/getcomplainticketdump", authenticateToken, async (req, res) => {
 
-  const {startDate , endDate} = req.body;
+  const { startDate, endDate } = req.body;
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
 
     const sql = `Select id,ticket_no,ticket_date,customer_id,customer_name,customer_mobile,alt_mobile,customer_email,ModelNumber,serial_no, address, region, state, city, area, pincode, sevice_partner, msp, csp, sales_partner, assigned_to, engineer_code, engineer_id, ticket_type, call_type , sub_call_status, call_status, warranty_status, invoice_date, mode_of_contact, customer_class, call_priority, closed_date, created_date, created_by,deleted From complaint_ticket where deleted = 0  AND ticket_date >= '${startDate}' AND ticket_date <= '${endDate}'`
 
-    console.log(sql , "$$$")
+    console.log(sql, "$$$")
 
 
     const result = await pool.request().query(sql);
@@ -11840,8 +11840,31 @@ app.get("/getshipmentfg", authenticateToken, async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
-    const result = await pool.request().query("SELECT  * FROM Shipment_Fg WHERE deleted = 0 ORDER BY id DESC");
-    return res.json(result.recordset);
+    const {
+      page = 1, // Default to page 1 if not provided
+      pageSize = 50, // Default to 10 items per page if not provided
+    } = req.query;
+
+    let sql = `Select s.* from Shipment_Fg as s WHERE s.deleted = 0`
+    // Pagination logic: Calculate offset based on the page number
+    const offset = (page - 1) * pageSize;
+    
+    // Add pagination to the SQL query (OFFSET and FETCH NEXT)
+    sql += ` ORDER BY s.id OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+
+    const result = await pool.request().query(sql);
+
+    // Get the total count of records for pagination
+    let countSql = `SELECT COUNT(*) as totalCount FROM Shipment_Fg WHERE deleted = 0`;
+    const countResult = await pool.request().query(countSql);
+    const totalCount = countResult.recordset[0].totalCount;
+    
+    return res.json({
+      data: result.recordset,
+      totalCount: totalCount,
+      page,
+      pageSize,
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'An error occurred while fetching data' });
@@ -11851,8 +11874,31 @@ app.get("/getshipmentparts", authenticateToken, async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
-    const result = await pool.request().query("SELECT  * FROM Shipment_Parts WHERE deleted = 0 ORDER BY id DESC");
-    return res.json(result.recordset);
+    const {
+      page = 1, // Default to page 1 if not provided
+      pageSize = 50, // Default to 10 items per page if not provided
+    } = req.query;
+
+    let sql = `Select s.* from Shipment_Parts as s WHERE s.deleted = 0`
+    // Pagination logic: Calculate offset based on the page number
+    const offset = (page - 1) * pageSize;
+    
+    // Add pagination to the SQL query (OFFSET and FETCH NEXT)
+    sql += ` ORDER BY s.id OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+
+    const result = await pool.request().query(sql);
+
+    // Get the total count of records for pagination
+    let countSql = `SELECT COUNT(*) as totalCount FROM Shipment_Parts WHERE deleted = 0`;
+    const countResult = await pool.request().query(countSql);
+    const totalCount = countResult.recordset[0].totalCount;
+    
+    return res.json({
+      data: result.recordset,
+      totalCount: totalCount,
+      page,
+      pageSize,
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'An error occurred while fetching data' });
@@ -11954,7 +12000,7 @@ app.post('/getmspusers', authenticateToken, async (req, res) => {
 
 // get data for quotation
 
-app.post('/getprintinfo',  async (req, res) => {
+app.post('/getprintinfo', async (req, res) => {
   const { id } = req.body;
 
   try {
@@ -11984,7 +12030,7 @@ app.post('/getprintinfo',  async (req, res) => {
 
 // get job card data 
 
-app.post('/getjobcard',  async (req, res) => {
+app.post('/getjobcard', async (req, res) => {
   const { id } = req.body;
 
   try {

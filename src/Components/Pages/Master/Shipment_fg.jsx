@@ -16,8 +16,19 @@ export function Shipment_fg(params) {
     const { loaders, axiosInstance } = useAxiosLoader();
     const [Shipmentfgdata, setShipmentFg] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
-      const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(false);
     const token = localStorage.getItem("token");
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(50);
+    const [totalCount, setTotalCount] = useState(0);
+
+    const totalPages = Math.ceil(totalCount / pageSize);
+
+    const handlePageChange = (page) => {
+
+        setCurrentPage(page);
+        fetchShipmentFg(page); // Fetch data for the new page
+    };
     const [formData, setFormData] = useState({
         InvoiceNumber: '',
         InvoiceDate: '',
@@ -61,20 +72,27 @@ export function Shipment_fg(params) {
 
     });
 
-    const fetchShipmentFg = async () => {
+    const fetchShipmentFg = async (page) => {
         try {
-            const response = await axiosInstance.get(`${Base_Url}/getshipmentfg`, {
+            // Initialize URLSearchParams for query parameters
+            const params = new URLSearchParams();
+
+            // Add the page and pageSize parameters
+            params.append('page', page || 1); // Current page number
+            params.append('pageSize', pageSize); // Page size
+            const response = await axiosInstance.get(`${Base_Url}/getshipmentfg?${params.toString()}`, {
                 headers: {
                     Authorization: token,
                 },
             });
-            setShipmentFg(response.data);
+            setShipmentFg(response.data.data);
+            setTotalCount(response.data.totalCount);
         } catch (error) {
             console.error('Error fetching ShipmentFG data:', error);
             setShipmentFg([]);
-        }finally {
+        } finally {
             setLoading(false);  // Stop loader after data is loaded or in case of error
-          }
+        }
     };
 
     const sendtoedit = async (id) => {
@@ -91,58 +109,74 @@ export function Shipment_fg(params) {
 
 
     // export to excel 
-    const exportToExcel = () => {
-        // Create a new workbook
-        const workbook = XLSX.utils.book_new();
+    const exportToExcel =  async () => {
+        try {
+            // Fetch all customer data without pagination
+            const response = await axiosInstance.get(`${Base_Url}/getshipmentfg`, {
+                headers: {
+                    Authorization: token,
+                },
+                params: {
+                    pageSize: totalCount, // Fetch all data
+                    page: 1, // Start from the first page
+                },
+            });
 
-        // Convert data to a worksheet
-        const worksheet = XLSX.utils.json_to_sheet(Shipmentfgdata.map(user => ({
-           
-            "InvoiceNumber": user.InvoiceNumber,
-            "InvoiceDate": user.InvoiceDate,
-            "Invoice_bpcode": user.Invoice_bpcode,
-            "Invoice_bpName": user.Invoice_bpName,
-            "Invoice_city": user.Invoice_city,
-            "Invoice_state": user.Invoice_state,
-           "orderType_desc": user. orderType_desc,
-           "Customer_Po": user.Customer_Po,
-            "Item_Code": user.Item_Code,
-            "Item_Description": user.Item_Description,
-            "Invoice_qty": user.Invoice_qty,
-            "Serial_no": user.Serial_no,
-            "compressor_bar": user.compressor_bar,
-            "Manufacture_date": user.Manufacture_date,
-            "Vehicle_no": user.Vehicle_no,
-            "Vehicale_Type": user.Vehicale_Type,
-            "Transporter_name": user.Transporter_name,
-           "Lr_number": user. Lr_number,
-           "Lr_date": user.Lr_date,
-            "Address_code": user.Address_code,
-            "Address": user.Address,
-            "Pincode": user.Pincode,
-            "Shipment_id": user.Shipment_id,
-            "Ship_date": user.Ship_date,
-            "Transaction_Type": user.Transaction_Type,
-            "customer_classification": user.customer_classification,
-            "hsn_code": user.hsn_code,
-            "basic_rate": user.basic_rate,
-            "licarecode": user.licarecode,
-            "licare_address": user.licare_address,
-            "product_choice": user.product_choice,
-           "serial_identification": user. serial_identification,
-           "lot_number": user.lot_number,
-            "order_number": user.order_number,
-            "order_line_number": user.order_line_number,
-            "wearhouse": user.wearhouse,
-            "service_type": user.service_type,
-       
-        })));
+            const AllShipmentfgdata = response.data.data;
+            // Create a new workbook
+            const workbook = XLSX.utils.book_new();
 
-        // Append the worksheet to the workbook
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Shipment FG");
+            // Convert data to a worksheet
+            const worksheet = XLSX.utils.json_to_sheet(AllShipmentfgdata.map(user => ({
 
-        // Export the workbook
-        XLSX.writeFile(workbook, "Shipment_fg.xlsx");
+                "InvoiceNumber": user.InvoiceNumber,
+                "InvoiceDate": user.InvoiceDate,
+                "Invoice_bpcode": user.Invoice_bpcode,
+                "Invoice_bpName": user.Invoice_bpName,
+                "Invoice_city": user.Invoice_city,
+                "Invoice_state": user.Invoice_state,
+                "orderType_desc": user.orderType_desc,
+                "Customer_Po": user.Customer_Po,
+                "Item_Code": user.Item_Code,
+                "Item_Description": user.Item_Description,
+                "Invoice_qty": user.Invoice_qty,
+                "Serial_no": user.Serial_no,
+                "compressor_bar": user.compressor_bar,
+                "Manufacture_date": user.Manufacture_date,
+                "Vehicle_no": user.Vehicle_no,
+                "Vehicale_Type": user.Vehicale_Type,
+                "Transporter_name": user.Transporter_name,
+                "Lr_number": user.Lr_number,
+                "Lr_date": user.Lr_date,
+                "Address_code": user.Address_code,
+                "Address": user.Address,
+                "Pincode": user.Pincode,
+                "Shipment_id": user.Shipment_id,
+                "Ship_date": user.Ship_date,
+                "Transaction_Type": user.Transaction_Type,
+                "customer_classification": user.customer_classification,
+                "hsn_code": user.hsn_code,
+                "basic_rate": user.basic_rate,
+                "licarecode": user.licarecode,
+                "licare_address": user.licare_address,
+                "product_choice": user.product_choice,
+                "serial_identification": user.serial_identification,
+                "lot_number": user.lot_number,
+                "order_number": user.order_number,
+                "order_line_number": user.order_line_number,
+                "wearhouse": user.wearhouse,
+                "service_type": user.service_type,
+
+            })));
+
+            // Append the worksheet to the workbook
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Shipment FG");
+
+            // Export the workbook
+            XLSX.writeFile(workbook, "Shipment_fg.xlsx");
+        } catch (error) {
+            console.error("Error exporting data to Excel:", error);
+        }
     };
 
     // export to excel end 
@@ -176,12 +210,12 @@ export function Shipment_fg(params) {
 
     return (
         <div className="tab-content">
-               < AllocationTab  />
-                       {(loaders || loading) && (
-                             <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                               <SyncLoader loading={loaders || loading} color="#FFFFFF" />
-                             </div>
-                           )}
+            < AllocationTab />
+            {(loaders || loading) && (
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <SyncLoader loading={loaders || loading} color="#FFFFFF" />
+                </div>
+            )}
             {roleaccess > 1 ? <div className="row mp0">
                 <div className="col-md-12 col-12">
                     <div className="card mb-3 tab_box">
@@ -238,49 +272,89 @@ export function Shipment_fg(params) {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {Shipmentfgdata.map((item, index) => (
-                                            <tr key={item.id}>
-                                                <td>{index + 1}</td>
-                                                <td>{item.InvoiceNumber}</td>
-                                                <td>{item.InvoiceDate}</td>
-                                                <td>{item.Invoice_bpcode}</td>
-                                                <td>{item.Invoice_bpName}</td>
-                                                <td>{item.Invoice_city}</td>
-                                                <td>{item.Invoice_state}</td>
-                                                <td>{item.orderType_desc}</td>
-                                                <td>{item.Customer_Po}</td>
-                                                <td>{item.Item_Code}</td>
-                                                <td>{item.Item_Description}</td>
-                                                <td>{item.Invoice_qty}</td>
-                                                <td>{item.Serial_no}</td>
-                                                <td>{item.compressor_bar}</td>
-                                                <td>{item.Manufacture_date}</td>
-                                                <td>{item.Vehicle_no}</td>
-                                                <td>{item.Vehicale_Type}</td>
-                                                <td>{item.Transporter_name}</td>
-                                                <td>{item.Lr_number}</td>
-                                                <td>{item.Lr_date}</td>
-                                                <td>{item.Address_code}</td>
-                                                <td>{item.Address}</td>
-                                                <td>{item.Pincode}</td>
-                                                <td>{item.Shipment_id}</td>
-                                                <td>{item.Ship_date}</td>
-                                                <td>{item.Transaction_Type}</td>
-                                                <td>{item.customer_classification}</td>
-                                                <td>{item.hsn_code}</td>
-                                                <td>{item.basic_rate}</td>
-                                                <td>{item.licarecode}</td>
-                                                <td>{item.licare_address}</td>
-                                                <td>{item.serial_identification}</td>
-                                                <td>{item.lot_number}</td>
-                                                <td>{item.order_number}</td>
-                                                <td>{item.order_line_number}</td>
-                                                <td>{item.wearhouse}</td>
-                                                <td>{item.service_type}</td>
-                                            </tr>
-                                        ))}
+                                        {Shipmentfgdata.map((item, index) => {
+                                            const displayIndex = (currentPage - 1) * pageSize + index + 1;
+                                            return (
+                                                <tr key={item.id}>
+                                                    <td>{displayIndex}</td>
+                                                    <td>{item.InvoiceNumber}</td>
+                                                    <td>{item.InvoiceDate}</td>
+                                                    <td>{item.Invoice_bpcode}</td>
+                                                    <td>{item.Invoice_bpName}</td>
+                                                    <td>{item.Invoice_city}</td>
+                                                    <td>{item.Invoice_state}</td>
+                                                    <td>{item.orderType_desc}</td>
+                                                    <td>{item.Customer_Po}</td>
+                                                    <td>{item.Item_Code}</td>
+                                                    <td>{item.Item_Description}</td>
+                                                    <td>{item.Invoice_qty}</td>
+                                                    <td>{item.Serial_no}</td>
+                                                    <td>{item.compressor_bar}</td>
+                                                    <td>{item.Manufacture_date}</td>
+                                                    <td>{item.Vehicle_no}</td>
+                                                    <td>{item.Vehicale_Type}</td>
+                                                    <td>{item.Transporter_name}</td>
+                                                    <td>{item.Lr_number}</td>
+                                                    <td>{item.Lr_date}</td>
+                                                    <td>{item.Address_code}</td>
+                                                    <td>{item.Address}</td>
+                                                    <td>{item.Pincode}</td>
+                                                    <td>{item.Shipment_id}</td>
+                                                    <td>{item.Ship_date}</td>
+                                                    <td>{item.Transaction_Type}</td>
+                                                    <td>{item.customer_classification}</td>
+                                                    <td>{item.hsn_code}</td>
+                                                    <td>{item.basic_rate}</td>
+                                                    <td>{item.licarecode}</td>
+                                                    <td>{item.licare_address}</td>
+                                                    <td>{item.serial_identification}</td>
+                                                    <td>{item.lot_number}</td>
+                                                    <td>{item.order_number}</td>
+                                                    <td>{item.order_line_number}</td>
+                                                    <td>{item.wearhouse}</td>
+                                                    <td>{item.service_type}</td>
+                                                </tr>
+                                            )
+                                        })}
                                     </tbody>
                                 </table>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                                    <button
+                                        onClick={() => handlePageChange(currentPage - 1)}
+                                        disabled={currentPage <= 1}
+                                        style={{
+                                            padding: '8px 15px',
+                                            fontSize: '16px',
+                                            cursor: currentPage <= 1 ? 'not-allowed' : 'pointer',
+                                            backgroundColor: currentPage <= 1 ? '#ccc' : '#007bff',
+                                            color: '#fff',
+                                            border: 'none',
+                                            borderRadius: '5px',
+                                            transition: 'background-color 0.3s',
+                                        }}
+                                    >
+                                        Previous
+                                    </button>
+                                    <span style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                                        Page {currentPage} of {totalPages}
+                                    </span>
+                                    <button
+                                        onClick={() => handlePageChange(currentPage + 1)}
+                                        disabled={currentPage >= totalPages}
+                                        style={{
+                                            padding: '8px 15px',
+                                            fontSize: '16px',
+                                            cursor: currentPage >= totalPages ? 'not-allowed' : 'pointer',
+                                            backgroundColor: currentPage >= totalPages ? '#ccc' : '#007bff',
+                                            color: '#fff',
+                                            border: 'none',
+                                            borderRadius: '5px',
+                                            transition: 'background-color 0.3s',
+                                        }}
+                                    >
+                                        Next
+                                    </button>
+                                </div>
                             </div>
 
                         </div>
