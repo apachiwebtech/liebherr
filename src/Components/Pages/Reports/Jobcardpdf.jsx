@@ -554,11 +554,11 @@ const Jobcardpdf = ({ data }) => {
                             <Text style={{ fontSize: '10px', marginTop: 10, color: '#000', fontWeight: 1600 }}></Text>
 
                         </View>
-                        <View style={[styles.tableCol14, { width: '13%' }]}>
+                        <View style={[styles.tableCol14, { width: '10%' }]}>
                             <Text style={{ fontSize: '10px', marginTop: 10, color: '#000', fontWeight: 1600 }}></Text>
 
                         </View>
-                        <View style={[styles.tableCol14, { width: '22%' }]}>
+                        <View style={[styles.tableCol14, { width: '20%' }]}>
                             <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 5, color: '#000', fontWeight: 1600 }}></Text>
 
                         </View>
@@ -786,7 +786,7 @@ const Jobcardpdf = ({ data }) => {
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
                         </View>
                         <View style={[styles.tableCol, { width: '20%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Ventilation- Bottom(mm)</Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, color: '#000' }}>Ventilation-Bottom(mm)</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '7.5%' }]}>
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
@@ -1062,6 +1062,7 @@ const Jobcardpdf = ({ data }) => {
 
 
                 </View>
+                
 
 
 
