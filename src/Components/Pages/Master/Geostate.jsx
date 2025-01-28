@@ -121,6 +121,10 @@ const Geostate = () => {
       setErrors(validationErrors);
       return;
     }
+    const encryptedData = CryptoJS.AES.encrypt(
+      JSON.stringify(formData),
+      secretKey
+    ).toString();
 
     setDuplicateError('');
 
@@ -128,7 +132,7 @@ const Geostate = () => {
       const confirmSubmission = window.confirm("Do you want to submit the data?");
       if (confirmSubmission) {
         if (isEdit) {
-          await axiosInstance.post(`${Base_Url}/putgeostate`, { ...formData }, {
+          await axiosInstance.post(`${Base_Url}/putgeostate`, { encryptedData }, {
             headers: {
               Authorization: token,
             },
@@ -147,7 +151,7 @@ const Geostate = () => {
               }
             });
         } else {
-          await axiosInstance.post(`${Base_Url}/postgeostate`, { ...formData }, {
+          await axiosInstance.post(`${Base_Url}/postgeostate`, { encryptedData }, {
             headers: {
               Authorization: token,
             },
@@ -173,25 +177,25 @@ const Geostate = () => {
   };
 
   const deleted = async (id) => {
-    const confirm =  window.confirm("Are you sure you want to delete ?");
+    const confirm = window.confirm("Are you sure you want to delete ?");
 
-    if(confirm){
-    try {
-      await axiosInstance.post(`${Base_Url}/deletegeostate`, { id }, {
-        headers: {
-          Authorization: token,
-        },
-      });
-      setFormData({
-        title: '',
-        country_id: '',
-        region_id: ''
-      })
-      fetchUsers();
-    } catch (error) {
-      console.error('Error deleting user:', error);
+    if (confirm) {
+      try {
+        await axiosInstance.post(`${Base_Url}/deletegeostate`, { id }, {
+          headers: {
+            Authorization: token,
+          },
+        });
+        setFormData({
+          title: '',
+          country_id: '',
+          region_id: ''
+        })
+        fetchUsers();
+      } catch (error) {
+        console.error('Error deleting user:', error);
+      }
     }
-  }
   };
 
   const edit = async (id) => {

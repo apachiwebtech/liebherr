@@ -129,7 +129,7 @@ const Pincode = () => {
           Authorization: token, // Send token in headers
         },
       });
-  
+
       setPincodes(response.data);
       setFilteredPincodes(response.data);
     } catch (error) {
@@ -148,6 +148,10 @@ const Pincode = () => {
       setErrors(validationErrors);
       return;
     }
+    const encryptedData = CryptoJS.AES.encrypt(
+      JSON.stringify(formData),
+      secretKey
+    ).toString();
 
     setDuplicateError("");
 
@@ -221,7 +225,7 @@ const Pincode = () => {
   };
 
   const deleted = async (id) => {
-    
+
     try {
       if (window.confirm("Are you sure you want to delete this pincode?")) {
         await axiosInstance.post(`${Base_Url}/deletepincode`, { id }, {
@@ -288,7 +292,7 @@ const Pincode = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-  
+
     if (name === "pincode") {
       const numericValue = value.replace(/[^0-9]/g, "");
       if (numericValue.length <= 6) {
@@ -297,13 +301,13 @@ const Pincode = () => {
     } else {
       const selectedOption = e.target.options[e.target.selectedIndex];
       const title = selectedOption ? selectedOption.text : "";
-  
+
       setFormData((prev) => ({
         ...prev,
         [name]: value,
         [`${name}_title`]: title, // Add the title for the dropdown
       }));
-  
+
       // Fetch dependent data based on ID
       if (name === "country_id") fetchRegions(value);
       if (name === "region_id") fetchGeoStates(value);
@@ -311,7 +315,7 @@ const Pincode = () => {
       if (name === "area_id") fetchGeoCities(value);
     }
   };
-  
+
 
   // export to excel 
   const exportToExcel = () => {
@@ -548,15 +552,15 @@ const Pincode = () => {
                     style={{ marginTop: "10px" }}
                   >
 
-                  <div>
-                    Showing {currentPage * itemsPerPage + 1} to{" "}
-                    {Math.min(
-                      (currentPage + 1) * itemsPerPage,
-                      filteredPincodes.length
-                    )}{" "}
-                    of {filteredPincodes.length} entries
-                  </div>
-                  <div className="pagination" style={{ marginLeft: "auto" }}>
+                    <div>
+                      Showing {currentPage * itemsPerPage + 1} to{" "}
+                      {Math.min(
+                        (currentPage + 1) * itemsPerPage,
+                        filteredPincodes.length
+                      )}{" "}
+                      of {filteredPincodes.length} entries
+                    </div>
+                    <div className="pagination" style={{ marginLeft: "auto" }}>
                       <button
                         onClick={() => setCurrentPage(currentPage - 1)}
                         disabled={currentPage === 0}
@@ -593,7 +597,7 @@ const Pincode = () => {
                         {">"}
                       </button>
                     </div>
-                    </div>
+                  </div>
                 </div>
               </div>
             </div>

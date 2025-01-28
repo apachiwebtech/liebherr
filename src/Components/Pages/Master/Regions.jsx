@@ -99,6 +99,11 @@ const Location = () => {
       return;
     }
 
+    const encryptedData = CryptoJS.AES.encrypt(
+      JSON.stringify(formData),
+      secretKey
+    ).toString();
+
     setDuplicateError("");
 
     try {
@@ -109,7 +114,7 @@ const Location = () => {
         if (isEdit) {
           await axios
             .post(`${Base_Url}/putregion`, {
-              ...formData,
+              encryptedData,
             },
               {
                 headers: {
@@ -128,7 +133,7 @@ const Location = () => {
         } else {
           await axios
             .post(`${Base_Url}/postregion`, {
-              ...formData,
+              encryptedData,
 
             },
               {
@@ -154,20 +159,20 @@ const Location = () => {
 
   const deleted = async (id) => {
 
-    const confirm =  window.confirm("Are you sure you want to delete ?");
-    if(confirm){
-    try {
-      await axiosInstance.post(`${Base_Url}/deleteregion`, { id }, {
-        headers: {
-          Authorization: token, // Send token in headers
-        },
-      });
-      setFormData({ title: "", country_id: "" });
-      fetchUsers();
-    } catch (error) {
-      console.error("Error deleting user:", error);
+    const confirm = window.confirm("Are you sure you want to delete ?");
+    if (confirm) {
+      try {
+        await axiosInstance.post(`${Base_Url}/deleteregion`, { id }, {
+          headers: {
+            Authorization: token, // Send token in headers
+          },
+        });
+        setFormData({ title: "", country_id: "" });
+        fetchUsers();
+      } catch (error) {
+        console.error("Error deleting user:", error);
+      }
     }
-  }
   };
 
   const edit = async (id) => {

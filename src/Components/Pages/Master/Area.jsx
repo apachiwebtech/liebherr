@@ -116,6 +116,11 @@ const Area = () => {
       return;
     }
 
+    const encryptedData = CryptoJS.AES.encrypt(
+      JSON.stringify(formData),
+      secretKey
+    ).toString();
+
 
     setDuplicateError("");
 
@@ -126,7 +131,7 @@ const Area = () => {
       if (confirmSubmission) {
         if (isEdit) {
           await axios
-            .post(`${Base_Url}/putarea`, { ...formData }, {
+            .post(`${Base_Url}/putarea`, { encryptedData }, {
               headers: {
                 Authorization: token, // Send token in headers
               },
@@ -150,7 +155,7 @@ const Area = () => {
             });
         } else {
           await axios
-            .post(`${Base_Url}/postarea`, { ...formData }, {
+            .post(`${Base_Url}/postarea`, { encryptedData }, {
               headers: {
                 Authorization: token, // Send token in headers
               },
@@ -227,28 +232,28 @@ const Area = () => {
   };
 
   const deleted = async (id) => {
-    const confirm =  window.confirm("Are you sure you want to delete ?");
+    const confirm = window.confirm("Are you sure you want to delete ?");
 
-    if(confirm){
-    try {
-      await axiosInstance.post(`${Base_Url}/deletearea`, { id }, {
-        headers: {
-          Authorization: token, // Send token in headers
-        },
+    if (confirm) {
+      try {
+        await axiosInstance.post(`${Base_Url}/deletearea`, { id }, {
+          headers: {
+            Authorization: token, // Send token in headers
+          },
+        }
+        );
+        setFormData({
+          title: "",
+          country_id: "",
+          region_id: "",
+          geostate_id: "",
+          geocity_id: "",
+        });
+        fetchAreas();
+      } catch (error) {
+        console.error("Error deleting area:", error);
       }
-      );
-      setFormData({
-        title: "",
-        country_id: "",
-        region_id: "",
-        geostate_id: "",
-        geocity_id: "",
-      });
-      fetchAreas();
-    } catch (error) {
-      console.error("Error deleting area:", error);
     }
-  }
   };
 
   const edit = async (id) => {
@@ -538,7 +543,7 @@ const Area = () => {
                     <tbody>
                       {filteredAreas
                         .slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage)
-                       .map((area, index) => (
+                        .map((area, index) => (
                           <tr key={area.id} className="text-center">
                             <td className='text-center'>{currentPage * itemsPerPage + index + 1}</td>
                             <td className='text-center'>{area.country_title}</td>
@@ -567,7 +572,7 @@ const Area = () => {
                     </div>
 
                     <div className="pagination" style={{ marginLeft: "auto" }}>
-                    <button
+                      <button
                         onClick={() =>
                           setCurrentPage((prev) => Math.max(prev - 1, 0))
                         }

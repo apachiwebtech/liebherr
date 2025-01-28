@@ -426,9 +426,9 @@ app.get("/requestdata/:id", authenticateToken, async (req, res) => {
 
 
 app.post("/postdata", authenticateToken, async (req, res) => {
-  const {encryptedData} = req.body;
+  const { encryptedData } = req.body;
   const decryptedData = decryptData(encryptedData, secretKey)
-  const { title } =  JSON.parse(decryptedData);
+  const { title } = JSON.parse(decryptedData);
 
   try {
     // Use the poolPromise to get the connection pool
@@ -482,7 +482,7 @@ app.post("/postdata", authenticateToken, async (req, res) => {
 
 // Update existing user with duplicate check
 app.post("/putdata", authenticateToken, async (req, res) => {
-  const {encryptedData} = req.body;
+  const { encryptedData } = req.body;
   const decryptedData = decryptData(encryptedData, secretKey)
 
 
@@ -591,7 +591,10 @@ app.get("/requestregion/:id", authenticateToken, async (req, res) => {
 
 // Insert new region with duplicate check
 app.post("/postregion", authenticateToken, async (req, res) => {
-  const { title, country_id } = req.body;
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { title, country_id } = JSON.parse(decryptedData);
+
 
   try {
     const pool = await poolPromise;
@@ -643,7 +646,9 @@ app.post("/postregion", authenticateToken, async (req, res) => {
 
 // Update existing region with duplicate check
 app.post("/putregion", authenticateToken, async (req, res) => {
-  const { title, id, country_id } = req.body;
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { title, id, country_id } = JSON.parse(decryptedData);
 
   try {
     const pool = await poolPromise;
@@ -761,7 +766,9 @@ app.get("/requestgeostate/:id", authenticateToken, async (req, res) => {
 
 // Insert new geostate with duplicate check
 app.post("/postgeostate", authenticateToken, async (req, res) => {
-  const { title, country_id, region_id } = req.body;
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { title, country_id, region_id } = JSON.parse(decryptedData);
 
   try {
     // Use the poolPromise to get the connection pool
@@ -816,7 +823,9 @@ app.post("/postgeostate", authenticateToken, async (req, res) => {
 
 // Update existing geostate with duplicate check
 app.post("/putgeostate", authenticateToken, async (req, res) => {
-  const { title, id, country_id, region_id } = req.body;
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { title, id, country_id, region_id } = JSON.parse(decryptedData);
 
   try {
     // Use the poolPromise to get the connection pool
@@ -1045,7 +1054,9 @@ app.get("/requestgeocity/:id", authenticateToken, async (req, res) => {
 
 // Insert new geocity with duplicate check
 app.post("/postgeocity", authenticateToken, async (req, res) => {
-  const { title, country_id, region_id, geostate_id, district } = req.body;
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { title, country_id, region_id, geostate_id, district } = JSON.parse(decryptedData);
 
   try {
     // Use the poolPromise to get the connection pool
@@ -1084,7 +1095,9 @@ app.post("/postgeocity", authenticateToken, async (req, res) => {
 // Update existing geocity with duplicate check
 app.post("/putgeocity", authenticateToken,
   async (req, res) => {
-    const { title, id, country_id, region_id, geostate_id, district } = req.body;
+    const { encryptedData } = req.body;
+    const decryptedData = decryptData(encryptedData, secretKey)
+    const { title, id, country_id, region_id, geostate_id, district } = JSON.parse(decryptedData);
 
     try {
       // Use the poolPromise to get the connection pool
@@ -1307,7 +1320,9 @@ app.get("/requestarea/:id", authenticateToken, async (req, res) => {
 
 // Insert new area with duplicate check
 app.post("/postarea", authenticateToken, async (req, res) => {
-  const { title, country_id, region_id, geostate_id } = req.body;
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { title, country_id, region_id, geostate_id } = JSON.parse(decryptedData);
 
   try {
     // Use the poolPromise to get the connection pool
@@ -1339,7 +1354,9 @@ app.post("/postarea", authenticateToken, async (req, res) => {
 
 // Update existing area with duplicate check
 app.post("/putarea", authenticateToken, async (req, res) => {
-  const { title, id, country_id, region_id, geostate_id } = req.body;
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { title, id, country_id, region_id, geostate_id } = JSON.parse(decryptedData);
 
   try {
     // Use the poolPromise to get the connection pool
@@ -3749,9 +3766,9 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
 
 
-console.log(cust_id, "first")
+    console.log(cust_id, "first")
 
-    if (ticket_id == '' && (cust_id == '' || cust_id == 'undefined' )) {
+    if (ticket_id == '' && (cust_id == '' || cust_id == 'undefined')) {
       console.log(cust_id, "second")
 
 
@@ -3786,7 +3803,7 @@ console.log(cust_id, "first")
 
 
 
-    if ((cust_id == '' || cust_id == 'undefined' ) && model != "") {
+    if ((cust_id == '' || cust_id == 'undefined') && model != "") {
 
 
 
@@ -3815,7 +3832,7 @@ console.log(cust_id, "first")
         .query(productSQL);
     }
 
-    if ((cust_id == '' || cust_id == 'undefined' )) {
+    if ((cust_id == '' || cust_id == 'undefined')) {
       // Insert into awt_customerlocation using insertedCustomerId as customer_id
       const customerLocationSQL = `
         INSERT INTO awt_customerlocation (
@@ -3977,7 +3994,7 @@ console.log(cust_id, "first")
       .input('city', city)
       .input('area', area)
       .input('pincode', pincode)
-      .input('customer_id', cust_id == '' || cust_id == 'undefined'  ? newcustid : cust_id)
+      .input('customer_id', cust_id == '' || cust_id == 'undefined' ? newcustid : cust_id)
       .input('model', model)
       .input('ticket_type', ticket_type)
       .input('cust_type', cust_type)
@@ -8850,7 +8867,7 @@ app.get("/getcomplainlistmsp", authenticateToken, async (req, res) => {
 
 app.get("/getmultiplelocation/:pincode/:classification/:ticket_type", authenticateToken, async (req, res) => {
 
-  const { pincode, classification ,ticket_type } = req.params;
+  const { pincode, classification, ticket_type } = req.params;
 
   try {
 
@@ -10190,44 +10207,6 @@ app.post('/getcallrecorddetails', async (req, res) => {
   } catch (err) {
     console.error("Database error:", err);
     return res.status(500).json({ error: "Database query failed", details: err.message });
-  }
-});
-
-// put for add users
-
-app.post("/putdata", authenticateToken, async (req, res) => {
-  const { title, id } = req.body;
-
-  try {
-    // Use the poolPromise to get the connection pool
-    const pool = await poolPromise;
-
-    // Step 1: Check if the same title exists for another record (other than the current one) and is not soft-deleted
-    const checkDuplicateSql = `
-      SELECT * FROM awt_country
-      WHERE title = '${title}'
-        AND id != ${id}
-        AND deleted = 0
-    `;
-    const result = await pool.request().query(checkDuplicateSql);
-
-    if (result.recordset.length > 0) {
-      // If a duplicate exists (other than the current record)
-      return res.status(409).json({ message: "Duplicate entry, title already exists!" });
-    } else {
-      // Step 2: Update the record if no duplicates are found
-      const updateSql = `
-        UPDATE awt_country
-        SET title = '${title}'
-        WHERE id = ${id}
-      `;
-      await pool.request().query(updateSql);
-
-      return res.json({ message: "Country updated successfully!" });
-    }
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "Database error", error: err });
   }
 });
 
@@ -11872,7 +11851,7 @@ app.get("/getshipmentfg", authenticateToken, async (req, res) => {
     let sql = `Select s.* from Shipment_Fg as s WHERE s.deleted = 0`
     // Pagination logic: Calculate offset based on the page number
     const offset = (page - 1) * pageSize;
-    
+
     // Add pagination to the SQL query (OFFSET and FETCH NEXT)
     sql += ` ORDER BY s.id OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
 
@@ -11882,7 +11861,7 @@ app.get("/getshipmentfg", authenticateToken, async (req, res) => {
     let countSql = `SELECT COUNT(*) as totalCount FROM Shipment_Fg WHERE deleted = 0`;
     const countResult = await pool.request().query(countSql);
     const totalCount = countResult.recordset[0].totalCount;
-    
+
     return res.json({
       data: result.recordset,
       totalCount: totalCount,
@@ -11906,7 +11885,7 @@ app.get("/getshipmentparts", authenticateToken, async (req, res) => {
     let sql = `Select s.* from Shipment_Parts as s WHERE s.deleted = 0`
     // Pagination logic: Calculate offset based on the page number
     const offset = (page - 1) * pageSize;
-    
+
     // Add pagination to the SQL query (OFFSET and FETCH NEXT)
     sql += ` ORDER BY s.id OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
 
@@ -11916,7 +11895,7 @@ app.get("/getshipmentparts", authenticateToken, async (req, res) => {
     let countSql = `SELECT COUNT(*) as totalCount FROM Shipment_Parts WHERE deleted = 0`;
     const countResult = await pool.request().query(countSql);
     const totalCount = countResult.recordset[0].totalCount;
-    
+
     return res.json({
       data: result.recordset,
       totalCount: totalCount,

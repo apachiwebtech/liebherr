@@ -115,6 +115,11 @@ const Geocity = () => {
       return;
     }
 
+    const encryptedData = CryptoJS.AES.encrypt(
+      JSON.stringify(formData),
+      secretKey
+    ).toString();
+
     setDuplicateError("");
 
     try {
@@ -124,7 +129,7 @@ const Geocity = () => {
       if (confirmSubmission) {
         if (isEdit) {
           await axios
-            .post(`${Base_Url}/putgeocity`, { ...formData }, {
+            .post(`${Base_Url}/putgeocity`, { encryptedData }, {
               headers: {
                 Authorization: token,
               },
@@ -146,7 +151,7 @@ const Geocity = () => {
             });
         } else {
           await axios
-            .post(`${Base_Url}/postgeocity`, { ...formData }, {
+            .post(`${Base_Url}/postgeocity`, { encryptedData }, {
               headers: {
                 Authorization: token,
               },
@@ -224,27 +229,27 @@ const Geocity = () => {
   };
 
   const deleted = async (id) => {
-    const confirm =  window.confirm("Are you sure you want to delete ?");
+    const confirm = window.confirm("Are you sure you want to delete ?");
 
-    if(confirm){
-    try {
-      await axiosInstance.post(`${Base_Url}/deletegeocity`, { id }, {
-        headers: {
-          Authorization: token,
-        },
-      });
-      setFormData({
-        title: "",
-        country_id: "",
-        region_id: "",
-        geostate_id: "",
-        district: "",
-      });
-      fetchUsers();
-    } catch (error) {
-      console.error("Error deleting user:", error);
+    if (confirm) {
+      try {
+        await axiosInstance.post(`${Base_Url}/deletegeocity`, { id }, {
+          headers: {
+            Authorization: token,
+          },
+        });
+        setFormData({
+          title: "",
+          country_id: "",
+          region_id: "",
+          geostate_id: "",
+          district: "",
+        });
+        fetchUsers();
+      } catch (error) {
+        console.error("Error deleting user:", error);
+      }
     }
-  }
   };
 
   const edit = async (id) => {
