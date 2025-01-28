@@ -3746,9 +3746,10 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
 
 
+console.log(cust_id, "first")
 
-
-    if (ticket_id == '' && cust_id == '') {
+    if (ticket_id == '' && (cust_id == '' || cust_id == 'undefined' )) {
+      console.log(cust_id, "second")
 
 
       // Insert into awt_customer
@@ -3782,7 +3783,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
 
 
-    if (cust_id == "" && model != "") {
+    if ((cust_id == '' || cust_id == 'undefined' ) && model != "") {
 
 
 
@@ -3811,7 +3812,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
         .query(productSQL);
     }
 
-    if (cust_id == "") {
+    if ((cust_id == '' || cust_id == 'undefined' )) {
       // Insert into awt_customerlocation using insertedCustomerId as customer_id
       const customerLocationSQL = `
         INSERT INTO awt_customerlocation (
@@ -3973,7 +3974,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
       .input('city', city)
       .input('area', area)
       .input('pincode', pincode)
-      .input('customer_id', cust_id == '' ? newcustid : cust_id)
+      .input('customer_id', cust_id == '' || cust_id == 'undefined'  ? newcustid : cust_id)
       .input('model', model)
       .input('ticket_type', ticket_type)
       .input('cust_type', cust_type)
@@ -8852,7 +8853,7 @@ app.get("/getmultiplelocation/:pincode/:classification/:ticket_type", authentica
 
     const pool = await poolPromise;
 
-    const sql = `SELECT cn.title as country, p.region_name as region, p.geostate_name as state, p.area_name as district, p.geocity_name as city, o.account_manager as msp, f.title as mspname, o.owner as csp, fm.title as cspname,  p.pincode
+    const sql = `SELECT cn.title as country, p.region_name as region, p.geostate_name as state, p.area_name as district, p.geocity_name as city, 'SP' + o.msp_code as msp, f.title as mspname, 'SP' + o.csp_code as csp, fm.title as cspname,  p.pincode
     FROM awt_pincode as p
     LEFT JOIN awt_region as r on p.region_id = r.id
     LEFT JOIN awt_country as cn on p.country_id = cn.id
@@ -8860,9 +8861,9 @@ app.get("/getmultiplelocation/:pincode/:classification/:ticket_type", authentica
     LEFT JOIN awt_district as d on p.area_id = d.id
     LEFT JOIN awt_geocity as c on p.geocity_id = c.id
     LEFT JOIN pincode_allocation as o on p.pincode = o.pincode
-	LEFT JOIN awt_franchisemaster as f on f.licarecode = o.account_manager
-	LEFT JOIN awt_childfranchisemaster as fm on fm.licare_code = o.owner
-	where p.pincode = ${pincode} and o.customer_classification = '${classification}' and call_type = '${ticket_type}'`
+	LEFT JOIN awt_franchisemaster as f on f.licarecode = 'SP' + o.msp_code
+	LEFT JOIN awt_childfranchisemaster as fm on fm.licare_code = 'SP' + o.csp_code
+	where p.pincode = ${pincode} and o.customer_classification = '${classification}' and o.call_type = '${ticket_type}'`
 
     const result = await pool.request().query(sql);
 

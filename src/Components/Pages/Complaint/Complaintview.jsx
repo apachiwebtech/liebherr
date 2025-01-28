@@ -984,7 +984,7 @@ export function Complaintview(params) {
     if (
 
       (complaintview.call_status === 'Closed'
-        ? isValidValue(complaintview.defect_type) && isValidValue(complaintview.site_defect) && groupstatusid && isValidValue(complaintview.serial_no) && (isValidValue(complaintview.purchase_date)) && addedEngineers.length > 0
+        ? isValidValue(complaintview.defect_type) && isValidValue(complaintview.site_defect) && isValidValue(complaintview.activity_code)  && groupstatusid && isValidValue(complaintview.serial_no) && (isValidValue(complaintview.purchase_date)) && addedEngineers.length > 0
         : true) // For other statuses, skip defect_type and site_defect validation
     ) {
 
@@ -1080,7 +1080,10 @@ export function Complaintview(params) {
           alert('Please select the Defect type');
         } else if (isInvalidValue(complaintview.site_defect)) {
           alert('Please select the site defect');
-        } else if (isInvalidValue(complaintview.serial_no)) {
+        }else if(isInvalidValue(complaintview.activity_code)){
+          alert('Please select activity code');
+        } 
+        else if (isInvalidValue(complaintview.serial_no)) {
           alert('Please select the Serial No');
         } else if (!complaintview.purchase_date) {
           alert('Please select the Purchase Date');

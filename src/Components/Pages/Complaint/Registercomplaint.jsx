@@ -26,7 +26,7 @@ export function Registercomplaint(params) {
   const [p_date, setpdate] = useState('')
   const [searchdata, setSearchData] = useState([])
   const [ProductCustomer, setProductCustomer] = useState([])
-  const [warranty_status_data, setWarranty_status_data] = useState('OUT OF WARRANTY')
+  const [warranty_status_data, setWarranty_status_data] = useState('')
   const [DuplicateCustomerNumber, setDuplicateCustomerNumber] = useState([])
   const [hasSearched, setHasSearched] = useState(false)
   const [form, setForm] = useState(false)
@@ -1725,7 +1725,7 @@ export function Registercomplaint(params) {
                     <div className="col-md-3">
                       <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Warranty Status</p>
                       <div className="mb-3">
-                        <select className="form-control" onChange={onHandleChange} value={warranty_status_data} name="warrenty_status" disabled={warranty_status_data == '' ? false : true}>
+                        <select className="form-control" onChange={onHandleChange} value={warranty_status_data} name="warrenty_status" disabled>   {/* disabled={warranty_status_data == '' ? false : true */}
                           <option value="">Select Option</option>
                           <option value="WARRANTY">IN WARRANTY</option>
                           <option value="OUT OF WARRANTY">OUT OF WARRANTY</option>
