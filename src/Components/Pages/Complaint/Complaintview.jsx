@@ -132,6 +132,8 @@ export function Complaintview(params) {
 
   }
 
+
+
   const getDateAfterOneYear = (value) => {
     try {
       // Ensure value is in a recognized format
@@ -979,7 +981,7 @@ export function Complaintview(params) {
     const isValidValue = (value) => value !== null && value !== 'null' && value !== '';
 
 
-    console.log("complaintview.purchase_date:", complaintview.purchase_date);
+
 
     if (
 
@@ -1811,7 +1813,7 @@ export function Complaintview(params) {
 
                     <div className="col-md-2">
                       <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Purchase Date</p>
-                      <p style={{ fontSize: "14px" }}>{purchase_date == (null || '') ? <DatePicker
+                      <p style={{ fontSize: "14px" }}>{purchase_date == null || purchase_date == '' ? <DatePicker
                         selected={complaintview.purchase_date}
                         onChange={(date) => {
 
@@ -1824,7 +1826,7 @@ export function Complaintview(params) {
                         aria-describedby="Anidate"
 
                         maxDate={new Date().toISOString().split("T")[0]}
-                      /> : formatDate(complaintview.purchase_date)}</p>
+                      /> :  formatDate(complaintview.purchase_date)}</p>
                     </div>
 
                     <div className="col-md-4">
@@ -2525,13 +2527,13 @@ export function Complaintview(params) {
               {(complaintview.call_status == 'Spares' || addedSpareParts.length > 0) && <div className="card mb-3">
                 <div className="card-body">
 
-                  <div className="mt-3">
+                  <div className="mt-3" >
                     {closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? null : <h4 className="pname" style={{ fontSize: "14px" }}>Spare Parts:</h4>}
 
                     {closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? null :
                       <div className="row align-items-center">
 
-                        <div className="col-lg-6">
+                        {/* <div className="col-lg-6">
                           <select
                             className="form-select dropdown-select m-0"
                             name="spare_part_id"
@@ -2552,6 +2554,33 @@ export function Complaintview(params) {
                               </option>
                             )}
                           </select>
+                        </div> */}
+                        <div className="col-lg-6">
+                          <Autocomplete
+                            size="small"
+                            options={spare || []}
+                            getOptionLabel={(option) =>
+                              option.article_code + " - " + option.article_description
+                            }
+                            value={
+                              spare.find((part) => part.id === spareid) || null
+                            } // Set the selected value
+                            onChange={(event, newValue) =>
+                              handlesparechange(newValue ? newValue.id : "")
+                            }
+                            disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                label="Select Spare Part"
+                                variant="outlined"
+                                fullWidth
+                             
+                              />
+                            )}
+                            noOptionsText="No spare parts available"
+                          
+                          />
                         </div>
 
                         <div className="col-lg-3">
@@ -2583,7 +2612,7 @@ export function Complaintview(params) {
 
 
                     {/* Display added spare parts */}
-                    <div className="mt-3">
+                    <div className="mt-3" style={{overflowX : "scroll"}}>
                       <h4 className="pname" style={{ fontSize: "14px" }}>Added Spare Parts:</h4>
                       <table className="table table-bordered" style={{ fontSize: "12px" }}>
                         <thead>

@@ -417,7 +417,7 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
 
                         </div>
                         <View style={[styles.tableCol14, { width: '20%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 15, color: '#000', fontWeight: 1600 }}>{engineer[0].title}</Text>
+                            <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 15, color: '#000', fontWeight: 1600 }}>{engineer[0] && engineer[0].title}</Text>
                         </View>
                         <View style={[styles.tableCol14, { width: '5%' }]}>
                             <Text style={{ fontSize: '10px', marginTop: 10, color: '#000', fontWeight: 1600 }}>{engineer[0] && engineer[0].created_date}</Text>
