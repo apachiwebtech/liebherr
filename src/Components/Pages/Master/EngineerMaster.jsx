@@ -28,8 +28,8 @@ const EngineerMaster = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const [duplicateError, setDuplicateError] = useState('');
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [joining_date, setJoiningDate] = useState(null);
+  const [selectedDate, setSelectedDate] = useState('');
+  const [joining_date, setJoiningDate] = useState('');
   const created_by = localStorage.getItem("userId"); // Get user ID from localStorage
   const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
 
@@ -296,7 +296,7 @@ const EngineerMaster = () => {
             });
         } else {
           // For insert, include duplicate check
-          await axiosInstance.post(`${Base_Url}/postengineer`, { ...hashedFormData, created_by,dob : selectedDate,joining_date_date : joining_date }
+          await axiosInstance.post(`${Base_Url}/postengineer`, { ...hashedFormData, created_by, dob : String(selectedDate),joining_date_date : String(joining_date) }
             , {
               headers: {
                 Authorization: token,

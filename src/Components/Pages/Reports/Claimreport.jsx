@@ -12,9 +12,7 @@ export function Claimreport(params) {
     const [data, setData] = useState([])
 
     const Navigate = useNavigate()
-    const handleSubmit = () => {
-        Navigate('/claimreport')
-    }
+
 
     async function downloadPDF(id) {
 

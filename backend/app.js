@@ -2782,8 +2782,27 @@ app.post("/deletetypeofdefect", authenticateToken, async (req, res) => {
 
 
 
-//Site code Start
-app.get("/getsitedefect", authenticateToken, async (req, res) => {
+
+
+// app.get("/getsitedefect", authenticateToken, async (req, res) => {
+//   try {
+//     const pool = await poolPromise;
+//     const sql = `
+//     SELECT
+//     td.*, dg.defectgrouptitle as grouptitle
+//   FROM awt_site_defect td
+//   LEFT JOIN awt_defectgroup dg ON td.defectgroupcode = dg.defectgroupcode
+//   WHERE td.deleted = 0 order by td.id DESC
+//     `;
+//     const result = await pool.request().query(sql);
+//     return res.json(result.recordset);
+//   } catch (err) {
+//     console.error("Error fetching Type of Defects:", err); // Log error for debugging
+//     return res.status(500).json({ message: "Error fetching Site Defects" });
+//   }
+// });
+
+app.get("/getsite", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
     const sql = `
@@ -8825,10 +8844,9 @@ app.get("/getcomplainlistmsp", authenticateToken, async (req, res) => {
 
 //Register Page Complaint Duplicate Start
 
-app.get("/getmultiplelocation/:pincode/:classification", authenticateToken, async (req, res) => {
-  const { pincode, classification } = req.params;
+app.get("/getmultiplelocation/:pincode/:classification/:ticket_type", authenticateToken, async (req, res) => {
 
-
+  const { pincode, classification ,ticket_type } = req.params;
 
   try {
 
@@ -8844,7 +8862,7 @@ app.get("/getmultiplelocation/:pincode/:classification", authenticateToken, asyn
     LEFT JOIN pincode_allocation as o on p.pincode = o.pincode
 	LEFT JOIN awt_franchisemaster as f on f.licarecode = o.account_manager
 	LEFT JOIN awt_childfranchisemaster as fm on fm.licare_code = o.owner
-	where p.pincode = ${pincode} and o.customer_classification = '${classification}'`
+	where p.pincode = ${pincode} and o.customer_classification = '${classification}' and call_type = '${ticket_type}'`
 
     const result = await pool.request().query(sql);
 
@@ -9166,7 +9184,7 @@ app.post("/getDefectCodewisesite", authenticateToken,
 app.get("/getquotationlist", authenticateToken, async (req, res) => {
   try {
     const {
-      ticketId,
+      ticket_no,
       spareId,
       ModelNumber,
       title,
@@ -9183,6 +9201,10 @@ app.get("/getquotationlist", authenticateToken, async (req, res) => {
 
     // Directly use the query (no parameter binding)
     let sql = `SELECT q.* FROM awt_quotation as q WHERE 1=1`;
+
+    if (ticket_no) {
+      sql += ` AND q.ticketId LIKE '%${ticket_no}%'`;
+    }
 
     if (CustomerName) {
       sql += ` AND q.CustomerName LIKE '%${CustomerName}%'`;
@@ -9224,6 +9246,7 @@ app.get("/getquotationlist", authenticateToken, async (req, res) => {
     if (title) countSql += ` AND title LIKE '%${title}%'`;
     if (quantity) countSql += ` AND quantity LIKE '%${quantity}%'`;
     if (price) countSql += ` AND price LIKE '%${price}%'`;
+    if (ticket_no) countSql += ` AND ticketId LIKE '%${ticket_no}%'`;
 
     const countResult = await pool.request().query(countSql);
     const totalCount = countResult.recordset[0].totalCount;

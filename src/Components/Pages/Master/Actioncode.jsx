@@ -54,7 +54,7 @@ const ActionCode = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axiosInstance.get(`${Base_Url}/getsitedefect`
+      const response = await axiosInstance.get(`${Base_Url}/getsite`
         , {
           headers: {
             Authorization: token, // Send token in headers

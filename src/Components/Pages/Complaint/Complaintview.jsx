@@ -18,6 +18,8 @@ import { error } from "jquery";
 import { useDispatch, useSelector } from "react-redux";
 import { getRoleData } from "../../Store/Role/role-action";
 import DatePicker from "react-datepicker";
+import Jobcardpdf from "../Reports/Jobcardpdf";
+import { pdf } from '@react-pdf/renderer';
 
 
 export function Complaintview(params) {
@@ -29,6 +31,7 @@ export function Complaintview(params) {
   const [activity, setactivity] = useState([]);
   const [model, setModel] = useState('');
   let { complaintid } = useParams();
+  const [data, setData] = useState([])
   const [warranty_status_data, setWarranty_status_data] = useState('OUT OF WARRANTY')
   const uniqueParts = new Set();
   const [purchase_date, setpurchase_date] = useState('')
@@ -44,6 +47,7 @@ export function Complaintview(params) {
   const [closestatus, setCloseStatus] = useState("");
   const [subclosestatus, setsubCloseStatus] = useState("");
   const [spareid, setspareid] = useState("");
+  const [updatedata, setUpdatedata] = useState([])
   const [ticketTab, setTicketTab] = useState(JSON.parse(localStorage.getItem('tabticket')) || []);
   const { loaders, axiosInstance } = useAxiosLoader();
   const [errors, setErrors] = useState({})
@@ -71,6 +75,8 @@ export function Complaintview(params) {
     city: "",
     activity_code: ""
   });
+
+
 
 
 
@@ -365,7 +371,7 @@ export function Complaintview(params) {
     } else {
 
       try {
-        const res = await axiosInstance.get(`${Base_Url}/getsitedefect`, {
+        const res = await axiosInstance.get(`${Base_Url}/getsite`, {
           headers: {
             Authorization: token, // Send token in headers
           },
@@ -678,7 +684,7 @@ export function Complaintview(params) {
       );
 
       setpurchase_date(response.data.purchase_date)
-
+      setUpdatedata(response.data)
       setComplaintview(response.data);
       setgroupstatusid(response.data.group_code)
 
@@ -877,7 +883,7 @@ export function Complaintview(params) {
     e.preventDefault();
 
 
-    if (addedEngineers.length > 0) { 
+    if (addedEngineers.length > 0) {
 
       const data = {
         serial_no: String(complaintview.serial_no) || '',
@@ -985,7 +991,8 @@ export function Complaintview(params) {
 
       // Check only for note being empty
       if (!note) {
-        setErrorMessage("Please fill the field.");
+        setErrorMessage("Please select Compulsary Field."); 
+
         return;
       }
 
@@ -998,7 +1005,7 @@ export function Complaintview(params) {
           site_defect: complaintview.site_defect || '',
           defect_type: complaintview.defect_type || '',
           activity_code: complaintview.activity_code || '',
-          serial_no: complaintview.serial_no,
+          serial_no: String(complaintview.serial_no),
           ModelNumber: complaintview.ModelNumber,
           purchase_date: complaintview.purchase_date,
           warrenty_status: complaintview.warranty_status || warranty_status_data,
@@ -1354,6 +1361,41 @@ export function Complaintview(params) {
   useEffect(() => {
     dispatch(getRoleData(roledata))
   }, [])
+
+
+  //For Pdf
+
+  async function downloadPDF(id) {
+
+
+    axios.post(`${Base_Url}/getprintinfo`, { id: id })
+        .then((res) => {
+            console.log(res.data[0], "DDD")
+            setData(res.data[0])
+
+            Blob(res.data[0])
+
+        })
+        .catch((err) => {
+            console.log(err)
+        })
+}
+
+
+const Blob = async (data) => {
+
+    try {
+        const blob = await pdf(<Jobcardpdf data={data} />).toBlob();
+        const url = URL.createObjectURL(blob);
+        window.open(url);
+        URL.revokeObjectURL(url);
+    } catch (err) {
+        console.error('Error generating PDF:', err);
+    }
+};
+
+
+
 
 
   return (
@@ -1746,14 +1788,16 @@ export function Complaintview(params) {
                       <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>
                         Serial No
                       </p>
-                      {sserial_no != "" ? (
+                      {closestatus === "Closed" && subclosestatus === 'Fully' && sserial_no == 0  ? (
+                        <p style={{ fontSize: "14px" }}>{complaintview.serial_no} </p>
+                      ) : sserial_no != 0 ? (
                         <p style={{ fontSize: "14px" }}>{complaintview.serial_no}</p>
                       ) : (
                         <input
                           type="text"
                           className="form-control"
                           name="serial_no"
-                          value={complaintview.serial_no || ''}
+                          value={complaintview.serial_no || ""}
                           placeholder="Enter Serial No"
                           style={{ fontSize: "14px", width: "100%" }}
                           onChange={handleModelChange}
@@ -2225,51 +2269,22 @@ export function Complaintview(params) {
 
             <div className="col-3">
               <div className="card mb-3" id="productInfocs">
+                <div className="m-1">
+                  <button className="btn btn-primary btn-sm float-end" onClick={() => downloadPDF()}>Download</button>
+                </div>
                 <div className="card-body">
                   <h4 className="pname" style={{ fontSize: "14px" }}>Call Status</h4>
                   <div className="mb-3">
-                    <select
-                      name="call_status"
-                      className="form-control"
-                      // disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
-                      disabled
-                      style={{ fontSize: "14px" }}
-                      value={complaintview.call_status}
-                      onChange={(e) => {
-                        const selectedname = e.target.value; // Get the id
-                        const selectedid = callstatus.find(item => item.Callstatus == selectedname)?.id; // Find the corresponding Callstatus value
-                        getsubcallstatus(selectedid); // Send the id to fetch sub-call statuses
-                        // Log or use the Callstatus value
-                        setCallstatusid(selectedname)
-                        handleModelChange(e)
-                      }}
-                    >
-                      <option value="">Select Status</option>
-                      {callstatus.map((item) => (
-                        <option key={item.id} value={item.Callstatus}>
-                          {item.Callstatus}
-                        </option>
-                      ))}
-                    </select>
+
+
+                    <input className="form-control" style={{ fontSize: "14px" }} disabled type="text" value={updatedata.call_status} />
 
                   </div>
 
                   <h4 className="pname" style={{ fontSize: "14px" }}>Sub Call Status</h4>
                   <div className="mb-3">
-                    <select name="sub_call_status" value={complaintview.sub_call_status}
-                      // disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false} 
-                      disabled
-                      className="form-control" style={{ fontSize: "14px" }} onChange={handleModelChange}>
-                      <option value="" >Select Status</option>
-                      {subcallstatus.map((item) => {
-                        return (
 
-                          <option value={item.SubCallstatus}>{item.SubCallstatus}</option>
-                        )
-                      })}
-
-
-                    </select>
+                    <input className="form-control" style={{ fontSize: "14px" }} disabled type="text" value={updatedata.sub_call_status} />
                   </div>
 
                   {closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? null : <div className="d-flex mb-3">

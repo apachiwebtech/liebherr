@@ -324,7 +324,7 @@ export function Complaintviewmsp(params) {
     } else {
 
       try {
-        const res = await axiosInstance.get(`${Base_Url}/getsitedefect`, {
+        const res = await axiosInstance.get(`${Base_Url}/getsite`, {
           headers: {
             Authorization: token, // Send token in headers
           },

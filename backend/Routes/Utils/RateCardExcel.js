@@ -2,6 +2,7 @@ const express = require('express');
 const app = express.Router();
 const poolPromise = require('../../db');
 const sql = require("mssql");
+const CryptoJS = require('crypto-js');
 
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ extended: true, limit: '100mb' }));
@@ -193,10 +194,12 @@ app.post('/uploadpostwarrentyexcel', async (req, res) => {
   }
 });
 
-app.post('/uplaodpincodeexcel', async (req, res) => {
-  let { excelData } = req.body;
+app.post('/uploadpinexcel', async (req, res) => {
 
-  excelData = JSON.parse(excelData);
+
+  let { jsonData } = req.body;
+  let excelData = JSON.parse(jsonData);
+
 
   try {
     const pool = await poolPromise;
@@ -220,16 +223,7 @@ app.post('/uplaodpincodeexcel', async (req, res) => {
         .input('call_type', sql.VarChar, item.call_type)
         .input('msp_code', sql.Int, item.master_service_partner_code)
         .input('csp_code', item.child_service_partner_code)
-        .query(`
-            IF NOT EXISTS (
-              SELECT 1 FROM pincode_allocation 
-              WHERE pincode = @pincode 
-                AND call_type = @call_type 
-                AND msp_code = @msp_code 
-                AND csp_code = @csp_code
-            )
-            BEGIN
-              INSERT INTO pincode_allocation 
+        .query(`INSERT INTO pincode_allocation 
               (pincode, country, region, state, city, mother_branch, resident_branch, area_manager, local_manager, customer_classification, class_city, csp_name, msp_name, call_type, msp_code, csp_code) 
               VALUES (
                 @pincode, 
@@ -249,7 +243,7 @@ app.post('/uplaodpincodeexcel', async (req, res) => {
                 @msp_code,
                 @csp_code
               )
-            END
+
           `);
     }
 

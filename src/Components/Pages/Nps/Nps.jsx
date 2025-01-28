@@ -76,8 +76,8 @@ const ContactForm = () => {
 
         if (validateForm()) {
             const data = {
-                rating1: formState.rating1,
-                remark: formState.remark,
+                rating1: String(formState.rating1),
+                remark: String(formState.remark),
                 rating2: formState.rating2,
                 email: email,
                 ticketNo: ticketNo,

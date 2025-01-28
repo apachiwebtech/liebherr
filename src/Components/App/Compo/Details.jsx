@@ -305,7 +305,7 @@ function Details() {
     } else {
 
       try {
-        const res = await axios.get(`${Base_Url}/getsitedefect`);
+        const res = await axios.get(`${Base_Url}/getsite`);
 
 
 

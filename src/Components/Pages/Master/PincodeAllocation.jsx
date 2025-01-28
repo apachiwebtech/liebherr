@@ -48,7 +48,7 @@ const PincodeAllocation = () => {
         const chunkSize = 70000; // Process in smaller chunks to avoid memory issues
         const jsonData = XLSX.utils.sheet_to_json(sheet, { defval: "" });
   
-        console.log("Total Rows:", jsonData.length);
+
   
         // Column mapping function
         const mapKeys = (obj) => {
@@ -59,7 +59,7 @@ const PincodeAllocation = () => {
           return Object.fromEntries(
             Object.entries(obj).map(([key, value]) => [
               keyMapping[key] || key.toLowerCase().replace(/\s+/g, "_"),
-              value,
+              String(value),
             ])
           );
         };
@@ -95,25 +95,36 @@ const PincodeAllocation = () => {
 
 
   const uploadexcel = () => {
-
-    setLoader(true)
-
-   const excelData2  = JSON.stringify(excelData)
-
-
-    axios.post(`${Base_Url}/uplaodpincodeexcel`, {excelData : excelData2 } )
-      .then((res) => {
-        if (res.data) {
-          alert("Uploaded")
-          setLoader(false)
-        }
-        console.log(res)
-      })
-      .catch((err) => {
-        console.log(err)
-      })
-  }
-
+    setLoader(true);
+  
+    try {
+      // Ensure excelData is converted to JSON string before encryption
+      const jsonData = JSON.stringify(excelData);
+  
+    
+  
+      axios.post(`${Base_Url}/uploadpinexcel`, { jsonData: jsonData })
+        .then((res) => {
+          if (res.data) {
+            alert("Uploaded successfully!");
+          }
+          console.log(res);
+        })
+        .catch((err) => {
+          console.error("Upload error:", err);
+          alert("Error uploading file. Please try again.");
+        })
+        .finally(() => {
+          setLoader(false);
+        });
+  
+    } catch (error) {
+      console.error("Encryption error:", error);
+      alert("Error during encryption.");
+      setLoader(false);
+    }
+  };
+  
 
 
   // Role Right 
