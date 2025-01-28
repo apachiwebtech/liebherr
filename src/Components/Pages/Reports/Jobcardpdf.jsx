@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
     image: {
         height: 10,
         width: 100,
-       
+
     },
     headerRight: {
         flex: "13"
@@ -103,19 +103,25 @@ const styles = StyleSheet.create({
     },
 });
 
-const Jobcardpdf = ({ data }) => {
+const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
+
+    console.log(engineer);
+
+
+
+
 
 
     return (
         <Document>
-            <Page size="A4" style={styles.page}>
+            <Page size="A3" style={styles.page}>
                 <View style={styles.header}>
                     <Image src={Liebherrlogo} style={styles.image} />
                     <View style={styles.headerRight}>
-                        <Text style={{ fontSize: '10px',marginLeft: 80, fontWeight: '1700', color: "#000" }}>Job Sheet _ Consumer</Text>
+                        <Text style={{ fontSize: '10px', marginLeft: 80, fontWeight: '1700', color: "#000" }}>Job Sheet _ Consumer</Text>
                     </View>
                     <View style={styles.headerRight}>
-                        <Text style={{ fontSize: '10px', marginLeft: 150,  color: "#000" }}>FO_1632 LHI</Text>
+                        <Text style={{ fontSize: '10px', marginLeft: 150, color: "#000" }}>FO_1632 LHI</Text>
                     </View>
 
                 </View>
@@ -125,23 +131,23 @@ const Jobcardpdf = ({ data }) => {
 
                     </div>
                     <View style={[styles.tableCol12, { width: '50%' }]}>
-                        <Text style={{ fontSize: '10px',color: '#000' }}></Text>
+                        <Text style={{ fontSize: '10px', color: '#000' }}></Text>
                     </View>
                     <View style={[{ width: '50%' }]}>
-                        <Text style={{ fontSize: '10px',marginLeft: 5, color: '#000' }}>Customer Care : 7038100400 </Text>
+                        <Text style={{ fontSize: '10px', marginLeft: 5, color: '#000' }}>Customer Care : 7038100400 </Text>
 
                     </View>
 
                 </View>
                 <View style={styles.Course}>
-                    <div style={{  margin: "0 0 0 0" }}>
+                    <div style={{ margin: "0 0 0 0" }}>
 
                     </div>
                     <View style={[styles.tableCol12, { width: '50%' }]}>
-                        <Text style={{ fontSize: '10px',color: '#000' }}></Text>
+                        <Text style={{ fontSize: '10px', color: '#000' }}></Text>
                     </View>
                     <View style={[{ width: '50%' }]}>
-                        <Text style={{ fontSize: '10px',marginLeft: 5, color: '#000' }}>E-Mail : : Customercare.lhi@liebherr.com </Text>
+                        <Text style={{ fontSize: '10px', marginLeft: 5, color: '#000' }}>E-Mail : : Customercare.lhi@liebherr.com </Text>
 
                     </View>
 
@@ -159,7 +165,7 @@ const Jobcardpdf = ({ data }) => {
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Service Partner</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '40%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.sevice_partner}</Text>
 
                         </View>
                         <View style={[styles.tableCol, { width: '15%' }, { backgroundColor: '#9EA0A1' }]}>
@@ -179,14 +185,14 @@ const Jobcardpdf = ({ data }) => {
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Customer Name</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '40%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.customer_name}</Text>
 
                         </View>
                         <View style={[styles.tableCol, { width: '15%' }, { backgroundColor: '#9EA0A1' }]}>
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Ticket Number</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '25%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.ticket_no}</Text>
 
                         </View>
 
@@ -199,14 +205,14 @@ const Jobcardpdf = ({ data }) => {
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Account ID</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '40%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.customer_id}</Text>
 
                         </View>
                         <View style={[styles.tableCol, { width: '15%' }]}>
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Model Number</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '25%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.ModelNumber}</Text>
 
                         </View>
 
@@ -226,7 +232,7 @@ const Jobcardpdf = ({ data }) => {
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Serial No</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '25%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.serial_no}</Text>
 
                         </View>
 
@@ -239,14 +245,14 @@ const Jobcardpdf = ({ data }) => {
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Address</Text>
                         </View>
                         <View style={[{ width: '40%' }, { borderRight: '1px' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.address}</Text>
 
                         </View>
                         <View style={[styles.tableCol, { width: '15%' }]}>
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Invoice Date</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '25%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.purchase_date}</Text>
 
                         </View>
 
@@ -280,7 +286,7 @@ const Jobcardpdf = ({ data }) => {
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>City</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '13%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.city}</Text>
 
                         </View>
                         <View style={[styles.tableCol, { width: '12%' }]}>
@@ -288,14 +294,14 @@ const Jobcardpdf = ({ data }) => {
 
                         </View>
                         <View style={[styles.tableCol, { width: '15%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.customer_mobile}</Text>
 
                         </View>
                         <View style={[styles.tableCol, { width: '15%' }]}>
                             <Text style={{ fontSize: '10px', marginTop: 5, color: '#000' }}>Ticket Create Date </Text>
                         </View>
                         <View style={[styles.tableCol, { width: '25%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.ticket_date}</Text>
 
                         </View>
 
@@ -309,7 +315,7 @@ const Jobcardpdf = ({ data }) => {
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Pincode </Text>
                         </View>
                         <View style={[styles.tableCol, { width: '13%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.pincode}</Text>
 
                         </View>
                         <View style={[styles.tableCol, { width: '12%' }]}>
@@ -317,14 +323,14 @@ const Jobcardpdf = ({ data }) => {
 
                         </View>
                         <View style={[styles.tableCol, { width: '15%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.alt_mobile}</Text>
 
                         </View>
                         <View style={[styles.tableCol, { width: '15%' }]}>
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Completed Date </Text>
                         </View>
                         <View style={[styles.tableCol, { width: '25%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.closed_date}</Text>
 
                         </View>
 
@@ -352,15 +358,15 @@ const Jobcardpdf = ({ data }) => {
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Past Complaints : </Text>
                         </View>
                         <View style={[styles.tableCol, { width: '25%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{duplicate && duplicate[0] && duplicate[0].ticket_no}</Text>
 
                         </View>
                         <View style={[styles.tableCol, { width: '30%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{duplicate && duplicate[0] && duplicate[1].ticket_no}</Text>
 
                         </View>
                         <View style={[styles.tableCol, { width: '25%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{duplicate && duplicate[0] && duplicate[2].ticket_no}</Text>
 
                         </View>
 
@@ -411,10 +417,10 @@ const Jobcardpdf = ({ data }) => {
 
                         </div>
                         <View style={[styles.tableCol14, { width: '20%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 15, color: '#000', fontWeight: 1600 }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 15, color: '#000', fontWeight: 1600 }}>{engineer[0].title}</Text>
                         </View>
                         <View style={[styles.tableCol14, { width: '5%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 10, color: '#000', fontWeight: 1600 }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 10, color: '#000', fontWeight: 1600 }}>{engineer[0] && engineer[0].created_date}</Text>
 
                         </View>
                         <View style={[styles.tableCol14, { width: '8%' }]}>
@@ -580,7 +586,8 @@ const Jobcardpdf = ({ data }) => {
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000', fontWeight: 1600 }}>Description</Text>
                         </View>
                         <View style={[styles.tableCol14, { width: '15%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 10, color: '#000', fontWeight: 1600 }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 10, color: '#000', fontWeight: 1600 }}>{spare[0] && spare[0].article_description
+                            }</Text>
 
                         </View>
                         <View style={[styles.tableCol14, { width: '10%' }]}>
@@ -609,7 +616,7 @@ const Jobcardpdf = ({ data }) => {
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000', fontWeight: 1600 }}>Price</Text>
                         </View>
                         <View style={[styles.tableCol14, { width: '15%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 10, color: '#000', fontWeight: 1600 }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 10, color: '#000', fontWeight: 1600 }}>{spare[0] && spare[0].price}</Text>
 
                         </View>
                         <View style={[styles.tableCol14, { width: '10%' }]}>
@@ -638,7 +645,7 @@ const Jobcardpdf = ({ data }) => {
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000', fontWeight: 1600 }}>Quantity</Text>
                         </View>
                         <View style={[styles.tableCol14, { width: '15%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 10, color: '#000', fontWeight: 1600 }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 10, color: '#000', fontWeight: 1600 }}>{spare[0] && spare[0].quantity}</Text>
 
                         </View>
                         <View style={[styles.tableCol14, { width: '10%' }]}>
@@ -1054,7 +1061,7 @@ const Jobcardpdf = ({ data }) => {
                         <View style={[styles.tableCol, { width: '100%' }]}>
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Note:-This is a record of Service rendered & Kindly ask a VALID TAX INVOICE against any payment made.</Text>
                         </View>
-                    
+
 
 
                     </View>
@@ -1062,7 +1069,7 @@ const Jobcardpdf = ({ data }) => {
 
 
                 </View>
-                
+
 
 
 

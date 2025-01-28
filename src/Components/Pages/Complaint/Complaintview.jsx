@@ -907,14 +907,14 @@ export function Complaintview(params) {
         },
       })
         .then((response) => {
-          setComplaintview({
-            ...complaintview,
-            serial_no: '',
-            ModelNumber: '',
-            engineer_id: '',
-            call_status: '',
-          });
-          fetchComplaintview(complaintid);
+          // setComplaintview({
+          //   ...complaintview,
+          //   serial_no: '',
+          //   ModelNumber: '',
+          //   engineer_id: '',
+          //   call_status: '',
+          // });
+          // fetchComplaintview(complaintid);
           fetchComplaintDetails(complaintid)
 
           setTicketUpdateSuccess({
@@ -984,14 +984,14 @@ export function Complaintview(params) {
     if (
 
       (complaintview.call_status === 'Closed'
-        ? isValidValue(complaintview.defect_type) && isValidValue(complaintview.site_defect) && isValidValue(complaintview.activity_code)  && groupstatusid && isValidValue(complaintview.serial_no) && (isValidValue(complaintview.purchase_date)) && addedEngineers.length > 0
+        ? isValidValue(complaintview.defect_type) && isValidValue(complaintview.site_defect) && isValidValue(complaintview.activity_code) && groupstatusid && isValidValue(complaintview.serial_no) && (isValidValue(complaintview.purchase_date)) && addedEngineers.length > 0
         : true) // For other statuses, skip defect_type and site_defect validation
     ) {
 
 
       // Check only for note being empty
       if (!note) {
-        setErrorMessage("Please select Compulsary Field."); 
+        setErrorMessage("Please select Compulsary Field.");
 
         return;
       }
@@ -1080,9 +1080,9 @@ export function Complaintview(params) {
           alert('Please select the Defect type');
         } else if (isInvalidValue(complaintview.site_defect)) {
           alert('Please select the site defect');
-        }else if(isInvalidValue(complaintview.activity_code)){
+        } else if (isInvalidValue(complaintview.activity_code)) {
           alert('Please select activity code');
-        } 
+        }
         else if (isInvalidValue(complaintview.serial_no)) {
           alert('Please select the Serial No');
         } else if (!complaintview.purchase_date) {
@@ -1370,32 +1370,21 @@ export function Complaintview(params) {
 
   async function downloadPDF(id) {
 
-
-    axios.post(`${Base_Url}/getprintinfo`, { id: id })
-        .then((res) => {
-            console.log(res.data[0], "DDD")
-            setData(res.data[0])
-
-            Blob(res.data[0])
-
-        })
-        .catch((err) => {
-            console.log(err)
-        })
-}
+    Blob()
+  }
 
 
-const Blob = async (data) => {
+  const Blob = async () => {
 
     try {
-        const blob = await pdf(<Jobcardpdf data={data} />).toBlob();
-        const url = URL.createObjectURL(blob);
-        window.open(url);
-        URL.revokeObjectURL(url);
+      const blob = await pdf(<Jobcardpdf data={updatedata} duplicate={duplicate} spare={addedSpareParts} engineer={addedEngineers} />).toBlob();
+      const url = URL.createObjectURL(blob);
+      window.open(url);
+      URL.revokeObjectURL(url);
     } catch (err) {
-        console.error('Error generating PDF:', err);
+      console.error('Error generating PDF:', err);
     }
-};
+  };
 
 
 
@@ -1791,7 +1780,7 @@ const Blob = async (data) => {
                       <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>
                         Serial No
                       </p>
-                      {closestatus === "Closed" && subclosestatus === 'Fully' && sserial_no == 0  ? (
+                      {closestatus === "Closed" && subclosestatus === 'Fully' && sserial_no == 0 ? (
                         <p style={{ fontSize: "14px" }}>{complaintview.serial_no} </p>
                       ) : sserial_no != 0 ? (
                         <p style={{ fontSize: "14px" }}>{complaintview.serial_no}</p>
@@ -2273,7 +2262,7 @@ const Blob = async (data) => {
             <div className="col-3">
               <div className="card mb-3" id="productInfocs">
                 <div className="m-1">
-                  <button className="btn btn-primary btn-sm float-end" onClick={() => downloadPDF()}>Download</button>
+                  <button className="btn btn-primary btn-sm float-end" onClick={() => downloadPDF()}>Download Job Card</button>
                 </div>
                 <div className="card-body">
                   <h4 className="pname" style={{ fontSize: "14px" }}>Call Status</h4>

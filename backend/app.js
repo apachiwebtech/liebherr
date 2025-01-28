@@ -3431,11 +3431,11 @@ app.get("/getcvengineer/:pincode/:msp/:csp", authenticateToken, async (req, res)
     //            END
     //  WHERE  pa.pincode ='${pincode}' and pa.account_manager = '${msp}' and pa.owner ='${csp}'`;
 
-    const newmasp = csp.replace(/^SP/, '').trim();
+    // const newmasp = csp.replace(/^SP/, '').trim();
 
 
 
-    const sql = `select * from awt_engineermaster where cfranchise_id = '${newmasp}' and deleted = 0 `
+    const sql = `select * from awt_engineermaster where cfranchise_id = '${csp}' and deleted = 0 `
     console.log(sql)
     // Execute the query
     const result = await pool.request().query(sql);
@@ -8856,7 +8856,7 @@ app.get("/getmultiplelocation/:pincode/:classification/:ticket_type", authentica
 
     const pool = await poolPromise;
 
-    const sql = `SELECT cn.title as country, p.region_name as region, p.geostate_name as state, p.area_name as district, p.geocity_name as city, 'SP' + o.msp_code as msp, f.title as mspname, 'SP' + o.csp_code as csp, fm.title as cspname,  p.pincode
+    const sql = `SELECT cn.title as country, p.region_name as region, p.geostate_name as state, p.area_name as district, p.geocity_name as city,  o.msp_code as msp, f.title as mspname,  o.csp_code as csp, fm.title as cspname,  p.pincode
     FROM awt_pincode as p
     LEFT JOIN awt_region as r on p.region_id = r.id
     LEFT JOIN awt_country as cn on p.country_id = cn.id
@@ -8864,8 +8864,8 @@ app.get("/getmultiplelocation/:pincode/:classification/:ticket_type", authentica
     LEFT JOIN awt_district as d on p.area_id = d.id
     LEFT JOIN awt_geocity as c on p.geocity_id = c.id
     LEFT JOIN pincode_allocation as o on p.pincode = o.pincode
-	LEFT JOIN awt_franchisemaster as f on f.licarecode = 'SP' + o.msp_code
-	LEFT JOIN awt_childfranchisemaster as fm on fm.licare_code = 'SP' + o.csp_code
+	LEFT JOIN awt_franchisemaster as f on f.licarecode =  o.msp_code
+	LEFT JOIN awt_childfranchisemaster as fm on fm.licare_code =  o.csp_code
 	where p.pincode = ${pincode} and o.customer_classification = '${classification}' and o.call_type = '${ticket_type}'`
 
     const result = await pool.request().query(sql);
@@ -9722,9 +9722,6 @@ app.post("/query", authenticateToken, async (req, res) => {
 
   try {
     let { encryptedQuery } = req.body; // Extract query and parameters from the body
-
-
-
 
 
     // Decrypt the encrypted query
