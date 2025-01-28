@@ -84,6 +84,10 @@ const Location = () => {
       return;
     }
 
+    const encryptedData = CryptoJS.AES.encrypt(
+      JSON.stringify(formData),
+      secretKey
+    ).toString();
     setDuplicateError(""); // Clear duplicate error before submitting
 
     try {
@@ -92,9 +96,9 @@ const Location = () => {
       );
       if (confirmSubmission) {
         if (isEdit) {
-          // For update, include duplicate check
+          // For update, include  duplicate check
           await axios
-            .post(`${Base_Url}/putdata`, { ...formData },{
+            .post(`${Base_Url}/putdata`, { encryptedData },{
               headers: {
                  Authorization: token, // Send token in headers
                },
@@ -113,7 +117,7 @@ const Location = () => {
         } else {
           // For insert, include duplicate check
           await axios
-            .post(`${Base_Url}/postdata`, { ...formData },{
+            .post(`${Base_Url}/postdata`, { encryptedData },{
               headers: {
                  Authorization: token, // Send token in headers
                },

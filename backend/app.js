@@ -42,6 +42,22 @@ const authenticateToken = (req, res, next) => {
 
 };
 
+function decryptData(encryptedData, secretKey) {
+  try {
+    // Decrypt the data using AES and convert to UTF-8 string
+    const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+    const decryptedData = decryptedBytes.toString(CryptoJS.enc.Utf8);
+
+    if (!decryptedData) {
+      throw new Error("Decryption failed or invalid data");
+    }
+
+    return decryptedData; // Return decrypted string
+  } catch (err) {
+    throw new Error("Error decrypting data: " + err.message);
+  }
+}
+
 // this is for use routing
 
 
@@ -365,32 +381,7 @@ app.post("/trainerlogin", async (req, res) => {
     res.status(500).json({ message: "Database error", error: err });
   }
 });
-// app
-//.post("/msplogin", async (req, res) => {
-//   const { title, password } = req.body;
 
-//   console.log(Msp)
-
-//   try {
-//     // Use the poolPromise to get the connection pool
-//     const pool = await poolPromise;
-
-//     const sql = `SELECT id, title FROM awt_franchisemaster WHERE title = '${title}' AND password = '${password}'`;
-
-//     console.log(sql)
-
-//     const result = await pool.request().query(sql);
-
-//     if (result.recordset.length > 0) {
-//       res.json({ id: result.recordset[0].id, title: result.recordset[0].title });
-//     } else {
-//       res.status(401).json({ message: "Invalid username or password" });
-//     }
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ message: "Database error", error: err });
-//   }
-// });
 
 app.post("/log", async (req, res) => {
   console.log("fffrdf")
@@ -432,8 +423,12 @@ app.get("/requestdata/:id", authenticateToken, async (req, res) => {
 });
 
 
+
+
 app.post("/postdata", authenticateToken, async (req, res) => {
-  const { title } = req.body;
+  const {encryptedData} = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { title } =  JSON.parse(decryptedData);
 
   try {
     // Use the poolPromise to get the connection pool
@@ -482,9 +477,17 @@ app.post("/postdata", authenticateToken, async (req, res) => {
 });
 
 
+
+
+
 // Update existing user with duplicate check
 app.post("/putdata", authenticateToken, async (req, res) => {
-  const { title, id } = req.body;
+  const {encryptedData} = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+
+
+
+  const { title, id } = JSON.parse(decryptedData);
 
   try {
     // Use the poolPromise to get the connection pool
