@@ -72,6 +72,12 @@ export function Shipment_fg(params) {
 
     });
 
+    const formatDate = (dateString) => {
+        const date = new Date(dateString); // Parse the date string
+        const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+        return date.toLocaleDateString('en-GB', options).replace(/\//g, '-'); // Convert to 'DD-MM-YYYY' format
+    };
+
     const fetchShipmentFg = async (page) => {
         try {
             // Initialize URLSearchParams for query parameters
@@ -252,9 +258,11 @@ export function Shipment_fg(params) {
                                             <th width="10%">Lr_date</th>
                                             <th width="10%">Address_code</th>
                                             <th width="10%">Address</th>
+                                            <th width="10%">Pincode</th>
                                             <th width="10%">Shipment_id</th>
                                             <th width="10%">Ship_date</th>
                                             <th width="10%">Transaction_Type</th>
+                                            <th width="10%">Customer Classification</th>
                                             <th width="10%">hsn_code</th>
                                             <th width="10%">basic_rate</th>
                                             <th width="10%">licarecode</th>
@@ -262,7 +270,6 @@ export function Shipment_fg(params) {
                                             <th width="10%">product_choice</th>
                                             <th width="10%">serial_identification</th>
                                             <th width="10%">lot_number</th>
-                                            <th width="10%">Lr_date</th>
                                             <th width="10%">order_number</th>
                                             <th width="10%">order_line_number</th>
                                             <th width="10%">wearhouse</th>
@@ -278,7 +285,7 @@ export function Shipment_fg(params) {
                                                 <tr key={item.id}>
                                                     <td>{displayIndex}</td>
                                                     <td>{item.InvoiceNumber}</td>
-                                                    <td>{item.InvoiceDate}</td>
+                                                    <td>{formatDate(item.InvoiceDate)}</td>
                                                     <td>{item.Invoice_bpcode}</td>
                                                     <td>{item.Invoice_bpName}</td>
                                                     <td>{item.Invoice_city}</td>
@@ -290,23 +297,24 @@ export function Shipment_fg(params) {
                                                     <td>{item.Invoice_qty}</td>
                                                     <td>{item.Serial_no}</td>
                                                     <td>{item.compressor_bar}</td>
-                                                    <td>{item.Manufacture_date}</td>
+                                                    <td>{formatDate(item.Manufacture_date)}</td>
                                                     <td>{item.Vehicle_no}</td>
                                                     <td>{item.Vehicale_Type}</td>
                                                     <td>{item.Transporter_name}</td>
                                                     <td>{item.Lr_number}</td>
-                                                    <td>{item.Lr_date}</td>
+                                                    <td>{formatDate(item.Lr_date)}</td>
                                                     <td>{item.Address_code}</td>
                                                     <td>{item.Address}</td>
                                                     <td>{item.Pincode}</td>
                                                     <td>{item.Shipment_id}</td>
-                                                    <td>{item.Ship_date}</td>
+                                                    <td>{formatDate(item.Ship_date)}</td>
                                                     <td>{item.Transaction_Type}</td>
                                                     <td>{item.customer_classification}</td>
                                                     <td>{item.hsn_code}</td>
                                                     <td>{item.basic_rate}</td>
                                                     <td>{item.licarecode}</td>
                                                     <td>{item.licare_address}</td>
+                                                    <td>{item.product_choice}</td>
                                                     <td>{item.serial_identification}</td>
                                                     <td>{item.lot_number}</td>
                                                     <td>{item.order_number}</td>
