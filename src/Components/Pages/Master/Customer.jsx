@@ -180,6 +180,18 @@ const Customer = () => {
       return;
     }
 
+    const payload ={
+      ...formData,
+      anniversary_date: anniversary_date,
+      dateofbirth :selectedDate
+    }
+
+    const encryptedData = CryptoJS.AES.encrypt(
+      JSON.stringify(payload),
+      secretKey
+    ).toString();
+
+
     setDuplicateError(''); // Clear duplicate error before submitting
 
     try {
@@ -188,9 +200,7 @@ const Customer = () => {
         if (isEdit) {
           // For update, include duplicate check
           await axiosInstance.post(`${Base_Url}/putcustomer`, {
-            ...formData,
-            dateofbirth: selectedDate,
-            anniversary_date: anniversary_date,
+            encryptedData
           }, {
             headers: {
               Authorization: token, // Send token in headers
@@ -222,9 +232,7 @@ const Customer = () => {
         } else {
           // For insert, include duplicate check
           await axiosInstance.post(`${Base_Url}/postcustomer`, {
-            ...formData,
-            dateofbirth: selectedDate,
-            anniversary_date: anniversary_date,
+            encryptedData
           }, {
             headers: {
               Authorization: token, // Send token in headers

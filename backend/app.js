@@ -4409,6 +4409,8 @@ app.get("/requestcustomer", authenticateToken, async (req, res) => {
   }
 });
 app.post("/postcustomer", authenticateToken, async (req, res) => {
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
   const {
     customer_fname,
     customer_type,
@@ -4420,7 +4422,7 @@ app.post("/postcustomer", authenticateToken, async (req, res) => {
     email,
     salutation,
     customer_id
-  } = req.body;
+  } = JSON.parse(decryptedData);
 
   try {
     // Use the poolPromise to get the connection pool
@@ -4510,7 +4512,9 @@ app.post("/postcustomer", authenticateToken, async (req, res) => {
 // customer put
 
 app.post("/putcustomer", authenticateToken, async (req, res) => {
-  const { id, customer_fname, customer_type, customer_classification, mobileno, alt_mobileno, dateofbirth, anniversary_date, email, salutation, customer_id, created_by } = req.body;
+  const { encryptedData,encryptedDate } = req.body;
+  const decryptedData = decryptData(encryptedData,encryptedDate, secretKey)
+  const { id, customer_fname, customer_type, customer_classification, mobileno, alt_mobileno, dateofbirth, anniversary_date, email, salutation, customer_id, created_by } = JSON.parse(decryptedData);
 
 
   try {
