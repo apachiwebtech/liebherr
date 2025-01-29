@@ -2,7 +2,7 @@ import axios from "axios";
 import * as XLSX from "xlsx";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
-import { Base_Url,secretKey } from "../../Utils/Base_Url";
+import { Base_Url, secretKey } from "../../Utils/Base_Url";
 import ProMaster from "./ProMaster";
 import { useSelector } from 'react-redux';
 import { SyncLoader } from 'react-spinners';
@@ -23,20 +23,21 @@ const ProductType = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [duplicateError, setDuplicateError] = useState(""); // State to track duplicate error
   const token = localStorage.getItem("token"); // Get token from localStorage
-  const createdBy = 1; // Static value for created_by
-  const updatedBy = 2; // Static value for updated_by
+  
 
   const [formData, setFormData] = useState({
     product_type: "",
+    created_by: "1",
+    updated_by: "",
   });
 
   const fetchUsers = async () => {
     try {
-      const response = await axiosInstance.get(`${Base_Url}/getproducttype`,{
+      const response = await axiosInstance.get(`${Base_Url}/getproducttype`, {
         headers: {
-            Authorization: token, // Send token in headers
-            },
-        });
+          Authorization: token, // Send token in headers
+        },
+      });
       console.log(response.data);
       setUsers(response.data);
       setFilteredUsers(response.data);
@@ -78,11 +79,20 @@ const ProductType = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+  
+
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
-    }
+    } 
+    
+
+    const encryptedData = CryptoJS.AES.encrypt(
+      JSON.stringify(formData),
+      secretKey
+    ).toString();
+
 
     setDuplicateError(""); // Clear duplicate error before submitting
 
@@ -95,13 +105,12 @@ const ProductType = () => {
           // For update, include 'updated_by'
           await axios
             .post(`${Base_Url}/putproducttypedata`, {
-              ...formData,
-              updated_by: updatedBy,
-            },{
+              encryptedData,
+            }, {
               headers: {
-                  Authorization: token, // Send token in headers
-                  },
-              })
+                Authorization: token, // Send token in headers
+              },
+            })
             .then((response) => {
               setFormData({
                 product_type: "",
@@ -119,16 +128,16 @@ const ProductType = () => {
           // For insert, include 'created_by'
           await axios
             .post(`${Base_Url}/postdataproducttype`, {
-              ...formData,
-              created_by: createdBy,
-            },{
+              encryptedData,
+            }, {
               headers: {
-                  Authorization: token, // Send token in headers
-                  },
-              })
+                Authorization: token, // Send token in headers
+              },
+            })
             .then((response) => {
               setFormData({
                 product_type: "",
+                created_by:'1',
               });
               fetchUsers();
             })
@@ -147,37 +156,41 @@ const ProductType = () => {
   };
 
   const deleted = async (id) => {
-    const confirm =  window.confirm("Are you sure you want to delete ?");
+    const confirm = window.confirm("Are you sure you want to delete ?");
 
-    if(confirm){
-    try {
-      const response = await axiosInstance.post(`${Base_Url}/deleteproducttypedata`, {
-        id,
-      },{
-        headers: {
+    if (confirm) {
+      try {
+        const response = await axiosInstance.post(`${Base_Url}/deleteproducttypedata`, {
+          id,
+        }, {
+          headers: {
             Authorization: token, // Send token in headers
-            },
+          },
         });
-      // alert(response.data[0]);
-      setFormData({
-        product_type: "",
-      });
-      fetchUsers();
-    } catch (error) {
-      console.error("Error deleting user:", error);
+        // alert(response.data[0]);
+        setFormData({
+          product_type: "",
+        });
+        fetchUsers();
+      } catch (error) {
+        console.error("Error deleting user:", error);
+      }
     }
-  }
   };
 
   const edit = async (id) => {
     try {
       const response = await axiosInstance.get(
-        `${Base_Url}/requestdataproducttype/${id}`,{
-          headers: {
-              Authorization: token, // Send token in headers
-              },
-          });
+        `${Base_Url}/requestdataproducttype/${id}`, {
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      });
       setFormData(response.data);
+      setFormData((prev) => ({
+        ...prev,
+        updated_by:"2",
+      }));
       setIsEdit(true);
       console.log(response.data);
     } catch (error) {
@@ -189,53 +202,53 @@ const ProductType = () => {
   const indexOfFirstUser = indexOfLastUser - itemsPerPage;
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
-   // export to excel 
-      const exportToExcel = () => {
-        // Create a new workbook
-        const workbook = XLSX.utils.book_new();
-    
-        // Convert data to a worksheet
-        const worksheet = XLSX.utils.json_to_sheet(filteredUsers.map(user => ({
-        
-        "Product Type": user.product_type
-          // Add fields you want to export
-        })));
-    
-        // Append the worksheet to the workbook
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Product Type");
-    
-        // Export the workbook
-        XLSX.writeFile(workbook, "Product_Type.xlsx");
-      };
-    
-      // export to excel end 
+  // export to excel 
+  const exportToExcel = () => {
+    // Create a new workbook
+    const workbook = XLSX.utils.book_new();
 
-   // Role Right 
-  
-  
-    const Decrypt = (encrypted) => {
-      encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
-      const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
-      return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
-    };
-  
-    const storedEncryptedRole = localStorage.getItem("Userrole");
-    const decryptedRole = Decrypt(storedEncryptedRole);
-  
-    const roledata = {
-      role: decryptedRole,
-      pageid: String(9)
-    }
-  
-    const dispatch = useDispatch()
-    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
-  
-  
-    useEffect(() => {
-      dispatch(getRoleData(roledata))
-    }, [])
-  
-    // Role Right End 
+    // Convert data to a worksheet
+    const worksheet = XLSX.utils.json_to_sheet(filteredUsers.map(user => ({
+
+      "Product Type": user.product_type
+      // Add fields you want to export
+    })));
+
+    // Append the worksheet to the workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Product Type");
+
+    // Export the workbook
+    XLSX.writeFile(workbook, "Product_Type.xlsx");
+  };
+
+  // export to excel end 
+
+  // Role Right 
+
+
+  const Decrypt = (encrypted) => {
+    encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+    const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+    return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+  };
+
+  const storedEncryptedRole = localStorage.getItem("Userrole");
+  const decryptedRole = Decrypt(storedEncryptedRole);
+
+  const roledata = {
+    role: decryptedRole,
+    pageid: String(9)
+  }
+
+  const dispatch = useDispatch()
+  const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+
+
+  useEffect(() => {
+    dispatch(getRoleData(roledata))
+  }, [])
+
+  // Role Right End 
 
   return (
     <div className="tab-content">
@@ -245,15 +258,15 @@ const ProductType = () => {
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
       )}
-        {roleaccess > 1 ? <div className="row mp0">
+      {roleaccess > 1 ? <div className="row mp0">
         <div className="col-12">
           <div className="card mb-3 tab_box">
             <div
               className="card-body"
               style={{ flex: "1 1 auto", padding: "13px 28px" }}
             >
-            
-      <div className="row mp0">
+
+              <div className="row mp0">
                 <div className="col-6">
                   <form
                     onSubmit={handleSubmit}
@@ -283,11 +296,11 @@ const ProductType = () => {
                       )}{" "}
                       {/* Show duplicate error */}
                     </div>
-                    {roleaccess > 2 ?  <div className="text-right">
+                    {roleaccess > 2 ? <div className="text-right">
                       <button className="btn btn-liebherr" type="submit">
                         {isEdit ? "Update" : "Submit"}
                       </button>
-                    </div> : null } 
+                    </div> : null}
                   </form>
                 </div>
 
@@ -359,7 +372,7 @@ const ProductType = () => {
                               className="btn btn-link text-danger"
                               onClick={() => deleted(item.id)}
                               title="Delete"
-                              disabled = {roleaccess > 4 ?false : true}
+                              disabled={roleaccess > 4 ? false : true}
                             >
                               <FaTrash />
                             </button>
@@ -417,7 +430,7 @@ const ProductType = () => {
                     </div>
                   </div>
                 </div>
-              </div> 
+              </div>
             </div>
           </div>
         </div>

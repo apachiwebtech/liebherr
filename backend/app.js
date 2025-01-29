@@ -1917,7 +1917,9 @@ app.get("/getcat", authenticateToken, async (req, res) => {
 
 // Insert for category
 app.post("/postdatacat", authenticateToken, async (req, res) => {
-  const { title } = req.body;
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { title } = JSON.parse(decryptedData);
 
   try {
     // Access the connection pool using poolPromise
@@ -2001,7 +2003,9 @@ app.get("/requestdatacat/:id", authenticateToken, async (req, res) => {
 
 // update for category
 app.post("/putcatdata", authenticateToken, async (req, res) => {
-  const { title, id } = req.body;
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { title, id } = JSON.parse(decryptedData);
 
   try {
     // Access the connection pool using poolPromise
@@ -2121,8 +2125,11 @@ app.get("/requestsubcat/:id", authenticateToken, async (req, res) => {
 
 // insert for subcategory
 app.post("/postsubcategory", authenticateToken, async (req, res) => {
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { title, category_id } = JSON.parse(decryptedData);
   try {
-    const { title, category_id } = req.body;
+
 
     // Access the connection pool using poolPromise
     const pool = await poolPromise;
@@ -2174,8 +2181,11 @@ app.post("/postsubcategory", authenticateToken, async (req, res) => {
 
 // update for subcategory
 app.post("/putsubcategory", authenticateToken, async (req, res) => {
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { title, id, category_id } = JSON.parse(decryptedData);
   try {
-    const { title, id, category_id } = req.body;
+
 
     // Access the connection pool using poolPromise
     const pool = await poolPromise;
@@ -2446,8 +2456,11 @@ app.get("/getcom", authenticateToken, async (req, res) => {
 
 // Insert for Defect Group Code
 app.post("/postdatacom", authenticateToken, async (req, res) => {
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { id, defectgroupcode, defectgrouptitle, description, created_by } = JSON.parse(decryptedData);
   try {
-    const { id, defectgroupcode, defectgrouptitle, description, created_by } = req.body;
+
     const pool = await poolPromise;
 
     if (id) {
@@ -2546,8 +2559,12 @@ app.get("/requestdatacom/:id", authenticateToken, async (req, res) => {
 
 // update for Defect Group Code
 app.post("/putcomdata", authenticateToken, async (req, res) => {
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+
+  const { id, defectgroupcode, defectgrouptitle, description, updated_by } = JSON.parse(decryptedData);
   try {
-    const { id, defectgroupcode, defectgrouptitle, description, updated_by } = req.body;
+
     const pool = await poolPromise;
 
     if (id) {
@@ -6127,7 +6144,9 @@ app.get("/getproducttype", authenticateToken, async (req, res) => {
 });
 // Insert for Product Type
 app.post("/postdataproducttype", authenticateToken, async (req, res) => {
-  const { id, product_type, created_by } = req.body;
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { id, product_type, created_by } = JSON.parse(decryptedData);
 
   try {
     const pool = await poolPromise;
@@ -6204,30 +6223,73 @@ app.get("/requestdataproducttype/:id", authenticateToken, async (req, res) => {
 });
 // Update for Product Type
 app.post("/putproducttypedata", authenticateToken, async (req, res) => {
-  const { id, product_type, updated_by } = req.body;
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey);
+  const { id, product_type, updated_by } = JSON.parse(decryptedData);
 
   try {
-    // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
 
-    // Check for duplicates, excluding the current record's ID
-    const checkDuplicateSql = `SELECT * FROM product_type WHERE product_type = '${product_type}' AND deleted = 0 AND id != ${id}`;
-    const duplicateCheckResult = await pool.request().query(checkDuplicateSql);
+    // Step 1: Check if a product type with the same name exists and is not soft-deleted
+    const checkDuplicateSql = `
+      SELECT * FROM product_type 
+      WHERE product_type = @product_type AND deleted = 0 AND id != @id
+    `;
+    const checkDuplicateResult = await pool.request()
+      .input("product_type", product_type)
+      .input("id", id)
+      .query(checkDuplicateSql);
 
-    if (duplicateCheckResult.recordset.length > 0) {
+    if (checkDuplicateResult.recordset.length > 0) {
       return res.status(409).json({ message: "Duplicate entry, ProductType already exists!" });
-    } else {
-      // Update the product type
-      const updateSql = `UPDATE product_type SET product_type = '${product_type}', updated_by = '${updated_by}', updated_date = GETDATE() WHERE id = ${id} AND deleted = 0`;
-      await pool.request().query(updateSql);
-      return res.json({ message: "ProductType updated successfully!" });
     }
 
+    // Step 2: Check if a soft-deleted product type exists
+    const checkSoftDeletedSql = `
+      SELECT * FROM product_type 
+      WHERE product_type = @product_type AND deleted = 1
+    `;
+    const checkSoftDeletedResult = await pool.request()
+      .input("product_type", product_type)
+      .query(checkSoftDeletedSql);
+
+    if (checkSoftDeletedResult.recordset.length > 0) {
+      // Restore the soft-deleted product type
+      const restoreSoftDeletedSql = `
+        UPDATE product_type 
+        SET deleted = 0, updated_date = GETDATE(), updated_by = @updated_by 
+        WHERE product_type = @product_type
+      `;
+      await pool.request()
+        .input("product_type", product_type)
+        .input("updated_by", updated_by)
+        .query(restoreSoftDeletedSql);
+
+      return res.json({ message: "Soft-deleted ProductType restored successfully!" });
+    }
+
+    // Step 3: Update the existing product type if no duplicate or soft-delete found
+    const updateSql = `
+      UPDATE product_type 
+      SET product_type = @product_type, updated_by = @updated_by, updated_date = GETDATE() 
+      WHERE id = @id
+    `;
+    await pool.request()
+      .input("product_type", product_type)
+      .input("updated_by", updated_by)
+      .input("id", id)
+      .query(updateSql);
+
+    return res.json({ message: "ProductType updated successfully!" });
+
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: "An error occurred while updating product type data" });
+    console.error("Error processing ProductType:", err);
+    return res.status(500).json({ message: "Error processing ProductType" });
   }
 });
+
+
+
 // Delete for Product Type
 app.post("/deleteproducttypedata", authenticateToken, async (req, res) => {
   const { id } = req.body;
@@ -6267,7 +6329,9 @@ app.get("/getproductline", authenticateToken, async (req, res) => {
 });
 // Insert for product line
 app.post("/postdataproductline", authenticateToken, async (req, res) => {
-  const { id, product_line, pline_code, created_by } = req.body;
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { id, product_line, pline_code, created_by } = JSON.parse(decryptedData);
 
   try {
     // Use the poolPromise to get the connection pool
@@ -6332,7 +6396,9 @@ app.get("/requestdataproductline/:id", authenticateToken, async (req, res) => {
 });
 // Update for product line
 app.post("/putproductlinedata", authenticateToken, async (req, res) => {
-  const { id, product_line, pline_code, updated_by } = req.body;
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { id, product_line, pline_code, updated_by } = JSON.parse(decryptedData);
 
   try {
     // Use the poolPromise to get the connection pool
@@ -6395,8 +6461,9 @@ app.get("/getmat", authenticateToken, async (req, res) => {
 });
 // Insert for material
 app.post("/postdatamat", authenticateToken, async (req, res) => {
-  const { id, Material, created_by } = req.body;
-
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { id, Material, created_by } = JSON.parse(decryptedData);
   try {
     const pool = await poolPromise;
 
@@ -6463,7 +6530,9 @@ app.get("/requestdatamat/:id", authenticateToken, async (req, res) => {
 });
 // Update for material
 app.post("/putmatdata", authenticateToken, async (req, res) => {
-  const { id, Material, updated_by } = req.body;
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { id, Material, updated_by } = JSON.parse(decryptedData);
 
   try {
     const pool = await poolPromise;
@@ -6525,8 +6594,9 @@ app.get("/getmanufacturer", authenticateToken, async (req, res) => {
 });
 // Insert for Mnufacturer
 app.post("/postmanufacturer", authenticateToken, async (req, res) => {
-  const { id, Manufacturer, created_by } = req.body;
-
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { id, Manufacturer, created_by } = JSON.parse(decryptedData);
   try {
     const pool = await poolPromise;
 
@@ -6603,7 +6673,9 @@ app.get("/requestmanufacturer/:id", authenticateToken, async (req, res) => {
 
 // Update for Manufacturer
 app.post("/putmanufacturer", authenticateToken, async (req, res) => {
-  const { id, Manufacturer, updated_by } = req.body;
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { id, Manufacturer, updated_by } = JSON.parse(decryptedData);
 
   try {
     const pool = await poolPromise;
@@ -7421,7 +7493,9 @@ app.get("/getcalldata", authenticateToken, async (req, res) => {
 });
 // Insert for Callstatus
 app.post("/postcalldata", authenticateToken, async (req, res) => {
-  const { Callstatus } = req.body;
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { Callstatus } = JSON.parse(decryptedData);
 
   try {
     const pool = await poolPromise;
@@ -7479,8 +7553,9 @@ app.get("/requestcalldata/:id",
   });
 // Update for Callstatus
 app.post("/putcalldata", authenticateToken, async (req, res) => {
-  const { Callstatus, id } = req.body;
-
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { Callstatus, id } = JSON.parse(decryptedData);
   const checkDuplicateSql = `SELECT * FROM call_status WHERE Callstatus = '${Callstatus}' AND id != '${id}' AND deleted = 0`;
 
   try {
@@ -9793,8 +9868,9 @@ app.get("/getrole", authenticateToken, async (req, res) => {
 // put role data
 
 app.post("/putrole", authenticateToken, async (req, res) => {
-  const { title, id, description } = req.body;
-
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { title, id, description } = JSON.parse(decryptedData);
   try {
     // Access the connection pool using poolPromise
     const pool = await poolPromise;
@@ -9833,7 +9909,9 @@ app.post("/putrole", authenticateToken, async (req, res) => {
 
 // post role data 
 app.post("/postrole", authenticateToken, async (req, res) => {
-  const { title, description } = req.body;
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { title, description } = JSON.parse(decryptedData);
 
   try {
     // Access the connection pool using poolPromise

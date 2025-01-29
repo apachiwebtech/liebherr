@@ -23,11 +23,10 @@ const Roleright = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [duplicateError, setDuplicateError] = useState(""); // State to track duplicate error
-  const createdBy = 1; // Static value for created_by
-  const updatedBy = 2; // Static value for updated_by
   const { loaders, axiosInstance } = useAxiosLoader();
   const [formData, setFormData] = useState({
     title: "",
+    description: "",
   });
 
   const fetchUsers = async () => {
@@ -83,6 +82,10 @@ const Roleright = () => {
       setErrors(validationErrors);
       return;
     }
+    const encryptedData = CryptoJS.AES.encrypt(
+      JSON.stringify(formData),
+      secretKey
+    ).toString();
 
     setDuplicateError(""); // Clear duplicate error before submitting
 
@@ -95,15 +98,18 @@ const Roleright = () => {
           // For update, include 'updated_by'
           await axios
             .post(`${Base_Url}/putrole`, {
-              ...formData,
-              updated_by: updatedBy,
+              encryptedData,
             }, {
               headers: {
                 Authorization: token,
               },
             })
             .then((response) => {
-              window.location.reload();
+              setFormData({
+                title: "",
+                description:"",
+              });
+              fetchUsers();
             })
             .catch((error) => {
               if (error.response && error.response.status === 409) {
@@ -114,8 +120,7 @@ const Roleright = () => {
           // For insert, include 'created_by'
           await axios
             .post(`${Base_Url}/postrole`, {
-              ...formData,
-              created_by: createdBy,
+              encryptedData,
 
             }, {
               headers: {
@@ -124,7 +129,12 @@ const Roleright = () => {
             }
             )
             .then((response) => {
-              window.location.reload();
+              setFormData({
+                title: "",
+                description: "",
+                created_by: '1',
+              });
+              fetchUsers();
             })
             .catch((error) => {
               if (error.response && error.response.status === 409) {
@@ -139,20 +149,24 @@ const Roleright = () => {
   };
 
   const deleted = async (id) => {
-    const confirm =  window.confirm("Are you sure you want to delete ?");
+    const confirm = window.confirm("Are you sure you want to delete ?");
 
-    if(confirm){
-    try {
-      const response = await axiosInstance.post(`${Base_Url}/deleterole`, { id }, {
-        headers: {
-          Authorization: token,
-        },
-      });
-      window.location.reload();
-    } catch (error) {
-      console.error("Error deleting role:", error);
+    if (confirm) {
+      try {
+        const response = await axiosInstance.post(`${Base_Url}/deleterole`, { id }, {
+          headers: {
+            Authorization: token,
+          },
+        });
+        setFormData({
+          title: "",
+          description: "",
+        });
+        fetchUsers();
+      } catch (error) {
+        console.error("Error deleting role:", error);
+      }
     }
-  }
   };
 
   const edit = async (id) => {
@@ -164,6 +178,10 @@ const Roleright = () => {
       }
       );
       setFormData(response.data);
+      setFormData((prev) => ({
+        ...prev,
+        updated_by: "2",
+      }));
       setIsEdit(true);
       console.log(response.data);
     } catch (error) {

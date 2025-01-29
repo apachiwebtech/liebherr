@@ -2,7 +2,7 @@ import axios from "axios";
 import * as XLSX from "xlsx";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
-import { Base_Url,secretKey } from "../../Utils/Base_Url";
+import { Base_Url, secretKey } from "../../Utils/Base_Url";
 import ProMaster from "./ProMaster";
 import { useSelector } from 'react-redux';
 import { SyncLoader } from 'react-spinners';
@@ -22,12 +22,12 @@ const ProductLine = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [duplicateError, setDuplicateError] = useState("");
   const token = localStorage.getItem("token"); // Get token from localStorage
-  const createdBy = 1;
-  const updatedBy = 2;
 
   const [formData, setFormData] = useState({
     pline_code: "",
     product_line: "",
+    created_by: "1",
+    updated_by: "",
   });
 
   const fetchUsers = async () => {
@@ -83,6 +83,11 @@ const ProductLine = () => {
       return;
     }
 
+    const encryptedData = CryptoJS.AES.encrypt(
+      JSON.stringify(formData),
+      secretKey
+    ).toString();
+
     setDuplicateError("");
 
     try {
@@ -93,8 +98,7 @@ const ProductLine = () => {
         if (isEdit) {
           await axios
             .post(`${Base_Url}/putproductlinedata`, {
-              ...formData,
-              updated_by: updatedBy,
+              encryptedData,
             }, {
               headers: {
                 Authorization: token, // Send token in headers
@@ -117,8 +121,7 @@ const ProductLine = () => {
         } else {
           await axios
             .post(`${Base_Url}/postdataproductline`, {
-              ...formData,
-              created_by: createdBy,
+              encryptedData,
             }, {
               headers: {
                 Authorization: token, // Send token in headers
@@ -128,7 +131,9 @@ const ProductLine = () => {
               setFormData({
                 pline_code: "",
                 product_line: "",
+                created_by: "1",
               });
+              
               fetchUsers();
             })
             .catch((error) => {
@@ -146,26 +151,26 @@ const ProductLine = () => {
   };
 
   const deleted = async (id) => {
-    const confirm =  window.confirm("Are you sure you want to delete ?");
+    const confirm = window.confirm("Are you sure you want to delete ?");
 
-    if(confirm){
-    try {
-      const response = await axiosInstance.post(`${Base_Url}/deleteproductlinedata`, {
-        id,
-      }, {
-        headers: {
-          Authorization: token, // Send token in headers
-        },
-      });
-      setFormData({
-        pline_code: "",
-        product_line: "",
-      });
-      fetchUsers();
-    } catch (error) {
-      console.error("Error deleting user:", error);
+    if (confirm) {
+      try {
+        const response = await axiosInstance.post(`${Base_Url}/deleteproductlinedata`, {
+          id,
+        }, {
+          headers: {
+            Authorization: token, // Send token in headers
+          },
+        });
+        setFormData({
+          pline_code: "",
+          product_line: "",
+        });
+        fetchUsers();
+      } catch (error) {
+        console.error("Error deleting user:", error);
+      }
     }
-  }
   };
 
   const edit = async (id) => {
@@ -178,6 +183,10 @@ const ProductLine = () => {
           },
         });
       setFormData(response.data);
+      setFormData((prev) => ({
+        ...prev,
+        updated_by:"2",
+      }));
       setIsEdit(true);
       console.log(response.data);
     } catch (error) {
@@ -188,54 +197,54 @@ const ProductLine = () => {
   const indexOfLastUser = (currentPage + 1) * itemsPerPage;
   const indexOfFirstUser = indexOfLastUser - itemsPerPage;
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
-   // export to excel 
-      const exportToExcel = () => {
-        // Create a new workbook
-        const workbook = XLSX.utils.book_new();
-    
-        // Convert data to a worksheet
-        const worksheet = XLSX.utils.json_to_sheet(filteredUsers.map(user => ({
-          "PLine Code": user.pline_code,
-          "Product Line": user.product_line,
-          
-          // Add fields you want to export
-        })));
-    
-        // Append the worksheet to the workbook
-        XLSX.utils.book_append_sheet(workbook, worksheet, "ProductLine");
-    
-        // Export the workbook
-        XLSX.writeFile(workbook, "ProductLine.xlsx");
-      };
-    
-      // export to excel end 
+  // export to excel 
+  const exportToExcel = () => {
+    // Create a new workbook
+    const workbook = XLSX.utils.book_new();
 
-   // Role Right 
-  
-  
-    const Decrypt = (encrypted) => {
-      encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
-      const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
-      return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
-    };
-  
-    const storedEncryptedRole = localStorage.getItem("Userrole");
-    const decryptedRole = Decrypt(storedEncryptedRole);
-  
-    const roledata = {
-      role: decryptedRole,
-      pageid: String(10)
-    }
-  
-    const dispatch = useDispatch()
-    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
-  
-  
-    useEffect(() => {
-      dispatch(getRoleData(roledata))
-    }, [])
-  
-    // Role Right End 
+    // Convert data to a worksheet
+    const worksheet = XLSX.utils.json_to_sheet(filteredUsers.map(user => ({
+      "PLine Code": user.pline_code,
+      "Product Line": user.product_line,
+
+      // Add fields you want to export
+    })));
+
+    // Append the worksheet to the workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, "ProductLine");
+
+    // Export the workbook
+    XLSX.writeFile(workbook, "ProductLine.xlsx");
+  };
+
+  // export to excel end 
+
+  // Role Right 
+
+
+  const Decrypt = (encrypted) => {
+    encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+    const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+    return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+  };
+
+  const storedEncryptedRole = localStorage.getItem("Userrole");
+  const decryptedRole = Decrypt(storedEncryptedRole);
+
+  const roledata = {
+    role: decryptedRole,
+    pageid: String(10)
+  }
+
+  const dispatch = useDispatch()
+  const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+
+
+  useEffect(() => {
+    dispatch(getRoleData(roledata))
+  }, [])
+
+  // Role Right End 
 
   return (
     <div className="tab-content">
@@ -245,7 +254,7 @@ const ProductLine = () => {
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
       )}
-     {roleaccess > 1 ?  <div className="row mp0">
+      {roleaccess > 1 ? <div className="row mp0">
         <div className="col-12">
           <div className="card mb-3 tab_box">
             <div
@@ -301,11 +310,11 @@ const ProductLine = () => {
                       )}
                     </div>
 
-                    {roleaccess > 2 ?    <div className="text-right">
+                    {roleaccess > 2 ? <div className="text-right">
                       <button className="btn btn-liebherr" type="submit">
                         {isEdit ? "Update" : "Submit"}
                       </button>
-                    </div> : null } 
+                    </div> : null}
                   </form>
                 </div>
 
@@ -379,7 +388,7 @@ const ProductLine = () => {
                               className="btn btn-link text-danger"
                               onClick={() => deleted(item.id)}
                               title="Delete"
-                              disabled = {roleaccess > 4 ?false : true}
+                              disabled={roleaccess > 4 ? false : true}
                             >
                               <FaTrash />
                             </button>
@@ -437,7 +446,7 @@ const ProductLine = () => {
             </div>
           </div>
         </div>
-      </div>: null}
+      </div> : null}
     </div>
   );
 };

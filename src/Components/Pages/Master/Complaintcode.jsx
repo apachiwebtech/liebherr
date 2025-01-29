@@ -97,6 +97,10 @@ const ComplaintCode = () => {
       setErrors(validationErrors);
       return;
     }
+    const encryptedData = CryptoJS.AES.encrypt(
+      JSON.stringify(formData),
+      secretKey
+    ).toString();
 
     setDuplicateError(""); // Clear duplicate error before submitting
 
@@ -110,7 +114,7 @@ const ComplaintCode = () => {
           // For update, include 'updated_by'
           await axios
             .post(`${Base_Url}/putcomdata`, {
-              ...formData,
+              encryptedData,
               updated_by: updated_by,
             }, {
               headers: {
@@ -137,8 +141,8 @@ const ComplaintCode = () => {
           // For insert, include 'updated_by'
           await axios
             .post(`${Base_Url}/postdatacom`, {
-              ...formData,
-              updated_by: created_by,
+              encryptedData,
+              created_by: created_by,
             }, {
               headers: {
                 Authorization: token,
@@ -170,21 +174,21 @@ const ComplaintCode = () => {
   };
 
   const deleted = async (id) => {
-    const confirm =  window.confirm("Are you sure you want to delete ?");
+    const confirm = window.confirm("Are you sure you want to delete ?");
 
-    if(confirm){
-    try {
-      const response = await axiosInstance.post(`${Base_Url}/deletecomdata`, { id }, {
-        headers: {
-          Authorization: token,
-        },
+    if (confirm) {
+      try {
+        const response = await axiosInstance.post(`${Base_Url}/deletecomdata`, { id }, {
+          headers: {
+            Authorization: token,
+          },
+        }
+        );
+        fetchUsers();
+      } catch (error) {
+        console.error("Error deleting user:", error);
       }
-      );
-      fetchUsers();
-    } catch (error) {
-      console.error("Error deleting user:", error);
     }
-  }
   };
 
   const edit = async (id) => {
@@ -216,7 +220,7 @@ const ComplaintCode = () => {
       "DefectGroupCode": user.defectgroupcode,
       "Description": user.description,
       "DefectGroupTitle": user.defectgrouptitle,
-      
+
 
     })));
 
@@ -319,7 +323,7 @@ const ComplaintCode = () => {
                         onChange={handleChange}
                         placeholder="Enter Defect Group Title "
                       />
-                     
+
                       {errors.defectgrouptitle && (
                         <small className="text-danger">
                           {errors.defectgrouptitle}
@@ -353,7 +357,7 @@ const ComplaintCode = () => {
                 </div>
 
                 <div className="col-md-6">
-                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <div className="d-flex justify-content-between align-items-center mb-3">
                     <span>
                       Show
                       <select
@@ -402,7 +406,7 @@ const ComplaintCode = () => {
                       </tr>
                     </thead>
                     <tbody>
-                    
+
                       {filteredUsers.map((item, index) => (
                         <tr key={item.id}>
                           <td className="text-center">{index + 1 + indexOfFirstUser}</td>

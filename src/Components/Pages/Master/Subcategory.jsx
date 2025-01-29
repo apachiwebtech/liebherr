@@ -2,7 +2,7 @@ import axios from "axios";
 import * as XLSX from "xlsx";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
-import { Base_Url,secretKey } from "../../Utils/Base_Url";
+import { Base_Url, secretKey } from "../../Utils/Base_Url";
 import ProMaster from "./ProMaster";
 import { useSelector } from 'react-redux';
 import { SyncLoader } from 'react-spinners';
@@ -32,7 +32,7 @@ const Subcategory = () => {
 
   const fetchCategory = async () => {
     try {
-      const response = await axiosInstance.get(`${Base_Url}/getcategory`,{
+      const response = await axiosInstance.get(`${Base_Url}/getcategory`, {
         headers: {
           Authorization: token, // Send token in headers
         },
@@ -46,7 +46,7 @@ const Subcategory = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axiosInstance.get(`${Base_Url}/getsubcategory`,{
+      const response = await axiosInstance.get(`${Base_Url}/getsubcategory`, {
         headers: {
           Authorization: token, // Send token in headers
         },
@@ -103,7 +103,10 @@ const Subcategory = () => {
       setErrors(validationErrors);
       return;
     }
-
+    const encryptedData = CryptoJS.AES.encrypt(
+      JSON.stringify(formData),
+      secretKey
+    ).toString();
     setDuplicateError(""); // Clear duplicate error before submitting
 
     try {
@@ -114,7 +117,7 @@ const Subcategory = () => {
         if (isEdit) {
           // For update, include duplicate check
           await axios
-            .post(`${Base_Url}/putsubcategory`, { ...formData },{
+            .post(`${Base_Url}/putsubcategory`, { encryptedData }, {
               headers: {
                 Authorization: token, // Send token in headers
               },
@@ -132,7 +135,7 @@ const Subcategory = () => {
         } else {
           // For insert, include duplicate check
           await axios
-            .post(`${Base_Url}/postsubcategory`, { ...formData },{
+            .post(`${Base_Url}/postsubcategory`, { encryptedData }, {
               headers: {
                 Authorization: token, // Send token in headers
               },
@@ -155,26 +158,26 @@ const Subcategory = () => {
   };
 
   const deleted = async (id) => {
-    const confirm =  window.confirm("Are you sure you want to delete ?");
+    const confirm = window.confirm("Are you sure you want to delete ?");
 
-    if(confirm){
-    try {
-      const response = await axiosInstance.post(`${Base_Url}/deletesubcat`, { id },{
-        headers: {
-          Authorization: token, // Send token in headers
-        },
-      });
+    if (confirm) {
+      try {
+        const response = await axiosInstance.post(`${Base_Url}/deletesubcat`, { id }, {
+          headers: {
+            Authorization: token, // Send token in headers
+          },
+        });
 
-      window.location.reload();
-    } catch (error) {
-      console.error("Error deleting user:", error);
+        window.location.reload();
+      } catch (error) {
+        console.error("Error deleting user:", error);
+      }
     }
-  }
   };
 
   const edit = async (id) => {
     try {
-      const response = await axiosInstance.get(`${Base_Url}/requestsubcat/${id}`,{
+      const response = await axiosInstance.get(`${Base_Url}/requestsubcat/${id}`, {
         headers: {
           Authorization: token, // Send token in headers
         },
@@ -191,56 +194,56 @@ const Subcategory = () => {
   const indexOfFirstUser = indexOfLastUser - itemsPerPage;
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
-      // export to excel 
-      const exportToExcel = () => {
-        // Create a new workbook
-        const workbook = XLSX.utils.book_new();
-    
-        // Convert data to a worksheet
-        const worksheet = XLSX.utils.json_to_sheet(filteredUsers.map(user => ({
-          "Category": user.category_title,
-          "SubCategory": user.title
-        
-          // Add fields you want to export
-        })));
-    
-        // Append the worksheet to the workbook
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Sub Category");
-    
-        // Export the workbook
-        XLSX.writeFile(workbook, "SubCategory.xlsx");
-      };
-    
-      // export to excel end 
-  
+  // export to excel 
+  const exportToExcel = () => {
+    // Create a new workbook
+    const workbook = XLSX.utils.book_new();
+
+    // Convert data to a worksheet
+    const worksheet = XLSX.utils.json_to_sheet(filteredUsers.map(user => ({
+      "Category": user.category_title,
+      "SubCategory": user.title
+
+      // Add fields you want to export
+    })));
+
+    // Append the worksheet to the workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sub Category");
+
+    // Export the workbook
+    XLSX.writeFile(workbook, "SubCategory.xlsx");
+  };
+
+  // export to excel end 
 
 
-   // Role Right 
-  
-  
-    const Decrypt = (encrypted) => {
-      encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
-      const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
-      return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
-    };
-  
-    const storedEncryptedRole = localStorage.getItem("Userrole");
-    const decryptedRole = Decrypt(storedEncryptedRole);
-  
-    const roledata = {
-      role: decryptedRole,
-      pageid: String(8)
-    }
-  
-    const dispatch = useDispatch()
-    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
-  
-  
-    useEffect(() => {
-      dispatch(getRoleData(roledata))
-    }, [])
-  
-    // Role Right End 
+
+  // Role Right 
+
+
+  const Decrypt = (encrypted) => {
+    encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+    const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+    return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+  };
+
+  const storedEncryptedRole = localStorage.getItem("Userrole");
+  const decryptedRole = Decrypt(storedEncryptedRole);
+
+  const roledata = {
+    role: decryptedRole,
+    pageid: String(8)
+  }
+
+  const dispatch = useDispatch()
+  const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+
+
+  useEffect(() => {
+    dispatch(getRoleData(roledata))
+  }, [])
+
+  // Role Right End 
 
   return (
     <div className="tab-content">
@@ -250,7 +253,7 @@ const Subcategory = () => {
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
       )}
-       {roleaccess > 1 ? <div className="row mp0">
+      {roleaccess > 1 ? <div className="row mp0">
         <div className="col-12">
           <div className="card mb-3 tab_box">
             <div
@@ -318,7 +321,7 @@ const Subcategory = () => {
                       )}{" "}
                       {/* Show duplicate error */}
                     </div>
-                    {roleaccess > 2 ?  <div className="text-right">
+                    {roleaccess > 2 ? <div className="text-right">
                       <button
                         className="btn btn-liebherr"
                         type="submit"
@@ -326,7 +329,7 @@ const Subcategory = () => {
                       >
                         {isEdit ? "Update" : "Submit"}
                       </button>
-                    </div> : null } 
+                    </div> : null}
                   </form>
                 </div>
 
@@ -360,7 +363,7 @@ const Subcategory = () => {
                       className="form-control d-inline-block"
                       style={{ width: "300px" }}
                     />
-                      <button
+                    <button
                       className="btn btn-primary"
                       onClick={exportToExcel}
                     >
@@ -402,7 +405,7 @@ const Subcategory = () => {
                               className="btn btn-link text-danger"
                               onClick={() => deleted(item.id)}
                               title="Delete"
-                              disabled = {roleaccess > 4 ?false : true}
+                              disabled={roleaccess > 4 ? false : true}
                             >
                               <FaTrash />
                             </button>
@@ -464,7 +467,7 @@ const Subcategory = () => {
             </div>
           </div>
         </div>
-      </div>: null}
+      </div> : null}
     </div>
   );
 };

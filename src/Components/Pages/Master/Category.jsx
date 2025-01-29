@@ -81,6 +81,10 @@ const Category = () => {
       setErrors(validationErrors);
       return;
     }
+        const encryptedData = CryptoJS.AES.encrypt(
+          JSON.stringify(formData),
+          secretKey
+        ).toString();
 
     setDuplicateError(""); // Clear duplicate error before submitting
 
@@ -93,7 +97,7 @@ const Category = () => {
           // For update, include 'updated_by'
           await axios
             .post(`${Base_Url}/putcatdata`, {
-              ...formData,
+              encryptedData,
               updated_by: updatedBy,
             },{
               headers: {
@@ -112,7 +116,7 @@ const Category = () => {
           // For insert, include 'created_by'
           await axios
             .post(`${Base_Url}/postdatacat`, {
-              ...formData,
+              encryptedData,
               created_by: createdBy,
 
             },{
