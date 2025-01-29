@@ -161,12 +161,42 @@ export function Complaintview(params) {
           ...prev,
           purchase_date: value
         }))
+
+        axios.post(`${Base_Url}/updatewarrentystate`, { warrenty: 'OUT OF WARRANTY', ticket_no: complaintid }, {
+          headers: {
+            Authorization: token
+          }
+        })
+          .then((res) => {
+            if (res.data && res.data[0].warranty_status) {
+              setWarranty_status_data(res.data[0].warranty_status)
+              setComplaintview((prev) => ({
+                ...prev,
+                warranty_status: res.data[0].warranty_status
+              }))
+            }
+          })
       } else {
         setComplaintview((prev) => ({
           ...prev,
           purchase_date: value
         }))
         setWarranty_status_data("WARRANTY");
+
+        axios.post(`${Base_Url}/updatewarrentystate`, { warrenty: 'WARRANTY', ticket_no: complaintid }, {
+          headers: {
+            Authorization: token
+          }
+        })
+          .then((res) => {
+            if (res.data && res.data[0].warranty_status) {
+              setWarranty_status_data(res.data[0].warranty_status)
+              setComplaintview((prev) => ({
+                ...prev,
+                warranty_status: res.data[0].warranty_status
+              }))
+            }
+          })
       }
 
     } catch (error) {
@@ -985,9 +1015,15 @@ export function Complaintview(params) {
 
     if (
 
-      (complaintview.call_status === 'Closed'
-        ? isValidValue(complaintview.defect_type) && isValidValue(complaintview.site_defect) && isValidValue(complaintview.activity_code) && groupstatusid && isValidValue(complaintview.serial_no) && (isValidValue(complaintview.purchase_date)) && addedEngineers.length > 0
-        : true) // For other statuses, skip defect_type and site_defect validation
+      complaintview.call_status === 'Closed'
+        ? isValidValue(complaintview.defect_type) &&
+        isValidValue(complaintview.site_defect) &&
+        isValidValue(complaintview.activity_code) &&
+        groupstatusid &&
+        (complaintview.ticket_type === 'VISIT' || isValidValue(complaintview.serial_no)) && // Adjusted for ticket_type = 'Visit'
+        isValidValue(complaintview.purchase_date) &&
+        addedEngineers.length > 0
+        : true // For other statuses, skip defect_type and site_defect validation
     ) {
 
 
@@ -1085,7 +1121,7 @@ export function Complaintview(params) {
         } else if (isInvalidValue(complaintview.activity_code)) {
           alert('Please select activity code');
         }
-        else if (isInvalidValue(complaintview.serial_no)) {
+        else if (complaintview.ticket_type !== 'VISIT' && isInvalidValue(complaintview.serial_no)) {
           alert('Please select the Serial No');
         } else if (!complaintview.purchase_date) {
           alert('Please select the Purchase Date');
@@ -1771,7 +1807,7 @@ export function Complaintview(params) {
             <div className="col-6">
               <div className="card" id="csformInfo">
                 <div className="card-body">
-                  <div className="row">
+                  <div className="row ">
 
                     {/* <div className="col-md-4">
                                       <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Model</p>
@@ -1800,9 +1836,8 @@ export function Complaintview(params) {
                     </div>
 
 
-                    <div className="col-md-4">
-                      <h4 className="pname" style={{ fontSize: "11px" }}>Model </h4>
-
+                    <div className="col-md-3">
+                      <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Model </p>
                       {complaintview.ModelNumber ? <p>{complaintview.ModelNumber}</p> : null}
 
 
@@ -1811,7 +1846,7 @@ export function Complaintview(params) {
 
 
 
-                    <div className="col-md-2">
+                    <div className="col-md-4">
                       <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Purchase Date</p>
                       <p style={{ fontSize: "14px" }}>{purchase_date == null || purchase_date == '' ? <DatePicker
                         selected={complaintview.purchase_date}
@@ -1826,10 +1861,10 @@ export function Complaintview(params) {
                         aria-describedby="Anidate"
 
                         maxDate={new Date().toISOString().split("T")[0]}
-                      /> :  formatDate(complaintview.purchase_date)}</p>
+                      /> : formatDate(complaintview.purchase_date)}</p>
                     </div>
 
-                    <div className="col-md-4">
+                    <div className="col-md-3">
                       <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Warranty Status</p>
                       <p style={{ fontSize: "14px" }}>{complaintview.warranty_status ? complaintview.warranty_status : warranty_status_data} </p>
                     </div>
@@ -1904,6 +1939,115 @@ export function Complaintview(params) {
 
                                   </select>
                                 </div>
+                                {(complaintview.call_status == 'Spares') &&
+                                  <div className=" py-1 my-2">
+                                    <h4 className="pname" style={{ fontSize: "14px" }}>Spare Parts:</h4>
+                                    <div className="row align-items-center">
+
+
+                                      <div className="col-lg-6">
+                                        <Autocomplete
+                                          size="small"
+                                          options={spare || []}
+                                          getOptionLabel={(option) =>
+                                            option.article_code + " - " + option.article_description
+                                          }
+                                          value={
+                                            spare.find((part) => part.id === spareid) || null
+                                          } // Set the selected value
+                                          onChange={(event, newValue) =>
+                                            handlesparechange(newValue ? newValue.id : "")
+                                          }
+                                          disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
+                                          renderInput={(params) => (
+                                            <TextField
+                                              {...params}
+                                              label="Select Spare Part"
+                                              variant="outlined"
+                                              fullWidth
+
+                                            />
+                                          )}
+                                          noOptionsText="No spare parts available"
+                                          sx={{
+                                            background: "#fff"
+                                          }}
+
+                                        />
+                                      </div>
+
+                                      <div className="col-lg-4 ">
+                                        <input
+                                          type="number"
+                                          className="form-control"
+                                          name="quantity"
+                                          placeholder="Qty"
+                                          value={quantity}
+                                          onChange={(e) => setQuantity(e.target.value)}
+                                          disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
+                                          min="1"
+                                        />
+                                      </div>
+
+                                      <div className="col-lg-2 ">
+
+                                        {roleaccess > 2 ? <button
+                                          className="btn btn-primary btn-sm"
+                                          disabled={closestatus == "Closed" && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
+                                          onClick={handleAddSparePart}
+                                        >
+                                          Add
+                                        </button> : null}
+
+                                      </div>
+                                    </div>
+
+                                    <div className="mt-3" style={{ overflowX: "scroll" }}>
+                                      <h4 className="pname" style={{ fontSize: "14px" }}>Added Spare Parts:</h4>
+                                      <table className="table table-bordered" style={{ fontSize: "12px" }}>
+                                        <thead>
+                                          <tr>
+                                            <th>Spare Part</th>
+                                            <th>Quantity</th>
+                                            <th>Action</th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+
+
+                                          {addedSpareParts.filter(part => {
+                                            if (uniqueParts.has(part.article_code)) {
+                                              return false; // Skip duplicate
+                                            }
+                                            uniqueParts.add(part.article_code);
+                                            return true; // Include unique
+                                          }).map((part) => {
+                                            return (
+                                              <tr key={part.id}>
+                                                <td>{part.article_code} - {part.article_description}</td>
+                                                <td>{part.quantity || 0}</td>
+                                                <td>
+                                                  <button
+                                                    className="btn btn-sm btn-danger"
+                                                    style={{ padding: "0.2rem 0.5rem" }}
+                                                    disabled={closestatus === 'Closed' && subclosestatus === 'Fully' || closestatus === 'Cancelled'}
+                                                    onClick={() => handleRemoveSparePart(part.id)}
+                                                  >
+                                                    ✖
+                                                  </button>
+                                                </td>
+                                              </tr>
+                                            );
+                                          })}
+
+
+                                        </tbody>
+                                      </table>
+                                    </div>
+                                  </div>
+
+                                }
+
                                 {(complaintview.call_status == 'Closed' || (complaintview.group_code != null && complaintview.group_code != "")) &&
                                   <div className=" py-1 my-2">
                                     <div className="row">
@@ -1996,6 +2140,13 @@ export function Complaintview(params) {
                                   </div>
                                 }
                                 <div className="form-outline mb-2">
+                                  <label
+                                    htmlFor="uploadFiles"
+                                    className="form-label mp-0"
+                                    style={{ fontSize: "14px" }}
+                                  >
+                                    <b>Remark</b><span className="text-danger">*</span>
+                                  </label>
                                   <input
                                     type="text"
                                     id="addANote"
@@ -2007,6 +2158,12 @@ export function Complaintview(params) {
                                     onChange={(e) => setNote(e.target.value)}
                                   />
                                 </div>
+                                {/* Consolidated error message */}
+                                {errorMessage && (
+                                  <div className="text-danger mt-2">{errorMessage}</div>
+                                )}
+
+                                {/* Right-aligned submit button */}
 
                                 {/* File upload field for images, videos, and audio */}
                                 <div className="form-outline mb-4">
@@ -2015,7 +2172,7 @@ export function Complaintview(params) {
                                     className="form-label mp-0"
                                     style={{ fontSize: "14px" }}
                                   >
-                                    Upload Files (Images, Videos, Audios)
+                                    <b> Upload Files (Images, Videos, Audios)</b>
                                   </label>
                                   <input
                                     type="file"
@@ -2030,12 +2187,7 @@ export function Complaintview(params) {
                                   />
                                 </div>
 
-                                {/* Consolidated error message */}
-                                {errorMessage && (
-                                  <div className="text-danger mt-2">{errorMessage}</div>
-                                )}
 
-                                {/* Right-aligned submit button */}
 
                                 <div className="d-flex justify-content-end">
 
@@ -2528,33 +2680,12 @@ export function Complaintview(params) {
                 <div className="card-body">
 
                   <div className="mt-3" >
-                    {closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? null : <h4 className="pname" style={{ fontSize: "14px" }}>Spare Parts:</h4>}
+                    {/* {closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? null : <h4 className="pname" style={{ fontSize: "14px" }}>Spare Parts:</h4>} */}
 
-                    {closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? null :
+                    {/* {closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? null :
                       <div className="row align-items-center">
 
-                        {/* <div className="col-lg-6">
-                          <select
-                            className="form-select dropdown-select m-0"
-                            name="spare_part_id"
-                            value={spareid}
-                            disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
-                            onChange={(e) => handlesparechange(e.target.value)}
-                          >
-                            <option value="">Select Spare Part</option>
-                            {Array.isArray(spare) && spare.length > 0 ? (
-                              spare.map((part) => (
-                                <option key={part.id} value={part.id}>
-                                  {part.article_code + '-' + part.article_description}
-                                </option>
-                              ))
-                            ) : (
-                              <option value="" disabled>
-                                No spare parts available
-                              </option>
-                            )}
-                          </select>
-                        </div> */}
+
                         <div className="col-lg-12">
                           <Autocomplete
                             size="small"
@@ -2575,11 +2706,11 @@ export function Complaintview(params) {
                                 label="Select Spare Part"
                                 variant="outlined"
                                 fullWidth
-                             
+
                               />
                             )}
                             noOptionsText="No spare parts available"
-                          
+
                           />
                         </div>
 
@@ -2608,11 +2739,11 @@ export function Complaintview(params) {
 
                         </div>
                       </div>
-                    }
+                    } */}
 
 
                     {/* Display added spare parts */}
-                    <div className="mt-3" style={{overflowX : "scroll"}}>
+                    <div className="mt-3" style={{ overflowX: "scroll" }}>
                       <h4 className="pname" style={{ fontSize: "14px" }}>Added Spare Parts:</h4>
                       <table className="table table-bordered" style={{ fontSize: "12px" }}>
                         <thead>
@@ -2655,19 +2786,19 @@ export function Complaintview(params) {
                       </table>
                     </div>
 
-                   {addedSpareParts.length > 0 &&
-                   <div className="d-flex justify-content-end py-2">
-                      <button
-                        type="submit"
-                        className="btn btn-primary"
-                        style={{ fontSize: "14px" }}
-                        onClick={GenerateQuotation}
-                        disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
-                      >
-                        Generate Quotation
-                      </button>
-                    </div>
-                   } 
+                    {addedSpareParts.length > 0 &&
+                      <div className="d-flex justify-content-end py-2">
+                        <button
+                          type="submit"
+                          className="btn btn-primary"
+                          style={{ fontSize: "14px" }}
+                          onClick={GenerateQuotation}
+                          disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
+                        >
+                          Generate Quotation
+                        </button>
+                      </div>
+                    }
                   </div>
                 </div>
               </div>}

@@ -7,7 +7,7 @@ import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 import CryptoJS from 'crypto-js';
 import { error } from 'jquery';
 import { IoArrowBack } from 'react-icons/io5';
-import MyDocument8 from  '../Reports/MyDocument8';
+import MyDocument8 from '../Reports/MyDocument8';
 import { pdf } from '@react-pdf/renderer';
 
 const QuotationEdit = () => {
@@ -43,8 +43,8 @@ const QuotationEdit = () => {
         quantity: '',
         price: '',
         address: '',
-        mobileno: '',
-        email: '',
+        customer_mobile: '',
+        customer_email: '',
     })
 
 
@@ -82,13 +82,6 @@ const QuotationEdit = () => {
         }
     }
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setValue((prev) => ({
-            ...prev,
-            [name]: value, // Dynamically update the field based on the input's name
-        }));
-    };
 
 
     useEffect(() => {
@@ -97,27 +90,7 @@ const QuotationEdit = () => {
     }, [])
 
 
-    const handleupdatedata = (e) => {
-        e.preventDefault()
 
-        const data = {
-            quantity: value.quantity,
-            price: value.price,
-            status: value.status,
-            qid: qid
-        }
-
-        axiosInstance.post(`${Base_Url}/updatequotation`, data, {
-            headers: {
-                Authorization: token, // Send token in headers
-            },
-        })
-            .then((res) => {
-                alert("Updated Successfully..")
-                navigate('/quotationlist')
-            })
-
-    }
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -133,33 +106,51 @@ const QuotationEdit = () => {
     async function downloadPDF(id) {
 
 
-        axios.post(`${Base_Url }/getprintinfo`, { id: id })
-          .then((res) => {
-            console.log(res.data[0], "DDD")
-            setData(res.data[0])
-    
-            Blob(res.data[0])
-    
-          })
-          .catch((err) => {
-            console.log(err)
-          })
-      }
+        axios.post(`${Base_Url}/getprintinfo`, { id: id })
+            .then((res) => {
+                console.log(res.data[0], "DDD")
+                setData(res.data[0])
 
-      
-  const Blob = async (data) => {
+                Blob(res.data[0])
 
-    try {
-   const blob = await pdf(<MyDocument8 data={data} />).toBlob();
-      const url = URL.createObjectURL(blob);      
-      window.open(url);
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error('Error generating PDF:', err);
-    }  
-  };
+            })
+            .catch((err) => {
+                console.log(err)
+            })
+    }
 
 
+    const Blob = async (data) => {
+
+        try {
+            const blob = await pdf(<MyDocument8 data={data} />).toBlob();
+            const url = URL.createObjectURL(blob);
+            window.open(url);
+            URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error('Error generating PDF:', err);
+        }
+    };
+
+
+    const ApproveQuotation = (price) => {
+
+        axios.post(`${Base_Url}/approvequotation`, { Qno: value.quotationNumber, data: spare }, {
+            headers: {
+                Authorization: token
+            }
+        })
+        .then((res) =>{
+            alert("Quotation  Approved")
+            getquotedetails()
+        })
+    }
+
+    const handlePriceChange = (index, newPrice) => {
+        const updatedSpare = [...spare];
+        updatedSpare[index].price = newPrice;
+        setSpare(updatedSpare);
+    };
     return (
         <div className="tab-content">
             {loaders && (
@@ -172,7 +163,7 @@ const QuotationEdit = () => {
                     <div className="card mb-3 tab_box">
                         <div className="card-body">
                             <IoArrowBack onClick={() => navigate(-1)} style={{ fontSize: "25px" }} />
-                            <button type="submit" class="btn btn-primary mr-2"  style={{marginLeft:'82%'}} onClick={() => downloadPDF()}>Download Quotation Details </button>
+                            <button type="submit" class="btn btn-primary mr-2" style={{ marginLeft: '82%' }} onClick={() => downloadPDF()}>Download Quotation Details </button>
                         </div>
                     </div>
                 </div>
@@ -239,11 +230,11 @@ const QuotationEdit = () => {
                                                 </li>
                                                 <li class="py-1" style={{ flex: "1 1 33.33%", padding: "10px" }}>
                                                     <span class="lable">Mobile Number:</span>
-                                                    &nbsp;<span class="value"><b>{value.mobileno}</b></span>
+                                                    &nbsp;<span class="value"><b>{value.customer_mobile}</b></span>
                                                 </li>
                                                 <li class="py-1" style={{ flex: "1 1 33.33%", padding: "10px" }}>
                                                     <span class="lable">Email:</span>
-                                                    &nbsp;<span class="value"><b>{value.email}</b></span>
+                                                    &nbsp;<span class="value"><b>{value.customer_email}</b></span>
                                                 </li>
 
                                             </ul>
@@ -289,19 +280,22 @@ const QuotationEdit = () => {
                                                                         placeholder="Enter Quantity"
                                                                         style={{ fontSize: "14px", width: "100%" }}
                                                                         className='form-control'
+                                                                        disabled
                                                                     />
                                                                 </td>
                                                                 <td>
                                                                     <input
                                                                         type="text"
-                                                                        name="serial_no"
+                                                                        name="price"
                                                                         value={item.price}
                                                                         placeholder="Enter Price"
                                                                         style={{ fontSize: "14px", width: "100%" }}
-                                                                        className='form-control'
+                                                                        className="form-control"
+                                                                        onChange={(e) =>
+                                                                            handlePriceChange(index, e.target.value)
+                                                                        }
                                                                     />
                                                                 </td>
-
 
                                                             </tr>
                                                         )
@@ -311,6 +305,10 @@ const QuotationEdit = () => {
 
                                                 </tbody>
                                             </table>
+
+                                            <div>
+                                                <button className='btn btn-sm btn-primary float-end' disabled={value.status == 'Approved' ? true : false}  onClick={() => ApproveQuotation()}>{value.status == 'Approved' ?'Approved' : 'Approve quotation'}</button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

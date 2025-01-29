@@ -140,7 +140,7 @@ app.get('/send-otp', async (req, res) => {
 
   } catch (error) {
     console.error('Error sending email:', error);
-  
+
   }
 
 
@@ -4523,8 +4523,8 @@ app.post("/postcustomer", authenticateToken, async (req, res) => {
 // customer put
 
 app.post("/putcustomer", authenticateToken, async (req, res) => {
-  const { encryptedData,encryptedDate } = req.body;
-  const decryptedData = decryptData(encryptedData,encryptedDate, secretKey)
+  const { encryptedData, encryptedDate } = req.body;
+  const decryptedData = decryptData(encryptedData, encryptedDate, secretKey)
   const { id, customer_fname, customer_type, customer_classification, mobileno, alt_mobileno, dateofbirth, anniversary_date, email, salutation, customer_id, created_by } = JSON.parse(decryptedData);
 
 
@@ -9342,7 +9342,7 @@ app.get("/getquotationlist", authenticateToken, async (req, res) => {
     // Pagination logic: Calculate offset based on the page number
     const offset = (page - 1) * pageSize;
     // Add pagination to the SQL query (OFFSET and FETCH NEXT)
-    sql += ` ORDER BY q.quotationNumber OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+    sql += ` ORDER BY q.quotationNumber desc OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
 
     // Execute the query
     const result = await pool.request().query(sql);
@@ -9599,7 +9599,7 @@ app.post('/getquotedetails', authenticateToken, async (req, res) => {
 
   try {
     // Use parameterized query to prevent SQL Injection
-    const query = `select * from  awt_quotation  WHERE id = @quote_id`;
+    const query = `select aq.* , ct.address,ct.customer_mobile,ct.customer_email , ct.assigned_to from  awt_quotation as aq left join complaint_ticket as ct on ct.ticket_no = aq.ticketId WHERE aq.id = @quote_id`;
 
 
 
@@ -12186,8 +12186,77 @@ app.post('/getjobcard', async (req, res) => {
   }
 });
 
+app.post('/updatewarrentystate', async (req, res) => {
+  const { warrenty, ticket_no } = req.body;
+
+  try {
+    // Connect to the MSSQL database
+    const pool = await poolPromise;
+
+    // Query to fetch data based on the `id`
+    const query = `update complaint_ticket set warranty_status = '${warrenty}' where id = '${ticket_no}'`;
+
+    const updateResult = await pool.request().query(query);
+
+    if (updateResult.rowsAffected[0] > 0) {
+      const getdata = `select warranty_status from complaint_ticket where id = '${ticket_no}'`
+
+      const getresult = await pool.request().query(getdata);
+      return res.json(getresult.recordset);
+    } else {
+      return res.json([])
+    }
 
 
 
+    // Return the fetched data
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
 
 
+app.post("/approvequotation", async (req, res) => {
+  const { Qno, data } = req.body;
+
+  try {
+    // Connect to the MSSQL database
+    const pool = await poolPromise;
+
+    // Begin transaction
+    const transaction = new sql.Transaction(pool);
+    await transaction.begin();
+
+    // Update quotation status
+    const updateQuotationQuery = `
+      UPDATE awt_quotation
+      SET status = 'Approved'
+      WHERE quotationNumber = @Qno`;
+
+    await pool.request().input("Qno", sql.VarChar, Qno).query(updateQuotationQuery);
+
+    // Update each spare item using for...in
+    for (const index in data) {
+      const item = data[index];
+      const query = `
+        UPDATE awt_uniquespare
+        SET price = @Price, quantity = @Quantity
+        WHERE id = @Id`;
+
+      const request = new sql.Request(transaction);
+      await request
+        .input("Price", sql.VarChar, item.price)
+        .input("Quantity", sql.VarChar, item.quantity)
+        .input("Id", sql.Int, item.id)
+        .query(query);
+    }
+
+    // Commit transaction
+    await transaction.commit();
+    res.status(200).json({ message: "Quotation approved successfully" });
+  } catch (error) {
+    // Rollback transaction on error
+    res.status(500).json({ message: "Error updating quotation", error });
+  }
+});

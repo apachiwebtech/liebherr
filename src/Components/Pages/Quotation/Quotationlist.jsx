@@ -381,12 +381,8 @@ export function Quotationlist(params) {
                                             <th width="7%">Ticket No.</th>
                                             <th width="10%">Ticket Date</th>
                                             <th width="20%">Engineer</th>
-                                            <th width="10%">Customer Name</th>
-            
+                                            <th width="10%">Customer Name</th>   
                                             <th width="15%">ModelNumber</th>
-                         
-                                            <th width="10%">Quantity</th>
-                                            <th width="15%">Price</th>
                                             <th width="10%">Status</th>
                                             <th width="10%">Edit</th>
 
@@ -402,13 +398,8 @@ export function Quotationlist(params) {
                                                 <td>{item.ticketId}</td>
                                                 <td>{formatDate(item.ticketdate)}</td>
                                                 <td>{item.assignedEngineer}</td>
-                                                <td>{item.CustomerName}</td>
-                                       
+                                                <td>{item.CustomerName}</td>                         
                                                 <td>{item.ModelNumber}</td>
-                                               
-                                                <td>{item.quantity}</td>
-                                                <td>{item.price}</td>
-
                                                 <td style={{ padding: '0px', textAlign: 'center' }}>
                                                     {item.status}
                                                 </td>
