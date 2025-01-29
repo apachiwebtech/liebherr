@@ -14,11 +14,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
-import Box from '@mui/material/Box';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select from '@mui/material/Select';
+
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -101,9 +97,14 @@ export function Engineers(params) {
     const data = {
       eng_id: id
     }
-    axios.post(`${Base_Url}/finalapproveenginner`, data)
+    axios.post(`${Base_Url}/finalapproveenginner`, data , {
+      headers :{
+        Authorization : token
+      }
+    })
       .then((res) => {
-        console.log(res.data)
+        alert("Engineer Approved")
+        ApproveEng()
         setOpen(false)
       })
   }

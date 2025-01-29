@@ -133,6 +133,7 @@ import { Shipment_parts } from './Components/Pages/Master/Shipment_parts';
 import { BussinePartner } from './Components/Pages/Master/BussinePartner';
 import MspAddtab from './Components/Pages/Master/MspAddtab';
 import AddMspUser from './Components/Pages/Master/AddMspUser';
+import { EnquiryForm } from './Components/Pages/Master/EnquiryForm';
 
 
 
@@ -745,7 +746,7 @@ const Router = createBrowserRouter([
       },
       {
         path: "addenquiry",
-        element: <AddEnquiry />
+        element: <EnquiryForm />
       },
       {
         path: "enuiry",

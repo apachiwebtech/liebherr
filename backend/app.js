@@ -140,7 +140,7 @@ app.get('/send-otp', async (req, res) => {
 
   } catch (error) {
     console.error('Error sending email:', error);
-    res.status(500).json({ error: 'Failed to send OTP' });
+  
   }
 
 
@@ -3228,6 +3228,9 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
     const remark_id = result.recordset[0]?.remark_id;
 
 
+    // const getrate = `select * from rate_card`
+
+
     //End
 
 
@@ -3925,8 +3928,16 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
     const newcount = Number(lastFourDigits) + 1
 
-    const formatDate = `${(new Date().getMonth() + 1).toString().padStart(2, '0')}${new Date().getDate().toString().padStart(2, '0')}`;
+    // i have ticket date like 2025-01-29 add this date in format date take month and date dont take current month and current date
+
+    // const formatDate = `${(new Date().getMonth() + 1).toString().padStart(2, '0')}${new Date().getDate().toString().padStart(2, '0')}`;
+
+    const formatDate = `${complaint_date.slice(5, 7)}${complaint_date.slice(8, 10)}`;
+
+
     const ticket_no = `${t_type}H${formatDate}-${newcount.toString().padStart(4, "0")}`;
+
+
 
     let complaintSQL
 
@@ -9374,29 +9385,62 @@ app.post('/add_uniqsparepart', authenticateToken, async (req, res) => {
     const ticket_no = finaldata.ticket_no;
 
     // Destructure values from `newdata`
-    const { article_code, article_description, price, spareId } = newdata;
+    const { article_code, article_description, price, spareId, quantity } = newdata;
 
+    const poolRequest = pool.request();
 
-
-
-    const poolRequest = pool.request(); // Ensure `pool` is initialized correctly.
-
-    const addspare = `
-      INSERT INTO awt_uniquespare (ticketId, spareId, article_code, article_description, price)
-      VALUES (@ticket_no, @product_code, @title, @ItemDescription, '100')
+    // Check if the spare part already exists
+    const checkDuplicateQuery = `
+      SELECT 1
+      FROM awt_uniquespare
+      WHERE ticketId = @ticket_no AND article_code = @article_code_d
     `;
 
-    await poolRequest
+    const duplicateResult = await poolRequest
       .input('ticket_no', sql.VarChar, ticket_no)
-      .input('product_code', sql.VarChar, spareId)
-      .input('title', sql.VarChar, article_code)
-      .input('ItemDescription', sql.VarChar, article_description)
-      .input('price', sql.VarChar, price)
-      .query(addspare);
+      .input('article_code_d', sql.VarChar, article_code)
+      .query(checkDuplicateQuery);
 
-    res.status(200).send({ message: 'Spare part added successfully!' });
+    if (duplicateResult.recordset.length > 0) {
+      // Record exists, perform an update
+      const updateSpareQuery = `
+        UPDATE awt_uniquespare
+        SET article_code = @article_code,
+            article_description = @article_description,
+            price = @price,
+            quantity = @quantity,
+            deleted = @deleted
+        WHERE ticketId = @ticket_no AND article_code = @article_code_d
+      `;
+
+      await poolRequest
+        .input('article_code', sql.VarChar, article_code)
+        .input('article_description', sql.VarChar, article_description)
+        .input('price', sql.VarChar, price)
+        .input('quantity', sql.Int, quantity)
+        .input('deleted', sql.Int, 0)
+        .query(updateSpareQuery);
+
+      res.status(200).send({ message: 'Spare part updated successfully!' });
+    } else {
+      // Record does not exist, perform an insert
+      const insertSpareQuery = `
+        INSERT INTO awt_uniquespare (ticketId, spareId, article_code, article_description, price, quantity)
+        VALUES (@ticket_no, @spareId, @article_code, @article_description, @price, @quantity)
+      `;
+
+      await poolRequest
+        .input('article_code', sql.VarChar, article_code)
+        .input('article_description', sql.VarChar, article_description)
+        .input('price', sql.VarChar, price)
+        .input('quantity', sql.Int, quantity)
+        .input('spareId', sql.VarChar, spareId)
+        .query(insertSpareQuery);
+
+      res.status(200).send({ message: 'Spare part added successfully!' });
+    }
   } catch (error) {
-    console.error('Error inserting spare part:', error);
+    console.error('Error inserting or updating spare part:', error);
     res.status(500).send({ error: 'Internal server error' });
   }
 });
@@ -9692,7 +9736,6 @@ app.post("/finalapproveenginner", authenticateToken, async (req, res) => {
 
     // Execute the query
     const result = await pool.request().query(sql);
-    console.log(result)
 
     return res.json(result.recordset);
   } catch (err) {

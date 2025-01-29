@@ -288,6 +288,7 @@ const QuotationEdit = () => {
                                                                         value={item.quantity}
                                                                         placeholder="Enter Quantity"
                                                                         style={{ fontSize: "14px", width: "100%" }}
+                                                                        className='form-control'
                                                                     />
                                                                 </td>
                                                                 <td>
@@ -295,8 +296,9 @@ const QuotationEdit = () => {
                                                                         type="text"
                                                                         name="serial_no"
                                                                         value={item.price}
-                                                                        placeholder="Enter Quantity"
+                                                                        placeholder="Enter Price"
                                                                         style={{ fontSize: "14px", width: "100%" }}
+                                                                        className='form-control'
                                                                     />
                                                                 </td>
 

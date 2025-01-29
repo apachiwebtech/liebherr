@@ -556,7 +556,7 @@ export function Complaintview(params) {
 
     const newPart = {
       ...selectedSparePart,
-      // quantity: parseInt(quantity), // Add quantity field
+      quantity: parseInt(quantity), // Add quantity field
     };
 
 
@@ -2555,7 +2555,7 @@ export function Complaintview(params) {
                             )}
                           </select>
                         </div> */}
-                        <div className="col-lg-6">
+                        <div className="col-lg-12">
                           <Autocomplete
                             size="small"
                             options={spare || []}
@@ -2583,7 +2583,7 @@ export function Complaintview(params) {
                           />
                         </div>
 
-                        <div className="col-lg-3">
+                        <div className="col-lg-9 mt-2">
                           <input
                             type="number"
                             className="form-control"
@@ -2596,7 +2596,7 @@ export function Complaintview(params) {
                           />
                         </div>
 
-                        <div className="col-lg-3">
+                        <div className="col-lg-3 mt-2">
 
                           {roleaccess > 2 ? <button
                             className="btn btn-primary btn-sm"
@@ -2635,7 +2635,7 @@ export function Complaintview(params) {
                             return (
                               <tr key={part.id}>
                                 <td>{part.article_code} - {part.article_description}</td>
-                                <td>1</td>
+                                <td>{part.quantity || 0}</td>
                                 <td>
                                   <button
                                     className="btn btn-sm btn-danger"
@@ -2655,7 +2655,8 @@ export function Complaintview(params) {
                       </table>
                     </div>
 
-                    <div className="d-flex justify-content-end py-2">
+                   {addedSpareParts.length > 0 &&
+                   <div className="d-flex justify-content-end py-2">
                       <button
                         type="submit"
                         className="btn btn-primary"
@@ -2666,6 +2667,7 @@ export function Complaintview(params) {
                         Generate Quotation
                       </button>
                     </div>
+                   } 
                   </div>
                 </div>
               </div>}
