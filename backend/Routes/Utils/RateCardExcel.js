@@ -255,6 +255,115 @@ app.post('/uploadpinexcel', async (req, res) => {
   }
 });
 
+app.post('/uploadtickets', async (req, res) => {
+  let { jsonData } = req.body;
+  let excelData = JSON.parse(jsonData);
+
+  try {
+    const pool = await poolPromise;
+    pool.config.options.requestTimeout = 600000;
+
+    for (const item of excelData) {
+      await pool.request()
+        .input('ticket_no', sql.VarChar, item.ticket_no)
+        .input('ticket_date', sql.VarChar, item.ticket_date)
+        .input('customer_id', sql.VarChar, item.customer_id)
+        .input('salutation', sql.VarChar, item.salutation)
+        .input('customer_name', sql.VarChar, item.customer_name)
+        .input('alt_mobile', sql.VarChar, item.alt_mobile)
+        .input('customer_mobile', sql.VarChar, item.customer_mobile)
+        .input('customer_email', sql.VarChar, item.customer_email)
+        .input('ModelNumber', sql.VarChar, item.ModelNumber)
+        .input('serial_no', sql.Int, item.serial_no)
+        .input('address', sql.VarChar, item.address)
+        .input('region', sql.VarChar, item.region)
+        .input('state', sql.VarChar, item.state)
+        .input('city', sql.VarChar, item.city)
+        .input('area', sql.VarChar, item.area)
+        .input('pincode', sql.VarChar, item.pincode)
+        .input('service_partner', sql.VarChar, item.service_partner)
+        .input('child_service_partner', sql.VarChar, item.child_service_partner)
+        .input('msp', sql.VarChar, item.msp)
+        .input('csp', sql.VarChar, item.csp)
+        .input('sales_partner', sql.VarChar, item.sales_partner)
+        .input('assigned_to', sql.VarChar, item.assigned_to)
+        .input('old_engineer', sql.VarBinary, item.old_engineer)
+        .input('engineer_code', sql.VarChar, item.engineer_code)
+        .input('engineer_id', sql.VarChar, item.engineer_id)
+        .input('ticket_type', sql.VarChar, item.ticket_type)
+        .input('call_type', sql.VarChar, item.call_type)
+        .input('sub_call_status', sql.VarChar, item.sub_call_status)
+        .input('call_status', sql.VarChar, item.call_status)
+        .input('symptom_code', sql.VarChar, item.symptom_code)
+        .input('cause_code', sql.VarChar, item.cause_code)
+        .input('action_code', sql.VarChar, item.action_code)
+        .input('service_charges', sql.VarChar, item.service_charges)
+        .input('other_charges', sql.VarChar, item.other_charges)
+        .input('warranty_status', sql.VarChar, item.warranty_status)
+        .input('invoice_date', sql.VarChar, item.invoice_date)
+        .input('call_charges', sql.VarChar, item.call_charges)
+        .input('mode_of_contact', sql.VarChar, item.mode_of_contact)
+        .input('created_date', sql.VarChar, item.created_date)
+        .input('created_by', sql.VarChar, item.created_by)
+        .input('deleted', sql.Int, item.deleted)
+        .input('updated_by', sql.VarChar, item.updated_by)
+        .input('updated_date', sql.DateTime, item.updated_date)
+        .input('contact_person', sql.VarChar, item.contact_person)
+        .input('purchase_date', sql.VarChar, item.purchase_date)
+        .input('specification', sql.VarChar, item.specification)
+        .input('ageing', sql.Int, item.ageing)
+        .input('area_id', sql.Int, item.area_id)
+        .input('state_id', sql.Int, item.state_id)
+        .input('city_id', sql.Int, item.city_id)
+        .input('pincode_id', sql.Int, item.pincode_id)
+        .input('closed_date', sql.DateTime, item.closed_date)
+        .input('customer_class', sql.VarChar, item.customer_class)
+        .input('call_priority', sql.VarChar, item.call_priority)
+        .input('spare_doc_path', sql.VarChar, item.spare_doc_path)
+        .input('call_remark', sql.Text, item.call_remark)
+        .input('spare_detail', sql.VarChar, item.spare_detail)
+        .input('group_code', sql.VarChar, item.group_code)
+        .input('defect_type', sql.VarChar, item.defect_type)
+        .input('site_defect', sql.VarChar, item.site_defect)
+        .input('activity_code', sql.VarChar, item.activity_code)
+        .input('spare_part_id', sql.VarChar, item.spare_part_id)
+        .input('totp', sql.VarChar, item.totp)
+        .input('requested_by', sql.VarChar, item.requested_by)
+        .input('requested_email', sql.VarChar, item.requested_email)
+        .input('requested_mobile', sql.VarChar, item.requested_mobile)
+        .input('sales_partner2', sql.VarChar, item.sales_partner2)
+        .input('mwhatsapp', sql.Int, item.mwhatsapp)
+        .input('awhatsapp', sql.Int, item.awhatsapp)
+        .query(`
+          INSERT INTO pincode_allocation (
+            ticket_no, ticket_date, customer_id, salutation, customer_name, alt_mobile, customer_mobile, customer_email, ModelNumber, serial_no, 
+            address, region, state, city, area, pincode, service_partner, child_service_partner, msp, csp, sales_partner, assigned_to, old_engineer, 
+            engineer_code, engineer_id, ticket_type, call_type, sub_call_status, call_status, symptom_code, cause_code, action_code, service_charges, 
+            other_charges, warranty_status, invoice_date, call_charges, mode_of_contact, created_date, created_by, deleted, updated_by, updated_date, 
+            contact_person, purchase_date, specification, ageing, area_id, state_id, city_id, pincode_id, closed_date, customer_class, call_priority, 
+            spare_doc_path, call_remark, spare_detail, group_code, defect_type, site_defect, activity_code, spare_part_id, totp, requested_by, 
+            requested_email, requested_mobile, sales_partner2, mwhatsapp, awhatsapp
+          ) 
+          VALUES (
+            @ticket_no, @ticket_date, @customer_id, @salutation, @customer_name, @alt_mobile, @customer_mobile, @customer_email, @ModelNumber, @serial_no, 
+            @address, @region, @state, @city, @area, @pincode, @service_partner, @child_service_partner, @msp, @csp, @sales_partner, @assigned_to, 
+            @old_engineer, @engineer_code, @engineer_id, @ticket_type, @call_type, @sub_call_status, @call_status, @symptom_code, @cause_code, @action_code, 
+            @service_charges, @other_charges, @warranty_status, @invoice_date, @call_charges, @mode_of_contact, @created_date, @created_by, @deleted, 
+            @updated_by, @updated_date, @contact_person, @purchase_date, @specification, @ageing, @area_id, @state_id, @city_id, @pincode_id, @closed_date, 
+            @customer_class, @call_priority, @spare_doc_path, @call_remark, @spare_detail, @group_code, @defect_type, @site_defect, @activity_code, 
+            @spare_part_id, @totp, @requested_by, @requested_email, @requested_mobile, @sales_partner2, @mwhatsapp, @awhatsapp
+          )
+        `);
+    }
+
+    return res.json({ message: 'Data inserted successfully' });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while inserting data' });
+  }
+});
+
+
 
 
 

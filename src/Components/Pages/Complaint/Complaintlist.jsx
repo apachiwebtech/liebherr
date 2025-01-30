@@ -6,35 +6,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
 import { Base_Url, secretKey } from '../../Utils/Base_Url';
 import { useSelector } from 'react-redux';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'datatables.net-bs4/css/dataTables.bootstrap4.min.css';
-import $ from 'jquery';
-import 'datatables.net';
-import 'datatables.net-bs4';
 import CryptoJS from 'crypto-js';
-// DataTables Responsive Extension (JS and CSS for Bootstrap 4)
-import 'datatables.net-responsive';
-import 'datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css';
-
-// DataTables Fixed Columns Extension
-import 'datatables.net-fixedcolumns';
-import 'datatables.net-fixedcolumns-bs4/css/fixedColumns.bootstrap4.min.css';
-
-// DataTables Fixed Header Extension
-import 'datatables.net-fixedheader';
-
-// DataTables Buttons Extension
-import 'datatables.net-buttons';
-import 'datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css';
-import 'datatables.net-buttons/js/buttons.html5.min.js';
-
-
-
-// DataTables KeyTable Extension
-import 'datatables.net-keytable';
-
-// DataTables Select Extension
-import 'datatables.net-select';
 import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 import { useDispatch } from "react-redux";
 import { getRoleData } from "../../Store/Role/role-action";
@@ -46,8 +18,10 @@ export function Complaintlist(params) {
   const [isEdit, setIsEdit] = useState(false);
   const token = localStorage.getItem("token"); // Get token from localStorage
   const [currentPage, setCurrentPage] = useState(1);
+  const [excelData, setExcelData] = useState([]);
   const [pageSize, setPageSize] = useState(10);
   const { loaders, axiosInstance } = useAxiosLoader();
+  const [loader, setLoader] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const totalPages = Math.ceil(totalCount / pageSize);
   const handlePageChange = (page) => {
@@ -185,18 +159,106 @@ export function Complaintlist(params) {
     fetchComplaintlist(); // Reset to original data
   };
 
-  //  const deleted = async (id) => {
-  //     try {
-  //         const response = await axiosInstance.post(`${Base_Url}/deleteengineer`, { id });
-  //         setFormData({
-  //             title: '',
-  //             cfranchise_id: ''
-  //         })
-  //         fetchComplaintlist();
-  //     } catch (error) {
-  //         console.error('Error deleting user:', error);
-  //     }
-  // };
+  const importexcel = (event) => {
+    setLoader(true);
+    const file = event?.target?.files ? event.target.files[0] : null;
+
+    if (!file) {
+      alert("Please upload an Excel file first!");
+      setLoader(false);  // Stop loader if no file is selected
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = async (e) => {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
+
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+
+        console.log("Sheet Loaded:", sheet);
+
+        const chunkSize = 70000; // Process in smaller chunks to avoid memory issues
+        const jsonData = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+
+
+        // Column mapping function
+        const mapKeys = (obj) => {
+          const keyMapping = {
+            "RESIDENT BRANCH": "resident_branch",
+          };
+
+          return Object.fromEntries(
+            Object.entries(obj).map(([key, value]) => [
+              keyMapping[key] || key.toLowerCase().replace(/\s+/g, "_"),
+              String(value),
+            ])
+          );
+        };
+
+        let processedData = [];
+        for (let i = 0; i < jsonData.length; i += chunkSize) {
+          const chunk = jsonData.slice(i, i + chunkSize).map(mapKeys);
+          console.log(`Processing chunk ${i / chunkSize + 1}`);
+          processedData.push(...chunk);
+
+          // Simulate async processing to avoid UI freeze
+          await new Promise((resolve) => setTimeout(resolve, 10));
+        }
+
+        setExcelData(processedData);
+        console.log("Processed Data:", processedData);
+      } catch (error) {
+        console.error("Error processing Excel file:", error);
+        alert("An error occurred while processing the file.");
+      } finally {
+        setLoader(false);  // Stop loader after processing completes or if an error occurs
+      }
+    };
+
+    reader.onerror = () => {
+      alert("Failed to read file!");
+      setLoader(false);  // Stop loader if file reading fails
+    };
+
+    reader.readAsArrayBuffer(file);
+  };
+
+
+  const uploadexcel = () => {
+    setLoader(true);
+
+    try {
+      // Ensure excelData is converted to JSON string before encryption
+      const jsonData = JSON.stringify(excelData);
+
+
+
+      axios.post(`${Base_Url}/uploadtickets`, { jsonData: jsonData })
+        .then((res) => {
+          if (res.data) {
+            alert("Uploaded successfully!");
+          }
+          console.log(res);
+        })
+        .catch((err) => {
+          console.error("Upload error:", err);
+          alert("Error uploading file. Please try again.");
+        })
+        .finally(() => {
+          setLoader(false);
+        });
+
+    } catch (error) {
+      console.error("Encryption error:", error);
+      alert("Error during encryption.");
+      setLoader(false);
+    }
+  };
 
   const edit = async (id) => {
     try {
@@ -222,38 +284,7 @@ export function Complaintlist(params) {
   const isActionDisabled = (status) => {
     return ['Closed', 'Cancelled'].includes(status);
   };
-  useEffect(() => {
-    if (filteredData.length > 0) {
-      // Initialize DataTable after data is fetched
-      const table = $('#example').DataTable({
-        destroy: true, // Destroy any existing DataTable instance before reinitializing
-        paging: true,
-        searching: true,
-        ordering: true,
-        info: true,
-        lengthChange: false,
-        autoWidth: false,
-        responsive: true,
-        fixedHeader: true,
-        fixedColumns: {
-          left: 5,
-        },
-        keys: true,
-        select: true,
-        dom: '<"d-flex justify-content-between"<"table-title"><"search-box"f>>t<"d-flex justify-content-between"ip>',
-        language: {
-          search: '', // Remove the "Search:" label
-          searchPlaceholder: 'Search...', // Add placeholder text
-        },
 
-      });
-
-      // Cleanup: Destroy DataTable instance before reinitializing when Productdata changes
-      return () => {
-        table.destroy();
-      };
-    }
-  }, [filteredData]);
 
 
   // This is for tab section
@@ -303,82 +334,82 @@ export function Complaintlist(params) {
   // export to excel 
   const exportToExcel = async () => {
     try {
-        // Fetch all ticket data without pagination
-        const response = await axiosInstance.get(`${Base_Url}/getcomplainlist`, {
-            headers: {
-                Authorization: token,
-            },
-            params: {
-                pageSize: totalCount, // Fetch all data
-                page: 1, // Start from the first page
-            },
-        });
+      // Fetch all ticket data without pagination
+      const response = await axiosInstance.get(`${Base_Url}/getcomplainlist`, {
+        headers: {
+          Authorization: token,
+        },
+        params: {
+          pageSize: totalCount, // Fetch all data
+          page: 1, // Start from the first page
+        },
+      });
 
-        const allTicketData = response.data.data;
+      const allTicketData = response.data.data;
 
-        // Create a new workbook
-        const workbook = XLSX.utils.book_new();
+      // Create a new workbook
+      const workbook = XLSX.utils.book_new();
 
-        // Convert data to a worksheet
-        const worksheet = XLSX.utils.json_to_sheet(allTicketData.map(user => ({
-            "TicketNo": user.ticket_no,
-            "TicketDate": user.ticket_date,
-            "CustomerId": user.customer_id,
-            "Salutation": user.salutation,
-            "CustomerName": user.customer_name,
-            "CustomerMobile": user.customer_mobile,
-            "CustomerEmail": user.customer_email,
-            "ModelNumber": user.ModelNumber,
-            "SerialNo": user.serial_no,
-            "Address": user.address,
-            "Region": user.region,
-            "State": user.state,
-            "City": user.city,
-            "District": user.area,
-            "Pincode": user.pincode,
-            "ServicePartner": user.service_partner,
-            "msp": user.msp,
-            "csp": user.csp,
-            "SalesPartner": user.sales_partner,
-            "AssignedTo": user.assigned_to,
-            "OldEngineer": user.old_engineer,
-            "EngineerCode": user.engineer_code,
-            "EngineerId": user.engineer_id,
-            "TicketType": user.ticket_type,
-            "CallType": user.call_type,
-            "SubCallStatus": user.sub_call_status,
-            "CallStatus": user.call_status,
-            "WarrantyStatus": user.warranty_status,
-            "InvoiceDate": user.invoice_date,
-            "ModeofContact": user.mode_of_contact,
-            "CallCharges": user.call_charges,
-            "ContactPerson": user.contact_person,
-            "PurchaseDate": user.purchase_date,
-            "CustomerClass": user.customer_class,
-            "CallPriority": user.call_priority,
-            "SpareDocPath": user.spare_doc_path,
-            "CallRemark": user.call_remark,
-            "SpareDetails": user.spare_detail,
-            "GroupCode": user.group_code,
-            "DefectType": user.defect_type,
-            "SiteDefect": user.site_defect,
-            "SparePartID": user.spare_part_id,
-            "TOTP": user.totp,
-            "RequestedBY": user.requested_by,
-            "RequestedEmail": user.requested_email,
-            "RequestedMobile": user.requested_mobile,
-            "SalesPartner2": user.sales_partner2,
-        })));
+      // Convert data to a worksheet
+      const worksheet = XLSX.utils.json_to_sheet(allTicketData.map(user => ({
+        "TicketNo": user.ticket_no,
+        "TicketDate": user.ticket_date,
+        "CustomerId": user.customer_id,
+        "Salutation": user.salutation,
+        "CustomerName": user.customer_name,
+        "CustomerMobile": user.customer_mobile,
+        "CustomerEmail": user.customer_email,
+        "ModelNumber": user.ModelNumber,
+        "SerialNo": user.serial_no,
+        "Address": user.address,
+        "Region": user.region,
+        "State": user.state,
+        "City": user.city,
+        "District": user.area,
+        "Pincode": user.pincode,
+        "ServicePartner": user.service_partner,
+        "msp": user.msp,
+        "csp": user.csp,
+        "SalesPartner": user.sales_partner,
+        "AssignedTo": user.assigned_to,
+        "OldEngineer": user.old_engineer,
+        "EngineerCode": user.engineer_code,
+        "EngineerId": user.engineer_id,
+        "TicketType": user.ticket_type,
+        "CallType": user.call_type,
+        "SubCallStatus": user.sub_call_status,
+        "CallStatus": user.call_status,
+        "WarrantyStatus": user.warranty_status,
+        "InvoiceDate": user.invoice_date,
+        "ModeofContact": user.mode_of_contact,
+        "CallCharges": user.call_charges,
+        "ContactPerson": user.contact_person,
+        "PurchaseDate": user.purchase_date,
+        "CustomerClass": user.customer_class,
+        "CallPriority": user.call_priority,
+        "SpareDocPath": user.spare_doc_path,
+        "CallRemark": user.call_remark,
+        "SpareDetails": user.spare_detail,
+        "GroupCode": user.group_code,
+        "DefectType": user.defect_type,
+        "SiteDefect": user.site_defect,
+        "SparePartID": user.spare_part_id,
+        "TOTP": user.totp,
+        "RequestedBY": user.requested_by,
+        "RequestedEmail": user.requested_email,
+        "RequestedMobile": user.requested_mobile,
+        "SalesPartner2": user.sales_partner2,
+      })));
 
-        // Append the worksheet to the workbook
-        XLSX.utils.book_append_sheet(workbook, worksheet, "TicketList");
+      // Append the worksheet to the workbook
+      XLSX.utils.book_append_sheet(workbook, worksheet, "TicketList");
 
-        // Export the workbook
-        XLSX.writeFile(workbook, "TicketList.xlsx");
+      // Export the workbook
+      XLSX.writeFile(workbook, "TicketList.xlsx");
     } catch (error) {
-        console.error("Error exporting data to Excel:", error);
+      console.error("Error exporting data to Excel:", error);
     }
-};
+  };
 
 
   // export to excel end
@@ -581,7 +612,7 @@ export function Complaintlist(params) {
                 </div>
               </div>
 
-  
+
             </div>
 
             {/* Third row of filter */}
@@ -664,30 +695,24 @@ export function Complaintlist(params) {
                 </div>
               </div>
 
-              {/* <div className="col-md-3">
-                                <div className="form-group">
-                                    <label>Customer Email</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        name="customerEmail"
-                                        value={searchFilters.customerEmail}
-                                        placeholder="Search by customer email"
-                                        onChange={handleFilterChange}
-                                    />
-                                </div>
-                            </div> */}
-
-              {/* Buttons and message at the far-right corner */}
-
               <div className="col-md-12 d-flex justify-content-end align-items-center mt-3 "  >
                 <div className=' form-group'>
-                 
+
                 </div>
                 <div className="form-group ">
-                <button
+                  <input type="file" accept=".xlsx, .xls" onChange={importexcel} />
+                  <button className="btn btn-primary" onClick={uploadexcel}
+                    style={{
+                      marginLeft: '-100px',
+                    }}>
+                    Import Tickets
+                  </button>
+                  <button
                     className="btn btn-primary"
                     onClick={exportToExcel}
+                    style={{
+                      marginLeft: '5px',
+                    }}
                   >
                     Export to Excel
                   </button>
@@ -697,7 +722,7 @@ export function Complaintlist(params) {
                     onClick={applyFilters}
                     style={{
                       marginLeft: '5px',
-                  }}
+                    }}
                   >
                     Search
                   </button>
