@@ -73,7 +73,8 @@ export function Complaintview(params) {
     quantity: "",
     state: "",
     city: "",
-    activity_code: ""
+    activity_code: "",
+    class_city: ""
   });
 
 
@@ -1016,14 +1017,14 @@ export function Complaintview(params) {
     if (
 
       complaintview.call_status === 'Closed'
-        ? isValidValue(complaintview.defect_type) &&
-        isValidValue(complaintview.site_defect) &&
-        isValidValue(complaintview.activity_code) &&
-        groupstatusid &&
+        ? (complaintview.ticket_type === 'MAINTENANCE' || isValidValue(complaintview.defect_type)) &&
+        (complaintview.ticket_type === 'MAINTENANCE' || isValidValue(complaintview.site_defect)) &&
+        (complaintview.ticket_type === 'MAINTENANCE' || isValidValue(complaintview.activity_code)) &&
+        (complaintview.ticket_type === 'MAINTENANCE' || groupstatusid) &&
         (complaintview.ticket_type === 'VISIT' || isValidValue(complaintview.serial_no)) && // Adjusted for ticket_type = 'Visit'
         isValidValue(complaintview.purchase_date) &&
         addedEngineers.length > 0
-        : true // For other statuses, skip defect_type and site_defect validation
+        : true
     ) {
 
 
@@ -1037,6 +1038,9 @@ export function Complaintview(params) {
       try {
         const complaintRemarkData = {
           ticket_no: complaintview.ticket_no,
+          ticket_type: complaintview.ticket_type,
+          ticket_start_date: complaintview.created_date,
+          call_city: complaintview.class_city,
           call_status: callstatusid || '',
           sub_call_status: complaintview.sub_call_status || '',
           group_code: groupstatusid || '',
@@ -1111,14 +1115,14 @@ export function Complaintview(params) {
     } else {
       const isInvalidValue = (value) => !value || value === 'null';
 
-      if (!groupstatusid) {
+      if (complaintview.ticket_type !== 'MAINTENANCE' && !groupstatusid) {
         alert('Please select the group code');
       } else if (complaintview.call_status === 'Closed') {
-        if (isInvalidValue(complaintview.defect_type)) {
+        if (complaintview.ticket_type !== 'MAINTENANCE' && isInvalidValue(complaintview.defect_type)) {
           alert('Please select the Defect type');
-        } else if (isInvalidValue(complaintview.site_defect)) {
+        } else if (complaintview.ticket_type !== 'MAINTENANCE' && isInvalidValue(complaintview.site_defect)) {
           alert('Please select the site defect');
-        } else if (isInvalidValue(complaintview.activity_code)) {
+        } else if (complaintview.ticket_type !== 'MAINTENANCE' && isInvalidValue(complaintview.activity_code)) {
           alert('Please select activity code');
         }
         else if (complaintview.ticket_type !== 'VISIT' && isInvalidValue(complaintview.serial_no)) {

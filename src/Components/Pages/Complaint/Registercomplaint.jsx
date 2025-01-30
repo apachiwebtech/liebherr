@@ -177,7 +177,7 @@ export function Registercomplaint(params) {
     requested_by: "",
     requested_email: "",
     requested_mobile: "",
-
+    class_city :""
   })
 
   const handleDateChange = (date) => {
@@ -937,6 +937,7 @@ export function Registercomplaint(params) {
         salutation: value.salutation || '',
         msp: value.msp || '',
         csp: value.csp || '',
+        class_city: value.class_city || '',
         sales_partner: value.sales_partner || '',
         sales_partner2: value.sales_partner2 || '',
         mwhatsapp: String(checkboxes.mwhatsapp),
@@ -956,7 +957,7 @@ export function Registercomplaint(params) {
         }
         )
           .then((res) => {
-            if (res.data) {
+            if (res.data.cust_id != 'NA') {
 
 
               handleAttachment2Submit(res.data.ticket_no)
@@ -965,6 +966,8 @@ export function Registercomplaint(params) {
               setTimeout(() => {
                 navigate('/complaintlist');
               }, 300);
+            }else{
+              alert(res.data.message)
             }
           })
           .catch(error => {
@@ -1174,7 +1177,8 @@ export function Registercomplaint(params) {
             master_service_partner: response.data[0].mspname,
             child_service_partner: response.data[0].cspname,
             csp: response.data[0].csp,
-            msp: response.data[0].msp
+            msp: response.data[0].msp,
+            class_city : response.data[0].class_city
           })
 
         }

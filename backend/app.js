@@ -3157,7 +3157,9 @@ app.get("/getcomplaintview/:complaintid", authenticateToken, async (req, res) =>
 });
 
 app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
-  const { ticket_no, note, created_by, call_status, sub_call_status, group_code, site_defect, defect_type, activity_code, serial_no, ModelNumber, purchase_date, warrenty_status, engineerdata, engineername } = req.body;
+  const { ticket_no, note, created_by, call_status, sub_call_status, group_code, site_defect, defect_type, activity_code, serial_no, ModelNumber, purchase_date, warrenty_status, engineerdata, engineername, ticket_type, call_city, ticket_start_date } = req.body;
+
+
 
 
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
@@ -3190,26 +3192,13 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
 
 
-    if (call_status == 'Closed' && sub_call_status == 'Fully') {
-      const updateSql = `
-      UPDATE complaint_ticket
-      SET closed_date = GETDATE()   WHERE ticket_no = '${ticket_no}'`;
-
-      await pool.request().query(updateSql);
-    }
-
-
-
-
 
 
     const updateSql = `
     UPDATE complaint_ticket
-    SET call_status = '${call_status}' , updated_by = '${created_by}', updated_date = '${formattedDate}' , sub_call_status  = '${sub_call_status}' ,group_code = '${group_code}' , defect_type = '${defect_type}' , ModelNumber = '${ModelNumber}',serial_no = '${serial_no}' , site_defect = '${site_defect}' ,activity_code = '${activity_code}' , purchase_date = '${purchase_date}' , warranty_status = '${warrenty_status}' ,engineer_id = '${engineer_id}' , assigned_to = '${engineer_name}'  WHERE ticket_no = '${ticket_no}'`;
+    SET call_status = '${call_status}' , updated_by = '${created_by}', updated_date = '${formattedDate}' , sub_call_status  = '${sub_call_status}' ,group_code = '${group_code}' , defect_type = '${defect_type}' , ModelNumber = '${ModelNumber}',serial_no = '${serial_no}' , site_defect = '${site_defect}' ,activity_code = '${activity_code}' , purchase_date = '${purchase_date}' , warranty_status = '${warrenty_status}' ,engineer_id = '${engineer_id}' , assigned_to = '${engineer_name}' ,call_remark = '${concatremark}'  WHERE ticket_no = '${ticket_no}' `;
 
     await pool.request().query(updateSql);
-
-
 
     // Use parameterized queries to prevent SQL injection
     const sql = `
@@ -3228,7 +3217,83 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
     const remark_id = result.recordset[0]?.remark_id;
 
 
-    // const getrate = `select * from rate_card`
+
+    if (call_status == 'Closed' && sub_call_status == 'Fully') {
+
+
+      const updateSql = `
+      UPDATE complaint_ticket
+      SET closed_date = GETDATE()  WHERE ticket_no = '${ticket_no}'`;
+
+      await pool.request().query(updateSql);
+
+      const startdate = new Date(ticket_start_date); // Ensure this is a Date object
+      const ticketenddate = new Date(); // Current date and time
+
+      // Calculate the difference in hours
+      const diffInMilliseconds = ticketenddate - startdate;
+      const hoursDifference = Math.floor(diffInMilliseconds / (1000 * 60 * 60)); // Convert to hours
+
+      console.log(`Hours difference: ${hoursDifference}`);
+
+
+      //rate card logic
+
+      const getproductinfo = `select top 1 id, productType ,  productLine , productClass from product_master where item_description = '${ModelNumber}'`;
+
+      const productresult = await pool.request().query(getproductinfo)
+
+
+
+      if (productresult.recordset.length > 0) {
+
+        const { productType, productLine, productClass } = productresult.recordset[0];
+
+        const getrate = `select * from rate_card where ProductType ='${productType}' AND ProductLine = '${productLine}' AND ProductClass = '${productClass}' AND call_type = '${ticket_type}' AND class_city = '${call_city}' `
+
+
+
+        const getresult = await pool.request().query(getrate)
+
+
+        if (getresult.recordset && getresult.recordset[0]) {
+
+          const within24 = getresult.recordset[0].Within_24_Hours;
+          const within48 = getresult.recordset[0].Within_48_Hours;
+          const within98 = getresult.recordset[0].Within_96_Hours;
+          const Morethan98 = getresult.recordset[0].MoreThan96_Hours;
+
+          let updatecomplaint;
+
+          if (hoursDifference <= 24) {
+            updatecomplaint = `update complaint_ticket  set service_charges = '${within24}' where ticket_no = '${ticket_no}'`
+          } else if (hoursDifference <= 48) {
+            updatecomplaint = `update complaint_ticket  set service_charges = '${within48}' where ticket_no = '${ticket_no}'`
+          } else if (hoursDifference <= 98) {
+            updatecomplaint = `update complaint_ticket  set service_charges = '${within98}' where ticket_no = '${ticket_no}'`
+          } else if (hoursDifference >= 98) {
+            updatecomplaint = `update complaint_ticket  set service_charges = '${Morethan98}' where ticket_no = '${ticket_no}'`
+          }
+
+          const finalresult = await pool.request().query(updatecomplaint);
+
+          return res.json({
+            hoursDifference, // Include the hours difference in the response
+            rateCardData: finalresult.affectedRows,
+          });
+
+        }
+
+
+      }
+
+
+
+
+    }
+
+
+
 
 
     //End
@@ -3727,107 +3792,107 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
     complaint_date, customer_name = "NA", contact_person, email, mobile, address,
     state, city, area, pincode, mode_of_contact, ticket_type, cust_type,
     warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks
-    , ticket_id, classification, priority, callType, requested_by, requested_email, requested_mobile, msp, csp, sales_partner, sales_partner2, salutation, mwhatsapp, awhatsapp
+    , ticket_id, classification, priority, callType, requested_by, requested_email, requested_mobile, msp, csp, sales_partner, sales_partner2, salutation, mwhatsapp, awhatsapp, class_city
   } = req.body;
 
 
+  const pool = await poolPromise;
 
 
+  // duplicate check
+
+  const duplicatecheck = `select * from complaint_ticket where customer_mobile = '${mobile}' and call_status = 'Open' `;
 
 
+  const dupresult = await pool.request().query(duplicatecheck);
 
 
+  if (dupresult.recordset.length == 0) {
 
+    const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
-  const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
+    let t_type;
 
-  let t_type;
+    if (ticket_type == 'BREAKDOWN') {
+      t_type = 'B'
+    }
+    else if (ticket_type == 'DEMO') {
+      t_type = 'D'
 
-  if (ticket_type == 'BREAKDOWN') {
-    t_type = 'B'
-  }
-  else if (ticket_type == 'DEMO') {
-    t_type = 'D'
+    } else if (ticket_type == 'INSTALLATION') {
+      t_type = 'I'
 
-  } else if (ticket_type == 'INSTALLATION') {
-    t_type = 'I'
+    } else if (ticket_type == 'MAINTENANCE') {
+      t_type = 'M'
 
-  } else if (ticket_type == 'MAINTENANCE') {
-    t_type = 'M'
-
-  } else if (ticket_type == 'HELPDESK') {
-    t_type = 'H'
-  }
-  else if (ticket_type == 'VISIT') {
-    t_type = 'V'
-  }
-
-
-  try {
-    const pool = await poolPromise;
-
-
-    // Split customer_name into customer_fname and customer_lname
-
-
-    const [customer_fname, ...customer_lnameArr] = customer_name.split(' ');
-    const customer_lname = customer_lnameArr.join(' ');
-
-
-    const getcustcount = `select top 1 id from awt_customer where customer_id is not null order by id desc`
-
-    const getcustresult = await pool.request().query(getcustcount)
-
-    const custcount = getcustresult.recordset[0].id;
-
-    const newcustid = 'B' + custcount.toString().padStart(7, "0")
-
-
-
-
-
-    console.log(cust_id, "first")
-
-    if (ticket_id == '' && (cust_id == '' || cust_id == 'undefined')) {
-      console.log(cust_id, "second")
-
-
-      // Insert into awt_customer
-      const customerSQL = `INSERT INTO awt_customer ( salutation,customer_id,customer_fname, customer_lname, email, mobileno, alt_mobileno, created_date, created_by)OUTPUT INSERTED.id VALUES ( @salutation, @customer_id,@customer_fname, @customer_lname, @email, @mobile, @alt_mobile, @formattedDate, @created_by)`;
-      // Debugging log
-
-      const customerResult = await pool.request()
-        .input('customer_fname', customer_fname)
-        .input('customer_id', newcustid)
-        .input('customer_lname', customer_lname)
-        .input('email', email)
-        .input('mobile', mobile)
-        .input('alt_mobile', alt_mobile)
-        .input('salutation', salutation)
-        .input('formattedDate', formattedDate)
-        .input('created_by', created_by)
-        .query(customerSQL);
-
-      const insertedCustomerId = customerResult.recordset;
-
-      console.log(insertedCustomerId, "insertedCustomerId")
-
-
-
-
+    } else if (ticket_type == 'HELPDESK') {
+      t_type = 'H'
+    }
+    else if (ticket_type == 'VISIT') {
+      t_type = 'V'
     }
 
 
-
-    // Insert into awt_uniqueproductmaster using insertedCustomerId as customer_id
-
-
-
-    if ((cust_id == '' || cust_id == 'undefined') && model != "") {
+    try {
+      const pool = await poolPromise;
 
 
+      // Split customer_name into customer_fname and customer_lname
 
-      const productSQL = `INSERT INTO awt_uniqueproductmaster (
+
+      const [customer_fname, ...customer_lnameArr] = customer_name.split(' ');
+      const customer_lname = customer_lnameArr.join(' ');
+
+
+      const getcustcount = `select top 1 id from awt_customer where customer_id is not null order by id desc`
+
+      const getcustresult = await pool.request().query(getcustcount)
+
+      const custcount = getcustresult.recordset[0].id;
+
+      const newcustid = 'B' + custcount.toString().padStart(7, "0")
+
+
+
+
+
+
+      if (ticket_id == '' && (cust_id == '' || cust_id == 'undefined')) {
+
+        // Insert into awt_customer
+        const customerSQL = `INSERT INTO awt_customer ( salutation,customer_id,customer_fname, customer_lname, email, mobileno, alt_mobileno, created_date, created_by)OUTPUT INSERTED.id VALUES ( @salutation, @customer_id,@customer_fname, @customer_lname, @email, @mobile, @alt_mobile, @formattedDate, @created_by)`;
+        // Debugging log
+
+        const customerResult = await pool.request()
+          .input('customer_fname', customer_fname)
+          .input('customer_id', newcustid)
+          .input('customer_lname', customer_lname)
+          .input('email', email)
+          .input('mobile', mobile)
+          .input('alt_mobile', alt_mobile)
+          .input('salutation', salutation)
+          .input('formattedDate', formattedDate)
+          .input('created_by', created_by)
+          .query(customerSQL);
+
+        const insertedCustomerId = customerResult.recordset;
+
+
+
+
+      }
+
+
+
+      // Insert into awt_uniqueproductmaster using insertedCustomerId as customer_id
+
+
+
+      if ((cust_id == '' || cust_id == 'undefined') && model != "") {
+
+
+
+        const productSQL = `INSERT INTO awt_uniqueproductmaster (
         CustomerID, ModelNumber, serial_no,  pincode ,address,state,city,district ,purchase_date, created_date, created_by,customer_classification
       )
       VALUES (
@@ -3836,25 +3901,25 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
 
 
-      const Unique = await pool.request()
-        .input('customer_id', newcustid)
-        .input('model', model)
-        .input('created_by', created_by)
-        .input('serial', serial)
-        .input('purchase_date', purchase_date)
-        .input('pincode', pincode)
-        .input('formattedDate', formattedDate)
-        .input('address', address)
-        .input('area', area)
-        .input('state', state)
-        .input('city', city)
-        .input('customer_classification', classification)
-        .query(productSQL);
-    }
+        await pool.request()
+          .input('customer_id', newcustid)
+          .input('model', model)
+          .input('created_by', created_by)
+          .input('serial', serial)
+          .input('purchase_date', purchase_date)
+          .input('pincode', pincode)
+          .input('formattedDate', formattedDate)
+          .input('address', address)
+          .input('area', area)
+          .input('state', state)
+          .input('city', city)
+          .input('customer_classification', classification)
+          .query(productSQL);
+      }
 
-    if ((cust_id == '' || cust_id == 'undefined')) {
-      // Insert into awt_customerlocation using insertedCustomerId as customer_id
-      const customerLocationSQL = `
+      if ((cust_id == '' || cust_id == 'undefined')) {
+        // Insert into awt_customerlocation using insertedCustomerId as customer_id
+        const customerLocationSQL = `
         INSERT INTO awt_customerlocation (
       customer_id, geostate_id, geocity_id, district_id, pincode_id,
       created_date, created_by, ccperson, ccnumber, address , deleted
@@ -3866,23 +3931,21 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
 
 
-      await pool.request()
-        .input('customer_id', newcustid)
-        .input('state', state)
-        .input('city', city)
-        .input('area', area)
-        .input('created_by', created_by)
-        .input('pincode', pincode)
-        .input('formattedDate', formattedDate)
-        .input('customer_name', customer_name)
-        .input('mobile', mobile)
-        .input('address', address)
-        .input('deleted', '0')
-        .query(customerLocationSQL);
+        await pool.request()
+          .input('customer_id', newcustid)
+          .input('state', state)
+          .input('city', city)
+          .input('area', area)
+          .input('created_by', created_by)
+          .input('pincode', pincode)
+          .input('formattedDate', formattedDate)
+          .input('customer_name', customer_name)
+          .input('mobile', mobile)
+          .input('address', address)
+          .input('deleted', '0')
+          .query(customerLocationSQL);
 
-    }
-
-
+      }
 
 
 
@@ -3890,21 +3953,17 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
 
 
-    const test = `SELECT Top 1 ticket_no
-        FROM complaint_ticket
-        WHERE ticket_no LIKE @ticketType + 'H' + '%'
-          AND ticket_date >= CAST(DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0) AS DATE)
-          AND ticket_date < CAST(DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) + 1, 0) AS DATE)
-        ORDER BY ticket_no Desc`
 
 
 
 
 
-    // this is for generating ticket no
-    const checkResult = await pool.request()
-      .input('ticketType', sql.NVarChar, t_type)  // Define the parameter
-      .query(`
+
+
+      // this is for generating ticket no
+      const checkResult = await pool.request()
+        .input('ticketType', sql.NVarChar, t_type)  // Define the parameter
+        .query(`
         SELECT Top 1 ticket_no
         FROM complaint_ticket
         WHERE ticket_no LIKE @ticketType + 'H' + '%'
@@ -3915,49 +3974,44 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
 
 
-    const count = checkResult.recordset[0] ? checkResult.recordset[0].ticket_no : 'H0000';
+      const count = checkResult.recordset[0] ? checkResult.recordset[0].ticket_no : 'H0000';
+
+
+      // Accessing the last 4 digits from the result
+      const lastFourDigits = count.slice(-4)
+
+      const newcount = Number(lastFourDigits) + 1
+
+      // i have ticket date like 2025-01-29 add this date in format date take month and date dont take current month and current date
+
+      const formatDate = `${(new Date().getMonth() + 1).toString().padStart(2, '0')}${new Date().getDate().toString().padStart(2, '0')}`;
+
+      // const formatDate = `${complaint_date.slice(5, 7)}${complaint_date.slice(8, 10)}`;
+
+
+      const ticket_no = `${t_type}H${formatDate}-${newcount.toString().padStart(4, "0")}`;
 
 
 
+      let complaintSQL
 
-
-
-
-    // Accessing the last 4 digits from the result
-    const lastFourDigits = count.slice(-4)
-
-    const newcount = Number(lastFourDigits) + 1
-
-    // i have ticket date like 2025-01-29 add this date in format date take month and date dont take current month and current date
-
-    // const formatDate = `${(new Date().getMonth() + 1).toString().padStart(2, '0')}${new Date().getDate().toString().padStart(2, '0')}`;
-
-    const formatDate = `${complaint_date.slice(5, 7)}${complaint_date.slice(8, 10)}`;
-
-
-    const ticket_no = `${t_type}H${formatDate}-${newcount.toString().padStart(4, "0")}`;
-
-
-
-    let complaintSQL
-
-    if (!ticket_id) {
-      complaintSQL = `
+      if (!ticket_id) {
+        complaintSQL = `
         INSERT INTO complaint_ticket (
           ticket_no, ticket_date, customer_name, customer_mobile, customer_email, address,
           state, city, area, pincode, customer_id, ModelNumber, ticket_type, call_type,
           call_status, warranty_status, invoice_date, call_charges, mode_of_contact,
-          contact_person,  created_date, created_by,  purchase_date, serial_no, child_service_partner, sevice_partner, specification ,customer_class,call_priority,requested_mobile,requested_email,requested_by,msp,csp,sales_partner,sales_partner2,call_remark,salutation,alt_mobile,mwhatsapp,awhatsapp
+          contact_person,  created_date, created_by,  purchase_date, serial_no, child_service_partner, sevice_partner, specification ,customer_class,call_priority,requested_mobile,requested_email,requested_by,msp,csp,sales_partner,sales_partner2,call_remark,salutation,alt_mobile,mwhatsapp,awhatsapp,class_city
         )
         VALUES (
           @ticket_no, @complaint_date, @customer_name, @mobile, @email, @address,
           @state, @city, @area, @pincode, @customer_id, @model, @ticket_type, @cust_type,
           'Open', @warranty_status, @invoice_date, @call_charge, @mode_of_contact,
-          @contact_person,  @formattedDate, @created_by,  @purchase_date, @serial, @child_service_partner, @master_service_partner, @specification ,@classification , @priority ,@requested_mobile,@requested_email,@requested_by,@msp,@csp,@sales_partner,@sales_partner2,@call_remark,@salutation,@alt_mobile,@mwhatsapp,@awhatsapp
+          @contact_person,  @formattedDate, @created_by,  @purchase_date, @serial, @child_service_partner, @master_service_partner, @specification ,@classification , @priority ,@requested_mobile,@requested_email,@requested_by,@msp,@csp,@sales_partner,@sales_partner2,@call_remark,@salutation,@alt_mobile,@mwhatsapp,@awhatsapp,@class_city
         )
       `;
-    } else {
-      complaintSQL = `
+      } else {
+        complaintSQL = `
         UPDATE complaint_ticket
         SET
           ticket_no = @ticket_no,
@@ -4000,64 +4054,66 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
           salutation = @salutation,
           alt_mobile = @alt_mobile,
           mwhatsapp = @mwhatsapp,
-          awhatsapp = @awhatsapp
+          awhatsapp = @awhatsapp,
+          class_city = @class_city
           WHERE
           id = @ticket_id
       `;
-    }
+      }
 
 
 
 
-    const resutlt = await pool.request()
-      .input('ticket_no', ticket_no)
-      .input('ticket_id', ticket_id)
-      .input('complaint_date', complaint_date)
-      .input('customer_name', customer_name)
-      .input('mobile', mobile)
-      .input('email', email)
-      .input('address', address)
-      .input('state', state)
-      .input('created_by', created_by)
-      .input('city', city)
-      .input('area', area)
-      .input('pincode', pincode)
-      .input('customer_id', cust_id == '' || cust_id == 'undefined' ? newcustid : cust_id)
-      .input('model', model)
-      .input('ticket_type', ticket_type)
-      .input('cust_type', cust_type)
-      .input('warranty_status', sql.NVarChar, warrenty_status)
-      .input('invoice_date', invoice_date)
-      .input('call_charge', call_charge)
-      .input('mode_of_contact', mode_of_contact)
-      .input('contact_person', contact_person)
-      .input('formattedDate', formattedDate)
-      .input('purchase_date', purchase_date)
-      .input('serial', serial)
-      .input('master_service_partner', master_service_partner)
-      .input('child_service_partner', child_service_partner)
-      .input('specification', specification)
-      .input('call_remark', additional_remarks)
-      .input('classification', classification)
-      .input('priority', priority)
-      .input('requested_by', requested_by)
-      .input('requested_email', requested_email)
-      .input('requested_mobile', requested_mobile)
-      .input('msp', msp)
-      .input('csp', csp)
-      .input('sales_partner', sales_partner)
-      .input('sales_partner2', sales_partner2)
-      .input('salutation', salutation)
-      .input('alt_mobile', alt_mobile)
-      .input('awhatsapp', awhatsapp)
-      .input('mwhatsapp', mwhatsapp)
-      .query(complaintSQL);
+      const resutlt = await pool.request()
+        .input('ticket_no', ticket_no)
+        .input('ticket_id', ticket_id)
+        .input('complaint_date', complaint_date)
+        .input('customer_name', customer_name)
+        .input('mobile', mobile)
+        .input('email', email)
+        .input('address', address)
+        .input('state', state)
+        .input('created_by', created_by)
+        .input('city', city)
+        .input('area', area)
+        .input('pincode', pincode)
+        .input('customer_id', cust_id == '' || cust_id == 'undefined' ? newcustid : cust_id)
+        .input('model', model)
+        .input('ticket_type', ticket_type)
+        .input('cust_type', cust_type)
+        .input('warranty_status', sql.NVarChar, warrenty_status)
+        .input('invoice_date', invoice_date)
+        .input('call_charge', call_charge)
+        .input('mode_of_contact', mode_of_contact)
+        .input('contact_person', contact_person)
+        .input('formattedDate', formattedDate)
+        .input('purchase_date', purchase_date)
+        .input('serial', serial)
+        .input('master_service_partner', master_service_partner)
+        .input('child_service_partner', child_service_partner)
+        .input('specification', specification)
+        .input('call_remark', additional_remarks)
+        .input('classification', classification)
+        .input('priority', priority)
+        .input('requested_by', requested_by)
+        .input('requested_email', requested_email)
+        .input('requested_mobile', requested_mobile)
+        .input('msp', msp)
+        .input('csp', csp)
+        .input('sales_partner', sales_partner)
+        .input('sales_partner2', sales_partner2)
+        .input('salutation', salutation)
+        .input('alt_mobile', alt_mobile)
+        .input('awhatsapp', awhatsapp)
+        .input('mwhatsapp', mwhatsapp)
+        .input('class_city', class_city)
+        .query(complaintSQL);
 
 
 
-    if (additional_remarks) {
-      //Remark insert query
-      const reamrks = `
+      if (additional_remarks) {
+        //Remark insert query
+        const reamrks = `
     INSERT INTO awt_complaintremark (
         ticket_no, remark, created_date, created_by
     )
@@ -4066,19 +4122,19 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
     )`;
 
 
-      await pool.request()
-        .input('ticket_no', ticket_no) // Use existing ticket_no from earlier query
-        .input('formattedDate', formattedDate) // Use current timestamp
-        .input('created_by', created_by) // Use current user ID
-        .input('additional_remarks', additional_remarks) // Use current user ID
-        .query(reamrks);
+        await pool.request()
+          .input('ticket_no', ticket_no) // Use existing ticket_no from earlier query
+          .input('formattedDate', formattedDate) // Use current timestamp
+          .input('created_by', created_by) // Use current user ID
+          .input('additional_remarks', additional_remarks) // Use current user ID
+          .query(reamrks);
 
-    }
+      }
 
 
 
-    if (specification) {
-      const faultreamrks = `
+      if (specification) {
+        const faultreamrks = `
       INSERT INTO awt_complaintremark (
           ticket_no, remark, created_date, created_by
       )
@@ -4087,38 +4143,52 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
       )`;
 
 
-      await pool.request()
-        .input('ticket_no', ticket_no) // Use existing ticket_no from earlier query
-        .input('formattedDate', formattedDate) // Use current timestamp
-        .input('created_by', created_by) // Use current user ID
-        .input('additional_remarks', specification) // Use current user ID
-        .query(faultreamrks);
+        await pool.request()
+          .input('ticket_no', ticket_no) // Use existing ticket_no from earlier query
+          .input('formattedDate', formattedDate) // Use current timestamp
+          .input('created_by', created_by) // Use current user ID
+          .input('additional_remarks', specification) // Use current user ID
+          .query(faultreamrks);
+      }
+      //Fault Description *************
+
+
+
+
+      // const mailOptions = {
+      //   from: 'zeliant997@gmail.com',
+      //   to: email,
+      //   subject: 'Welcome to Our Platform!',
+      //   html: `<a href='http://localhost:3000/nps/${email}/${ticket_no}/${cust_id == '' ? newcustid : cust_id}'>Click here to give us feedback</a>`,
+      // };
+
+
+
+      // await transporter.verify();
+      // const info = await transporter.sendMail(mailOptions);
+
+
+
+
+      return res.json({ message: 'Complaint added successfully!', ticket_no, cust_id });
+    } catch (err) {
+      console.error("Error inserting complaint:", err.stack);
+      return res.status(500).json({ error: 'An error occurred while adding the complaint', details: err.message });
     }
-    //Fault Description *************
 
-
-
-
-    // const mailOptions = {
-    //   from: 'zeliant997@gmail.com',
-    //   to: email,
-    //   subject: 'Welcome to Our Platform!',
-    //   html: `<a href='http://localhost:3000/nps/${email}/${ticket_no}/${cust_id == '' ? newcustid : cust_id}'>Click here to give us feedback</a>`,
-    // };
-
-
-
-    // await transporter.verify();
-    // const info = await transporter.sendMail(mailOptions);
-
-
-
-
-    return res.json({ message: 'Complaint added successfully!', ticket_no, cust_id });
-  } catch (err) {
-    console.error("Error inserting complaint:", err.stack);
-    return res.status(500).json({ error: 'An error occurred while adding the complaint', details: err.message });
+  } else {
+    return res.json({message :"Ticket is already created", ticket_no : 'Ticket is already created' ,cust_id : 'NA'})
   }
+
+
+
+
+
+
+
+
+
+
 });
 
 
@@ -4126,7 +4196,7 @@ app.post("/u_complaint", authenticateToken, async (req, res) => {
   let {
     customer_name, contact_person, email, mobile, address,
     state, city, area, pincode, mode_of_contact, cust_type,
-    warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks, ticket_no, classification, priority, requested_by, requested_email, requested_mobile, sales_partner2, salutation, mwhatsapp, awhatsapp
+    warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks, ticket_no, classification, priority, requested_by, requested_email, requested_mobile, sales_partner2, salutation, mwhatsapp, awhatsapp, class_city
   } = req.body;
 
 
@@ -4180,7 +4250,8 @@ SET
   salutation = @salutation,
   alt_mobile = @alt_mobile,
   mwhatsapp = @mwhatsapp,
-  awhatsapp = @awhatsapp
+  awhatsapp = @awhatsapp,
+  class_city = @class_city
   WHERE
   ticket_no = @ticket_no
 `;
@@ -4225,6 +4296,7 @@ SET
       .input('alt_mobile', alt_mobile)
       .input('mwhatsapp', mwhatsapp)
       .input('awhatsapp', awhatsapp)
+      .input('class_city', class_city)
       .query(complaintSQL);
 
     //Remark insert query
@@ -7784,23 +7856,7 @@ app.get("/getcomplaintview/:complaintid", authenticateToken, async (req, res) =>
   }
 });
 
-app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
-  const { ticket_no, note, created_by } = req.body;
 
-  try {
-    const pool = await poolPromise;
-
-    // SQL query to insert a new complaint remark
-    const sql = `INSERT INTO awt_complaintremark (ticket_no, remark, created_by, created_date)
-                    VALUES (${ticket_no}, '${note}', ${created_by}, GETDATE())`;
-    const result = await pool.request().query(sql);
-
-    res.json({ insertId: result.rowsAffected[0] }); // Send the inserted ID back to the client
-  } catch (err) {
-    console.error("Error inserting remark:", err);
-    return res.status(500).json({ error: "Database error", details: err.message }); // Send back more details for debugging
-  }
-});
 
 // app.post("/uploadcomplaintattachments", upload.array("attachment"), async (req, res) => {
 //   const { ticket_no, remark_id, created_by } = req.body;
@@ -8982,7 +9038,7 @@ app.get("/getmultiplelocation/:pincode/:classification/:ticket_type", authentica
 
     const pool = await poolPromise;
 
-    const sql = `SELECT cn.title as country, p.region_name as region, p.geostate_name as state, p.area_name as district, p.geocity_name as city,  o.msp_code as msp, f.title as mspname,  o.csp_code as csp, fm.title as cspname,  p.pincode
+    const sql = `SELECT cn.title as country, p.region_name as region, p.geostate_name as state, p.area_name as district, p.geocity_name as city,  o.msp_code as msp, f.title as mspname,  o.csp_code as csp, fm.title as cspname,  p.pincode , class_city
     FROM awt_pincode as p
     LEFT JOIN awt_region as r on p.region_id = r.id
     LEFT JOIN awt_country as cn on p.country_id = cn.id
@@ -11195,7 +11251,7 @@ app.post('/updateissuespares', async (req, res) => {
 
       // Update quantity in `awt_cspissuespare`
       const updateIssueQuery = `
-        UPDATE awt_cspissuespare
+        UPDATE  
         SET quantity = @quantity 
         WHERE issue_no = @issue_no AND spare_no = @spare_no
       `;
