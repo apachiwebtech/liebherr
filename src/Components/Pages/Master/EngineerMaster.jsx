@@ -246,19 +246,27 @@ const EngineerMaster = () => {
       setErrors(validationErrors);
       return;
     }
+    const payload = {
+      ...formData,
+      joining_date: joining_date,
+      dob: selectedDate,
+      password: md5(formData.password),
+      created_by,
+    }
+
+    const encryptedData = CryptoJS.AES.encrypt(
+      JSON.stringify(payload),
+      secretKey
+    ).toString();
 
     setDuplicateError(''); // Clear duplicate error before submitting
 
     try {
       const confirmSubmission = window.confirm("Do you want to submit the data?");
       if (confirmSubmission) {
-        const hashedFormData = {
-          ...formData,
-          password: md5(formData.password) // Hash the password using MD5
-        };
         if (isEdit) {
           // For update, include duplicate check
-          await axiosInstance.post(`${Base_Url}/putengineer`, { ...hashedFormData, created_by,dob : selectedDate,joining_date_date : joining_date }
+          await axiosInstance.post(`${Base_Url}/putengineer`, { encryptedData }
             , {
               headers: {
                 Authorization: token,
@@ -296,7 +304,7 @@ const EngineerMaster = () => {
             });
         } else {
           // For insert, include duplicate check
-          await axiosInstance.post(`${Base_Url}/postengineer`, { ...hashedFormData, created_by, dob : String(selectedDate),joining_date_date : String(joining_date) }
+          await axiosInstance.post(`${Base_Url}/postengineer`, { encryptedData }
             , {
               headers: {
                 Authorization: token,

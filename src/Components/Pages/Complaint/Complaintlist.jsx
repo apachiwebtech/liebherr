@@ -189,7 +189,7 @@ export function Complaintlist(params) {
         // Column mapping function
         const mapKeys = (obj) => {
           const keyMapping = {
-            "RESIDENT BRANCH": "resident_branch",
+            "TicketNo": "ticket_no",
           };
 
           return Object.fromEntries(

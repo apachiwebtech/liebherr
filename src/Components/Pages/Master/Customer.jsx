@@ -270,31 +270,6 @@ const Customer = () => {
 
 
 
-  // const deleted = async (id) => {
-  //   try {
-  //     const response = await axiosInstance.post(`${Base_Url}/deletecustomer`, { id }, {
-  //       headers: {
-  //         Authorization: token,
-  //       },
-  //     });
-  //     setFormData({
-  //       customer_fname: '',
-  //       // customer_lname: '',
-  //       customer_type: '',
-  //       customer_classification: '',
-  //       mobileno: '',
-  //       alt_mobileno: '',
-  //       dateofbirth: '',
-  //       anniversary_date: '',
-  //       email: '',
-  //       customer_id: '',
-  //     })
-  //     fetchCustomerData();
-  //   } catch (error) {
-  //     console.error('Error deleting user:', error);
-  //   }
-  // };
-
 
   // Role Right 
 

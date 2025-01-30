@@ -55,7 +55,7 @@ const Servicecontract = () => {
       const formattedDate = formatDate(date);
       setEndDate(formattedDate)
     }
-    
+
 
   };
 
@@ -185,6 +185,18 @@ const Servicecontract = () => {
       return;
     }
 
+    const payload = {
+      ...formData,
+      
+      startDate: startDate,
+      endDate: enddate,
+     
+    }
+    const encryptedData = CryptoJS.AES.encrypt(
+      JSON.stringify(payload),
+      secretKey
+    ).toString();
+
     setDuplicateError(""); // Clear duplicate error before submitting
 
     try {
@@ -196,10 +208,7 @@ const Servicecontract = () => {
           // For update, include 'updated_by'
           await axios
             .post(`${Base_Url}/putservicecontract`, {
-              ...formData,
-              updated_by: updatedBy,
-              startDate : startDate,
-              endDate : enddate,
+              encryptedData,
             }, {
               headers: {
                 Authorization: token, // Send token in headers
@@ -235,10 +244,7 @@ const Servicecontract = () => {
           // For insert, include 'created_by'
           await axios
             .post(`${Base_Url}/postservicecontract`, {
-              ...formData,
-              created_by: createdBy,
-              startDate : startDate,
-              endDate : enddate,
+              encryptedData
             }, {
               headers: {
                 Authorization: token, // Send token in headers

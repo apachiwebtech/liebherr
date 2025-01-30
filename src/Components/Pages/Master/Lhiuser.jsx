@@ -98,9 +98,9 @@ const Lhiuser = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prevState => ({
-     ...prevState,
-     [name]: value
-   }));
+      ...prevState,
+      [name]: value
+    }));
   };
 
 
@@ -157,12 +157,25 @@ const Lhiuser = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-        const validationErrors = validateForm();
+    const validationErrors = validateForm();
     const newErrors = {};
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
+
+    const payload = {
+      ...formData,
+      password: md5(formData.password),
+      updated_by: updatedBy,
+      created_by: String(createdBy),
+
+    }
+
+    const encryptedData = CryptoJS.AES.encrypt(
+      JSON.stringify(payload),
+      secretKey
+    ).toString();
 
     if (validateForm()) {
 
@@ -174,14 +187,10 @@ const Lhiuser = () => {
           "Do you want to submit the data?"
         );
         if (confirmSubmission) {
-          const hashedFormData = {
-            ...formData,
-            password: md5(formData.password) // Hash the password using MD5
-          };
           if (isEdit) {
             // For update, include 'updated_by'
             await axios
-              .post(`${Base_Url}/putlhidata`, { ...hashedFormData,updated_by:updatedBy },
+              .post(`${Base_Url}/putlhidata`, { encryptedData},
                 {
                   headers: {
                     Authorization: token, // Send token in headers
@@ -214,8 +223,8 @@ const Lhiuser = () => {
             // For insert, include 'created_by'
             await axios
               .post(`${Base_Url}/postlhidata`, {
-                ...formData,
-                created_by: String(createdBy),
+                encryptedData
+               
               },
                 {
                   headers: {

@@ -4508,7 +4508,7 @@ app.post("/postcustomer", authenticateToken, async (req, res) => {
       .query(insertSql);
 
     // Send success response
-    return res.status(201).json({
+    return res.status(200).json({
       message: "Customer master added successfully",
     });
 
@@ -5069,7 +5069,9 @@ app.get("/requestengineer/:id", authenticateToken,
   });
 app.post("/postengineer",
   authenticateToken, async (req, res) => {
-    const { title, mfranchise_id, cfranchise_id, password, email, mobile_no, personal_email, employee_code, personal_mobile, dob, blood_group, academic_qualification, joining_date, passport_picture, resume, photo_proof, address_proof, permanent_address, current_address } = req.body;
+    const { encryptedData } = req.body;
+    const decryptedData = decryptData(encryptedData, secretKey)
+    const { title, mfranchise_id, cfranchise_id, password, email, mobile_no, personal_email, employee_code, personal_mobile, dob, blood_group, academic_qualification, joining_date, passport_picture, resume, photo_proof, address_proof, permanent_address, current_address } = JSON.parse(decryptedData);
 
     try {
       // Use the poolPromise to get the connection pool
@@ -5108,7 +5110,9 @@ app.post("/postengineer",
     }
   });
 app.post("/putengineer", authenticateToken, async (req, res) => {
-  const { title, mfranchise_id, cfranchise_id, password, email, mobile_no, personal_email, employee_code, personal_mobile, dob, blood_group, academic_qualification, joining_date, passport_picture, resume, photo_proof, address_proof, permanent_address, current_address, id } = req.body;
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { title, mfranchise_id, cfranchise_id, password, email, mobile_no, personal_email, employee_code, personal_mobile, dob, blood_group, academic_qualification, joining_date, passport_picture, resume, photo_proof, address_proof, permanent_address, current_address, id } = JSON.parse(decryptedData);
 
   try {
     // Use the poolPromise to get the connection pool
@@ -5167,7 +5171,6 @@ app.get("/getengineerpopulate/:engineerid", authenticateToken, async (req, res) 
   const { engineerid } = req.params;
 
 
-  console.log(engineerid, "%%%")
 
   if (engineerid != "undefined") {
     try {
@@ -6987,7 +6990,9 @@ app.get("/getservicecontract", authenticateToken,
 
 // Insert for Servicecontract
 app.post("/postservicecontract", authenticateToken, async (req, res) => {
-  const { customerName, customerMobile, contractNumber, contractType, productName, serialNumber, startDate, endDate } = req.body;
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData,secretKey)
+  const { customerName, customerMobile, contractNumber, contractType, productName, serialNumber, startDate, endDate } = JSON.parse(decryptedData);
 
   try {
     const pool = await poolPromise;
@@ -7047,7 +7052,9 @@ app.get("/requestservicecontract/:id", authenticateToken, async (req, res) => {
 
 
 app.post("/putservicecontract", authenticateToken, async (req, res) => {
-  const { id, customerName, customerMobile, contractNumber, contractType, productName, serialNumber, startDate, endDate, created_by } = req.body;
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { id, customerName, customerMobile, contractNumber, contractType, productName, serialNumber, startDate, endDate, created_by } = JSON.parse(decryptedData);
 
 
   try {
@@ -7347,6 +7354,8 @@ app.get("/getreport", authenticateToken, async (req, res) => {
 });
 // Insert for Lhiuser
 app.post("/postlhidata", authenticateToken, async (req, res) => {
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
   const { Lhiuser,
     mobile_no,
     password,
@@ -7359,7 +7368,7 @@ app.post("/postlhidata", authenticateToken, async (req, res) => {
     Designation,
 
 
-  } = req.body;
+  } = JSON.parse(decryptedData);
 
 
 
@@ -7420,9 +7429,11 @@ app.get("/requestlhidata/:id", authenticateToken, async (req, res) => {
 });
 // update for Lhiuser
 app.post("/putlhidata", authenticateToken, async (req, res) => {
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
   const {
     Lhiuser, id, updated_by, mobile_no, Usercode, password, status, email, remarks, Role, Designation, Reporting_to
-  } = req.body;
+  } = JSON.parse(decryptedData);
 
 
   try {
