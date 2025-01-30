@@ -4713,7 +4713,9 @@ app.post("/deletecustomerlocation", authenticateToken, async (req, res) => {
 
 // Insert new Customer Location with duplicate check
 app.post("/postcustomerlocation", authenticateToken, async (req, res) => {
-  const { customer_id, country_id, region_id, geostate_id, geocity_id, area_id, pincode_id, address, ccperson, ccnumber, address_type } = req.body;
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { customer_id, country_id, region_id, geostate_id, geocity_id, area_id, pincode_id, address, ccperson, ccnumber, address_type } = JSON.parse(decryptedData);
 
   try {
     // Use the poolPromise to get the connection pool
@@ -4756,9 +4758,11 @@ app.post("/postcustomerlocation", authenticateToken, async (req, res) => {
 
 // Update existing Customer Location with duplicate check
 app.post("/putcustomerlocation", authenticateToken, async (req, res) => {
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
   const {
     country_id, region_id, geostate_id, geocity_id, area_id, pincode_id, address, ccperson, ccnumber, address_type, id
-  } = req.body;
+  } = JSON.parse(decryptedData);
 
   try {
     // Use the poolPromise to get the connection pool
@@ -4847,7 +4851,9 @@ app.get("/requestproductunique/:id", authenticateToken, async (req, res) => {
 });
 
 app.post("/postproductunique", authenticateToken, async (req, res) => {
-  const { product, location, date, serialnumber, CustomerID, CustomerName } = req.body;
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { product, location, date, serialnumber, CustomerID, CustomerName } =  JSON.parse(decryptedData);
   try {
 
     const pool = await poolPromise;
@@ -4870,7 +4876,9 @@ app.post("/postproductunique", authenticateToken, async (req, res) => {
 });
 
 app.post("/putproductunique", authenticateToken, async (req, res) => {
-  const { product, id, location, date, serialnumber } = req.body;
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { product, id, location, date, serialnumber } =  JSON.parse(decryptedData);
 
   try {
     // Use the poolPromise to get the connection pool
@@ -6991,7 +6999,7 @@ app.get("/getservicecontract", authenticateToken,
 // Insert for Servicecontract
 app.post("/postservicecontract", authenticateToken, async (req, res) => {
   const { encryptedData } = req.body;
-  const decryptedData = decryptData(encryptedData,secretKey)
+  const decryptedData = decryptData(encryptedData, secretKey)
   const { customerName, customerMobile, contractNumber, contractType, productName, serialNumber, startDate, endDate } = JSON.parse(decryptedData);
 
   try {

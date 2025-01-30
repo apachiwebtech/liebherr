@@ -2,7 +2,7 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
-import { Base_Url,secretKey } from "../../Utils/Base_Url";
+import { Base_Url, secretKey } from "../../Utils/Base_Url";
 import Endcustomertabs from "./Endcustomertabs";
 import { useSelector } from 'react-redux';
 import { SyncLoader } from 'react-spinners';
@@ -78,7 +78,7 @@ const Uniqueproduct = () => {
 
   const fecthProduct = async (customer_id) => {
     try {
-      const response = await axiosInstance.get(`${Base_Url}/getproductunique/${customer_id}`,{
+      const response = await axiosInstance.get(`${Base_Url}/getproductunique/${customer_id}`, {
         headers: {
           Authorization: token, // Send token in headers
         },
@@ -92,7 +92,7 @@ const Uniqueproduct = () => {
 
   const fetchModelno = async () => {
     try {
-      const response = await axiosInstance.get(`${Base_Url}/product_master`,{
+      const response = await axiosInstance.get(`${Base_Url}/product_master`, {
         headers: {
           Authorization: token, // Send token in headers
         },
@@ -160,80 +160,89 @@ const Uniqueproduct = () => {
     return newErrors;
   };
 
-    //handlesubmit form
-    const handleSubmit = async (e) => {
-              e.preventDefault();
-              const validationErrors = validateForm();
-              if (Object.keys(validationErrors).length > 0) {
-                setErrors(validationErrors);
-                return;
-              }
-                setDuplicateError(""); // Clear duplicate error before submitting
+  //handlesubmit form
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
 
-            try {
-              const confirmSubmission = window.confirm(
-                "Do you want to submit the data?"
-              );
-              if (confirmSubmission) {
-                if (isEdit) {
-                  // For update, include duplicate check
-                  await axios
-                    .post(`${Base_Url}/putproductunique`, { ...formData },{
-                      headers: {
-                        Authorization: token, // Send token in headers
-                      },
-                    })
-                    .then((response) => {
-                      console.log(response.data);
-                      setFormData({
-                        product: "",
-                        location: "",
-                        date: "",
-                        serialnumber: "",
-                      });
-                      fecthProduct(customer_id);
-                    })
-                    .catch((error) => {
-                      if (error.response && error.response.status === 409) {
-                        setDuplicateError(
-                          "Product with same serial number already exists!"
-                        ); // Show duplicate error for update
-                      }
-                    });
-                } else {
-                  // For insert, include duplicate check
-                  await axios
-                    .post(`${Base_Url}/postproductunique`, { ...formData },{
-                      headers: {
-                        Authorization: token, // Send token in headers
-                      },
-                    })
-                    .then((response) => {
-                      setFormData({
-                        product: "",
-                        location: "",
-                        date: "",
-                        serialnumber: "",
-                      });
-                      fecthProduct(customer_id);
-                    })
-                    .catch((error) => {
-                      if (error.response && error.response.status === 409) {
-                        setDuplicateError(
-                          "Product with same serial number already exists!"
-                        ); // Show duplicate error for insert
-                      }
-                    });
-                }
+    const payload = {
+      ...formData,
+    }
+
+    const encryptedData = CryptoJS.AES.encrypt(
+      JSON.stringify(payload),
+      secretKey
+    ).toString();
+    setDuplicateError(""); // Clear duplicate error before submitting
+
+    try {
+      const confirmSubmission = window.confirm(
+        "Do you want to submit the data?"
+      );
+      if (confirmSubmission) {
+        if (isEdit) {
+          // For update, include duplicate check
+          await axios
+            .post(`${Base_Url}/putproductunique`, { encryptedData }, {
+              headers: {
+                Authorization: token, // Send token in headers
+              },
+            })
+            .then((response) => {
+              console.log(response.data);
+              setFormData({
+                product: "",
+                location: "",
+                date: "",
+                serialnumber: "",
+              });
+              fecthProduct(customer_id);
+            })
+            .catch((error) => {
+              if (error.response && error.response.status === 409) {
+                setDuplicateError(
+                  "Product with same serial number already exists!"
+                ); // Show duplicate error for update
               }
-            } catch (error) {
-              console.error("Error during form submission:", error);
+            });
+        } else {
+          // For insert, include duplicate check
+          await axios
+            .post(`${Base_Url}/postproductunique`, { encryptedData }, {
+              headers: {
+                Authorization: token, // Send token in headers
+              },
+            })
+            .then((response) => {
+              setFormData({
+                product: "",
+                location: "",
+                date: "",
+                serialnumber: "",
+              });
+              fecthProduct(customer_id);
+            })
+            .catch((error) => {
+              if (error.response && error.response.status === 409) {
+                setDuplicateError(
+                  "Product with same serial number already exists!"
+                ); // Show duplicate error for insert
+              }
+            });
+        }
+      }
+    } catch (error) {
+      console.error("Error during form submission:", error);
     }
   };
 
   const deleted = async (id) => {
     try {
-      const response = await axiosInstance.post(`${Base_Url}/deleteproductunique`, { id },{
+      const response = await axiosInstance.post(`${Base_Url}/deleteproductunique`, { id }, {
         headers: {
           Authorization: token, // Send token in headers
         },
@@ -248,7 +257,7 @@ const Uniqueproduct = () => {
     try {
       const response = await axiosInstance.get(
         `${Base_Url}/requestproductunique/${id}`
-        ,{
+        , {
           headers: {
             Authorization: token, // Send token in headers
           },
@@ -272,31 +281,31 @@ const Uniqueproduct = () => {
   };
 
   // Role Right 
-    
-    
-     const Decrypt = (encrypted) => {
-      encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
-      const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
-      return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
-    };
-  
-    const storedEncryptedRole = localStorage.getItem("Userrole");
-    const decryptedRole = Decrypt(storedEncryptedRole);
-  
-    const roledata = {
-      role: decryptedRole,
-      pageid: String(17)
-    }
-  
-    const dispatch = useDispatch()
-    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
-  
-  
-    useEffect(() => {
-      dispatch(getRoleData(roledata))
-    }, [])
-  
-    // Role Right End
+
+
+  const Decrypt = (encrypted) => {
+    encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+    const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+    return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+  };
+
+  const storedEncryptedRole = localStorage.getItem("Userrole");
+  const decryptedRole = Decrypt(storedEncryptedRole);
+
+  const roledata = {
+    role: decryptedRole,
+    pageid: String(17)
+  }
+
+  const dispatch = useDispatch()
+  const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+
+
+  useEffect(() => {
+    dispatch(getRoleData(roledata))
+  }, [])
+
+  // Role Right End
 
   return (
     <div className="tab-content">
@@ -306,116 +315,116 @@ const Uniqueproduct = () => {
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
       )}
-    {roleaccess > 1 ?    <div className="row mp0">
-      <div className="col-12">
-        <div className="card mb-3 tab_box">
-          <div className="card-body">
-            <div className="row mp0">
-              <div className="col-4">
-                <form onSubmit={handleSubmit}>
-                  <div className="row">
+      {roleaccess > 1 ? <div className="row mp0">
+        <div className="col-12">
+          <div className="card mb-3 tab_box">
+            <div className="card-body">
+              <div className="row mp0">
+                <div className="col-4">
+                  <form onSubmit={handleSubmit}>
+                    <div className="row">
 
-                            <div className="col-md-6 mb-3">
-                                      <label htmlFor="snumber" className="form-label">
-                                        Serial Number<span className="text-danger">*</span>
-                                      </label>
-                                      <input
-                                        type="text"
-                                        className="form-control"
-                                        id="snumber"
-                                        name="serialnumber"
-                                        value={formData.serialnumber}
-                                        onChange={handleChange}
-                                        aria-describedby="snumber"
-                                      />
-                                      {errors.serialnumber && (
-                                        <small className="text-danger">{errors.serialnumber}</small>
-                                      )}
-                                      {duplicateError && (
-                                      <small className="text-danger">{duplicateError}</small>
-                                    )}
-                                  </div>
-
-
-                                  <div className="col-md-6 mb-3">
-                                      <label htmlFor="pdate" className="form-label">
-                                        Purchase Date<span className="text-danger">*</span>
-                                      </label>
-                                      <input
-                                        type="date"
-                                        name="date"
-                                        className="form-control"
-                                        id="pdate"
-                                        value={formData.date}
-                                        onChange={handleChange}
-                                        aria-describedby="pdate"
-                                      />
-                                      {errors.date && (
-                                        <small className="text-danger">{errors.date}</small>
-                                      )}
-                                  </div>
-
-                                    <div className="col-md-12 mb-3">
-                                        <label htmlFor="pname" className="form-label">
-                                          Product<span className="text-danger">*</span>
-                                        </label>
-                                            <select
-                                              className="form-control"
-                                              onChange={handleChange}
-                                              value={formData.product || ''}
-                                              name="product"
-                                            >
-                                              <option value="">Select</option>
-                                              {Model && Model.length > 0 ? (
-                                                Model.map((item, index) => (
-                                                  <option key={index} value={item.item_description}>
-                                                    {item.item_description}
-                                                  </option>
-                                                ))
-                                              ) : (
-                                                <option value="" disabled>No products available</option>
-                                              )}
-                                            </select>
-                                        {errors.product && (
-                                          <small className="text-danger">{errors.product}</small>
-                                        )}
-                                  </div>
-
-                                <div className="col-md-12 mb-3">
-                                        <label htmlFor="country" className="form-label pb-0 dropdown-label">
-                                          Customer Address<span className="text-danger">*</span>
-                                        </label>
-                                          <select
-                                            className="form-select dropdown-select"
-                                            name="location"
-                                            value={formData.customer_address}
-                                            onChange={(e) => handleChange(e)}
-                                          >
-                                            <option value="">Select Customer Address</option>
-                                            {CustomerAddress.length > 0 ? (
-                                              CustomerAddress.map((cust_add, index) => (
-                                                <option
-                                                  key={index}
-                                                  value={cust_add.address}
-                                                  data-customername={cust_add.customername}
-                                                >
-                                                  {cust_add.address}
-                                                </option>
-                                              ))
-                                            ) : (
-                                              <option value="" disabled>
-                                                No addresses available
-                                              </option>
-                                            )}
-                                          </select>
-
-                                          {errors.location && (
-                                        <small className="text-danger">{errors.location}</small>
-                                      )}
-                                </div>
+                      <div className="col-md-6 mb-3">
+                        <label htmlFor="snumber" className="form-label">
+                          Serial Number<span className="text-danger">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          id="snumber"
+                          name="serialnumber"
+                          value={formData.serialnumber}
+                          onChange={handleChange}
+                          aria-describedby="snumber"
+                        />
+                        {errors.serialnumber && (
+                          <small className="text-danger">{errors.serialnumber}</small>
+                        )}
+                        {duplicateError && (
+                          <small className="text-danger">{duplicateError}</small>
+                        )}
+                      </div>
 
 
-                    {/* <div className="col-md-6 mb-3">
+                      <div className="col-md-6 mb-3">
+                        <label htmlFor="pdate" className="form-label">
+                          Purchase Date<span className="text-danger">*</span>
+                        </label>
+                        <input
+                          type="date"
+                          name="date"
+                          className="form-control"
+                          id="pdate"
+                          value={formData.date}
+                          onChange={handleChange}
+                          aria-describedby="pdate"
+                        />
+                        {errors.date && (
+                          <small className="text-danger">{errors.date}</small>
+                        )}
+                      </div>
+
+                      <div className="col-md-12 mb-3">
+                        <label htmlFor="pname" className="form-label">
+                          Product<span className="text-danger">*</span>
+                        </label>
+                        <select
+                          className="form-control"
+                          onChange={handleChange}
+                          value={formData.product || ''}
+                          name="product"
+                        >
+                          <option value="">Select</option>
+                          {Model && Model.length > 0 ? (
+                            Model.map((item, index) => (
+                              <option key={index} value={item.item_description}>
+                                {item.item_description}
+                              </option>
+                            ))
+                          ) : (
+                            <option value="" disabled>No products available</option>
+                          )}
+                        </select>
+                        {errors.product && (
+                          <small className="text-danger">{errors.product}</small>
+                        )}
+                      </div>
+
+                      <div className="col-md-12 mb-3">
+                        <label htmlFor="country" className="form-label pb-0 dropdown-label">
+                          Customer Address<span className="text-danger">*</span>
+                        </label>
+                        <select
+                          className="form-select dropdown-select"
+                          name="location"
+                          value={formData.customer_address}
+                          onChange={(e) => handleChange(e)}
+                        >
+                          <option value="">Select Customer Address</option>
+                          {CustomerAddress.length > 0 ? (
+                            CustomerAddress.map((cust_add, index) => (
+                              <option
+                                key={index}
+                                value={cust_add.address}
+                                data-customername={cust_add.customername}
+                              >
+                                {cust_add.address}
+                              </option>
+                            ))
+                          ) : (
+                            <option value="" disabled>
+                              No addresses available
+                            </option>
+                          )}
+                        </select>
+
+                        {errors.location && (
+                          <small className="text-danger">{errors.location}</small>
+                        )}
+                      </div>
+
+
+                      {/* <div className="col-md-6 mb-3">
                       <label htmlFor="locationc" className="form-label">
                         Location
                       </label>
@@ -433,87 +442,87 @@ const Uniqueproduct = () => {
                       )}
                     </div> */}
 
-{roleaccess > 2 ?   <div className="col-md-12 text-right">
-                      <button
-                        className="btn btn-liebherr"
-                        type="submit"
-                        style={{ marginTop: "15px" }}
-                      >
-                        {isEdit ? "Update" : "Submit"}
-                      </button>
-                    </div> : null } 
-                  </div>
-                </form>
-              </div>
-              <div className="col-8">
-                <table
-                  className="table table-bordered table dt-responsive nowrap w-100"
-                  id="basic-datatable"
-                >
-                  <thead>
-                    <tr>
-                      <th scope="col" width="10%">
-                        #
-                      </th>
-                      <th scope="col">Purchase Date</th>
-                      <th scope="col">Product Name</th>
-                      <th scope="col">Serial No.</th>
-                      <th scope="col">Delivered Location</th>
-                      <th
-                        scope="col"
-                        width="15%"
-                        style={{ textAlign: "center" }}
-                      >
-                        Edit
-                      </th>
-                      <th
-                        scope="col"
-                        width="15%"
-                        style={{ textAlign: "center" }}
-                      >
-                        Delete
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {product.map((item, index) => (
-                      <tr key={item.id}>
-                        <th scope="row">{index + 1}</th>
-                        <td>{formatDate(item.purchase_date)}</td>
-                        <td>{item.ModelNumber}</td>
-                        <td>{item.serial_no}</td>
-                        <td>{item.address}</td>
-                        <td className="text-center">
-                          <button
-                            className="btn btn-link text-primary"
-                            onClick={() => edit(item.id)}
-                            title="Edit"
-                            disabled={roleaccess > 3 ? false : true}
-                          >
-                            <FaPencilAlt />
-                          </button>
-                        </td>
-                        {/* kjkbvskd */}
-                        <td className="text-center">
-                          <button
-                            className="btn btn-link text-danger"
-                            onClick={() => deleted(item.id)}
-                            title="Delete"
-                            disabled = {roleaccess > 4 ?false : true}
-                          >
-                            <FaTrash />
-                          </button>
-                        </td>
+                      {roleaccess > 2 ? <div className="col-md-12 text-right">
+                        <button
+                          className="btn btn-liebherr"
+                          type="submit"
+                          style={{ marginTop: "15px" }}
+                        >
+                          {isEdit ? "Update" : "Submit"}
+                        </button>
+                      </div> : null}
+                    </div>
+                  </form>
+                </div>
+                <div className="col-8">
+                  <table
+                    className="table table-bordered table dt-responsive nowrap w-100"
+                    id="basic-datatable"
+                  >
+                    <thead>
+                      <tr>
+                        <th scope="col" width="10%">
+                          #
+                        </th>
+                        <th scope="col">Purchase Date</th>
+                        <th scope="col">Product Name</th>
+                        <th scope="col">Serial No.</th>
+                        <th scope="col">Delivered Location</th>
+                        <th
+                          scope="col"
+                          width="15%"
+                          style={{ textAlign: "center" }}
+                        >
+                          Edit
+                        </th>
+                        <th
+                          scope="col"
+                          width="15%"
+                          style={{ textAlign: "center" }}
+                        >
+                          Delete
+                        </th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {product.map((item, index) => (
+                        <tr key={item.id}>
+                          <th scope="row">{index + 1}</th>
+                          <td>{formatDate(item.purchase_date)}</td>
+                          <td>{item.ModelNumber}</td>
+                          <td>{item.serial_no}</td>
+                          <td>{item.address}</td>
+                          <td className="text-center">
+                            <button
+                              className="btn btn-link text-primary"
+                              onClick={() => edit(item.id)}
+                              title="Edit"
+                              disabled={roleaccess > 3 ? false : true}
+                            >
+                              <FaPencilAlt />
+                            </button>
+                          </td>
+                          {/* kjkbvskd */}
+                          <td className="text-center">
+                            <button
+                              className="btn btn-link text-danger"
+                              onClick={() => deleted(item.id)}
+                              title="Delete"
+                              disabled={roleaccess > 4 ? false : true}
+                            >
+                              <FaTrash />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </div> : null}
+      </div> : null}
     </div>
   );
 };

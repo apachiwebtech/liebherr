@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
-import { Base_Url,secretKey } from "../../Utils/Base_Url";
+import { Base_Url, secretKey } from "../../Utils/Base_Url";
 import Endcustomertabs from "./Endcustomertabs";
 import { useParams } from "react-router-dom";
 import { SyncLoader } from 'react-spinners';
@@ -13,7 +13,7 @@ import { getRoleData } from "../../Store/Role/role-action";
 const Customerlocation = () => {
   const [countries, setCountries] = useState([]);
   const { loaders, axiosInstance } = useAxiosLoader();
-  const{customer_id} = useParams()
+  const { customer_id } = useParams()
   console.log(customer_id);
 
   const token = localStorage.getItem("token");
@@ -22,7 +22,7 @@ const Customerlocation = () => {
   const [geoCities, setGeoCities] = useState([]);
   const [geoAreas, setGeoAreas] = useState([]);
   const [geoPincodes, setGeoPincodes] = useState([]);
-  const [customerid,setCustomerId] = useState([]);
+  const [customerid, setCustomerId] = useState([]);
   const [Customernumber, setCustomernumber] = useState([]);
   const [customerLocation, setCustomerLocation] = useState([]);
   const [errors, setErrors] = useState({});
@@ -63,7 +63,7 @@ const Customerlocation = () => {
 
   const fetchCustomermobile = async () => {
     try {
-      const response = await axiosInstance.get(`${Base_Url}/getcustomer`,{
+      const response = await axiosInstance.get(`${Base_Url}/getcustomer`, {
         headers: {
           Authorization: token,
         },
@@ -83,12 +83,12 @@ const Customerlocation = () => {
 
   const fetchCountries = async () => {
     try {
-      const response = await axiosInstance.get(`${Base_Url}/getcountries`,{
+      const response = await axiosInstance.get(`${Base_Url}/getcountries`, {
         headers: {
           Authorization: token,
         },
       }
-);
+      );
       setCountries(response.data);
     } catch (error) {
       console.error("Error fetching countries:", error);
@@ -97,7 +97,7 @@ const Customerlocation = () => {
 
   const fetchRegions = async (countryId) => {
     try {
-      const response = await axiosInstance.get(`${Base_Url}/getregions/${countryId}`,{
+      const response = await axiosInstance.get(`${Base_Url}/getregions/${countryId}`, {
         headers: {
           Authorization: token,
         },
@@ -111,11 +111,11 @@ const Customerlocation = () => {
   const fetchGeoStates = async (regionId) => {
     try {
       const response = await axiosInstance.get(`${Base_Url}/getgeostates/${regionId}`
-,{
-        headers: {
-          Authorization: token,
-        },
-      });
+        , {
+          headers: {
+            Authorization: token,
+          },
+        });
       setGeoStates(response.data);
     } catch (error) {
       console.error("Error fetching geo states:", error);
@@ -125,11 +125,11 @@ const Customerlocation = () => {
   const fetchGeoCities = async (district_id) => {
     try {
       const response = await axiosInstance.get(
-        `${Base_Url}/getgeocities_a/${district_id}`,{
-          headers: {
-            Authorization: token,
-          },
-        }
+        `${Base_Url}/getgeocities_a/${district_id}`, {
+        headers: {
+          Authorization: token,
+        },
+      }
       );
       console.log("Geo Cities:", response.data);
       setGeoCities(response.data);
@@ -142,11 +142,11 @@ const Customerlocation = () => {
   const fetchDistrict = async (geostate_id) => {
     try {
       const response = await axiosInstance.get(
-        `${Base_Url}/getareadrop/${geostate_id}`,{
-          headers: {
-            Authorization: token,
-          },
-        }
+        `${Base_Url}/getareadrop/${geostate_id}`, {
+        headers: {
+          Authorization: token,
+        },
+      }
       );
       console.log("Area Dropdown:", response.data);
       setGeoAreas(response.data);
@@ -158,11 +158,11 @@ const Customerlocation = () => {
   const fetchPincodedrop = async (geocity_id) => {
     try {
       const response = await axiosInstance.get(
-        `${Base_Url}/getpincodedrop/${geocity_id}`,{
-          headers: {
-            Authorization: token,
-          },
-        }
+        `${Base_Url}/getpincodedrop/${geocity_id}`, {
+        headers: {
+          Authorization: token,
+        },
+      }
       );
       console.log("Pincode Dropdown:", response.data);
       setGeoPincodes(response.data);
@@ -174,12 +174,12 @@ const Customerlocation = () => {
   const fetchCustomerlocation = async () => {
     try {
 
-      const response = await axiosInstance.get(`${Base_Url}/getcustomerlocation/${customer_id}`,{
+      const response = await axiosInstance.get(`${Base_Url}/getcustomerlocation/${customer_id}`, {
         headers: {
           Authorization: token,
         },
       }
-);
+      );
       setCustomerLocation(response.data);
       setFilteredAreas(response.data);
     } catch (error) {
@@ -190,17 +190,17 @@ const Customerlocation = () => {
 
   const fetchcustomerid = async () => {
     try {
-      const response = await axiosInstance.get(`${Base_Url}/getcustomerid`,{
+      const response = await axiosInstance.get(`${Base_Url}/getcustomerid`, {
         headers: {
           Authorization: token,
         },
+      }
+      );
+      setCustomerId(response.data);
+    } catch (error) {
+      console.error("Error fetching customer id:", error);
     }
-  );
-  setCustomerId(response.data);
-  } catch (error) {
-    console.error("Error fetching customer id:", error);
-  }
-};
+  };
 
   useEffect(() => {
     fetchCountries();
@@ -221,6 +221,15 @@ const Customerlocation = () => {
       return;
     }
 
+    const payload = {
+      ...formData,
+    }
+
+    const encryptedData = CryptoJS.AES.encrypt(
+      JSON.stringify(payload),
+      secretKey
+    ).toString();
+
     setDuplicateError("");
 
     try {
@@ -228,19 +237,13 @@ const Customerlocation = () => {
         "Do you want to submit the data?"
       );
       if (confirmSubmission) {
-            const payload = {
-          ...formData,
-          customer_id: customer_id,
-          country_id: formData.country_id,
-          region_id: formData.region_id,
-          geostate_id: formData.geostate_id,
-          district_id: formData.district_id,
-          geocity_id: formData.geocity_id,
-          pincode_id: formData.pincode_id,
+        const payload = {
+          encryptedData
+          
         };
         if (isEdit) {
           await axios
-            .post(`${Base_Url}/putcustomerlocation`, { ...formData },{
+            .post(`${Base_Url}/putcustomerlocation`, { encryptedData }, {
               headers: {
                 Authorization: token,
               },
@@ -269,7 +272,7 @@ const Customerlocation = () => {
             });
         } else {
           await axios
-            .post(`${Base_Url}/postcustomerlocation`, { ...formData },{
+            .post(`${Base_Url}/postcustomerlocation`, { encryptedData }, {
               headers: {
                 Authorization: token,
               },
@@ -307,9 +310,9 @@ const Customerlocation = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name === "pincode_id") {
-     if(value.length === 6){
-      fetchlocations(value);
-     }
+      if (value.length === 6) {
+        fetchlocations(value);
+      }
       setFormData(prevState => ({
         ...prevState,
         pincode_id: value,
@@ -399,11 +402,11 @@ const Customerlocation = () => {
   };
 
 
-  console.log("locations data",locations)
+  console.log("locations data", locations)
 
   const deleted = async (id) => {
     try {
-      await axiosInstance.post(`${Base_Url}/deletecustomerlocation`, { id },{
+      await axiosInstance.post(`${Base_Url}/deletecustomerlocation`, { id }, {
         headers: {
           Authorization: token,
         },
@@ -428,11 +431,11 @@ const Customerlocation = () => {
 
   const edit = async (id) => {
     try {
-      const response = await axiosInstance.get(`${Base_Url}/requestcustomerlocation/${id}`,{
+      const response = await axiosInstance.get(`${Base_Url}/requestcustomerlocation/${id}`, {
         headers: {
-           Authorization: token, // Send token in headers
-         },
-       });
+          Authorization: token, // Send token in headers
+        },
+      });
       setFormData(response.data);
       console.log("Form Data", setFormData);
       setIsEdit(true);
@@ -445,46 +448,46 @@ const Customerlocation = () => {
   const indexOfFirstUser = indexOfLastUser - itemsPerPage;
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
-   // Role Right 
-    
-    
-     const Decrypt = (encrypted) => {
-      encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
-      const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
-      return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
-    };
-  
-    const storedEncryptedRole = localStorage.getItem("Userrole");
-    const decryptedRole = Decrypt(storedEncryptedRole);
-  
-    const roledata = {
-      role: decryptedRole,
-      pageid: String(16)
-    }
-  
-    const dispatch = useDispatch()
-    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
-  
-  
-    useEffect(() => {
-      dispatch(getRoleData(roledata))
-    }, [])
-  
-    // Role Right End 
+  // Role Right 
+
+
+  const Decrypt = (encrypted) => {
+    encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+    const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+    return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+  };
+
+  const storedEncryptedRole = localStorage.getItem("Userrole");
+  const decryptedRole = Decrypt(storedEncryptedRole);
+
+  const roledata = {
+    role: decryptedRole,
+    pageid: String(16)
+  }
+
+  const dispatch = useDispatch()
+  const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+
+
+  useEffect(() => {
+    dispatch(getRoleData(roledata))
+  }, [])
+
+  // Role Right End 
 
   return (
     <div className="tab-content">
-          {loaders && (
+      {loaders && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
       )}
       <Endcustomertabs></Endcustomertabs>
-      {roleaccess > 1 ?     <div className="row mp0">
+      {roleaccess > 1 ? <div className="row mp0">
         <div className="col-12">
           <div className="card mb-3 tab_box">
             <div className="card-body">
-            {successMessage && (
+              {successMessage && (
                 <div className="alert alert-success text-center mb-3" role="alert">
                   {successMessage}
                 </div>
@@ -516,23 +519,8 @@ const Customerlocation = () => {
                           Country
                         </label>
 
-    <input type="text" className="form-control" value={locations.country} name="country_id" onChange={handleChange} placeholder="" disabled />
+                        <input type="text" className="form-control" value={locations.country} name="country_id" onChange={handleChange} placeholder="" disabled />
 
-                        {/* <select
-                          id="country"
-                          name="country_id"
-                          className="form-select"
-                          aria-label=".form-select-lg example"
-                          value={formData.country_id}
-                          onChange={handleChange}
-                        >
-                          <option value="">Select Country</option>
-                          {countries.map((country) => (
-                            <option key={country.id} value={country.id}>
-                              {country.title}
-                            </option>
-                          ))}
-                        </select> */}
                         {errors.country_id && (
                           <small className="text-danger">
                             {errors.country_id}
@@ -543,23 +531,8 @@ const Customerlocation = () => {
                         <label htmlFor="region" className="form-label">
                           Region
                         </label>
-    <input type="text" className="form-control" value={locations.region} name="region_id" onChange={handleChange} placeholder="" disabled />
+                        <input type="text" className="form-control" value={locations.region} name="region_id" onChange={handleChange} placeholder="" disabled />
 
-                        {/* <select
-                          id="region"
-                          name="region_id"
-                          className="form-select"
-                          aria-label=".form-select-lg example"
-                          value={formData.region_id}
-                          onChange={handleChange}
-                        >
-                          <option value="">Select Region</option>
-                          {regions.map((region) => (
-                            <option key={region.id} value={region.id}>
-                              {region.title}
-                            </option>
-                          ))}
-                        </select> */}
                         {errors.region_id && (
                           <small className="text-danger">
                             {errors.region_id}
@@ -573,21 +546,7 @@ const Customerlocation = () => {
                           Geo States
                         </label>
                         <input type="text" className="form-control" value={locations.state} name="geostate_id" onChange={handleChange} placeholder="" disabled />
-                        {/* <select
-                          id="geostate"
-                          name="geostate_id"
-                          className="form-select"
-                          aria-label=".form-select-lg example"
-                          value={formData.geostate_id}
-                          onChange={handleChange}
-                        >
-                          <option value="">Select Geo State</option>
-                          {geoStates.map((geoState) => (
-                            <option key={geoState.id} value={geoState.id}>
-                              {geoState.title}
-                            </option>
-                          ))}
-                        </select> */}
+
                         {errors.geostate_id && (
                           <small className="text-danger">
                             {errors.geostate_id}
@@ -602,21 +561,7 @@ const Customerlocation = () => {
                         </label>
 
                         <input type="text" className="form-control" value={locations.district} name="area_id" onChange={handleChange} placeholder="" disabled />
-                        {/* <select
-                          id="area"
-                          name="area_id"
-                          className="form-select"
-                          aria-label=".form-select-lg example"
-                          value={formData.area_id}
-                          onChange={handleChange}
-                        >
-                          <option value="">Select District</option>
-                          {geoAreas.map((geoArea) => (
-                            <option key={geoArea.id} value={geoArea.id}>
-                              {geoArea.title}
-                            </option>
-                          ))}
-                        </select> */}
+
                         {errors.area_id && (
                           <small className="text-danger">{errors.area_id}</small>
                         )}
@@ -628,21 +573,7 @@ const Customerlocation = () => {
                           Geo City
                         </label>
                         <input type="text" className="form-control" value={locations.city} name="geocity_id" onChange={handleChange} placeholder="" disabled />
-                        {/* <select
-                          id="geocity"
-                          name="geocity_id"
-                          className="form-select"
-                          aria-label=".form-select-lg example"
-                          value={formData.geocity_id}
-                          onChange={handleChange}
-                        >
-                          <option value="">Select Geo City</option>
-                          {geoCities.map((geoCity) => (
-                            <option key={geoCity.id} value={geoCity.id}>
-                              {geoCity.title}
-                            </option>
-                          ))}
-                        </select> */}
+
                         {errors.geocity_id && (
                           <small className="text-danger">
                             {errors.geocity_id}
@@ -660,21 +591,6 @@ const Customerlocation = () => {
 
                         <input type="text" className="form-control" value={formData.pincode_id} name="pincode_id" onChange={handleChange} placeholder="" />
 
-                        {/* <select
-                          id="pincode"
-                          name="pincode_id"
-                          className="form-select"
-                          aria-label=".form-select-lg example"
-                          value={formData.pincode_id}
-                          onChange={handleChange}
-                        >
-                          <option value="">Select Pincode</option>
-                          {geoPincodes.map((geoPincode) => (
-                            <option key={geoPincode.id} value={geoPincode.id}>
-                              {geoPincode.pincode}
-                            </option>
-                          ))}
-                        </select> */}
                         {errors.pincode_id && (
                           <small className="text-danger">{errors.pincode_id}</small>
                         )}
@@ -752,28 +668,31 @@ const Customerlocation = () => {
                       </div> */}
 
                       <div className="col-md-4 mb-3">
-                      <label htmlFor="ccnumber" className="form-label">
-                         Contact Person Mobile Number<span className="text-danger">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        id="ccnumber"
-                        name="ccnumber"
-                        value={formData.ccnumber}
-                         onChange={handleChange}
-                        aria-describedby="ccnumber"
-                      />
+                        <label htmlFor="ccnumber" className="form-label">
+                          Contact Person Mobile Number<span className="text-danger">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          id="ccnumber"
+                          name="ccnumber"
+                          value={formData.ccnumber}
+                          onChange={handleChange}
+                          aria-describedby="ccnumber"
+                          pattern="[0-9]{10}"
+                          maxLength="10"
+                          minLength="10"
+                        />
                         {duplicateError && (
-                      <small className="text-danger">{duplicateError}</small>
-                    )}
-                    </div>
+                          <small className="text-danger">{duplicateError}</small>
+                        )}
+                      </div>
 
-                    {roleaccess > 2 ?    <div className="col-md-12 text-right">
+                      {roleaccess > 2 ? <div className="col-md-12 text-right">
                         <button type="submit" className="btn btn-liebherr">
                           Submit
                         </button>
-                      </div> : null } 
+                      </div> : null}
                     </div>
                   </form>
                 </div>
@@ -863,7 +782,7 @@ const Customerlocation = () => {
                               className="btn btn-link text-danger"
                               onClick={() => deleted(item.id)}
                               title="Delete"
-                              disabled = {roleaccess > 4 ?false : true}
+                              disabled={roleaccess > 4 ? false : true}
                             >
                               <FaTrash />
                             </button>
@@ -920,7 +839,7 @@ const Customerlocation = () => {
           </div>
         </div>
       </div> : null}
-      </div>
+    </div>
   );
 };
 
