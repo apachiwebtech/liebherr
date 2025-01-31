@@ -124,9 +124,241 @@ app.get('/send-otp', async (req, res) => {
 
   const mailOptions = {
     from: 'zeliant997@gmail.com',
-    to: 'satyamsatkr875@gmail.com',
-    subject: 'Welcome to Our Platform!',
-    text: `Thank you for registering. Your OTP is 1234`,
+    to: 'monikakharb90@gmail.com',
+    subject: 'This is for open ticket',
+    html: `<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <p>Dear Customer,</p>
+
+    <p style="margin-bottom: 0px;">Greetings from Liebherr!</p>
+    <p style="margin: 0px;">Your Ticket Number is <b>VH0130-0002</b>. Please share OTP <b>123456</b> with the engineer once the ticket is resolved.</p>
+
+    <p>For any query please contact  7038 100 400 or write us at customercare.lhi@liebherr.com for any support required.</p>
+    <br/>
+    <p style="margin: 0px;">Regards</p>
+    <p style="margin: 0px;">Team – Customer Care</p>
+    <p style="margin: 0px;">Liebherr Appliances India Pvt Ltd</p>
+    <p style="margin: 0px;">Operation Timings: 8:30 AM to 5:30 PM (Business Days)</p>
+
+</body>
+
+</html>`,
+  };
+
+  try {
+    // Verify the transporter connection
+    await transporter.verify();
+    const info = await transporter.sendMail(mailOptions);
+
+
+    res.status(200).json({ message: 'OTP sent successfully', info });
+
+
+  } catch (error) {
+    console.error('Error sending email:', error);
+
+  }
+
+
+});
+
+
+app.get('/send-appointment', async (req, res) => {
+  // const { email, otp } = req.body;
+
+
+
+  const mailOptions = {
+    from: 'zeliant997@gmail.com',
+    to: 'monikakharb90@gmail.com',
+    subject: 'This is for appointment ticket',
+    html: `<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <p>Dear Customer,</p>
+
+    <p style="margin-bottom: 0px;">Greetings from Liebherr!</p>
+    <p style="margin: 0px;">Your Ticket Number <b>VH0130-0002</b> has been successfully scheduled. Our Service engineer will attend as per the appointment.</p>
+
+    <p>For any query please contact  7038 100 400 or write us at customercare.lhi@liebherr.com for any support required.</p>
+    <br />
+    <p style="margin: 0px;">Regards</p>
+    <p style="margin: 0px;">Team – Customer Care</p>
+    <p style="margin: 0px;">Liebherr Appliances India Pvt Ltd</p>
+    <p style="margin: 0px;">Operation Timings: 8:30 AM to 5:30 PM (Business Days)</p>
+
+</body>
+
+</html>`,
+  };
+
+  try {
+    // Verify the transporter connection
+    await transporter.verify();
+    const info = await transporter.sendMail(mailOptions);
+
+
+    res.status(200).json({ message: 'OTP sent successfully', info });
+
+
+  } catch (error) {
+    console.error('Error sending email:', error);
+
+  }
+
+
+});
+app.get('/send-cancelled', async (req, res) => {
+  // const { email, otp } = req.body;
+
+
+
+  const mailOptions = {
+    from: 'zeliant997@gmail.com',
+    to: 'monikakharb90@gmail.com',
+    subject: 'This is for cancelled ticket',
+    html: `<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <p>Dear Customer,</p>
+
+    <p style="margin-bottom: 0px;">Greetings from Liebherr!</p>
+    <p style="margin: 0px;">We regret to inform that the ticket registered with Liebherr is cancelled <b>VH0130-0002</b>. To reschedule, please contact 7038100400 or write us at customercare.lhi@liebherr.com for any support required.</p>
+
+    <br />
+    <p style="margin: 0px;">Regards</p>
+    <p style="margin: 0px;">Team – Customer Care</p>
+    <p style="margin: 0px;">Liebherr Appliances India Pvt Ltd</p>
+    <p style="margin: 0px;">Operation Timings: 8:30 AM to 5:30 PM (Business Days)</p>
+
+</body>
+
+</html>`,
+  };
+
+  try {
+    // Verify the transporter connection
+    await transporter.verify();
+    const info = await transporter.sendMail(mailOptions);
+
+
+    res.status(200).json({ message: 'OTP sent successfully', info });
+
+
+  } catch (error) {
+    console.error('Error sending email:', error);
+
+  }
+
+
+});
+
+app.get('/send-closed', async (req, res) => {
+  // const { email, otp } = req.body;
+
+
+
+  const mailOptions = {
+    from: 'zeliant997@gmail.com',
+    to: 'monikakharb90@gmail.com',
+    subject: 'This is for closed ticket',
+    html: `<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <p>Dear Customer,</p>
+
+    <p style="margin-bottom: 0px;">Greetings from Liebherr!</p>
+    <p style="margin: 0px;">Your Ticket Number <b>VH0130-0002</b> has been successfully closed. </p>
+    <p style="margin: 0px;">Please contact 7038100400 for future assistance. Thank you for choosing Liebherr.</p>
+    <br />
+    <p style="margin: 0px;">Regards</p>
+    <p style="margin: 0px;">Team – Customer Care</p>
+    <p style="margin: 0px;">Liebherr Appliances India Pvt Ltd</p>
+    <p style="margin: 0px;">Operation Timings: 8:30 AM to 5:30 PM (Business Days)</p>
+
+</body>
+
+</html>`,
+  };
+
+  try {
+    // Verify the transporter connection
+    await transporter.verify();
+    const info = await transporter.sendMail(mailOptions);
+
+
+    res.status(200).json({ message: 'OTP sent successfully', info });
+
+
+  } catch (error) {
+    console.error('Error sending email:', error);
+
+  }
+
+
+});
+app.get('/send-spare', async (req, res) => {
+  // const { email, otp } = req.body;
+
+
+
+  const mailOptions = {
+    from: 'zeliant997@gmail.com',
+    to: 'monikakharb90@gmail.com',
+    subject: 'This is for spares ticket',
+    html: `<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <p>Dear Customer,</p>
+
+    <p style="margin-bottom: 0px;">Greetings from Liebherr!</p>
+    <p style="margin: 0px;">Ticket Number <b>VH0130-0002</b> has been raised for a spare request and will be processed shortly. </p>
+    <p>For any query, please contact 7038100400 or write us at customercare.lhi@liebherr.com for any support required.</p>
+    <br />
+    <p style="margin: 0px;">Regards</p>
+    <p style="margin: 0px;">Team – Customer Care</p>
+    <p style="margin: 0px;">Liebherr Appliances India Pvt Ltd</p>
+    <p style="margin: 0px;">Operation Timings: 8:30 AM to 5:30 PM (Business Days)</p>
+
+</body>
+
+</html>`,
   };
 
   try {
@@ -4177,7 +4409,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
     }
 
   } else {
-    return res.json({message :"Ticket is already created", ticket_no : 'Ticket is already created' ,cust_id : 'NA'})
+    return res.json({ message: "Ticket is already created", ticket_no: 'Ticket is already created', cust_id: 'NA' })
   }
 
 
@@ -4925,7 +5157,7 @@ app.get("/requestproductunique/:id", authenticateToken, async (req, res) => {
 app.post("/postproductunique", authenticateToken, async (req, res) => {
   const { encryptedData } = req.body;
   const decryptedData = decryptData(encryptedData, secretKey)
-  const { product, location, date, serialnumber, CustomerID, CustomerName } =  JSON.parse(decryptedData);
+  const { product, location, date, serialnumber, CustomerID, CustomerName } = JSON.parse(decryptedData);
   try {
 
     const pool = await poolPromise;
@@ -4950,7 +5182,7 @@ app.post("/postproductunique", authenticateToken, async (req, res) => {
 app.post("/putproductunique", authenticateToken, async (req, res) => {
   const { encryptedData } = req.body;
   const decryptedData = decryptData(encryptedData, secretKey)
-  const { product, id, location, date, serialnumber } =  JSON.parse(decryptedData);
+  const { product, id, location, date, serialnumber } = JSON.parse(decryptedData);
 
   try {
     // Use the poolPromise to get the connection pool
@@ -5061,7 +5293,7 @@ app.get("/getengineer", authenticateToken, async (req, res) => {
         SELECT r.*, c.title AS childfranchise_title
         FROM awt_engineermaster r
         INNER JOIN awt_childfranchisemaster c 
-        ON r.cfranchise_id = RIGHT(c.licare_code, LEN(c.licare_code) - 2)
+        ON r.cfranchise_id = c.licare_code
         WHERE r.deleted = 0
       `;
 
@@ -5090,7 +5322,7 @@ app.get("/getengineer", authenticateToken, async (req, res) => {
         SELECT COUNT(*) AS totalCount
         FROM awt_engineermaster r
         INNER JOIN awt_childfranchisemaster c 
-        ON r.cfranchise_id = RIGHT(c.licare_code, LEN(c.licare_code) - 2)
+        ON r.cfranchise_id = c.licare_code
         WHERE r.deleted = 0
       `;
     if (title) {
@@ -10753,25 +10985,7 @@ app.post("/deletecsprole", authenticateToken, async (req, res) => {
   }
 });
 
-// fetch qury for enquiry listing 
-app.get("/getenquirylist", authenticateToken, async (req, res) => {
-  try {
-    // Use the poolPromise to get the connection pool
-    const pool = await poolPromise;
 
-    // Directly use the query (no parameter binding)
-    const sql = "SELECT * FROM awt_enquiry ORDER BY id ASC";
-
-    // Execute the query
-    const result = await pool.request().query(sql);
-
-    // Return the result as JSON
-    return res.json(result.recordset);
-  } catch (err) {
-    console.error("Database error:", err);
-    return res.status(500).json({ error: "Database error occurred" });
-  }
-});
 
 // fetch enquiry details 
 
@@ -10841,56 +11055,98 @@ app.post("/putenquiry", authenticateToken, async (req, res) => {
 
 // post role data 
 app.post("/postenquiry", authenticateToken, async (req, res) => {
-  const { name, mobile_no, email, address } = req.body;
-
   try {
-    // Access the connection pool using poolPromise
+    let {
+      source,
+      enquiry_date,
+      salutation,
+      customer_name,
+      email,
+      mobile,
+      alt_mobile,
+      request_mobile,
+      customer_type,
+      enquiry_type,
+      address,
+      pincode,
+      state,
+      district,
+      city,
+      interested,
+      modelnumber,
+      priority,
+      notes,
+      created_by,
+      mwhatsapp,
+      awhatsaap
+    } = req.body;
+
+    if (mwhatsapp === true) {
+      mwhatsapp = 1
+    } else {
+      mwhatsapp = 0
+    }
+
+    if (awhatsaap === true) {
+      awhatsaap = 1
+    } else {
+      awhatsaap = 0
+    }
+
+
+    const created_date = new Date()
+
+
+
+
+    // Access the connection pool
     const pool = await poolPromise;
 
-    // Step 1: Check if the same title exists and is not soft-deleted
-    const checkDuplicateSql = `
-      SELECT *
-      FROM awt_enquirymaster
-      WHERE mobile_no = '${mobile_no}' AND deleted = 0
+    // SQL Query to insert data into the enquiry table
+    const sql = `
+      INSERT INTO awt_enquirymaster (
+        source, enquiry_date, salutation, customer_name, email, mobile, alt_mobile, request_mobile, customer_type, enquiry_type, address, pincode, state, district, city, interested, modelnumber, priority, notes , awhatsapp, mwhatsapp,created_by,created_date
+      )
+      VALUES (
+        @source, @enquiry_date, @salutation, @customer_name, @email, @mobile, @alt_mobile, @request_mobile, @customer_type, @enquiry_type, @address, @pincode, @state, @district, @city, @interested, @modelnumber, @priority, @notes ,@awhatsapp, @mwhatsapp,@created_by,@created_date
+      );
     `;
-    const duplicateCheckResult = await pool.request().query(checkDuplicateSql);
 
-    if (duplicateCheckResult.recordset.length > 0) {
-      // If duplicate data exists (not soft-deleted)
-      return res.status(409).json({ message: "Duplicate entry, enquiry already exists!" });
-    } else {
-      // Step 2: Check if the same title exists but is soft-deleted
-      const checkSoftDeletedSql = `
-        SELECT *
-        FROM awt_enquirymaster
-        WHERE mobile_no = '${mobile_no}' AND deleted = 1
-      `;
-      const softDeletedCheckResult = await pool.request().query(checkSoftDeletedSql);
+    // Use prepared statements to avoid SQL injection
+    const result = await pool.request()
+      .input("source", source)
+      .input("enquiry_date", enquiry_date)
+      .input("salutation", salutation)
+      .input("customer_name", customer_name)
+      .input("email", email || null) // Handle optional fields
+      .input("mobile", mobile)
+      .input("alt_mobile", alt_mobile || null)
+      .input("request_mobile", request_mobile || null)
+      .input("customer_type", customer_type)
+      .input("enquiry_type", enquiry_type)
+      .input("address", address)
+      .input("pincode", pincode)
+      .input("state", state || null)
+      .input("district", district || null)
+      .input("city", city || null)
+      .input("interested", interested)
+      .input("modelnumber", modelnumber || null)
+      .input("priority", priority)
+      .input("notes", notes)
+      .input("awhatsapp", awhatsaap)
+      .input("mwhatsapp", mwhatsapp)
+      .input("created_by", created_by)
+      .input("created_date", created_date)
+      .query(sql);
 
-      if (softDeletedCheckResult.recordset.length > 0) {
-        // If soft-deleted data exists, restore the entry
-        const restoreSoftDeletedSql = `
-          UPDATE awt_enquirymaster
-          SET deleted = 0
-          WHERE mobile_no = '${mobile_no}'
-        `;
-        await pool.request().query(restoreSoftDeletedSql);
-        return res.json({ message: "Soft-deleted data restored successfully!" });
-      } else {
-        // Step 3: Insert new entry if no duplicates found
-        const insertSql = `
-          INSERT INTO awt_enquirymaster (name,mobile_no,email,address)
-          VALUES ('${name}','${mobile_no}','${email}','${address}')
-        `;
-        await pool.request().query(insertSql);
-        return res.json({ message: "enquiries added successfully!" });
-      }
-    }
+    return res.status(201).json({ message: "Enquiry added successfully", data: result.recordset });
+
   } catch (err) {
     console.error("Error adding enquiry:", err); // Log the error for debugging
-    return res.status(500).json({ message: "Internal Server Error", error: err });
+    return res.status(500).json({ message: "Internal Server Error", error: err.message });
   }
 });
+
 
 // delete role data 
 
@@ -12333,5 +12589,51 @@ app.post("/approvequotation", async (req, res) => {
   } catch (error) {
     // Rollback transaction on error
     res.status(500).json({ message: "Error updating quotation", error });
+  }
+});
+
+
+app.post('/getcspformticket', async (req, res) => {
+  const { ticket_no } = req.body;
+
+  try {
+    // Connect to the MSSQL database
+    const pool = await poolPromise;
+
+    // Query to fetch data based on the `id`
+    const query = `select acf.id ,acf.licare_code , acf.title as partner_name , acf.address , acf.mobile_no , acf.email from complaint_ticket as ct left join awt_childfranchisemaster as acf on acf.licare_code = ct.csp  where ct.ticket_no = '${ticket_no}' `;
+
+    const Result = await pool.request().query(query);
+
+    return res.json(Result.recordset)
+
+
+    // Return the fetched data
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
+
+
+app.get('/getdatafrompincode/:pincode', async (req, res) => {
+  const { pincode } = req.params;
+
+  try {
+    // Connect to the MSSQL database
+    const pool = await poolPromise;
+
+    // Query to fetch data based on the `id`
+    const query = `select id , geocity_name as city , geostate_name as state ,region_name , area_name as district, pincode from awt_pincode  where pincode = '${pincode}'`;
+
+    const Result = await pool.request().query(query);
+
+    return res.json(Result.recordset)
+
+
+    // Return the fetched data
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
   }
 });

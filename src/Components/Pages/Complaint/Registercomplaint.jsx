@@ -2053,7 +2053,7 @@ export function Registercomplaint(params) {
                       <div className="col-md-3">
                         <div className="mb-3">
                           <label htmlFor="exampleFormControlInput1" className="form-label">Pincode <span className="text-danger">*</span></label>
-                          <input type="number" className="form-control" value={value.pincode} name="pincode" onChange={onHandleChange} placeholder="" />
+                          <input type="number" className="form-control" value={value.pincode} onKeyDown={handleKeyDown} name="pincode" onChange={onHandleChange} placeholder="" />
                           {errors.pincode && <span style={{ fontSize: "12px" }} className="text-danger">{errors.pincode}</span>}
                         </div>
                       </div>

@@ -14,7 +14,7 @@ const QuotationEdit = () => {
     const token = localStorage.getItem("token"); // Get token from localStorage
     const { loaders, axiosInstance } = useAxiosLoader();
     const [spare, setSpare] = useState([])
-    const [data, setData] = useState([])
+    const [csp, setCsp] = useState([])
     let { qid } = useParams()
 
     try {
@@ -61,7 +61,7 @@ const QuotationEdit = () => {
 
             getquotespare(res.data[0].quotationNumber)
 
-
+            getcspformticket(res.data[0].ticketId)
 
         } catch (error) {
             console.error('Error fetching quote details:', error);
@@ -82,11 +82,26 @@ const QuotationEdit = () => {
         }
     }
 
+    async function getcspformticket(ticketId){
+        
+        axiosInstance.post(`${Base_Url}/getcspformticket` , {ticket_no : ticketId} , {
+            headers :{
+                Authorization : token
+            }
+        })
+        .then((res) =>{
+            setCsp(res.data[0])
+        })
+        .catch((err) =>{
+            console.log(err)
+        })
+    } 
+
 
 
     useEffect(() => {
         getquotedetails()
-
+       
     }, [])
 
 
@@ -104,26 +119,16 @@ const QuotationEdit = () => {
     // code for pdf 
 
     async function downloadPDF(id) {
-
-
-        axios.post(`${Base_Url}/getprintinfo`, { id: id })
-            .then((res) => {
-                console.log(res.data[0], "DDD")
-                setData(res.data[0])
-
-                Blob(res.data[0])
-
-            })
-            .catch((err) => {
-                console.log(err)
-            })
+        Blob(value)
     }
+
+
 
 
     const Blob = async (data) => {
 
         try {
-            const blob = await pdf(<MyDocument8 data={data} />).toBlob();
+            const blob = await pdf(<MyDocument8 data={value} spare={spare} csp={csp} />).toBlob();
             const url = URL.createObjectURL(blob);
             window.open(url);
             URL.revokeObjectURL(url);
@@ -151,6 +156,7 @@ const QuotationEdit = () => {
         updatedSpare[index].price = newPrice;
         setSpare(updatedSpare);
     };
+
     return (
         <div className="tab-content">
             {loaders && (

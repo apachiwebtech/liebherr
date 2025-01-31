@@ -120,6 +120,17 @@ export function Siteheader() {
 
             </li>
             <li className="nav-item dropdown">
+              <Link className={`nav-link site `}
+                to={`/enquiryListing`}
+                id="navbarDropdown"
+                role="button"
+                aria-expanded="false"
+              >
+                Enquiry
+              </Link>
+
+            </li>
+            <li className="nav-item dropdown">
               <Link className={`nav-link dropdown-toggle site `}
                 to="#"
                 id="navbarDropdown"

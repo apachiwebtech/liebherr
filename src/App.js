@@ -134,6 +134,7 @@ import { BussinePartner } from './Components/Pages/Master/BussinePartner';
 import MspAddtab from './Components/Pages/Master/MspAddtab';
 import AddMspUser from './Components/Pages/Master/AddMspUser';
 import { EnquiryForm } from './Components/Pages/Master/EnquiryForm';
+import { EnquiryListing } from './Components/Pages/Master/EnquiryListing';
 
 
 
@@ -745,7 +746,7 @@ const Router = createBrowserRouter([
         element: <FeedBackreport />
       },
       {
-        path: "addenquiry",
+        path: "/addenquiry",
         element: <EnquiryForm />
       },
       {
@@ -768,6 +769,10 @@ const Router = createBrowserRouter([
       {
         path: "/quotation/:qid",
         element: <QuotationEdit />
+      },
+      {
+        path: "/enquiryListing",
+        element: <EnquiryListing />
       },
       {
         path: "/shipment_fg",

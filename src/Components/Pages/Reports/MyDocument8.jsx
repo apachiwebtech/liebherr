@@ -2,8 +2,9 @@
 import { Document, Page, Text, View, StyleSheet, PDFDownloadLink, Image, Font } from '@react-pdf/renderer';
 import Liebherrlogo from '../../../images/Liebherr-logo-768x432.png';
 
-import axios from 'axios';
 // Create styles
+
+
 const styles = StyleSheet.create({
     page: {
         padding: 30,
@@ -104,7 +105,26 @@ const styles = StyleSheet.create({
     },
 });
 
-const MyDocument8 = ({ data }) => {
+const MyDocument8 = ({ data, spare , csp}) => {
+
+    const formatDate = (dateString) => {
+        if (!dateString) {
+            return dateString; // Return an empty string or a placeholder if dateString is undefined or null
+        }
+
+        const date = new Date(dateString.split(" ")[0]);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+
+        return `${day}-${month}-${year}`;
+    };
+
+
+    const grandtotal = spare.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+
+
 
 
     return (
@@ -129,7 +149,7 @@ const MyDocument8 = ({ data }) => {
                         <Text style={{ fontSize: '10px', marginTop: 5, color: '#000' }}></Text>
                     </View>
                     <View style={[styles.tableCol11, { width: '50%' }]}>
-                        <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Quotation Number : </Text>
+                        <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Quotation Number : {data.quotationNumber}</Text>
 
                     </View>
 
@@ -142,7 +162,7 @@ const MyDocument8 = ({ data }) => {
                         <Text style={{ fontSize: '10px', marginTop: 5, color: '#000' }}></Text>
                     </View>
                     <View style={[styles.tableCol11, { width: '50%' }]}>
-                        <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Quotation Date : </Text>
+                        <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Quotation Date : {formatDate(data.created_date)}</Text>
 
                     </View>
 
@@ -172,14 +192,14 @@ const MyDocument8 = ({ data }) => {
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Customer ID</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '30%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.customer_id}</Text>
 
                         </View>
                         <View style={[styles.tableCol, { width: '20%' }]}>
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Service Partner Code</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '30%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{csp.licare_code}</Text>
 
                         </View>
 
@@ -192,14 +212,14 @@ const MyDocument8 = ({ data }) => {
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Customer Name</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '30%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.CustomerName}</Text>
 
                         </View>
                         <View style={[styles.tableCol, { width: '20%' }]}>
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Service Partner</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '30%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{csp.partner_name}</Text>
 
                         </View>
 
@@ -212,14 +232,14 @@ const MyDocument8 = ({ data }) => {
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Address</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '30%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.address},{data.city} -{data.pincode},{data.state}</Text>
 
                         </View>
                         <View style={[styles.tableCol, { width: '20%' }]}>
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Address</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '30%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{csp.address}</Text>
 
                         </View>
 
@@ -232,14 +252,14 @@ const MyDocument8 = ({ data }) => {
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Phone</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '30%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.customer_mobile}</Text>
 
                         </View>
                         <View style={[styles.tableCol, { width: '20%' }]}>
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Phone</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '30%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{csp.mobile_no}</Text>
 
                         </View>
 
@@ -252,14 +272,14 @@ const MyDocument8 = ({ data }) => {
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>E-mail ID </Text>
                         </View>
                         <View style={[styles.tableCol, { width: '30%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.customer_email}</Text>
 
                         </View>
                         <View style={[styles.tableCol, { width: '20%' }]}>
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>E-mail ID</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '30%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{csp.email}</Text>
 
                         </View>
 
@@ -272,7 +292,7 @@ const MyDocument8 = ({ data }) => {
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Ticket Create Date </Text>
                         </View>
                         <View style={[styles.tableCol, { width: '30%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{formatDate(data.ticketdate)}</Text>
 
                         </View>
 
@@ -286,7 +306,7 @@ const MyDocument8 = ({ data }) => {
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Ticket Number </Text>
                         </View>
                         <View style={[styles.tableCol, { width: '30%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.ticketId}</Text>
 
                         </View>
                         <View style={[styles.tableCol, { width: '50%', borderStyle: 'solid', borderBottomWidth: '1px' }]}>
@@ -349,126 +369,40 @@ const MyDocument8 = ({ data }) => {
                         </View>
 
                     </View>
-                    <View style={styles.Course}>
-                        <div style={{ height: "20px", margin: "0 0 0 0" }}>
 
-                        </div>
-                        <View style={[styles.tableCol, { width: '25%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
-                        </View>
-                        <View style={[styles.tableCol, { width: '25%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                    {spare.map((item, index) => {
 
-                        </View>
-                        <View style={[styles.tableCol, { width: '15%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
-                        </View>
-                        <View style={[styles.tableCol, { width: '15%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+             
+                        return (
+                            <View style={styles.Course} key={index}>
+                                <div style={{ height: "20px", margin: "0 0 0 0" }}>
 
-                        </View>
-                        <View style={[styles.tableCol, { width: '20%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                                </div>
+                                <View style={[styles.tableCol, { width: '35%' }]}>
+                                    <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000',textOverflow : 'ellipsis',whiteSpace: 'pre-wrap',lineHeight: 15 }}>{item.article_description}</Text>
 
-                        </View>
+                                </View>
+                                 
+                                <View style={[styles.tableCol, { width: '15%' }]}>
+                                    <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{item.article_code}</Text>
 
-                    </View>
-                    <View style={styles.Course}>
-                        <div style={{ height: "20px", margin: "0 0 0 0" }}>
+                                </View>
+                                <View style={[styles.tableCol, { width: '15%' }]}>
+                                    <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{item.price}</Text>
+                                </View>
+                                <View style={[styles.tableCol, { width: '15%' }]}>
+                                    <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{item.price * item.quantity} </Text>
 
-                        </div>
-                        <View style={[styles.tableCol, { width: '25%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
-                        </View>
-                        <View style={[styles.tableCol, { width: '25%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                                </View>
+                                <View style={[styles.tableCol, { width: '20%' }]}>
+                                    <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
 
-                        </View>
-                        <View style={[styles.tableCol, { width: '15%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
-                        </View>
-                        <View style={[styles.tableCol, { width: '15%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                                </View>
 
-                        </View>
-                        <View style={[styles.tableCol, { width: '20%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            </View>
+                        )
+                    })}
 
-                        </View>
-
-                    </View>
-                    <View style={styles.Course}>
-                        <div style={{ height: "20px", margin: "0 0 0 0" }}>
-
-                        </div>
-                        <View style={[styles.tableCol, { width: '25%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
-                        </View>
-                        <View style={[styles.tableCol, { width: '25%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
-
-                        </View>
-                        <View style={[styles.tableCol, { width: '15%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
-                        </View>
-                        <View style={[styles.tableCol, { width: '15%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
-
-                        </View>
-                        <View style={[styles.tableCol, { width: '20%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
-
-                        </View>
-
-                    </View>
-                    <View style={styles.Course}>
-                        <div style={{ height: "20px", margin: "0 0 0 0" }}>
-
-                        </div>
-                        <View style={[styles.tableCol, { width: '25%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
-                        </View>
-                        <View style={[styles.tableCol, { width: '25%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
-
-                        </View>
-                        <View style={[styles.tableCol, { width: '15%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
-                        </View>
-                        <View style={[styles.tableCol, { width: '15%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
-
-                        </View>
-                        <View style={[styles.tableCol, { width: '20%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
-
-                        </View>
-
-                    </View>
-                    <View style={styles.Course}>
-                        <div style={{ height: "20px", margin: "0 0 0 0" }}>
-
-                        </div>
-                        <View style={[styles.tableCol, { width: '25%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
-                        </View>
-                        <View style={[styles.tableCol, { width: '25%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
-
-                        </View>
-                        <View style={[styles.tableCol, { width: '15%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
-                        </View>
-                        <View style={[styles.tableCol, { width: '15%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
-
-                        </View>
-                        <View style={[styles.tableCol, { width: '20%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
-
-                        </View>
-
-                    </View>
                     <View style={styles.Course}>
                         <div style={{ height: "30px", margin: "0 0 0 0" }}>
 
@@ -481,7 +415,7 @@ const MyDocument8 = ({ data }) => {
 
                         </View>
                         <View style={[styles.tableCol, { width: '20%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{grandtotal}</Text>
                         </View>
 
 
