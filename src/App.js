@@ -775,6 +775,10 @@ const Router = createBrowserRouter([
         element: <EnquiryListing />
       },
       {
+        path: "/enquiryListing/:enquiryid",
+        element: <EnquiryForm />
+      },
+      {
         path: "/shipment_fg",
         element: <Shipment_fg />
       },

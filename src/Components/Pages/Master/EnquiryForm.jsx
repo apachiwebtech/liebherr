@@ -1,8 +1,9 @@
 import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
 import DatePicker from "react-datepicker";
-import { Base_Url } from "../../Utils/Base_Url";
-
+import { Base_Url, secretKey } from "../../Utils/Base_Url";
+import { useParams } from "react-router-dom";
+import CryptoJS from 'crypto-js';
 
 export function EnquiryForm(params) {
 
@@ -32,6 +33,16 @@ export function EnquiryForm(params) {
         priority: "",
         notes: "",
     });
+    let { enquiryid } = useParams()
+
+    try {
+        enquiryid = enquiryid.replace(/-/g, '+').replace(/_/g, '/');
+        const bytes = CryptoJS.AES.decrypt(enquiryid, secretKey);
+        const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+        enquiryid = parseInt(decrypted, 10)
+    } catch (error) {
+        console.log("Error".error)
+    }
 
 
     //Validattion
@@ -60,6 +71,25 @@ export function EnquiryForm(params) {
         return Object.keys(newErrors).length === 0;
     };
 
+
+    async function requestenquiry(params) {
+        axios.get(`${Base_Url}/requestenquiry/${enquiryid}`, {
+            headers: {
+                Authorization: token
+            }
+        })
+            .then((res) => {
+                setFormData(res.data)
+            })
+            .catch((err) => {
+                console.log(err)
+            })
+    }
+
+    useEffect(() =>{
+        requestenquiry()
+    },[])
+
     const handleKeyDown = (e) => {
         // Prevent '+' and '-' keys
         if (e.key === "-" || e.key === "+") {
@@ -83,34 +113,34 @@ export function EnquiryForm(params) {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (validate()) {
-    
-           // Append form values to FormData
-           const data = {
-            source: formData.source || "",
-            enquiry_date: formData.enquiry_date || "",
-            salutation: formData.salutation || "",
-            customer_name: formData.customer_name || "",
-            email: formData.email || "",
-            mobile: formData.mobile || "",
-            alt_mobile: formData.alt_mobile || "",
-            request_mobile: formData.request_mobile || "",
-            customer_type: formData.customer_type || "",
-            enquiry_type: formData.enquiry_type || "",
-            address: formData.address || "",
-            pincode: formData.pincode || "",
-            state: formData.state || "",
-            district: formData.district || "",
-            city: formData.city || "",
-            interested: formData.interested || "",
-            modelnumber: formData.modelnumber || "",
-            priority: formData.priority || "",
-            notes: formData.notes || "",
-            created_by: created_by || "", // Pass the logged-in user's ID
-            mwhatsapp : formData.mwhatsapp ,
-            awhatsaap : formData.awhatsaap 
 
-          };
-    
+            // Append form values to FormData
+            const data = {
+                source: formData.source || "",
+                enquiry_date: formData.enquiry_date || "",
+                salutation: formData.salutation || "",
+                customer_name: formData.customer_name || "",
+                email: formData.email || "",
+                mobile: formData.mobile || "",
+                alt_mobile: formData.alt_mobile || "",
+                request_mobile: formData.request_mobile || "",
+                customer_type: formData.customer_type || "",
+                enquiry_type: formData.enquiry_type || "",
+                address: formData.address || "",
+                pincode: formData.pincode || "",
+                state: formData.state || "",
+                district: formData.district || "",
+                city: formData.city || "",
+                interested: formData.interested || "",
+                modelnumber: formData.modelnumber || "",
+                priority: formData.priority || "",
+                notes: formData.notes || "",
+                created_by: created_by || "", // Pass the logged-in user's ID
+                mwhatsapp: formData.mwhatsapp,
+                awhatsaap: formData.awhatsaap
+
+            };
+
             // Submit formData via API
             axios
                 .post(`${Base_Url}/postenquiry`, data, {
@@ -120,7 +150,7 @@ export function EnquiryForm(params) {
                 })
                 .then((response) => {
                     alert("Enquiry submitted successfully!");
-                   
+
                 })
                 .catch((error) => {
                     console.error("Error submitting enquiry:", error);
@@ -423,7 +453,7 @@ export function EnquiryForm(params) {
                                     <div className="col-md-4">
                                         <div className="mb-3">
                                             <label htmlFor="exampleFormControlInput1" className="form-label">Mobile No.  <span className="text-danger">*</span>
-                                                <input type="checkbox" name='mwhatsapp' onChange={handleChange}  />Whatsapp</label>
+                                                <input type="checkbox" name='mwhatsapp' onChange={handleChange} />Whatsapp</label>
                                             <input type="number" name="mobile" onKeyDown={handleKeyDown} className="form-control" placeholder="Enter Mobile" value={formData.mobile} onChange={(e) => {
                                                 if (e.target.value.length <= 10) {
                                                     handleChange(e);
@@ -436,7 +466,7 @@ export function EnquiryForm(params) {
                                     </div>
                                     <div className="col-md-4">
                                         <div className="mb-3">
-                                            <label htmlFor="exampleFormControlInput1" className="form-label">Alt. Mobile No. <input type="checkbox" name="awhatsaap" onChange={handleChange}  />Whatsapp</label>
+                                            <label htmlFor="exampleFormControlInput1" className="form-label">Alt. Mobile No. <input type="checkbox" name="awhatsaap" onChange={handleChange} />Whatsapp</label>
                                             <input type="number" className="form-control" name="alt_mobile" placeholder="Enter Mobile" onChange={handleChange} value={formData.alt_mobile} />
 
                                         </div>

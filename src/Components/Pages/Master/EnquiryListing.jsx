@@ -16,6 +16,26 @@ export function EnquiryListing(params) {
 
     const [enquirydata, setEnquirydata] = useState([]);
     const navigate = useNavigate();
+    const token = localStorage.getItem("token");
+
+    async function getenquirydata(params) {
+        axios.get(`${Base_Url}/getenquiry` , {
+            headers :{
+                Authorization : token
+            }
+        })
+        .then((res) =>{
+         setEnquirydata(res.data)
+        })
+        .catch((err) =>{
+         console.log(err)
+        })
+    }
+
+
+    useEffect(() =>{
+        getenquirydata()
+    },[])
 
 
 
@@ -34,7 +54,7 @@ export function EnquiryListing(params) {
         id = id.toString()
         let encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
         encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-        navigate(`/quotation/${encrypted}`)
+        navigate(`/enquiryListing/${encrypted}`)
     };
 
     return (
@@ -46,7 +66,7 @@ export function EnquiryListing(params) {
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
 
                             <div className='my-2'>
-                                <button className='btn btn-primary' onClick={() =>{
+                                <button className='btn btn-primary ' onClick={() =>{
                                     navigate('/addenquiry')
                                 }}>Add Enquiry</button>
                             </div>
@@ -56,15 +76,15 @@ export function EnquiryListing(params) {
                                 <table id="example" className="table table-striped">
                                     <thead>
                                         <tr>
-                                            <th width="3%">#</th>
-                                            <th width="13%">Quotation Number</th>
-                                            <th width="7%">Ticket No.</th>
-                                            <th width="10%">Ticket Date</th>
-                                            <th width="20%">Engineer</th>
-                                            <th width="10%">Customer Name</th>
-                                            <th width="15%">ModelNumber</th>
-                                            <th width="10%">Status</th>
-                                            <th width="10%">Edit</th>
+                                            <th width="5%">#</th>
+                                            <th width="15%">Customer Name</th>
+                                            <th width="15%">Enquiry Date</th>
+                                            <th width="10%">Mobile</th>
+                                            <th width="15%">Customer Type</th>
+                                            <th width="10%">Enquiry Type</th>
+                                            <th width="15%">Priority</th>
+                                            <th width="10%">Model Number</th>
+                                            <th width="5%">Edit</th>
 
                                         </tr>
                                     </thead>
@@ -74,14 +94,14 @@ export function EnquiryListing(params) {
                                             return (
                                                 <tr key={item.id}>
                                                     <td >{index}</td>
-                                                    <td>{item.quotationNumber}</td>
-                                                    <td>{item.ticketId}</td>
-                                                    <td>{formatDate(item.ticketdate)}</td>
-                                                    <td>{item.assignedEngineer}</td>
-                                                    <td>{item.CustomerName}</td>
-                                                    <td>{item.ModelNumber}</td>
-                                                    <td style={{ padding: '0px', textAlign: 'center' }}>
-                                                        {item.status}
+                                                    <td>{item.customer_name}</td>
+                                                    <td>{formatDate(item.enquiry_date)}</td>
+                                                    <td>{item.mobile}</td>
+                                                    <td>{item.customer_type}</td>
+                                                    <td>{item.enquiry_type}</td>
+                                                    <td>{item.priority}</td>
+                                                    <td>
+                                                        {item.modelnumber}
                                                     </td>
                                                     <td>
 
