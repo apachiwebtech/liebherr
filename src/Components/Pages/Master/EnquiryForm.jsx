@@ -2,14 +2,27 @@ import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
 import DatePicker from "react-datepicker";
 import { Base_Url, secretKey } from "../../Utils/Base_Url";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import CryptoJS from 'crypto-js';
 
 export function EnquiryForm(params) {
 
     const [errors, setErrors] = useState({});
+    const [search, setSearch] = useState('');
+    const [remark, setRemarkdata] = useState([]);
+    const [custinfo, setCustInfo] = useState([]);
+    const [previousinfo, setCustPreviousInfo] = useState([]);
+    const [uid, setUid] = useState([]);
+    const navigate = useNavigate()
     const token = localStorage.getItem("token");
     const created_by = localStorage.getItem("licare_code");
+
+    const [remarkdata, setRemarks] = useState({
+        remark: "",
+        leadconvert: ""
+    })
+
+
     const [formData, setFormData] = useState({
         source: "",
         enquiry_date: null,
@@ -17,9 +30,9 @@ export function EnquiryForm(params) {
         customer_name: "",
         email: "",
         mobile: "",
-        mwhatsapp: false,
+        mwhatsapp: 0,
         alt_mobile: "",
-        awhatsaap: false,
+        awhatsapp: 0,
         request_mobile: "",
         customer_type: "",
         enquiry_type: "",
@@ -32,6 +45,7 @@ export function EnquiryForm(params) {
         modelnumber: "",
         priority: "",
         notes: "",
+        enquiry_no: ""
     });
     let { enquiryid } = useParams()
 
@@ -43,6 +57,20 @@ export function EnquiryForm(params) {
     } catch (error) {
         console.log("Error".error)
     }
+
+    function formatDate(dateStr) {
+        const dateObj = new Date(dateStr);
+
+        const day = dateObj.getUTCDate().toString().padStart(2, '0');
+        const month = (dateObj.getUTCMonth() + 1).toString().padStart(2, '0');
+        const year = dateObj.getUTCFullYear();
+
+        return `${day}-${month}-${year}`;
+    }
+
+
+
+
 
 
     //Validattion
@@ -80,15 +108,62 @@ export function EnquiryForm(params) {
         })
             .then((res) => {
                 setFormData(res.data)
+
+                setUid(res.data)
+                getremarks(res.data.enquiry_no)
             })
             .catch((err) => {
                 console.log(err)
             })
     }
 
-    useEffect(() =>{
-        requestenquiry()
-    },[])
+
+    async function getremarks(enquiry_no) {
+        axios.post(`${Base_Url}/getenquiryremark`, { enquiry_no: enquiry_no }, {
+            headers: {
+                Authorization: token
+            }
+        })
+            .then((res) => {
+                setRemarkdata(res.data)
+            })
+            .catch((err) => {
+                alert("Error")
+            })
+    }
+
+    useEffect(() => {
+
+        if (enquiryid != undefined) {
+            requestenquiry()
+
+        }
+
+    }, [])
+
+    const populatedata = () => {
+        setFormData({
+            ...formData, // Preserve existing data in case you need it
+            ...custinfo, // Overwrite with values from `custinfo`
+        })
+    }
+
+
+    const handlesearchenquiry = () => {
+        axios.post(`${Base_Url}/searchenquiry`, { search: search }, {
+            headers: {
+                Authorization: token
+            }
+        })
+            .then((res) => {
+                console.log(res)
+                setCustInfo(res.data.customerdetails)
+                setCustPreviousInfo(res.data.previousrecords)
+            })
+            .catch((err) => {
+                alert("Error")
+            })
+    }
 
     const handleKeyDown = (e) => {
         // Prevent '+' and '-' keys
@@ -101,7 +176,15 @@ export function EnquiryForm(params) {
         const { name, value, type, checked } = e.target;
         setFormData({
             ...formData,
-            [name]: type === "checkbox" ? checked : value,
+            [name]: type === "checkbox" ? (checked ? 1 : 0) : value,
+        });
+    };
+
+    const handleremarkchange = (e) => {
+        const { name, value } = e.target;
+        setRemarks({
+            ...remarkdata,
+            [name]: value,
         });
     };
 
@@ -114,52 +197,133 @@ export function EnquiryForm(params) {
         e.preventDefault();
         if (validate()) {
 
-            // Append form values to FormData
-            const data = {
-                source: formData.source || "",
-                enquiry_date: formData.enquiry_date || "",
-                salutation: formData.salutation || "",
-                customer_name: formData.customer_name || "",
-                email: formData.email || "",
-                mobile: formData.mobile || "",
-                alt_mobile: formData.alt_mobile || "",
-                request_mobile: formData.request_mobile || "",
-                customer_type: formData.customer_type || "",
-                enquiry_type: formData.enquiry_type || "",
-                address: formData.address || "",
-                pincode: formData.pincode || "",
-                state: formData.state || "",
-                district: formData.district || "",
-                city: formData.city || "",
-                interested: formData.interested || "",
-                modelnumber: formData.modelnumber || "",
-                priority: formData.priority || "",
-                notes: formData.notes || "",
-                created_by: created_by || "", // Pass the logged-in user's ID
-                mwhatsapp: formData.mwhatsapp,
-                awhatsaap: formData.awhatsaap
+            if (uid.id) {
+                // Append form values to FormData
+                const data = {
+                    source: formData.source || "",
+                    enquiry_date: formData.enquiry_date || "",
+                    salutation: formData.salutation || "",
+                    customer_name: formData.customer_name || "",
+                    email: formData.email || "",
+                    mobile: formData.mobile || "",
+                    alt_mobile: formData.alt_mobile || "",
+                    request_mobile: formData.request_mobile || "",
+                    customer_type: formData.customer_type || "",
+                    enquiry_type: formData.enquiry_type || "",
+                    address: formData.address || "",
+                    pincode: String(formData.pincode) || "",
+                    state: formData.state || "",
+                    district: formData.district || "",
+                    city: formData.city || "",
+                    interested: formData.interested || "",
+                    modelnumber: formData.modelnumber || "",
+                    priority: formData.priority || "",
+                    notes: formData.notes || "",
+                    created_by: created_by || "", // Pass the logged-in user's ID
+                    mwhatsapp: String(formData.mwhatsapp) || "0",
+                    awhatsapp: String(formData.awhatsapp) || "0",
+                    uid: String(uid.id)
+                };
 
-            };
+                // Submit formData via API
+                axios
+                    .post(`${Base_Url}/putenquiry`, data, {
+                        headers: {
+                            Authorization: token,
+                        },
+                    })
+                    .then((response) => {
+                        alert("Enquiry updated successfully!");
+                        navigate('/enquiryListing')
 
-            // Submit formData via API
-            axios
-                .post(`${Base_Url}/postenquiry`, data, {
-                    headers: {
-                        Authorization: token,
-                    },
-                })
-                .then((response) => {
-                    alert("Enquiry submitted successfully!");
+                    })
+                    .catch((error) => {
+                        console.error("Error submitting enquiry:", error);
+                        alert("Something went wrong. Please try again.");
+                    });
+            } else {
+                // Append form values to FormData
+                const data = {
+                    source: formData.source || "",
+                    enquiry_date: formData.enquiry_date || "",
+                    salutation: formData.salutation || "",
+                    customer_name: formData.customer_name || "",
+                    email: formData.email || "",
+                    mobile: formData.mobile || "",
+                    alt_mobile: formData.alt_mobile || "",
+                    request_mobile: formData.request_mobile || "",
+                    customer_type: formData.customer_type || "",
+                    enquiry_type: formData.enquiry_type || "",
+                    address: formData.address || "",
+                    pincode: String(formData.pincode) || "",
+                    state: formData.state || "",
+                    district: formData.district || "",
+                    city: formData.city || "",
+                    interested: formData.interested || "",
+                    modelnumber: formData.modelnumber || "",
+                    priority: formData.priority || "",
+                    notes: formData.notes || "",
+                    created_by: created_by || "", // Pass the logged-in user's ID
+                    mwhatsapp: String(formData.mwhatsapp),
+                    awhatsapp: String(formData.awhatsapp)
 
-                })
-                .catch((error) => {
-                    console.error("Error submitting enquiry:", error);
-                    alert("Something went wrong. Please try again.");
-                });
+                };
+
+                // Submit formData via API
+                axios
+                    .post(`${Base_Url}/postenquiry`, data, {
+                        headers: {
+                            Authorization: token,
+                        },
+                    })
+                    .then((response) => {
+                        alert("Enquiry submitted successfully!");
+                        navigate('/enquiryListing')
+                    })
+                    .catch((error) => {
+                        console.error("Error submitting enquiry:", error);
+                        alert("Something went wrong. Please try again.");
+                    });
+            }
+
+
+
+
+
         } else {
             alert("Please fix the errors before submitting.");
         }
     };
+
+    const remarksubmit = (e) => {
+        e.preventDefault();
+
+        const data = {
+            remark: remarkdata.remark,
+            leadconvert: remarkdata.leadconvert,
+            enquiry_no: formData.enquiry_no,
+            created_by: created_by
+        }
+
+
+        if (remarkdata.remark != '') {
+            axios.post(`${Base_Url}/addenquiryremark`, data, {
+                headers: {
+                    Authorization: token
+                }
+            })
+                .then((res) => {
+                    alert("Remark Added")
+                    getremarks()
+                })
+        } else {
+            alert("Remark is required")
+        }
+    }
+
+    //get remarks
+
+
 
     const fetchlocations = async (pincode) => {
 
@@ -211,8 +375,6 @@ export function EnquiryForm(params) {
                     </div>
                 </div>
 
-
-
                 <div className="row mt-25">
 
                     {/* First Part Start  */}
@@ -221,7 +383,7 @@ export function EnquiryForm(params) {
                         <div className="card mb-3">
                             <div className="card-body">
                                 <div>
-                                    <p>Search by Mobile No./ Customer Id / Email Id</p>
+                                    <p>Search by Mobile No./ Customer Name / Email Id</p>
                                     <div className="row g-3 align-items-center">
                                         <div className="col-8">
                                             <input
@@ -231,8 +393,9 @@ export function EnquiryForm(params) {
                                                 id="searchtext"
                                                 className="form-control"
                                                 aria-describedby="passwordHelpInline"
-                                                value={''}
-
+                                                onChange={(e) => {
+                                                    setSearch(e.target.value)
+                                                }}
 
                                                 placeholder="Enter Mobile / Email / Customer Name"
                                             />
@@ -243,7 +406,7 @@ export function EnquiryForm(params) {
                                                 name="inputSearch"
                                                 type="submit"
                                                 className="btn btn-liebherr"
-                                                onClick={''}
+                                                onClick={handlesearchenquiry}
                                             >
                                                 Search
                                             </button>
@@ -255,7 +418,7 @@ export function EnquiryForm(params) {
                         </div>
 
 
-                        <div id="searchResult" className="card">
+                        {custinfo.id ? <div id="searchResult" className="card">
 
                             <div className="card-body">
 
@@ -271,10 +434,6 @@ export function EnquiryForm(params) {
                                     </div>
                                 </div>
 
-
-
-
-
                                 <>
 
                                     <div className="tab-content mb-3">
@@ -284,10 +443,10 @@ export function EnquiryForm(params) {
 
 
                                                     <tr>
-                                                        <td>Customer Name </td>
+                                                        <td>{custinfo.customer_name}</td>
                                                         <td>
                                                             <div className="text-right pb-2">
-                                                                <button className="btn btn-sm btn-primary generateTicket" >New Enquiry</button>
+                                                                <button className="btn btn-sm btn-primary generateTicket" onClick={populatedata} >New Enquiry</button>
                                                             </div>
                                                         </td>
                                                     </tr>
@@ -302,33 +461,33 @@ export function EnquiryForm(params) {
                                 <>
                                     <ul className="nav nav-tabs" id="myTab" role="tablist">
                                         <li className="nav-item">
-                                            <a className="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">Product List</a>
+                                            <a className="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">Previous Enquiry</a>
                                         </li>
                                     </ul>
 
                                     <div className="tab-content">
                                         <div className="tab-pane active" id="home" role="tabpanel" aria-labelledby="home-tab">
                                             <table className="table table-striped">
-                                                <tbody>
-
-                                                    <tr >
-                                                        <td>
-                                                            <div style={{ fontSize: "14px" }}></div>
-                                                            <span style={{ fontSize: "14px" }}></span>
-                                                        </td>
-                                                        <td style={{ fontSize: "14px" }}></td>
-                                                        <td>
-                                                            <div style={{ fontSize: "14px" }}></div>
-                                                            <span style={{ fontSize: "14px" }}><button
-                                                                className='btn'
-
-                                                                title="View Info"
-                                                                style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                                                            >
-
-                                                            </button></span>
-                                                        </td>
+                                                <thead>
+                                                    <tr>
+                                                        <td>Enquiry No</td>
+                                                        <td>Enquiry Date</td>
                                                     </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {previousinfo.map((item, index) => {
+                                                        return (
+                                                            <tr key={index}>
+                                                                <td>
+                                                                    <div style={{ fontSize: "14px" }}>{item.enquiry_no}</div>
+                                                                    <span style={{ fontSize: "14px" }}></span>
+                                                                </td>
+                                                                <td style={{ fontSize: "14px" }}>{formatDate(item.enquiry_date)}</td>
+
+                                                            </tr>
+                                                        )
+                                                    })}
+
 
                                                 </tbody>
 
@@ -341,16 +500,19 @@ export function EnquiryForm(params) {
 
                             </div>
 
-                        </div> <br></br>
-                        <div className="card">
+                        </div> : <div className="card">
                             <div className="card-body">
                                 {/* Only show "No Result Found" if a search was performed and no results were found */}
-                                <p className="text-danger ">No Result Found</p>
+                                {previousinfo.length == 0 && <p className="text-danger ">No Result Found</p>}
                                 <button className="btn btn-sm btn-primary">New Enquiry</button>
                             </div>
 
 
-                        </div>
+                        </div>}
+
+
+
+
 
 
 
@@ -453,7 +615,7 @@ export function EnquiryForm(params) {
                                     <div className="col-md-4">
                                         <div className="mb-3">
                                             <label htmlFor="exampleFormControlInput1" className="form-label">Mobile No.  <span className="text-danger">*</span>
-                                                <input type="checkbox" name='mwhatsapp' onChange={handleChange} />Whatsapp</label>
+                                                <input type="checkbox" name='mwhatsapp' onChange={handleChange} checked={formData.mwhatsapp === 1} />Whatsapp</label>
                                             <input type="number" name="mobile" onKeyDown={handleKeyDown} className="form-control" placeholder="Enter Mobile" value={formData.mobile} onChange={(e) => {
                                                 if (e.target.value.length <= 10) {
                                                     handleChange(e);
@@ -466,7 +628,7 @@ export function EnquiryForm(params) {
                                     </div>
                                     <div className="col-md-4">
                                         <div className="mb-3">
-                                            <label htmlFor="exampleFormControlInput1" className="form-label">Alt. Mobile No. <input type="checkbox" name="awhatsaap" onChange={handleChange} />Whatsapp</label>
+                                            <label htmlFor="exampleFormControlInput1" className="form-label">Alt. Mobile No. <input type="checkbox" name="awhatsapp" checked={formData.awhatsapp === 1} onChange={handleChange} />Whatsapp</label>
                                             <input type="number" className="form-control" name="alt_mobile" placeholder="Enter Mobile" onChange={handleChange} value={formData.alt_mobile} />
 
                                         </div>
@@ -710,17 +872,18 @@ export function EnquiryForm(params) {
 
 
                     {/* End Part Start  */}
-                    <div className="col-3">
+                    {uid.id ? <div className="col-3">
 
                         <>
                             <div className="card mb-3" id="engineerInfo">
-                                <div className="card-body">
+                                <form className="card-body" onSubmit={remarksubmit}>
                                     <h4 className="pname">Follow Up Remarks <span className="text-danger">*</span></h4>
+
                                     <div className="mb-3">
                                         <textarea
                                             className="form-control"
-                                            name="specification"
-
+                                            name="remark"
+                                            onChange={handleremarkchange}
                                             placeholder="Enter Fault Remarks..."
                                         ></textarea>
 
@@ -728,7 +891,7 @@ export function EnquiryForm(params) {
 
                                     <div className="mb-3">
                                         <label className="form-label">Lead Converted</label>
-                                        <select className="form-control" name="LeadConverted">
+                                        <select className="form-control" name="leadconvert" onChange={handleremarkchange}>
                                             <option value="">Select</option>
                                             <option value="Yes">Yes</option>
                                             <option value="No">No</option>
@@ -737,9 +900,9 @@ export function EnquiryForm(params) {
                                     </div>
 
                                     <div className="mb-3 text-right">
-                                        <button class="btn btn-sm btn-primary">Submit Remarks</button>
+                                        <button type="submit" class="btn btn-sm btn-primary">Submit Remarks</button>
                                     </div>
-                                </div>
+                                </form>
                             </div>
 
                             <div className="card mb-3" id="flwremarks">
@@ -748,9 +911,14 @@ export function EnquiryForm(params) {
 
                                         <table class="table table-bordered" >
                                             <thead>
-                                                <tr>
-                                                    <td><p>Remarks added in followup<br></br><br /><span>Date : 30-01-2025 by Abhishek</span></p></td>
-                                                </tr>
+                                                {remark.map((item) => {
+                                                    return (
+                                                        <tr>
+                                                            <td><p>{item.remark}<br></br><br /><span>Date : {formatDate(item.created_date)} by {item.title}</span></p></td>
+                                                        </tr>
+                                                    )
+                                                })}
+
                                                 <tr>
                                                     <td><p>Remarks added in followup<br></br><br />Date : 30-01-2025 by Abhishek</p></td>
                                                 </tr>
@@ -764,7 +932,8 @@ export function EnquiryForm(params) {
 
                         </>
 
-                    </div>
+                    </div> : null}
+
 
 
 

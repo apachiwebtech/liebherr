@@ -11021,46 +11021,185 @@ app.get("/getenquiry", authenticateToken, async (req, res) => {
   }
 });
 
+
+app.post("/searchenquiry", authenticateToken, async (req, res) => {
+  const {
+    search
+  } = req.body;
+
+  try {
+    const pool = await poolPromise;
+
+    const sql = `
+    SELECT * 
+    FROM awt_enquirymaster 
+    WHERE 
+      (customer_name LIKE '%' + @search + '%' 
+      OR mobile LIKE '%' + @search + '%' 
+      OR email LIKE '%' + @search + '%') 
+      AND deleted = 0
+  `;
+
+    const result = await pool.request()
+      .input("search", search)
+      .query(sql);
+
+    const customerdetails = result.recordset[0]
+
+    const previousrecords = result.recordset
+
+
+    res.status(200).json({customerdetails, previousrecords});
+  } catch (err) {
+    console.error("Error updating enquiry:", err);
+    res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+});
+
+app.post("/addenquiryremark", authenticateToken, async (req, res) => {
+  const { remark, leadconvert ,enquiry_no,created_by} = req.body;
+
+  const date = new Date()
+
+  try {
+    const pool = await poolPromise;
+
+    // SQL query with placeholders
+    const sql = `INSERT INTO enquiry_remark (remark, leadconvert ,enquiry_no ,created_date , created_by) VALUES (@remark, @leadconvert,@enquiry_no , @created_date , @created_by)`;
+
+    // Execute the query with parameters
+    const result = await pool
+      .request()
+      .input("remark",  remark) // Assuming 'remark' is a string
+      .input("leadconvert",  leadconvert) // Assuming 'leadconvert' is a string
+      .input("enquiry_no",  enquiry_no) // Assuming 'leadconvert' is a string
+      .input("created_by",  created_by) // Assuming 'leadconvert' is a string
+      .input("created_date",  date) // Assuming 'leadconvert' is a string
+      .query(sql);
+
+    res.status(200).json({ message: "Remark Added", result });
+  } catch (err) {
+    console.error("Error adding enquiry remark:", err);
+    res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+});
+
+
+app.post("/getenquiryremark", authenticateToken, async (req, res) => {
+  const { enquiry_no } = req.body;
+
+  try {
+    const pool = await poolPromise;
+
+    // SQL query with placeholders
+    const sql = `select er.* , ul.title from enquiry_remark as er left join userdetails as ul on ul.usercode = er.created_by where er.enquiry_no = '${enquiry_no}'`;
+
+    // Execute the query with parameters
+    const result = await pool.request().query(sql);
+
+    res.status(200).json(result.recordset);
+  } catch (err) {
+    console.error("Error adding enquiry remark:", err);
+    res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+});
+
+
 // put enquiry data
 
 app.post("/putenquiry", authenticateToken, async (req, res) => {
-  const { name, id, mobile_no, email, address } = req.body;
+  const {
+    uid, // The unique identifier for the enquiry to be updated
+    source,
+    enquiry_date,
+    salutation,
+    customer_name,
+    email,
+    mobile,
+    alt_mobile,
+    request_mobile,
+    customer_type,
+    enquiry_type,
+    address,
+    pincode,
+    state,
+    district,
+    city,
+    interested,
+    modelnumber,
+    priority,
+    notes,
+    awhatsapp,
+    mwhatsapp,
+    updated_by,
+
+  } = req.body;
 
   try {
-    // Access the connection pool using poolPromise
     const pool = await poolPromise;
 
-    // Step 1: Direct SQL query to check for duplicates without parameter binding
-    const checkDuplicateSql = `
-      SELECT *
-      FROM awt_enquirymaster
-      WHERE mobile_no = '${mobile_no}'  AND id != ${id} AND deleted = 0
+    const sql = `
+      UPDATE awt_enquirymaster
+      SET 
+        source = @source,
+        enquiry_date = @enquiry_date,
+        salutation = @salutation,
+        customer_name = @customer_name,
+        email = @email,
+        mobile = @mobile,
+        alt_mobile = @alt_mobile,
+        request_mobile = @request_mobile,
+        customer_type = @customer_type,
+        enquiry_type = @enquiry_type,
+        address = @address,
+        pincode = @pincode,
+        state = @state,
+        district = @district,
+        city = @city,
+        interested = @interested,
+        modelnumber = @modelnumber,
+        priority = @priority,
+        notes = @notes,
+        awhatsapp = @awhatsapp,
+        mwhatsapp = @mwhatsapp,
+        updated_by = @updated_by,
+        updated_date = GETDATE() 
+      WHERE id = @id
     `;
 
-    // Execute the duplicate check query
-    const duplicateCheckResult = await pool.request().query(checkDuplicateSql);
+    const result = await pool.request()
+      .input("id", uid)
+      .input("source", source)
+      .input("enquiry_date", enquiry_date)
+      .input("salutation", salutation)
+      .input("customer_name", customer_name)
+      .input("email", email)
+      .input("mobile", mobile)
+      .input("alt_mobile", alt_mobile)
+      .input("request_mobile", request_mobile)
+      .input("customer_type", customer_type)
+      .input("enquiry_type", enquiry_type)
+      .input("address", address)
+      .input("pincode", pincode)
+      .input("state", state)
+      .input("district", district)
+      .input("city", city)
+      .input("interested", interested)
+      .input("modelnumber", modelnumber)
+      .input("priority", priority)
+      .input("notes", notes)
+      .input("awhatsapp", awhatsapp)
+      .input("mwhatsapp", mwhatsapp)
+      .input("updated_by", updated_by)
+      .query(sql);
 
-    if (duplicateCheckResult.recordset.length > 0) {
-      // If a duplicate title exists (other than the current record)
-      return res.status(409).json({ message: "Duplicate entry, enquiry already exists!" });
-    } else {
-      // Step 2: Update the record if no duplicates are found
-      const updateSql = `
-        UPDATE awt_enquirymaster
-        SET name = '${name}', address ='${address}', mobile_no ='${mobile_no}', email ='${email}'
-        WHERE id = ${id}
-      `;
-
-      // Execute the update query
-      await pool.request().query(updateSql);
-
-      return res.json({ message: "enquiry updated successfully!" });
-    }
+    res.status(200).json({ message: "Enquiry updated successfully!", result });
   } catch (err) {
-    console.error("Error updating enquiry:", err); // Log the error for debugging
-    return res.status(500).json({ message: "Internal Server Error", error: err });
+    console.error("Error updating enquiry:", err);
+    res.status(500).json({ message: "Internal Server Error", error: err });
   }
 });
+
 
 // post role data 
 app.post("/postenquiry", authenticateToken, async (req, res) => {
@@ -11087,43 +11226,45 @@ app.post("/postenquiry", authenticateToken, async (req, res) => {
       notes,
       created_by,
       mwhatsapp,
-      awhatsaap
+      awhatsapp
     } = req.body;
 
-    if (mwhatsapp === true) {
-      mwhatsapp = 1
-    } else {
-      mwhatsapp = 0
-    }
 
-    if (awhatsaap === true) {
-      awhatsaap = 1
-    } else {
-      awhatsaap = 0
-    }
+    const pool = await poolPromise;
 
 
     const created_date = new Date()
 
+    //Enquiry Id Creation 
+
+    const createenquiryid = `select Count(*) as count  from awt_enquirymaster`;
+
+    const getcount = await pool.request().query(createenquiryid)
+
+    const newcount = getcount.recordset[0].count + 1;
+
+    const formatDate = `${(new Date().getMonth() + 1).toString().padStart(2, '0')}${new Date().getDate().toString().padStart(2, '0')}`;
+
+    const Enquiry_no = `E${formatDate}-${newcount.toString().padStart(4, "0")}`;
 
 
 
     // Access the connection pool
-    const pool = await poolPromise;
 
     // SQL Query to insert data into the enquiry table
     const sql = `
       INSERT INTO awt_enquirymaster (
-        source, enquiry_date, salutation, customer_name, email, mobile, alt_mobile, request_mobile, customer_type, enquiry_type, address, pincode, state, district, city, interested, modelnumber, priority, notes , awhatsapp, mwhatsapp,created_by,created_date
+        source, enquiry_no,enquiry_date, salutation, customer_name, email, mobile, alt_mobile, request_mobile, customer_type, enquiry_type, address, pincode, state, district, city, interested, modelnumber, priority, notes , awhatsapp, mwhatsapp,created_by,created_date
       )
       VALUES (
-        @source, @enquiry_date, @salutation, @customer_name, @email, @mobile, @alt_mobile, @request_mobile, @customer_type, @enquiry_type, @address, @pincode, @state, @district, @city, @interested, @modelnumber, @priority, @notes ,@awhatsapp, @mwhatsapp,@created_by,@created_date
+        @source,@enquiry_no, @enquiry_date, @salutation, @customer_name, @email, @mobile, @alt_mobile, @request_mobile, @customer_type, @enquiry_type, @address, @pincode, @state, @district, @city, @interested, @modelnumber, @priority, @notes ,@awhatsapp, @mwhatsapp,@created_by,@created_date
       );
     `;
 
     // Use prepared statements to avoid SQL injection
     const result = await pool.request()
       .input("source", source)
+      .input("enquiry_no", Enquiry_no)
       .input("enquiry_date", enquiry_date)
       .input("salutation", salutation)
       .input("customer_name", customer_name)
@@ -11142,7 +11283,7 @@ app.post("/postenquiry", authenticateToken, async (req, res) => {
       .input("modelnumber", modelnumber || null)
       .input("priority", priority)
       .input("notes", notes)
-      .input("awhatsapp", awhatsaap)
+      .input("awhatsapp", awhatsapp)
       .input("mwhatsapp", mwhatsapp)
       .input("created_by", created_by)
       .input("created_date", created_date)
