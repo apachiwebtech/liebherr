@@ -1,8 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url, secretKey } from "../../Utils/Base_Url";
-import Ratecardtabs from "./Ratecardtabs";
 import { useSelector } from 'react-redux';
 import { SyncLoader } from 'react-spinners';
 import CryptoJS from 'crypto-js';
@@ -129,7 +127,7 @@ const PincodeAllocation = () => {
   const exportToExcel = async () => {
     try {
       // Fetch all customer data without pagination
-      const response = await axiosInstance.get(`${Base_Url}/getchildFranchiseDetails`, {
+      const response = await axiosInstance.get(`${Base_Url}/getpincodelist`, {
         headers: {
           Authorization: token,
         },
@@ -138,36 +136,39 @@ const PincodeAllocation = () => {
           page: 1, // Start from the first page
         },
       });
-      const allQuotationdata = response.data.data;
+      const allPincodedata = response.data.data;
       // Create a new workbook
       const workbook = XLSX.utils.book_new();
 
       // Convert data to a worksheet
-      const worksheet = XLSX.utils.json_to_sheet(allQuotationdata.map(user => ({
+      const worksheet = XLSX.utils.json_to_sheet(allPincodedata.map(user => ({
 
-        "QuotationNumber": user.quotationNumber,
-        "ticketId": user.ticketId,
-        "ticketdate": user.ticketdate,
-        "QuotationDate": user.quotationDate,
-        "EngineerName": user.assignedEngineer,
-        "CustomerName": user.CustomerName,
-        "CustomerID": user.customer_id,
-        "ModelNumber": user.ModelNumber,
+        "PIncode": user.pincode,
+        "Region": user.region,
+        "Country": user.country,
         "State": user.state,
         "City": user.city,
-        "SpareName": user.title,
-        "Quantity": user.quantity,
-        "Price": user.price,
-        "Status": user.status,
+        "MotherBranch": user.mother_branch,
+        "ResidentBranch": user.resident_branch,
+        "AreaManager": user.area_manager,
+        "LocalManager": user.local_manager,
+        "CustomerClassification": user.customer_classification,
+        "ClassCity": user.class_city,
+        "CspName": user.csp_name,
+        "MspName": user.msp_name,
+        "CallType": user.call_type,
+        "MspCode": user.msp_code,
+        "CspCode": user.csp_code,
+
 
 
       })));
 
       // Append the worksheet to the workbook
-      XLSX.utils.book_append_sheet(workbook, worksheet, "QuotationList");
+      XLSX.utils.book_append_sheet(workbook, worksheet, "PincodeAllocation");
 
       // Export the workbook
-      XLSX.writeFile(workbook, "QuotationList.xlsx");
+      XLSX.writeFile(workbook, "PincodeAllocation.xlsx");
     } catch (error) {
       console.error("Error exporting data to Excel:", error);
     }
@@ -303,170 +304,216 @@ const PincodeAllocation = () => {
         </div>
       )}
       {roleaccess > 1 ? <div className="row mp0">
+        <div className="searchFilter">
+
+        <div className="m-3">
+
+        <div className="row mb-3">
+
+          <div className="col-md-2">
+            <div className="form-group">
+              <label>Pincode</label>
+              <input
+                type="text"
+                className="form-control"
+                name="pincode"
+                value={searchFilters.pincode}
+                placeholder="Search by Pincode"
+                onChange={handleFilterChange}
+              />
+            </div>
+          </div>
+
+
+          <div className="col-md-2">
+            <div className="form-group">
+              <label>Country</label>
+              <input
+                type="text"
+                className="form-control"
+                name="country"
+                value={searchFilters.country}
+                placeholder="Search by Country"
+                onChange={handleFilterChange}
+              />
+            </div>
+          </div>
+
+          <div className="col-md-2">
+            <div className="form-group">
+              <label>Region</label>
+              <input
+                type="text"
+                className="form-control"
+                name="region"
+                value={searchFilters.region}
+                placeholder="Search by Region"
+                onChange={handleFilterChange}
+              />
+            </div>
+          </div>
+
+          <div className="col-md-2">
+            <div className="form-group">
+              <label>State</label>
+              <input
+                type="text"
+                className="form-control"
+                name="state"
+                value={searchFilters.state}
+                placeholder="Search by State"
+                onChange={handleFilterChange}
+              />
+            </div>
+          </div>
+
+          <div className="col-md-2">
+            <div className="form-group">
+              <label>City</label>
+              <input
+                type="text"
+                className="form-control"
+                name="city"
+                value={searchFilters.city}
+                placeholder="Search by City "
+                onChange={handleFilterChange}
+              />
+            </div>
+          </div>
+          <div className="col-md-2">
+            <div className="form-group">
+              <label>Customer Classification</label>
+              <select
+                className="form-control"
+                name="customer_classification"
+                value={searchFilters.customer_classification}
+                onChange={handleFilterChange}
+              >
+                <option value=""> SELECT</option>
+                <option value="Import">IMPORT</option>
+                <option value="Consumer">CONSUMER</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div className="row mb-3">
+          <div className="col-md-2">
+            <div className="form-group">
+              <label>Call Status</label>
+              <select
+                className="form-control"
+                name="call_type"
+                value={searchFilters.call_type}
+                onChange={handleFilterChange}
+              >
+                <option value="">Select Status</option>
+
+                <option value="Installation">INSTALLATION</option>
+                <option value="Breakdown">BREAKDOWN</option>
+                <option value="Visit">VISIT</option>
+                <option value="Helpdesk">HELDESK</option>
+                <option value="Maintenance">MAINTENANCE</option>
+                <option value="Demo">DEMO</option>
+
+              </select>
+            </div>
+          </div>
+          <div className="col-md-2">
+            <div className="form-group">
+              <label>Msp Name</label>
+              <input
+                type="text"
+                className="form-control"
+                name="msp_name"
+                value={searchFilters.msp_name}
+                placeholder="Search by Msp Name"
+                onChange={handleFilterChange}
+              />
+            </div>
+          </div>
+          <div className="col-md-2">
+            <div className="form-group">
+              <label>Csp Name</label>
+              <input
+                type="text"
+                className="form-control"
+                name="csp_name"
+                value={searchFilters.csp_name}
+                placeholder="Search by Csp Name"
+                onChange={handleFilterChange}
+              />
+            </div>
+          </div>
+
+
+
+        </div>
+        <div className="row mb-3">
+          <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
+            <div className="form-group">
+              <input type="file" accept=".xlsx, .xls" onChange={importexcel} />
+              <button className="btn btn-primary" onClick={uploadexcel}
+                style={{
+                  marginLeft: '-100px',
+                }}>
+                Import Pincode Allocation
+              </button>
+
+            </div>
+            <div className="form-group">
+              <button
+                className="btn btn-primary"
+                onClick={exportToExcel}
+                style={{
+                  marginLeft: '5px',
+                }}
+              >
+                Export to Excel
+              </button>
+              <button
+                className="btn btn-primary mr-2"
+                onClick={applyFilters}
+                style={{
+                  marginLeft: '5px',
+                }}
+              >
+                Search
+              </button>
+              <button
+                className="btn btn-secondary"
+                onClick={() => {
+                  window.location.reload()
+                }}
+                style={{
+                  marginLeft: '5px',
+                }}
+              >
+                Reset
+              </button>
+              {filteredData.length === 0 && (
+                <div
+                  style={{
+                    backgroundColor: '#f8d7da',
+                    color: '#721c24',
+                    padding: '5px 10px',
+                    marginLeft: '10px',
+                    borderRadius: '4px',
+                    border: '1px solid #f5c6cb',
+                    fontSize: '14px',
+                    display: 'inline-block'
+                  }}
+                >
+                  No Record Found
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+        </div>
+        </div>
         <div className=" col-md-12 col-12">
           <div className="card mb-3 tab_box">
             <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
-              <div className="row mb-3">
-
-                <div className="col-md-2">
-                  <div className="form-group">
-                    <label>Pincode</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="pincode"
-                      value={searchFilters.pincode}
-                      placeholder="Search by Pincode"
-                      onChange={handleFilterChange}
-                    />
-                  </div>
-                </div>
-
-
-                <div className="col-md-2">
-                  <div className="form-group">
-                    <label>Country</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="country"
-                      value={searchFilters.country}
-                      placeholder="Search by Country"
-                      onChange={handleFilterChange}
-                    />
-                  </div>
-                </div>
-
-                <div className="col-md-2">
-                  <div className="form-group">
-                    <label>Region</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="region"
-                      value={searchFilters.region}
-                      placeholder="Search by Region"
-                      onChange={handleFilterChange}
-                    />
-                  </div>
-                </div>
-
-                <div className="col-md-2">
-                  <div className="form-group">
-                    <label>State</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="state"
-                      value={searchFilters.state}
-                      placeholder="Search by State"
-                      onChange={handleFilterChange}
-                    />
-                  </div>
-                </div>
-
-                <div className="col-md-2">
-                  <div className="form-group">
-                    <label>City</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="city"
-                      value={searchFilters.city}
-                      placeholder="Search by City "
-                      onChange={handleFilterChange}
-                    />
-                  </div>
-                </div>
-                <div className="col-md-2">
-                  <div className="form-group">
-                    <label>Customer Classification</label>
-                    <select
-                      className="form-control"
-                      name="customer_classification"
-                      value={searchFilters.customer_classification}
-                      onChange={handleFilterChange}
-                    >
-                      <option value=""> SELECT</option>
-                      <option value="Import">IMPORT</option>
-                      <option value="Consumer">CONSUMER</option>
-                    </select>
-                  </div>
-                </div>
-                </div>
-                <div>
-                <div className="col-md-2">
-                  <div className="form-group">
-                    <label>Status</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="status"
-                      value={searchFilters.status}
-                      placeholder="Search by Status"
-                      onChange={handleFilterChange}
-                    />
-                  </div>
-                </div>
-
-
-
-              </div>
-              <div className="row mb-3">
-                <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
-                  <div className="form-group">
-                    <input type="file" accept=".xlsx, .xls" onChange={importexcel} />
-                    <button className="btn btn-primary" onClick={uploadexcel}>
-                      Import Pincode Allocation
-                    </button>
-
-                  </div>
-                  <div className="form-group">
-                    <button
-                      className="btn btn-primary"
-                    // onClick={exportToExcel}
-                    >
-                      Export to Excel
-                    </button>
-                    <button
-                      className="btn btn-primary mr-2"
-                      // onClick={applyFilters}
-                      style={{
-                        marginLeft: '5px',
-                      }}
-                    >
-                      Search
-                    </button>
-                    <button
-                      className="btn btn-secondary"
-                      onClick={() => {
-                        window.location.reload()
-                      }}
-                      style={{
-                        marginLeft: '5px',
-                      }}
-                    >
-                      Reset
-                    </button>
-                    {filteredData.length === 0 && (
-                      <div
-                        style={{
-                          backgroundColor: '#f8d7da',
-                          color: '#721c24',
-                          padding: '5px 10px',
-                          marginLeft: '10px',
-                          borderRadius: '4px',
-                          border: '1px solid #f5c6cb',
-                          fontSize: '14px',
-                          display: 'inline-block'
-                        }}
-                      >
-                        No Record Found
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
               <div className='table-responsive'>
                 <table id="example" className="table table-striped">
                   <thead>
@@ -474,9 +521,9 @@ const PincodeAllocation = () => {
                       <th width="3%">#</th>
                       <th width="5%">Pincode</th>
                       <th width="5%">Country</th>
-                      <th width="10%">Region</th>
-                      <th width="10%">State</th>
-                      <th width="10%">City</th>
+                      <th width="5%">Region</th>
+                      <th width="5%">State</th>
+                      <th width="5%">City</th>
                       <th width="10%">Msp Name</th>
                       <th width="10%">Csp Name</th>
                       <th width="10%">Customer Classification</th>

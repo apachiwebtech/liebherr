@@ -1,6 +1,5 @@
-import axios from 'axios';
 import * as XLSX from "xlsx";
-import { Link, useNavigate } from 'react-router-dom';
+import {  useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { Base_Url, secretKey } from '../../Utils/Base_Url';
@@ -14,7 +13,6 @@ import { getRoleData } from "../../Store/Role/role-action";
 export function Quotationlist(params) {
     const { loaders, axiosInstance } = useAxiosLoader();
     const [Quotationdata, setQuotationdata] = useState([]);
-    const [isEdit, setIsEdit] = useState(false);
     const token = localStorage.getItem("token");
     const [filteredData, setFilteredData] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
