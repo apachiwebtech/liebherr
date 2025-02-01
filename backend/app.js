@@ -11000,24 +11000,84 @@ app.post("/deletecsprole", authenticateToken, async (req, res) => {
 
 app.get("/getenquiry", authenticateToken, async (req, res) => {
   try {
+    const {
+      enquiry_no,
+      customer_name,
+      mobile,
+      customer_type,
+      enquiry_type,
+      priority,
+      modelnumber,
+      page = 1, // Default to page 1 if not provided
+      pageSize = 10, // Default to 10 items per page if not provided
+    } = req.query;
     // Access the connection pool using poolPromise
     const pool = await poolPromise;
 
     // Direct SQL query
-    const sql = `
-      SELECT *
-      FROM awt_enquirymaster
-      WHERE deleted = 0
-    `;
+    let sql = `
+      SELECT p.* FROM awt_enquirymaster as p WHERE deleted = 0 `;
+    if (enquiry_no) {
+      sql += ` AND p.enquiry_no LIKE '%${enquiry_no}%'`;
+    }
+
+    if (customer_name) {
+      sql += ` AND p.customer_name LIKE '%${customer_name}%'`;
+    }
+
+    if (mobile) {
+      sql += ` AND p.mobile LIKE '%${mobile}%'`;
+    }
+
+    if (customer_type) {
+      sql += ` AND p.customer_type LIKE '%${customer_type}%'`;
+    }
+
+    if (enquiry_type) {
+      sql += ` AND p.enquiry_type LIKE '%${enquiry_type}%'`;
+    }
+
+    if (priority) {
+      sql += ` AND p.priority LIKE '%${priority}%'`;
+    }
+    if (modelnumber) {
+      sql += ` AND p.modelnumber LIKE '%${modelnumber}%'`;
+    }
+
+
+    // Pagination logic: Calculate offset based on the page number
+    const offset = (page - 1) * pageSize;
+    // Add pagination to the SQL query (OFFSET and FETCH NEXT)
+    sql += ` ORDER BY p.enquiry_no  OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+
 
     // Execute the query
     const result = await pool.request().query(sql);
 
-    // Return only the recordset from the result
-    return res.json(result.recordset);
+    // Get the total count of records for pagination
+    let countSql = `SELECT COUNT(*) as totalCount FROM awt_enquirymaster where 1=1 `;
+    if (enquiry_no) countSql += ` AND enquiry_no LIKE '%${enquiry_no}%'`;
+    if (customer_name) countSql += ` AND customer_name LIKE '%${customer_name}%'`;
+
+    if (mobile) countSql += ` AND mobile LIKE '%${mobile}%'`;
+    if (customer_type) countSql += ` AND customer_type LIKE '%${customer_type}%'`;
+    if (enquiry_type) countSql += ` AND enquiry_type LIKE '%${enquiry_type}%'`;
+    if (priority) countSql += ` AND priority LIKE '%${priority}%'`;
+    if (modelnumber) countSql += ` AND modelnumber LIKE '%${modelnumber}%'`;
+
+    const countResult = await pool.request().query(countSql);
+    const totalCount = countResult.recordset[0].totalCount;
+    return res.json({
+      data: result.recordset,
+      totalCount: totalCount,
+      page,
+      pageSize,
+    });
+
+
   } catch (err) {
-    console.error("Error fetching enquiries:", err); // Log the error for debugging
-    return res.status(500).json({ message: "Internal Server Error", error: err });
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred" });
   }
 });
 
@@ -11049,7 +11109,7 @@ app.post("/searchenquiry", authenticateToken, async (req, res) => {
     const previousrecords = result.recordset
 
 
-    res.status(200).json({customerdetails, previousrecords});
+    res.status(200).json({ customerdetails, previousrecords });
   } catch (err) {
     console.error("Error updating enquiry:", err);
     res.status(500).json({ message: "Internal Server Error", error: err });
@@ -11057,7 +11117,7 @@ app.post("/searchenquiry", authenticateToken, async (req, res) => {
 });
 
 app.post("/addenquiryremark", authenticateToken, async (req, res) => {
-  const { remark, leadconvert ,enquiry_no,created_by} = req.body;
+  const { remark, leadconvert, enquiry_no, created_by } = req.body;
 
   const date = new Date()
 
@@ -11070,11 +11130,11 @@ app.post("/addenquiryremark", authenticateToken, async (req, res) => {
     // Execute the query with parameters
     const result = await pool
       .request()
-      .input("remark",  remark) // Assuming 'remark' is a string
-      .input("leadconvert",  leadconvert) // Assuming 'leadconvert' is a string
-      .input("enquiry_no",  enquiry_no) // Assuming 'leadconvert' is a string
-      .input("created_by",  created_by) // Assuming 'leadconvert' is a string
-      .input("created_date",  date) // Assuming 'leadconvert' is a string
+      .input("remark", remark) // Assuming 'remark' is a string
+      .input("leadconvert", leadconvert) // Assuming 'leadconvert' is a string
+      .input("enquiry_no", enquiry_no) // Assuming 'leadconvert' is a string
+      .input("created_by", created_by) // Assuming 'leadconvert' is a string
+      .input("created_date", date) // Assuming 'leadconvert' is a string
       .query(sql);
 
     res.status(200).json({ message: "Remark Added", result });
