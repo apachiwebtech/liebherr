@@ -146,12 +146,12 @@ const Ticketlistcsp = (params) => {
     };
 
     const sendtoedit123 = async (id) => {
-      // alert(id)
-      id = id.toString()
-      let encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
-      encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-      // navigate(`/quotation/${encrypted}`)
-      navigate(`/csp/ticketview/${encrypted}`)
+        // alert(id)
+        id = id.toString()
+        let encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
+        encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        // navigate(`/quotation/${encrypted}`)
+        navigate(`/csp/ticketview/${encrypted}`)
     };
 
 
@@ -531,50 +531,31 @@ const Ticketlistcsp = (params) => {
                                     <th>Serial No</th>
                                     <th>Age</th>
                                     <th>Assigned Users</th>
+                                    <th>Call Priority</th>
                                     <th>Status</th>
-                                    {/* <th>Edit</th> */}
                                     <th>View</th>
-                                    {/* <th>Delete</th> */}
                                 </tr>
                             </thead>
                             <tbody>
                                 {filteredData.map((item, index) => {
                                     const displayIndex = (currentPage - 1) * pageSize + index + 1;
+                                    const rowStyle = {
+                                        backgroundColor: item.call_priority == "HIGH" ? "#d4edda" : item.call_priority == "REGULAR" ? "#transparent" : "transparent",
+                                    };
                                     return (
                                         <tr key={item.id}>
-                                            <td>{displayIndex}</td>
-                                            <td>{item.ticket_no}</td>
-                                            <td>{formatDate(item.ticket_date)}</td>
-                                            <td>{item.customer_name}</td>
-                                            <td>{item.ModelNumber}</td>
-                                            <td>{item.serial_no}</td>
-                                            <td>{item.ageingdays}</td>
-                                            <td>{item.assigned_name}</td>
-                                            <td>{item.call_status}</td>
-                                            {/* Uncomment the below block if editing is needed */}
-                                            {/* <td>
-                <Link to={`/registercomaplaint/${item.ticket_no}`}>
-                    <button
-                        className="btn"
-                        disabled={isActionDisabled(item.call_status)}
-                        title={
-                            isActionDisabled(item.call_status)
-                                ? "Cannot edit closed or cancelled complaints"
-                                : "Edit"
-                        }
-                        style={{
-                            backgroundColor: 'transparent',
-                            border: 'none',
-                            color: isActionDisabled(item.call_status) ? 'gray' : 'blue',
-                            fontSize: '20px',
-                            cursor: isActionDisabled(item.call_status) ? 'not-allowed' : 'pointer',
-                        }}
-                    >
-                        <FaPencilAlt />
-                    </button>
-                </Link>
-            </td> */}
-                                            <td>
+                                            <td style={rowStyle}>{displayIndex}</td>  {/* Use displayIndex for correct pagination */}
+                                            <td style={rowStyle}>{item.ticket_no}</td>
+                                            <td style={rowStyle}>{formatDate(item.ticket_date)}</td>
+                                            <td style={rowStyle}>{item.customer_name}</td>
+                                            <td style={rowStyle}>{item.ModelNumber}</td>
+                                            <td style={rowStyle}>{item.serial_no}</td>
+                                            <td style={rowStyle}>{item.ageingdays}</td>
+                                            <td style={rowStyle}>{item.assigned_name}</td>
+                                            <td style={rowStyle}>{item.call_priority}</td>
+                                            <td style={rowStyle}>{item.call_status}</td>
+
+                                            <td style={rowStyle}>
                                                 <button
                                                     className="btn"
                                                     onClick={() => {
