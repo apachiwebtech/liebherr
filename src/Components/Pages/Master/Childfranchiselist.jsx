@@ -355,7 +355,7 @@ export function ChildFranchiselist(params) {
                             <div className="row mb-3">
                                 <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
                                     <div className="form-group">
-                                        <button className='btn btn-primary mx-2'>Add Partner</button>
+                                        <button className='btn btn-primary mx-2' onClick={() => navigate("/Childfranchisemaster")} >Add Partner</button>
                                         <button
                                             className="btn btn-primary"
                                             onClick={exportToExcel}

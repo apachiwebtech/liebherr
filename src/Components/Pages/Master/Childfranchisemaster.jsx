@@ -210,7 +210,7 @@ const Childfranchisemaster = () => {
   const fetchlocations = async (pincode) => {
     try {
       const response = await axiosInstance.get(
-        `${Base_Url}/getmultiplelocation/${pincode}`, {
+        `${Base_Url}/getdatafrompincode/${pincode}`, {
         headers: {
           Authorization: token,
         },
@@ -263,13 +263,13 @@ const Childfranchisemaster = () => {
     if (!formData.address.trim()) newErrors.address = "Address is required.";
 
     // Add validations for new fields
-    if (!formData.licare_code.trim()) newErrors.licare_code = "Licare Code is required.";
+    // if (!formData.licare_code.trim()) newErrors.licare_code = "Licare Code is required.";
     if (!formData.partner_name.trim()) newErrors.partner_name = "Partner Name is required.";
-    if (!formData.gst_number.trim()) newErrors.gst_number = "GST Number is required.";
-    if (!formData.pan_number.trim()) newErrors.pan_number = "PAN Number is required.";
-    if (!formData.bank_name.trim()) newErrors.bank_name = "Bank Name is required.";
-    if (!formData.bank_account_number.trim()) newErrors.bank_account_number = "Bank Account Number is required.";
-    if (!formData.bank_ifsc_code.trim()) newErrors.bank_ifsc_code = "Bank IFSC Code is required.";
+    // if (!formData.gst_number.trim()) newErrors.gst_number = "GST Number is required.";
+    // if (!formData.pan_number.trim()) newErrors.pan_number = "PAN Number is required.";
+    // if (!formData.bank_name.trim()) newErrors.bank_name = "Bank Name is required.";
+    // if (!formData.bank_account_number.trim()) newErrors.bank_account_number = "Bank Account Number is required.";
+    // if (!formData.bank_ifsc_code.trim()) newErrors.bank_ifsc_code = "Bank IFSC Code is required.";
 
     return newErrors;
   };
@@ -485,9 +485,9 @@ const Childfranchisemaster = () => {
                   </div>
 
                   <div className="col-md-3">
-                    <label className="input-field">Child Licare Code<span className="text-danger">*</span></label>
+                    <label className="input-field">Child Licare Code</label>
                     <input
-                      type="text"
+                      type="text" disabled
                       className="form-control"
                       name="licare_code"
                       value={formData.licare_code}
@@ -564,9 +564,9 @@ const Childfranchisemaster = () => {
                     {errors.password && <small className="text-danger">{errors.password}</small>}
                   </div>
 
-                  <div className="col-md-3">
+                  <div className="col-md-3" hidden>
                     <label className="input-field">Country</label>
-                    <input
+                    <input 
                       type="text"
                       className="form-control"
                       value={locations.country}

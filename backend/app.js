@@ -6188,6 +6188,15 @@ app.post("/postchildfranchise", authenticateToken, async (req, res) => {
 
 
   try {
+    const getcount = `Select Top 1 id from awt_childfranchisemaster order by id desc`;
+    const countResult = await pool.request().query(getcount);
+
+    const latestLicare = countResult.recordset[0]?.id || 0;
+
+    const newcount = latestLicare + 1;
+
+    const licarecode = `${pfranchise_id}-C${newcount.toString().padStart(4, "0")}`;
+    console.log(licarecode)
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
 
@@ -6216,7 +6225,7 @@ app.post("/postchildfranchise", authenticateToken, async (req, res) => {
       await pool.request()
         .input('title', sql.VarChar, title)
         .input('pfranchise_id', sql.Int, pfranchise_id)
-        .input('licare_code', sql.VarChar, licare_code)
+        .input('licare_code', sql.VarChar, licarecode)
         .input('partner_name', sql.VarChar, partner_name)
         .input('contact_person', sql.VarChar, contact_person)
         .input('email', sql.VarChar, email)
@@ -6257,7 +6266,7 @@ app.post("/postchildfranchise", authenticateToken, async (req, res) => {
             geostate_id = @state,
             area_id = @area,
             geocity_id = @city,
-            created_by = ${created_by},
+             created_by = @created_by,
             pincode_id = @pincode_id,
             webste = @website,
             gstno = @gst_number,
@@ -6282,7 +6291,7 @@ app.post("/postchildfranchise", authenticateToken, async (req, res) => {
     const insert = await pool.request()
       .input('title', sql.VarChar, title)
       .input('pfranchise_id', sql.Int, pfranchise_id)
-      .input('licare_code', sql.VarChar, licare_code)
+      .input('licare_code', sql.VarChar, licarecode)
       .input('partner_name', sql.VarChar, partner_name)
       .input('contact_person', sql.VarChar, contact_person)
       .input('email', sql.VarChar, email)
@@ -6315,7 +6324,7 @@ app.post("/postchildfranchise", authenticateToken, async (req, res) => {
         (@title, @pfranchise_id, @licare_code, @partner_name, @contact_person, @email, @mobile_no, @password,
          @address, @country_id, @region_id, @state, @area, @city, @pincode_id, @website, @gst_number, @pan_number,
          @bank_name, @bank_account_number, @bank_ifsc_code, @bank_address,@with_liebherr , @last_working_date,
-         @contract_activation_date, @contract_expiration_date,${created_by})
+         @contract_activation_date, @contract_expiration_date, @created_by)
       `);
     return res.json({
       message: "Child Franchise Master added successfully!",
@@ -12624,7 +12633,7 @@ app.get('/getdatafrompincode/:pincode', async (req, res) => {
     const pool = await poolPromise;
 
     // Query to fetch data based on the `id`
-    const query = `select id , geocity_name as city , geostate_name as state ,region_name , area_name as district, pincode from awt_pincode  where pincode = '${pincode}'`;
+    const query = `select id , geocity_name as city , geostate_name as state ,region_name as region , area_name as district, pincode from awt_pincode  where pincode = '${pincode}'`;
 
     const Result = await pool.request().query(query);
 
@@ -12635,5 +12644,95 @@ app.get('/getdatafrompincode/:pincode', async (req, res) => {
   } catch (err) {
     console.error("Database error:", err);
     return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
+
+// fetch pincode allocation Data 
+app.get("/getpincodelist", authenticateToken, async (req, res) => {
+  try {
+    const {
+      pincode,
+      country,
+      region,
+      state,
+      city,
+      msp_name,
+      csp_name,
+      customer_classification,
+      call_type,
+      page = 1, // Default to page 1 if not provided
+      pageSize = 10, // Default to 10 items per page if not provided
+    } = req.query;
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    // Directly use the query (no parameter binding)
+    let sql = `SELECT p.* FROM pincode_allocation as p WHERE 1=1`;
+
+    if (pincode) {
+      sql += ` AND p.pincode LIKE '%${pincode}%'`;
+    }
+
+    if (country) {
+      sql += ` AND p.country LIKE '%${country}%'`;
+    }
+
+    if (region) {
+      sql += ` AND p.region LIKE '%${region}%'`;
+    }
+
+    if (state) {
+      sql += ` AND p.state LIKE '%${state}%'`;
+    }
+
+    if (city) {
+      sql += ` AND p.city LIKE '%${city}%'`;
+    }
+
+    if (msp_name) {
+      sql += ` AND p.msp_name LIKE '%${msp_name}%'`;
+    }
+    if (csp_name) {
+      sql += ` AND p.csp_name LIKE '%${csp_name}%'`;
+    }
+    if (customer_classification) {
+      sql += ` AND p.customer_classification LIKE '%${customer_classification}%'`;
+    }
+    if (call_type) {
+      sql += ` AND p.call_type LIKE '%${call_type}%'`;
+    }
+    // Pagination logic: Calculate offset based on the page number
+    const offset = (page - 1) * pageSize;
+    // Add pagination to the SQL query (OFFSET and FETCH NEXT)
+    sql += ` ORDER BY p.pincode  OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+
+    // Execute the query
+    const result = await pool.request().query(sql);
+    // Get the total count of records for pagination
+    let countSql = `SELECT COUNT(*) as totalCount FROM pincode_allocation where 1=1 `;
+    if (pincode) countSql += ` AND pincode LIKE '%${pincode}%'`;
+    if (country) countSql += ` AND country LIKE '%${country}%'`;
+
+    if (region) countSql += ` AND region LIKE '%${region}%'`;
+    if (state) countSql += ` AND state LIKE '%${state}%'`;
+    if (city) countSql += ` AND city LIKE '%${city}%'`;
+    if (csp_name) countSql += ` AND csp_name LIKE '%${csp_name}%'`;
+    if (msp_name) countSql += ` AND msp_name LIKE '%${msp_name}%'`;
+    if (customer_classification) countSql += ` AND customer_classification LIKE '%${customer_classification}%'`;
+    if (call_type) countSql += ` AND call_type LIKE '%${call_type}%'`;
+
+    const countResult = await pool.request().query(countSql);
+    const totalCount = countResult.recordset[0].totalCount;
+    return res.json({
+      data: result.recordset,
+      totalCount: totalCount,
+      page,
+      pageSize,
+    });
+
+
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred" });
   }
 });
