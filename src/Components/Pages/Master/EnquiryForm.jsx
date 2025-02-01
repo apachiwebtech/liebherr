@@ -314,7 +314,7 @@ export function EnquiryForm(params) {
             })
                 .then((res) => {
                     alert("Remark Added")
-                    getremarks()
+                    getremarks(formData.enquiry_no)
                 })
         } else {
             alert("Remark is required")
@@ -918,10 +918,6 @@ export function EnquiryForm(params) {
                                                         </tr>
                                                     )
                                                 })}
-
-                                                <tr>
-                                                    <td><p>Remarks added in followup<br></br><br />Date : 30-01-2025 by Abhishek</p></td>
-                                                </tr>
                                             </thead>
                                             <tbody>
                                             </tbody>

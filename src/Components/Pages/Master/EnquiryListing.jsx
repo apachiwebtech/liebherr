@@ -76,11 +76,11 @@ export function EnquiryListing(params) {
                                 <table id="example" className="table table-striped">
                                     <thead>
                                         <tr>
-                                            <th width="5%">#</th>
-                                            <th width="15%">Customer Name</th>
+                                            <th width="10%">Enquiry No.</th>
                                             <th width="15%">Enquiry Date</th>
+                                            <th width="15%">Customer Name</th>
                                             <th width="10%">Mobile</th>
-                                            <th width="15%">Customer Type</th>
+                                            <th width="10%">Customer Type</th>
                                             <th width="10%">Enquiry Type</th>
                                             <th width="15%">Priority</th>
                                             <th width="10%">Model Number</th>
@@ -93,9 +93,9 @@ export function EnquiryListing(params) {
                                             // const displayIndex = (currentPage - 1) * pageSize + index + 1;
                                             return (
                                                 <tr key={item.id}>
-                                                    <td >{index}</td>
-                                                    <td>{item.customer_name}</td>
+                                                    <td >{item.enquiry_no}</td>
                                                     <td>{formatDate(item.enquiry_date)}</td>
+                                                    <td>{item.customer_name}</td>
                                                     <td>{item.mobile}</td>
                                                     <td>{item.customer_type}</td>
                                                     <td>{item.enquiry_type}</td>
