@@ -2942,7 +2942,7 @@ app.get("/getactivity", authenticateToken, async (req, res) => {
     const jsonData = JSON.stringify(result.recordset);
     const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
 
-    return res.json({encryptedData});
+    return res.json({ encryptedData });
   } catch (err) {
     console.error(err);
     return res.status(500).json(err);
@@ -4093,7 +4093,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
     complaint_date, customer_name = "NA", contact_person, email, mobile, address,
     state, city, area, pincode, mode_of_contact, ticket_type, cust_type,
     warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks
-    , ticket_id, classification, priority, callType, requested_by, requested_email, requested_mobile, msp, csp, sales_partner, sales_partner2, salutation, mwhatsapp, awhatsapp, class_city
+    , ticket_id, classification, priority, callType, requested_by, requested_email, requested_mobile, msp, csp, sales_partner, sales_partner2, salutation, mwhatsapp, awhatsapp, class_city, mother_branch
   } = req.body;
 
 
@@ -4302,13 +4302,13 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
           ticket_no, ticket_date, customer_name, customer_mobile, customer_email, address,
           state, city, area, pincode, customer_id, ModelNumber, ticket_type, call_type,
           call_status, warranty_status, invoice_date, call_charges, mode_of_contact,
-          contact_person,  created_date, created_by,  purchase_date, serial_no, child_service_partner, sevice_partner, specification ,customer_class,call_priority,requested_mobile,requested_email,requested_by,msp,csp,sales_partner,sales_partner2,call_remark,salutation,alt_mobile,mwhatsapp,awhatsapp,class_city
+          contact_person,  created_date, created_by,  purchase_date, serial_no, child_service_partner, sevice_partner, specification ,customer_class,call_priority,requested_mobile,requested_email,requested_by,msp,csp,sales_partner,sales_partner2,call_remark,salutation,alt_mobile,mwhatsapp,awhatsapp,class_city,mother_branch
         )
         VALUES (
           @ticket_no, @complaint_date, @customer_name, @mobile, @email, @address,
           @state, @city, @area, @pincode, @customer_id, @model, @ticket_type, @cust_type,
           'Open', @warranty_status, @invoice_date, @call_charge, @mode_of_contact,
-          @contact_person,  @formattedDate, @created_by,  @purchase_date, @serial, @child_service_partner, @master_service_partner, @specification ,@classification , @priority ,@requested_mobile,@requested_email,@requested_by,@msp,@csp,@sales_partner,@sales_partner2,@call_remark,@salutation,@alt_mobile,@mwhatsapp,@awhatsapp,@class_city
+          @contact_person,  @formattedDate, @created_by,  @purchase_date, @serial, @child_service_partner, @master_service_partner, @specification ,@classification , @priority ,@requested_mobile,@requested_email,@requested_by,@msp,@csp,@sales_partner,@sales_partner2,@call_remark,@salutation,@alt_mobile,@mwhatsapp,@awhatsapp,@class_city,@mother_branch
         )
       `;
       } else {
@@ -4356,7 +4356,8 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
           alt_mobile = @alt_mobile,
           mwhatsapp = @mwhatsapp,
           awhatsapp = @awhatsapp,
-          class_city = @class_city
+          class_city = @class_city,
+          mother_branch = @mother_branch
           WHERE
           id = @ticket_id
       `;
@@ -4408,6 +4409,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
         .input('awhatsapp', awhatsapp)
         .input('mwhatsapp', mwhatsapp)
         .input('class_city', class_city)
+        .input('mother_branch', mother_branch)
         .query(complaintSQL);
 
 
@@ -4497,7 +4499,7 @@ app.post("/u_complaint", authenticateToken, async (req, res) => {
   let {
     customer_name, contact_person, email, mobile, address,
     state, city, area, pincode, mode_of_contact, cust_type,
-    warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks, ticket_no, classification, priority, requested_by, requested_email, requested_mobile, sales_partner2, salutation, mwhatsapp, awhatsapp, class_city
+    warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks, ticket_no, classification, priority, requested_by, requested_email, requested_mobile, sales_partner2, salutation, mwhatsapp, awhatsapp, class_city, mother_branch
   } = req.body;
 
 
@@ -4552,7 +4554,8 @@ SET
   alt_mobile = @alt_mobile,
   mwhatsapp = @mwhatsapp,
   awhatsapp = @awhatsapp,
-  class_city = @class_city
+  class_city = @class_city,
+  mother_branch = @mother_branch
   WHERE
   ticket_no = @ticket_no
 `;
@@ -4598,6 +4601,7 @@ SET
       .input('mwhatsapp', mwhatsapp)
       .input('awhatsapp', awhatsapp)
       .input('class_city', class_city)
+      .input('mother_branch', mother_branch)
       .query(complaintSQL);
 
     //Remark insert query
@@ -5382,7 +5386,7 @@ app.get("/getengineer", authenticateToken, async (req, res) => {
 
     // Pagination logic
     const offset = (page - 1) * pageSize;
-    sql += ` ORDER BY r.id OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+    sql += ` ORDER BY r.id desc OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
 
     // Execute the main SQL query
     const result = await pool.request().query(sql);
@@ -6079,7 +6083,7 @@ WHERE m.deleted = 0
     const offset = (page - 1) * pageSize;
 
     // Add pagination to the SQL query (OFFSET and FETCH NEXT)
-    sql += ` ORDER BY m.id OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+    sql += ` ORDER BY m.id desc OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
 
 
     // Execute the SQL query
@@ -6216,48 +6220,7 @@ app.get("/requestchildfranchise/:id", authenticateToken, async (req, res) => {
   }
 });
 // app
-//.post("/postchildfranchise", async (req, res) => {
-//   const { title, pfranchise_id } = req.body;
 
-//   try {
-//     // Use the poolPromise to get the connection pool
-//     const pool = await poolPromise;
-
-//     // Check if the title already exists and is not deleted
-//     const checkDuplicateSql = `SELECT * FROM awt_childfranchisemaster WHERE title = '${title}' AND deleted = 0`;
-//     const duplicateResult = await pool.request().query(checkDuplicateSql);
-
-//     if (duplicateResult.recordset.length > 0) {
-//       return res.status(409).json({
-//         message: "Duplicate entry, Child Franchise Master already exists!",
-//       });
-//     }
-
-//     // Check if the title exists and is soft-deleted
-//     const checkSoftDeletedSql = `SELECT * FROM awt_childfranchisemaster WHERE title = '${title}' AND deleted = 1`;
-//     const softDeletedResult = await pool.request().query(checkSoftDeletedSql);
-
-//     if (softDeletedResult.recordset.length > 0) {
-//       const restoreSoftDeletedSql = `UPDATE awt_childfranchisemaster SET deleted = 0 WHERE title = '${title}'`;
-//       await pool.request().query(restoreSoftDeletedSql);
-
-//       return res.json({
-//         message: "Soft-deleted Child Franchise Master restored successfully!",
-//       });
-//     }
-
-//     // Insert the new child franchise if no duplicates or soft-deleted records found
-//     const insertSql = `INSERT INTO awt_childfranchisemaster (title, pfranchise_id) VALUES ('${title}', '${pfranchise_id}')`;
-//     await pool.request().query(insertSql);
-
-//     return res.json({
-//       message: "Child Franchise Master added successfully!",
-//     });
-//   } catch (err) {
-//     console.error(err);
-//     return res.status(500).json(err);
-//   }
-// });
 
 app.post("/postchildfranchise", authenticateToken, async (req, res) => {
   const {
@@ -6268,19 +6231,11 @@ app.post("/postchildfranchise", authenticateToken, async (req, res) => {
     state, title, website, with_liebherr, created_by
   } = req.body;
 
+  const pool = await poolPromise;
 
   try {
-    const getcount = `Select Top 1 id from awt_childfranchisemaster order by id desc`;
-    const countResult = await pool.request().query(getcount);
 
-    const latestLicare = countResult.recordset[0]?.id || 0;
-
-    const newcount = latestLicare + 1;
-
-    const licarecode = `${pfranchise_id}-C${newcount.toString().padStart(4, "0")}`;
-    console.log(licarecode)
     // Use the poolPromise to get the connection pool
-    const pool = await poolPromise;
 
     // Check if the data already exists and is not deleted
     const checkDuplicateResult = await pool.request()
@@ -6328,10 +6283,10 @@ app.post("/postchildfranchise", authenticateToken, async (req, res) => {
         .input('bank_account_number', sql.VarChar, bank_account_number)
         .input('bank_ifsc_code', sql.VarChar, bank_ifsc_code)
         .input('bank_address', sql.VarChar, bank_address)
-        .input('with_liebherr', sql.DateTime, with_liebherr)
-        .input('last_working_date', sql.DateTime, last_working_date)
-        .input('contract_activation_date', sql.DateTime, contract_activation_date)
-        .input('contract_expiration_date', sql.DateTime, contract_expiration_date)
+        .input('with_liebherr', sql.DateTime, with_liebherr || null)
+        .input('last_working_date', sql.DateTime, last_working_date || null)
+        .input('contract_activation_date', sql.DateTime, contract_activation_date || null)
+        .input('contract_expiration_date', sql.DateTime, contract_expiration_date || null)
         .query(`
           UPDATE awt_childfranchisemaster
           SET
@@ -6369,6 +6324,23 @@ app.post("/postchildfranchise", authenticateToken, async (req, res) => {
         message: "Soft-deleted Child Franchise Master restored successfully with updated data!",
       });
     }
+
+
+    const getfrinchisecount = `select Count(*) as count from awt_childfranchisemaster where pfranchise_id = '${pfranchise_id}'`
+
+    const countResult = await pool.request().query(getfrinchisecount);
+
+    const latestLicare = countResult.recordset[0].count || 0;
+
+    const newcount = latestLicare + 1;
+
+    const licarecode = `${pfranchise_id}-C${newcount.toString().padStart(4, "0")}`;
+
+
+    console.log(licarecode,"$$$")
+
+
+
     // Insert the new child franchise if no duplicates or soft-deleted records found
     const insert = await pool.request()
       .input('title', sql.VarChar, title)
@@ -6393,10 +6365,11 @@ app.post("/postchildfranchise", authenticateToken, async (req, res) => {
       .input('bank_account_number', sql.VarChar, bank_account_number)
       .input('bank_ifsc_code', sql.VarChar, bank_ifsc_code)
       .input('bank_address', sql.VarChar, bank_address)
-      .input('last_working_date', sql.DateTime, last_working_date)
-      .input('contract_activation_date', sql.DateTime, contract_activation_date)
-      .input('contract_expiration_date', sql.DateTime, contract_expiration_date)
-      .input('with_liebherr', sql.DateTime, with_liebherr)
+      .input('last_working_date', sql.DateTime, last_working_date || null)
+      .input('contract_activation_date', sql.DateTime, contract_activation_date || null)
+      .input('contract_expiration_date', sql.DateTime, contract_expiration_date || null)
+      .input('with_liebherr', sql.DateTime, with_liebherr || null)
+      .input('created_by', sql.VarChar, created_by)
       .query(`
         INSERT INTO awt_childfranchisemaster
         (title, pfranchise_id, licare_code, partner_name, contact_person, email, mobile_no, password, address,
@@ -7754,7 +7727,7 @@ app.get("/getlhidata", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
 
     // SQL query to fetch lhi_user data where deleted is 0
-    const sql = "SELECT * FROM lhi_user WHERE deleted = 0";
+    const sql = "SELECT * FROM lhi_user WHERE deleted = 0 order by id desc";
     const result = await pool.request().query(sql);
     // Convert data to JSON string and encrypt it
     const jsonData = JSON.stringify(result.recordset);
@@ -7828,8 +7801,22 @@ app.post("/postlhidata", authenticateToken, async (req, res) => {
 
         return res.json({ message: "Soft-deleted data restored successfully!" });
       } else {
+
+        const getcount = `SELECT COUNT(*) AS count FROM lhi_user`;
+
+        const getcountresult = await pool.request().query(getcount);
+        
+        const newcount = getcountresult.recordset[0].count + 1;
+        
+        // Format the newcount as LH0001
+        const licarecode = `LH${newcount.toString().padStart(4, '0')}`;
+        
+
+
+
+
         // Step 3: Insert new entry if no duplicates found
-        sql = `INSERT INTO lhi_user (Lhiuser,password,remarks,Usercode,mobile_no,email,status,Role,Reporting_to,Designation) VALUES ('${Lhiuser}','${password}','${remarks}','${UserCode}','${mobile_no}','${email}','${status}','${Role}','${Reporting_to}','${Designation}')`
+        sql = `INSERT INTO lhi_user (Lhiuser,password,remarks,Usercode,mobile_no,email,status,Role,Reporting_to,Designation) VALUES ('${Lhiuser}','${password}','${remarks}','${licarecode}','${mobile_no}','${email}','${status}','${Role}','${Reporting_to}','${Designation}')`
         await pool.request().query(sql);
 
         return res.json({ message: "Lhiuser added successfully!" });
@@ -9395,7 +9382,7 @@ app.get("/getmultiplelocation/:pincode/:classification/:ticket_type", authentica
 
     const pool = await poolPromise;
 
-    const sql = `SELECT cn.title as country, p.region_name as region, p.geostate_name as state, p.area_name as district, p.geocity_name as city,  o.msp_code as msp, f.title as mspname,  o.csp_code as csp, fm.title as cspname,  p.pincode , class_city
+    const sql = `SELECT cn.title as country, p.region_name as region, p.geostate_name as state, p.area_name as district, p.geocity_name as city,  o.msp_code as msp, f.title as mspname,  o.csp_code as csp, fm.title as cspname,  p.pincode , class_city , o.mother_branch
     FROM awt_pincode as p
     LEFT JOIN awt_region as r on p.region_id = r.id
     LEFT JOIN awt_country as cn on p.country_id = cn.id
@@ -9918,7 +9905,7 @@ app.post(`/add_quotation`, authenticateToken, async (req, res) => {
 
     const quotationcode = 'Q' + newcount.toString().padStart(4, "0")
 
-    console.log(quotationcode)
+
 
 
     const query = `
@@ -11437,10 +11424,10 @@ app.post("/postenquiry", authenticateToken, async (req, res) => {
     // SQL Query to insert data into the enquiry table
     const sql = `
       INSERT INTO awt_enquirymaster (
-        source, enquiry_no,enquiry_date, salutation, customer_name, email, mobile, alt_mobile, request_mobile, customer_type, enquiry_type, address, pincode, state, district, city, interested, modelnumber, priority, notes , awhatsapp, mwhatsapp,created_by,created_date
+        source, enquiry_no,enquiry_date, salutation, customer_name, email, mobile, alt_mobile, request_mobile, customer_type, enquiry_type, address, pincode, state, district, city, interested, modelnumber, priority, notes , awhatsapp, mwhatsapp,leadstatus,created_by,created_date
       )
       VALUES (
-        @source,@enquiry_no, @enquiry_date, @salutation, @customer_name, @email, @mobile, @alt_mobile, @request_mobile, @customer_type, @enquiry_type, @address, @pincode, @state, @district, @city, @interested, @modelnumber, @priority, @notes ,@awhatsapp, @mwhatsapp,@created_by,@created_date
+        @source,@enquiry_no, @enquiry_date, @salutation, @customer_name, @email, @mobile, @alt_mobile, @request_mobile, @customer_type, @enquiry_type, @address, @pincode, @state, @district, @city, @interested, @modelnumber, @priority, @notes ,@awhatsapp, @mwhatsapp,@leadstatus,@created_by,@created_date
       );
     `;
 
@@ -11468,6 +11455,7 @@ app.post("/postenquiry", authenticateToken, async (req, res) => {
       .input("notes", notes)
       .input("awhatsapp", awhatsapp)
       .input("mwhatsapp", mwhatsapp)
+      .input("leadstatus", 'No')
       .input("created_by", created_by)
       .input("created_date", created_date)
       .query(sql);
@@ -11587,7 +11575,7 @@ app.post("/getsearchcsp", authenticateToken, async (req, res) => {
 
     // Parameterized query with a limit
     const sql = `
-    SELECT TOP 20 id, title
+    SELECT TOP 20 licare_code as id, title
     FROM awt_childfranchisemaster
     WHERE title LIKE @param AND deleted = 0
     ORDER BY title;
@@ -11758,7 +11746,7 @@ app.post("/add_spareoutward", authenticateToken, async (req, res) => {
       .query(sql);
 
     // If the insert was successful, send the result
-    return res.json({ message: "Issue created successfully", issue_no: issue_no, data: result.recordset });
+    return res.json({ message: "Issue created successfully", issue_no: issue_no, issue_to: isEng, lhi_code: lhi_code, data: result.recordset });
 
   } catch (err) {
     console.error("Error fetching data:", err);
@@ -11852,6 +11840,95 @@ app.post('/updateissuespares', async (req, res) => {
       await request.query(updateIssueQuery);
 
 
+      // Update or insert into `engineer_stock` if issued to an engineer
+      if (item.issue_to === 'eng') {
+        const engStockRequest = new sql.Request(transaction);
+
+        // Check if stock exists
+        const getEngStockQuery = `
+      SELECT stock_quantity
+      FROM engineer_stock
+      WHERE product_code = @product_code and eng_code = @eng_code
+    `;
+
+
+        engStockRequest.input('product_code', sql.VarChar, item.article_code);
+        engStockRequest.input('productname', sql.VarChar, item.article_title);
+        engStockRequest.input('eng_code', sql.VarChar, item.lhi_code);
+        const stockEngResult = await engStockRequest.query(getEngStockQuery);
+
+        if (stockEngResult.recordset.length > 0) {
+          const existingStock = stockEngResult.recordset[0];
+          const updatedQty = Number(existingStock.stock_quantity) + Number(item.quantity);
+          const createdDate = new Date().toISOString();
+          const updateEngStockQuery = `
+        UPDATE engineer_stock
+        SET stock_quantity = @updated_qty , updated_by = @updated_by , updated_date = @updated_date 
+        WHERE product_code = @product_code and eng_code = @eng_code
+      `;
+          engStockRequest.input('updated_qty', sql.Int, updatedQty);
+          engStockRequest.input('updated_by', sql.VarChar, item.licare_code);
+          engStockRequest.input('updated_date', sql.DateTime, createdDate);
+          await engStockRequest.query(updateEngStockQuery);
+        } else {
+          const createdDate = new Date().toISOString();
+          const insertEngStockQuery = `
+        INSERT INTO engineer_stock (eng_code,product_code, productname,stock_quantity, created_by, created_date)
+        VALUES (@eng_code,@product_code,@productname, @stock_qty, @created_by, @created_date)
+      `;
+          engStockRequest
+            .input('stock_qty', sql.Int, item.quantity)
+            .input('created_by', sql.VarChar, item.licare_code)
+            .input('created_date', sql.DateTime, createdDate);
+          await engStockRequest.query(insertEngStockQuery);
+        }
+      }
+
+
+      if (item.issue_to === 'csp') {
+        const cspStockRequest = new sql.Request(transaction);
+
+        // Check if stock exists
+        const getEngStockQuery = `
+      SELECT stock_quantity
+      FROM csp_stock
+      WHERE product_code = @product_code and csp_code = @csp_code
+    `;
+
+
+        cspStockRequest.input('product_code', sql.VarChar, item.article_code);
+        cspStockRequest.input('productname', sql.VarChar, item.article_title);
+        cspStockRequest.input('csp_code', sql.VarChar, item.lhi_code);
+        const stockEngResult = await cspStockRequest.query(getEngStockQuery);
+
+        if (stockEngResult.recordset.length > 0) {
+          const existingStock = stockEngResult.recordset[0];
+          const updatedQty = Number(existingStock.stock_quantity) + Number(item.quantity);
+          const createdDate = new Date().toISOString();
+          const updateEngStockQuery = `
+        UPDATE csp_stock
+        SET stock_quantity = @updated_qty , updated_by = @updated_by , updated_date = @updated_date 
+        WHERE product_code = @product_code and csp_code = @csp_code
+      `;
+          cspStockRequest.input('updated_qty', sql.Int, updatedQty);
+          cspStockRequest.input('updated_by', sql.VarChar, item.licare_code);
+          cspStockRequest.input('updated_date', sql.DateTime, createdDate);
+          await cspStockRequest.query(updateEngStockQuery);
+        } else {
+          const createdDate = new Date().toISOString();
+          const insertEngStockQuery = `
+        INSERT INTO csp_stock (csp_code,product_code, productname,stock_quantity, created_by, created_date)
+        VALUES (@csp_code,@product_code,@productname, @stock_qty, @created_by, @created_date)
+      `;
+          cspStockRequest
+            .input('stock_qty', sql.Int, item.quantity)
+            .input('created_by', sql.VarChar, item.licare_code)
+            .input('created_date', sql.DateTime, createdDate);
+          await cspStockRequest.query(insertEngStockQuery);
+        }
+      }
+
+
 
 
 
@@ -11860,7 +11937,7 @@ app.post('/updateissuespares', async (req, res) => {
       const getStockQuery = `
         SELECT stock_quantity 
         FROM csp_stock 
-        WHERE product_code = @spare_no AND created_by = @licare_code
+        WHERE product_code = @spare_no AND csp_code = @licare_code
       `;
       request.input('licare_code', sql.VarChar, item.licare_code);
       const stockResult = await request.query(getStockQuery);
@@ -11868,20 +11945,24 @@ app.post('/updateissuespares', async (req, res) => {
 
 
       if (stockResult.recordset.length > 0) {
+
+
+
+
         const spare = stockResult.recordset[0];
         const final_qty = Number(spare.stock_quantity) - Number(item.quantity);
-
-
 
         // Update stock in `csp_stock`
         const updateStockQuery = `
           UPDATE csp_stock 
           SET stock_quantity = @final_quantity 
-          WHERE product_code = @spare_no AND created_by = @licare_code
+          WHERE product_code = @spare_no AND csp_code = @licare_code
         `;
         request.input('final_quantity', sql.Int, final_qty);
         await request.query(updateStockQuery);
       }
+
+
     }
 
     // Commit transaction
@@ -12060,8 +12141,8 @@ app.post('/addgrnspares', async (req, res) => {
       VALUES (@grn_no, @article_code, @article_title, @spare_qty, @created_by, @created_date)
     `;
     const Stockadd = `
-      INSERT INTO csp_stock (product_code, productname, stock_quantity, created_by, created_date)
-      VALUES (@product_code, @productname, @stock_quantity, @created_by, @created_date)
+      INSERT INTO csp_stock (csp_code,product_code, productname, stock_quantity, created_by, created_date)
+      VALUES (@csp_code ,@product_code, @productname, @stock_quantity, @created_by, @created_date)
     `;
 
     const duplicateCheckQuery = `
@@ -12117,6 +12198,7 @@ app.post('/addgrnspares', async (req, res) => {
         await bulkInstock
           .input('product_code', sql.VarChar, item.article_code) // Correct parameter names
           .input('productname', sql.VarChar, item.article_title) // 
+          .input('csp_code', sql.VarChar, created_by) // Correct parameter names
           .input('stock_quantity', sql.Int, item.spare_qty)
           .input('created_by', sql.VarChar, item.created_by)
           .input('created_date', sql.DateTime, item.created_date)
@@ -12263,7 +12345,7 @@ app.post("/getgrnsparelist", authenticateToken, async (req, res) => {
 
 app.post("/getissuesparelist", authenticateToken, async (req, res) => {
 
-  const { Issue_No } = req.body;
+  const { Issue_No, csp_code } = req.body;
 
 
   try {
@@ -12531,22 +12613,24 @@ app.get('/mspgetheaddata_web', authenticateToken, async (req, res) => {
   }
 });
 
-app.get("/getstock", authenticateToken, async (req, res) => {
+app.get("/getstock/:licare_code", authenticateToken, async (req, res) => {
+  const { licare_code } = req.params
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
-    const result = await pool.request().query("SELECT * FROM csp_stock WHERE deleted = 0 ");
+    const result = await pool.request().query(`SELECT * FROM csp_stock WHERE deleted = 0 and csp_code = '${licare_code}'`);
     return res.json(result.recordset);
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'An error occurred while fetching data' });
   }
 });
-app.get("/getengstock", authenticateToken, async (req, res) => {
+app.get("/getengstock/:licare_code", authenticateToken, async (req, res) => {
+  const { licare_code } = req.params
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
-    const result = await pool.request().query("SELECT * FROM engineer_stock WHERE deleted = 0 ");
+    const result = await pool.request().query(`SELECT * FROM engineer_stock WHERE deleted = 0 and eng_code = '${licare_code}'`);
     return res.json(result.recordset);
   } catch (err) {
     console.error(err);

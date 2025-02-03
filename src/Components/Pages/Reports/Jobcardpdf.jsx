@@ -105,7 +105,16 @@ const styles = StyleSheet.create({
 
 const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
 
-    console.log(engineer);
+
+
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const year = date.getFullYear();
+    
+        return `${day}-${month}-${year}`;
+      };
 
 
 
@@ -252,7 +261,7 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Invoice Date</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '25%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.purchase_date}</Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{ data.purchase_date?formatDate(data.purchase_date) : null}</Text>
 
                         </View>
 
@@ -301,7 +310,7 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
                             <Text style={{ fontSize: '10px', marginTop: 5, color: '#000' }}>Ticket Create Date </Text>
                         </View>
                         <View style={[styles.tableCol, { width: '25%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.ticket_date}</Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.ticket_date ?formatDate(data.ticket_date)  : null}</Text>
 
                         </View>
 
@@ -330,7 +339,7 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Completed Date </Text>
                         </View>
                         <View style={[styles.tableCol, { width: '25%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.closed_date}</Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.closed_date ? formatDate(data.closed_date) : null}</Text>
 
                         </View>
 
@@ -420,7 +429,7 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
                             <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 15, color: '#000', fontWeight: 1600 }}>{engineer[0] && engineer[0].title}</Text>
                         </View>
                         <View style={[styles.tableCol14, { width: '5%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 10, color: '#000', fontWeight: 1600 }}>{engineer[0] && engineer[0].created_date}</Text>
+                            <Text style={{ fontSize: '10px', marginTop: 10, color: '#000', fontWeight: 1600 }}>{engineer[0] &&  formatDate(engineer[0].created_date)}</Text>
 
                         </View>
                         <View style={[styles.tableCol14, { width: '8%' }]}>

@@ -16,7 +16,7 @@ export function CspStock(params) {
     const { loaders, axiosInstance } = useAxiosLoader();
     const token = localStorage.getItem("token");
     const [Stockdata, setStockdata] = useState([]);
-
+    const licare_code = localStorage.getItem("licare_code");
     
         const [formData, setFormData] = useState({
             productname: '',
@@ -28,7 +28,7 @@ export function CspStock(params) {
     const fetchStock = async (page) => {
         try {
 
-            const response = await axiosInstance.get(`${Base_Url}/getstock `, {
+            const response = await axiosInstance.get(`${Base_Url}/getstock/${licare_code}`, {
                 headers: {
                     Authorization: token,
                 },

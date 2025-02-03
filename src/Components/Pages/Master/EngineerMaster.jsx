@@ -281,7 +281,7 @@ const EngineerMaster = () => {
               },
             })
             .then(response => {
-              console.log(response.data)
+              alert("Engineer Updated")
               setFormData({
                 title: '',
                 mfranchise_id: '',
@@ -320,6 +320,7 @@ const EngineerMaster = () => {
             }
           )
             .then(response => {
+              alert("Engineer Added")
               setFormData({
                 title: '',
                 mfranchise_id: '',
@@ -590,7 +591,7 @@ const EngineerMaster = () => {
                       </div>
 
                       <div className="col-md-3">
-                        <label htmlFor="dobInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>Date of Birth</label>
+                        <label htmlFor="dobInput" className="input-field d-block"  style={{ marginBottom: '15px', fontSize: '18px' }}>Date of Birth</label>
                         <DatePicker
                           selected={selectedDate}
                           onChange={handleDateChange}
@@ -651,7 +652,7 @@ const EngineerMaster = () => {
                         {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
                       </div>
                       <div className="col-md-3">
-                        <label htmlFor="joiningDateInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>Joining Date</label>
+                        <label htmlFor="joiningDateInput" className="input-field d-block" style={{ marginBottom: '15px', fontSize: '18px' }}>Joining Date</label>
                         <DatePicker
                           selected={joining_date}
                           onChange={handleDateChange2}

@@ -14,6 +14,7 @@ import CspAddtab from "./CspAddtab";
 import GrnTab from "./GrnTab";
 import { Autocomplete, TextField } from "@mui/material";
 import _debounce from 'lodash.debounce';
+import { useNavigate } from "react-router-dom";
 
 
 const CreateGrn = () => {
@@ -30,6 +31,7 @@ const CreateGrn = () => {
     const [SpareId, setSpareId] = useState([]);
     const [selectedspare, setselectedSpare] = useState([]);
     const [productdata, setProduct] = useState([]);
+    const [submithide, setsubmithide] = useState(false);
     const [selectcsp, setselectedCsp] = useState(null);
     const [selectengineer, setselectedEngineer] = useState(null);
     const [csp_no, setcsp_no] = useState(null);
@@ -212,6 +214,7 @@ const CreateGrn = () => {
                         localStorage.setItem('grn_no', res.data.grn_no)
 
                         setHidelist(true)
+                        setsubmithide(true)
                     }
 
                 })
@@ -223,6 +226,8 @@ const CreateGrn = () => {
 
 
     }
+
+    const navigate = useNavigate()
 
     const handleSpareSend = async () => {
         try {
@@ -246,10 +251,10 @@ const CreateGrn = () => {
                 }
             });
 
-            console.log("Response:", response.data);
 
             if (response.status === 200) {
                 alert("Data saved successfully!");
+                navigate('/csp/grnlisting')
             } else {
                 alert("Failed to save data.");
             }
@@ -537,9 +542,10 @@ const CreateGrn = () => {
 
                                 </div>
 
-                                <div className="">
+                             {submithide ?  null :<div className="">
                                     <button className="btn btn-primary" type="">Submit</button>
-                                </div>
+                                </div> }  
+                            
 
 
                             </form>

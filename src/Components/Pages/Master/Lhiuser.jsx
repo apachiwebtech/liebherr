@@ -209,6 +209,7 @@ const Lhiuser = () => {
                   },
                 })
               .then((response) => {
+                alert("User Updated")
                 setFormData({
                   Lhiuser: "",
                   Usercode: "",
@@ -244,6 +245,8 @@ const Lhiuser = () => {
                   },
                 })
               .then((response) => {
+
+                alert("User Added")
                 setFormData({
                   Lhiuser: "",
                   Usercode: "",

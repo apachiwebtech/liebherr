@@ -14,6 +14,7 @@ import CspAddtab from "./CspAddtab";
 import GrnTab from "./GrnTab";
 import { Autocomplete, TextField } from "@mui/material";
 import _debounce from 'lodash.debounce';
+import { useNavigate } from "react-router-dom";
 
 
 const Spareoutward = () => {
@@ -35,6 +36,7 @@ const Spareoutward = () => {
     const [csp_no, setcsp_no] = useState(null);
     const [selectproduct, setselectedproduct] = useState(null);
     const [text, setText] = useState("");
+    const [submithide, setsubmithide] = useState(false);
     const [engtext, setEngText] = useState("");
     const [producttext, setProductText] = useState("");
     const token = localStorage.getItem("token"); // Get token from localStorage
@@ -210,7 +212,9 @@ const Spareoutward = () => {
 
                     if (res.data.issue_no) {
                         localStorage.setItem('issue_no', res.data.issue_no)
-
+                        localStorage.setItem('issue_to', res.data.issue_to)
+                        localStorage.setItem('lhi_code', res.data.lhi_code)
+                        setsubmithide(true)
                         setHidelist(true)
                     }
 
@@ -223,7 +227,7 @@ const Spareoutward = () => {
 
 
     }
-
+ const navigate = useNavigate()
     const handleSpareSend = async () => {
         try {
             // Map the `spare` array to construct the payload with additional `spare_qty`
@@ -233,7 +237,9 @@ const Spareoutward = () => {
                 article_title: item.spare_title,
                 quantity: String(item.quantity) || String(0), // Use the updated `spare_qty`, default to 0 if empty
                 issue_no: localStorage.getItem('issue_no'),
-                licare_code : created_by
+                licare_code : created_by,
+                issue_to : localStorage.getItem('issue_to'),
+                lhi_code : localStorage.getItem('lhi_code')
             }));
 
 
@@ -251,6 +257,8 @@ const Spareoutward = () => {
 
             if (response.status === 200) {
                 alert("Data saved successfully!");
+                navigate('/csp/grnoutward')
+
             } else {
                 alert("Failed to save data.");
             }
@@ -503,10 +511,10 @@ const Spareoutward = () => {
 
                                 </div>
 
-                                <div className="">
+                            {submithide ? null : <div className="">
                                     <button className="btn btn-primary" type="">Submit</button>
                                 </div>
-
+}    
 
                             </form>
 

@@ -4,22 +4,17 @@ import { Base_Url } from '../../Utils/Base_Url';
 import Header from './Header';
 
 export function EngineerStock(params) {
-    const { loaders, axiosInstance } = useAxiosLoader();
+   const { loaders, axiosInstance } = useAxiosLoader();
     const token = localStorage.getItem("token");
     const [Stockdata, setStockdata] = useState([]);
+    const licare_code = localStorage.getItem("userid");
 
-
-    const [formData, setFormData] = useState({
-        productname: '',
-        stock_quantity: '',
-
-    });
 
 
     const fetchStock = async (page) => {
         try {
 
-            const response = await axiosInstance.get(`${Base_Url}/getengstock `, {
+            const response = await axiosInstance.get(`${Base_Url}/getengstock/${licare_code}`, {
                 headers: {
                     Authorization: token,
                 },
@@ -31,6 +26,8 @@ export function EngineerStock(params) {
             setStockdata([]);
         }
     };
+
+
     useEffect(() => {
         fetchStock();
     }, []);

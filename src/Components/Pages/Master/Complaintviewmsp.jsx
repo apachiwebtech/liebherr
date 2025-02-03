@@ -277,7 +277,11 @@ export function Complaintviewmsp(params) {
       });
 
       if (res.data) {
-        setGroupDefect(res.data);
+               const encryptedData = res.data.encryptedData; // Assuming response contains { encryptedData }
+               const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+               const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+       
+               setGroupDefect(decryptedData);
       } else {
         console.error("Expected array from API but got:", typeof res.data);
         setGroupDefect([]); // Set empty array as fallback
@@ -297,7 +301,10 @@ export function Complaintviewmsp(params) {
       });
 
       if (res.data) {
-        setactivity(res.data);
+          const encryptedData = res.data.encryptedData; // Assuming response contains { encryptedData }
+               const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+               const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+               setactivity(decryptedData);
       } else {
         console.error("Expected array from API but got:", typeof res.data);
         setactivity([]); // Set empty array as fallback
@@ -352,7 +359,10 @@ export function Complaintviewmsp(params) {
 
 
         if (res.data) {
-          setGroupDefecttype(res.data);
+             const encryptedData = res.data.encryptedData; // Assuming response contains { encryptedData }
+                    const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+                    const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+                    setGroupDefecttype(decryptedData);
         } else {
           console.error("Expected array from API but got:", typeof res.data);
           setGroupDefecttype([]); // Set empty array as fallback
@@ -413,7 +423,10 @@ export function Complaintviewmsp(params) {
 
 
         if (res.data) {
-          setGroupDefectsite(res.data);
+                   const encryptedData = res.data.encryptedData; // Assuming response contains { encryptedData }
+                    const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+                    const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+                    setGroupDefectsite(decryptedData);
         } else {
           console.error("Expected array from API but got:", typeof res.data);
           setGroupDefectsite([]); // Set empty array as fallback

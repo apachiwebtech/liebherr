@@ -177,7 +177,14 @@ const EnquiryListing = () => {
                 <div className="searchFilter">
 
                     <div className="m-3">
+                        <div className='my-2 text-end'>
+                            <button className='btn btn-primary ' onClick={() => {
+                                navigate('/addenquiry')
+                            }}>Add Enquiry</button>
+                        </div>
+
                         <div className="row mb-3">
+
 
                             <div className="col-md-2">
                                 <div className="form-group">
@@ -252,7 +259,7 @@ const EnquiryListing = () => {
                                         <option value="Dealership">DEALERSHIP</option>
                                         <option value="Service Partner">SERVICE PARTNER</option>
                                         <option value="Others">OTHERS</option>
-                                        
+
                                     </select>
                                 </div>
                             </div>
@@ -287,7 +294,7 @@ const EnquiryListing = () => {
                                     />
                                 </div>
                             </div>
-                           
+
 
 
 
@@ -348,11 +355,7 @@ const EnquiryListing = () => {
                 </div>
 
 
-                {/* <div className='my-2'>
-                            <button className='btn btn-primary ' onClick={() => {
-                                navigate('/addenquiry')
-                            }}>Add Enquiry</button>
-                        </div> */}
+
 
                 <div className="col-md-12 col-12">
                     <div className="card mb-3 tab_box">
@@ -368,8 +371,9 @@ const EnquiryListing = () => {
                                             <th width="10%">Mobile</th>
                                             <th width="10%">Customer Type</th>
                                             <th width="10%">Enquiry Type</th>
-                                            <th width="15%">Priority</th>
+                                            <th width="5%">Priority</th>
                                             <th width="10%">Model Number</th>
+                                            <th width="10%">Lead Status</th>
                                             <th width="5%">Edit</th>
 
                                         </tr>
@@ -389,6 +393,9 @@ const EnquiryListing = () => {
                                                     <td>{item.priority}</td>
                                                     <td>
                                                         {item.modelnumber}
+                                                    </td>
+                                                    <td>
+                                                        {item.leadstatus}
                                                     </td>
                                                     <td>
 

@@ -177,7 +177,8 @@ export function Registercomplaint(params) {
     requested_by: "",
     requested_email: "",
     requested_mobile: "",
-    class_city :""
+    class_city :"",
+    mother_branch : ""
   })
 
   const handleDateChange = (date) => {
@@ -942,7 +943,8 @@ export function Registercomplaint(params) {
         sales_partner2: value.sales_partner2 || '',
         mwhatsapp: String(checkboxes.mwhatsapp),
         awhatsapp: String(checkboxes.awhatsaap),
-        ticket_id: String(ticketid)
+        ticket_id: String(ticketid),
+        mother_branch : value.mother_branch || ''
       };
 
 
@@ -1023,7 +1025,8 @@ export function Registercomplaint(params) {
       salutation: value.salutation || "",
       mwhatsapp: checkboxes.mwhatsapp || 0,
       awhatsapp: checkboxes.awhatsaap || 0,
-      ticket_no: Comp_id
+      ticket_no: Comp_id,
+      mother_branch : value.mother_branch || ''
     };
 
 
@@ -1178,7 +1181,8 @@ export function Registercomplaint(params) {
             child_service_partner: response.data[0].cspname,
             csp: response.data[0].csp,
             msp: response.data[0].msp,
-            class_city : response.data[0].class_city
+            class_city : response.data[0].class_city,
+            mother_branch : response.data[0].mother_branch
           })
 
         }
@@ -1660,6 +1664,7 @@ export function Registercomplaint(params) {
                             name="serial"
                             value={value.serial}
                             onChange={onHandleChange}
+                            onKeyDown={handleKeyDown}
                             className="form-control"
                             placeholder="Enter.."
                             disabled={serialhide == '' ? false : true}

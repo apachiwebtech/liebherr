@@ -4,7 +4,7 @@ import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url, secretKey } from "../../Utils/Base_Url";
 import Franchisemaster from '../Master/Franchisemaster';
 import { useSelector } from 'react-redux';
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import md5 from "js-md5";
 import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
@@ -282,6 +282,8 @@ const Childfranchisemaster = () => {
     return newErrors;
   };
 
+  const navigate = useNavigate()
+
 
   //handlesubmit form
   const handleSubmit = async (e) => {
@@ -312,6 +314,7 @@ const Childfranchisemaster = () => {
               },
             })
             .then((response) => {
+             
               setFormData({
                 title: "",
                 pfranchise_id: "",
@@ -358,6 +361,8 @@ const Childfranchisemaster = () => {
             },
           })
             .then((response) => {
+
+
               setFormData({
                 title: "",
                 pfranchise_id: "",
@@ -386,6 +391,7 @@ const Childfranchisemaster = () => {
                 contract_expiration_date: "",
                 with_liebherr: ""
               });
+              navigate('/Childfranchiselist')
               fetchUsers();
             })
             .catch((error) => {
