@@ -109,6 +109,10 @@ const ReasonCode = () => {
             setErrors(validationErrors);
             return;
         }
+        const encryptedData = CryptoJS.AES.encrypt(
+            JSON.stringify(formData),
+            secretKey
+        ).toString();
 
         setDuplicateError(''); // Clear duplicate error before submitting
 
@@ -118,11 +122,7 @@ const ReasonCode = () => {
                 if (isEdit) {
                     // For update, include 'updated_by'
                     await axiosInstance.post(`${Base_Url}/putdatatypeofdefect`, {
-                        id: formData.id,  // Explicitly pass the ID
-                        groupdefect_code: formData.groupdefect_code,
-                        defect_code: formData.defect_code,
-                        defect_title: formData.defect_title,
-                        description: formData.description,
+                        encryptedData,
                         updated_by: updated_by
                     }, {
                         headers: {
@@ -146,7 +146,7 @@ const ReasonCode = () => {
                         });
                 } else {
                     // For insert, include 'created_by'
-                    await axiosInstance.post(`${Base_Url}/postdatatypeofdefect`, { ...formData, created_by: created_by }, {
+                    await axiosInstance.post(`${Base_Url}/postdatatypeofdefect`, { encryptedData, created_by: created_by }, {
                         headers: {
                             Authorization: token, // Send token in headers
                         },

@@ -2919,7 +2919,9 @@ app.get("/gettypeofdefect", authenticateToken, async (req, res) => {
 
 // Insert  Type Of Defect Code
 app.post("/postdatatypeofdefect", authenticateToken, async (req, res) => {
-  const { defect_code, groupdefect_code, defect_title, description, created_by } = req.body;
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { defect_code, groupdefect_code, defect_title, description, created_by } = JSON.parse(decryptedData);
 
   try {
     const pool = await poolPromise;
@@ -2990,7 +2992,9 @@ app.get("/requestdatatypeofdefect/:id", authenticateToken, async (req, res) => {
 
 // Update Type Of Defect Code
 app.post("/putdatatypeofdefect", authenticateToken, async (req, res) => {
-  const { id, defect_code, groupdefect_code, defect_title, description, updated_by } = req.body;
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { id, defect_code, groupdefect_code, defect_title, description, updated_by } = JSON.parse(decryptedData);
   try {
     const pool = await poolPromise;
     const checkDuplicateSql = `
@@ -3132,7 +3136,9 @@ app.post("/postactivity", authenticateToken, async (req, res) => {
 });
 // Insert  Type Of Defect Code
 app.post("/postsitedefect", authenticateToken, async (req, res) => {
-  const { dsite_code, groupdefectcode, dsite_title, description, created_by } = req.body;
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { dsite_code, groupdefectcode, dsite_title, description, created_by } = JSON.parse(decryptedData);
 
   try {
     const pool = await poolPromise;
@@ -3275,7 +3281,9 @@ app.post("/putactivity", authenticateToken, async (req, res) => {
 
 // Update Type Of Defect Code
 app.post("/putsitedefect", authenticateToken, async (req, res) => {
-  const { id, dsite_code, groupdefectcode, dsite_title, description, updated_by } = req.body;
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { id, dsite_code, groupdefectcode, dsite_title, description, updated_by } = JSON.parse(decryptedData);
 
   try {
     const pool = await poolPromise;

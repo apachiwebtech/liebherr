@@ -111,6 +111,10 @@ const ActionCode = () => {
       setErrors(validationErrors);
       return;
     }
+    const encryptedData = CryptoJS.AES.encrypt(
+      JSON.stringify(formData),
+      secretKey
+    ).toString();
 
     setDuplicateError(''); // Clear duplicate error before submitting
 
@@ -120,11 +124,7 @@ const ActionCode = () => {
         if (isEdit) {
           // For update, include 'updated_by'
           await axiosInstance.post(`${Base_Url}/putsitedefect`, {
-            id: formData.id,  // Explicitly pass the ID
-            groupdefectcode: formData.groupdefectcode,
-            dsite_code: formData.dsite_code,
-            dsite_title: formData.dsite_title,
-            description: formData.description,
+            encryptedData,
             updated_by: updated_by
           }
             , {
@@ -149,7 +149,7 @@ const ActionCode = () => {
             });
         } else {
           // For insert, include 'created_by'
-          await axiosInstance.post(`${Base_Url}/postsitedefect`, { ...formData, created_by: created_by }
+          await axiosInstance.post(`${Base_Url}/postsitedefect`, { encryptedData, created_by: created_by }
             , {
               headers: {
                 Authorization: token, // Send token in headers
@@ -180,21 +180,21 @@ const ActionCode = () => {
 
 
   const deleted = async (id) => {
-    const confirm =  window.confirm("Are you sure you want to delete ?");
+    const confirm = window.confirm("Are you sure you want to delete ?");
 
-    if(confirm){
-    try {
-      const response = await axiosInstance.post(`${Base_Url}/deletesitedefect`, { id }
-        , {
-          headers: {
-            Authorization: token, // Send token in headers
-          },
-        });
-      fetchUsers();
-    } catch (error) {
-      console.error('Error deleting user:', error);
+    if (confirm) {
+      try {
+        const response = await axiosInstance.post(`${Base_Url}/deletesitedefect`, { id }
+          , {
+            headers: {
+              Authorization: token, // Send token in headers
+            },
+          });
+        fetchUsers();
+      } catch (error) {
+        console.error('Error deleting user:', error);
+      }
     }
-  }
   };
   const edit = async (id) => {
     try {
