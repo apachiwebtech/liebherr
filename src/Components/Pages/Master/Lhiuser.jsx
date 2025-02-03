@@ -52,9 +52,13 @@ const Lhiuser = () => {
           Authorization: token, // Send token in headers
         },
       });
-      console.log(response.data);
+      // Decrypt the response data
+      const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+      const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+      const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+      console.log(decryptedData);
 
-      setRoles(response.data);
+      setRoles(decryptedData);
     } catch (error) {
       console.error("Error fetching countries:", error);
     }
@@ -68,8 +72,12 @@ const Lhiuser = () => {
           Authorization: token, // Send token in headers
         },
       });
-      console.log(response.data);
-      setReporting(response.data);
+      // Decrypt the response data
+      const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+      const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+      const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+      console.log(decryptedData);
+      setReporting(decryptedData);
     } catch (error) {
       console.error("Error fetching users:", error);
     }
@@ -81,9 +89,13 @@ const Lhiuser = () => {
           Authorization: token, // Send token in headers
         },
       });
-      console.log(response.data);
-      setUsers(response.data);
-      setFilteredUsers(response.data);
+      // Decrypt the response data
+      const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+      const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+      const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+      console.log(decryptedData);
+      setUsers(decryptedData);
+      setFilteredUsers(decryptedData);
     } catch (error) {
       console.error("Error fetching users:", error);
     }
@@ -190,7 +202,7 @@ const Lhiuser = () => {
           if (isEdit) {
             // For update, include 'updated_by'
             await axios
-              .post(`${Base_Url}/putlhidata`, { encryptedData},
+              .post(`${Base_Url}/putlhidata`, { encryptedData },
                 {
                   headers: {
                     Authorization: token, // Send token in headers
@@ -224,7 +236,7 @@ const Lhiuser = () => {
             await axios
               .post(`${Base_Url}/postlhidata`, {
                 encryptedData
-               
+
               },
                 {
                   headers: {

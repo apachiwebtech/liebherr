@@ -2720,8 +2720,11 @@ app.get("/getcom", authenticateToken, async (req, res) => {
 
     // Execute the query
     const result = await pool.request().query(sql);
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
 
-    return res.json(result.recordset);
+    return res.json({ encryptedData });
   } catch (err) {
     console.error("Error fetching Defect Group Code:", err); // Log error for debugging
     return res.status(500).json({ message: "Error fetching Defect Group Codes" });
@@ -2916,8 +2919,11 @@ app.get("/getgroupdefectcode", authenticateToken, async (req, res) => {
     const sql = "select * from awt_defectgroup WHERE deleted = 0";
 
     const result = await pool.request().query(sql);
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
 
-    return res.json(result.recordset);
+    return res.json({ encryptedData });
   } catch (err) {
     console.error(err);
     return res.status(500).json(err);
@@ -2932,8 +2938,11 @@ app.get("/getactivity", authenticateToken, async (req, res) => {
     const sql = "select * from awt_activity WHERE deleted = 0";
 
     const result = await pool.request().query(sql);
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
 
-    return res.json(result.recordset);
+    return res.json({encryptedData});
   } catch (err) {
     console.error(err);
     return res.status(500).json(err);
@@ -2952,7 +2961,10 @@ app.get("/gettypeofdefect", authenticateToken, async (req, res) => {
       WHERE td.deleted = 0 ORDER by id desc
     `;
     const result = await pool.request().query(sql);
-    return res.json(result.recordset);
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
+    return res.json({ encryptedData });
   } catch (err) {
     console.error("Error fetching Type of Defects:", err); // Log error for debugging
     return res.status(500).json({ message: "Error fetching Type of Defects" });
@@ -3128,7 +3140,10 @@ app.get("/getsite", authenticateToken, async (req, res) => {
   WHERE td.deleted = 0 order by td.id DESC
     `;
     const result = await pool.request().query(sql);
-    return res.json(result.recordset);
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
+    return res.json({ encryptedData });
   } catch (err) {
     console.error("Error fetching Type of Defects:", err); // Log error for debugging
     return res.status(500).json({ message: "Error fetching Site Defects" });
@@ -4716,7 +4731,7 @@ app.get("/getcustomer", authenticateToken, async (req, res) => {
 
     // Execute the query
     const result = await pool.request().query(sql);
-    
+
 
     // Return the first record or an appropriate message if no records are found
     if (result.recordset.length > 0) {
@@ -5396,9 +5411,12 @@ app.get("/getengineer", authenticateToken, async (req, res) => {
     // Execute the count query
     const countResult = await pool.request().query(countSql);
     const totalCount = countResult.recordset[0].totalCount;
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
 
     return res.json({
-      data: result.recordset,
+      encryptedData,
       totalCount,
       page,
       pageSize,
@@ -5690,8 +5708,11 @@ app.get("/getmasterfranchiselist", authenticateToken, async (req, res) => {
 
     const countResult = await pool.request().query(countSql);
     const totalCount = countResult.recordset[0].totalCount;
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
     return res.json({
-      data: result.recordset,
+      encryptedData,
       totalCount: totalCount,
       page,
       pageSize,
@@ -5963,8 +5984,11 @@ app.get("/getparentfranchise", authenticateToken, async (req, res) => {
 
     // Execute the SQL query
     const result = await pool.request().query(sql);
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
 
-    return res.json(result.recordset);
+    return res.json({ encryptedData });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "Error fetching parent franchise data" });
@@ -6070,8 +6094,11 @@ WHERE m.deleted = 0
 
     const countResult = await pool.request().query(countSql);
     const totalCount = countResult.recordset[0].totalCount;
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
     return res.json({
-      data: result.recordset,
+      encryptedData,
       totalCount: totalCount,
       page,
       pageSize,
@@ -7137,8 +7164,11 @@ app.get("/getratedata", authenticateToken, async (req, res) => {
     // SQL query to fetch rate data where deleted is 0
     const sql = "SELECT * FROM rate_card WHERE deleted = 0";
     const result = await pool.request().query(sql);
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
 
-    return res.json(result.recordset);
+    return res.json({ encryptedData });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "An error occurred while fetching rate data" });
@@ -7372,8 +7402,11 @@ app.get("/getservicecontract", authenticateToken,
       // SQL query to fetch service product data where deleted is 0
       const sql = "SELECT * FROM awt_servicecontract WHERE deleted = 0";
       const result = await pool.request().query(sql);
+      // Convert data to JSON string and encrypt it
+      const jsonData = JSON.stringify(result.recordset);
+      const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
 
-      return res.json(result.recordset);
+      return res.json({ encryptedData });
     } catch (err) {
       console.error(err);
       return res.status(500).json({ message: "An error occurred while fetching service_contract data" });
@@ -7675,8 +7708,11 @@ app.get("/getservicecontractlist", authenticateToken, async (req, res) => {
 
     const countResult = await pool.request().query(countSql);
     const totalCount = countResult.recordset[0].totalCount;
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
     return res.json({
-      data: result.recordset,
+      encryptedData,
       totalCount: totalCount,
       page,
       pageSize,
@@ -7720,8 +7756,11 @@ app.get("/getlhidata", authenticateToken, async (req, res) => {
     // SQL query to fetch lhi_user data where deleted is 0
     const sql = "SELECT * FROM lhi_user WHERE deleted = 0";
     const result = await pool.request().query(sql);
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
 
-    return res.json(result.recordset);
+    return res.json({ encryptedData });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "An error occurred while fetching LHI data" });
@@ -7737,8 +7776,11 @@ app.get("/getreport", authenticateToken, async (req, res) => {
     // SQL query to fetch lhi_user data where deleted is 0
     const sql = "SELECT Lhiuser FROM lhi_user WHERE deleted = 0";
     const result = await pool.request().query(sql);
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
 
-    return res.json(result.recordset);
+    return res.json({ encryptedData });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "An error occurred while fetching LHI data" });
@@ -7902,8 +7944,11 @@ app.get("/getcalldata", authenticateToken, async (req, res) => {
     // SQL query to fetch call status records that are not deleted
     const sql = "SELECT * FROM call_status WHERE deleted = 0";
     const result = await pool.request().query(sql);
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
 
-    return res.json(result.recordset);
+    return res.json({ encryptedData });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "An error occurred while fetching call status data" });
@@ -10290,9 +10335,12 @@ app.get("/getrole", authenticateToken, async (req, res) => {
 
     // Execute the query
     const result = await pool.request().query(sql);
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
 
     // Return only the recordset from the result
-    return res.json(result.recordset);
+    return res.json({ encryptedData });
   } catch (err) {
     console.error("Error fetching categories:", err); // Log the error for debugging
     return res.status(500).json({ message: "Internal Server Error", error: err });
@@ -12724,8 +12772,11 @@ app.get("/getmasterwarrenty", authenticateToken, async (req, res) => {
     // SQL query to fetch rate data where deleted is 0
     const sql = "SELECT * FROM master_warrenty WHERE deleted = 0";
     const result = await pool.request().query(sql);
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
 
-    return res.json(result.recordset);
+    return res.json({ encryptedData });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "An error occurred while fetching masterWarrenty data" });
@@ -12740,8 +12791,11 @@ app.get("/getpostsalewarrenty", authenticateToken, async (req, res) => {
     // SQL query to fetch rate data where deleted is 0
     const sql = "SELECT * FROM post_sale_warrenty WHERE deleted = 0";
     const result = await pool.request().query(sql);
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
 
-    return res.json(result.recordset);
+    return res.json({ encryptedData });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "An error occurred while fetching masterWarrenty data" });

@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { getRoleData } from '../../Store/Role/role-action';
 import Lhiusertabs from './Lhiusertabs';
-import { Base_Url,secretKey } from '../../Utils/Base_Url';
+import { Base_Url, secretKey } from '../../Utils/Base_Url';
 import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 import { SyncLoader } from 'react-spinners';
 import toast, { Toaster } from 'react-hot-toast';
@@ -40,8 +40,13 @@ const Roleassign = () => {
                 Authorization: token, // Send token in headers
             },
         })
+
             .then((res) => {
-                setRoleData(res.data)
+                // Decrypt the response data
+                const encryptedData = res.data.encryptedData; // Assuming response contains { encryptedData }
+                const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+                const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8))
+                setRoleData(decryptedData)
             })
             .catch((err) => {
                 console.log(err)
@@ -67,11 +72,12 @@ const Roleassign = () => {
     };
 
     async function getRolePages(rid) {
-        axiosInstance.post(`${Base_Url}/role_pages`, { role_id: rid },{
+        axiosInstance.post(`${Base_Url}/role_pages`, { role_id: rid }, {
             headers: {
                 Authorization: token, // Send token in headers
-                },
-            })
+            },
+        })
+
             .then((res) => {
                 // console.log(res.data, ">>>>>")
                 setRolePages(res.data)
@@ -84,7 +90,7 @@ const Roleassign = () => {
 
     const handlesubmit = (e) => {
         e.preventDefault()
-    
+
         // Convert all values in rolePages to strings
         const updatedRolePages = rolePages.map(item => {
             return {
@@ -93,30 +99,30 @@ const Roleassign = () => {
                 roleid: item.roleid.toString(),
                 pageid: item.pageid.toString(),
                 accessid: item.accessid.toString(),
-                deleted : item.deleted.toString()
+                deleted: item.deleted.toString()
                 // You can add other properties you want to ensure are strings
             };
         });
-    
-        axiosInstance.post(`${Base_Url}/assign_role`, updatedRolePages,{
+
+        axiosInstance.post(`${Base_Url}/assign_role`, updatedRolePages, {
             headers: {
                 Authorization: token, // Send token in headers
-                },
-            })
+            },
+        })
             .then((res) => {
                 if (res.data) {
                     notify()
                 }
             })
     }
-    
+
 
 
     const Decrypt = (encrypted) => {
         encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
         const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
         return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
-      };
+    };
 
     const storedEncryptedRole = localStorage.getItem("Userrole");
     const decryptedRole = Decrypt(storedEncryptedRole);

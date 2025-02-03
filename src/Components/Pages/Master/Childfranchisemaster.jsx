@@ -39,17 +39,17 @@ const Childfranchisemaster = () => {
   const created_by = localStorage.getItem("userId"); // Get user ID from localStorage
   const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
 
- 
-        try{
-          childid = childid.replace(/-/g, '+').replace(/_/g, '/');
-          const bytes = CryptoJS.AES.decrypt(childid, secretKey);
-          const decrypted = bytes.toString(CryptoJS.enc.Utf8);
-          childid = parseInt(decrypted, 10)
-      }catch(error){
-          console.log("Error".error)
-      }
-          
- 
+
+  try {
+    childid = childid.replace(/-/g, '+').replace(/_/g, '/');
+    const bytes = CryptoJS.AES.decrypt(childid, secretKey);
+    const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+    childid = parseInt(decrypted, 10)
+  } catch (error) {
+    console.log("Error".error)
+  }
+
+
 
   const [formData, setFormData] = useState({
     title: "",
@@ -146,8 +146,12 @@ const Childfranchisemaster = () => {
         },
       }
       );
-      console.log("pf", response.data);
-      setParentfranchise(response.data);
+      // Decrypt the response data
+      const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+      const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+      const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+      console.log("pf", decryptedData);
+      setParentfranchise(decryptedData);
     } catch (error) {
       console.error("Error fetching Parentfranchise:", error);
     }
@@ -160,8 +164,12 @@ const Childfranchisemaster = () => {
           Authorization: token,
         },
       });
-      console.log(response.data);
-      setUsers(response.data);
+      // Decrypt the response data
+      const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+      const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+      const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+      console.log(decryptedData);
+      setUsers(decryptedData);
       // setFilteredUsers(response.data);
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -395,42 +403,42 @@ const Childfranchisemaster = () => {
   };
 
   // Role Right 
-    
-    
-     const Decrypt = (encrypted) => {
-      encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
-      const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
-      return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
-    };
-  
-    const storedEncryptedRole = localStorage.getItem("Userrole");
-    const decryptedRole = Decrypt(storedEncryptedRole);
-  
-    const roledata = {
-      role: decryptedRole,
-      pageid: String(22)
-    }
-  
-    const dispatch = useDispatch()
-    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
-  
-  
-    useEffect(() => {
-      dispatch(getRoleData(roledata))
-    }, [])
-  
-    // Role Right End 
+
+
+  const Decrypt = (encrypted) => {
+    encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+    const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+    return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+  };
+
+  const storedEncryptedRole = localStorage.getItem("Userrole");
+  const decryptedRole = Decrypt(storedEncryptedRole);
+
+  const roledata = {
+    role: decryptedRole,
+    pageid: String(22)
+  }
+
+  const dispatch = useDispatch()
+  const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+
+
+  useEffect(() => {
+    dispatch(getRoleData(roledata))
+  }, [])
+
+  // Role Right End 
 
 
   return (
     <div className="tab-content">
-          {loaders && (
+      {loaders && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
       )}
       <Franchisemaster />
-      {roleaccess > 1 ?    <div className="row mp0">
+      {roleaccess > 1 ? <div className="row mp0">
         <div className="col-12">
           <div className="card mb-3 tab_box">
             <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
@@ -438,7 +446,7 @@ const Childfranchisemaster = () => {
                 <div className="row">
                   <div className="col-md-3">
                     <label htmlFor="Parent Franchise" className="form-label pb-0 dropdown-label">
-                    Master Service Partner
+                      Master Service Partner
                     </label>
                     <select
                       className="form-select dropdown-select"
@@ -566,7 +574,7 @@ const Childfranchisemaster = () => {
 
                   <div className="col-md-3" hidden>
                     <label className="input-field">Country</label>
-                    <input 
+                    <input
                       type="text"
                       className="form-control"
                       value={locations.country}
@@ -810,15 +818,15 @@ const Childfranchisemaster = () => {
                     {errors.address && <small className="text-danger">{errors.address}</small>}
                   </div>
 
-                  {roleaccess > 2 ?   <div className="col-12 text-right">
-                    <button 
+                  {roleaccess > 2 ? <div className="col-12 text-right">
+                    <button
                       className="btn btn-liebherr"
                       type="submit"
                       style={{ marginTop: "15px" }}
                     >
                       {isEdit ? "Update" : "Submit"}
                     </button>
-                  </div> : null }
+                  </div> : null}
                 </div>
               </form>
             </div>

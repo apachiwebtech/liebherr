@@ -75,8 +75,12 @@ export function Engineerlist(params) {
                 },
             }
             );
-            setEngineerdata(response.data.data);
-            setFilteredData(response.data.data);
+            // Decrypt the response data
+            const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+            const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+            const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+            setEngineerdata(decryptedData);
+            setFilteredData(decryptedData);
             setTotalCount(response.data.totalCount);
         } catch (error) {
             console.error('Error fetching Engineerdata:', error);
@@ -104,8 +108,12 @@ export function Engineerlist(params) {
                 },
             }
             );
-            setEngineerdata(response.data.data);
-            setFilteredData(response.data.data);
+            // Decrypt the response data
+            const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+            const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+            const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+            setEngineerdata(decryptedData);
+            setFilteredData(decryptedData);
             setTotalCount(response.data.totalCount);
         } catch (error) {
             console.error('Error fetching filtered data:', error);
@@ -422,7 +430,7 @@ export function Engineerlist(params) {
                                                             type="checkbox"
                                                             onChange={handleChangestatus}
                                                             data-id={item.id}
-                                                            checked = {item.status == 1 ? 'checked' : '' } // Check if status is 1 (checked)
+                                                            checked={item.status == 1 ? 'checked' : ''} // Check if status is 1 (checked)
                                                             className="status"
                                                         />
 

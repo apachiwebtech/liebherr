@@ -143,7 +143,11 @@ const EngineerMaster = () => {
         },
       }
       );
-      setParentfranchise(response.data);
+      // Decrypt the response data
+      const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+      const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+      const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+      setParentfranchise(decryptedData);
     } catch (error) {
       console.error("Error fetching Parentfranchise:", error);
     }
@@ -172,8 +176,12 @@ const EngineerMaster = () => {
         },
       }
       );
-      setUsers(response.data);
-      setFilteredUsers(response.data);
+      // Decrypt the response data
+      const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+      const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+      const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+      setUsers(decryptedData);
+      setFilteredUsers(decryptedData);
     } catch (error) {
       console.error('Error fetching users:', error);
     }

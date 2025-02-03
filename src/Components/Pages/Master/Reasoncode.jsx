@@ -44,8 +44,12 @@ const ReasonCode = () => {
                     Authorization: token, // Send token in headers
                 },
             });
-            console.log(response.data);
-            setGroupdefect_code(response.data);
+            // Decrypt the response data
+            const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+            const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+            const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+            console.log(decryptedData);
+            setGroupdefect_code(decryptedData);
         } catch (error) {
             console.error("Error fetching groupdefect_code:", error);
         }
@@ -58,9 +62,13 @@ const ReasonCode = () => {
                     Authorization: token, // Send token in headers
                 },
             });
-            console.log(response.data);
-            setUsers(response.data);
-            setFilteredUsers(response.data);
+            // Decrypt the response data
+            const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+            const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+            const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+            console.log(decryptedData);
+            setUsers(decryptedData);
+            setFilteredUsers(decryptedData);
         } catch (error) {
             console.error('Error fetching users:', error);
         }

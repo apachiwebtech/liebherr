@@ -17,25 +17,29 @@ const PostSaleWarrenty = () => {
   const token = localStorage.getItem("token"); // Get token from localStorage
   const [users, setUsers] = useState([]);
 
-  
-    const fetchUsers = async () => {
-      try {
-        const response = await axiosInstance.get(`${Base_Url}/getpostsalewarrenty`, {
-          headers: {
-            Authorization: token, // Send token in headers
-          },
-        });
-        console.log(response.data);
-        setUsers(response.data);
-      } catch (error) {
-        console.error("Error fetching users:", error);
-      }
-    };
 
-    
-      useEffect(() => {
-        fetchUsers();
-      }, []);
+  const fetchUsers = async () => {
+    try {
+      const response = await axiosInstance.get(`${Base_Url}/getpostsalewarrenty`, {
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      });
+      // Decrypt the response data
+      const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+      const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+      const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+      console.log(decryptedData);
+      setUsers(decryptedData);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
+
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   const importexcel = (event) => {
     // If triggered by file input

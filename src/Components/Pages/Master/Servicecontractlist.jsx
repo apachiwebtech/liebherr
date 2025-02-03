@@ -71,9 +71,13 @@ export function Servicecontractlist(params) {
                     Authorization: token, // Send token in headers
                 },
             });
+            // Decrypt the response data
+            const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+            const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+            const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
 
-            setServicecontractdata(response.data.data);
-            setFilteredData(response.data.data);
+            setServicecontractdata(decryptedData);
+            setFilteredData(decryptedData);
             // Store total count for pagination logic on the frontend
             setTotalCount(response.data.totalCount);
         } catch (error) {
@@ -102,8 +106,12 @@ export function Servicecontractlist(params) {
                     Authorization: token, // Send token in headers
                 },
             });
-            setServicecontractdata(response.data.data);
-            setFilteredData(response.data.data);
+            // Decrypt the response data
+            const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+            const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+            const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+            setServicecontractdata(decryptedData);
+            setFilteredData(decryptedData);
             setTotalCount(response.data.totalCount);
 
         } catch (error) {
@@ -388,7 +396,7 @@ export function Servicecontractlist(params) {
                                                             type="checkbox"
                                                             onChange={handleChangestatus}
                                                             data-id={item.id}
-                                                            checked = {item.status == 1 ? 'checked' : '' }
+                                                            checked={item.status == 1 ? 'checked' : ''}
                                                             className="status"
                                                         />
 
