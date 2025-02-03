@@ -42,7 +42,11 @@ const Area = () => {
           Authorization: token, // Send token in headers
         },
       });
-      setCountries(response.data);
+      // Decrypt the response data
+      const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+      const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+      const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+      setCountries(decryptedData);
     } catch (error) {
       console.error("Error fetching countries:", error);
     }
@@ -76,17 +80,6 @@ const Area = () => {
     }
   };
 
-  // const fetchGeoCities = async (geostate_id) => {
-  //   try {
-  //     const response = await axiosInstance.get(
-  //       `${Base_Url}/getgeocities_a/${geostate_id}`
-  //     );
-  //     console.log("Geo Cities:", response.data);
-  //     setGeoCities(response.data);
-  //   } catch (error) {
-  //     console.error("Error fetching geo cities:", error);
-  //   }
-  // };
 
   const fetchAreas = async () => {
     try {
@@ -95,8 +88,14 @@ const Area = () => {
           Authorization: token, // Send token in headers
         },
       });
-      setAreas(response.data);
-      setFilteredAreas(response.data);
+      // Decrypt the response data
+      const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+      const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+      const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+
+
+      setAreas(decryptedData);
+      setFilteredAreas(decryptedData);
     } catch (error) {
       console.error("Error fetching areas:", error);
     }

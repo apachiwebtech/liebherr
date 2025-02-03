@@ -795,7 +795,11 @@ app.get("/getregionsr", authenticateToken, async (req, res) => {
     `;
     const result = await pool.request().query(sql);
 
-    return res.json(result.recordset); // Use `recordset` for MSSQL result
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
+
+    return res.json({ encryptedData }); // Use `recordset` for MSSQL result
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "Database error", error: err });
@@ -957,9 +961,14 @@ app.get("/getgeostates",
       // Execute the query
       const result = await pool.request().query(sqlQuery);
 
+      // Convert data to JSON string and encrypt it
+      const jsonData = JSON.stringify(result.recordset);
+      const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
+
+
       if (result.recordset.length > 0) {
         // Return the fetched geostates
-        res.json(result.recordset);
+        res.json({ encryptedData });
       } else {
         res.status(404).json({ message: "No geostates found" });
       }
@@ -1249,9 +1258,12 @@ app.get("/getgeocities", authenticateToken,
 
       // Execute the query
       const result = await pool.request().query(sql);
+      // Convert data to JSON string and encrypt it
+      const jsonData = JSON.stringify(result.recordset);
+      const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
 
       // Return the fetched geocities
-      return res.json(result.recordset);
+      return res.json({ encryptedData });
 
     } catch (err) {
       console.error("Database error:", err); // Log error for debugging
@@ -1391,8 +1403,12 @@ app.get("/getcountries", authenticateToken,
       const sql = "SELECT * FROM awt_country WHERE deleted = 0";
 
       const result = await pool.request().query(sql);
+      // Convert data to JSON string and encrypt it
+      const jsonData = JSON.stringify(result.recordset);
+      const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
 
-      return res.json(result.recordset);
+
+      return res.json({ encryptedData });
     } catch (err) {
       console.error(err);
       return res.status(500).json(err);
@@ -1497,7 +1513,11 @@ app.get("/getareas", authenticateToken, async (req, res) => {
     `;
 
     const result = await pool.request().query(sql);
-    return res.json(result.recordset);
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
+
+    return res.json({ encryptedData });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'An error occurred while fetching data' });
@@ -1769,9 +1789,12 @@ app.get("/getpincodes", authenticateToken, async (req, res) => {
 
     // Execute the query and get the results
     const result = await pool.request().query(sql);
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
 
     // Return only the recordset from the result
-    return res.json(result.recordset);
+    return res.json({ encryptedData });
   } catch (err) {
     console.error(err); // Log the error for debugging
     return res.status(500).json(err); // Return error response
@@ -11624,7 +11647,7 @@ app.post("/add_grn", authenticateToken, async (req, res) => {
 
 
 app.post("/add_spareoutward", authenticateToken, async (req, res) => {
-  const { issue_date, lhi_code, lhi_name, remark, created_by , isEng } = req.body;
+  const { issue_date, lhi_code, lhi_name, remark, created_by, isEng } = req.body;
 
   try {
     const pool = await poolPromise;
@@ -12569,8 +12592,13 @@ app.get("/getshipmentfg", authenticateToken, async (req, res) => {
     const countResult = await pool.request().query(countSql);
     const totalCount = countResult.recordset[0].totalCount;
 
+
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
+
     return res.json({
-      data: result.recordset,
+      encryptedData,
       totalCount: totalCount,
       page,
       pageSize,
@@ -12602,9 +12630,12 @@ app.get("/getshipmentparts", authenticateToken, async (req, res) => {
     let countSql = `SELECT COUNT(*) as totalCount FROM Shipment_Parts WHERE deleted = 0`;
     const countResult = await pool.request().query(countSql);
     const totalCount = countResult.recordset[0].totalCount;
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
 
     return res.json({
-      data: result.recordset,
+      encryptedData,
       totalCount: totalCount,
       page,
       pageSize,
@@ -12965,8 +12996,11 @@ app.get("/getpincodelist", authenticateToken, async (req, res) => {
 
     const countResult = await pool.request().query(countSql);
     const totalCount = countResult.recordset[0].totalCount;
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
     return res.json({
-      data: result.recordset,
+      encryptedData,
       totalCount: totalCount,
       page,
       pageSize,

@@ -91,7 +91,12 @@ export function Shipment_parts(params) {
                     Authorization: token,
                 },
             });
-            setShipmentpartsdata(response.data.data);
+            // Decrypt the response data
+            const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+            const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+            const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+
+            setShipmentpartsdata(decryptedData);
             setTotalCount(response.data.totalCount);
         } catch (error) {
             console.error('Error fetching ShipmentFG data:', error);

@@ -91,7 +91,13 @@ export function Shipment_fg(params) {
                     Authorization: token,
                 },
             });
-            setShipmentFg(response.data.data);
+
+            // Decrypt the response data
+            const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+            const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+            const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+
+            setShipmentFg(decryptedData);
             setTotalCount(response.data.totalCount);
         } catch (error) {
             console.error('Error fetching ShipmentFG data:', error);
@@ -115,7 +121,7 @@ export function Shipment_fg(params) {
 
 
     // export to excel 
-    const exportToExcel =  async () => {
+    const exportToExcel = async () => {
         try {
             // Fetch all customer data without pagination
             const response = await axiosInstance.get(`${Base_Url}/getshipmentfg`, {

@@ -53,8 +53,12 @@ const Pincode = () => {
           Authorization: token, // Send token in headers
         },
       });
+      // Decrypt the response data
+      const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+      const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+      const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
 
-      setCountries(response.data); // Update countries with the response data
+      setCountries(decryptedData); // Update countries with the response data
     } catch (error) {
       console.error("Error fetching countries:", error.message);
       // Optionally, handle errors in a user-friendly way, e.g., show a message
@@ -129,9 +133,13 @@ const Pincode = () => {
           Authorization: token, // Send token in headers
         },
       });
+      // Decrypt the response data
+      const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+      const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+      const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
 
-      setPincodes(response.data);
-      setFilteredPincodes(response.data);
+      setPincodes(decryptedData);
+      setFilteredPincodes(decryptedData);
     } catch (error) {
       console.error("Error fetching pincodes:", error.message);
       // Optionally, handle errors in a user-friendly way

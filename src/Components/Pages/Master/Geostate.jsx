@@ -37,7 +37,11 @@ const Geostate = () => {
           Authorization: token,
         },
       });
-      setCountries(response.data);
+      // Decrypt the response data
+      const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+      const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+      const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+      setCountries(decryptedData);
     } catch (error) {
       console.error('Error fetching countries:', error);
     }
@@ -66,8 +70,12 @@ const Geostate = () => {
           Authorization: token,
         },
       }); // This should be updated to fetch from your geostate table if necessary
-      setUsers(response.data);
-      setFilteredUsers(response.data);
+      // Decrypt the response data
+      const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+      const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+      const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+      setUsers(decryptedData);
+      setFilteredUsers(decryptedData);
     } catch (error) {
       console.error('Error fetching users:', error);
     }
@@ -76,7 +84,6 @@ const Geostate = () => {
   useEffect(() => {
     fetchCountries();
     fetchUsers();
-    fetchRegions();
   }, []);
 
   const handleChange = (e) => {

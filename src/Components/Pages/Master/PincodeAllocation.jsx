@@ -70,8 +70,13 @@ const PincodeAllocation = () => {
           Authorization: token,
         },
       });
-      setPincodedata(response.data.data);
-      setFilteredData(response.data.data);
+      // Decrypt the response data
+      const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+      const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+      const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+
+      setPincodedata(decryptedData);
+      setFilteredData(decryptedData);
       // Store total count for pagination logic on the frontend
       setTotalCount(response.data.totalCount);
     } catch (error) {
@@ -99,8 +104,13 @@ const PincodeAllocation = () => {
         },
       }
       );
-      setPincodedata(response.data.data);
-      setFilteredData(response.data.data);
+      // Decrypt the response data
+      const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+      const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+      const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+
+      setPincodedata(decryptedData);
+      setFilteredData(decryptedData);
       setTotalCount(response.data.totalCount);
     } catch (error) {
       console.error('Error fetching filtered data:', error);
@@ -306,210 +316,210 @@ const PincodeAllocation = () => {
       {roleaccess > 1 ? <div className="row mp0">
         <div className="searchFilter">
 
-        <div className="m-3">
+          <div className="m-3">
 
-        <div className="row mb-3">
+            <div className="row mb-3">
 
-          <div className="col-md-2">
-            <div className="form-group">
-              <label>Pincode</label>
-              <input
-                type="text"
-                className="form-control"
-                name="pincode"
-                value={searchFilters.pincode}
-                placeholder="Search by Pincode"
-                onChange={handleFilterChange}
-              />
-            </div>
-          </div>
-
-
-          <div className="col-md-2">
-            <div className="form-group">
-              <label>Country</label>
-              <input
-                type="text"
-                className="form-control"
-                name="country"
-                value={searchFilters.country}
-                placeholder="Search by Country"
-                onChange={handleFilterChange}
-              />
-            </div>
-          </div>
-
-          <div className="col-md-2">
-            <div className="form-group">
-              <label>Region</label>
-              <input
-                type="text"
-                className="form-control"
-                name="region"
-                value={searchFilters.region}
-                placeholder="Search by Region"
-                onChange={handleFilterChange}
-              />
-            </div>
-          </div>
-
-          <div className="col-md-2">
-            <div className="form-group">
-              <label>State</label>
-              <input
-                type="text"
-                className="form-control"
-                name="state"
-                value={searchFilters.state}
-                placeholder="Search by State"
-                onChange={handleFilterChange}
-              />
-            </div>
-          </div>
-
-          <div className="col-md-2">
-            <div className="form-group">
-              <label>City</label>
-              <input
-                type="text"
-                className="form-control"
-                name="city"
-                value={searchFilters.city}
-                placeholder="Search by City "
-                onChange={handleFilterChange}
-              />
-            </div>
-          </div>
-          <div className="col-md-2">
-            <div className="form-group">
-              <label>Customer Classification</label>
-              <select
-                className="form-control"
-                name="customer_classification"
-                value={searchFilters.customer_classification}
-                onChange={handleFilterChange}
-              >
-                <option value=""> SELECT</option>
-                <option value="Import">IMPORT</option>
-                <option value="Consumer">CONSUMER</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        <div className="row mb-3">
-          <div className="col-md-2">
-            <div className="form-group">
-              <label>Call Status</label>
-              <select
-                className="form-control"
-                name="call_type"
-                value={searchFilters.call_type}
-                onChange={handleFilterChange}
-              >
-                <option value="">Select Status</option>
-
-                <option value="Installation">INSTALLATION</option>
-                <option value="Breakdown">BREAKDOWN</option>
-                <option value="Visit">VISIT</option>
-                <option value="Helpdesk">HELDESK</option>
-                <option value="Maintenance">MAINTENANCE</option>
-                <option value="Demo">DEMO</option>
-
-              </select>
-            </div>
-          </div>
-          <div className="col-md-2">
-            <div className="form-group">
-              <label>Msp Name</label>
-              <input
-                type="text"
-                className="form-control"
-                name="msp_name"
-                value={searchFilters.msp_name}
-                placeholder="Search by Msp Name"
-                onChange={handleFilterChange}
-              />
-            </div>
-          </div>
-          <div className="col-md-2">
-            <div className="form-group">
-              <label>Csp Name</label>
-              <input
-                type="text"
-                className="form-control"
-                name="csp_name"
-                value={searchFilters.csp_name}
-                placeholder="Search by Csp Name"
-                onChange={handleFilterChange}
-              />
-            </div>
-          </div>
-
-
-
-        </div>
-        <div className="row mb-3">
-          <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
-            <div className="form-group">
-              <input type="file" accept=".xlsx, .xls" onChange={importexcel} />
-              <button className="btn btn-primary" onClick={uploadexcel}
-                style={{
-                  marginLeft: '-100px',
-                }}>
-                Import Pincode Allocation
-              </button>
-
-            </div>
-            <div className="form-group">
-              <button
-                className="btn btn-primary"
-                onClick={exportToExcel}
-                style={{
-                  marginLeft: '5px',
-                }}
-              >
-                Export to Excel
-              </button>
-              <button
-                className="btn btn-primary mr-2"
-                onClick={applyFilters}
-                style={{
-                  marginLeft: '5px',
-                }}
-              >
-                Search
-              </button>
-              <button
-                className="btn btn-secondary"
-                onClick={() => {
-                  window.location.reload()
-                }}
-                style={{
-                  marginLeft: '5px',
-                }}
-              >
-                Reset
-              </button>
-              {filteredData.length === 0 && (
-                <div
-                  style={{
-                    backgroundColor: '#f8d7da',
-                    color: '#721c24',
-                    padding: '5px 10px',
-                    marginLeft: '10px',
-                    borderRadius: '4px',
-                    border: '1px solid #f5c6cb',
-                    fontSize: '14px',
-                    display: 'inline-block'
-                  }}
-                >
-                  No Record Found
+              <div className="col-md-2">
+                <div className="form-group">
+                  <label>Pincode</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="pincode"
+                    value={searchFilters.pincode}
+                    placeholder="Search by Pincode"
+                    onChange={handleFilterChange}
+                  />
                 </div>
-              )}
+              </div>
+
+
+              <div className="col-md-2">
+                <div className="form-group">
+                  <label>Country</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="country"
+                    value={searchFilters.country}
+                    placeholder="Search by Country"
+                    onChange={handleFilterChange}
+                  />
+                </div>
+              </div>
+
+              <div className="col-md-2">
+                <div className="form-group">
+                  <label>Region</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="region"
+                    value={searchFilters.region}
+                    placeholder="Search by Region"
+                    onChange={handleFilterChange}
+                  />
+                </div>
+              </div>
+
+              <div className="col-md-2">
+                <div className="form-group">
+                  <label>State</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="state"
+                    value={searchFilters.state}
+                    placeholder="Search by State"
+                    onChange={handleFilterChange}
+                  />
+                </div>
+              </div>
+
+              <div className="col-md-2">
+                <div className="form-group">
+                  <label>City</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="city"
+                    value={searchFilters.city}
+                    placeholder="Search by City "
+                    onChange={handleFilterChange}
+                  />
+                </div>
+              </div>
+              <div className="col-md-2">
+                <div className="form-group">
+                  <label>Customer Classification</label>
+                  <select
+                    className="form-control"
+                    name="customer_classification"
+                    value={searchFilters.customer_classification}
+                    onChange={handleFilterChange}
+                  >
+                    <option value=""> SELECT</option>
+                    <option value="Import">IMPORT</option>
+                    <option value="Consumer">CONSUMER</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div className="row mb-3">
+              <div className="col-md-2">
+                <div className="form-group">
+                  <label>Call Status</label>
+                  <select
+                    className="form-control"
+                    name="call_type"
+                    value={searchFilters.call_type}
+                    onChange={handleFilterChange}
+                  >
+                    <option value="">Select Status</option>
+
+                    <option value="Installation">INSTALLATION</option>
+                    <option value="Breakdown">BREAKDOWN</option>
+                    <option value="Visit">VISIT</option>
+                    <option value="Helpdesk">HELDESK</option>
+                    <option value="Maintenance">MAINTENANCE</option>
+                    <option value="Demo">DEMO</option>
+
+                  </select>
+                </div>
+              </div>
+              <div className="col-md-2">
+                <div className="form-group">
+                  <label>Msp Name</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="msp_name"
+                    value={searchFilters.msp_name}
+                    placeholder="Search by Msp Name"
+                    onChange={handleFilterChange}
+                  />
+                </div>
+              </div>
+              <div className="col-md-2">
+                <div className="form-group">
+                  <label>Csp Name</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="csp_name"
+                    value={searchFilters.csp_name}
+                    placeholder="Search by Csp Name"
+                    onChange={handleFilterChange}
+                  />
+                </div>
+              </div>
+
+
+
+            </div>
+            <div className="row mb-3">
+              <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
+                <div className="form-group">
+                  <input type="file" accept=".xlsx, .xls" onChange={importexcel} />
+                  <button className="btn btn-primary" onClick={uploadexcel}
+                    style={{
+                      marginLeft: '-100px',
+                    }}>
+                    Import Pincode Allocation
+                  </button>
+
+                </div>
+                <div className="form-group">
+                  <button
+                    className="btn btn-primary"
+                    onClick={exportToExcel}
+                    style={{
+                      marginLeft: '5px',
+                    }}
+                  >
+                    Export to Excel
+                  </button>
+                  <button
+                    className="btn btn-primary mr-2"
+                    onClick={applyFilters}
+                    style={{
+                      marginLeft: '5px',
+                    }}
+                  >
+                    Search
+                  </button>
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => {
+                      window.location.reload()
+                    }}
+                    style={{
+                      marginLeft: '5px',
+                    }}
+                  >
+                    Reset
+                  </button>
+                  {filteredData.length === 0 && (
+                    <div
+                      style={{
+                        backgroundColor: '#f8d7da',
+                        color: '#721c24',
+                        padding: '5px 10px',
+                        marginLeft: '10px',
+                        borderRadius: '4px',
+                        border: '1px solid #f5c6cb',
+                        fontSize: '14px',
+                        display: 'inline-block'
+                      }}
+                    >
+                      No Record Found
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-        </div>
         </div>
         <div className=" col-md-12 col-12">
           <div className="card mb-3 tab_box">
