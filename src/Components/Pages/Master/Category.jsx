@@ -2,7 +2,7 @@ import axios from "axios";
 import * as XLSX from "xlsx";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
-import { Base_Url,secretKey } from "../../Utils/Base_Url";
+import { Base_Url, secretKey } from "../../Utils/Base_Url";
 import ProMaster from "./ProMaster";
 import { SyncLoader } from 'react-spinners';
 import CryptoJS from 'crypto-js';
@@ -30,14 +30,18 @@ const Category = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axiosInstance.get(`${Base_Url}/getcat`,{
+      const response = await axiosInstance.get(`${Base_Url}/getcat`, {
         headers: {
           Authorization: token, // Send token in headers
         },
       });
-      console.log(response.data);
-      setUsers(response.data);
-      setFilteredUsers(response.data);
+      // Decrypt the response data
+      const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+      const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+      const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+      console.log(decryptedData);
+      setUsers(decryptedData);
+      setFilteredUsers(decryptedData);
     } catch (error) {
       console.error("Error fetching users:", error);
     }
@@ -81,10 +85,10 @@ const Category = () => {
       setErrors(validationErrors);
       return;
     }
-        const encryptedData = CryptoJS.AES.encrypt(
-          JSON.stringify(formData),
-          secretKey
-        ).toString();
+    const encryptedData = CryptoJS.AES.encrypt(
+      JSON.stringify(formData),
+      secretKey
+    ).toString();
 
     setDuplicateError(""); // Clear duplicate error before submitting
 
@@ -99,7 +103,7 @@ const Category = () => {
             .post(`${Base_Url}/putcatdata`, {
               encryptedData,
               updated_by: updatedBy,
-            },{
+            }, {
               headers: {
                 Authorization: token,
               },
@@ -119,12 +123,12 @@ const Category = () => {
               encryptedData,
               created_by: createdBy,
 
-            },{
+            }, {
               headers: {
                 Authorization: token,
               },
             }
-          )
+            )
             .then((response) => {
               window.location.reload();
             })
@@ -141,30 +145,30 @@ const Category = () => {
   };
 
   const deleted = async (id) => {
-    const confirm =  window.confirm("Are you sure you want to delete ?");
+    const confirm = window.confirm("Are you sure you want to delete ?");
 
-    if(confirm){
-    try {
-      const response = await axiosInstance.post(`${Base_Url}/deletecatdata`, { id },{
-        headers: {
-          Authorization: token,
-        },
-      });
-      window.location.reload();
-    } catch (error) {
-      console.error("Error deleting user:", error);
+    if (confirm) {
+      try {
+        const response = await axiosInstance.post(`${Base_Url}/deletecatdata`, { id }, {
+          headers: {
+            Authorization: token,
+          },
+        });
+        window.location.reload();
+      } catch (error) {
+        console.error("Error deleting user:", error);
+      }
     }
-  }
   };
 
   const edit = async (id) => {
     try {
-      const response = await axiosInstance.get(`${Base_Url}/requestdatacat/${id}`,{
+      const response = await axiosInstance.get(`${Base_Url}/requestdatacat/${id}`, {
         headers: {
           Authorization: token,
         },
       }
-);
+      );
       setFormData(response.data);
       setIsEdit(true);
       console.log(response.data);
@@ -177,56 +181,56 @@ const Category = () => {
   const indexOfFirstUser = indexOfLastUser - itemsPerPage;
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
-   // export to excel 
-      const exportToExcel = () => {
-        // Create a new workbook
-        const workbook = XLSX.utils.book_new();
-    
-        // Convert data to a worksheet
-        const worksheet = XLSX.utils.json_to_sheet(filteredUsers.map(user => ({
-          "Category": user.title,
-         
-          // Add fields you want to export
-        })));
-    
-        // Append the worksheet to the workbook
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Category");
-    
-        // Export the workbook
-        XLSX.writeFile(workbook, "Category.xlsx");
-      };
-    
-      // export to excel end 
+  // export to excel 
+  const exportToExcel = () => {
+    // Create a new workbook
+    const workbook = XLSX.utils.book_new();
+
+    // Convert data to a worksheet
+    const worksheet = XLSX.utils.json_to_sheet(filteredUsers.map(user => ({
+      "Category": user.title,
+
+      // Add fields you want to export
+    })));
+
+    // Append the worksheet to the workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Category");
+
+    // Export the workbook
+    XLSX.writeFile(workbook, "Category.xlsx");
+  };
+
+  // export to excel end 
   // Role Right 
-  
-  
-    const Decrypt = (encrypted) => {
-      encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
-      const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
-      return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
-    };
-  
-    const storedEncryptedRole = localStorage.getItem("Userrole");
-    const decryptedRole = Decrypt(storedEncryptedRole);
-  
-    const roledata = {
-      role: decryptedRole,
-      pageid: String(7)
-    }
-  
-    const dispatch = useDispatch()
-    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
-  
-  
-    useEffect(() => {
-      dispatch(getRoleData(roledata))
-    }, [])
-  
-    // Role Right End 
+
+
+  const Decrypt = (encrypted) => {
+    encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+    const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+    return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+  };
+
+  const storedEncryptedRole = localStorage.getItem("Userrole");
+  const decryptedRole = Decrypt(storedEncryptedRole);
+
+  const roledata = {
+    role: decryptedRole,
+    pageid: String(7)
+  }
+
+  const dispatch = useDispatch()
+  const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+
+
+  useEffect(() => {
+    dispatch(getRoleData(roledata))
+  }, [])
+
+  // Role Right End 
 
   return (
     <div className="tab-content">
-          {loaders && (
+      {loaders && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
@@ -267,11 +271,11 @@ const Category = () => {
                       )}{" "}
                       {/* Show duplicate error */}
                     </div>
-                    {roleaccess > 2 ?  <div className="text-right">
+                    {roleaccess > 2 ? <div className="text-right">
                       <button className="btn btn-liebherr" type="submit">
                         {isEdit ? "Update" : "Submit"}
                       </button>
-                    </div>: null } 
+                    </div> : null}
                   </form>
                 </div>
 
@@ -305,7 +309,7 @@ const Category = () => {
                       className="form-control d-inline-block"
                       style={{ width: "300px" }}
                     />
-                       <button
+                    <button
                       className="btn btn-primary"
                       onClick={exportToExcel}
                     >
@@ -343,10 +347,10 @@ const Category = () => {
                           </td>
                           <td className="text-center">
                             <button
-                             className="btn btn-link text-danger"
+                              className="btn btn-link text-danger"
                               onClick={() => deleted(item.id)}
                               title="Delete"
-                              disabled = {roleaccess > 4 ?false : true}
+                              disabled={roleaccess > 4 ? false : true}
                             >
                               <FaTrash />
                             </button>
@@ -408,7 +412,7 @@ const Category = () => {
             </div>
           </div>
         </div>
-      </div>: null}
+      </div> : null}
     </div>
   );
 };

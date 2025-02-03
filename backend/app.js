@@ -2036,8 +2036,12 @@ app.get("/getproductlist", authenticateToken, async (req, res) => {
 
     const countResult = await pool.request().query(countSql);
     const totalCount = countResult.recordset[0].totalCount;
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
+
     return res.json({
-      data: result.recordset,
+      encryptedData,
       totalCount: totalCount,
       page,
       pageSize,
@@ -2112,9 +2116,13 @@ app.get("/getcustomerlist", authenticateToken, async (req, res) => {
 
     const countResult = await pool.request().query(countSql);
     const totalCount = countResult.recordset[0].totalCount;
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
+
 
     return res.json({
-      data: result.recordset,
+      encryptedData,
       totalCount: totalCount,
       page,
       pageSize,
@@ -2163,9 +2171,12 @@ app.get("/getcat", authenticateToken, async (req, res) => {
 
     // Execute the query
     const result = await pool.request().query(sql);
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
 
     // Return only the recordset from the result
-    return res.json(result.recordset);
+    return res.json({ encryptedData });
   } catch (err) {
     console.error("Error fetching categories:", err); // Log the error for debugging
     return res.status(500).json({ message: "Internal Server Error", error: err });
@@ -2346,9 +2357,12 @@ app.get("/getsubcategory", authenticateToken, async (req, res) => {
 
     // Execute the query and get the results
     const result = await pool.request().query(sql);
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
 
     // Return only the recordset from the result
-    return res.json(result.recordset);
+    return res.json({ encryptedData });
   } catch (err) {
     console.error("Error fetching subcategories:", err); // Log error for debugging
     return res.status(500).json({ message: "Error fetching subcategories" });
@@ -2515,6 +2529,7 @@ app.get("/getcategory", authenticateToken, async (req, res) => {
 
     // Execute the query
     const result = await pool.request().query(sql);
+
 
     return res.json(result.recordset);
   } catch (err) {
@@ -4701,6 +4716,7 @@ app.get("/getcustomer", authenticateToken, async (req, res) => {
 
     // Execute the query
     const result = await pool.request().query(sql);
+    
 
     // Return the first record or an appropriate message if no records are found
     if (result.recordset.length > 0) {
@@ -6514,7 +6530,11 @@ app.get("/getproducttype", authenticateToken, async (req, res) => {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
     const result = await pool.request().query("SELECT * FROM product_type WHERE deleted = 0");
-    return res.json(result.recordset);
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
+
+    return res.json({ encryptedData });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'An error occurred while fetching product types' });
@@ -6698,8 +6718,12 @@ app.get("/getproductline", authenticateToken, async (req, res) => {
     // Query to get all non-deleted product lines
     const sql = `SELECT * FROM product_line WHERE deleted = 0`;
     const result = await pool.request().query(sql);
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
 
-    return res.json(result.recordset);
+
+    return res.json({ encryptedData });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "An error occurred while fetching product lines" });
@@ -6830,8 +6854,12 @@ app.get("/getmat", authenticateToken, async (req, res) => {
     // Query to get all non-deleted materials
     const sql = `SELECT * FROM material WHERE deleted = 0`;
     const result = await pool.request().query(sql);
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
 
-    return res.json(result.recordset);
+
+    return res.json({ encryptedData });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "An error occurred while fetching materials" });
@@ -6963,8 +6991,12 @@ app.get("/getmanufacturer", authenticateToken, async (req, res) => {
     // SQL query to fetch manufacturers that are not deleted
     const sql = "SELECT * FROM manufacturer WHERE deleted = 0";
     const result = await pool.request().query(sql);
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
 
-    return res.json(result.recordset);
+
+    return res.json({ encryptedData });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "An error occurred while fetching manufacturer data" });

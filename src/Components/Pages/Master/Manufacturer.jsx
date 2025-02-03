@@ -37,9 +37,13 @@ const Manufacturer = () => {
           Authorization: token, // Send token in headers
         },
       });
-      console.log(response.data);
-      setUsers(response.data);
-      setFilteredUsers(response.data);
+      // Decrypt the response data
+      const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+      const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+      const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+      console.log(decryptedData);
+      setUsers(decryptedData);
+      setFilteredUsers(decryptedData);
     } catch (error) {
       console.error('Error fetching Manufacturer:', error);
     }
@@ -95,7 +99,7 @@ const Manufacturer = () => {
       if (confirmSubmission) {
         if (isEdit) {
           // For update, include 'updated_by'
-          await axiosInstance.post(`${Base_Url}/putmanufacturer`, { encryptedData}, {
+          await axiosInstance.post(`${Base_Url}/putmanufacturer`, { encryptedData }, {
             headers: {
               Authorization: token, // Send token in headers
             },

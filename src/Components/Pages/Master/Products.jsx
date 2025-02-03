@@ -76,8 +76,12 @@ export function Products(params) {
                     Authorization: token,
                 },
             });
-            setProductdata(response.data.data);
-            setFilteredData(response.data.data);
+            // Decrypt the response data
+            const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+            const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+            const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+            setProductdata(decryptedData);
+            setFilteredData(decryptedData);
             // Store total count for pagination logic on the frontend
             setTotalCount(response.data.totalCount);
         } catch (error) {
@@ -106,8 +110,12 @@ export function Products(params) {
                 },
             }
             );
-            setProductdata(response.data.data);
-            setFilteredData(response.data.data);
+             // Decrypt the response data
+                  const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+                  const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+                  const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+            setProductdata(decryptedData);
+            setFilteredData(decryptedData);
             setTotalCount(response.data.totalCount);
         } catch (error) {
             console.error('Error fetching filtered data:', error);

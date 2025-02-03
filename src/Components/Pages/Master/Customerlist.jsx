@@ -88,10 +88,14 @@ export function Customerlist(params) {
                     Authorization: token,
                 }
             });
+            // Decrypt the response data
+            const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+            const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+            const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
 
             // Update state with data and total record count
-            setCustomerdata(response.data.data);
-            setFilteredData(response.data.data);
+            setCustomerdata(decryptedData);
+            setFilteredData(decryptedData);
 
             // Store total count for pagination logic on the frontend
             setTotalCount(response.data.totalCount);
@@ -162,8 +166,12 @@ export function Customerlist(params) {
                 },
             }
             );
-            setCustomerdata(response.data.data);
-            setFilteredData(response.data.data);
+            // Decrypt the response data
+            const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+            const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+            const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+            setCustomerdata(decryptedData);
+            setFilteredData(decryptedData);
             setTotalCount(response.data.totalCount);
         } catch (error) {
             console.error('Error fetching filtered data:', error);

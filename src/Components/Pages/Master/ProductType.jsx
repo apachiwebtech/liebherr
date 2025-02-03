@@ -23,7 +23,7 @@ const ProductType = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [duplicateError, setDuplicateError] = useState(""); // State to track duplicate error
   const token = localStorage.getItem("token"); // Get token from localStorage
-  
+
 
   const [formData, setFormData] = useState({
     product_type: "",
@@ -38,9 +38,14 @@ const ProductType = () => {
           Authorization: token, // Send token in headers
         },
       });
-      console.log(response.data);
-      setUsers(response.data);
-      setFilteredUsers(response.data);
+     // Decrypt the response data
+           const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+           const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+           const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+
+      console.log(decryptedData);
+      setUsers(decryptedData);
+      setFilteredUsers(decryptedData);
     } catch (error) {
       console.error("Error fetching users:", error);
     }
@@ -79,14 +84,14 @@ const ProductType = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-  
+
 
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
-    } 
-    
+    }
+
 
     const encryptedData = CryptoJS.AES.encrypt(
       JSON.stringify(formData),
@@ -137,7 +142,7 @@ const ProductType = () => {
             .then((response) => {
               setFormData({
                 product_type: "",
-                created_by:'1',
+                created_by: '1',
               });
               fetchUsers();
             })
@@ -189,7 +194,7 @@ const ProductType = () => {
       setFormData(response.data);
       setFormData((prev) => ({
         ...prev,
-        updated_by:"2",
+        updated_by: "2",
       }));
       setIsEdit(true);
       console.log(response.data);
