@@ -196,6 +196,7 @@ const Spareoutward = () => {
                 lhi_name: selectcsp?.title || selecteng?.title, // Safely access title
                 created_by: created_by,
                 remark: formData.remark,
+                isEng: selecteng ? 'eng' : selectcsp ? 'csp' : ''
             };
             
 

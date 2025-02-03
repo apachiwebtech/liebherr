@@ -615,19 +615,23 @@ app.post("/trainerlogin", async (req, res) => {
 });
 
 
-app.post("/log", async (req, res) => {
-  console.log("fffrdf")
-})
 
 app.get("/getdata", authenticateToken, async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
-    const result = await pool.request().query("SELECT * FROM awt_country WHERE deleted = 0 ORDER BY id DESC");
-    return res.json(result.recordset);
+    const result = await pool
+      .request()
+      .query("SELECT * FROM awt_country WHERE deleted = 0 ORDER BY id DESC");
+
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
+
+    return res.json({ encryptedData }); // Send the encrypted data
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: 'An error occurred while fetching data' });
+    return res.status(500).json({ error: "An error occurred while fetching data" });
   }
 });
 
@@ -11513,7 +11517,7 @@ app.post("/getsearcheng", authenticateToken, async (req, res) => {
 
     // Parameterized query with a limit
     const sql = `
-    SELECT TOP 20 id, title
+    SELECT TOP 20 engineer_id as id, title
     FROM awt_engineermaster
     WHERE title LIKE @param AND deleted = 0
     ORDER BY title;
@@ -11620,7 +11624,7 @@ app.post("/add_grn", authenticateToken, async (req, res) => {
 
 
 app.post("/add_spareoutward", authenticateToken, async (req, res) => {
-  const { issue_date, lhi_code, lhi_name, remark, created_by } = req.body;
+  const { issue_date, lhi_code, lhi_name, remark, created_by , isEng } = req.body;
 
   try {
     const pool = await poolPromise;
@@ -11636,14 +11640,15 @@ app.post("/add_spareoutward", authenticateToken, async (req, res) => {
 
 
     // Insert the data into awt_grnmaster
-    const sql = `INSERT INTO awt_spareoutward (issue_no, issue_date, lhi_name, lhi_code,remark, created_date, created_by) 
-                 VALUES (@issue_no, @issue_date, @lhi_name, @lhi_code,@remark,@created_date, @created_by)`;
+    const sql = `INSERT INTO awt_spareoutward (issue_no, issue_date, lhi_name, lhi_code,remark,issue_to,created_date, created_by) 
+                 VALUES (@issue_no, @issue_date, @lhi_name, @lhi_code,@remark,@issue_to,@created_date, @created_by)`;
 
     const result = await pool.request()
       .input('issue_no', issue_no)
       .input('issue_date', issue_date)
       .input('lhi_name', lhi_name)
       .input('lhi_code', lhi_code)  // Assuming you want to insert csp_no as csp_code
+      .input('issue_to', isEng)  // Assuming you want to insert csp_no as csp_code
       .input('remark', remark)  // Assuming you want to insert csp_no as csp_code
       .input('created_date', new Date())  // Use the current date for created_date
       .input('created_by', created_by)
@@ -11733,14 +11738,20 @@ app.post('/updateissuespares', async (req, res) => {
 
       // Update quantity in `awt_cspissuespare`
       const updateIssueQuery = `
-        UPDATE  
+        UPDATE  awt_cspissuespare
         SET quantity = @quantity 
         WHERE issue_no = @issue_no AND spare_no = @spare_no
       `;
+
       request.input('issue_no', sql.VarChar, item.issue_no);
       request.input('spare_no', sql.VarChar, item.article_code);
       request.input('quantity', sql.Int, item.quantity);
       await request.query(updateIssueQuery);
+
+
+
+
+
 
       // Get previous stock
       const getStockQuery = `
@@ -11751,9 +11762,13 @@ app.post('/updateissuespares', async (req, res) => {
       request.input('licare_code', sql.VarChar, item.licare_code);
       const stockResult = await request.query(getStockQuery);
 
+
+
       if (stockResult.recordset.length > 0) {
         const spare = stockResult.recordset[0];
         const final_qty = Number(spare.stock_quantity) - Number(item.quantity);
+
+
 
         // Update stock in `csp_stock`
         const updateStockQuery = `
@@ -11776,7 +11791,6 @@ app.post('/updateissuespares', async (req, res) => {
   } catch (err) {
     console.error('Error updating data:', err);
     res.status(500).json({ error: 'Database error' });
-    if (transaction) await transaction.rollback();
   } finally {
     sql.close();
   }
@@ -12449,7 +12463,7 @@ app.post("/getsearchengineer", authenticateToken, async (req, res) => {
 
     // Parameterized query with a limit
     const sql = `
-    SELECT TOP 20 id, title
+    SELECT TOP 20 engineer_id as id, title
     FROM awt_engineermaster
     WHERE title LIKE @param AND deleted = 0
     ORDER BY title;
