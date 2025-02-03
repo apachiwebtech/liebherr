@@ -3095,7 +3095,9 @@ app.get("/getsite", authenticateToken, async (req, res) => {
 
 // Insert  Type Of Defect Code
 app.post("/postactivity", authenticateToken, async (req, res) => {
-  const { dsite_code, groupdefectcode, dsite_title, description, created_by } = req.body;
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { dsite_code, groupdefectcode, dsite_title, description, created_by } = JSON.parse(decryptedData);
 
   try {
     const pool = await poolPromise;
@@ -3235,7 +3237,9 @@ app.get("/requestsitedefect/:id", authenticateToken, async (req, res) => {
 
 // Update Type Of Activity
 app.post("/putactivity", authenticateToken, async (req, res) => {
-  const { id, dsite_code, groupdefectcode, dsite_title, description, updated_by } = req.body;
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { id, dsite_code, groupdefectcode, dsite_title, description, updated_by } = JSON.parse(decryptedData);
 
   try {
     const pool = await poolPromise;
@@ -11135,7 +11139,7 @@ app.post("/addenquiryremark", authenticateToken, async (req, res) => {
     const updatestatus = `update awt_enquirymaster set leadstatus = '${leadconvert}' where enquiry_no = '${enquiry_no}'`
 
     await pool.request().query(updatestatus)
- 
+
     // SQL query with placeholders
     const sql = `INSERT INTO enquiry_remark (remark, leadconvert ,enquiry_no ,created_date , created_by) VALUES (@remark, @leadconvert,@enquiry_no , @created_date , @created_by)`;
 
@@ -13194,7 +13198,7 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
   { name: 'spare_doc_two', maxCount: 1 },
   { name: 'spare_doc_three', maxCount: 1 },
 ]), async (req, res) => {
-  const { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode, activitycode, com_id, warranty_status, spare_detail, ticket_no, user_id , serial_no,ModelNumber } = req.body;
+  const { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode, activitycode, com_id, warranty_status, spare_detail, ticket_no, user_id, serial_no, ModelNumber } = req.body;
 
 
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
@@ -13207,7 +13211,7 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
     call_status && call_status !== 'undefined' ? `Call Status: ${call_status}` : '',
     service_charges && service_charges !== 'undefined' ? `Price: ${service_charges}` : '',
     other_charge && other_charge !== 'undefined' ? `Other Charges: ${other_charge}` : '',
-    serial_no && serial_no !== 'undefined'? `Serial No: ${serial_no}` : '',
+    serial_no && serial_no !== 'undefined' ? `Serial No: ${serial_no}` : '',
     ModelNumber && ModelNumber !== 'undefined' ? `Model Number: ${ModelNumber}` : ''
   ].filter(Boolean).join(', ');
 

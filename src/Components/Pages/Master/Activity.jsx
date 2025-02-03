@@ -107,6 +107,10 @@ const Activity = () => {
       setErrors(validationErrors);
       return;
     }
+    const encryptedData = CryptoJS.AES.encrypt(
+      JSON.stringify(formData),
+      secretKey
+    ).toString();
 
     setDuplicateError(''); // Clear duplicate error before submitting
 
@@ -116,11 +120,7 @@ const Activity = () => {
         if (isEdit) {
           // For update, include 'updated_by'
           await axiosInstance.post(`${Base_Url}/putactivity`, {
-            id: formData.id,  // Explicitly pass the ID
-            groupdefectcode: formData.groupdefectcode,
-            dsite_code: formData.dsite_code,
-            dsite_title: formData.dsite_title,
-            description: formData.description,
+            encryptedData,
             updated_by: updated_by
           }
             , {
@@ -145,7 +145,7 @@ const Activity = () => {
             });
         } else {
           // For insert, include 'created_by'
-          await axiosInstance.post(`${Base_Url}/postactivity`, { ...formData, created_by: created_by }
+          await axiosInstance.post(`${Base_Url}/postactivity`, { encryptedData, created_by: created_by }
             , {
               headers: {
                 Authorization: token, // Send token in headers
