@@ -135,6 +135,7 @@ import MspAddtab from './Components/Pages/Master/MspAddtab';
 import AddMspUser from './Components/Pages/Master/AddMspUser';
 import { EnquiryForm } from './Components/Pages/Master/EnquiryForm';
 import  EnquiryListing  from './Components/Pages/Master/EnquiryListing';
+import { EngineerStock } from './Components/App/Compo/EngineerStock';
 
 
 
@@ -353,6 +354,10 @@ const Router = createBrowserRouter([
       {
         path: '/mobapp/mobile',
         element: <Mobile />,
+      },
+      {
+        path: '/mobapp/stock',
+        element: <EngineerStock />,
       },
       {
         path: '/mobapp/applogin',

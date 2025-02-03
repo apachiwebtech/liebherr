@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import img from './image.png';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { Network } from '@capacitor/network';
 function Header() {
   const navigate = useNavigate();
@@ -86,7 +86,10 @@ const [isOnline, setIsOnline] = useState(true); // Default to true, assuming onl
       <ul className="navbar-nav me-auto mb-2 mb-md-0">
 
         <li className="nav-item">
-          <a className="nav-link text-light active" href={`/mobapp/dash`}>Home</a>
+          <Link className="nav-link text-light active" to={`/mobapp/dash`}>Home</Link>
+        </li>
+        <li className="nav-item">
+          <Link className="nav-link text-light active" to={`/mobapp/stock`}>Stock</Link>
         </li>
         <li className="nav-item">
           <a className="nav-link text-light" type="button" onClick={logout} tabIndex="-1">Logout</a>
