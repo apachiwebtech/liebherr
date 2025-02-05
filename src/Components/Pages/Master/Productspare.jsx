@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { Base_Url ,secretKey} from "../../Utils/Base_Url";
+import { Base_Url, secretKey } from "../../Utils/Base_Url";
 import { Autocomplete, TextField } from "@mui/material";
 import _debounce from "lodash.debounce";
 import CryptoJS from "crypto-js";
+import * as XLSX from "xlsx";
 
 export function Productspare() {
     const [text, setText] = useState("");
@@ -83,6 +84,41 @@ export function Productspare() {
         }
     };
 
+    // export to excel 
+    const exportToExcel = () => {
+        // Create a new workbook
+        const workbook = XLSX.utils.book_new();
+
+        // Convert data to a worksheet
+        const worksheet = XLSX.utils.json_to_sheet(spareParts.map(user => ({
+            "Spare": user.title, // Add fields you want to export
+            "ProductCode": user.ProductCode,
+            "ModelNumber":user.ModelNumber,
+            "ItemDescription":user.ItemDescription,
+            "Manufactured": user.Manufactured,
+            "BOM Qty": user.BOMQty,
+            "PriceGroup": user.PriceGroup,
+            "Status": user.Status,
+            "ProductType": user.ProductType,
+            "Model": user.Model,
+            "Index1": user.Index1,
+            "PartNature": user.PartNature,
+            "Warranty": user.Warranty,
+            "HSN": user.HSN,
+            "Packed": user.Packed,
+            "Returnable": user.Returnable,
+
+
+
+        })));
+
+        // Append the worksheet to the workbook
+        XLSX.utils.book_append_sheet(workbook, worksheet, "SpareListing");
+
+        // Export the workbook
+        XLSX.writeFile(workbook, "SpareListing.xlsx");
+    };
+
 
     return (
         <div className="row mp0">
@@ -126,7 +162,16 @@ export function Productspare() {
                 {isSubmitted && spareParts.length > 0 && ( // Show table only after submission
                     <div className="card mt-3 mb-3">
                         <div className="card-body">
-                            <h5>Spare Parts Listing</h5>
+                            <div className="row">
+                            <h5 style={{width:"200px"}}>Spare Parts Listing</h5>
+                            <button
+                                className="btn btn-primary"
+                                onClick={exportToExcel}
+                                style={{width:"20%",marginLeft:'560px'}}
+                            >
+                                Export to Excel
+                            </button>
+                            </div>
                             <table className="table table-striped">
                                 <thead>
                                     <tr>
