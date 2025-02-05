@@ -6337,7 +6337,7 @@ app.post("/postchildfranchise", authenticateToken, async (req, res) => {
     const licarecode = `${pfranchise_id}-C${newcount.toString().padStart(4, "0")}`;
 
 
-    console.log(licarecode,"$$$")
+    console.log(licarecode, "$$$")
 
 
 
@@ -7805,12 +7805,12 @@ app.post("/postlhidata", authenticateToken, async (req, res) => {
         const getcount = `SELECT COUNT(*) AS count FROM lhi_user`;
 
         const getcountresult = await pool.request().query(getcount);
-        
+
         const newcount = getcountresult.recordset[0].count + 1;
-        
+
         // Format the newcount as LH0001
         const licarecode = `LH${newcount.toString().padStart(4, '0')}`;
-        
+
 
 
 
@@ -9780,8 +9780,11 @@ app.get("/getquotationlist", authenticateToken, async (req, res) => {
 
     const countResult = await pool.request().query(countSql);
     const totalCount = countResult.recordset[0].totalCount;
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
     return res.json({
-      data: result.recordset,
+      encryptedData,
       totalCount: totalCount,
       page,
       pageSize,
@@ -10025,10 +10028,13 @@ app.post('/getquotedetails', authenticateToken, async (req, res) => {
     const result = await pool.request()
       .input('quote_id', sql.Int, quotaion_id) // Parameterize spare_id
       .query(query);
+       // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
 
 
 
-    return res.json(result.recordset);
+    return res.json({ encryptedData });
   } catch (error) {
     console.error("Error updating data:", error);
     res.status(500).json({ message: "Error updating data", error });
@@ -10180,8 +10186,11 @@ app.post("/getquotationspare", authenticateToken, async (req, res) => {
     // Execute the query
     const result = await pool.request().query(sql);
     console.log(result)
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
 
-    return res.json(result.recordset);
+    return res.json({ encryptedData });
   } catch (err) {
     console.error("Database error:", err);
     return res.status(500).json({ error: "Database error occurred" });
@@ -13053,11 +13062,14 @@ app.post('/getcspformticket', async (req, res) => {
     const pool = await poolPromise;
 
     // Query to fetch data based on the `id`
-    const query = `select acf.id ,acf.licare_code , acf.title as partner_name , acf.address , acf.mobile_no , acf.email from complaint_ticket as ct left join awt_childfranchisemaster as acf on acf.licare_code = ct.csp  where ct.ticket_no = '${ticket_no}' `;
+    const sql = `select acf.id ,acf.licare_code , acf.title as partner_name , acf.address , acf.mobile_no , acf.email from complaint_ticket as ct left join awt_childfranchisemaster as acf on acf.licare_code = ct.csp  where ct.ticket_no = '${ticket_no}' `;
 
-    const Result = await pool.request().query(query);
+    const result = await pool.request().query(sql);
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
 
-    return res.json(Result.recordset)
+    return res.json({ encryptedData })
 
 
     // Return the fetched data

@@ -57,11 +57,16 @@ const QuotationEdit = () => {
                     Authorization: token, // Send token in headers
                 },
             });
-            setValue(res.data[0]);
+            // Decrypt the response data
+            const encryptedData = res.data.encryptedData; // Assuming response contains { encryptedData }
+            const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+            const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
 
-            getquotespare(res.data[0].quotationNumber)
+            setValue(decryptedData[0]);
 
-            getcspformticket(res.data[0].ticketId)
+            getquotespare(decryptedData[0].quotationNumber)
+
+            getcspformticket(decryptedData[0].ticketId)
 
         } catch (error) {
             console.error('Error fetching quote details:', error);
@@ -75,33 +80,41 @@ const QuotationEdit = () => {
                     Authorization: token, // Send token in headers
                 },
             });
-            setSpare(res.data);
+            // Decrypt the response data
+            const encryptedData = res.data.encryptedData; // Assuming response contains { encryptedData }
+            const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+            const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+            setSpare(decryptedData);
 
         } catch (error) {
             console.error('Error fetching quote details:', error);
         }
     }
 
-    async function getcspformticket(ticketId){
-        
-        axiosInstance.post(`${Base_Url}/getcspformticket` , {ticket_no : ticketId} , {
-            headers :{
-                Authorization : token
+    async function getcspformticket(ticketId) {
+
+        axiosInstance.post(`${Base_Url}/getcspformticket`, { ticket_no: ticketId }, {
+            headers: {
+                Authorization: token
             }
         })
-        .then((res) =>{
-            setCsp(res.data[0])
-        })
-        .catch((err) =>{
-            console.log(err)
-        })
-    } 
+            .then((res) => {
+                // Decrypt the response data
+                const encryptedData = res.data.encryptedData; // Assuming response contains { encryptedData }
+                const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+                const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+                setCsp(decryptedData)
+            })
+            .catch((err) => {
+                console.log(err)
+            })
+    }
 
 
 
     useEffect(() => {
         getquotedetails()
-       
+
     }, [])
 
 
@@ -145,10 +158,10 @@ const QuotationEdit = () => {
                 Authorization: token
             }
         })
-        .then((res) =>{
-            alert("Quotation  Approved")
-            getquotedetails()
-        })
+            .then((res) => {
+                alert("Quotation  Approved")
+                getquotedetails()
+            })
     }
 
     const handlePriceChange = (index, newPrice) => {
@@ -313,7 +326,7 @@ const QuotationEdit = () => {
                                             </table>
 
                                             <div>
-                                                <button className='btn btn-sm btn-primary float-end' disabled={value.status == 'Approved' ? true : false}  onClick={() => ApproveQuotation()}>{value.status == 'Approved' ?'Approved' : 'Approve quotation'}</button>
+                                                <button className='btn btn-sm btn-primary float-end' disabled={value.status == 'Approved' ? true : false} onClick={() => ApproveQuotation()}>{value.status == 'Approved' ? 'Approved' : 'Approve quotation'}</button>
                                             </div>
                                         </div>
                                     </div>

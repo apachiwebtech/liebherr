@@ -1,5 +1,5 @@
 import * as XLSX from "xlsx";
-import {  useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { Base_Url, secretKey } from '../../Utils/Base_Url';
@@ -66,8 +66,12 @@ export function Quotationlist(params) {
                     Authorization: token,
                 },
             });
-            setQuotationdata(response.data.data);
-            setFilteredData(response.data.data);
+            // Decrypt the response data
+            const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+            const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+            const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+            setQuotationdata(decryptedData);
+            setFilteredData(decryptedData);
             // Store total count for pagination logic on the frontend
             setTotalCount(response.data.totalCount);
         } catch (error) {
@@ -96,8 +100,12 @@ export function Quotationlist(params) {
                 },
             }
             );
-            setQuotationdata(response.data.data);
-            setFilteredData(response.data.data);
+            // Decrypt the response data
+            const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+            const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+            const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+            setQuotationdata(decryptedData);
+            setFilteredData(decryptedData);
             setTotalCount(response.data.totalCount);
         } catch (error) {
             console.error('Error fetching filtered data:', error);
@@ -210,13 +218,13 @@ export function Quotationlist(params) {
 
     function formatDate(dateStr) {
         const dateObj = new Date(dateStr);
-        
+
         const day = dateObj.getUTCDate().toString().padStart(2, '0');
         const month = (dateObj.getUTCMonth() + 1).toString().padStart(2, '0');
         const year = dateObj.getUTCFullYear();
-        
+
         return `${day}-${month}-${year}`;
-      }
+    }
 
     // Role Right End 
 
@@ -379,7 +387,7 @@ export function Quotationlist(params) {
                                             <th width="7%">Ticket No.</th>
                                             <th width="10%">Ticket Date</th>
                                             <th width="20%">Engineer</th>
-                                            <th width="10%">Customer Name</th>   
+                                            <th width="10%">Customer Name</th>
                                             <th width="15%">ModelNumber</th>
                                             <th width="10%">Status</th>
                                             <th width="10%">Edit</th>
@@ -388,35 +396,35 @@ export function Quotationlist(params) {
                                     </thead>
                                     <tbody>
                                         {Quotationdata.map((item, index) => {
-                                             const displayIndex = (currentPage - 1) * pageSize + index + 1;
-                                             return (
-                                            <tr key={item.id}>
-                                               <td >{displayIndex}</td>
-                                                <td>{item.quotationNumber}</td>
-                                                <td>{item.ticketId}</td>
-                                                <td>{formatDate(item.ticketdate)}</td>
-                                                <td>{item.assignedEngineer}</td>
-                                                <td>{item.CustomerName}</td>                         
-                                                <td>{item.ModelNumber}</td>
-                                                <td style={{ padding: '0px', textAlign: 'center' }}>
-                                                    {item.status}
-                                                </td>
-                                                <td>
+                                            const displayIndex = (currentPage - 1) * pageSize + index + 1;
+                                            return (
+                                                <tr key={item.id}>
+                                                    <td >{displayIndex}</td>
+                                                    <td>{item.quotationNumber}</td>
+                                                    <td>{item.ticketId}</td>
+                                                    <td>{formatDate(item.ticketdate)}</td>
+                                                    <td>{item.assignedEngineer}</td>
+                                                    <td>{item.CustomerName}</td>
+                                                    <td>{item.ModelNumber}</td>
+                                                    <td style={{ padding: '0px', textAlign: 'center' }}>
+                                                        {item.status}
+                                                    </td>
+                                                    <td>
 
-                                                    <button
-                                                        className='btn'
-                                                        onClick={() => sendtoedit(item.id)}
-                                                        title="Edit"
-                                                        style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                                                        disabled={roleaccess > 3 ? false : true}
-                                                    >
-                                                        <FaPencilAlt />
-                                                    </button>
+                                                        <button
+                                                            className='btn'
+                                                            onClick={() => sendtoedit(item.id)}
+                                                            title="Edit"
+                                                            style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                                                            disabled={roleaccess > 3 ? false : true}
+                                                        >
+                                                            <FaPencilAlt />
+                                                        </button>
 
-                                                </td>
-                                            </tr>
-                                        )
-                                    })}
+                                                    </td>
+                                                </tr>
+                                            )
+                                        })}
                                     </tbody>
                                 </table>
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
