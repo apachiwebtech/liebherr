@@ -10028,7 +10028,7 @@ app.post('/getquotedetails', authenticateToken, async (req, res) => {
     const result = await pool.request()
       .input('quote_id', sql.Int, quotaion_id) // Parameterize spare_id
       .query(query);
-       // Convert data to JSON string and encrypt it
+    // Convert data to JSON string and encrypt it
     const jsonData = JSON.stringify(result.recordset);
     const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
 
@@ -10694,9 +10694,12 @@ app.get("/getfeedbacklist", authenticateToken, async (req, res) => {
 
     // Execute the query
     const result = await pool.request().query(sql);
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
 
     // Return the result as JSON
-    return res.json(result.recordset);
+    return res.json({ encryptedData });
   } catch (err) {
     console.error("Database error:", err);
     return res.status(500).json({ error: "Database error occurred" });
@@ -12705,8 +12708,11 @@ app.post("/getmodelno", authenticateToken, async (req, res) => {
     if (result.recordset.length === 0) {
       return res.status(404).json({ message: "No results found" });
     }
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
 
-    return res.json(result.recordset);
+    return res.json({ encryptedData });
   } catch (err) {
     console.error("Error fetching data:", err);
     return res.status(500).json({ message: "Internal Server Error", error: err });
@@ -12731,9 +12737,13 @@ app.get("/getsparelisting", authenticateToken, async (req, res) => {
       .query(
         "SELECT * FROM Spare_parts WHERE ModelNumber = @modelNumber AND deleted = 0"
       );
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
 
-    console.log("Query result:", result.recordset);
-    return res.json(result.recordset);
+
+    console.log("Query result:",encryptedData);
+    return res.json({ encryptedData});
   } catch (err) {
     console.error("Error in /getsparelisting API:", err);
     return res.status(500).json({ error: "An error occurred while fetching data." });

@@ -241,6 +241,9 @@ const EngineerMaster = () => {
     if (!formData.password) {
       newErrors.password = "Engineer Password Field is required.";
     }
+    if (!formData.title) {
+      newErrors.title = "Engineer Name Field is required.";
+    }
     return newErrors;
   };
 
@@ -488,8 +491,8 @@ const EngineerMaster = () => {
                         {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
                       </div>
                       <div className="col-md-3">
-                        <label htmlFor="employeeCodeInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>Employee Code<span className="text-danger">*</span></label>
-                        <input
+                        <label htmlFor="employeeCodeInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>Employee Code</label>
+                        <input disabled
                           type="text"  // Changed to "text" for Employee Code
                           className="form-control"
                           name="employee_code"

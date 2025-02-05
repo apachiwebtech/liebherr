@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { Base_Url } from "../../Utils/Base_Url";
+import { Base_Url ,secretKey} from "../../Utils/Base_Url";
 import { Autocomplete, TextField } from "@mui/material";
 import _debounce from "lodash.debounce";
+import CryptoJS from "crypto-js";
 
 export function Productspare() {
     const [text, setText] = useState("");
@@ -22,7 +23,11 @@ export function Productspare() {
                     headers: { Authorization: token },
                 }
             );
-            setModelData(response.data);
+            // Decrypt the response data
+            const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+            const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+            const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+            setModelData(decryptedData);
         } catch (error) {
             console.error("Error fetching models:", error);
         }
@@ -36,14 +41,18 @@ export function Productspare() {
                 params: { ModelNumber },
                 headers: { Authorization: token },
             });
-            console.log("Response data:", response.data);
-            setSpareParts(response.data);
+            // Decrypt the response data
+            const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+            const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+            const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+            console.log("Response data:", decryptedData);
+            setSpareParts(decryptedData);
         } catch (error) {
             console.error("API Error:", error);
             alert("Failed to fetch spare listing. Please try again.");
         }
     };
-    
+
 
     const handleInputChange = _debounce((newValue) => {
         setText(newValue);
@@ -65,8 +74,8 @@ export function Productspare() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log(selectmodel.ModelNumber,"selectmodel");
-        
+        console.log(selectmodel.ModelNumber, "selectmodel");
+
         const validationErrors = validateForm();
         if (Object.keys(validationErrors).length === 0) {
             setIsSubmitted(true); // Mark submission as true
@@ -128,7 +137,7 @@ export function Productspare() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {spareParts.map((spare,index) => (
+                                    {spareParts.map((spare, index) => (
                                         <tr key={spare.id}>
                                             <td>{index + 1}</td>
                                             <td>{spare.title}</td>

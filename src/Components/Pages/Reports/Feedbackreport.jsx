@@ -63,7 +63,11 @@ export function FeedBackreport(params) {
                     Authorization: token,
                 },
             });
-            setFeedbackdata(response.data);
+            // Decrypt the response data
+            const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+            const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+            const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+            setFeedbackdata(decryptedData);
         } catch (error) {
             console.error('Error fetching Feedbackdata:', error);
             setFeedbackdata([]);
