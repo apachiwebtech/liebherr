@@ -301,7 +301,7 @@ app.post('/uploadtickets', async (req, res) => {
         .input('customer_mobile', sql.VarChar, processedItem.customer_mobile)
         .input('customer_email', sql.VarChar, processedItem.customer_email)
         .input('ModelNumber', sql.VarChar, processedItem.ModelNumber)
-        .input('serial_no',  Number(processedItem.serial_no))
+        .input('serial_no', Number(processedItem.serial_no))
         .input('address', sql.VarChar, processedItem.address)
         .input('region', sql.VarChar, processedItem.region)
         .input('state', sql.VarChar, processedItem.state)
@@ -326,7 +326,7 @@ app.post('/uploadtickets', async (req, res) => {
         .input('service_charges', sql.VarChar, processedItem.service_charges)
         .input('other_charges', sql.VarChar, processedItem.other_charges)
         .input('warranty_status', sql.VarChar, processedItem.warranty_status)
-        .input('invoice_date',  sql.DateTime, processedItem.invoice_date ? excelDateToJSDate(processedItem.invoice_date) : null)
+        .input('invoice_date', sql.DateTime, processedItem.invoice_date ? excelDateToJSDate(processedItem.invoice_date) : null)
         .input('call_charges', sql.VarChar, processedItem.call_charges)
         .input('mode_of_contact', sql.VarChar, processedItem.mode_of_contact)
         .input('created_date', sql.DateTime, processedItem.created_date ? excelDateToJSDate(processedItem.created_date) : null)
@@ -335,13 +335,13 @@ app.post('/uploadtickets', async (req, res) => {
         .input('updated_by', sql.VarChar, processedItem.updated_by)
         .input('updated_date', sql.VarChar, processedItem.updated_date ? excelDateToJSDate(processedItem.updated_date) : null)
         .input('contact_person', sql.VarChar, processedItem.contact_person)
-        .input('purchase_date',  sql.VarChar, processedItem.purchase_date ? excelDateToJSDate(processedItem.purchase_date) : null)
+        .input('purchase_date', sql.VarChar, processedItem.purchase_date ? excelDateToJSDate(processedItem.purchase_date) : null)
         .input('specification', sql.VarChar, processedItem.specification)
-        .input('ageing',  Number(processedItem.ageing))
+        .input('ageing', Number(processedItem.ageing))
         .input('area_id', Number(processedItem.area_id))
         .input('state_id', Number(processedItem.state_id))
-        .input('city_id',  Number(processedItem.city_id))
-        .input('pincode_id',  Number(processedItem.pincode_id))
+        .input('city_id', Number(processedItem.city_id))
+        .input('pincode_id', Number(processedItem.pincode_id))
         .input('closed_date', sql.DateTime, processedItem.closed_date ? excelDateToJSDate(processedItem.closed_date) : null)
         .input('customer_class', sql.VarChar, processedItem.customer_class)
         .input('call_priority', sql.VarChar, processedItem.call_priority)
@@ -358,8 +358,8 @@ app.post('/uploadtickets', async (req, res) => {
         .input('requested_email', sql.VarChar, processedItem.requested_email)
         .input('requested_mobile', sql.VarChar, processedItem.requested_mobile)
         .input('sales_partner2', sql.VarChar, processedItem.sales_partner2)
-        .input('mwhatsapp',  Number(processedItem.mwhatsapp))
-        .input('awhatsapp',  Number(processedItem.awhatsapp))
+        .input('mwhatsapp', Number(processedItem.mwhatsapp))
+        .input('awhatsapp', Number(processedItem.awhatsapp))
         .query(`
           INSERT INTO complaint_ticket  (
             ticket_no, ticket_date, customer_id, salutation, customer_name, alt_mobile, customer_mobile, customer_email, ModelNumber, serial_no, 
@@ -388,6 +388,123 @@ app.post('/uploadtickets', async (req, res) => {
     return res.status(500).json({ error: 'An error occurred while inserting data' });
   }
 });
+
+app.post('/uploadspareexcel', async (req, res) => {
+  let { jsonData } = req.body;
+  let excelData = JSON.parse(jsonData);
+
+  try {
+    const pool = await poolPromise;
+    pool.config.options.requestTimeout = 600000;
+
+    for (const item of excelData) {
+      // Check for duplicate entry in Spare_part table
+      const duplicateCheckQuery = `
+        SELECT COUNT(*) AS count 
+        FROM Spare_parts
+        WHERE title = @title AND ProductCode = @ProductCode
+      `;
+
+      const duplicateCheckResult = await pool.request()
+        .input('title', sql.VarChar(100), item.title)
+        .input('ProductCode', sql.VarChar(50), item.ProductCode)
+        .query(duplicateCheckQuery);
+
+      const duplicateCount = duplicateCheckResult.recordset[0].count;
+
+      if (duplicateCount > 0) {
+        // Update existing record in Spare_partprice table
+        const updateQuery = `
+          UPDATE Spare_parts
+          SET 
+            Item_Description = @ItemDescription,
+            ModelNumber = @ModelNumber,
+            Manufactured = @Manufactured,
+            BOMQty = @BOMQty,
+            PriceGroup = @PriceGroup,
+            Status = @Status,
+            ProductType = @ProductType,
+            Model = @Model,
+            Index1 = @Index1,
+            PartNature = @PartNature,
+            Warranty = @Warranty,
+            HSN = @HSN,
+            Packed = @Packed,
+            Returnable = @Returnable
+          WHERE ProductCode = @ProductCode AND title = @title
+        `;
+
+        await pool.request()
+          .input('ProductCode', sql.VarChar, item.ProductCode)
+          .input('ItemDescription', sql.VarChar, item.ItemDescription)
+          .input('ModelNumber', sql.VarChar, item.ModelNumber)
+          .input('title', sql.VarChar, item.title)
+          .input('Manufactured', sql.VarChar, item.Manufactured)
+          .input('BOMQty', sql.VarChar, item.BOMQty)
+          .input('PriceGroup', sql.VarChar, item.PriceGroup)
+          .input('Status', sql.VarChar, item.Status)
+          .input('ProductType', sql.VarChar, item.ProductType)
+          .input('Model', sql.VarChar, item.Model)
+          .input('Index1', sql.VarChar, item.Index1)
+          .input('PartNature', sql.VarChar, item.PartNature)
+          .input('Warranty', sql.VarChar, item.Warranty)
+          .input('HSN', sql.VarChar, item.HSN)
+          .input('Packed', sql.VarChar, item.Packed)
+          .input('Returnable', sql.VarChar, item.Returnable)
+          .query(updateQuery);
+
+      } else {
+        // Insert new record in Spare_parts table
+        await pool.request()
+          .input('ProductCode', sql.VarChar, item.ProductCode)
+          .input('ModelNumber', sql.VarChar, item.ModelNumber)
+          .input('title', sql.VarChar, item.title)
+          .input('ItemDescription', sql.VarChar, item.ItemDescription)
+          .input('Manufactured', sql.VarChar, item.Manufactured)
+          .input('BOMQty', sql.VarChar, item.BOMQty)
+          .input('PriceGroup', sql.VarChar, item.PriceGroup)
+          .input('Status', sql.VarChar, item.Status)
+          .input('ProductType', sql.VarChar, item.ProductType)
+          .input('Model', sql.VarChar, item.Model)
+          .input('Index1', sql.VarChar, item.Index1)
+          .input('PartNature', sql.VarChar, item.PartNature)
+          .input('Warranty', sql.VarChar, item.Warranty)
+          .input('HSN', sql.VarChar, item.HSN)
+          .input('Packed', sql.VarChar, item.Packed)
+          .input('Returnable', sql.VarChar, item.Returnable)
+          .query(`
+            INSERT INTO Spare_parts 
+              (ProductCode, ModelNumber, title, ItemDescription, Manufactured, BOMQty, PriceGroup, Status, ProductType, Model, Index1, PartNature, Warranty, HSN, Packed, Returnable) 
+            VALUES (
+              @ProductCode, 
+              @ModelNumber, 
+              @title, 
+              @ItemDescription, 
+              @Manufactured, 
+              @BOMQty, 
+              @PriceGroup, 
+              @Status, 
+              @ProductType, 
+              @Model, 
+              @Index1, 
+              @PartNature, 
+              @Warranty, 
+              @HSN,
+              @Packed,
+              @Returnable
+            )
+          `);
+      }
+    }
+
+    return res.status(200).json({ message: 'Data processed successfully' });
+
+  } catch (err) {
+    console.error("Error inserting/updating data:", err);
+    return res.status(500).json({ error: 'An error occurred while processing data' });
+  }
+});
+
 
 
 

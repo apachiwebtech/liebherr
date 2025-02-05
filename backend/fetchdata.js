@@ -911,7 +911,7 @@ app.post("/fetchspareprice", async (req, res) => {
       SELECT COUNT(*) AS count 
       FROM Spare_partprice
       WHERE Item = @Item AND Product_code = @Product_code
-    `;
+    `; 
 
     const duplicateCheckResult = await pool.request()
       .input('Item', sql.VarChar(50), Item)
