@@ -396,113 +396,68 @@ app.post('/uploadspareexcel', async (req, res) => {
     const pool = await poolPromise;
     pool.config.options.requestTimeout = 600000;
 
+    // Truncate Spare_parts table before inserting new records
+    await pool.request().query("TRUNCATE TABLE Spare_parts");
+
     for (const item of excelData) {
-      // Check for duplicate entry in Spare_part table
-      const duplicateCheckQuery = `
-        SELECT COUNT(*) AS count 
-        FROM Spare_parts
-        WHERE title = @title AND ProductCode = @ProductCode
-      `;
-
-      const duplicateCheckResult = await pool.request()
-        .input('title', sql.VarChar(100), item.title)
-        .input('ProductCode', sql.VarChar(50), item.ProductCode)
-        .query(duplicateCheckQuery);
-
-      const duplicateCount = duplicateCheckResult.recordset[0].count;
-
-      if (duplicateCount > 0) {
-        // Update existing record in Spare_partprice table
-        const updateQuery = `
-          UPDATE Spare_parts
-          SET 
-            Item_Description = @ItemDescription,
-            ModelNumber = @ModelNumber,
-            Manufactured = @Manufactured,
-            BOMQty = @BOMQty,
-            PriceGroup = @PriceGroup,
-            Status = @Status,
-            ProductType = @ProductType,
-            Model = @Model,
-            Index1 = @Index1,
-            PartNature = @PartNature,
-            Warranty = @Warranty,
-            HSN = @HSN,
-            Packed = @Packed,
-            Returnable = @Returnable
-          WHERE ProductCode = @ProductCode AND title = @title
-        `;
-
-        await pool.request()
-          .input('ProductCode', sql.VarChar, item.ProductCode)
-          .input('ItemDescription', sql.VarChar, item.ItemDescription)
-          .input('ModelNumber', sql.VarChar, item.ModelNumber)
-          .input('title', sql.VarChar, item.title)
-          .input('Manufactured', sql.VarChar, item.Manufactured)
-          .input('BOMQty', sql.VarChar, item.BOMQty)
-          .input('PriceGroup', sql.VarChar, item.PriceGroup)
-          .input('Status', sql.VarChar, item.Status)
-          .input('ProductType', sql.VarChar, item.ProductType)
-          .input('Model', sql.VarChar, item.Model)
-          .input('Index1', sql.VarChar, item.Index1)
-          .input('PartNature', sql.VarChar, item.PartNature)
-          .input('Warranty', sql.VarChar, item.Warranty)
-          .input('HSN', sql.VarChar, item.HSN)
-          .input('Packed', sql.VarChar, item.Packed)
-          .input('Returnable', sql.VarChar, item.Returnable)
-          .query(updateQuery);
-
-      } else {
-        // Insert new record in Spare_parts table
-        await pool.request()
-          .input('ProductCode', sql.VarChar, item.ProductCode)
-          .input('ModelNumber', sql.VarChar, item.ModelNumber)
-          .input('title', sql.VarChar, item.title)
-          .input('ItemDescription', sql.VarChar, item.ItemDescription)
-          .input('Manufactured', sql.VarChar, item.Manufactured)
-          .input('BOMQty', sql.VarChar, item.BOMQty)
-          .input('PriceGroup', sql.VarChar, item.PriceGroup)
-          .input('Status', sql.VarChar, item.Status)
-          .input('ProductType', sql.VarChar, item.ProductType)
-          .input('Model', sql.VarChar, item.Model)
-          .input('Index1', sql.VarChar, item.Index1)
-          .input('PartNature', sql.VarChar, item.PartNature)
-          .input('Warranty', sql.VarChar, item.Warranty)
-          .input('HSN', sql.VarChar, item.HSN)
-          .input('Packed', sql.VarChar, item.Packed)
-          .input('Returnable', sql.VarChar, item.Returnable)
-          .query(`
-            INSERT INTO Spare_parts 
-              (ProductCode, ModelNumber, title, ItemDescription, Manufactured, BOMQty, PriceGroup, Status, ProductType, Model, Index1, PartNature, Warranty, HSN, Packed, Returnable) 
-            VALUES (
-              @ProductCode, 
-              @ModelNumber, 
-              @title, 
-              @ItemDescription, 
-              @Manufactured, 
-              @BOMQty, 
-              @PriceGroup, 
-              @Status, 
-              @ProductType, 
-              @Model, 
-              @Index1, 
-              @PartNature, 
-              @Warranty, 
-              @HSN,
-              @Packed,
-              @Returnable
-            )
-          `);
-      }
+      // Insert new record in Spare_parts table
+      await pool.request()
+        .input('ProductCode', sql.VarChar, item.ProductCode)
+        .input('ModelNumber', sql.VarChar, item.ModelNumber)
+        .input('title', sql.VarChar, item.title)
+        .input('ItemDescription', sql.VarChar, item.ItemDescription)
+        .input('Manufactured', sql.VarChar, item.Manufactured)
+        .input('BOMQty', sql.VarChar, item.BOMQty)
+        .input('PriceGroup', sql.VarChar, item.PriceGroup)
+        .input('Status', sql.VarChar, item.Status)
+        .input('ProductType', sql.VarChar, item.ProductType)
+        .input('Model', sql.VarChar, item.Model)
+        .input('Index1', sql.VarChar, item.Index1)
+        .input('PartNature', sql.VarChar, item.PartNature)
+        .input('Warranty', sql.VarChar, item.Warranty)
+        .input('HSN', sql.VarChar, item.HSN)
+        .input('Packed', sql.VarChar, item.Packed)
+        .input('Returnable', sql.VarChar, item.Returnable)
+        .input('ProductLine', sql.VarChar, item.ProductLine)
+        .input('ProductClass', sql.VarChar, item.ProductClass)
+        .input('Serialized', sql.VarChar, item.Serialized)
+        .query(`
+          INSERT INTO Spare_parts 
+            (ProductCode, ModelNumber, title, ItemDescription, Manufactured, BOMQty, PriceGroup, Status, ProductType, Model, Index1, PartNature, Warranty, HSN, Packed, Returnable, ProductClass, ProductLine, Serialized) 
+          VALUES (
+            @ProductCode, 
+            @ModelNumber, 
+            @title, 
+            @ItemDescription, 
+            @Manufactured, 
+            @BOMQty, 
+            @PriceGroup, 
+            @Status, 
+            @ProductType, 
+            @Model, 
+            @Index1, 
+            @PartNature, 
+            @Warranty, 
+            @HSN,
+            @Packed,
+            @Returnable,
+            @ProductClass,
+            @ProductLine,
+            @Serialized
+          )
+        `);
     }
 
     return res.status(200).json({ message: 'Data processed successfully' });
 
   } catch (err) {
-    console.error("Error inserting/updating data:", err);
+    console.error("Error inserting data:", err);
     return res.status(500).json({ error: 'An error occurred while processing data' });
   }
 });
+
+
+
 
 
 

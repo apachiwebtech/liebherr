@@ -156,6 +156,20 @@ export function Productspare() {
                 const mapKeys = (obj) => {
                     const keyMapping = {
                         "Product Code": "ProductCode",
+                        "Item": "title",
+                        "Product Description": "ModelNumber",
+                        "Item Description": "ItemDescription",
+                        "BOM Qty": "BOMQty",
+                        "Price Group":"PriceGroup",
+                        "Product Type": "ProductType",
+                        "Product Class": "ProductClass",
+                        "Product Line": "ProductLine",
+                        "Product Nature": "PartNature",
+                        "Product Warranty Type": "Warranty",
+                        "Product Returnable Type": "Returnable",
+                        "Manufacturer": "Manufactured",
+                        "Serialized": "Serialized",
+                        "Status ": "Status"
                     };
 
                     return Object.fromEntries(
