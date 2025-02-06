@@ -17,8 +17,9 @@ function Details() {
   const [subcatcode, setsubcatcode] = useState([])
   const [calltype, setcalltype] = useState([])
   const [spareadd, setspareadd] = useState(true)
-  const [remark, setremark] = useState([])
+  const [GroupDefectsite, setGroupDefectsite] = useState([]);
   const [callstatus, setcallstatus] = useState([])
+  const [remark, setremark] = useState([])
   const { id } = useParams();
   const [activity, setactivity] = useState([]);
   const [otppart, setotppart] = useState(true);
@@ -27,6 +28,7 @@ function Details() {
   const [otp, setotp] = useState([]);
   const [serial_no, setserial] = useState('');
   const [modelno, setModelNumber] = useState('');
+  const [errors, setErrors] = useState({})
   const [files, setFiles] = useState({
     spare_doc: null,
     spare_doc_two: null,
@@ -57,10 +59,11 @@ function Details() {
     otps_error: '',
     call_status: '',
     serial_no: '',
-    ModelNumber: ''
+    ModelNumber: '',
+    call_remark: '',
+    spare_qty: ''
   })
 
-  const [GroupDefectsite, setGroupDefectsite] = useState([]);
 
 
 
@@ -73,16 +76,14 @@ function Details() {
     if (e.target.name == 'spare_required') {
       setspare(e.target.checked)
     }
+
     if (e.target.name == 'symptomcode') {
       getDefectCodewisetype_app(e.target.value)
       getDefectCodewisesite_app(e.target.value)
     }
 
 
-    if (e.target.value == 'Completed' || e.target.value === 'Approve' || e.target.value === 'Spares') {
-      setIscomplate(false)
-      setotppart(false)
-    }
+
   }
 
 
@@ -130,75 +131,143 @@ function Details() {
   };
 
 
+
+  const validateForm = () => {
+
+    let isValid = true;
+    const newErrors = { ...errors };
+
+
+    if (!Value.call_remark) {
+      isValid = false;
+      newErrors.call_remark = "Remark is required";
+    }
+
+
+
+    if (Value.call_status == "Spares") {
+      if (sparelist.length <= 0) {
+        isValid = false;
+        newErrors.spare = "Add Spares";
+      }
+
+    }
+
+
+
+    // // Additional validations only when call_status is 'Completed'
+    if (Value.call_status == "Completed") {
+
+      if (!serial_no && !data.serial_no) {
+        isValid = false;
+        newErrors.serial_no = "Serial No is required";
+      }
+
+      if (!Value.activity_code || Value.activity_code == 'null') {
+        isValid = false;
+        newErrors.activity_code = "Activity is required";
+      }
+      if (!Value.otps) {
+        isValid = false;
+        newErrors.otps = "OTP is required";
+      }
+      if (!Value.causecode || Value.causecode == 'null') {
+        isValid = false;
+        newErrors.causecode = "Defect code is required";
+      }
+      if (!Value.symptomcode || Value.symptomcode == 'null') {
+        isValid = false;
+        newErrors.symptomcode = "Defect group is required";
+      }
+      if (!Value.actioncode  || Value.actioncode == 'null') {
+        isValid = false;
+        newErrors.actioncode = "Action code is required";
+      }
+
+
+
+    }
+
+
+    setErrors(newErrors);
+    setTimeout(() => {
+      setErrors("");
+    }, 15000);
+
+
+
+    return isValid;
+  };
+
+
+
+
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
 
+    if (validateForm()) {
 
 
-    const formData = new FormData();
+      const formData = new FormData();
 
-    formData.append('otp', Value.otps);
-    formData.append('symptomcode', Value.symptomcode);
-    formData.append('causecode', Value.causecode);
-    formData.append('actioncode', Value.actioncode);
-    formData.append('activitycode', Value.activity_code);
-    formData.append('service_charges', Value.service_charges);
-    formData.append('call_status', Value.call_status);
-    formData.append('call_type', Value.call_type);
-    formData.append('other_charge', Value.other_charge);
-    formData.append('warranty_status', Value.warranty_status);
-    formData.append('com_id', data.id);
-    formData.append('call_remark', Value.call_remark);
-    formData.append('ticket_no', data.ticket_no);
-    formData.append('ModelNumber', modelno || data.ModelNumber);
-    formData.append('serial_no', serial_no || data.serial_no);
-    formData.append('user_id', localStorage.getItem('userid'));
-    if (Value.spare_required) {
-      formData.append('spare_detail', Value.spare_detail);
-    }
-    // Append the file if it exists
+      formData.append('otp', Value.otps);
+      formData.append('symptomcode', Value.symptomcode);
+      formData.append('causecode', Value.causecode);
+      formData.append('actioncode', Value.actioncode);
+      formData.append('activitycode', Value.activity_code);
+      formData.append('service_charges', Value.service_charges);
+      formData.append('call_status', Value.call_status);
+      formData.append('call_type', Value.call_type);
+      formData.append('other_charge', Value.other_charge);
+      formData.append('warranty_status', Value.warranty_status);
+      formData.append('com_id', data.id);
+      formData.append('call_remark', Value.call_remark);
+      formData.append('ticket_no', data.ticket_no);
+      formData.append('ModelNumber', modelno || data.ModelNumber);
+      formData.append('serial_no', serial_no || data.serial_no);
+      formData.append('user_id', localStorage.getItem('userid'));
+      if (Value.spare_required) {
+        formData.append('spare_detail', Value.spare_detail);
+      }
+      // Append the file if it exists
 
 
-    if (files.spare_doc) {
-      formData.append('spare_doc', files.spare_doc);
-    }
+      if (files.spare_doc) {
+        formData.append('spare_doc', files.spare_doc);
+      }
 
-    if (files.spare_doc_two) {
-      formData.append('spare_doc_two', files.spare_doc_two);
-    }
+      if (files.spare_doc_two) {
+        formData.append('spare_doc_two', files.spare_doc_two);
+      }
 
-    if (files.spare_doc_three) {
-      formData.append('spare_doc_three', files.spare_doc_three);
-    }
+      if (files.spare_doc_three) {
+        formData.append('spare_doc_three', files.spare_doc_three);
+      }
 
-    // const fileInput = document.getElementById('spare_doc');
-    // console.log(fileInput,'file')
-    // if (fileInput.files[0]) {
-    //   formData.append('spare_doc', fileInput.files[0]);
-    // }
-    // const fileInput2 = document.getElementById('spare_doc_two');
-    // if (fileInput2.files[0]) {
-    //   formData.append('spare_doc_two', fileInput2.files[0]);
-    // }
-    // const fileInput3 = document.getElementById('spare_doc_three');
-    // if (fileInput3.files[0]) {
-    //   formData.append('spare_doc_three', fileInput3.files[0]);
-    // }
 
-    axios.post(`${Base_Url}/updatecomplaint`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        Authorization: token,
-      },
-    })
-      .then((res) => {
-        console.log(res);
-        navigate('/mobapp/dash');
+
+      axios.post(`${Base_Url}/updatecomplaint`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: token,
+        },
       })
-      .catch((err) => {
-        console.log(err);
-      });
+        .then((res) => {
+          console.log(res);
+          navigate('/mobapp/dash');
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+
+
+    } else {
+      alert("Please fill required feilds")
+    }
+
+
 
 
   }
@@ -339,6 +408,7 @@ function Details() {
       ItemDescription: sparedata[Value.spare].article_description,
       title: sparedata[Value.spare].article_code,
       product_code: sparedata[Value.spare].spareId,
+      spare_qty: Value.spare_qty
     }
     // console.log(data);
 
@@ -575,7 +645,7 @@ function Details() {
       }
       );
 
-      if ( response.data && response.data[0].ModelNumber) {
+      if (response.data && response.data[0].ModelNumber) {
 
         setModelNumber(response.data[0].ModelNumber)
 
@@ -640,8 +710,9 @@ function Details() {
                   </p> : <div class="mb-3">
                     <div class="form-group">
                       <label for="val-actioncode"><strong>Serial No</strong></label>
-                      <input type="number" class="form-control" onChange={(e) => handlegetmodel(e.target.value)} name="spare_doc" id="spare_doc" />
+                      <input type="number" class="form-control" onChange={(e) => handlegetmodel(e.target.value)} name="serial_no" id="spare_doc" />
                     </div>
+                    {errors.serial_no && <span className='text-danger'>{errors.serial_no}</span>}
                   </div>}
 
                   <p className="mb-0 small">
@@ -650,9 +721,9 @@ function Details() {
                 </div>
 
                 <div className=" mb-2">
-                  <p className="mb-2 small">
+                  {/* <p className="mb-2 small">
                     <strong>Call Type:</strong> {data.call_type}
-                  </p>
+                  </p> */}
                   <p className="mb-0 small">
                     <strong>Customer Class:</strong> <span style={{ textTransform: "uppercase" }}> {data.customer_class}</span>
                   </p>
@@ -687,49 +758,56 @@ function Details() {
             <div class="col-12 mt-2">
               <div class="col-12">
                 <div class="bg-light mb-3 p-2 rounded">
+
                   <div class="mb-3">
                     <label for="Country" class="form-label">Defect Group Code</label>
-                    <select required value={Value.symptomcode} id="country" onChange={handleChange} name="symptomcode" class="form-select" aria-label=".form-select-lg example">
+                    <select value={Value.symptomcode} id="country" onChange={handleChange} name="symptomcode" class="form-select" aria-label=".form-select-lg example">
                       <option value=''>Select Defect Group Code</option>
                       {symptomsode.map((item) => {
                         return (
-                          <option value={item.defectgroupcode}>{item.defectgrouptitle}</option>
+                          <option value={item.defectgroupcode}>{item.defectgroupcode}-{item.defectgrouptitle}</option>
                         )
                       })}
                     </select>
+                    {errors.symptomcode && <span className='text-danger'>{errors.symptomcode}</span>}
                   </div>
+
                   <div class="mb-3">
                     <label for="Region" class="form-label">Type of Defect Code</label>
                     <select id="Region" value={Value.causecode} onChange={handleChange} name="causecode" class="form-select" aria-label=".form-select-lg example">
                       <option value="">Select Type of Defect Code</option>
                       {causecode.map((item) => {
                         return (
-                          <option value={item.defect_code}>{item.defect_title}</option>
+                          <option value={item.defect_code}>{item.defect_code}-{item.defect_title}</option>
                         )
                       })}
                     </select>
+     Re               {errors.causecode && <span className='text-danger'>{errors.causecode}</span>}
                   </div>
+
                   <div class="mb-3">
                     <label for="geostate" class="form-label">Site Defect Code</label>
                     <select id="geostate" value={Value.actioncode} onChange={handleChange} name="actioncode" class="form-select" aria-label=".form-select-lg example">
                       <option value="">Select Site Defect Code</option>
                       {actioncode.map((item) => {
                         return (
-                          <option value={item.dsite_code}>{item.dsite_title}</option>
+                          <option value={item.dsite_code}>{item.dsite_code}-{item.dsite_title}</option>
                         )
                       })}
                     </select>
+                    {errors.actioncode && <span className='text-danger'>{errors.actioncode}</span>}
                   </div>
                   <div class="mb-3">
                     <label for="geostate" class="form-label">Activity Code</label>
                     <select id="geostate" value={Value.activity_code} onChange={handleChange} name="activity_code" class="form-select" aria-label=".form-select-lg example">
                       <option value="">Select Site Defect Code</option>
                       {activity.map((item) => (
-                        <option key={item.id} value={item.id}>
+                        <option key={item.id} value={item.code}>
                           {item.code} - {item.title}
                         </option>
                       ))}
                     </select>
+                    {errors.activity_code && <span className='text-danger'>{errors.activity_code}</span>}
                   </div>
                 </div>
               </div>
@@ -759,9 +837,9 @@ function Details() {
                     <div class="form-group">
                       <label for="val-actioncode">Warranty Status</label>
                       <select name="warranty_status" disabled onChange={handleChange} value={Value.warranty_status} class="form-control" id="val_warranty_status">
-                        <option>Select Warranty Status</option>
-                        <option value="Out Warranty" selected>Out Warranty</option>
-                        <option value="Warranty">In Warranty</option>
+                        {/* <option>Select Warranty Status</option> */}
+                        <option value="OUT OF WARRANTY" selected>Out Warranty</option>
+                        <option value="WARRANTY">In Warranty</option>
                       </select>
                     </div>
                   </div>
@@ -783,32 +861,32 @@ function Details() {
 
                   <div class="mb-3">
                     <div class="form-group">
-                      <label for="val-actioncode">Attachment</label>
+                      <label for="val-actioncode">Invoice No.</label>
                       <input type="file" class="form-control" name="spare_doc" id="spare_doc" onChange={handleFileChange} />
                     </div>
                   </div>
                   <div class="mb-3">
                     <div class="form-group">
-                      <label for="val-actioncode">Attachment2</label>
+                      <label for="val-actioncode">Serial No.</label>
                       <input type="file" class="form-control" name="spare_doc_two" id="spare_doc_two" onChange={handleFileChange} />
                     </div>
                   </div>
                   <div class="mb-3">
                     <div class="form-group">
-                      <label for="val-actioncode">Attachment3</label>
+                      <label for="val-actioncode">Attachment</label>
                       <input type="file" class="form-control" name="spare_doc_three" id="spare_doc_three" onChange={handleFileChange} />
                     </div>
                   </div>
 
                   <div class="mb-3">
                     <div class="form-group">
-                      <input type="checkbox" onChange={handleChange} name="spare_required" id="spare-required" /> <label>Spare Required</label>
+                      <input type="checkbox" onChange={handleChange} name="spare_required" id="spare-required" /> <label>Select Spare</label>
                     </div>
                   </div>
                   {spare ? (
-                    <div id="sparedt" class="mb-3 d-flex justify-content-between align-content-center">
+                    <div id="sparedt" class="mb-3 row justify-content-between align-content-center">
 
-                      <div class="form-group">
+                      <div class="form-group col-6">
                         <label for="val-actioncode">Spare Details</label>
                         {/* <input  type="text" onChange={handleChange} class="form-control" name="spare_detail" id="val-spare_detail" value="" /> */}
                         <select required id="geostate" onChange={handleChange} name="spare" class="form-select" aria-label=".form-select-lg example">
@@ -821,10 +899,12 @@ function Details() {
                         </select>
                       </div>
 
+                      <div class="form-group col-3">
+                        <label for="val-actioncode">Qty</label>
+                        <input type="number" onChange={handleChange} class="form-control" value={Value.spare_qty} name="spare_qty" id="val-spare_detail" />
+                      </div>
 
-
-
-                      <div >
+                      <div className='col-3'>
                         <button type='button' onClick={addspare} className='btn btn-primary mt-3 '>ADD</button>
                       </div>
 
@@ -844,7 +924,7 @@ function Details() {
                         {sparelist.map((item) => {
                           return (
                             <tr>
-                              <td>{item.article_description}</td>
+                              <td>{item.article_code}-{item.article_description}</td>
                               <td>{item.quantity}</td>
                               <td>
                                 <button
@@ -863,6 +943,8 @@ function Details() {
                     </table>
                   </div>
                 </div>
+                {errors.spare && <span className='text-danger'>{errors.spare}</span>}
+
                 <table hidden className="table table-striped table-bordered">
                   <thead className="table-light">
                     <tr>
@@ -887,6 +969,30 @@ function Details() {
                 <div class="bg-light mb-3 p-2 rounded">
                   <div class="mb-3">
                     <div class="form-group">
+                      <label for="val-spare_remark"><strong>Extra Charges</strong></label>
+                    </div>
+                    <div className='row mt-2'>
+                      <div class="form-group col-6">
+                        <input type="checkbox" onChange={handleChange} name="gas_chargs" /> <label>Gas Charges</label>
+                      </div>
+                      <div class="form-group col-6">
+                        <input type="checkbox" onChange={handleChange} name="transpotation" /> <label>Transpotation</label>
+                      </div>
+                    </div>
+
+                  </div>
+
+
+
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 mt-2">
+              <div class="col-12">
+                <div class="bg-light mb-3 p-2 rounded">
+                  <div class="mb-3">
+                    <div class="form-group">
                       <label for="val-spare_remark"><strong>Additional Remarks</strong></label>
                       <p id="val_cc_remark" style={{ marginTop: '7px' }} >{remark.remark}</p>
                     </div>
@@ -894,58 +1000,50 @@ function Details() {
 
                   <div class="mb-3">
                     <div class="form-group">
-                      <label for="val-spare_remark">Technician Feedback</label>
+                      <label for="val-spare_remark">Technician Feedback<span className='text-danger'>*</span></label>
                       <textarea class="form-control" onChange={handleChange} name="call_remark" id="call_remark" rows="3"></textarea>
+                      {errors.call_remark && <span className='text-danger'>{errors.call_remark}</span>}
                     </div>
                   </div>
 
-                  {done ? (
-                    <>
-                      <div class="mb-3">
-                        <div class="form-group">
-                          <label for="val-spare_status">Call Status</label>
-                          <select required name="call_status" value={Value.call_status} onChange={handleChange} id="val-spare_status" class="form-control select2-hidden-accessible" >
-                            <option value="2">Select Status</option>
-                            {/* {callstatus
-                              .filter((item) => item.Callstatus === 'Closed' || item.Callstatus === 'Cancelled' || item.Callstatus === 'Spares' || item.Callstatus === 'Completed') // Filter items
-                              .map((item) => (
-                                <option key={item.Callstatus} value={item.Callstatus}>
-                                  {item.Callstatus}
-                                </option>
-                              ))} */}
 
-                            <option value='Closed'>Completed</option>
-                            <option value='Spares'>Spares</option>
-                            <option value='Approval'>Approval / Customer / Quotation</option>
-                            <option value='Approval'>Approval /Internal</option>
+                  <>
+                    <div class="mb-3">
+                      <div class="form-group">
+                        <label for="val-spare_status">Call Status</label>
+                        <select required name="call_status" value={Value.call_status} onChange={handleChange} id="val-spare_status" class="form-control select2-hidden-accessible" >
+                          <option value="2">Select Status</option>
 
-                          </select>
-                          <p className='text-danger' >{Value.status_error}</p>
-                        </div>
+
+                          <option value='Completed'>Completed / Partially</option>
+                          <option value='Spares'>Spares / Required</option>
+                          <option value='Approval'>Approval / Customer / Quotation</option>
+                          <option value='Approval-Int'>Approval / Internal</option>
+
+                        </select>
+                        {errors.call_status && <span className='text-danger'>{errors.call_status}</span>}
                       </div>
-                      {otppart ? (
-                        <div class="mb-3">
-                          <button type="submit" name="spare_submit" class="btn btn-primary float-right">{iscomplate ? "Send OTP" : "Submit"}</button>
-                        </div>
+                    </div>
 
-                      ) : (
-                        <>
-                          <div class="mb-3">
-                            <div class="form-group">
-                              <label for="val-actioncode">Entry OTP - {otp}</label>
-                              <input type="text" onChange={handleChange} class="form-control" name="otps" id="otps" />
-                              <p className='text-danger' >{Value.otps_error}</p>
-                            </div>
-                          </div>
-                          <div class="mb-3">
-                            <button type="submit" name="spare_submit" class="btn btn-primary float-right">Submit</button>
-                          </div>
-                        </>
-                      )}
+                    <>
+
+                      {Value.call_status == 'Completed' && <div class="mb-3">
+                        <div class="form-group">
+                          <label for="val-actioncode">Enter OTP - {otp}</label>
+                          <input type="text" onChange={handleChange} value={Value.otps} class="form-control" name="otps" id="otps" />
+                          {errors.otps && <span className='text-danger'>{errors.otps}</span>}
+                        </div>
+                      </div>}
+
 
 
                     </>
-                  ) : null}
+
+                    <div class="mb-3">
+                      <button type="submit" name="spare_submit" class="btn btn-primary float-right">Submit</button>
+                    </div>
+                  </>
+
                 </div>
               </div>
             </div>

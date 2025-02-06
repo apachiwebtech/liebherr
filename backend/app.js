@@ -4499,7 +4499,7 @@ app.post("/u_complaint", authenticateToken, async (req, res) => {
   let {
     customer_name, contact_person, email, mobile, address,
     state, city, area, pincode, mode_of_contact, cust_type,
-    warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks, ticket_no, classification, priority, requested_by, requested_email, requested_mobile, sales_partner2, salutation, mwhatsapp, awhatsapp, class_city, mother_branch
+    warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks, ticket_no, classification, priority, requested_by, requested_email, requested_mobile, sales_partner2, salutation, mwhatsapp, awhatsapp, class_city, mother_branch , csp , msp
   } = req.body;
 
 
@@ -4551,6 +4551,8 @@ SET
   requested_email = @requested_email,
   sales_partner2 = @sales_partner2,
   salutation = @salutation,
+  msp = @msp,
+  csp = @csp,
   alt_mobile = @alt_mobile,
   mwhatsapp = @mwhatsapp,
   awhatsapp = @awhatsapp,
@@ -4578,7 +4580,7 @@ SET
       .input('customer_id', cust_id)
       .input('model', model)
       .input('cust_type', cust_type)
-      .input("warranty_status", sql.NVarChar, warrenty_status || "WARRANTY")
+      .input("warranty_status", sql.NVarChar, warrenty_status )
       .input('invoice_date', invoice_date)
       .input('call_charge', call_charge)
       .input('mode_of_contact', mode_of_contact)
@@ -4597,6 +4599,8 @@ SET
       .input('requested_mobile', requested_mobile)
       .input('sales_partner2', sales_partner2)
       .input('salutation', salutation)
+      .input('msp', msp)
+      .input('csp', csp)
       .input('alt_mobile', alt_mobile)
       .input('mwhatsapp', mwhatsapp)
       .input('awhatsapp', awhatsapp)
@@ -9439,7 +9443,7 @@ WHERE
 
 
     const fallbackSql = `SELECT ac.salutation , ac.customer_fname ,ac.customer_lname , ac.customer_type , ac.customer_classification , ac.mobileno , ac.alt_mobileno,ac.email ,
-au.CustomerID , au.ModelNumber , au.address , au.region , au.state ,au.district , au.city , au.pincode ,au.purchase_date,au.SalesDealer as SalesPartner,au.serial_no , au.SubDealer as SalesAM , au.customer_classification as customerClassification
+au.CustomerID , au.ModelNumber , au.address , au.region , au.state ,au.district , au.city , au.pincode ,au.purchase_date,au.SalesDealer as SalesPartner,au.serial_no , au.SubDealer as SalesAM ,au.ModelName as ItemNumber ,au.customer_classification as customerClassification
 FROM awt_uniqueproductmaster as au
 left join awt_customer as ac on ac.customer_id = au.CustomerID
 WHERE au.serial_no = @serial order by au.id desc`;
@@ -13438,7 +13442,21 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
   { name: 'spare_doc_two', maxCount: 1 },
   { name: 'spare_doc_three', maxCount: 1 },
 ]), async (req, res) => {
-  const { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode, activitycode, com_id, warranty_status, spare_detail, ticket_no, user_id, serial_no, ModelNumber } = req.body;
+  let { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode, activitycode, com_id, warranty_status, spare_detail, ticket_no, user_id, serial_no, ModelNumber ,sub_call_status} = req.body;
+
+  if(call_status == 'Completed'){
+    sub_call_status = 'Partially'
+  }
+  else if(call_status == 'Spares'){
+    sub_call_status = 'Spare Required'
+  }
+  else if(call_status == 'Approval'){
+    sub_call_status = 'Customer Approval / Quotation'
+  }
+  else if(call_status == 'Approval-Int'){
+    sub_call_status = 'Internal Approval'
+    call_status = 'Approval'
+  }
 
 
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
@@ -13465,26 +13483,26 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
   try {
     const pool = await poolPromise;
     const result = await pool.request()
-      .input('actioncode', sql.VarChar, actioncode != 'undefined' ? actioncode : null)
-      .input('symptomcode', sql.VarChar, symptomcode != 'undefined' ? symptomcode : null)
-      .input('causecode', sql.VarChar, causecode != 'undefined' ? causecode : null)
-      .input('activitycode', sql.VarChar, activitycode != 'undefined' ? activitycode : null)
+      .input('actioncode', sql.VarChar, actioncode != 'undefined' ? actioncode : '')
+      .input('symptomcode', sql.VarChar, symptomcode != 'undefined' ? symptomcode : '')
+      .input('causecode', sql.VarChar, causecode != 'undefined' ? causecode : '')
+      .input('activitycode', sql.VarChar, activitycode != 'undefined' ? activitycode : '')
       .input('service_charges', sql.VarChar, service_charges != 'undefined' ? service_charges : null)
-      .input('call_status', sql.VarChar, call_status != 'undefined' ? call_status : null)
+      .input('call_status', sql.VarChar, call_status != 'undefined' ? call_status : '')
+      .input('sub_call_status', sql.VarChar, sub_call_status != 'undefined' ? sub_call_status : '')
       .input('call_type', sql.VarChar, call_type != 'undefined' ? call_type : null)
       .input('other_charge', sql.VarChar, other_charge != 'undefined' ? other_charge : null)
       .input('warranty_status', sql.VarChar, warranty_status != 'undefined' ? warranty_status : null)
       .input('com_id', sql.VarChar, com_id != 'undefined' ? com_id : null)
       .input('spare_doc_path', sql.VarChar, spareDoc)
-      .input('call_remark', sql.VarChar, call_remark != 'undefined' ? call_remark : null) // Add call_remark
+      .input('call_remark', sql.VarChar, call_remark != 'undefined' ? call_remark : '') // Add call_remark
       .input('spare_detail', sql.VarChar, spare_detail != 'undefined' ? spare_detail : null)
       .input('serial_no', sql.VarChar, serial_no != 'undefined' ? serial_no : null)
-      .input('ModelNumber', sql.VarChar, ModelNumber != 'undefined' ? ModelNumber : null)
-      .query('UPDATE complaint_ticket SET warranty_status = @warranty_status, group_code = @symptomcode, defect_type = @causecode, site_defect = @actioncode,activity_code = @activitycode,service_charges = @service_charges, call_status = @call_status, call_type = @call_type, other_charges = @other_charge, spare_doc_path = @spare_doc_path, call_remark = @call_remark, spare_detail = @spare_detail , ModelNumber = @ModelNumber , serial_no = @serial_no WHERE id = @com_id');
+      .input('ModelNumber', sql.VarChar, ModelNumber != 'undefined' ? ModelNumber : '')
+      .query('UPDATE complaint_ticket SET warranty_status = @warranty_status, group_code = @symptomcode, defect_type = @causecode, site_defect = @actioncode,activity_code = @activitycode,service_charges = @service_charges, call_status = @call_status,sub_call_status = @sub_call_status, call_type = @call_type, other_charges = @other_charge, spare_doc_path = @spare_doc_path, call_remark = @call_remark, spare_detail = @spare_detail , ModelNumber = @ModelNumber , serial_no = @serial_no WHERE id = @com_id');
 
     // Check if any rows were updated
     if (result.rowsAffected[0] > 0) {
-
 
 
 
@@ -13677,24 +13695,40 @@ app.get("/getSpareParts_app/:model", authenticateToken, async (req, res) => {
 
 
 app.post("/addspareapp", authenticateToken, async (req, res) => {
-  const { ItemDescription, title, product_code, ticket_no } = req.body;
+  const { ItemDescription, title, product_code, ticket_no, spare_qty } = req.body;
 
   try {
     const pool = await poolPromise;
-    // Modified SQL query using parameterized query
 
-    const addspare = `insert into awt_uniquespare (ticketId , spareId , article_code ,article_description ) values('${ticket_no}','${product_code}' ,'${title}','${ItemDescription}'  )`;
+    // Check if a record with the same ticketId already exists
+    const checkDuplicateQuery = `SELECT * FROM awt_uniquespare WHERE ticketId = '${ticket_no}'`;
+    const duplicateResult = await pool.request().query(checkDuplicateQuery);
 
-
-
-    const result = await pool.request().query(addspare);
-
-    return res.json({ message: 'done' });
+    if (duplicateResult.recordset.length > 0) {
+      // If the record exists, update the spare_qty
+      const updateSpareQuery = `
+        UPDATE awt_uniquespare
+        SET spareId = '${product_code}', article_code = '${title}', 
+            article_description = '${ItemDescription}', quantity = '${spare_qty}'
+        WHERE ticketId = '${ticket_no}' and article_code = '${title}'`;
+      await pool.request().query(updateSpareQuery);
+      return res.json({ message: 'Quantity updated for existing ticket' });
+    } else {
+      // If the record does not exist, insert a new record
+      const addSpareQuery = `
+        INSERT INTO awt_uniquespare (ticketId, spareId, article_code, article_description, quantity)
+        VALUES ('${ticket_no}', '${product_code}', '${title}', '${ItemDescription}','${spare_qty}')`;
+      await pool.request().query(addSpareQuery);
+      return res.json({ message: 'New spare added successfully' });
+    }
   } catch (err) {
     console.error("Database error:", err);
     return res.status(500).json({ error: "Database error occurred", details: err.message });
   }
 });
+
+
+
 
 app.post("/getotpapp", authenticateToken, async (req, res) => {
   const { otp, orderid } = req.body;

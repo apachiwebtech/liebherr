@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Header from './Header';
 import axios from 'axios';
 import { Base_Url } from '../../Utils/Base_Url';
+import _debounce from 'lodash.debounce';
 
 function Dashbord() {
   const [list, setList] = useState([]);
@@ -41,9 +42,18 @@ function Dashbord() {
       });
   }
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+
+    return `${day}-${month}-${year}`;
+  };
+
   const getComplaints = async () => {
     const en_id = localStorage.getItem("userid");
-    if (!hasMore || loading) return;
+    if (!hasMore || loading ) return;
 
     setLoading(true);
     try {
@@ -54,7 +64,7 @@ function Dashbord() {
             Authorization: token, // Send token in headers
         },
     });
-      console.log("message", res.data.message);
+
       if (res.data.message != "No records found") {
         if (res.data.data !== 0 || res.data.data.length !== 0) {
 
@@ -76,28 +86,40 @@ function Dashbord() {
     setLoading(false);
   };
 
-  useEffect(() => {
-
-    getComplaints();
-
-    console.log('i fire once');
-  }, []);
+  const debouncedGetComplaints = useCallback(_debounce(getComplaints, 300), []);
 
   useEffect(() => {
-    const handleScroll = () => {
-      if (
-        window.innerHeight + document.documentElement.scrollTop + 1 >=
-        document.documentElement.scrollHeight
-      ) {
-        getComplaints(); // Fetch more complaints when scrolled to the bottom
-      }
+    debouncedGetComplaints();
+
+    // Cleanup debounce on unmount
+    return () => {
+      debouncedGetComplaints.cancel();
     };
+  }, [debouncedGetComplaints]);
 
-    window.addEventListener("scroll", handleScroll);
 
-    // Cleanup the event listener on component unmount
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [page]); // Add page as a dependency
+  console.log(filteredList.length , "%%")
+
+const handleScroll = _debounce(() => {
+  const { scrollTop, clientHeight, scrollHeight } = document.documentElement;
+
+  // Trigger if scrolled near the bottom and filteredList has more than 5 items
+  if (scrollTop + clientHeight >= scrollHeight - 100 ) {
+    getComplaints();
+  }
+}, 200);
+
+  useEffect(() => {
+    // Add an event listener to the scroll event
+    window.addEventListener('scroll', handleScroll);
+    // Clean up the event listener when the component unmounts
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+
+    };
+  }, [page]);
+
+
 
 
   useEffect(() => {
@@ -196,12 +218,12 @@ function Dashbord() {
         {/* List of complaints */}
         <div className="row mt-4">
           {filteredList && filteredList.length > 0 ? (
-            filteredList.map((item) => (
-              <div key={item.id} className="col-12">
+            filteredList.map((item , index) => (
+              <div key={index} className="col-12">
                 <div className="bg-light mb-3 p-2 rounded">
                   <h3 className="mainheadinh">
                     <span id="compaintno1">{item.ticket_no}</span>
-                    <span className="complDate">{item.ticket_date}</span>
+                    <span className="complDate">{item.ticket_date ? formatDate(item.ticket_date) : null}</span>
                   </h3>
                   <h4 className="pname">{item.customer_name}</h4>
                   <p>{item.address} , {item.area} , {item.city} , {item.pincode}</p>
@@ -220,8 +242,8 @@ function Dashbord() {
                     <a href={`/mobapp/details/${item.id}`} className="btn btn-info mr-2">
                       <i className="fa-solid fa-eye"></i>
                     </a>
-                    <p className="btn btn-warning ml-2 statusbx">
-                      {item.call_status}
+                    <p className="btn btn-warning ml-2 statusbx" style={{fontSize : "10px",marginBottom : "0px"}}>
+                      {item.call_status} {item.call_status == 'Open' ? '' : '/'} {item.sub_call_status}
                     </p>
                   </div>
                 </div>

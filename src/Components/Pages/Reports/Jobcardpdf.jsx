@@ -123,7 +123,7 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
 
     return (
         <Document>
-            <Page size="A3" style={styles.page}>
+            <Page size="A4" style={styles.page}>
                 <View style={styles.header}>
                     <Image src={Liebherrlogo} style={styles.image} />
                     <View style={styles.headerRight}>
@@ -174,14 +174,14 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Service Partner</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '40%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.sevice_partner}</Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.child_service_partner}</Text>
 
                         </View>
                         <View style={[styles.tableCol, { width: '15%' }, { backgroundColor: '#9EA0A1' }]}>
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Liebherr Branch</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '25%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.mother_branch}</Text>
 
                         </View>
 

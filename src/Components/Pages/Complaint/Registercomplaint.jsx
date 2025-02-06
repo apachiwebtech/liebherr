@@ -433,6 +433,10 @@ export function Registercomplaint(params) {
       isValid = false;
       newErrors.cust_type = "Type is required";
     }
+    if (!value.call_charge ) {
+      isValid = false;
+      newErrors.call_charge = "This is required";
+    }
 
     if (value.requested_mobile && !validateMobile(value.requested_mobile)) {
       isValid = false;
@@ -1023,6 +1027,8 @@ export function Registercomplaint(params) {
       requested_mobile: value.requested_mobile || "",
       sales_partner2: value.sales_partner2 || "",
       salutation: value.salutation || "",
+      msp: value.msp || '',
+      csp: value.csp || '',
       mwhatsapp: checkboxes.mwhatsapp || 0,
       awhatsapp: checkboxes.awhatsaap || 0,
       ticket_no: Comp_id,
@@ -1137,9 +1143,9 @@ export function Registercomplaint(params) {
       case "complaint_date":
         setDate(e.target.value);
         break;
-      case "mobile":
-        fetchfrommobile(inputValue)
-        break;
+      // case "mobile":
+      //   fetchfrommobile(inputValue)
+      //   break;
     }
 
 
@@ -1255,6 +1261,17 @@ export function Registercomplaint(params) {
 
   const fetchfrommobile = async (mobile) => {
 
+    setValue({
+      salutation: "",
+      customer_name:  "",
+      cust_type:  "",
+      alt_mobile:  "",
+      email:  "",
+      address:  "",
+      customer_id:  "",
+      pincode :  '',
+    })
+    
     try {
       const response = await axiosInstance.get(
         `${Base_Url}/fetchfrommobile/${mobile || value.mobile}`, {
@@ -1826,6 +1843,7 @@ export function Registercomplaint(params) {
                         {errors.email && <span style={{ fontSize: "12px" }} className="text-danger">{errors.email}</span>}
                       </div>
                     </div>
+                    
                     <div className="col-md-4">
                       <div className="mb-3">
                         <label htmlFor="exampleFormControlInput1" className="form-label">Mobile No.  <span className="text-danger">*</span>
@@ -1834,10 +1852,16 @@ export function Registercomplaint(params) {
                           if (e.target.value.length <= 10) {
                             onHandleChange(e);
                           }
+                        }}  onBlur={(e) => {
+                          if (e.target.value.length === 10) {
+                            // Call your API function here
+                            fetchfrommobile()
+                          } 
                         }} className="form-control" placeholder="Enter Mobile" />
                         {errors.mobile && <span style={{ fontSize: "12px" }} className="text-danger">{errors.mobile}</span>}
                       </div>
                     </div>
+
                     <div className="col-md-4">
                       <div className="mb-3">
                         <label htmlFor="exampleFormControlInput1" className="form-label">Alt. Mobile No. <input type="checkbox" name="awhatsaap" onChange={oncheckchange} checked={checkboxes.awhatsaap === 1} />Whatsapp</label>
