@@ -3497,7 +3497,7 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
 
     const updateSql = `
     UPDATE complaint_ticket
-    SET call_status = '${call_status}' , updated_by = '${created_by}', updated_date = '${formattedDate}' , sub_call_status  = '${sub_call_status}' ,group_code = '${group_code}' , defect_type = '${defect_type}' , ModelNumber = '${ModelNumber}',serial_no = '${serial_no}' , site_defect = '${site_defect}' ,activity_code = '${activity_code}' , purchase_date = '${purchase_date}' , warranty_status = '${warrenty_status}' ,engineer_id = '${engineer_id}' , assigned_to = '${engineer_name}' ,call_remark = '${concatremark}'  WHERE ticket_no = '${ticket_no}' `;
+    SET call_status = '${call_status}' , updated_by = '${created_by}', updated_date = '${formattedDate}' , sub_call_status  = '${sub_call_status}' ,group_code = '${group_code}' , defect_type = '${defect_type}' , ModelNumber = '${ModelNumber}',serial_no = '${serial_no}' , site_defect = '${site_defect}' ,activity_code = '${activity_code}' , purchase_date = '${purchase_date}' , warranty_status = '${warrenty_status}' ,engineer_id = '${engineer_id}' , assigned_to = '${engineer_name}'   WHERE ticket_no = '${ticket_no}' `;
 
     await pool.request().query(updateSql);
 
@@ -4530,7 +4530,6 @@ SET
   customer_id = @customer_id,
   ModelNumber = @model,
   call_type = @cust_type,
-  call_status = 'Pending',
   warranty_status = @warranty_status,
   invoice_date = @invoice_date,
   call_charges = @call_charge,
@@ -13867,6 +13866,27 @@ app.post("/removeappsparepart", authenticateToken, async (req, res) => {
 });
 
 // Mobapp End
+
+app.post("/getcspdetails", authenticateToken, async (req, res) => {
+
+  let { licare_code } = req.body;
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    const sql = `select * from awt_childfranchisemaster where licare_code = '${licare_code}' and deleted = 0`;
+
+    const result = await pool.request().query(sql);
+
+
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json(err);
+  }
+});
 
 
 
