@@ -399,23 +399,23 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
                         <View style={[styles.tableCol14, { width: '20%' }]}>
                             <Text style={{ fontSize: '8px', marginTop: 10, marginLeft: 15, color: '#000', fontWeight: 1600 }}>Engineer Name</Text>
                         </View>
-                        <View style={[styles.tableCol14, { width: '5%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 10, color: '#000', fontWeight: 1600 }}>Date</Text>
+                        <View style={[styles.tableCol14, { width: '9%' }]}>
+                            <Text style={{ fontSize: '8px', marginTop: 10, color: '#000', fontWeight: 1600, marginLeft: 10 }}>Date</Text>
 
                         </View>
-                        <View style={[styles.tableCol14, { width: '8%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 10, color: '#000', fontWeight: 1600 }}>Time In </Text>
+                        <View style={[styles.tableCol14, { width: '9%' }]}>
+                            <Text style={{ fontSize: '8px', marginTop: 10, color: '#000', fontWeight: 1600, marginLeft : 10 }}>Time In </Text>
 
                         </View>
                         <View style={[styles.tableCol14, { width: '27%' }]}>
                             <Text style={{ fontSize: '8px', marginTop: 10, marginLeft: 5, color: '#000', fontWeight: 1600 }}>Observation</Text>
 
                         </View>
-                        <View style={[styles.tableCol14, { width: '25%' }]}>
+                        <View style={[styles.tableCol14, { width: '22%' }]}>
                             <Text style={{ fontSize: '8px', marginTop: 10, marginLeft: 15, color: '#000', fontWeight: 1600 }}>Repair Done</Text>
 
                         </View>
-                        <View style={[styles.tableCol14, { width: '15%' }]}>
+                        <View style={[styles.tableCol14, { width: '13%' }]}>
                             <Text style={{ fontSize: '8px', marginTop: 10, marginLeft: 15, color: '#000', fontWeight: 1600 }}>Sign</Text>
 
                         </View>
@@ -428,11 +428,11 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
                         <View style={[styles.tableCol14, { width: '20%' }]}>
                             <Text style={{ fontSize: '8px', marginTop: 10, marginLeft: 15, color: '#000', fontWeight: 1600 }}>{engineer[0] && engineer[0].title}</Text>
                         </View>
-                        <View style={[styles.tableCol14, { width: '5%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 10, color: '#000', fontWeight: 1600 }}>{engineer[0] &&  formatDate(engineer[0].created_date)}</Text>
+                        <View style={[styles.tableCol14, { width: '9%' }]}>
+                            <Text style={{ fontSize: '8px', marginTop: 10, color: '#000', fontWeight: 1600,marginLeft: 2 }}>{engineer[0] &&  formatDate(engineer[0].created_date)}</Text>
 
                         </View>
-                        <View style={[styles.tableCol14, { width: '8%' }]}>
+                        <View style={[styles.tableCol14, { width: '9%' }]}>
                             <Text style={{ fontSize: '8px', marginTop: 10, color: '#000', fontWeight: 1600 }}> </Text>
 
                         </View>
@@ -440,40 +440,11 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
                             <Text style={{ fontSize: '8px', marginTop: 10, marginLeft: 5, color: '#000', fontWeight: 1600 }}></Text>
 
                         </View>
-                        <View style={[styles.tableCol14, { width: '25%' }]}>
+                        <View style={[styles.tableCol14, { width: '22%' }]}>
                             <Text style={{ fontSize: '8px', marginTop: 10, marginLeft: 15, color: '#000', fontWeight: 1600 }}></Text>
 
                         </View>
-                        <View style={[styles.tableCol14, { width: '15%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 10, marginLeft: 15, color: '#000', fontWeight: 1600 }}></Text>
-
-                        </View>
-
-                    </View>
-                    <View style={styles.Course}>
-                        <div style={{ height: "18px", margin: "0 0 0 0" }}>
-
-                        </div>
-                        <View style={[styles.tableCol14, { width: '20%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 10, marginLeft: 15, color: '#000', fontWeight: 1600 }}></Text>
-                        </View>
-                        <View style={[styles.tableCol14, { width: '5%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 10, color: '#000', fontWeight: 1600 }}></Text>
-
-                        </View>
-                        <View style={[styles.tableCol14, { width: '8%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 10, color: '#000', fontWeight: 1600 }}></Text>
-
-                        </View>
-                        <View style={[styles.tableCol14, { width: '27%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 10, marginLeft: 5, color: '#000', fontWeight: 1600 }}></Text>
-
-                        </View>
-                        <View style={[styles.tableCol14, { width: '25%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 10, marginLeft: 15, color: '#000', fontWeight: 1600 }}></Text>
-
-                        </View>
-                        <View style={[styles.tableCol14, { width: '15%' }]}>
+                        <View style={[styles.tableCol14, { width: '13%' }]}>
                             <Text style={{ fontSize: '8px', marginTop: 10, marginLeft: 15, color: '#000', fontWeight: 1600 }}></Text>
 
                         </View>
@@ -486,11 +457,11 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
                         <View style={[styles.tableCol14, { width: '20%' }]}>
                             <Text style={{ fontSize: '8px', marginTop: 10, marginLeft: 15, color: '#000', fontWeight: 1600 }}></Text>
                         </View>
-                        <View style={[styles.tableCol14, { width: '5%' }]}>
+                        <View style={[styles.tableCol14, { width: '9%' }]}>
                             <Text style={{ fontSize: '8px', marginTop: 10, color: '#000', fontWeight: 1600 }}></Text>
 
                         </View>
-                        <View style={[styles.tableCol14, { width: '8%' }]}>
+                        <View style={[styles.tableCol14, { width: '9%' }]}>
                             <Text style={{ fontSize: '8px', marginTop: 10, color: '#000', fontWeight: 1600 }}></Text>
 
                         </View>
@@ -498,11 +469,40 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
                             <Text style={{ fontSize: '8px', marginTop: 10, marginLeft: 5, color: '#000', fontWeight: 1600 }}></Text>
 
                         </View>
-                        <View style={[styles.tableCol14, { width: '25%' }]}>
+                        <View style={[styles.tableCol14, { width: '22%' }]}>
                             <Text style={{ fontSize: '8px', marginTop: 10, marginLeft: 15, color: '#000', fontWeight: 1600 }}></Text>
 
                         </View>
-                        <View style={[styles.tableCol14, { width: '15%' }]}>
+                        <View style={[styles.tableCol14, { width: '13%' }]}>
+                            <Text style={{ fontSize: '8px', marginTop: 10, marginLeft: 15, color: '#000', fontWeight: 1600 }}></Text>
+
+                        </View>
+
+                    </View>
+                    <View style={styles.Course}>
+                        <div style={{ height: "18px", margin: "0 0 0 0" }}>
+
+                        </div>
+                        <View style={[styles.tableCol14, { width: '20%' }]}>
+                            <Text style={{ fontSize: '8px', marginTop: 10, marginLeft: 15, color: '#000', fontWeight: 1600 }}></Text>
+                        </View>
+                        <View style={[styles.tableCol14, { width: '9%' }]}>
+                            <Text style={{ fontSize: '8px', marginTop: 10, color: '#000', fontWeight: 1600 }}></Text>
+
+                        </View>
+                        <View style={[styles.tableCol14, { width: '9%' }]}>
+                            <Text style={{ fontSize: '8px', marginTop: 10, color: '#000', fontWeight: 1600 }}></Text>
+
+                        </View>
+                        <View style={[styles.tableCol14, { width: '27%' }]}>
+                            <Text style={{ fontSize: '8px', marginTop: 10, marginLeft: 5, color: '#000', fontWeight: 1600 }}></Text>
+
+                        </View>
+                        <View style={[styles.tableCol14, { width: '22%' }]}>
+                            <Text style={{ fontSize: '8px', marginTop: 10, marginLeft: 15, color: '#000', fontWeight: 1600 }}></Text>
+
+                        </View>
+                        <View style={[styles.tableCol14, { width: '13%' }]}>
                             <Text style={{ fontSize: '8px', marginTop: 10, marginLeft: 15, color: '#000', fontWeight: 1600 }}></Text>
 
                         </View>
