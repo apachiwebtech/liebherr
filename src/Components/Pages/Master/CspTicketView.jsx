@@ -74,7 +74,14 @@ export function CspTicketView(params) {
     state: "",
     city: "",
     activity_code: "",
-    class_city: ""
+    class_city: "",
+    gas_chargs: "",
+    gas_transportation: '',
+    mandays: '',
+    mandaysprice: '',
+    transportation: "",
+    transportation_charge: "",
+    visit_count: ""
   });
 
 
@@ -89,6 +96,8 @@ export function CspTicketView(params) {
   const [files, setFiles] = useState([]); // Store selected files
   const [remarks, setRemarks] = useState([]);
   const [duplicate, setDuplicate] = useState([]);
+  const [mandays, setMandays] = useState(false);
+  const [transport, settransport] = useState(false);
   const [attachments, setAttachments] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [engtype, setEngType] = useState("");
@@ -116,6 +125,44 @@ export function CspTicketView(params) {
     visible: false,
     type: 'success' // can be 'success' or 'error'
   });
+
+
+
+  const handleChange = (e) => {
+    setComplaintview((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+
+
+    if (e.target.name == 'mandays') {
+      setMandays(e.target.checked)
+    }
+
+    if (e.target.name == 'transportation') {
+      settransport(e.target.checked)
+    }
+
+
+  }
+
+
+  const handlevisitchange = (e) => {
+    const { value } = e.target;
+
+    setComplaintview((prevState) => ({
+      ...prevState,
+      visit_count: value, // Update the visit_count field
+    }));
+
+
+    axiosInstance.post(`${Base_Url}/updatevisitcount`, { count: value, ticket_no: complaintview.ticket_no }, {
+      headers: {
+        Authorization: token
+      }
+    })
+      .then((res) => {
+        alert("Visit Count Changed")
+      })
+  };
+
 
   async function getProduct(params) {
 
@@ -268,6 +315,8 @@ export function CspTicketView(params) {
 
   }
 
+
+
   async function getgroupdefect(params) {
     try {
       const res = await axiosInstance.get(`${Base_Url}/getcom`, {
@@ -277,11 +326,12 @@ export function CspTicketView(params) {
       });
 
       if (res.data) {
-                 const encryptedData = res.data.encryptedData; // Assuming response contains { encryptedData }
-                       const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
-                       const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
-               
-                       setGroupDefect(decryptedData);
+        // Decrypt the response data
+        const encryptedData = res.data.encryptedData; // Assuming response contains { encryptedData }
+        const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+        const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+
+        setGroupDefect(decryptedData);
       } else {
         console.error("Expected array from API but got:", typeof res.data);
         setGroupDefect([]); // Set empty array as fallback
@@ -292,6 +342,7 @@ export function CspTicketView(params) {
       setGroupDefect([]); // Set empty array on error
     }
   }
+
   async function getactivity(params) {
     try {
       const res = await axiosInstance.get(`${Base_Url}/getactivity`, {
@@ -301,10 +352,10 @@ export function CspTicketView(params) {
       });
 
       if (res.data) {
-             const encryptedData = res.data.encryptedData; // Assuming response contains { encryptedData }
-                       const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
-                       const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
-                       setactivity(decryptedData);
+        const encryptedData = res.data.encryptedData; // Assuming response contains { encryptedData }
+        const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+        const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+        setactivity(decryptedData);
       } else {
         console.error("Expected array from API but got:", typeof res.data);
         setactivity([]); // Set empty array as fallback
@@ -332,6 +383,7 @@ export function CspTicketView(params) {
 
 
         if (res.data) {
+
           setGroupDefecttype(res.data);
         } else {
           console.error("Expected array from API but got:", typeof res.data);
@@ -359,10 +411,10 @@ export function CspTicketView(params) {
 
 
         if (res.data) {
-                 const encryptedData = res.data.encryptedData; // Assuming response contains { encryptedData }
-                              const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
-                              const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
-                              setGroupDefecttype(decryptedData);
+          const encryptedData = res.data.encryptedData; // Assuming response contains { encryptedData }
+          const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+          const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+          setGroupDefecttype(decryptedData);
         } else {
           console.error("Expected array from API but got:", typeof res.data);
           setGroupDefecttype([]); // Set empty array as fallback
@@ -397,6 +449,7 @@ export function CspTicketView(params) {
 
 
         if (res.data) {
+
           setGroupDefectsite(res.data);
         } else {
           console.error("Expected array from API but got:", typeof res.data);
@@ -423,10 +476,10 @@ export function CspTicketView(params) {
 
 
         if (res.data) {
-                  const encryptedData = res.data.encryptedData; // Assuming response contains { encryptedData }
-                              const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
-                              const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
-                              setGroupDefectsite(decryptedData);
+          const encryptedData = res.data.encryptedData; // Assuming response contains { encryptedData }
+          const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+          const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+          setGroupDefectsite(decryptedData);
         } else {
           console.error("Expected array from API but got:", typeof res.data);
           setGroupDefectsite([]); // Set empty array as fallback
@@ -447,8 +500,6 @@ export function CspTicketView(params) {
   }
 
   async function getcallstatus(params) {
-
-
     try {
       const res = await axiosInstance.get(`${Base_Url}/getcallstatus`, {
         headers: {
@@ -471,7 +522,9 @@ export function CspTicketView(params) {
   }
 
   const getsubcallstatus = async (value) => {
-    if (value !== undefined) {
+
+
+    if (value) {
       try {
         const res = await axiosInstance.post(
           `${Base_Url}/getsubcallstatus`,
@@ -523,6 +576,8 @@ export function CspTicketView(params) {
     }
 
   };
+
+
 
   const addInTab = (ticket_no, ticket_id) => {
     console.log(ticket_no, ticket_id, "ticket_no, ticket_id");
@@ -1067,6 +1122,12 @@ export function CspTicketView(params) {
           warrenty_status: complaintview.warranty_status || warranty_status_data,
           engineerdata: addedEngineers.map((item) => item.engineer_id),
           engineername: addedEngineers.map((item) => item.title),
+          mandays: complaintview.mandays,
+          mandaysprice: complaintview.mandaysprice,
+          gas_chargs: complaintview.gas_chargs,
+          gas_transportation: complaintview.gas_transportation,
+          transportation: complaintview.transportation,
+          transportation_charge: complaintview.transportation_charge,
           note,
           created_by,
         };
@@ -1202,8 +1263,8 @@ export function CspTicketView(params) {
 
   useEffect(() => {
     getcallstatus()
-
     getsubcallstatus()
+
     getgroupdefect()
     getdefecttype()
     getsitecode()
@@ -1522,6 +1583,9 @@ export function CspTicketView(params) {
             <div className="col-3">
               <div id="customerInfo" className="card">
                 <div className="card-body">
+                  <p style={{ fontSize: "14px" }}>
+                    <b>Mother Branch</b> : {complaintview.mother_branch}
+                  </p>
                   <p style={{ fontSize: "14px" }}>
                     <b>Customer Id</b> : {complaintview.customer_id}
                   </p>
@@ -2132,6 +2196,7 @@ export function CspTicketView(params) {
                                           ))}
                                         </select>
                                       </div>
+
                                       <div className="my-3 col-lg-6">
                                         <h4 className="pname" style={{ fontSize: "14px" }}>Activity Code</h4>
                                         <select
@@ -2152,11 +2217,51 @@ export function CspTicketView(params) {
                                           ))}
                                         </select>
                                       </div>
+
+
+
+
                                     </div>
 
 
                                   </div>
                                 }
+
+                                {(complaintview.call_status == 'Closed') &&
+                                  <>
+
+                                    <div className="my-3 col-lg-6">
+                                      <input type="checkbox" onChange={handleChange} name="gas_chargs" /> <label>Gas Charges</label>
+                                    </div>
+
+                                    <div className="my-3 col-lg-6">
+                                      <input type="checkbox" onChange={handleChange} name="gas_transportation" /> <label>Gas Transport Charges</label>
+                                    </div>
+                                    <div className="my-3 col-lg-6">
+                                      <input type="checkbox" onChange={handleChange} name="mandays" /> <label>Mandays</label>
+                                      {mandays && <input
+                                        type="number"
+                                        name="mandaysprice"
+                                        className="form-control"
+                                        onChange={handleModelChange}
+                                      />}
+
+                                    </div>
+
+                                    <div className="my-3 col-lg-6">
+                                      <input type="checkbox" onChange={handleChange} name="transportation" /> <label>Tranportation</label>
+                                      {transport && <input
+                                        type="number"
+                                        name="transportation_charge"
+                                        className="form-control"
+                                        onChange={handleModelChange}
+                                      />}
+
+                                    </div>
+                                  </>
+                                }
+
+
                                 <div className="form-outline mb-2">
                                   <label
                                     htmlFor="uploadFiles"
@@ -2570,6 +2675,7 @@ export function CspTicketView(params) {
                       </tbody>
                     </table>
                   </div>
+
                   <div className="d-flex justify-content-end py-2">
 
                     {roleaccess > 2 ?
@@ -2585,6 +2691,27 @@ export function CspTicketView(params) {
 
 
                   </div>
+
+                  <div className="mt-3">
+                    <h4 className="pname" style={{ fontSize: "14px" }}>Visit Count</h4>
+                    <select
+                      name="group_code"
+                      className="form-control"
+                      disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
+                      style={{ fontSize: "14px" }}
+                      value={complaintview.visit_count}
+                      onChange={handlevisitchange}
+                    >
+                      <option value="">Select Status</option>
+                      <option value='0'>0</option>
+                      <option value='1'>1</option>
+                      <option value='2'>2</option>
+                      <option value='3'>3</option>
+                      <option value='4'>4</option>
+                    </select>
+                  </div>
+
+
 
                   {(complaintview.call_status == 'Closed' || (complaintview.group_code != null && complaintview.group_code != "")) &&
                     <>

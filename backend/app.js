@@ -8900,6 +8900,10 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
       }
     }
 
+    if (status == undefined) {
+      sql += ``;
+    }
+
     if (upcoming == 'current') {
       sql += ` AND ticket_date <= @currentdate`;
       countSql += ` AND ticket_date <= @currentdate`;
@@ -9099,9 +9103,11 @@ app.get("/getcomplainlistcsp", authenticateToken, async (req, res) => {
       countSql += ` AND c.call_status = '${status}'`
 
     } else {
-      sql += ` AND c.call_status != 'Closed' AND c.call_status != 'Cancelled'`;
-      countSql += ` AND c.call_status != 'Closed' AND c.call_status != 'Cancelled'`
-
+      if (!customerName && !customerEmail && !serialNo && !productCode && !customerMobile &&
+        !ticketno && !customerID && !csp && !msp && !mode_of_contact && !customer_class) {
+        sql += ` AND c.call_status != 'Closed' AND c.call_status != 'Cancelled'`;
+        countSql += ` AND c.call_status != 'Closed' AND c.call_status != 'Cancelled'`;
+      }
     }
 
     if (status == undefined) {
@@ -9368,8 +9374,16 @@ app.get("/getcomplainlistmsp", authenticateToken, async (req, res) => {
       sql += ` AND c.call_status = '${status}'`;
       countSql += ` AND c.call_status = '${status}'`;
     } else {
-      sql += ` AND c.call_status != 'Closed' AND c.call_status != 'Cancelled'`;
-      countSql += ` AND c.call_status != 'Closed' AND c.call_status != 'Cancelled'`;
+      if (!customerName && !customerEmail && !serialNo && !productCode && !customerMobile &&
+        !ticketno && !customerID && !csp && !msp && !mode_of_contact && !customer_class) {
+        sql += ` AND c.call_status != 'Closed' AND c.call_status != 'Cancelled'`;
+        countSql += ` AND c.call_status != 'Closed' AND c.call_status != 'Cancelled'`;
+      }
+    }
+
+    
+    if (status == undefined) {
+      sql += ``;
     }
 
     // Add pagination

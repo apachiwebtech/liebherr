@@ -144,7 +144,7 @@ export function Complaintview(params) {
   }
 
 
-   const handlevisitchange = (e) => {
+  const handlevisitchange = (e) => {
     const { value } = e.target;
 
     setComplaintview((prevState) => ({
@@ -153,7 +153,7 @@ export function Complaintview(params) {
     }));
 
 
-    axiosInstance.post(`${Base_Url}/updatevisitcount`, { count: value , ticket_no : complaintview.ticket_no }, {
+    axiosInstance.post(`${Base_Url}/updatevisitcount`, { count: value, ticket_no: complaintview.ticket_no }, {
       headers: {
         Authorization: token
       }
@@ -2218,40 +2218,50 @@ export function Complaintview(params) {
                                         </select>
                                       </div>
 
-                                      <div className="my-3 col-lg-6">
-                                        <input type="checkbox" onChange={handleChange} name="gas_chargs" /> <label>Gas Charges</label>
-                                      </div>
 
-                                      <div className="my-3 col-lg-6">
-                                        <input type="checkbox" onChange={handleChange} name="gas_transportation" /> <label>Gas Transport Charges</label>
-                                      </div>
-                                      <div className="my-3 col-lg-6">
-                                        <input type="checkbox" onChange={handleChange} name="mandays" /> <label>Mandays</label>
-                                        {mandays && <input
-                                          type="number"
-                                          name="mandaysprice"
-                                          className="form-control"
-                                          onChange={handleModelChange}
-                                        />}
 
-                                      </div>
 
-                                      <div className="my-3 col-lg-6">
-                                        <input type="checkbox" onChange={handleChange} name="transportation" /> <label>Tranportation</label>
-                                        {transport && <input
-                                          type="number"
-                                          name="transportation_charge"
-                                          className="form-control"
-                                          onChange={handleModelChange}
-                                        />}
-
-                                      </div>
 
                                     </div>
 
 
                                   </div>
                                 }
+
+                                {(complaintview.call_status == 'Closed') &&
+                                  <>
+                                    <div className="my-3 col-lg-6">
+                                      <input type="checkbox" onChange={handleChange} name="gas_chargs" /> <label>Gas Charges</label>
+                                    </div>
+
+                                    <div className="my-3 col-lg-6">
+                                      <input type="checkbox" onChange={handleChange} name="gas_transportation" /> <label>Gas Transport Charges</label>
+                                    </div>
+                                    <div className="my-3 col-lg-6">
+                                      <input type="checkbox" onChange={handleChange} name="mandays" /> <label>Mandays</label>
+                                      {mandays && <input
+                                        type="number"
+                                        name="mandaysprice"
+                                        className="form-control"
+                                        onChange={handleModelChange}
+                                      />}
+
+                                    </div>
+
+                                    <div className="my-3 col-lg-6">
+                                      <input type="checkbox" onChange={handleChange} name="transportation" /> <label>Tranportation</label>
+                                      {transport && <input
+                                        type="number"
+                                        name="transportation_charge"
+                                        className="form-control"
+                                        onChange={handleModelChange}
+                                      />}
+
+                                    </div>
+                                  </>
+                                }
+
+
                                 <div className="form-outline mb-2">
                                   <label
                                     htmlFor="uploadFiles"

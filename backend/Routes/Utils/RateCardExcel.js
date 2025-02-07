@@ -415,7 +415,7 @@ app.post('/uploadspareexcel', async (req, res) => {
     pool.config.options.requestTimeout = 600000;
 
     // Truncate Spare_parts table before inserting new records
-    await pool.request().query("TRUNCATE TABLE Spare_parts");
+    // await pool.request().query("TRUNCATE TABLE Spare_parts");
 
     for (const item of excelData) {
       // Insert new record in Spare_parts table

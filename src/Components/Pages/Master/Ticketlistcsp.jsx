@@ -553,7 +553,7 @@ const Ticketlistcsp = (params) => {
                                             <td style={rowStyle}>{item.ageingdays}</td>
                                             <td style={rowStyle}>{item.assigned_name}</td>
                                             <td style={rowStyle}>{item.call_priority}</td>
-                                            <td style={rowStyle}>{item.call_status}</td>
+                                            <td style={rowStyle}>{item.call_status} / {item.sub_call_status}</td>
 
                                             <td style={rowStyle}>
                                                 <button

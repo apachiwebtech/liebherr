@@ -126,7 +126,7 @@ const Loginheader = (params) => {
 
 
 
-          <p><b>Welcome</b> {Custname}</p>
+          {/* <p><b>Welcome</b> {Custname}</p> */}
 
           <div className="dropdown text-end">
             {/* <Link className="btn btn-primary newcomplaint" onClick={redirect}>New Ticket</Link> */}
