@@ -3458,7 +3458,9 @@ app.get("/getcomplaintview/:complaintid", authenticateToken, async (req, res) =>
 });
 
 app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
-  const { ticket_no, note, created_by, call_status, sub_call_status, group_code, site_defect, defect_type, activity_code, serial_no, ModelNumber, purchase_date, warrenty_status, engineerdata, engineername, ticket_type, call_city, ticket_start_date } = req.body;
+  const { ticket_no, note, created_by, call_status, sub_call_status, group_code, site_defect, defect_type, activity_code, serial_no, ModelNumber, purchase_date, warrenty_status, engineerdata, engineername, ticket_type, call_city, ticket_start_date,  mandaysprice, gas_chargs, gas_transportation, transportation_charge } = req.body;
+
+  console.log(mandaysprice, "RR")
 
 
 
@@ -3497,7 +3499,7 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
 
     const updateSql = `
     UPDATE complaint_ticket
-    SET call_status = '${call_status}' , updated_by = '${created_by}', updated_date = '${formattedDate}' , sub_call_status  = '${sub_call_status}' ,group_code = '${group_code}' , defect_type = '${defect_type}' , ModelNumber = '${ModelNumber}',serial_no = '${serial_no}' , site_defect = '${site_defect}' ,activity_code = '${activity_code}' , purchase_date = '${purchase_date}' , warranty_status = '${warrenty_status}' ,engineer_id = '${engineer_id}' , assigned_to = '${engineer_name}'   WHERE ticket_no = '${ticket_no}' `;
+    SET call_status = '${call_status}' , updated_by = '${created_by}', updated_date = '${formattedDate}' , sub_call_status  = '${sub_call_status}' ,group_code = '${group_code}' , defect_type = '${defect_type}' , ModelNumber = '${ModelNumber}',serial_no = '${serial_no}' , site_defect = '${site_defect}' ,activity_code = '${activity_code}' , purchase_date = '${purchase_date}' , warranty_status = '${warrenty_status}' ,engineer_id = '${engineer_id}' ,mandays_charges = '${mandaysprice}',transport_charge = '${transportation_charge}', assigned_to = '${engineer_name}'   WHERE ticket_no = '${ticket_no}' `;
 
     await pool.request().query(updateSql);
 
@@ -3535,7 +3537,6 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
       const diffInMilliseconds = ticketenddate - startdate;
       const hoursDifference = Math.floor(diffInMilliseconds / (1000 * 60 * 60)); // Convert to hours
 
-      console.log(`Hours difference: ${hoursDifference}`);
 
 
       //rate card logic
@@ -3543,6 +3544,9 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
       const getproductinfo = `select top 1 id, productType ,  productLine , productClass from product_master where item_description = '${ModelNumber}'`;
 
       const productresult = await pool.request().query(getproductinfo)
+
+
+
 
 
 
@@ -3554,10 +3558,46 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
 
 
 
-        const getresult = await pool.request().query(getrate)
+        const getresult = await pool.request().query(getrate);
+
+
+
+
+
 
 
         if (getresult.recordset && getresult.recordset[0]) {
+
+          if (gas_chargs == 'on') {
+
+           
+
+            const gascharges = getresult.recordset[0].gas_charging;
+
+      
+
+            const  updategascharges = `update complaint_ticket  set gas_charges = '${gascharges}' where ticket_no = '${ticket_no}'`;
+
+            console.log(updategascharges , "3")
+
+
+             await pool.request().query(updategascharges);
+            
+            
+          } 
+          
+          if (gas_transportation == 'on') {
+
+            const gastransport = getresult.recordset[0].transportation;
+            console.log(gastransport , "2")
+
+            const  updategastransportcharges = `update complaint_ticket  set gas_transoprt = '${gastransport}' where ticket_no = '${ticket_no}'`;
+
+            console.log(updategastransportcharges)
+
+            await pool.request().query(updategastransportcharges);
+            
+          }
 
           const within24 = getresult.recordset[0].Within_24_Hours;
           const within48 = getresult.recordset[0].Within_48_Hours;
@@ -3587,7 +3627,6 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
 
 
       }
-
 
 
 
@@ -4499,7 +4538,7 @@ app.post("/u_complaint", authenticateToken, async (req, res) => {
   let {
     customer_name, contact_person, email, mobile, address,
     state, city, area, pincode, mode_of_contact, cust_type,
-    warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks, ticket_no, classification, priority, requested_by, requested_email, requested_mobile, sales_partner2, salutation, mwhatsapp, awhatsapp, class_city, mother_branch , csp , msp
+    warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks, ticket_no, classification, priority, requested_by, requested_email, requested_mobile, sales_partner2, salutation, mwhatsapp, awhatsapp, class_city, mother_branch, csp, msp
   } = req.body;
 
 
@@ -4579,7 +4618,7 @@ SET
       .input('customer_id', cust_id)
       .input('model', model)
       .input('cust_type', cust_type)
-      .input("warranty_status", sql.NVarChar, warrenty_status )
+      .input("warranty_status", sql.NVarChar, warrenty_status)
       .input('invoice_date', invoice_date)
       .input('call_charge', call_charge)
       .input('mode_of_contact', mode_of_contact)
@@ -5459,6 +5498,7 @@ app.get("/requestengineer/:id", authenticateToken,
       return res.status(500).json({ error: 'An error occurred while fetching the engineer' });
     }
   });
+
 app.post("/postengineer",
   authenticateToken, async (req, res) => {
     const { encryptedData } = req.body;
@@ -5468,6 +5508,17 @@ app.post("/postengineer",
     try {
       // Use the poolPromise to get the connection pool
       const pool = await poolPromise;
+
+
+      const getcount = `SELECT TOP 1 id FROM awt_engineermaster ORDER BY id DESC`;
+
+      const countResult = await pool.request().query(getcount);
+
+      const latestQuotation = countResult.recordset[0]?.id || 0;
+
+      const newcount = latestQuotation + 1
+
+      const engineercode = 'E' + newcount.toString().padStart(4, "0")
 
       // Check for duplicates using direct query injection
       const checkDuplicateSql = `SELECT * FROM awt_engineermaster WHERE mobile_no = '${mobile_no}' AND email = '${email}' AND deleted = 0`;
@@ -5490,8 +5541,8 @@ app.post("/postengineer",
           });
         } else {
           // Insert new engineer if no duplicate or soft-deleted found
-          const insertSql = `INSERT INTO awt_engineermaster (title,mfranchise_id, cfranchise_id, mobile_no, email, password,employee_code,personal_email,personal_mobile,dob,blood_group,academic_qualification,joining_date,passport_picture,resume,photo_proof,address_proof,permanent_address,current_address)
-                           VALUES ('${title}','${mfranchise_id}', '${cfranchise_id}', '${mobile_no}', '${email}', '${password}', '${employee_code}', '${personal_email}', '${personal_mobile}', '${dob}', '${blood_group}', '${academic_qualification}', '${joining_date}', '${passport_picture}', '${resume}', '${photo_proof}', '${address_proof}', '${permanent_address}', '${current_address}')`;
+          const insertSql = `INSERT INTO awt_engineermaster (title,mfranchise_id, cfranchise_id, mobile_no, email, password,engineer_id,personal_email,personal_mobile,dob,blood_group,academic_qualification,joining_date,passport_picture,resume,photo_proof,address_proof,permanent_address,current_address)
+                           VALUES ('${title}','${mfranchise_id}', '${cfranchise_id}', '${mobile_no}', '${email}', '${password}', '${engineercode}', '${personal_email}', '${personal_mobile}', '${dob}', '${blood_group}', '${academic_qualification}', '${joining_date}', '${passport_picture}', '${resume}', '${photo_proof}', '${address_proof}', '${permanent_address}', '${current_address}')`;
           await pool.request().query(insertSql);
           return res.json({ message: "Engineer added successfully!" });
         }
@@ -5504,7 +5555,7 @@ app.post("/postengineer",
 app.post("/putengineer", authenticateToken, async (req, res) => {
   const { encryptedData } = req.body;
   const decryptedData = decryptData(encryptedData, secretKey)
-  const { title, mfranchise_id, cfranchise_id, password, email, mobile_no, personal_email, employee_code, personal_mobile, dob, blood_group, academic_qualification, joining_date, passport_picture, resume, photo_proof, address_proof, permanent_address, current_address, id } = JSON.parse(decryptedData);
+  const { title, mfranchise_id, cfranchise_id, password, email, mobile_no, personal_email, personal_mobile, dob, blood_group, academic_qualification, joining_date, passport_picture, resume, photo_proof, address_proof, permanent_address, current_address, id } = JSON.parse(decryptedData);
 
   try {
     // Use the poolPromise to get the connection pool
@@ -5522,7 +5573,7 @@ app.post("/putengineer", authenticateToken, async (req, res) => {
       // Update the engineer record if no duplicates are found
       const updateSql = `UPDATE awt_engineermaster
                          SET title = '${title}',mfranchise_id = '${mfranchise_id}', cfranchise_id = '${cfranchise_id}', mobile_no = '${mobile_no}', email = '${email}', password = '${password}',
-                         personal_email = '${personal_email}', employee_code = '${employee_code}', personal_mobile = '${personal_mobile}', dob = '${dob}',
+                         personal_email = '${personal_email}', personal_mobile = '${personal_mobile}', dob = '${dob}',
                          blood_group = '${blood_group}', academic_qualification = '${academic_qualification}', joining_date = '${joining_date}', passport_picture = '${passport_picture}',
                          resume = '${resume}', photo_proof = '${photo_proof}', address_proof = '${address_proof}', permanent_address = '${permanent_address}', current_address = '${current_address}'
                          WHERE id = '${id}'`;
@@ -12725,8 +12776,8 @@ app.get("/getsparelisting", authenticateToken, async (req, res) => {
     const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
 
 
-    console.log("Query result:",encryptedData);
-    return res.json({ encryptedData});
+    console.log("Query result:", encryptedData);
+    return res.json({ encryptedData });
   } catch (err) {
     console.error("Error in /getsparelisting API:", err);
     return res.status(500).json({ error: "An error occurred while fetching data." });
@@ -13364,18 +13415,18 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
   { name: 'spare_doc_two', maxCount: 1 },
   { name: 'spare_doc_three', maxCount: 1 },
 ]), async (req, res) => {
-  let { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode, activitycode, com_id, warranty_status, spare_detail, ticket_no, user_id, serial_no, ModelNumber ,sub_call_status} = req.body;
+  let { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode, activitycode, com_id, warranty_status, spare_detail, ticket_no, user_id, serial_no, ModelNumber, sub_call_status } = req.body;
 
-  if(call_status == 'Completed'){
+  if (call_status == 'Completed') {
     sub_call_status = 'Partially'
   }
-  else if(call_status == 'Spares'){
+  else if (call_status == 'Spares') {
     sub_call_status = 'Spare Required'
   }
-  else if(call_status == 'Approval'){
+  else if (call_status == 'Approval') {
     sub_call_status = 'Customer Approval / Quotation'
   }
-  else if(call_status == 'Approval-Int'){
+  else if (call_status == 'Approval-Int') {
     sub_call_status = 'Internal Approval'
     call_status = 'Approval'
   }
@@ -13799,6 +13850,27 @@ app.post("/getcspdetails", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
 
     const sql = `select * from awt_childfranchisemaster where licare_code = '${licare_code}' and deleted = 0`;
+
+    const result = await pool.request().query(sql);
+
+
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json(err);
+  }
+});
+
+app.post("/updatevisitcount", authenticateToken, async (req, res) => {
+
+  let { count ,ticket_no } = req.body;
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    const sql = `update complaint_ticket set visit_count = '${count}' where ticket_no = '${ticket_no}'`;
 
     const result = await pool.request().query(sql);
 
