@@ -250,7 +250,7 @@ export function Productspare() {
             <div className="col-4">
                 <div className="card mt-3 mb-3">
                     <div className="card-body">
-                        <form onSubmit={handleSubmit} className="row">
+                        <form onSubmit={handleSubmit} className="row">  
                             <div className="mb-3 col-lg-12">
                                 <label htmlFor="ModelNumberInput" className="input-field">
                                     Model Number<span className="text-danger">*</span>
@@ -281,18 +281,26 @@ export function Productspare() {
                             </div>
 
                         </form>
-                        {isSubmitted && (
+                     
+                            
+
+                        
+                    </div>
+                </div>
+                <div className="card mt-3 mb-3">
+                    <div className="card-body">                     
                             <div className="row" style={{marginTop:'10px'}}>
-                                <input type="file" accept=".xlsx, .xls" onChange={importexcel} style={{ width: '230px', marginTop: '5px', marginLeft: '90px' }} />
+                                <input type="file" accept=".xlsx, .xls" onChange={importexcel} style={{ width: '230px', marginTop: '5px', marginLeft: '20px' }} />
                                 <button className="btn btn-primary" onClick={uploadexcel}
                                     style={{ width: '30%' }}>
                                     Import Spares
                                 </button>
                             </div>
 
-                        )}
+                        
                     </div>
                 </div>
+
             </div>
             <div className="col-8">
                 {isSubmitted && spareParts.length > 0 && ( // Show table only after submission
@@ -336,7 +344,7 @@ export function Productspare() {
                     <p>No spare parts available for the selected model.</p>
                 )}
             </div>
-            
+                     
         </div>
     );
 }
