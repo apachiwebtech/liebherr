@@ -350,7 +350,7 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
                             <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>Fault Description : </Text>
                         </View>
                         <View style={[styles.tableCol, { width: '40%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.specification}</Text>
 
                         </View>
                         <View style={[styles.tableCol, { width: '15%' }]}>
@@ -510,7 +510,7 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
 
                     </View>
                     <View style={styles.Course}>
-                        <div style={{ height: "25px", margin: "0 0 0 0" }}>
+                        <div style={{ height: "20px", margin: "0 0 0 0" }}>
 
                         </div>
                         <View style={[styles.tableCol14, { width: '20%' }]}>
@@ -543,7 +543,7 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
 
                     </View>
                     <View style={styles.Course}>
-                        <div style={{ height: "25px", margin: "0 0 0 0" }}>
+                        <div style={{ height: "20px", margin: "0 0 0 0" }}>
 
                         </div>
                         <View style={[styles.tableCol14, { width: '20%' }]}>
@@ -577,7 +577,7 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
 
                     </View>
                     <View style={styles.Course}>
-                        <div style={{ height: "25px", margin: "0 0 0 0" }}>
+                        <div style={{ height: "20px", margin: "0 0 0 0" }}>
 
                         </div>
                         <View style={[styles.tableCol14, { width: '20%' }]}>

@@ -30,11 +30,13 @@ const Loginheader = (params) => {
     setName(firstLetter)
   }, [])
 
+  const Custname = localStorage.getItem('Lhiuser') || ""; 
+
 
   return (
 
     <header className="p-3 border-bottom">
-      <div className="container-fuild">
+      <div className="container-fuild ">
         <div className="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
           <a href="/" className="d-flex align-items-center  mb-2 mb-lg-0 mr-5 text-dark text-decoration-none img" >
             <img src={Logo} />
@@ -124,9 +126,11 @@ const Loginheader = (params) => {
 
 
 
+          <p><b>Welcome</b> {Custname}</p>
 
           <div className="dropdown text-end">
             {/* <Link className="btn btn-primary newcomplaint" onClick={redirect}>New Ticket</Link> */}
+
 
             <a href="#" className="link-dark d-flex align-content-center justify-content-center text-decoration-none " id="dropdownUser1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               <Avatar

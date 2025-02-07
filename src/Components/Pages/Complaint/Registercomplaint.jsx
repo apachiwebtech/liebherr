@@ -1132,14 +1132,14 @@ export function Registercomplaint(params) {
           area: ""
         }));
         break;
-      case "serial":
-        fetchserial(inputValue);
-        setpurchase_data("");
-        setValue(prevState => ({
-          ...prevState,
-          model: ""
-        }));
-        break;
+      // case "serial":
+      //   fetchserial(inputValue);
+      //   setpurchase_data("");
+      //   setValue(prevState => ({
+      //     ...prevState,
+      //     model: ""
+      //   }));
+      //   break;
       case "complaint_date":
         setDate(e.target.value);
         break;
@@ -1205,6 +1205,33 @@ export function Registercomplaint(params) {
 
 
   const fetchserial = async (serial) => {
+
+    setValue(
+      {
+        ...value ,
+        model:  "", // Default to an empty string if null/undefined
+        sales_partner:  "",
+        classification:  "",
+        salutation:  "",
+        customer_name:  "",
+        cust_type:  "",
+        mobile:  "",
+        alt_mobile: "",
+        email: "",
+        address:  "",
+        customer_id: "",
+        pincode :  '',
+        state : '',
+        city : '',
+        msp : '',
+        csp : '',
+        area : "",
+
+
+      }
+
+    )
+    setlocations({ franchiseem: '', childfranchiseem: '' })
     setpurchseHide('')
     try {
       const response = await axiosInstance.get(
@@ -1262,14 +1289,21 @@ export function Registercomplaint(params) {
   const fetchfrommobile = async (mobile) => {
 
     setValue({
+      ...value,
       salutation: "",
       customer_name:  "",
+      contact_person : '',
       cust_type:  "",
       alt_mobile:  "",
       email:  "",
       address:  "",
       customer_id:  "",
       pincode :  '',
+      csp : '',
+      msp : '',
+      state :'',
+      city : '',
+      area : '',
     })
     
     try {
@@ -1677,10 +1711,27 @@ export function Registercomplaint(params) {
                       {!serialid ?
                         <div className="mb-3">
                           <input
-                            type="text"
+                            type="number"
                             name="serial"
                             value={value.serial}
-                            onChange={onHandleChange}
+                            onChange={(e) => {
+                              // Only update value if the serial number length is <= 9
+                              if (e.target.value.length <= 9) {
+                                onHandleChange(e);
+                              }
+                            }}
+                            onBlur={(e) => {
+                              if (e.target.value.length == 9) {
+                                // Call your API function here
+                                fetchserial(e.target.value)
+
+                                setpurchase_data("");
+                                setValue(prevState => ({
+                                  ...prevState,
+                                  model: ""
+                                }));
+                              } 
+                            }}
                             onKeyDown={handleKeyDown}
                             className="form-control"
                             placeholder="Enter.."

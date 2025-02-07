@@ -433,7 +433,7 @@ function Details() {
     const eata = {
       ticket_no: ticket_no,
     }
-    // console.log(data);
+    // console.log(data);4
 
     axios.post(`${Base_Url}/getuniquesparelist`, eata, {
       headers: {
@@ -861,19 +861,19 @@ function Details() {
 
                   <div class="mb-3">
                     <div class="form-group">
-                      <label for="val-actioncode">Invoice No.</label>
+                      <label for="val-actioncode">Invoice Upload</label>
                       <input type="file" class="form-control" name="spare_doc" id="spare_doc" onChange={handleFileChange} />
                     </div>
                   </div>
                   <div class="mb-3">
                     <div class="form-group">
-                      <label for="val-actioncode">Serial No.</label>
+                      <label for="val-actioncode">Serial No. Upload</label>
                       <input type="file" class="form-control" name="spare_doc_two" id="spare_doc_two" onChange={handleFileChange} />
                     </div>
                   </div>
                   <div class="mb-3">
                     <div class="form-group">
-                      <label for="val-actioncode">Attachment</label>
+                      <label for="val-actioncode">Image & Video Upload</label>
                       <input type="file" class="form-control" name="spare_doc_three" id="spare_doc_three" onChange={handleFileChange} />
                     </div>
                   </div>
