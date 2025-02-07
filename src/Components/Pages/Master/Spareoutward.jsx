@@ -172,6 +172,7 @@ const Spareoutward = () => {
                     headers: {
                         Authorization: token, // Send token in headers
                         "Content-Type": "application/json", // Explicitly set Content-Type
+                        Authorization: token, // Send token in headers
                     },
                 });
                 setHide(true)
@@ -249,7 +250,8 @@ const Spareoutward = () => {
             // Send stringified payload to the server
             const response = await axios.post(`${Base_Url}/updateissuespares`, stringifiedPayload, {
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    Authorization: token, // Send token in headers
                 }
             });
 

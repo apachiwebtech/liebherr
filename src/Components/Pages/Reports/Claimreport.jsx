@@ -5,6 +5,7 @@ import { pdf } from '@react-pdf/renderer';
 import { Base_Url } from "../../Utils/Base_Url";
 import axios from 'axios';
 import { useEffect, useState } from 'react';
+import MyDocument8 from './MyDocument8';
 
 export function Claimreport(params) {
 
@@ -14,34 +15,8 @@ export function Claimreport(params) {
     const Navigate = useNavigate()
 
 
-    async function downloadPDF(id) {
 
 
-        axios.post(`${Base_Url}/getprintinfo`, { id: id })
-            .then((res) => {
-                console.log(res.data[0], "DDD")
-                setData(res.data[0])
-
-                Blob(res.data[0])
-
-            })
-            .catch((err) => {
-                console.log(err)
-            })
-    }
-
-
-    const Blob = async (data) => {
-
-        try {
-            const blob = await pdf(<Jobcardpdf data={data} />).toBlob();
-            const url = URL.createObjectURL(blob);
-            window.open(url);
-            URL.revokeObjectURL(url);
-        } catch (err) {
-            console.error('Error generating PDF:', err);
-        }
-    };
 
     return (
         <div className="row mp0">
@@ -50,8 +25,7 @@ export function Claimreport(params) {
                     <div className="card-body">
                         Coming Soon
                     </div>
-                    <button type="submit" class="btn btn-primary mr-2"  onClick={() => downloadPDF()}>Submit</button>
-              
+                                 
             </div>
 
             

@@ -157,7 +157,8 @@ const Grndetailspage = () => {
             // Send stringified payload to the server
             const response = await axios.post(`${Base_Url}/updategrnspares`, stringifiedPayload, {
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    Authorization: token, // Send token in headers
                 }
             });
 

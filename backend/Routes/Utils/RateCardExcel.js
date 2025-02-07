@@ -7,6 +7,24 @@ const CryptoJS = require('crypto-js');
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ extended: true, limit: '100mb' }));
 
+const authenticateToken = (req, res, next) => {
+
+  const token = req.headers["authorization"];
+
+  if (!token) {
+    return res.status(403).json({ message: "Token required" });
+  }
+
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) {
+      return res.status(401).json({ message: "Invalid token" });
+    }
+
+    req.user = user; // Attach user info to request
+    next();
+  });
+
+};
 
 const convertExcelDate = (excelDate) => {
   // Excel uses 1900-01-01 as the base date, so we create that as a JavaScript Date object
@@ -26,7 +44,7 @@ const convertExcelDate = (excelDate) => {
 };
 
 
-app.post('/uplaodratecardexcel', async (req, res) => {
+app.post('/uplaodratecardexcel', authenticateToken, async (req, res) => {
   let { excelData, created_by = "1" } = req.body;
 
   excelData = JSON.parse(excelData)
@@ -92,7 +110,7 @@ app.post('/uplaodratecardexcel', async (req, res) => {
   }
 });
 
-app.post('/uploadmasterwarrantyexcel', async (req, res) => {
+app.post('/uploadmasterwarrantyexcel',authenticateToken, async (req, res) => {
   let { excelData, created_by = "1" } = req.body;
 
   excelData = JSON.parse(excelData)
@@ -121,8 +139,8 @@ app.post('/uploadmasterwarrantyexcel', async (req, res) => {
         .input('warranty_amount', sql.Int, item.warranty_amount)
         .input('is_scheme', sql.VarChar, item.is_scheme)
         .input('scheme_name', sql.VarChar, item.scheme_name)
-        .input('scheme_startdate', sql.DateTime,item.scheme_startdate ? convertExcelDate(item.scheme_startdate) : null )
-        .input('scheme_enddate', sql.DateTime, item.scheme_enddate ?  convertExcelDate(item.scheme_enddate) : null)
+        .input('scheme_startdate', sql.DateTime, item.scheme_startdate ? convertExcelDate(item.scheme_startdate) : null)
+        .input('scheme_enddate', sql.DateTime, item.scheme_enddate ? convertExcelDate(item.scheme_enddate) : null)
         .input('csp_code', sql.VarChar, "NULL")
         .input('created_by', sql.VarChar, created_by)
         .input('created_date', sql.DateTime, new Date())
@@ -141,7 +159,7 @@ app.post('/uploadmasterwarrantyexcel', async (req, res) => {
   }
 });
 
-app.post('/uploadpostwarrentyexcel', async (req, res) => {
+app.post('/uploadpostwarrentyexcel',authenticateToken, async (req, res) => {
   let { excelData, created_by = "1" } = req.body;
 
   // Parse the incoming JSON data for excelData
@@ -165,7 +183,7 @@ app.post('/uploadpostwarrentyexcel', async (req, res) => {
         .input('ProductLine', sql.VarChar, item.ProductLine)
         .input('ProductClass', sql.VarChar, item.ProductClass)
         .input('ServiceType', sql.VarChar, item.ServiceType)
-        .input('warranty_year',item.warranty_year ?  item.warranty_year : null)
+        .input('warranty_year', item.warranty_year ? item.warranty_year : null)
         .input('compressor_warranty', sql.Int, item.compressor_warranty)
         .input('warranty_amount', sql.Int, item.warranty_amount)
         .input('is_scheme', sql.VarChar, item.is_scheme)
@@ -193,7 +211,7 @@ app.post('/uploadpostwarrentyexcel', async (req, res) => {
   }
 });
 
-app.post('/uploadpinexcel', async (req, res) => {
+app.post('/uploadpinexcel',authenticateToken, async (req, res) => {
 
 
   let { jsonData } = req.body;

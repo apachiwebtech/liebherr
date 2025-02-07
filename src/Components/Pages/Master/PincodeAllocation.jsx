@@ -265,7 +265,11 @@ const PincodeAllocation = () => {
 
 
 
-      axios.post(`${Base_Url}/uploadpinexcel`, { jsonData: jsonData })
+      axios.post(`${Base_Url}/uploadpinexcel`, { jsonData: jsonData },{
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      })
         .then((res) => {
           if (res.data) {
             alert("Uploaded successfully!");

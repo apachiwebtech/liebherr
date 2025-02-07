@@ -117,7 +117,7 @@ const transporter = nodemailer.createTransport({
 });
 
 
-app.get('/send-otp', async (req, res) => {
+app.get('/send-otp',authenticateToken, async (req, res) => {
   // const { email, otp } = req.body;
 
 
@@ -171,7 +171,7 @@ app.get('/send-otp', async (req, res) => {
 });
 
 
-app.get('/send-appointment', async (req, res) => {
+app.get('/send-appointment',authenticateToken, async (req, res) => {
   // const { email, otp } = req.body;
 
 
@@ -223,7 +223,7 @@ app.get('/send-appointment', async (req, res) => {
 
 
 });
-app.get('/send-cancelled', async (req, res) => {
+app.get('/send-cancelled',authenticateToken, async (req, res) => {
   // const { email, otp } = req.body;
 
 
@@ -275,7 +275,7 @@ app.get('/send-cancelled', async (req, res) => {
 
 });
 
-app.get('/send-closed', async (req, res) => {
+app.get('/send-closed',authenticateToken, async (req, res) => {
   // const { email, otp } = req.body;
 
 
@@ -326,7 +326,7 @@ app.get('/send-closed', async (req, res) => {
 
 
 });
-app.get('/send-spare', async (req, res) => {
+app.get('/send-spare',authenticateToken, async (req, res) => {
   // const { email, otp } = req.body;
 
 
@@ -3733,7 +3733,7 @@ app.get("/getComplaintDuplicate/:customer_mobile", authenticateToken, async (req
 
 // End Complaint View
 
-app.post("/uploadAttachment2", upload.array("attachment2"), async (req, res) => {
+app.post("/uploadAttachment2",authenticateToken, upload.array("attachment2"), async (req, res) => {
   const { ticket_no, created_by } = req.body;
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
@@ -6503,26 +6503,6 @@ app.post("/putchildfranchise", authenticateToken, async (req, res) => {
     console.error(err);
     return res.status(500).json({ error: "An error occurred while processing the request" });
   }
-});
-
-
-
-
-
-app.post("/deletechildfranchise", (req, res) => {
-  const { id } = req.body;
-  const sql = `UPDATE awt_childfranchisemaster SET deleted = 1 WHERE id = '${id}'`;
-
-  con.query(sql, (err, data) => {
-    if (err) {
-      console.error(err);
-      return res
-        .status(500)
-        .json({ message: "Error updating Child Franchise" });
-    } else {
-      return res.json(data);
-    }
-  });
 });
 // End Child Franchise Master
 
@@ -10732,7 +10712,7 @@ app.post('/getcspusers', authenticateToken, async (req, res) => {
 });
 
 
-app.post('/getcallrecorddetails', async (req, res) => {
+app.post('/getcallrecorddetails',authenticateToken, async (req, res) => {
   const { uuid, call_to_number, caller_id_number, start_stamp, call_id, billing_circle, customer_no_with_prefix } = req.body;
 
   const date = new Date();
@@ -11769,7 +11749,7 @@ app.post("/add_spareoutward", authenticateToken, async (req, res) => {
   }
 });
 
-app.post('/updategrnspares', async (req, res) => {
+app.post('/updategrnspares',authenticateToken, async (req, res) => {
   const spareData = req.body; // Expecting an array of spare objects
 
   // console.log(req.body);
@@ -11821,7 +11801,7 @@ app.post('/updategrnspares', async (req, res) => {
 });
 
 
-app.post('/updateissuespares', async (req, res) => {
+app.post('/updateissuespares',authenticateToken, async (req, res) => {
   const spareData = req.body; // Expecting an array of spare objects
 
   if (!Array.isArray(spareData)) {
@@ -12121,7 +12101,7 @@ app.post("/getoutwardlisting", authenticateToken, async (req, res) => {
 });
 
 
-app.post('/addgrnspares', async (req, res) => {
+app.post('/addgrnspares',authenticateToken, async (req, res) => {
   const { spare_id, grn_no, created_by } = req.body; // Expecting required fields in the request body
 
   try {
@@ -12245,7 +12225,7 @@ app.post('/addgrnspares', async (req, res) => {
     sql.close();
   }
 });
-app.post('/addissuespares', async (req, res) => {
+app.post('/addissuespares',authenticateToken, async (req, res) => {
   const { spare_id, issue_no, created_by } = req.body; // Expecting required fields in the request body
 
   try {
@@ -12931,67 +12911,10 @@ app.post('/getmspusers', authenticateToken, async (req, res) => {
   }
 });
 
-// get data for quotation
 
-app.post('/getprintinfo', async (req, res) => {
-  const { id } = req.body;
 
-  try {
-    // Connect to the MSSQL database
-    const pool = await poolPromise;
 
-    // Query to fetch data based on the `id`
-    const query = `
-      SELECT * 
-      FROM awt_quotation AS a
-      LEFT JOIN awt_customer AS o 
-      ON a.customer_id = o.customer_id
-      WHERE a.deleted = 0 AND a.id = @id
-    `;
-
-    const result = await pool.request()
-      .input("id", sql.Int, id) // Assuming `id` is an integer
-      .query(query);
-
-    // Return the fetched data
-    return res.json(result.recordset);
-  } catch (err) {
-    console.error("Database error:", err);
-    return res.status(500).json({ error: "Database query failed", details: err });
-  }
-});
-
-// get job card data 
-
-app.post('/getjobcard', async (req, res) => {
-  const { id } = req.body;
-
-  try {
-    // Connect to the MSSQL database
-    const pool = await poolPromise;
-
-    // Query to fetch data based on the `id`
-    const query = `
-      SELECT * 
-      FROM complaint_ticket AS a
-      LEFT JOIN awt_customer AS o 
-      ON a.customer_id = o.customer_id
-      WHERE a.deleted = 0 AND a.id = @id
-    `;
-
-    const result = await pool.request()
-      .input("id", sql.Int, id) // Assuming `id` is an integer
-      .query(query);
-
-    // Return the fetched data
-    return res.json(result.recordset);
-  } catch (err) {
-    console.error("Database error:", err);
-    return res.status(500).json({ error: "Database query failed", details: err });
-  }
-});
-
-app.post('/updatewarrentystate', async (req, res) => {
+app.post('/updatewarrentystate',authenticateToken, async (req, res) => {
   const { warrenty, ticket_no } = req.body;
 
   try {
@@ -13022,7 +12945,7 @@ app.post('/updatewarrentystate', async (req, res) => {
 });
 
 
-app.post("/approvequotation", async (req, res) => {
+app.post("/approvequotation",authenticateToken, async (req, res) => {
   const { Qno, data } = req.body;
 
   try {
@@ -13067,7 +12990,7 @@ app.post("/approvequotation", async (req, res) => {
 });
 
 
-app.post('/getcspformticket', async (req, res) => {
+app.post('/getcspformticket',authenticateToken, async (req, res) => {
   const { ticket_no } = req.body;
 
   try {
@@ -13093,7 +13016,7 @@ app.post('/getcspformticket', async (req, res) => {
 });
 
 
-app.get('/getdatafrompincode/:pincode', async (req, res) => {
+app.get('/getdatafrompincode/:pincode',authenticateToken, async (req, res) => {
   const { pincode } = req.params;
 
   try {

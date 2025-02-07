@@ -73,7 +73,11 @@ const PostSaleWarrenty = () => {
       created_by: localStorage.getItem("licare_code")
     };
 
-    axios.post(`${Base_Url}/uploadpostwarrentyexcel`, data)
+    axios.post(`${Base_Url}/uploadpostwarrentyexcel`, data,{
+      headers: {
+        Authorization: token, // Send token in headers
+      },
+    })
       .then((res) => {
         if (res.data) {
           alert("Uploaded")

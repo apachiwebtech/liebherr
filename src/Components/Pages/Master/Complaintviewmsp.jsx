@@ -858,6 +858,7 @@ export function Complaintviewmsp(params) {
         await axiosInstance.post(`${Base_Url}/uploadAttachment2`, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
+            Authorization: token, // Send token in headers
 
           },
         });

@@ -76,7 +76,11 @@ const Master_Warrenty = () => {
       created_by: localStorage.getItem("licare_code")
     };
 
-    axios.post(`${Base_Url}/uploadmasterwarrantyexcel`, data)
+    axios.post(`${Base_Url}/uploadmasterwarrantyexcel`, data,{
+      headers: {
+        Authorization: token, // Send token in headers
+      },
+    })
       .then((res) => {
         if (res.data) {
           alert("Uploaded")
