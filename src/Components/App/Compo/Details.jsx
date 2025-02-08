@@ -179,7 +179,7 @@ function Details() {
         isValid = false;
         newErrors.symptomcode = "Defect group is required";
       }
-      if (!Value.actioncode  || Value.actioncode == 'null') {
+      if (!Value.actioncode || Value.actioncode == 'null') {
         isValid = false;
         newErrors.actioncode = "Action code is required";
       }
@@ -638,17 +638,55 @@ function Details() {
 
     try {
       const response = await axios.get(
-        `${Base_Url}/getserial/${value || value.serial_no}`, {
+        `${Base_Url}/getmobserial/${value || value.serial_no}`, {
         headers: {
           Authorization: token, // Send token in headers
         },
       }
       );
 
-      if (response.data && response.data[0].ModelNumber) {
+      if (response.data.length === 0) {
+        alert("This serial does not exist.");
+        setserial(''); // Resetting serial number to 0
+        setModelNumber(''); // Clearing the model number
+      }
 
-        setModelNumber(response.data[0].ModelNumber)
+      if (response.data && response.data[0] && response.data[0].ModelNumber) {
 
+        
+        
+        if (response.data[0].customer_id == 'null' || response.data[0].customer_id == null) {
+          alert("New serial no")
+          getspare(response.data[0].ModelNumber)
+          setModelNumber(response.data[0].ModelNumber)
+        }
+        else if (response.data[0].customer_id == data.customer_id) {
+          alert("Serial no matched")
+          getspare(response.data[0].ModelNumber)
+          setModelNumber(response.data[0].ModelNumber)
+        }
+        else {
+          setserial('')
+          setModelNumber('')
+          alert("This serial no already allocated")
+        }
+        
+      }
+      
+      
+      
+      if ((response.data && response.data[0] && response.data[0].customer_classification == 'null') || (response.data && response.data[0] && response.data[0].customer_classification == null)) {
+        console.log("Matched")
+      }
+      else if (response.data && response.data[0] && response.data[0].customer_classification == data.customer_class) {
+        
+        console.log("Matched")
+        
+      } else {
+        alert("classification is different")
+        setserial('')
+        setsparedata('')
+        setModelNumber('')
       }
 
 
@@ -710,7 +748,33 @@ function Details() {
                   </p> : <div class="mb-3">
                     <div class="form-group">
                       <label for="val-actioncode"><strong>Serial No</strong></label>
-                      <input type="number" class="form-control" onChange={(e) => handlegetmodel(e.target.value)} name="serial_no" id="spare_doc" />
+                      <input
+                        type="number"
+                        className="form-control"
+                        maxLength="9"
+                        value={serial_no}
+                        onInput={(e) => {
+                          if (e.target.value.length > 9) {
+                            e.target.value = e.target.value.slice(0, 9);
+                          }
+                        }}
+                        onChange={(e) => {
+                          const input = e.target.value;
+
+                          // Limit the value to 9 characters
+                          if (input.length <= 9) {
+                            setserial(input);
+
+                            // Call API when the length is exactly 9
+                            if (input.length === 9) {
+                              handlegetmodel(input);
+                            }
+                          }
+                        }}
+                        name="serial_no"
+                        id="spare_doc"
+                      />
+
                     </div>
                     {errors.serial_no && <span className='text-danger'>{errors.serial_no}</span>}
                   </div>}
@@ -782,7 +846,7 @@ function Details() {
                         )
                       })}
                     </select>
-     Re               {errors.causecode && <span className='text-danger'>{errors.causecode}</span>}
+                    {errors.causecode && <span className='text-danger'>{errors.causecode}</span>}
                   </div>
 
                   <div class="mb-3">

@@ -3458,7 +3458,7 @@ app.get("/getcomplaintview/:complaintid", authenticateToken, async (req, res) =>
 });
 
 app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
-  const { ticket_no, note, created_by, call_status, sub_call_status, group_code, site_defect, defect_type, activity_code, serial_no, ModelNumber, purchase_date, warrenty_status, engineerdata, engineername, ticket_type, call_city, ticket_start_date,  mandaysprice, gas_chargs, gas_transportation, transportation_charge } = req.body;
+  const { ticket_no, note, created_by, call_status,call_status_id,sub_call_status, group_code, site_defect, defect_type, activity_code, serial_no, ModelNumber, purchase_date, warrenty_status, engineerdata, engineername, ticket_type, call_city, ticket_start_date,  mandaysprice, gas_chargs, gas_transportation, transportation_charge } = req.body;
 
   console.log(mandaysprice, "RR")
 
@@ -3499,7 +3499,7 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
 
     const updateSql = `
     UPDATE complaint_ticket
-    SET call_status = '${call_status}' , updated_by = '${created_by}', updated_date = '${formattedDate}' , sub_call_status  = '${sub_call_status}' ,group_code = '${group_code}' , defect_type = '${defect_type}' , ModelNumber = '${ModelNumber}',serial_no = '${serial_no}' , site_defect = '${site_defect}' ,activity_code = '${activity_code}' , purchase_date = '${purchase_date}' , warranty_status = '${warrenty_status}' ,engineer_id = '${engineer_id}' ,mandays_charges = '${mandaysprice}',transport_charge = '${transportation_charge}', assigned_to = '${engineer_name}'   WHERE ticket_no = '${ticket_no}' `;
+    SET call_status = '${call_status}' , updated_by = '${created_by}', updated_date = '${formattedDate}' , sub_call_status  = '${sub_call_status}' ,group_code = '${group_code}' , defect_type = '${defect_type}' , ModelNumber = '${ModelNumber}',serial_no = '${serial_no}' , site_defect = '${site_defect}' ,activity_code = '${activity_code}' , purchase_date = '${purchase_date}' , warranty_status = '${warrenty_status}' ,engineer_id = '${engineer_id}' ,mandays_charges = '${mandaysprice}',transport_charge = '${transportation_charge}', assigned_to = '${engineer_name}' , call_status_id = '${call_status_id}'  WHERE ticket_no = '${ticket_no}' `;
 
     await pool.request().query(updateSql);
 
@@ -3851,33 +3851,36 @@ app.get("/getAttachment2Details/:ticket_no",
 
 app.get("/getcvengineer/:pincode/:msp/:csp", authenticateToken, async (req, res) => {
 
-  let { pincode, msp, csp } = req.params;
-  console.log(pincode, msp, csp, "vkjuyfhdgviuc dyuhj");
+  let { csp } = req.params;
 
   try {
     const pool = await poolPromise;
 
 
-    // Direct SQL query without parameter binding
-    //   const sql = `SELECT em.id, em.title ,em.engineer_id
-    //  FROM pincode_allocation AS pa
-    //  LEFT JOIN awt_franchisemaster AS fm
-    //         ON fm.licarecode = pa.account_manager
-    //  LEFT JOIN awt_childfranchisemaster AS cfm
-    //         ON cfm.licare_code = pa.owner
-    //  LEFT JOIN awt_engineermaster AS em
-    //         ON em.cfranchise_id =
-    //            CASE
-    //              WHEN pa.account_manager = pa.owner THEN RIGHT(pa.account_manager, LEN(pa.account_manager) - 2)
-    //              ELSE  RIGHT(pa.owner, LEN(pa.owner) - 2)
-    //            END
-    //  WHERE  pa.pincode ='${pincode}' and pa.account_manager = '${msp}' and pa.owner ='${csp}'`;
-
-    // const newmasp = csp.replace(/^SP/, '').trim();
 
 
+    const sql = `select * from awt_engineermaster where cfranchise_id = '${csp}' and deleted = 0 and status = 1 and employee_code = 'SRV'`
+    console.log(sql)
+    // Execute the query
+    const result = await pool.request().query(sql);
 
-    const sql = `select * from awt_engineermaster where cfranchise_id = '${csp}' and deleted = 0 `
+    // Return the entire array of data
+    return res.json(result.recordset);
+
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred" });
+  }
+});
+
+app.get("/getlhiengineer", authenticateToken, async (req, res) => {
+
+
+
+  try {
+    const pool = await poolPromise;
+
+    const sql = `select * from awt_engineermaster where  deleted = 0 and status = 1 and employee_code = 'LHI'`
     console.log(sql)
     // Execute the query
     const result = await pool.request().query(sql);
@@ -4341,13 +4344,13 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
           ticket_no, ticket_date, customer_name, customer_mobile, customer_email, address,
           state, city, area, pincode, customer_id, ModelNumber, ticket_type, call_type,
           call_status, warranty_status, invoice_date, call_charges, mode_of_contact,
-          contact_person,  created_date, created_by,  purchase_date, serial_no, child_service_partner, sevice_partner, specification ,customer_class,call_priority,requested_mobile,requested_email,requested_by,msp,csp,sales_partner,sales_partner2,call_remark,salutation,alt_mobile,mwhatsapp,awhatsapp,class_city,mother_branch
+          contact_person,  created_date, created_by,  purchase_date, serial_no, child_service_partner, sevice_partner, specification ,customer_class,call_priority,requested_mobile,requested_email,requested_by,msp,csp,sales_partner,sales_partner2,call_remark,salutation,alt_mobile,mwhatsapp,awhatsapp,class_city,mother_branch,call_status_id
         )
         VALUES (
           @ticket_no, @complaint_date, @customer_name, @mobile, @email, @address,
           @state, @city, @area, @pincode, @customer_id, @model, @ticket_type, @cust_type,
           'Open', @warranty_status, @invoice_date, @call_charge, @mode_of_contact,
-          @contact_person,  @formattedDate, @created_by,  @purchase_date, @serial, @child_service_partner, @master_service_partner, @specification ,@classification , @priority ,@requested_mobile,@requested_email,@requested_by,@msp,@csp,@sales_partner,@sales_partner2,@call_remark,@salutation,@alt_mobile,@mwhatsapp,@awhatsapp,@class_city,@mother_branch
+          @contact_person,  @formattedDate, @created_by,  @purchase_date, @serial, @child_service_partner, @master_service_partner, @specification ,@classification , @priority ,@requested_mobile,@requested_email,@requested_by,@msp,@csp,@sales_partner,@sales_partner2,@call_remark,@salutation,@alt_mobile,@mwhatsapp,@awhatsapp,@class_city,@mother_branch,'1'
         )
       `;
       } else {
@@ -4369,6 +4372,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
           ticket_type = @ticket_type,
           call_type = @cust_type,
           call_status = 'Open',
+          call_status_id = '1',
           warranty_status = @warranty_status,
           invoice_date = @invoice_date,
           call_charges = @call_charge,
@@ -9505,6 +9509,35 @@ WHERE au.serial_no = @serial order by au.id desc`;
       return res.json(result.recordset);
 
     }
+
+
+
+
+
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred", details: err.message });
+  }
+});
+
+
+app.get("/getmobserial/:serial", authenticateToken, async (req, res) => {
+  const { serial } = req.params;
+
+  try {
+
+    const pool = await poolPromise;
+
+    const sql = `select serial_no , DESCRIPTION as ModelNumber , ACCOUNT as customer_id , ALLOCATIONSTATUS as allocation , CUSTOMERCLASSIFICATION as customer_classification from LHI_Licare_data where serial_no = @serial`;
+
+    const result = await pool.request()
+      .input('serial', serial)
+      .query(sql);
+
+
+
+      return res.json(result.recordset);
+
 
 
 

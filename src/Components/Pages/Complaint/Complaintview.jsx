@@ -115,6 +115,7 @@ export function Complaintview(params) {
   const [callstatus, setCallstatus] = useState([]); // Current attachment for modal
   const [subcallstatus, setsubCallstatus] = useState([]); // Current attachment for modal
   const [callstatusid, setCallstatusid] = useState(""); // Current attachment for modal
+  const [callid, setCallid] = useState(""); // Current attachment for modal
   const created_by = localStorage.getItem("licare_code"); // Get user ID from localStorage
   const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
   const [GroupDefectsite, setGroupDefectsite] = useState([]);
@@ -263,6 +264,35 @@ export function Complaintview(params) {
 
       });
 
+
+
+      if (res.data && Array.isArray(res.data)) {
+        setEngineer(res.data);
+      } else {
+        console.error("Expected array from API but got:", typeof res.data);
+        setEngineer([]); // Set empty array as fallback
+      }
+
+
+
+
+
+    } catch (error) {
+      console.error("Error fetching engineers:", error);
+      setEngineer([]); // Set empty array on error
+    }
+
+
+  }
+  async function getLHIEngineer(params) {
+
+    try {
+      const res = await axiosInstance.get(`${Base_Url}/getlhiengineer`, {
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+
+      });
 
 
       if (res.data && Array.isArray(res.data)) {
@@ -788,7 +818,7 @@ export function Complaintview(params) {
       setUpdatedata(response.data)
       setComplaintview(response.data);
       setgroupstatusid(response.data.group_code)
-
+      getsubcallstatus(response.data.call_status_id)
       setCloseStatus(response.data.call_status)
       setsubCloseStatus(response.data.sub_call_status)
       setActiveTicket(complaintid);
@@ -1111,6 +1141,7 @@ export function Complaintview(params) {
           ticket_start_date: complaintview.created_date,
           call_city: complaintview.class_city,
           call_status: callstatusid || '',
+          call_status_id: callid || '',
           sub_call_status: complaintview.sub_call_status || '',
           group_code: groupstatusid || '',
           site_defect: complaintview.site_defect || '',
@@ -1254,7 +1285,11 @@ export function Complaintview(params) {
     if (engtype == "Franchisee") {
 
       getEngineer();
-    } else {
+    } else if(engtype == "LHI") {
+
+      getLHIEngineer();
+
+    }else{
       setEngineer([])
     }
 
@@ -1263,7 +1298,7 @@ export function Complaintview(params) {
 
   useEffect(() => {
     getcallstatus()
-    getsubcallstatus()
+    // getsubcallstatus()
 
     getgroupdefect()
     getdefecttype()
@@ -1995,6 +2030,7 @@ export function Complaintview(params) {
                                       getsubcallstatus(selectedid); // Send the id to fetch sub-call statuses
                                       // Log or use the Callstatus value
                                       setCallstatusid(selectedname)
+                                      setCallid(selectedid)
                                       handleModelChange(e)
                                     }}
                                   >
@@ -2659,7 +2695,7 @@ export function Complaintview(params) {
                         {addedEngineers.map((eng) => (
                           <tr key={eng.id}>
                             <td>{eng.title}</td>
-                            <td>{eng.userType || "N/A"}</td> {/* Display user type or "N/A" */}
+                            <td>{eng.employee_code || "N/A"}</td> {/* Display user type or "N/A" */}
                             <td>
                               <button
                                 className="btn btn-sm btn-danger"

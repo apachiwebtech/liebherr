@@ -115,6 +115,7 @@ export function CspTicketView(params) {
   const [callstatus, setCallstatus] = useState([]); // Current attachment for modal
   const [subcallstatus, setsubCallstatus] = useState([]); // Current attachment for modal
   const [callstatusid, setCallstatusid] = useState(""); // Current attachment for modal
+  const [callid, setCallid] = useState(""); // Current attachment for modal
   const created_by = localStorage.getItem("licare_code"); // Get user ID from localStorage
   const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
   const [GroupDefectsite, setGroupDefectsite] = useState([]);
@@ -788,7 +789,7 @@ export function CspTicketView(params) {
       setUpdatedata(response.data)
       setComplaintview(response.data);
       setgroupstatusid(response.data.group_code)
-
+      getsubcallstatus(response.data.call_status_id)
       setCloseStatus(response.data.call_status)
       setsubCloseStatus(response.data.sub_call_status)
       setActiveTicket(complaintid);
@@ -1111,6 +1112,7 @@ export function CspTicketView(params) {
           ticket_start_date: complaintview.created_date,
           call_city: complaintview.class_city,
           call_status: callstatusid || '',
+          call_status_id: callid || '',
           sub_call_status: complaintview.sub_call_status || '',
           group_code: groupstatusid || '',
           site_defect: complaintview.site_defect || '',
@@ -1254,8 +1256,11 @@ export function CspTicketView(params) {
     if (engtype == "Franchisee") {
 
       getEngineer();
-    } else {
+    } else if(engtype == "Franchisee") {
+      getEngineer();
+    }else{
       setEngineer([])
+
     }
 
 
@@ -1263,7 +1268,7 @@ export function CspTicketView(params) {
 
   useEffect(() => {
     getcallstatus()
-    getsubcallstatus()
+    // getsubcallstatus()
 
     getgroupdefect()
     getdefecttype()
@@ -1995,6 +2000,7 @@ export function CspTicketView(params) {
                                       getsubcallstatus(selectedid); // Send the id to fetch sub-call statuses
                                       // Log or use the Callstatus value
                                       setCallstatusid(selectedname)
+                                      setCallid(selectedid)
                                       handleModelChange(e)
                                     }}
                                   >
@@ -2221,6 +2227,7 @@ export function CspTicketView(params) {
 
 
 
+
                                     </div>
 
 
@@ -2229,7 +2236,6 @@ export function CspTicketView(params) {
 
                                 {(complaintview.call_status == 'Closed') &&
                                   <>
-
                                     <div className="my-3 col-lg-6">
                                       <input type="checkbox" onChange={handleChange} name="gas_chargs" /> <label>Gas Charges</label>
                                     </div>
