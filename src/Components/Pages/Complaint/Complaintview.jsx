@@ -81,7 +81,8 @@ export function Complaintview(params) {
     mandaysprice: '',
     transportation: "",
     transportation_charge: "",
-    visit_count: ""
+    visit_count: "",
+    csp : ""
   });
 
 
@@ -729,7 +730,7 @@ export function Complaintview(params) {
 
 
     // Combine spare parts, ticket number, and model number into a single array
-    const finaldata = { data: combinedSpareParts, ticket_no: complaintview.ticket_no, ModelNumber: complaintview.ModelNumber, customer_id: complaintview.customer_id, Customername: complaintview.customer_name, state: complaintview.state, city: complaintview.city, Engineer: addedEngineers.map((item) => item.engineer_id) || complaintview.engineer_id };
+    const finaldata = { data: combinedSpareParts, ticket_no: complaintview.ticket_no, ModelNumber: complaintview.ModelNumber, customer_id: complaintview.customer_id, Customername: complaintview.customer_name, state: complaintview.state, city: complaintview.city,csp_code : complaintview.csp, Engineer: addedEngineers.map((item) => item.engineer_id) || complaintview.engineer_id };
 
     // Prepare the data object
     const data = {
@@ -1110,6 +1111,14 @@ export function Complaintview(params) {
 
     const isValidValue = (value) => value !== null && value !== 'null' && value !== '';
 
+
+    if (complaintview.sub_call_status === 'Technician on-route') {
+      if (addedEngineers.length === 0) {
+        // Handle the case where no engineers are added
+        alert('Please add the engineer');
+        return; // Prevent further execution if needed
+      }
+    }
 
 
 

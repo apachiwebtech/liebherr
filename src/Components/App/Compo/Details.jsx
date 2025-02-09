@@ -27,6 +27,7 @@ function Details() {
   const token = localStorage.getItem("token"); // Get token from localStorage
   const [otp, setotp] = useState([]);
   const [serial_no, setserial] = useState('');
+  const [allocation, setallocation] = useState('');
   const [modelno, setModelNumber] = useState('');
   const [errors, setErrors] = useState({})
   const [files, setFiles] = useState({
@@ -225,9 +226,11 @@ function Details() {
       formData.append('com_id', data.id);
       formData.append('call_remark', Value.call_remark);
       formData.append('ticket_no', data.ticket_no);
+      formData.append('allocation', allocation);
       formData.append('ModelNumber', modelno || data.ModelNumber);
       formData.append('serial_no', serial_no || data.serial_no);
       formData.append('user_id', localStorage.getItem('userid'));
+      formData.append('serial_data' , JSON.stringify(data))
       if (Value.spare_required) {
         formData.append('spare_detail', Value.spare_detail);
       }
@@ -659,6 +662,7 @@ function Details() {
           alert("New serial no")
           getspare(response.data[0].ModelNumber)
           setModelNumber(response.data[0].ModelNumber)
+          setallocation(response.data[0].allocation)
         }
         else if (response.data[0].customer_id == data.customer_id) {
           alert("Serial no matched")

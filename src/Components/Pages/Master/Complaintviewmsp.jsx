@@ -81,7 +81,8 @@ export function Complaintviewmsp(params) {
     mandaysprice: '',
     transportation: "",
     transportation_charge: "",
-    visit_count: ""
+    visit_count: "",
+    csp : ""
   });
 
 
@@ -264,6 +265,35 @@ export function Complaintviewmsp(params) {
 
       });
 
+
+
+      if (res.data && Array.isArray(res.data)) {
+        setEngineer(res.data);
+      } else {
+        console.error("Expected array from API but got:", typeof res.data);
+        setEngineer([]); // Set empty array as fallback
+      }
+
+
+
+
+
+    } catch (error) {
+      console.error("Error fetching engineers:", error);
+      setEngineer([]); // Set empty array on error
+    }
+
+
+  }
+  async function getLHIEngineer(params) {
+
+    try {
+      const res = await axiosInstance.get(`${Base_Url}/getlhiengineer`, {
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+
+      });
 
 
       if (res.data && Array.isArray(res.data)) {
@@ -700,7 +730,7 @@ export function Complaintviewmsp(params) {
 
 
     // Combine spare parts, ticket number, and model number into a single array
-    const finaldata = { data: combinedSpareParts, ticket_no: complaintview.ticket_no, ModelNumber: complaintview.ModelNumber, customer_id: complaintview.customer_id, Customername: complaintview.customer_name, state: complaintview.state, city: complaintview.city, Engineer: addedEngineers.map((item) => item.engineer_id) || complaintview.engineer_id };
+    const finaldata = { data: combinedSpareParts, ticket_no: complaintview.ticket_no, ModelNumber: complaintview.ModelNumber, customer_id: complaintview.customer_id, Customername: complaintview.customer_name, state: complaintview.state, city: complaintview.city,csp_code : complaintview.csp, Engineer: addedEngineers.map((item) => item.engineer_id) || complaintview.engineer_id };
 
     // Prepare the data object
     const data = {
@@ -1082,6 +1112,14 @@ export function Complaintviewmsp(params) {
     const isValidValue = (value) => value !== null && value !== 'null' && value !== '';
 
 
+    if (complaintview.sub_call_status === 'Technician on-route') {
+      if (addedEngineers.length === 0) {
+        // Handle the case where no engineers are added
+        alert('Please add the engineer');
+        return; // Prevent further execution if needed
+      }
+    }
+
 
 
     if (
@@ -1256,11 +1294,12 @@ export function Complaintviewmsp(params) {
     if (engtype == "Franchisee") {
 
       getEngineer();
-    } else if(engtype == "Franchisee") {
-      getEngineer();
+    } else if(engtype == "LHI") {
+
+      getLHIEngineer();
+
     }else{
       setEngineer([])
-
     }
 
 
@@ -1441,7 +1480,7 @@ export function Complaintviewmsp(params) {
     if (ticket_id == activeTicket) {
       if (newTicketList.length > 0) {
         setActiveTicket(newTicketList[0].ticket_id);
-        navigate(`/msp/complaintviewmsp${newTicketList[0].ticket_id}`);
+        navigate(`/msp/complaintviewmsp/${newTicketList[0].ticket_id}`);
       } else {
         setActiveTicket(null);
         navigate(`/msp/ticketlistmsp`);
@@ -1458,7 +1497,7 @@ export function Complaintviewmsp(params) {
     encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
     // navigate(`/quotation/${encrypted}`)
     // alert(encrypted)
-    navigate(`/msp/complaintviewmsp${encrypted}`)
+    navigate(`/msp/complaintviewmsp/${encrypted}`)
   };
 
 
@@ -2665,7 +2704,7 @@ export function Complaintviewmsp(params) {
                         {addedEngineers.map((eng) => (
                           <tr key={eng.id}>
                             <td>{eng.title}</td>
-                            <td>{eng.userType || "N/A"}</td> {/* Display user type or "N/A" */}
+                            <td>{eng.employee_code || "N/A"}</td> {/* Display user type or "N/A" */}
                             <td>
                               <button
                                 className="btn btn-sm btn-danger"

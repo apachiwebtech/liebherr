@@ -91,6 +91,20 @@ const Loginheader = (params) => {
               </Link>
             </li>
             <li
+              className={`nav-item dropdown ${location.pathname === "/csp/quotationlist" ? "active-class" : ""}`}
+              style={location.pathname === "/csp/quotationlist" ? { background: '#0d6efd', borderRadius: '5px' } : {}}
+            >
+              <Link
+                to={`/csp/quotationlist`}
+                className={`nav-link site ${location.pathname === "/csp/quotationlist" ? "text-light" : ""}`}
+                id="navbarDropdown"
+                role="button"
+                aria-expanded="false"
+              >
+                Quotationlist
+              </Link>
+            </li>
+            <li
               className={`nav-item dropdown ${location.pathname === "/csp/adduser" ? "active-class" : ""}`}
               style={location.pathname === "/csp/adduser" ? { background: '#0d6efd', borderRadius: '5px' } : {}}
             >

@@ -120,6 +120,39 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
     };
 
 
+    function numberToWords(num) {
+        if (num === 0) return "Zero";
+    
+        const belowTwenty = [
+            "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten",
+            "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", 
+            "Eighteen", "Nineteen"
+        ];
+        const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+        const thousands = ["", "Thousand", "Million", "Billion"];
+    
+        function helper(n) {
+            if (n === 0) return "";
+            else if (n < 20) return belowTwenty[n - 1] + " ";
+            else if (n < 100) return tens[Math.floor(n / 10)] + " " + helper(n % 10);
+            else if (n < 1000) return belowTwenty[Math.floor(n / 100) - 1] + " hundred " + helper(n % 100);
+            else {
+                for (let i = 0, unit = 1000; unit <= Math.pow(10, 12); unit *= 1000, i++) {
+                    if (n < unit * 1000) {
+                        return helper(Math.floor(n / unit)) + thousands[i] + " " + helper(n % unit);
+                    }
+                }
+            }
+        }
+    
+        return helper(num).trim();
+    }
+
+    const totalPrice = spare.reduce((total, item) => {
+        return total + Number(item.quantity) * Number(item.price);
+    }, 0);
+
+
 
 
 
@@ -504,13 +537,14 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
 
                         </View>
                         <View style={[styles.tableCol14, { width: '7%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000', fontWeight: 1600 }}></Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000', fontWeight: 1600 }}>{spare[0] && spare[0].price}</Text>
 
                         </View>
                         <View style={[styles.tableCol14, { width: '7%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000', fontWeight: 1600 }}></Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000', fontWeight: 1600 }}>{spare[0] && Number(spare[0].price) *  Number(spare[0] && spare[0].quantity)}</Text>
 
                         </View>
+
                         <View style={[styles.tableCol14, { width: '10%' }]}>
                             <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000', fontWeight: 1600 }}>Defect Type</Text>
 
@@ -538,11 +572,11 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
 
                         </View>
                         <View style={[styles.tableCol14, { width: '7%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000', fontWeight: 1600 }}></Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000', fontWeight: 1600 }}>{spare[1] && spare[1].price}</Text>
 
                         </View>
                         <View style={[styles.tableCol14, { width: '7%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000', fontWeight: 1600 }}></Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000', fontWeight: 1600 }}>{spare[1] && Number(spare[1].price) *  Number(spare[1] && spare[1].quantity)}</Text>
 
                         </View>
                         <View style={[styles.tableCol14, { width: '10%' }]}>
@@ -572,11 +606,11 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
 
                         </View>
                         <View style={[styles.tableCol14, { width: '7%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000', fontWeight: 1600 }}></Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000', fontWeight: 1600 }}>{spare[2] && spare[2].price}</Text>
 
                         </View>
                         <View style={[styles.tableCol14, { width: '7%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000', fontWeight: 1600 }}></Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000', fontWeight: 1600 }}>{spare[2] && Number(spare[2].price) *  Number(spare[2] && spare[2].quantity)}</Text>
 
                         </View>
                         <View style={[styles.tableCol14, { width: '10%' }]}>
@@ -597,7 +631,7 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
                             <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000', fontWeight: 1600 }}>Total(in Words)</Text>
                         </View>
                         <View style={[styles.tableCol14, { width: '80%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, color: '#000', fontWeight: 1600 }}></Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, color: '#000', fontWeight: 1600 , paddingLeft :"5px" }}>{numberToWords(totalPrice)} {numberToWords(totalPrice) == 'Zero' ? null : "Rupees Only."}</Text>
 
                         </View>
 

@@ -13,6 +13,7 @@ const fetchdata = require('./fetchdata')
 const RateCardExcel = require('./Routes/Utils/RateCardExcel')
 const CryptoJS = require('crypto-js');
 const nodemailer = require('nodemailer');
+const axios = require("axios");
 // Secret key for JWT
 const JWT_SECRET = "Lh!_Login_123"; // Replace with a strong, secret key
 const API_KEY = "a8f2b3c4-d5e6-7f8g-h9i0-12345jklmn67";
@@ -117,7 +118,7 @@ const transporter = nodemailer.createTransport({
 });
 
 
-app.get('/send-otp',authenticateToken, async (req, res) => {
+app.get('/send-otp', authenticateToken, async (req, res) => {
   // const { email, otp } = req.body;
 
 
@@ -171,7 +172,7 @@ app.get('/send-otp',authenticateToken, async (req, res) => {
 });
 
 
-app.get('/send-appointment',authenticateToken, async (req, res) => {
+app.get('/send-appointment', authenticateToken, async (req, res) => {
   // const { email, otp } = req.body;
 
 
@@ -223,7 +224,7 @@ app.get('/send-appointment',authenticateToken, async (req, res) => {
 
 
 });
-app.get('/send-cancelled',authenticateToken, async (req, res) => {
+app.get('/send-cancelled', authenticateToken, async (req, res) => {
   // const { email, otp } = req.body;
 
 
@@ -275,7 +276,7 @@ app.get('/send-cancelled',authenticateToken, async (req, res) => {
 
 });
 
-app.get('/send-closed',authenticateToken, async (req, res) => {
+app.get('/send-closed', authenticateToken, async (req, res) => {
   // const { email, otp } = req.body;
 
 
@@ -326,7 +327,7 @@ app.get('/send-closed',authenticateToken, async (req, res) => {
 
 
 });
-app.get('/send-spare',authenticateToken, async (req, res) => {
+app.get('/send-spare', authenticateToken, async (req, res) => {
   // const { email, otp } = req.body;
 
 
@@ -3458,7 +3459,7 @@ app.get("/getcomplaintview/:complaintid", authenticateToken, async (req, res) =>
 });
 
 app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
-  const { ticket_no, note, created_by, call_status,call_status_id,sub_call_status, group_code, site_defect, defect_type, activity_code, serial_no, ModelNumber, purchase_date, warrenty_status, engineerdata, engineername, ticket_type, call_city, ticket_start_date,  mandaysprice, gas_chargs, gas_transportation, transportation_charge } = req.body;
+  const { ticket_no, note, created_by, call_status, call_status_id, sub_call_status, group_code, site_defect, defect_type, activity_code, serial_no, ModelNumber, purchase_date, warrenty_status, engineerdata, engineername, ticket_type, call_city, ticket_start_date, mandaysprice, gas_chargs, gas_transportation, transportation_charge } = req.body;
 
   console.log(mandaysprice, "RR")
 
@@ -3570,33 +3571,33 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
 
           if (gas_chargs == 'on') {
 
-           
+
 
             const gascharges = getresult.recordset[0].gas_charging;
 
-      
-
-            const  updategascharges = `update complaint_ticket  set gas_charges = '${gascharges}' where ticket_no = '${ticket_no}'`;
-
-            console.log(updategascharges , "3")
 
 
-             await pool.request().query(updategascharges);
-            
-            
-          } 
-          
+            const updategascharges = `update complaint_ticket  set gas_charges = '${gascharges}' where ticket_no = '${ticket_no}'`;
+
+            console.log(updategascharges, "3")
+
+
+            await pool.request().query(updategascharges);
+
+
+          }
+
           if (gas_transportation == 'on') {
 
             const gastransport = getresult.recordset[0].transportation;
-            console.log(gastransport , "2")
+            console.log(gastransport, "2")
 
-            const  updategastransportcharges = `update complaint_ticket  set gas_transoprt = '${gastransport}' where ticket_no = '${ticket_no}'`;
+            const updategastransportcharges = `update complaint_ticket  set gas_transoprt = '${gastransport}' where ticket_no = '${ticket_no}'`;
 
             console.log(updategastransportcharges)
 
             await pool.request().query(updategastransportcharges);
-            
+
           }
 
           const within24 = getresult.recordset[0].Within_24_Hours;
@@ -3697,9 +3698,9 @@ app.get("/getComplaintDetails/:ticket_no", authenticateToken, async (req, res) =
     const pool = await poolPromise;
 
     // Direct SQL query without parameter binding for remarks
-    const remarkQuery = `SELECT ac.*, ud.title FROM awt_complaintremark as ac LEFT JOIN userdetails as ud on ud.usercode = ac.created_by WHERE ac.ticket_no = ${"'" + ticket_no + "'"} order by id DESC`;
+    const remarkQuery = `SELECT   ac.created_by , ac.id , ac.ticket_no , ac.remark  ,ac.created_date  , ud.title   FROM awt_complaintremark as ac LEFT JOIN userdetails as ud on ud.usercode = ac.created_by WHERE ac.ticket_no = ${"'" + ticket_no + "'"}  order by ac.id DESC`;
 
-    console.log(remarkQuery, "$$")
+
 
     // Execute remark query
     const remarksResult = await pool.request().query(remarkQuery);
@@ -3772,7 +3773,7 @@ app.get("/getComplaintDuplicate/:customer_mobile", authenticateToken, async (req
 
 // End Complaint View
 
-app.post("/uploadAttachment2",authenticateToken, upload.array("attachment2"), async (req, res) => {
+app.post("/uploadAttachment2", authenticateToken, upload.array("attachment2"), async (req, res) => {
   const { ticket_no, created_by } = req.body;
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
@@ -4176,6 +4177,9 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
     }
 
 
+    //Dynamic sms 
+
+
     try {
       const pool = await poolPromise;
 
@@ -4456,46 +4460,102 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
         .query(complaintSQL);
 
 
+        if (1 === 1) {
+          const auth = {
+            username: "rohit.jape@liebherr.com",
+            password: "W3W_4wbaiF2JzNn",
+          };
+        
+          try {
+            const tokenResponse = await axios.post(
+              'https://cts.myvi.in:8443/SMS/api/token',
+              auth
+            );
+        
+            if (tokenResponse.data) {
+              const token = tokenResponse.data.token;
+        
+        
+              const smsPayload = {
+                pingBackType: "0",
+                pingBackId: "-1",
+                jsonData: {
+                  senderId: "LICARE",
+                  TemplateID: "1207173530305447084",
+                  templateName: "welcomemsg",
+                  unicodeStatus: 0,
+                  messages: [
+                    {
+                      msisdn: mobile,
+                      message:
+                        `Dear Customer, Greetings from Liebherr! Your Ticket Number is ${ticket_no}. Please share OTP 12345 with the engineer once the ticket is resolved.`,
+                      customerReferenceId: "1",
+                    },
+                  ],
+                },
+                validationFlag: "1",
+                validatyPeriod: null,
+              };
+        
+              try {
+                const smsResponse = await axios.post(
+                  'https://cts.myvi.in:8443/SMS/api/broadcast',
+                  smsPayload,
+                  {
+                    headers: {
+                      'Content-Type': 'application/json',
+                      Authorization: `Bearer ${token}`, // Ensure the token is correctly prefixed
+                    },
+                  }
+                );
+        
+                if (smsResponse.status === 200) {
+                  console.log('SMS sent successfully:', smsResponse.data);
+                } else {
+                  console.error('Failed to send SMS:', smsResponse.data);
+                }
+              } catch (error) {
+                console.error('Error hitting SMS API (broadcast):', error.response?.data || error.message);
+              }
+            }
+          } catch (error) {
+            console.error('Error hitting SMS API (token):', error.response?.data || error.message);
+          }
+        }
+        
 
-      if (additional_remarks) {
-        //Remark insert query
-        const reamrks = `
-    INSERT INTO awt_complaintremark (
-        ticket_no, remark, created_date, created_by
-    )
-    VALUES (
-        @ticket_no, @additional_remarks, @formattedDate, @created_by
-    )`;
 
 
+
+
+
+
+      if (additional_remarks || specification) {
+        // Combine both remarks
+        const combinedRemarks = `
+            ${additional_remarks ? `Additional Remark: ${additional_remarks}` : ''} 
+            ${specification ? `Fault Description: ${specification}` : ''}
+          `.trim(); // Trim to avoid unnecessary whitespace if one is empty
+
+        // Insert query for combined remarks
+        const remarksQuery = `
+            INSERT INTO awt_complaintremark (
+                ticket_no, remark, created_date, created_by
+            )
+            VALUES (
+                @ticket_no, @combinedRemarks, @formattedDate, @created_by
+            )`;
+
+        // Execute the query
         await pool.request()
           .input('ticket_no', ticket_no) // Use existing ticket_no from earlier query
           .input('formattedDate', formattedDate) // Use current timestamp
           .input('created_by', created_by) // Use current user ID
-          .input('additional_remarks', additional_remarks) // Use current user ID
-          .query(reamrks);
-
+          .input('combinedRemarks', combinedRemarks) // Combined remarks
+          .query(remarksQuery);
       }
 
 
-
-      if (specification) {
-        const faultreamrks = `
-      INSERT INTO awt_complaintremark (
-          ticket_no, remark, created_date, created_by
-      )
-      VALUES (
-          @ticket_no, @additional_remarks, @formattedDate, @created_by
-      )`;
-
-
-        await pool.request()
-          .input('ticket_no', ticket_no) // Use existing ticket_no from earlier query
-          .input('formattedDate', formattedDate) // Use current timestamp
-          .input('created_by', created_by) // Use current user ID
-          .input('additional_remarks', specification) // Use current user ID
-          .query(faultreamrks);
-      }
       //Fault Description *************
 
 
@@ -9385,7 +9445,7 @@ app.get("/getcomplainlistmsp", authenticateToken, async (req, res) => {
       }
     }
 
-    
+
     if (status == undefined) {
       sql += ``;
     }
@@ -9536,7 +9596,7 @@ app.get("/getmobserial/:serial", authenticateToken, async (req, res) => {
 
 
 
-      return res.json(result.recordset);
+    return res.json(result.recordset);
 
 
 
@@ -9735,9 +9795,7 @@ app.get("/getSpareParts/:model", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
     // Parameterized query
     const sql = `
-      SELECT id, ModelNumber, title as article_code ,ProductCode as spareId, ItemDescription as article_description
-      FROM Spare_parts
-      WHERE deleted = 0 AND ModelNumber = @model
+      SELECT sp.id, sp.ModelNumber, sp.title as article_code ,sp.ProductCode as spareId, sp.ItemDescription as article_description , spt.Price_group as price FROM Spare_parts as sp left join Spare_partprice as spt on sp.title = spt.Item  WHERE sp.deleted = 0  AND ModelNumber = @model
     `;
 
     const result = await pool.request()
@@ -9878,6 +9936,93 @@ app.get("/getquotationlist", authenticateToken, async (req, res) => {
   }
 });
 
+app.get("/getquotationcsplist", authenticateToken, async (req, res) => {
+  try {
+    const {
+      ticket_no,
+      spareId,
+      ModelNumber,
+      title,
+      quantity,
+      price,
+      quotationNumber,
+      assignedEngineer,
+      CustomerName,
+      licare_code,
+      page = 1, // Default to page 1 if not provided
+      pageSize = 10, // Default to 10 items per page if not provided
+    } = req.query;
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    // Directly use the query (no parameter binding)
+    let sql = `SELECT q.* FROM awt_quotation as q  WHERE 1=1 and q.csp_code = '${licare_code}' `;
+
+    if (ticket_no) {
+      sql += ` AND q.ticketId LIKE '%${ticket_no}%'`;
+    }
+
+    if (CustomerName) {
+      sql += ` AND q.CustomerName LIKE '%${CustomerName}%'`;
+    }
+
+    if (quotationNumber) {
+      sql += ` AND q.quotationNumber LIKE '%${quotationNumber}%'`;
+    }
+
+    if (ModelNumber) {
+      sql += ` AND q.ModelNumber LIKE '%${ModelNumber}%'`;
+    }
+
+    if (title) {
+      sql += ` AND q.title LIKE '%${title}%'`;
+    }
+
+    if (quantity) {
+      sql += ` AND q.quantity LIKE '%${quantity}%'`;
+    }
+    if (price) {
+      sql += ` AND q.price LIKE '%${price}%'`;
+    }
+    // Pagination logic: Calculate offset based on the page number
+    const offset = (page - 1) * pageSize;
+    // Add pagination to the SQL query (OFFSET and FETCH NEXT)
+    sql += `ORDER BY q.quotationNumber desc OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+
+    // Execute the query
+    const result = await pool.request().query(sql);
+    // Get the total count of records for pagination
+    let countSql = `SELECT COUNT(*) as totalCount FROM awt_quotation where 1=1 `;
+    if (quotationNumber) countSql += ` AND quotationNumber LIKE '%${quotationNumber}%'`;
+    if (assignedEngineer) countSql += ` AND assignedEngineer LIKE '%${assignedEngineer}%'`;
+
+    if (CustomerName) countSql += ` AND CustomerName LIKE '%${CustomerName}%'`;
+    if (spareId) countSql += ` AND spareId LIKE '%${spareId}%'`;
+    if (ModelNumber) countSql += ` AND ModelNumber LIKE '%${ModelNumber}%'`;
+    if (title) countSql += ` AND title LIKE '%${title}%'`;
+    if (quantity) countSql += ` AND quantity LIKE '%${quantity}%'`;
+    if (price) countSql += ` AND price LIKE '%${price}%'`;
+    if (ticket_no) countSql += ` AND ticketId LIKE '%${ticket_no}%'`;
+
+    const countResult = await pool.request().query(countSql);
+    const totalCount = countResult.recordset[0].totalCount;
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
+    return res.json({
+      encryptedData,
+      totalCount: totalCount,
+      page,
+      pageSize,
+    });
+
+
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred" });
+  }
+});
+
 
 app.post('/add_uniqsparepart', authenticateToken, async (req, res) => {
   try {
@@ -9963,7 +10108,7 @@ app.post(`/add_quotation`, authenticateToken, async (req, res) => {
   const Engineer = finaldata.Engineer;
   const date = new Date();
   const pool = await poolPromise;
-
+  const csp_code = finaldata.csp_code;
 
 
 
@@ -9971,7 +10116,6 @@ app.post(`/add_quotation`, authenticateToken, async (req, res) => {
 
   engineer_id = Engineer.join(',');
 
-  console.log(finaldata.data)
 
   const newdata = finaldata.data;
 
@@ -9994,9 +10138,9 @@ app.post(`/add_quotation`, authenticateToken, async (req, res) => {
 
     const query = `
     INSERT INTO awt_quotation
-    (ticketId, ticketdate, quotationNumber, CustomerName, state, city, assignedEngineer, status, customer_id, ModelNumber,  created_date, created_by)
+    (ticketId, ticketdate, quotationNumber, CustomerName, state, city, assignedEngineer, status, customer_id, ModelNumber,csp_code, created_date, created_by)
     VALUES
-    (@ticket_no, @date, @quotationNumber, @CustomerName, @state, @city, @assignedEngineer, @status, @customer_id, @ModelNumber,  @created_date, @created_by)
+    (@ticket_no, @date, @quotationNumber, @CustomerName, @state, @city, @assignedEngineer, @status, @customer_id, @ModelNumber,@csp_code,  @created_date, @created_by)
   `;
 
     const result = await pool.request()
@@ -10006,6 +10150,7 @@ app.post(`/add_quotation`, authenticateToken, async (req, res) => {
       .input('CustomerName', sql.NVarChar, Customername) // Replace with actual value
       .input('state', sql.NVarChar, state) // Replace with actual value
       .input('city', sql.NVarChar, city) // Replace with actual value
+      .input('csp_code', sql.NVarChar, csp_code) // Replace with actual value
       .input('assignedEngineer', sql.NVarChar, engineer_id) // Replace with actual value
       .input('status', sql.NVarChar, 'Pending') // Replace with actual value
       .input('customer_id', sql.NVarChar, customer_id)
@@ -10810,7 +10955,7 @@ app.post('/getcspusers', authenticateToken, async (req, res) => {
 });
 
 
-app.post('/getcallrecorddetails',authenticateToken, async (req, res) => {
+app.post('/getcallrecorddetails', authenticateToken, async (req, res) => {
   const { uuid, call_to_number, caller_id_number, start_stamp, call_id, billing_circle, customer_no_with_prefix } = req.body;
 
   const date = new Date();
@@ -11847,7 +11992,7 @@ app.post("/add_spareoutward", authenticateToken, async (req, res) => {
   }
 });
 
-app.post('/updategrnspares',authenticateToken, async (req, res) => {
+app.post('/updategrnspares', authenticateToken, async (req, res) => {
   const spareData = req.body; // Expecting an array of spare objects
 
   // console.log(req.body);
@@ -11899,7 +12044,7 @@ app.post('/updategrnspares',authenticateToken, async (req, res) => {
 });
 
 
-app.post('/updateissuespares',authenticateToken, async (req, res) => {
+app.post('/updateissuespares', authenticateToken, async (req, res) => {
   const spareData = req.body; // Expecting an array of spare objects
 
   if (!Array.isArray(spareData)) {
@@ -12085,8 +12230,7 @@ app.post("/getselctedspare", authenticateToken, async (req, res) => {
 
     // Parameterized query with a limit
     const sql = `
-   SELECT id, ModelNumber, title as article_code ,ProductCode as spareId, ItemDescription as article_description
-       from Spare_parts where id = '${article_id}' 
+   SELECT sp.id, sp.ModelNumber, sp.title as article_code ,sp.ProductCode as spareId, sp.ItemDescription as article_description , spt.Price_group as price FROM Spare_parts as sp left join Spare_partprice as spt on sp.title = spt.Item  WHERE sp.deleted = 0 and  id = '${article_id}' 
     `;
 
     const result = await pool.request()
@@ -12199,7 +12343,7 @@ app.post("/getoutwardlisting", authenticateToken, async (req, res) => {
 });
 
 
-app.post('/addgrnspares',authenticateToken, async (req, res) => {
+app.post('/addgrnspares', authenticateToken, async (req, res) => {
   const { spare_id, grn_no, created_by } = req.body; // Expecting required fields in the request body
 
   try {
@@ -12323,7 +12467,7 @@ app.post('/addgrnspares',authenticateToken, async (req, res) => {
     sql.close();
   }
 });
-app.post('/addissuespares',authenticateToken, async (req, res) => {
+app.post('/addissuespares', authenticateToken, async (req, res) => {
   const { spare_id, issue_no, created_by } = req.body; // Expecting required fields in the request body
 
   try {
@@ -13012,7 +13156,7 @@ app.post('/getmspusers', authenticateToken, async (req, res) => {
 
 
 
-app.post('/updatewarrentystate',authenticateToken, async (req, res) => {
+app.post('/updatewarrentystate', authenticateToken, async (req, res) => {
   const { warrenty, ticket_no } = req.body;
 
   try {
@@ -13043,7 +13187,7 @@ app.post('/updatewarrentystate',authenticateToken, async (req, res) => {
 });
 
 
-app.post("/approvequotation",authenticateToken, async (req, res) => {
+app.post("/approvequotation", authenticateToken, async (req, res) => {
   const { Qno, data } = req.body;
 
   try {
@@ -13088,7 +13232,7 @@ app.post("/approvequotation",authenticateToken, async (req, res) => {
 });
 
 
-app.post('/getcspformticket',authenticateToken, async (req, res) => {
+app.post('/getcspformticket', authenticateToken, async (req, res) => {
   const { ticket_no } = req.body;
 
   try {
@@ -13114,7 +13258,7 @@ app.post('/getcspformticket',authenticateToken, async (req, res) => {
 });
 
 
-app.get('/getdatafrompincode/:pincode',authenticateToken, async (req, res) => {
+app.get('/getdatafrompincode/:pincode', authenticateToken, async (req, res) => {
   const { pincode } = req.params;
 
   try {
@@ -13462,7 +13606,11 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
   { name: 'spare_doc_two', maxCount: 1 },
   { name: 'spare_doc_three', maxCount: 1 },
 ]), async (req, res) => {
-  let { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode, activitycode, com_id, warranty_status, spare_detail, ticket_no, user_id, serial_no, ModelNumber, sub_call_status } = req.body;
+  let { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode, activitycode, com_id, warranty_status, spare_detail, ticket_no, user_id, serial_no, ModelNumber, sub_call_status, allocation, serial_data } = req.body;
+
+
+  const data_serial = JSON.parse(serial_data);
+
 
   if (call_status == 'Completed') {
     sub_call_status = 'Partially'
@@ -13522,6 +13670,46 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
       .query('UPDATE complaint_ticket SET warranty_status = @warranty_status, group_code = @symptomcode, defect_type = @causecode, site_defect = @actioncode,activity_code = @activitycode,service_charges = @service_charges, call_status = @call_status,sub_call_status = @sub_call_status, call_type = @call_type, other_charges = @other_charge, spare_doc_path = @spare_doc_path, call_remark = @call_remark, spare_detail = @spare_detail , ModelNumber = @ModelNumber , serial_no = @serial_no WHERE id = @com_id');
 
     // Check if any rows were updated
+
+    const date = new Date()
+
+
+    if (allocation == 'Available') {
+      const {
+        customer_id,
+        customer_name,
+        ModelNumber,
+        address,
+        region,
+        state,
+        city,
+        area,
+        pincode,
+        customer_class
+      } = data_serial;
+
+
+      const insertQuery = `INSERT INTO awt_uniqueproductmaster (CustomerID, CustomerName, ModelNumber, serial_no, address, region, state, district, city, pincode, created_by, created_date, customer_classification) VALUES (@CustomerID, @CustomerName, @ModelNumber, @SerialNo, @Address, @Region, @State, @District, @City, @Pincode, @CreatedBy, GETDATE(), @CustomerClassification);`;
+
+      const result = await pool.request()
+        .input('CustomerID', sql.VarChar, customer_id)
+        .input('CustomerName', sql.VarChar, customer_name)
+        .input('ModelNumber', sql.VarChar, ModelNumber)
+        .input('SerialNo', sql.Int, serial_no)
+        .input('Address', sql.VarChar, address)
+        .input('Region', sql.VarChar, region)
+        .input('State', sql.VarChar, state)
+        .input('District', sql.VarChar, area) // Assuming area is district
+        .input('City', sql.VarChar, city)
+        .input('Pincode', sql.VarChar, pincode)
+        .input('CreatedBy', sql.VarChar, user_id) // Example for created_by
+        // .input('Createddate', sql.DateTime, date) // Example for created_by
+        .input('CustomerClassification', sql.VarChar, customer_class) // Example classification
+        .query(insertQuery)
+
+
+    }
+
     if (result.rowsAffected[0] > 0) {
 
 
@@ -13567,6 +13755,9 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
     } else {
       res.status(400).json({ message: 'Failed to update: No rows affected' });
     }
+
+
+
   } catch (error) {
     console.error('Database Query Error:', error.message, error.stack);
     res.status(500).json({ message: 'An error occurred during the update', error: error.message });
@@ -13697,9 +13888,7 @@ app.get("/getSpareParts_app/:model", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
     // Parameterized query
     const sql = `
-          SELECT id, ModelNumber, title as article_code ,ProductCode as spareId, ItemDescription as article_description
-          FROM Spare_parts
-          WHERE deleted = 0 AND ModelNumber = @model
+          SELECT sp.id, sp.ModelNumber, sp.title as article_code ,sp.ProductCode as spareId, sp.ItemDescription as article_description , spt.Price_group as price FROM Spare_parts as sp left join Spare_partprice as spt on sp.title = spt.Item  WHERE sp.deleted = 0  AND ModelNumber = @model
         `;
 
     const result = await pool.request()
@@ -13911,7 +14100,7 @@ app.post("/getcspdetails", authenticateToken, async (req, res) => {
 
 app.post("/updatevisitcount", authenticateToken, async (req, res) => {
 
-  let { count ,ticket_no } = req.body;
+  let { count, ticket_no } = req.body;
 
   try {
     // Use the poolPromise to get the connection pool

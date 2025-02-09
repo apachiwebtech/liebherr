@@ -136,6 +136,9 @@ import AddMspUser from './Components/Pages/Master/AddMspUser';
 import { EnquiryForm } from './Components/Pages/Master/EnquiryForm';
 import  EnquiryListing  from './Components/Pages/Master/EnquiryListing';
 import { EngineerStock } from './Components/App/Compo/EngineerStock';
+import { CspQuotationlist } from './Components/Pages/Master/CspQuotationlist';
+import CspQuotationEdit from './Components/Pages/Master/CspQuotationEdit';
+
 
 
 
@@ -310,6 +313,18 @@ const Router = createBrowserRouter([
       {
         path: "/csp/dashboard",
         element: <CspDashboard />
+      },
+      {
+        path: "/csp/quotationlist",
+        element: (
+          <Suspense fallback={<div>Loading data...</div>}>
+            <CspQuotationlist />
+          </Suspense>
+        )
+      },
+      {
+        path: "/csp/quotation/:qid",
+        element: <CspQuotationEdit />
       },
       
     ],
