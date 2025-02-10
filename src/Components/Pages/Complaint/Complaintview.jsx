@@ -82,7 +82,7 @@ export function Complaintview(params) {
     transportation: "",
     transportation_charge: "",
     visit_count: "",
-    csp : ""
+    csp: ""
   });
 
 
@@ -594,10 +594,28 @@ export function Complaintview(params) {
 
 
   const AddEngineer = () => {
+
+
     const selectedEngineer = engineer.find(
       (eng) => eng.id === parseInt(complaintview.engineer_id)
     );
-    console.log(selectedEngineer, "$$$")
+
+    const payload = {
+      ...selectedEngineer,
+      created_by,
+      complaintid :complaintview.ticket_no
+    };
+
+
+    // axios.post(`${Base_Url}/adduniqueengineer`, payload, {
+    //   headers: {
+    //     Authorization: token
+    //   }
+    // })
+    // .then((res) =>{
+    //   console.log("test")
+    // })
+
     if (
       selectedEngineer &&
       !addedEngineers.some((eng) => eng.id === selectedEngineer.id)
@@ -730,7 +748,7 @@ export function Complaintview(params) {
 
 
     // Combine spare parts, ticket number, and model number into a single array
-    const finaldata = { data: combinedSpareParts, ticket_no: complaintview.ticket_no, ModelNumber: complaintview.ModelNumber, customer_id: complaintview.customer_id, Customername: complaintview.customer_name, state: complaintview.state, city: complaintview.city,csp_code : complaintview.csp, Engineer: addedEngineers.map((item) => item.engineer_id) || complaintview.engineer_id };
+    const finaldata = { data: combinedSpareParts, ticket_no: complaintview.ticket_no, ModelNumber: complaintview.ModelNumber, customer_id: complaintview.customer_id, Customername: complaintview.customer_name, state: complaintview.state, city: complaintview.city, csp_code: complaintview.csp, Engineer: addedEngineers.map((item) => item.engineer_id) || complaintview.engineer_id };
 
     // Prepare the data object
     const data = {
@@ -1128,6 +1146,7 @@ export function Complaintview(params) {
         ? (complaintview.ticket_type === 'MAINTENANCE' || isValidValue(complaintview.defect_type)) &&
         (complaintview.ticket_type === 'MAINTENANCE' || isValidValue(complaintview.site_defect)) &&
         (complaintview.ticket_type === 'MAINTENANCE' || isValidValue(complaintview.activity_code)) &&
+        (complaintview.ticket_type === 'MAINTENANCE' || isValidValue(complaintview.visit_count)) &&
         (complaintview.ticket_type === 'MAINTENANCE' || groupstatusid) &&
         (complaintview.ticket_type === 'VISIT' || isValidValue(complaintview.serial_no)) && // Adjusted for ticket_type = 'Visit'
         isValidValue(complaintview.purchase_date) &&
@@ -1240,6 +1259,9 @@ export function Complaintview(params) {
         } else if (complaintview.ticket_type !== 'MAINTENANCE' && isInvalidValue(complaintview.activity_code)) {
           alert('Please select activity code');
         }
+        else if (complaintview.ticket_type !== 'MAINTENANCE' && isInvalidValue(complaintview.visit_count)) {
+          alert('Please select visit count');
+        }
         else if (complaintview.ticket_type !== 'VISIT' && isInvalidValue(complaintview.serial_no)) {
           alert('Please select the Serial No');
         } else if (!complaintview.purchase_date) {
@@ -1294,11 +1316,11 @@ export function Complaintview(params) {
     if (engtype == "Franchisee") {
 
       getEngineer();
-    } else if(engtype == "LHI") {
+    } else if (engtype == "LHI") {
 
       getLHIEngineer();
 
-    }else{
+    } else {
       setEngineer([])
     }
 

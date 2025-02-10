@@ -14119,6 +14119,41 @@ app.post("/updatevisitcount", authenticateToken, async (req, res) => {
   }
 });
 
+app.post("/adduniqueengineer", authenticateToken, async (req, res) => {
+  const { title, engineer_id, employee_code, created_by ,complaintid} = req.body;
+
+  const created_date = new Date();
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    // Parameterized query to prevent SQL injection
+    const sql = `
+      INSERT INTO awt_uniqueengineer (ticket_no,name, engineer_id, employee_code, created_date, created_by)
+      VALUES (@ticket_no,@title, @engineer_id, @employee_code, @created_date, @created_by)
+    `;
+
+    // Execute the query with parameterized inputs
+    const result = await pool
+      .request()
+      .input("title", title)
+      .input("engineer_id", engineer_id)
+      .input("employee_code", employee_code)
+      .input("ticket_no", complaintid)
+      .input("created_date", created_date)
+      .input("created_by", created_by)
+      .query(sql);
+
+    // Return a success message or other relevant data
+    return res.json({ message: "Engineer added successfully", rowsAffected: result.rowsAffected });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+
 
 
 

@@ -247,131 +247,6 @@ export function Registercomplaint(params) {
 
 
 
-  //Validation
-
-  // const validateForm = () => {
-  //   let isValid = true;
-  //   const newErrors = { ...errors };
-
-  //   // if (!value.complaint_date) {
-  //   //     isValid = false;
-  //   //     newErrors.complaint_date = "Date is required";
-  //   // }
-  //   if (!value.customer_name && value.ticket_type !== 'VISIT' && value.ticket_type !== 'HELPDESK') {
-  //     isValid = false;
-  //     newErrors.customer_name = "Name is required";
-  //   }
-
-  //   // if (!value.serial && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
-  //   //   isValid = false;
-  //   //   newErrors.serial = "Serial No is required";
-  //   // }
-  //   // if (!value.model && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
-  //   //   isValid = false;
-  //   //   newErrors.model = "Model is required";
-  //   // }
-  //   // if (!purchase_data && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
-  //   //   isValid = false;
-  //   //   newErrors.purchase_date = "Date is required";
-  //   // }
-  //   // if (!warranty_status_data && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
-  //   //   isValid = false;
-  //   //   newErrors.warrenty_status = "Status is required";
-  //   // }
-  //   if (!value.salutation && value.ticket_type !== 'VISIT' && value.ticket_type !== 'HELPDESK') {
-  //     isValid = false;
-  //     newErrors.salutation = "Salutation is required";
-  //   }
-  //   if (!value.contact_person && value.ticket_type !== 'VISIT' && value.ticket_type !== 'HELPDESK') {
-  //     isValid = false;
-  //     newErrors.contact_person = "Contact Person is required";
-  //   }
-  //   const mobileRegex = /^\d{10}$/; // Matches exactly 10 digits
-
-  //   const validateMobile = (mobile) => mobileRegex.test(mobile);
-
-  //   if (!value.mobile && value.ticket_type !== 'VISIT' && value.ticket_type !== 'HELPDESK') {
-  //     isValid = false;
-  //     newErrors.mobile = "Mobile is required";
-  //   } else if (value.mobile && !validateMobile(value.mobile)) {
-  //     isValid = false;
-  //     newErrors.mobile = "Please enter a valid 10-digit mobile number.";
-  //   }
-
-  //   if (value.alt_mobile && !validateMobile(value.alt_mobile)) {
-  //     newErrors.alt_mobile = "Please enter a valid 10-digit mobile number.";
-  //   }
-
-  //   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-  //   if (value.email && !emailRegex.test(value.email)) {
-  //     newErrors.email = "Email id is not valid";
-  //   }
-
-
-  //   if (!value.address && value.ticket_type !== 'VISIT' && value.ticket_type !== 'HELPDESK') {
-  //     isValid = false;
-  //     newErrors.address = "Address is required";
-  //   }
-  //   if (!value.pincode && value.ticket_type !== 'VISIT' && value.ticket_type !== 'HELPDESK') {
-  //     isValid = false;
-  //     newErrors.pincode = "Pincode is required";
-  //   }
-  //   if (!value.mode_of_contact && value.ticket_type !== 'VISIT' && value.ticket_type !== 'HELPDESK') {
-  //     isValid = false;
-  //     newErrors.mode_of_contact = "This is required";
-  //   }
-  //   if (!value.ticket_type && value.ticket_type !== 'VISIT' && value.ticket_type !== 'HELPDESK') {
-  //     isValid = false;
-  //     newErrors.ticket_type = "Ticket is required";
-  //   }
-  //   if (!value.cust_type && value.ticket_type !== 'VISIT' && value.ticket_type !== 'HELPDESK') {
-  //     isValid = false;
-  //     newErrors.cust_type = "Type is required";
-  //   }
-  //   // if (!value.requested_by && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
-  //   //   isValid = false;
-  //   //   newErrors.requested_by = "This is required";
-  //   // }
-  //   // if (!value.requested_email && value.ticket_type !== 'Visit' && value.ticket_type !== 'Helpdesk') {
-  //   //   isValid = false;
-  //   //   newErrors.requested_email = "This is required";
-  //   // }
-  //   if (value.requested_mobile && !validateMobile(value.requested_mobile)) {
-  //     isValid = false;
-  //     newErrors.requested_mobile = "Please enter a valid 10-digit mobile number.";
-  //   }
-
-  //   if (!value.classification && value.ticket_type !== 'VISIT' && value.ticket_type !== 'HELPDESK') {
-  //     isValid = false;
-  //     newErrors.classification = "Classification is required";
-  //   }
-  //   if (!value.specification) {
-  //     isValid = false;
-  //     newErrors.specification = "Description is required";
-  //   }
-
-  //   // if (!value.additional_remarks && (value.ticket_type == 'VISIT' || value.ticket_type == 'HELPDESK')) {
-  //   //   isValid = false;
-  //   //   newErrors.additional_remarks = "Remark is required";
-  //   // }
-
-  //   // if (!value.Priority) {
-  //   //     isValid = false;
-  //   //     newErrors.Priority = "Priority is required";
-  //   // }
-
-
-
-
-  //   setErrors(newErrors);
-  //   setTimeout(() => {
-  //     setErrors("")
-  //   }, 5000);
-  //   return isValid;
-  // }
-
-
   const validateForm = () => {
     let isValid = true;
     const newErrors = { ...errors };
@@ -470,12 +345,7 @@ export function Registercomplaint(params) {
   const [newAddress, setNewAddress] = useState('');
 
 
-  // Sample existing addresses (you can fetch this from your API)
-  const existingAddresses = [
-    "Address 1",
-    "Address 2",
-    "Address 3",
-  ];
+
 
   // Function to handle the address change
   const handleAddressChange = (e) => {
@@ -1125,7 +995,9 @@ export function Registercomplaint(params) {
         fetchPincodes(inputValue);
         break;
       case "pincode":
-        fetchlocations(inputValue);
+        if (inputValue.length === 6) {
+          fetchlocations(inputValue); // Fetch locations only for 6-digit PIN code
+        }
         setValue(prevState => ({
           ...prevState,
           city: "",
@@ -1289,23 +1161,25 @@ export function Registercomplaint(params) {
 
   const fetchfrommobile = async (mobile) => {
 
-    setValue({
-      ...value,
-      salutation: "",
-      customer_name:  "",
-      contact_person : '',
-      cust_type:  "",
-      alt_mobile:  "",
-      email:  "",
-      address:  "",
-      customer_id:  "",
-      pincode :  '',
-      csp : '',
-      msp : '',
-      state :'',
-      city : '',
-      area : '',
-    })
+
+
+    // setValue({
+    //   ...value,
+    //   salutation: "",
+    //   customer_name:  "",
+    //   contact_person : '',
+    //   cust_type:  "",
+    //   alt_mobile:  "",
+    //   email:  "",
+    //   address:  "",
+    //   customer_id:  "",
+    //   pincode :  '',
+    //   csp : '',
+    //   msp : '',
+    //   state :'',
+    //   city : '',
+    //   area : '',
+    // })
     
     try {
       const response = await axiosInstance.get(

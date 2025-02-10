@@ -1128,6 +1128,7 @@ export function CspTicketView(params) {
         ? (complaintview.ticket_type === 'MAINTENANCE' || isValidValue(complaintview.defect_type)) &&
         (complaintview.ticket_type === 'MAINTENANCE' || isValidValue(complaintview.site_defect)) &&
         (complaintview.ticket_type === 'MAINTENANCE' || isValidValue(complaintview.activity_code)) &&
+        (complaintview.ticket_type === 'MAINTENANCE' || isValidValue(complaintview.visit_count)) &&
         (complaintview.ticket_type === 'MAINTENANCE' || groupstatusid) &&
         (complaintview.ticket_type === 'VISIT' || isValidValue(complaintview.serial_no)) && // Adjusted for ticket_type = 'Visit'
         isValidValue(complaintview.purchase_date) &&
@@ -1239,6 +1240,9 @@ export function CspTicketView(params) {
           alert('Please select the site defect');
         } else if (complaintview.ticket_type !== 'MAINTENANCE' && isInvalidValue(complaintview.activity_code)) {
           alert('Please select activity code');
+        }
+        else if (complaintview.ticket_type !== 'MAINTENANCE' && isInvalidValue(complaintview.visit_count)) {
+          alert('Please select visit count');
         }
         else if (complaintview.ticket_type !== 'VISIT' && isInvalidValue(complaintview.serial_no)) {
           alert('Please select the Serial No');

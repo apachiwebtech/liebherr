@@ -121,7 +121,7 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
 
 
     function numberToWords(num) {
-        if (num === 0) return "Zero";
+        if (num === 0) return "";
     
         const belowTwenty = [
             "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten",
@@ -631,7 +631,7 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
                             <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000', fontWeight: 1600 }}>Total(in Words)</Text>
                         </View>
                         <View style={[styles.tableCol14, { width: '80%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, color: '#000', fontWeight: 1600 , paddingLeft :"5px" }}>{numberToWords(totalPrice)} {numberToWords(totalPrice) == 'Zero' ? null : "Rupees Only."}</Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, color: '#000', fontWeight: 1600 , paddingLeft :"5px" }}>{numberToWords(totalPrice)} {numberToWords(totalPrice) == '' ? null : "Rupees Only."}</Text>
 
                         </View>
 
