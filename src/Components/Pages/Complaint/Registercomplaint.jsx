@@ -1802,7 +1802,7 @@ export function Registercomplaint(params) {
                     <div className="col-md-4">
                       <div className="mb-3">
                         <label className="form-label">Customer Classification <span className="text-danger">*</span></label>
-                        <select className="form-control" onChange={onHandleChange} value={value.classification} name="classification" disabled={value.serial == undefined || value.serial == '' ? false : true}>
+                        <select className="form-control" onChange={onHandleChange} value={value.classification} name="classification" disabled={!value.classification || value.serial == undefined || value.serial == ''  ? false : true}>
                           <option value="">Select</option>
                           <option value="Consumer">Consumer</option>
                           <option value="Import">Import</option>

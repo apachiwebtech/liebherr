@@ -36,6 +36,23 @@ function Details() {
     spare_doc_three: null,
   });
 
+
+  const [checklist, setChecklist] = useState({
+    picking_damages: "No",
+    product_damages: "No",
+    missing_part: "No",
+    leg_adjustment: "No",
+    water_connection: "No",
+    abnormal_noise: "No",
+    ventilation_top: "No",
+    ventilation_bottom: "No",
+    ventilation_back: "No",
+    voltage_supply: "No",
+    earthing: "No",
+    gas_charges : 'No',
+    transpotation  :"No"
+  });
+
   const handleFileChange = (e) => {
     const { name, files } = e.target;
     setFiles((prevState) => ({
@@ -86,6 +103,15 @@ function Details() {
 
 
   }
+  const handleCheckChange = (e) => {
+    const { name, checked } = e.target;
+    setChecklist((prevState) => ({
+      ...prevState,
+      [name]: checked ? "Yes" : "No",
+    }));
+  };
+
+
 
 
 
@@ -210,60 +236,79 @@ function Details() {
 
     if (validateForm()) {
 
+      if(Value.otps == data.totp){
 
-      const formData = new FormData();
+        const formData = new FormData();
 
-      formData.append('otp', Value.otps);
-      formData.append('symptomcode', Value.symptomcode);
-      formData.append('causecode', Value.causecode);
-      formData.append('actioncode', Value.actioncode);
-      formData.append('activitycode', Value.activity_code);
-      formData.append('service_charges', Value.service_charges);
-      formData.append('call_status', Value.call_status);
-      formData.append('call_type', Value.call_type);
-      formData.append('other_charge', Value.other_charge);
-      formData.append('warranty_status', Value.warranty_status);
-      formData.append('com_id', data.id);
-      formData.append('call_remark', Value.call_remark);
-      formData.append('ticket_no', data.ticket_no);
-      formData.append('allocation', allocation);
-      formData.append('ModelNumber', modelno || data.ModelNumber);
-      formData.append('serial_no', serial_no || data.serial_no);
-      formData.append('user_id', localStorage.getItem('userid'));
-      formData.append('serial_data' , JSON.stringify(data))
-      if (Value.spare_required) {
-        formData.append('spare_detail', Value.spare_detail);
-      }
-      // Append the file if it exists
-
-
-      if (files.spare_doc) {
-        formData.append('spare_doc', files.spare_doc);
-      }
-
-      if (files.spare_doc_two) {
-        formData.append('spare_doc_two', files.spare_doc_two);
-      }
-
-      if (files.spare_doc_three) {
-        formData.append('spare_doc_three', files.spare_doc_three);
-      }
-
-
-
-      axios.post(`${Base_Url}/updatecomplaint`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: token,
-        },
-      })
-        .then((res) => {
-          console.log(res);
-          navigate('/mobapp/dash');
+        formData.append('otp', Value.otps);
+        formData.append('symptomcode', Value.symptomcode);
+        formData.append('causecode', Value.causecode);
+        formData.append('actioncode', Value.actioncode);
+        formData.append('activitycode', Value.activity_code);
+        formData.append('service_charges', Value.service_charges);
+        formData.append('call_status', Value.call_status);
+        formData.append('call_type', Value.call_type);
+        formData.append('other_charge', Value.other_charge);
+        formData.append('warranty_status', Value.warranty_status);
+        formData.append('com_id', data.id);
+        formData.append('call_remark', Value.call_remark);
+        formData.append('ticket_no', data.ticket_no);
+        formData.append('allocation', allocation);
+        formData.append('ModelNumber', modelno || data.ModelNumber);
+        formData.append('serial_no', serial_no || data.serial_no);
+        formData.append('user_id', localStorage.getItem('userid'));
+        formData.append('serial_data' , JSON.stringify(data));
+        formData.append('picking_damages' , checklist.picking_damages );
+        formData.append('product_damages' , checklist.product_damages );
+        formData.append('missing_part' , checklist.missing_part );
+        formData.append('leg_adjustment' , checklist.leg_adjustment );
+        formData.append('water_connection' , checklist.water_connection );
+        formData.append('abnormal_noise' , checklist.abnormal_noise );
+        formData.append('ventilation_top' , checklist.ventilation_top );
+        formData.append('ventilation_bottom' , checklist.ventilation_bottom );
+        formData.append('ventilation_back' , checklist.ventilation_back );
+        formData.append('voltage_supply' , checklist.voltage_supply );
+        formData.append('earthing' , checklist.earthing );
+        formData.append('gas_charges' , checklist.gas_charges );
+        formData.append('transpotation' , checklist.transpotation );
+        if (Value.spare_required) {
+          formData.append('spare_detail', Value.spare_detail);
+        }
+        // Append the file if it exists
+  
+  
+        if (files.spare_doc) {
+          formData.append('spare_doc', files.spare_doc);
+        }
+  
+        if (files.spare_doc_two) {
+          formData.append('spare_doc_two', files.spare_doc_two);
+        }
+  
+        if (files.spare_doc_three) {
+          formData.append('spare_doc_three', files.spare_doc_three);
+        }
+  
+  
+  
+        axios.post(`${Base_Url}/updatecomplaint`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: token,
+          },
         })
-        .catch((err) => {
-          console.log(err);
-        });
+          .then((res) => {
+            console.log(res);
+            navigate('/mobapp/dash');
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      }else{
+        alert("Wrong Otp")
+      }
+
+
 
 
     } else {
@@ -305,6 +350,24 @@ function Details() {
             call_status: res.data.data[0].call_status,
 
           })
+
+          setChecklist({
+            picking_damages: res.data.data[0].picking_damages,
+            product_damages:res.data.data[0].product_damages,
+            missing_part:res.data.data[0].missing_part,
+            leg_adjustment:res.data.data[0].leg_adjustment,
+            water_connection:res.data.data[0].water_connection,
+            abnormal_noise:res.data.data[0].abnormal_noise,
+            ventilation_top:res.data.data[0].ventilation_top,
+            ventilation_bottom:res.data.data[0].ventilation_bottom,
+            ventilation_back:res.data.data[0].ventilation_back,
+            voltage_supply:res.data.data[0].voltage_supply,
+            earthing:res.data.data[0].earthing,
+            gas_charges :res.data.data[0].gascheck,
+            transpotation : res.data.data[0].transportcheck
+          })
+
+
           getsparelistapp(res.data.data[0].ticket_no)
 
           console.log(res.data.data[0].call_status);
@@ -648,10 +711,13 @@ function Details() {
       }
       );
 
-      if (response.data.length === 0) {
+
+
+      if (!response.data || response.data.length === 0) {
         alert("This serial does not exist.");
         setserial(''); // Resetting serial number to 0
         setModelNumber(''); // Clearing the model number
+        return;
       }
 
       if (response.data && response.data[0] && response.data[0].ModelNumber) {
@@ -829,7 +895,7 @@ function Details() {
 
                   <div class="mb-3">
                     <label for="Country" class="form-label">Defect Group Code</label>
-                    <select value={Value.symptomcode} id="country" onChange={handleChange} name="symptomcode" class="form-select" aria-label=".form-select-lg example">
+                    <select value={Value.symptomcode} id="country" onChange={handleChange} name="symptomcode" class="form-select" aria-label=".form-select-lg example" disabled = {data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false}>
                       <option value=''>Select Defect Group Code</option>
                       {symptomsode.map((item) => {
                         return (
@@ -842,7 +908,7 @@ function Details() {
 
                   <div class="mb-3">
                     <label for="Region" class="form-label">Type of Defect Code</label>
-                    <select id="Region" value={Value.causecode} onChange={handleChange} name="causecode" class="form-select" aria-label=".form-select-lg example">
+                    <select id="Region" value={Value.causecode} onChange={handleChange} name="causecode" class="form-select" aria-label=".form-select-lg example" disabled = {data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false}>
                       <option value="">Select Type of Defect Code</option>
                       {causecode.map((item) => {
                         return (
@@ -855,7 +921,7 @@ function Details() {
 
                   <div class="mb-3">
                     <label for="geostate" class="form-label">Site Defect Code</label>
-                    <select id="geostate" value={Value.actioncode} onChange={handleChange} name="actioncode" class="form-select" aria-label=".form-select-lg example">
+                    <select id="geostate" value={Value.actioncode} onChange={handleChange} name="actioncode" class="form-select" aria-label=".form-select-lg example" disabled = {data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false}>
                       <option value="">Select Site Defect Code</option>
                       {actioncode.map((item) => {
                         return (
@@ -867,7 +933,7 @@ function Details() {
                   </div>
                   <div class="mb-3">
                     <label for="geostate" class="form-label">Activity Code</label>
-                    <select id="geostate" value={Value.activity_code} onChange={handleChange} name="activity_code" class="form-select" aria-label=".form-select-lg example">
+                    <select id="geostate" value={Value.activity_code} onChange={handleChange} name="activity_code" class="form-select" aria-label=".form-select-lg example" disabled = {data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false}>
                       <option value="">Select Site Defect Code</option>
                       {activity.map((item) => (
                         <option key={item.id} value={item.code}>
@@ -930,25 +996,25 @@ function Details() {
                   <div class="mb-3">
                     <div class="form-group">
                       <label for="val-actioncode">Invoice Upload</label>
-                      <input type="file" class="form-control" name="spare_doc" id="spare_doc" onChange={handleFileChange} />
+                      <input type="file" class="form-control" name="spare_doc" id="spare_doc" onChange={handleFileChange} disabled = {data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false}/>
                     </div>
                   </div>
                   <div class="mb-3">
                     <div class="form-group">
                       <label for="val-actioncode">Serial No. Upload</label>
-                      <input type="file" class="form-control" name="spare_doc_two" id="spare_doc_two" onChange={handleFileChange} />
+                      <input type="file" class="form-control" name="spare_doc_two" id="spare_doc_two" onChange={handleFileChange} disabled = {data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false} />
                     </div>
                   </div>
                   <div class="mb-3">
                     <div class="form-group">
                       <label for="val-actioncode">Image & Video Upload</label>
-                      <input type="file" class="form-control" name="spare_doc_three" id="spare_doc_three" onChange={handleFileChange} />
+                      <input type="file" class="form-control" name="spare_doc_three" id="spare_doc_three" onChange={handleFileChange} disabled = {data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false} />
                     </div>
                   </div>
 
                   <div class="mb-3">
                     <div class="form-group">
-                      <input type="checkbox" onChange={handleChange} name="spare_required" id="spare-required" /> <label>Select Spare</label>
+                      <input type="checkbox" onChange={handleChange} name="spare_required" id="spare-required"  disabled = {data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false}/> <label>Select Spare</label>
                     </div>
                   </div>
                   {spare ? (
@@ -998,6 +1064,7 @@ function Details() {
                                 <button
                                   className="btn btn-sm btn-danger"
                                   style={{ padding: "0.2rem 0.5rem" }}
+                                  disabled = {data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false}
                                   onClick={() => handleRemoveSparePart(item.id)}
                                 >
                                   ✖
@@ -1041,10 +1108,65 @@ function Details() {
                     </div>
                     <div className='row mt-2'>
                       <div class="form-group col-6">
-                        <input type="checkbox" onChange={handleChange} name="gas_chargs" /> <label>Gas Charges</label>
+                        <input type="checkbox"  onChange={handleCheckChange} name="gas_charges" checked={checklist.gas_charges == 'Yes' ? true  :false} disabled = {data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false}/> <label>Gas Charges</label>
                       </div>
                       <div class="form-group col-6">
-                        <input type="checkbox" onChange={handleChange} name="transpotation" /> <label>Transpotation</label>
+                        <input type="checkbox" onChange={handleCheckChange} name="transpotation" checked={checklist.transpotation == 'Yes' ? true  :false} disabled = {data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false}/> <label>Transpotation</label>
+                      </div>
+                    </div>
+
+                  </div>
+
+
+
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 mt-2">
+              <div class="col-12">
+                <div class="bg-light mb-3 p-2 rounded">
+                  <div class="mb-3">
+                    <div class="form-group">
+                      <label for="val-spare_remark"><strong>Check List</strong></label><span style={{width : '10px' , height : "10px" , border :"1px solid black"}}></span>
+                    </div>
+                    <div className='row mt-2'>
+                      <div class="form-group col-6">
+                        <input type="checkbox" onChange={handleCheckChange} name="picking_damages" checked={checklist.picking_damages == 'Yes' ? true  :false} disabled = {data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false}/> <label>Any Picking Damages</label>
+                      </div>
+                      <div class="form-group col-6">
+                        <input type="checkbox" onChange={handleCheckChange} name="product_damages" checked={checklist.product_damages == 'Yes' ? true  :false} disabled = {data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false}/> <label>Any Product Damages </label>
+                      </div>
+                      <div class="form-group col-6">
+                        <input type="checkbox" onChange={handleCheckChange} name="missing_part" checked={checklist.missing_part == 'Yes' ? true  :false} disabled = {data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false}/> <label>Any Missing Parts</label>
+                      </div>
+                      <div class="form-group col-6">
+                        <input type="checkbox" onChange={handleCheckChange} name="leg_adjustment" checked={checklist.leg_adjustment == 'Yes' ? true  :false} disabled = {data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false}/> <label>Leg Adjustment Done</label>
+                      </div>
+                      <div class="form-group col-6">
+                        <input type="checkbox" onChange={handleCheckChange} name="water_connection"  checked={checklist.water_connection == 'Yes' ? true  :false} disabled = {data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false}/> <label>Water Connection</label>
+                      </div>
+                      <div class="form-group col-6">
+                        <input type="checkbox" onChange={handleCheckChange} name="abnormal_noise" checked={checklist.abnormal_noise == 'Yes' ? true  :false} disabled = {data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false}/> <label>Any abnormal noise </label>
+                      </div>
+                      <div class="form-group col-6">
+                        <input type="checkbox" onChange={handleCheckChange} name="ventilation_top" checked={checklist.ventilation_top == 'Yes' ? true  :false} disabled = {data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false}/> <label>Ventilation Top</label>
+                      </div>
+                      <div class="form-group col-6">
+                        <input type="checkbox" onChange={handleCheckChange} name="ventilation_bottom" checked={checklist.ventilation_bottom == 'Yes' ? true  :false} disabled = {data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false}/> <label>Ventilation Bottom
+                        </label>
+                      </div>
+                      <div class="form-group col-6">
+                        <input type="checkbox" onChange={handleCheckChange} name="ventilation_back" checked={checklist.ventilation_back == 'Yes' ? true  :false} disabled = {data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false}/> <label>Ventilation Back
+                        </label>
+                      </div>
+                      <div class="form-group col-6">
+                        <input type="checkbox" onChange={handleCheckChange} name="voltage_supply" checked={checklist.voltage_supply == 'Yes' ? true  :false} disabled = {data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false}/> <label>Voltage Supply OK
+                        </label>
+                      </div>
+                      <div class="form-group col-6">
+                        <input type="checkbox" onChange={handleCheckChange} name="earthing" checked={checklist.earthing == 'Yes' ? true  :false} disabled = {data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false}/> <label>Earthing Proper
+                        </label>
                       </div>
                     </div>
 
@@ -1062,14 +1184,14 @@ function Details() {
                   <div class="mb-3">
                     <div class="form-group">
                       <label for="val-spare_remark"><strong>Additional Remarks</strong></label>
-                      <p id="val_cc_remark" style={{ marginTop: '7px' }} >{remark.remark}</p>
+                      <p id="val_cc_remark" style={{ marginTop: '7px' }} >{data.call_remark}</p>
                     </div>
                   </div>
 
                   <div class="mb-3">
                     <div class="form-group">
                       <label for="val-spare_remark">Technician Feedback<span className='text-danger'>*</span></label>
-                      <textarea class="form-control" onChange={handleChange} name="call_remark" id="call_remark" rows="3"></textarea>
+                      <textarea class="form-control" onChange={handleChange} name="call_remark" id="call_remark" rows="3" disabled = {data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false}></textarea>
                       {errors.call_remark && <span className='text-danger'>{errors.call_remark}</span>}
                     </div>
                   </div>
@@ -1079,7 +1201,7 @@ function Details() {
                     <div class="mb-3">
                       <div class="form-group">
                         <label for="val-spare_status">Call Status</label>
-                        <select required name="call_status" value={Value.call_status} onChange={handleChange} id="val-spare_status" class="form-control select2-hidden-accessible" >
+                        <select required name="call_status" value={Value.call_status} onChange={handleChange} id="val-spare_status" class="form-control select2-hidden-accessible" disabled = {data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false}>
                           <option value="2">Select Status</option>
 
 
@@ -1097,8 +1219,8 @@ function Details() {
 
                       {Value.call_status == 'Completed' && <div class="mb-3">
                         <div class="form-group">
-                          <label for="val-actioncode">Enter OTP - {otp}</label>
-                          <input type="text" onChange={handleChange} value={Value.otps} class="form-control" name="otps" id="otps" />
+                          <label for="val-actioncode">Enter OTP - {data.totp}</label>
+                          <input type="text" onChange={handleChange} value={Value.otps} class="form-control" name="otps" id="otps" disabled = {data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false}/>
                           {errors.otps && <span className='text-danger'>{errors.otps}</span>}
                         </div>
                       </div>}
@@ -1108,7 +1230,7 @@ function Details() {
                     </>
 
                     <div class="mb-3">
-                      <button type="submit" name="spare_submit" class="btn btn-primary float-right">Submit</button>
+                      <button type="submit" name="spare_submit" class="btn btn-primary float-right" disabled = {data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false}>Submit</button>
                     </div>
                   </>
 

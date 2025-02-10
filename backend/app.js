@@ -3459,7 +3459,7 @@ app.get("/getcomplaintview/:complaintid", authenticateToken, async (req, res) =>
 });
 
 app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
-  const { ticket_no, note, created_by, call_status, call_status_id, sub_call_status, group_code, site_defect, defect_type, activity_code, serial_no, ModelNumber, purchase_date, warrenty_status, engineerdata, engineername, ticket_type, call_city, ticket_start_date, mandaysprice, gas_chargs, gas_transportation, transportation_charge ,visit_count } = req.body;
+  const { ticket_no, note, created_by, call_status, call_status_id, sub_call_status, group_code, site_defect, defect_type, activity_code, serial_no, ModelNumber, purchase_date, warrenty_status, engineerdata, engineername, ticket_type, call_city, ticket_start_date, mandaysprice, gas_chargs, gas_transportation, transportation_charge, visit_count } = req.body;
 
   console.log(mandaysprice, "RR")
 
@@ -4140,6 +4140,8 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
     , ticket_id, classification, priority, callType, requested_by, requested_email, requested_mobile, msp, csp, sales_partner, sales_partner2, salutation, mwhatsapp, awhatsapp, class_city, mother_branch
   } = req.body;
 
+  const otp = Math.floor(1000 + Math.random() * 9000);
+
 
   const pool = await poolPromise;
 
@@ -4349,13 +4351,13 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
           ticket_no, ticket_date, customer_name, customer_mobile, customer_email, address,
           state, city, area, pincode, customer_id, ModelNumber, ticket_type, call_type,
           call_status, warranty_status, invoice_date, call_charges, mode_of_contact,
-          contact_person,  created_date, created_by,  purchase_date, serial_no, child_service_partner, sevice_partner, specification ,customer_class,call_priority,requested_mobile,requested_email,requested_by,msp,csp,sales_partner,sales_partner2,call_remark,salutation,alt_mobile,mwhatsapp,awhatsapp,class_city,mother_branch,call_status_id
+          contact_person,  created_date, created_by,  purchase_date, serial_no, child_service_partner, sevice_partner, specification ,customer_class,call_priority,requested_mobile,requested_email,requested_by,msp,csp,sales_partner,sales_partner2,call_remark,salutation,alt_mobile,mwhatsapp,awhatsapp,class_city,mother_branch,call_status_id ,totp
         )
         VALUES (
           @ticket_no, @complaint_date, @customer_name, @mobile, @email, @address,
           @state, @city, @area, @pincode, @customer_id, @model, @ticket_type, @cust_type,
           'Open', @warranty_status, @invoice_date, @call_charge, @mode_of_contact,
-          @contact_person,  @formattedDate, @created_by,  @purchase_date, @serial, @child_service_partner, @master_service_partner, @specification ,@classification , @priority ,@requested_mobile,@requested_email,@requested_by,@msp,@csp,@sales_partner,@sales_partner2,@call_remark,@salutation,@alt_mobile,@mwhatsapp,@awhatsapp,@class_city,@mother_branch,'1'
+          @contact_person,  @formattedDate, @created_by,  @purchase_date, @serial, @child_service_partner, @master_service_partner, @specification ,@classification , @priority ,@requested_mobile,@requested_email,@requested_by,@msp,@csp,@sales_partner,@sales_partner2,@call_remark,@salutation,@alt_mobile,@mwhatsapp,@awhatsapp,@class_city,@mother_branch,'1',@totp
         )
       `;
       } else {
@@ -4405,7 +4407,8 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
           mwhatsapp = @mwhatsapp,
           awhatsapp = @awhatsapp,
           class_city = @class_city,
-          mother_branch = @mother_branch
+          mother_branch = @mother_branch,
+          totp = @totp
           WHERE
           id = @ticket_id
       `;
@@ -4458,6 +4461,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
         .input('mwhatsapp', mwhatsapp)
         .input('class_city', class_city)
         .input('mother_branch', mother_branch)
+        .input('totp', otp)
         .query(complaintSQL);
 
 
@@ -4489,7 +4493,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
                   {
                     msisdn: mobile,
                     message:
-                      `Dear Customer, Greetings from Liebherr! Your Ticket Number is ${ticket_no}. Please share OTP 12345 with the engineer once the ticket is resolved.`,
+                      `Dear Customer, Greetings from Liebherr! Your Ticket Number is ${ticket_no}. Please share OTP ${otp} with the engineer once the ticket is resolved.`,
                     customerReferenceId: "1",
                   },
                 ],
@@ -9520,6 +9524,68 @@ app.get("/getmultiplelocation/:pincode/:classification/:ticket_type", authentica
 
 
 
+// app.get("/getserial/:serial", authenticateToken, async (req, res) => {
+//   const { serial } = req.params;
+
+//   try {
+
+//     const pool = await poolPromise;
+
+//     const sql = `	SELECT
+//     asl.*,
+//     spm.SalesPartner,
+//     spm.SalesAM,
+//     CASE
+//         WHEN asl.CountryofOrigin = 'India' THEN 'Consumer'
+//         ELSE 'Import'
+//     END AS customerClassification
+// FROM
+//     awt_serial_list AS asl
+// LEFT JOIN
+//     SalesPartnerMaster AS spm
+// ON
+//     asl.PrimarySalesDealer = spm.BPcode
+// WHERE
+//     asl.serial_no = @serial;
+// `
+
+//     const result = await pool.request()
+//       .input('serial', serial)
+//       .query(sql);
+
+
+
+//     const fallbackSql = `SELECT ac.salutation , ac.customer_fname ,ac.customer_lname , ac.customer_type , ac.customer_classification , ac.mobileno , ac.alt_mobileno,ac.email ,
+// au.CustomerID , au.ModelNumber , au.address , au.region , au.state ,au.district , au.city , au.pincode ,au.purchase_date,au.SalesDealer as SalesPartner,au.serial_no , au.SubDealer as SalesAM ,au.ModelName as ItemNumber ,au.customer_classification as customerClassification
+// FROM awt_uniqueproductmaster as au
+// left join awt_customer as ac on ac.customer_id = au.CustomerID
+// WHERE au.serial_no = @serial order by au.id desc`;
+
+//     const fallbackResult = await pool.request()
+//       .input('serial', serial)
+//       .query(fallbackSql);
+
+//     if (fallbackResult.recordset.length !== 0) {
+
+//       return res.json(fallbackResult.recordset);
+
+//     } else {
+
+//       return res.json(result.recordset);
+
+//     }
+
+
+
+
+
+//   } catch (err) {
+//     console.error("Database error:", err);
+//     return res.status(500).json({ error: "Database error occurred", details: err.message });
+//   }
+// });
+
+
 app.get("/getserial/:serial", authenticateToken, async (req, res) => {
   const { serial } = req.params;
 
@@ -9527,23 +9593,8 @@ app.get("/getserial/:serial", authenticateToken, async (req, res) => {
 
     const pool = await poolPromise;
 
-    const sql = `	SELECT
-    asl.*,
-    spm.SalesPartner,
-    spm.SalesAM,
-    CASE
-        WHEN asl.CountryofOrigin = 'India' THEN 'Consumer'
-        ELSE 'Import'
-    END AS customerClassification
-FROM
-    awt_serial_list AS asl
-LEFT JOIN
-    SalesPartnerMaster AS spm
-ON
-    asl.PrimarySalesDealer = spm.BPcode
-WHERE
-    asl.serial_no = @serial;
-`
+
+ const sql = `select serial_no , DESCRIPTION as ModelNumber , ACCOUNT as customer_id , ALLOCATIONSTATUS as allocation , CUSTOMERCLASSIFICATION as customerClassification ,spm.SalesPartner ,spm.SalesAM from LHI_Licare_data as lhi LEFT JOIN SalesPartnerMaster AS spm  ON lhi.DealerCode = spm.BPcode where serial_no = @serial`
 
     const result = await pool.request()
       .input('serial', serial)
@@ -9551,8 +9602,8 @@ WHERE
 
 
 
-    const fallbackSql = `SELECT ac.salutation , ac.customer_fname ,ac.customer_lname , ac.customer_type , ac.customer_classification , ac.mobileno , ac.alt_mobileno,ac.email ,
-au.CustomerID , au.ModelNumber , au.address , au.region , au.state ,au.district , au.city , au.pincode ,au.purchase_date,au.SalesDealer as SalesPartner,au.serial_no , au.SubDealer as SalesAM ,au.ModelName as ItemNumber ,au.customer_classification as customerClassification
+    const fallbackSql = `SELECT ac.salutation , ac.customer_fname ,ac.customer_lname , ac.customer_type , ac.customer_classification , ac.mobileno , ac.alt_mobileno,ac.email ,allocation = 'Allocated',
+au.CustomerID as customer_id , au.ModelNumber , au.address , au.region , au.state ,au.district , au.city , au.pincode ,au.purchase_date,au.SalesDealer as SalesPartner,au.serial_no , au.SubDealer as SalesAM ,au.ModelName as ItemNumber ,au.customer_classification as customerClassification
 FROM awt_uniqueproductmaster as au
 left join awt_customer as ac on ac.customer_id = au.CustomerID
 WHERE au.serial_no = @serial order by au.id desc`;
@@ -9574,7 +9625,6 @@ WHERE au.serial_no = @serial order by au.id desc`;
 
 
 
-
   } catch (err) {
     console.error("Database error:", err);
     return res.status(500).json({ error: "Database error occurred", details: err.message });
@@ -9591,13 +9641,36 @@ app.get("/getmobserial/:serial", authenticateToken, async (req, res) => {
 
     const sql = `select serial_no , DESCRIPTION as ModelNumber , ACCOUNT as customer_id , ALLOCATIONSTATUS as allocation , CUSTOMERCLASSIFICATION as customer_classification from LHI_Licare_data where serial_no = @serial`;
 
+
+    const fallbackSql = `SELECT allocation = 'Allocated', ac.customer_classification ,
+    au.CustomerID as customer_id , au.ModelNumber ,au.serial_no 
+    FROM awt_uniqueproductmaster as au
+    left join awt_customer as ac on ac.customer_id = au.CustomerID
+    WHERE au.serial_no = @serial order by au.id desc`;
+
+
+
+
     const result = await pool.request()
       .input('serial', serial)
       .query(sql);
 
 
+    const fallbackResult = await pool.request()
+      .input('serial', serial)
+      .query(fallbackSql);
 
-    return res.json(result.recordset);
+
+
+    if (fallbackResult.recordset.length !== 0) {
+
+      return res.json(fallbackResult.recordset);
+
+    } else {
+
+      return res.json(result.recordset);
+
+    }
 
 
 
@@ -13622,7 +13695,7 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
   { name: 'spare_doc_two', maxCount: 1 },
   { name: 'spare_doc_three', maxCount: 1 },
 ]), async (req, res) => {
-  let { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode, activitycode, com_id, warranty_status, spare_detail, ticket_no, user_id, serial_no, ModelNumber, sub_call_status, allocation, serial_data } = req.body;
+  let { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode, activitycode, com_id, warranty_status, spare_detail, ticket_no, user_id, serial_no, ModelNumber, sub_call_status, allocation, serial_data ,picking_damages,product_damages,missing_part,leg_adjustment,water_connection,abnormal_noise,ventilation_top,ventilation_bottom,ventilation_back,voltage_supply,earthing,gas_charges,transpotation   } = req.body;
 
 
   const data_serial = JSON.parse(serial_data);
@@ -13679,11 +13752,23 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
       .input('warranty_status', sql.VarChar, warranty_status != 'undefined' ? warranty_status : null)
       .input('com_id', sql.VarChar, com_id != 'undefined' ? com_id : null)
       .input('spare_doc_path', sql.VarChar, spareDoc)
-      .input('call_remark', sql.VarChar, call_remark != 'undefined' ? call_remark : '') // Add call_remark
       .input('spare_detail', sql.VarChar, spare_detail != 'undefined' ? spare_detail : null)
       .input('serial_no', sql.VarChar, serial_no != 'undefined' ? serial_no : null)
       .input('ModelNumber', sql.VarChar, ModelNumber != 'undefined' ? ModelNumber : '')
-      .query('UPDATE complaint_ticket SET warranty_status = @warranty_status, group_code = @symptomcode, defect_type = @causecode, site_defect = @actioncode,activity_code = @activitycode,service_charges = @service_charges, call_status = @call_status,sub_call_status = @sub_call_status, call_type = @call_type, other_charges = @other_charge, spare_doc_path = @spare_doc_path, call_remark = @call_remark, spare_detail = @spare_detail , ModelNumber = @ModelNumber , serial_no = @serial_no WHERE id = @com_id');
+      .input('picking_damages', sql.VarChar, picking_damages)
+      .input('product_damages', sql.VarChar, product_damages)
+      .input('missing_part', sql.VarChar, missing_part)
+      .input('leg_adjustment', sql.VarChar, leg_adjustment)
+      .input('water_connection', sql.VarChar, water_connection)
+      .input('abnormal_noise', sql.VarChar, abnormal_noise)
+      .input('ventilation_top', sql.VarChar, ventilation_top)
+      .input('ventilation_bottom', sql.VarChar, ventilation_bottom)
+      .input('ventilation_back', sql.VarChar, ventilation_back)
+      .input('voltage_supply', sql.VarChar, voltage_supply)
+      .input('earthing', sql.VarChar, earthing)
+      .input('gas_charges', sql.VarChar, gas_charges)
+      .input('transpotation', sql.VarChar, transpotation)
+      .query('UPDATE complaint_ticket SET warranty_status = @warranty_status, group_code = @symptomcode, defect_type = @causecode, site_defect = @actioncode,activity_code = @activitycode,service_charges = @service_charges, call_status = @call_status,sub_call_status = @sub_call_status, call_type = @call_type, other_charges = @other_charge, spare_doc_path = @spare_doc_path, spare_detail = @spare_detail , ModelNumber = @ModelNumber , serial_no = @serial_no ,picking_damages = @picking_damages,product_damages = @product_damages,missing_part = @missing_part,leg_adjustment = @leg_adjustment,water_connection = @water_connection, abnormal_noise = @abnormal_noise,ventilation_top = @ventilation_top,ventilation_bottom = @ventilation_bottom,ventilation_back = @ventilation_back,voltage_supply = @voltage_supply , earthing = @earthing ,gascheck = @gas_charges , transportcheck = @transpotation WHERE id = @com_id');
 
     // Check if any rows were updated
 

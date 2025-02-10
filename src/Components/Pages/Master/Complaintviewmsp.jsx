@@ -212,7 +212,7 @@ export function Complaintviewmsp(params) {
           purchase_date: value
         }))
 
-        axios.post(`${Base_Url}/updatewarrentystate`, { warrenty: 'OUT OF WARRANTY', ticket_no: complaintid }, {
+        axios.post(`${Base_Url}/updatewarrentystate`, { warrenty: 'OUT OF WARRANTY', ticket_no: String(complaintid)  }, {
           headers: {
             Authorization: token
           }

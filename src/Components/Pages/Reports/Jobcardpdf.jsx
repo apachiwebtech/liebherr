@@ -3,6 +3,7 @@ import { Document, Page, Text, View, StyleSheet, PDFDownloadLink, Image, Font } 
 import Liebherrlogo from '../../../images/Liebherr-logo-768x432.png';
 
 import axios from 'axios';
+import { Base_Url } from '../../Utils/Base_Url';
 // Create styles
 const styles = StyleSheet.create({
     page: {
@@ -106,7 +107,10 @@ const styles = StyleSheet.create({
     },
 });
 
-const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
+const Jobcardpdf = ({ data, duplicate, spare, engineer, attachments }) => {
+
+
+    console.log(data,"%%")
 
 
 
@@ -119,18 +123,20 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
         return `${day}-${month}-${year}`;
     };
 
+    console.log(attachments, "EERR")
+
 
     function numberToWords(num) {
         if (num === 0) return "";
-    
+
         const belowTwenty = [
             "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten",
-            "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", 
+            "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen",
             "Eighteen", "Nineteen"
         ];
         const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
         const thousands = ["", "Thousand", "Million", "Billion"];
-    
+
         function helper(n) {
             if (n === 0) return "";
             else if (n < 20) return belowTwenty[n - 1] + " ";
@@ -144,7 +150,7 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
                 }
             }
         }
-    
+
         return helper(num).trim();
     }
 
@@ -309,11 +315,11 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
 
                         </View>
                         <View style={[styles.tableCol, { width: '12%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>Phone</Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>State</Text>
 
                         </View>
                         <View style={[styles.tableCol, { width: '15%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.customer_mobile}</Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.state}</Text>
 
                         </View>
                         <View style={[styles.tableCol, { width: '15%' }]}>
@@ -331,18 +337,18 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
 
                         </div>
                         <View style={[styles.tableCol, { width: '20%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>Pincode </Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>Pin Code </Text>
                         </View>
                         <View style={[styles.tableCol, { width: '13%' }]}>
                             <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.pincode}</Text>
 
                         </View>
                         <View style={[styles.tableCol, { width: '12%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, color: '#000' }}>Alternate No</Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, color: '#000' }}> Phone</Text>
 
                         </View>
                         <View style={[styles.tableCol, { width: '15%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.alt_mobile}</Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.customer_mobile}</Text>
 
                         </View>
                         <View style={[styles.tableCol, { width: '15%' }]}>
@@ -515,7 +521,7 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
 
                         </View>
                         <View style={[styles.tableCol14, { width: '10%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 15, color: '#000', fontWeight: 1600 }}></Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000', fontWeight: 1600 }}>{data.group_code}</Text>
 
                         </View>
 
@@ -541,7 +547,7 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
 
                         </View>
                         <View style={[styles.tableCol14, { width: '7%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000', fontWeight: 1600 }}>{spare[0] && Number(spare[0].price) *  Number(spare[0] && spare[0].quantity)}</Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000', fontWeight: 1600 }}>{spare[0] && Number(spare[0].price) * Number(spare[0] && spare[0].quantity)}</Text>
 
                         </View>
 
@@ -550,7 +556,7 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
 
                         </View>
                         <View style={[styles.tableCol14, { width: '10%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000', fontWeight: 1600 }}></Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000', fontWeight: 1600 }}>{data.defect_type}</Text>
 
                         </View>
 
@@ -576,7 +582,7 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
 
                         </View>
                         <View style={[styles.tableCol14, { width: '7%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000', fontWeight: 1600 }}>{spare[1] && Number(spare[1].price) *  Number(spare[1] && spare[1].quantity)}</Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000', fontWeight: 1600 }}>{spare[1] && Number(spare[1].price) * Number(spare[1] && spare[1].quantity)}</Text>
 
                         </View>
                         <View style={[styles.tableCol14, { width: '10%' }]}>
@@ -584,7 +590,7 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
 
                         </View>
                         <View style={[styles.tableCol14, { width: '10%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000', fontWeight: 1600 }}></Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000', fontWeight: 1600 }}>{data.site_defect}</Text>
 
                         </View>
 
@@ -610,7 +616,7 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
 
                         </View>
                         <View style={[styles.tableCol14, { width: '7%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000', fontWeight: 1600 }}>{spare[2] && Number(spare[2].price) *  Number(spare[2] && spare[2].quantity)}</Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000', fontWeight: 1600 }}>{spare[2] && Number(spare[2].price) * Number(spare[2] && spare[2].quantity)}</Text>
 
                         </View>
                         <View style={[styles.tableCol14, { width: '10%' }]}>
@@ -618,7 +624,7 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
 
                         </View>
                         <View style={[styles.tableCol14, { width: '10%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000', fontWeight: 1600 }}></Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000', fontWeight: 1600 }}>{data.activity_code}</Text>
 
                         </View>
 
@@ -631,7 +637,7 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
                             <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000', fontWeight: 1600 }}>Total(in Words)</Text>
                         </View>
                         <View style={[styles.tableCol14, { width: '80%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, color: '#000', fontWeight: 1600 , paddingLeft :"5px" }}>{numberToWords(totalPrice)} {numberToWords(totalPrice) == '' ? null : "Rupees Only."}</Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, color: '#000', fontWeight: 1600, paddingLeft: "5px" }}>{numberToWords(totalPrice)} {numberToWords(totalPrice) == '' ? null : "Rupees Only."}</Text>
 
                         </View>
 
@@ -683,21 +689,21 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
                             <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>Any Packing Damages</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '7.5%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.picking_damages == 'Yes'? 'Yes' : null }</Text>
 
                         </View>
                         <View style={[styles.tableCol, { width: '7.5%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.picking_damages == 'No'? 'No' : null }</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '20%' }]}>
                             <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>Ventilation Top</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '7.5%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.ventilation_top == 'Yes'? 'Yes' : null }</Text>
 
                         </View>
                         <View style={[styles.tableCol, { width: '7.5%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.ventilation_top == 'No'? 'No' : null }</Text>
                         </View>
                         <View style={[{ width: '25%' }, { borderRight: "1px" }]}>
                             <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 15, color: '#000' }}></Text>
@@ -713,21 +719,21 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
                             <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>Any Product Damages</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '7.5%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.product_damages == 'Yes'? 'Yes' : null }</Text>
 
                         </View>
                         <View style={[styles.tableCol, { width: '7.5%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.product_damages == 'No'? 'No' : null }</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '20%' }]}>
                             <Text style={{ fontSize: '8px', marginTop: 5, color: '#000', marginLeft: 5 }}>Ventilation Bottom</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '7.5%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.ventilation_bottom == 'Yes'? 'Yes' : null }</Text>
 
                         </View>
                         <View style={[styles.tableCol, { width: '7.5%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.ventilation_bottom == 'No'? 'No' : null }</Text>
                         </View>
                         <View style={[{ width: '25%' }, { borderRight: "1px" }]}>
                             <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 15, color: '#000' }}></Text>
@@ -743,21 +749,21 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
                             <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>Any Missing Parts</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '7.5%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.missing_part == 'Yes'? 'Yes' : null }</Text>
 
                         </View>
                         <View style={[styles.tableCol, { width: '7.5%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.missing_part == 'No'? 'No' : null }</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '20%' }]}>
                             <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>Ventilation Back</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '7.5%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.ventilation_back == 'Yes'? 'Yes' : null }</Text>
 
                         </View>
                         <View style={[styles.tableCol, { width: '7.5%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.ventilation_back == 'No'? 'No' : null }</Text>
                         </View>
                         <View style={[{ width: '25%' }, { borderRight: "1px" }]}>
                             <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 15, color: '#000' }}></Text>
@@ -773,21 +779,21 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
                             <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>Leg Adjustment Done</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '7.5%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.leg_adjustment == 'Yes'? 'Yes' : null }</Text>
 
                         </View>
                         <View style={[styles.tableCol, { width: '7.5%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.leg_adjustment == 'No'? 'No' : null }</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '20%' }]}>
                             <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>Voltage Supply OK</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '7.5%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.voltage_supply == 'Yes'? 'Yes' : null }</Text>
 
                         </View>
                         <View style={[styles.tableCol, { width: '7.5%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.voltage_supply == 'No'? 'No' : null }</Text>
                         </View>
                         <View style={[{ width: '25%' }, { borderRight: "1px" }]}>
                             <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 15, color: '#000' }}></Text>
@@ -803,21 +809,21 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
                             <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>Water Connection</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '7.5%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.water_connection == 'Yes'? 'Yes' : null }</Text>
 
                         </View>
                         <View style={[styles.tableCol, { width: '7.5%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.water_connection == 'No'? 'No' : null }</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '20%' }]}>
                             <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>Earthing Proper</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '7.5%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.earthing == 'Yes'? 'Yes' : null }</Text>
 
                         </View>
                         <View style={[styles.tableCol, { width: '7.5%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.earthing == 'No'? 'No' : null }</Text>
                         </View>
                         <View style={[{ width: '25%' }, { borderRight: "1px" }]}>
                             <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
@@ -833,11 +839,11 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
                             <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>Any abnormal noise </Text>
                         </View>
                         <View style={[styles.tableCol, { width: '50%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.abnormal_noise == 'Yes'? 'Yes' : null }</Text>
 
                         </View>
                         <View style={[styles.tableCol, { width: '25%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.abnormal_noise == 'No'? 'No' : null }</Text>
                         </View>
 
 
@@ -898,6 +904,23 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer }) => {
                             <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>Images, If any:</Text>
                         </View>
 
+                        {attachments
+                            .filter(item => {
+                                // Check if the file extension indicates it's an image
+                                const validImageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+                                const fileExtension = item.attachment.split('.').pop().toLowerCase();
+                                return validImageExtensions.includes(fileExtension);
+                            })
+                            .map((item) => {
+                                return (
+                                    <Image
+                                        key={item.attachment} // Add a unique key to each image
+                                        style={{ width: "400px" }}
+                                        src={`${Base_Url}/uploads/${item.attachment}`}
+                                        alt={item.attachment} // Optional alt text
+                                    />
+                                );
+                            })}
 
 
                     </View>

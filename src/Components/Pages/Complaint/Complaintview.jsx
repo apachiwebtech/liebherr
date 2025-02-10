@@ -47,6 +47,7 @@ export function Complaintview(params) {
   const [closestatus, setCloseStatus] = useState("");
   const [subclosestatus, setsubCloseStatus] = useState("");
   const [spareid, setspareid] = useState("");
+  const [allocation, setallocation] = useState('');
   const [updatedata, setUpdatedata] = useState([])
   const [ticketTab, setTicketTab] = useState(JSON.parse(localStorage.getItem('tabticket')) || []);
   const { loaders, axiosInstance } = useAxiosLoader();
@@ -82,7 +83,11 @@ export function Complaintview(params) {
     transportation: "",
     transportation_charge: "",
     visit_count: "",
-    csp: ""
+    csp: "",
+    customer_class : "",
+    customer_id : '',
+    gascheck : '',
+    transportcheck : ''
   });
 
 
@@ -212,7 +217,7 @@ export function Complaintview(params) {
           purchase_date: value
         }))
 
-        axios.post(`${Base_Url}/updatewarrentystate`, { warrenty: 'OUT OF WARRANTY', ticket_no: complaintid }, {
+        axios.post(`${Base_Url}/updatewarrentystate`, { warrenty: 'OUT OF WARRANTY', ticket_no: String(complaintid) }, {
           headers: {
             Authorization: token
           }
@@ -1024,40 +1029,77 @@ export function Complaintview(params) {
     setComplaintview(prev => ({ ...prev, [name]: value }));
 
 
-    if (name == 'serial_no') {
-      handlegetmodel(value)
+    if (name === 'serial_no') {
+      if (value.length === 9) { // Check if the value has exactly 9 digits
+        handlegetmodel(value);
+      }
     }
+    
 
   };
 
 
   const handlegetmodel = async (value) => {
-
     try {
-      const response = await axios.get(
-        `${Base_Url}/getserial/${value || value.serial_no}`, {
+      const serial = value?.serial_no || value;
+  
+      const response = await axios.get(`${Base_Url}/getserial/${serial}`, {
         headers: {
           Authorization: token, // Send token in headers
         },
-      }
-      );
-
-      if (response.data && response.data[0]) {
+      });
+  
+      if (!response.data || response.data.length === 0) {
+        alert("This serial does not exist.");
         setComplaintview((prevstate) => ({
-
           ...prevstate,
-          ModelNumber: response.data[0].ModelNumber
-
-        }))
+          ModelNumber: '',
+          serial_no: '',
+        }));
+        return;
       }
-
-
-
-
+  
+      const serialData = response.data[0];
+  
+      if (serialData?.ModelNumber) {
+        if (!serialData.customer_id) {
+          alert("New serial no");
+          setallocation(serialData.allocation);
+          setComplaintview((prevstate) => ({
+            ...prevstate,
+            ModelNumber: serialData.ModelNumber,
+          }));
+        } else if (serialData.customer_id == complaintview.customer_id) {
+          alert("Serial no matched");
+          setComplaintview((prevstate) => ({
+            ...prevstate,
+            ModelNumber: serialData.ModelNumber,
+          }));
+        } else {
+          alert("This serial no already allocated");
+          setComplaintview((prevstate) => ({
+            ...prevstate,
+            ModelNumber: '',
+            serial_no: '',
+          }));
+        }
+      }
+  
+      if (!serialData?.customer_classification || serialData.customer_classification == complaintview.customer_class) {
+        console.log("Matched");
+      } else {
+        alert("Classification is different");
+        setComplaintview((prevstate) => ({
+          ...prevstate,
+          ModelNumber: '',
+          serial_no: '',
+        }));
+      }
     } catch (error) {
       console.error("Error fetching serial details:", error);
     }
-  }
+  };
+  
 
 
 
@@ -1593,7 +1635,7 @@ export function Complaintview(params) {
   const Blob = async () => {
 
     try {
-      const blob = await pdf(<Jobcardpdf data={updatedata} duplicate={duplicate} spare={addedSpareParts} engineer={addedEngineers} />).toBlob();
+      const blob = await pdf(<Jobcardpdf attachments={attachments} data={updatedata} duplicate={duplicate} spare={addedSpareParts} engineer={addedEngineers} />).toBlob();
       const url = URL.createObjectURL(blob);
       window.open(url);
       URL.revokeObjectURL(url);
@@ -2331,11 +2373,11 @@ export function Complaintview(params) {
                                 {(complaintview.call_status == 'Closed') &&
                                   <>
                                     <div className="my-3 col-lg-6">
-                                      <input type="checkbox" onChange={handleChange} name="gas_chargs" /> <label>Gas Charges</label>
+                                      <input type="checkbox" onChange={handleChange} name="gascheck" checked={complaintview.gascheck == 'Yes' ? true : false} /> <label>Gas Charges</label>
                                     </div>
 
                                     <div className="my-3 col-lg-6">
-                                      <input type="checkbox" onChange={handleChange} name="gas_transportation" /> <label>Gas Transport Charges</label>
+                                      <input type="checkbox" onChange={handleChange} name="transportcheck" checked={complaintview.transportcheck == 'Yes' ? true : false} /> <label>Gas Transport Charges</label>
                                     </div>
                                     <div className="my-3 col-lg-6">
                                       <input type="checkbox" onChange={handleChange} name="mandays" /> <label>Mandays</label>
