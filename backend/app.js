@@ -3459,7 +3459,7 @@ app.get("/getcomplaintview/:complaintid", authenticateToken, async (req, res) =>
 });
 
 app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
-  const { ticket_no, note, created_by, call_status, call_status_id, sub_call_status, group_code, site_defect, defect_type, activity_code, serial_no, ModelNumber, purchase_date, warrenty_status, engineerdata, engineername, ticket_type, call_city, ticket_start_date, mandaysprice, gas_chargs, gas_transportation, transportation_charge } = req.body;
+  const { ticket_no, note, created_by, call_status, call_status_id, sub_call_status, group_code, site_defect, defect_type, activity_code, serial_no, ModelNumber, purchase_date, warrenty_status, engineerdata, engineername, ticket_type, call_city, ticket_start_date, mandaysprice, gas_chargs, gas_transportation, transportation_charge ,visit_count } = req.body;
 
   console.log(mandaysprice, "RR")
 
@@ -3485,6 +3485,7 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
     activity_code ? `Activity Code : ${activity_code}` : '',
     engineer_name ? `Engineer Name: ${engineer_name}` : '',
     serial_no ? `Serial No: ${serial_no}` : '',
+    visit_count ? `Visit Count: ${visit_count}` : '',
     ModelNumber ? `Model Number: ${ModelNumber}` : '',
     note ? `<b>Remark:</b> ${note}` : ''
 
@@ -3500,7 +3501,7 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
 
     const updateSql = `
     UPDATE complaint_ticket
-    SET call_status = '${call_status}' , updated_by = '${created_by}', updated_date = '${formattedDate}' , sub_call_status  = '${sub_call_status}' ,group_code = '${group_code}' , defect_type = '${defect_type}' , ModelNumber = '${ModelNumber}',serial_no = '${serial_no}' , site_defect = '${site_defect}' ,activity_code = '${activity_code}' , purchase_date = '${purchase_date}' , warranty_status = '${warrenty_status}' ,engineer_id = '${engineer_id}' ,mandays_charges = '${mandaysprice}',transport_charge = '${transportation_charge}', assigned_to = '${engineer_name}' , call_status_id = '${call_status_id}'  WHERE ticket_no = '${ticket_no}' `;
+    SET call_status = '${call_status}' , updated_by = '${created_by}', updated_date = '${formattedDate}' , sub_call_status  = '${sub_call_status}' ,group_code = '${group_code}' , defect_type = '${defect_type}' , ModelNumber = '${ModelNumber}',serial_no = '${serial_no}' , site_defect = '${site_defect}' ,activity_code = '${activity_code}' , purchase_date = '${purchase_date}' , warranty_status = '${warrenty_status}' ,engineer_id = '${engineer_id}' ,mandays_charges = '${mandaysprice}',transport_charge = '${transportation_charge}', assigned_to = '${engineer_name}' , call_status_id = '${call_status_id}' , visit_count = '${visit_count}'  WHERE ticket_no = '${ticket_no}' `;
 
     await pool.request().query(updateSql);
 
@@ -4460,69 +4461,69 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
         .query(complaintSQL);
 
 
-        if (1 === 1) {
-          const auth = {
-            username: "rohit.jape@liebherr.com",
-            password: "W3W_4wbaiF2JzNn",
-          };
-        
-          try {
-            const tokenResponse = await axios.post(
-              'https://cts.myvi.in:8443/SMS/api/token',
-              auth
-            );
-        
-            if (tokenResponse.data) {
-              const token = tokenResponse.data.token;
-        
-        
-              const smsPayload = {
-                pingBackType: "0",
-                pingBackId: "-1",
-                jsonData: {
-                  senderId: "LICARE",
-                  TemplateID: "1207173530305447084",
-                  templateName: "welcomemsg",
-                  unicodeStatus: 0,
-                  messages: [
-                    {
-                      msisdn: mobile,
-                      message:
-                        `Dear Customer, Greetings from Liebherr! Your Ticket Number is ${ticket_no}. Please share OTP 12345 with the engineer once the ticket is resolved.`,
-                      customerReferenceId: "1",
-                    },
-                  ],
-                },
-                validationFlag: "1",
-                validatyPeriod: null,
-              };
-        
-              try {
-                const smsResponse = await axios.post(
-                  'https://cts.myvi.in:8443/SMS/api/broadcast',
-                  smsPayload,
+      if (1 === 1) {
+        const auth = {
+          username: "rohit.jape@liebherr.com",
+          password: "W3W_4wbaiF2JzNn",
+        };
+
+        try {
+          const tokenResponse = await axios.post(
+            'https://cts.myvi.in:8443/SMS/api/token',
+            auth
+          );
+
+          if (tokenResponse.data) {
+            const token = tokenResponse.data.token;
+
+
+            const smsPayload = {
+              pingBackType: "0",
+              pingBackId: "-1",
+              jsonData: {
+                senderId: "LICARE",
+                TemplateID: "1207173530305447084",
+                templateName: "welcomemsg",
+                unicodeStatus: 0,
+                messages: [
                   {
-                    headers: {
-                      'Content-Type': 'application/json',
-                      Authorization: `Bearer ${token}`, // Ensure the token is correctly prefixed
-                    },
-                  }
-                );
-        
-                if (smsResponse.status === 200) {
-                  console.log('SMS sent successfully:', smsResponse.data);
-                } else {
-                  console.error('Failed to send SMS:', smsResponse.data);
+                    msisdn: mobile,
+                    message:
+                      `Dear Customer, Greetings from Liebherr! Your Ticket Number is ${ticket_no}. Please share OTP 12345 with the engineer once the ticket is resolved.`,
+                    customerReferenceId: "1",
+                  },
+                ],
+              },
+              validationFlag: "1",
+              validatyPeriod: null,
+            };
+
+            try {
+              const smsResponse = await axios.post(
+                'https://cts.myvi.in:8443/SMS/api/broadcast',
+                smsPayload,
+                {
+                  headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`, // Ensure the token is correctly prefixed
+                  },
                 }
-              } catch (error) {
-                console.error('Error hitting SMS API (broadcast):', error.response?.data || error.message);
+              );
+
+              if (smsResponse.status === 200) {
+                console.log('SMS sent successfully:', smsResponse.data);
+              } else {
+                console.error('Failed to send SMS:', smsResponse.data);
               }
+            } catch (error) {
+              console.error('Error hitting SMS API (broadcast):', error.response?.data || error.message);
             }
-          } catch (error) {
-            console.error('Error hitting SMS API (token):', error.response?.data || error.message);
           }
+        } catch (error) {
+          console.error('Error hitting SMS API (token):', error.response?.data || error.message);
         }
-        
+      }
+
 
 
 
@@ -9714,23 +9715,16 @@ app.post("/getupdateengineer", authenticateToken,
       return res.status(500).json({ error: "Database error occurred", details: err.message });
     }
   });
-app.post("/getupdateengineer", authenticateToken,
+
+app.post("/getuniqueengineer", authenticateToken,
   async (req, res) => {
 
-    const { eng_id } = req.body;
+    const { ticket_no } = req.body;
 
     try {
       const pool = await poolPromise;
       // Modified SQL query using parameterized query
-      const sql = `
-    SELECT *
-    FROM awt_engineermaster
-    WHERE deleted = 0
-      AND engineer_id IN (
-          SELECT value
-          FROM STRING_SPLIT('${eng_id}', ',')
-      )
-`;
+      const sql = `select * from awt_uniqueengineer where ticket_no = '${ticket_no}' and deleted = 0`;
 
       const result = await pool.request().query(sql);
 
@@ -9740,6 +9734,26 @@ app.post("/getupdateengineer", authenticateToken,
       return res.status(500).json({ error: "Database error occurred", details: err.message });
     }
   });
+
+app.post("/getremoveengineer", authenticateToken,
+  async (req, res) => {
+
+    const { id } = req.body;
+
+    try {
+      const pool = await poolPromise;
+      // Modified SQL query using parameterized query
+      const sql = `update awt_uniqueengineer set deleted = 1 where id = '${id}'`;
+
+      const result = await pool.request().query(sql);
+
+      return res.json(result.recordset);
+    } catch (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ error: "Database error occurred", details: err.message });
+    }
+  });
+
 
 app.post("/getupdatesparelist", authenticateToken,
   async (req, res) => {
@@ -14120,38 +14134,43 @@ app.post("/updatevisitcount", authenticateToken, async (req, res) => {
 });
 
 app.post("/adduniqueengineer", authenticateToken, async (req, res) => {
-  const { title, engineer_id, employee_code, created_by ,complaintid} = req.body;
+  const { title, engineer_id, employee_code, created_by, complaintid } = req.body;
 
   const created_date = new Date();
 
   try {
-    // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
 
-    // Parameterized query to prevent SQL injection
+    // Use a MERGE query for upsert logic
     const sql = `
-      INSERT INTO awt_uniqueengineer (ticket_no,name, engineer_id, employee_code, created_date, created_by)
-      VALUES (@ticket_no,@title, @engineer_id, @employee_code, @created_date, @created_by)
+      MERGE awt_uniqueengineer AS target
+      USING (SELECT @ticket_no AS ticket_no, @engineer_id AS engineer_id) AS source
+      ON (target.ticket_no = source.ticket_no AND target.engineer_id = source.engineer_id)
+      WHEN MATCHED THEN 
+        UPDATE SET title = @title, employee_code = @employee_code, created_date = @created_date, created_by = @created_by ,deleted = '0'
+      WHEN NOT MATCHED THEN
+        INSERT (ticket_no, title, engineer_id, employee_code, created_date, created_by)
+        VALUES (@ticket_no, @title, @engineer_id, @employee_code, @created_date, @created_by);
     `;
 
-    // Execute the query with parameterized inputs
     const result = await pool
       .request()
+      .input("ticket_no", complaintid)
       .input("title", title)
       .input("engineer_id", engineer_id)
       .input("employee_code", employee_code)
-      .input("ticket_no", complaintid)
       .input("created_date", created_date)
       .input("created_by", created_by)
       .query(sql);
 
-    // Return a success message or other relevant data
-    return res.json({ message: "Engineer added successfully", rowsAffected: result.rowsAffected });
+    // Return a success response
+    return res.json({ message: "Operation completed successfully" });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "Internal server error" });
   }
 });
+
 
 
 

@@ -146,24 +146,24 @@ export function Complaintview(params) {
   }
 
 
-  const handlevisitchange = (e) => {
-    const { value } = e.target;
+  // const handlevisitchange = (e) => {
+  //   const { value } = e.target;
 
-    setComplaintview((prevState) => ({
-      ...prevState,
-      visit_count: value, // Update the visit_count field
-    }));
+  //   setComplaintview((prevState) => ({
+  //     ...prevState,
+  //     visit_count: value, // Update the visit_count field
+  //   }));
 
 
-    axiosInstance.post(`${Base_Url}/updatevisitcount`, { count: value, ticket_no: complaintview.ticket_no }, {
-      headers: {
-        Authorization: token
-      }
-    })
-      .then((res) => {
-        alert("Visit Count Changed")
-      })
-  };
+  //   axiosInstance.post(`${Base_Url}/updatevisitcount`, { count: value, ticket_no: complaintview.ticket_no }, {
+  //     headers: {
+  //       Authorization: token
+  //     }
+  //   })
+  //     .then((res) => {
+  //       alert("Visit Count Changed")
+  //     })
+  // };
 
 
   async function getProduct(params) {
@@ -603,18 +603,18 @@ export function Complaintview(params) {
     const payload = {
       ...selectedEngineer,
       created_by,
-      complaintid :complaintview.ticket_no
+      complaintid: complaintview.ticket_no
     };
 
 
-    // axios.post(`${Base_Url}/adduniqueengineer`, payload, {
-    //   headers: {
-    //     Authorization: token
-    //   }
-    // })
-    // .then((res) =>{
-    //   console.log("test")
-    // })
+    axios.post(`${Base_Url}/adduniqueengineer`, payload, {
+      headers: {
+        Authorization: token
+      }
+    })
+      .then((res) => {
+        console.log("test")
+      })
 
     if (
       selectedEngineer &&
@@ -798,6 +798,21 @@ export function Complaintview(params) {
   const handleRemoveEngineer = (id) => {
     const updatedEngineers = addedEngineers.filter((eng) => eng.id !== id);
     setAddedEngineers(updatedEngineers); // Update the state (assuming you use React's useState)
+
+
+    axiosInstance.post(`${Base_Url}/getremoveengineer`, { id: id }, {
+      headers: {
+        Authorization: token,
+      },
+    })
+      .then((res) => {
+        console.log(res)
+        getupdateengineer(complaintview.ticket_no)
+      })
+      .then((err) => {
+        console.log(err)
+      })
+
   };
 
 
@@ -845,7 +860,7 @@ export function Complaintview(params) {
         setCallstatusid(response.data.call_status)
       }
       if (response.data.engineer_id != null) {
-        getupdateengineer(response.data.engineer_id)
+        getupdateengineer(response.data.ticket_no)
       }
 
 
@@ -864,8 +879,21 @@ export function Complaintview(params) {
     }
   };
 
-  async function getupdateengineer(id) {
-    axiosInstance.post(`${Base_Url}/getupdateengineer`, { eng_id: id }, {
+  // async function getupdateengineer(id) {
+  //   axiosInstance.post(`${Base_Url}/getupdateengineer`, { eng_id: id }, {
+  //     headers: {
+  //       Authorization: token,
+  //     },
+  //   })
+  //     .then((res) => {
+
+  //       setAddedEngineers(res.data)
+  //     })
+  // }
+
+
+  async function getupdateengineer(ticket_no) {
+    axiosInstance.post(`${Base_Url}/getuniqueengineer`, { ticket_no: ticket_no }, {
       headers: {
         Authorization: token,
       },
@@ -874,7 +902,11 @@ export function Complaintview(params) {
 
         setAddedEngineers(res.data)
       })
+      .then((err) => {
+        console.log(err)
+      })
   }
+
   async function getupdatespare(id) {
 
     axiosInstance.post(`${Base_Url}/getupdatesparelist`, { ticket_no: id }, {
@@ -1002,7 +1034,7 @@ export function Complaintview(params) {
   const handlegetmodel = async (value) => {
 
     try {
-      const response = await axiosInstance.get(
+      const response = await axios.get(
         `${Base_Url}/getserial/${value || value.serial_no}`, {
         headers: {
           Authorization: token, // Send token in headers
@@ -1168,6 +1200,7 @@ export function Complaintview(params) {
           ticket_type: complaintview.ticket_type,
           ticket_start_date: complaintview.created_date,
           call_city: complaintview.class_city,
+          visit_count: complaintview.visit_count || 0,
           call_status: callstatusid || '',
           call_status_id: callid || '',
           sub_call_status: complaintview.sub_call_status || '',
@@ -2065,7 +2098,7 @@ export function Complaintview(params) {
                                       handleModelChange(e)
                                     }}
                                   >
-                                    <option value="">Select Status</option>
+                                    <option value="">Select </option>
                                     {callstatus.map((item) => (
                                       <option key={item.id} value={item.Callstatus}>
                                         {item.Callstatus}
@@ -2077,7 +2110,7 @@ export function Complaintview(params) {
                                 <div className="mb-3 col-lg-6">
                                   <h4 className="pname" style={{ fontSize: "14px" }}>Sub Call Status</h4>
                                   <select name="sub_call_status" value={complaintview.sub_call_status} disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false} className="form-control" style={{ fontSize: "14px" }} onChange={handleModelChange}>
-                                    <option value="" >Select Status</option>
+                                    <option value="" >Select </option>
                                     {subcallstatus.map((item) => {
                                       return (
 
@@ -2218,7 +2251,7 @@ export function Complaintview(params) {
                                             handleModelChange(e)
                                           }}
                                         >
-                                          <option value="">Select Status</option>
+                                          <option value="">Select </option>
                                           {groupdefect.map((item) => (
                                             <option key={item.id} value={item.defectgroupcode}>
                                               {item.defectgroupcode} - {item.defectgrouptitle}
@@ -2324,6 +2357,25 @@ export function Complaintview(params) {
                                         onChange={handleModelChange}
                                       />}
 
+                                    </div>
+
+                                    <div className="my-3 col-lg-6">
+                                      <h4 className="pname" style={{ fontSize: "14px" }}>Visit Count</h4>
+                                      <select
+                                        name="visit_count"
+                                        className="form-control"
+                                        disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
+                                        style={{ fontSize: "14px" }}
+                                        value={complaintview.visit_count}
+                                        onChange={handleModelChange}
+                                      >
+                                        <option value="">Select </option>
+                                        <option value='0'>0</option>
+                                        <option value='1'>1</option>
+                                        <option value='2'>2</option>
+                                        <option value='3'>3</option>
+                                        <option value='4'>4</option>
+                                      </select>
                                     </div>
                                   </>
                                 }
@@ -2759,17 +2811,16 @@ export function Complaintview(params) {
 
                   </div>
 
-                  <div className="mt-3">
+                  <div className="my-3 ">
                     <h4 className="pname" style={{ fontSize: "14px" }}>Visit Count</h4>
                     <select
-                      name="group_code"
+                      name="visit_count"
                       className="form-control"
-                      disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
+                      disabled
                       style={{ fontSize: "14px" }}
                       value={complaintview.visit_count}
-                      onChange={handlevisitchange}
+                      onChange={handleModelChange}
                     >
-                      <option value="">Select Status</option>
                       <option value='0'>0</option>
                       <option value='1'>1</option>
                       <option value='2'>2</option>
@@ -2777,6 +2828,8 @@ export function Complaintview(params) {
                       <option value='4'>4</option>
                     </select>
                   </div>
+
+
 
 
 
@@ -2800,7 +2853,7 @@ export function Complaintview(params) {
                             handleModelChange(e)
                           }}
                         >
-                          <option value="">Select Status</option>
+                          <option value="">Select </option>
                           {groupdefect.map((item) => (
                             <option key={item.id} value={item.defectgroupcode}>
                               {item.defectgroupcode} - {item.defectgrouptitle}

@@ -1037,7 +1037,7 @@ export function Registercomplaint(params) {
 
       try {
 
-        const response = await axiosInstance.get(
+        const response = await axios.get(
           `${Base_Url}/getmultiplelocation/${pincode || value.pincode}/${value.classification}/${value.ticket_type}`, {
           headers: {
             Authorization: token, // Send token in headers
@@ -1939,71 +1939,7 @@ export function Registercomplaint(params) {
                       )}
                     </>
 
-                    {!duplicate ? <>
-                      <div className="col-md-3">
-                        <div className="mb-3">
-                          <label className="form-label">Pincode<span className="text-danger">*</span></label>
-                          <select className="form-control" value={value.pincode} name="pincode" onChange={onHandleChange}>
-                            <option value="">Select Pincode</option>
-                            {pincode.map((item) => {
-                              return (
-                                <option value={item.id} key={item.id}>{item.pincode}</option>
-                              );
-                            })}
-                          </select>
-                          {errors.pincode && <span style={{ fontSize: "12px" }} className="text-danger">{errors.pincode}</span>}
-                        </div>
-                      </div>
-
-                      <div className="col-md-3">
-                        <div className="mb-3">
-                          <label className="form-label">State</label>
-                          <select className="form-control" value={value.state} name="state" onChange={onHandleChange}>
-                            <option value="">Select State</option>
-                            {state.map((item) => {
-                              return (
-
-                                <option value={item.id}>{item.title}</option>
-                              )
-                            })}
-                          </select>
-                          {errors.state && <span style={{ fontSize: "12px" }} className="text-danger">{errors.state}</span>}
-                        </div>
-                      </div>
-
-
-                      <div className="col-md-3">
-                        <div className="mb-3">
-                          <label className="form-label">District</label>
-                          <select className="form-control" onChange={onHandleChange} name="area" value={value.area}>
-                            <option value="">Select Area</option>
-                            {area.map((item) => {
-                              return (
-                                <option value={item.id} key={item.id}>{item.title}</option>
-                              );
-                            })}
-                          </select>
-                          {errors.area && <span style={{ fontSize: "12px" }} className="text-danger">{errors.area}</span>}
-                        </div>
-                      </div>
-
-                      {/* city */}
-                      <div className="col-md-3">
-                        <div className="mb-3">
-                          <label className="form-label">City</label>
-                          <select className="form-control" value={value.city} name="city" onChange={onHandleChange}>
-                            <option value="">Select City</option>
-                            {city.map((item) => {
-                              return (
-                                <option value={item.id} key={item.id}>{item.title}</option>
-                              );
-                            })}
-                          </select>
-                          {errors.city && <span style={{ fontSize: "12px" }} className="text-danger">{errors.city}</span>}
-                        </div>
-                      </div>
-
-                    </> : <>
+                    <>
 
                       <div className="col-md-3">
                         <div className="mb-3">
@@ -2034,7 +1970,7 @@ export function Registercomplaint(params) {
                         </div>
                       </div>
 
-                    </>}
+                    </>
 
                     <div className="col-md-4">
                       <div className="mb-3">

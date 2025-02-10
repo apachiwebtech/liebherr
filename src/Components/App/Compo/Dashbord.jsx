@@ -147,7 +147,7 @@ const handleScroll = _debounce(() => {
     setFilteredList(filtered);
   };
 
-  const Name = localStorage.getItem('Name');
+  const Name = localStorage.getItem('lhiuser');
 
   const handlesett = () => {
     setserach(true)
