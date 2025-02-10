@@ -9740,10 +9740,12 @@ app.post("/getremoveengineer", authenticateToken,
 
     const { id } = req.body;
 
+    const date = new Date()
+
     try {
       const pool = await poolPromise;
       // Modified SQL query using parameterized query
-      const sql = `update awt_uniqueengineer set deleted = 1 where id = '${id}'`;
+      const sql = `update awt_uniqueengineer set deleted = 1 ,update_date = '${date}' where id = '${id}'`;
 
       const result = await pool.request().query(sql);
 
