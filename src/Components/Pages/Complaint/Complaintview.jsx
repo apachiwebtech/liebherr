@@ -2838,7 +2838,7 @@ export function Complaintview(params) {
                   </div>
 
                   <div className="d-flex justify-content-end py-2">
-
+{/* 
                     {roleaccess > 2 ?
                       <button
                         type="submit"
@@ -2848,7 +2848,7 @@ export function Complaintview(params) {
                         disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
                       >
                         Submit
-                      </button> : null}
+                      </button> : null} */}
 
 
                   </div>

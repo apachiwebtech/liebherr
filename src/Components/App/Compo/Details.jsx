@@ -116,25 +116,26 @@ function Details() {
   };
 
 
-  async function getprice(params) {
+  async function getprice(modelno) {
 
-    axios.post(`${Base_Url}/getServiceCharges`, { ModelNumber: Value.ModelNumber }, {
+    axios.post(`${Base_Url}/getServiceCharges`, { ModelNumber:  modelno }, {
       headers: {
         Authorization: token
       }
     })
       .then((res) => {
         console.log(res.data)
+
+        if (res.data && res.data[0]) {
+          setValue((prev) => ({
+            ...prev,
+            service_charges: res.data[0].warrenty_amount
+          }))
+        }
+
+
       })
   }
-
-  useEffect(() => {
-
-    if (Value.warranty_status == 'OUT OF WARRENTY' || data.warranty_status == 'OUT OF WARRENTY') {
-      getprice()
-    }
-
-  }, [])
 
 
 
@@ -204,15 +205,17 @@ function Details() {
 
     }
 
+    if (!serial_no && !data.serial_no) {
+      isValid = false;
+      newErrors.serial_no = "Serial No is required";
+    }
+
+
 
 
     // // Additional validations only when call_status is 'Completed'
     if (Value.call_status == "Completed") {
 
-      if (!serial_no && !data.serial_no) {
-        isValid = false;
-        newErrors.serial_no = "Serial No is required";
-      }
 
       if (!Value.activity_code || Value.activity_code == 'null') {
         isValid = false;
@@ -277,7 +280,7 @@ function Details() {
           formData.append('warranty_status', Value.warranty_status);
           formData.append('com_id', data.id);
           formData.append('call_remark', Value.call_remark);
-          formData.append('purchase_date',Value.purchase_date &&  formatpurchasedate(Value.purchase_date));
+          formData.append('purchase_date', Value.purchase_date && formatpurchasedate(Value.purchase_date));
           formData.append('ticket_no', data.ticket_no);
           formData.append('allocation', allocation);
           formData.append('ModelNumber', modelno || data.ModelNumber);
@@ -348,7 +351,7 @@ function Details() {
         formData.append('call_type', Value.call_type);
         formData.append('other_charge', Value.other_charge);
         formData.append('warranty_status', Value.warranty_status);
-        formData.append('purchase_date', Value.purchase_date &&  formatpurchasedate(Value.purchase_date));
+        formData.append('purchase_date', Value.purchase_date && formatpurchasedate(Value.purchase_date));
         formData.append('com_id', data.id);
         formData.append('call_remark', Value.call_remark);
         formData.append('ticket_no', data.ticket_no);
@@ -431,6 +434,7 @@ function Details() {
           getremark(res.data.data[0].ticket_no)
           getuniquespare(res.data.data[0].ticket_no)
           getspare(res.data.data[0].ModelNumber)
+          getprice(res.data.data[0].ModelNumber)
           setPurchaseDate(res.data.data[0].purchase_date)
           // console.log(Value.symptomcode);
           if (res.data.data[0].group_code != "") {
@@ -446,7 +450,7 @@ function Details() {
             call_type: res.data.data[0].ticket_type,
             warranty_status: res.data.data[0].warranty_status,
             call_status: res.data.data[0].call_status,
-            purchase_date : res.data.data[0].purchase_date
+            purchase_date: res.data.data[0].purchase_date
           })
 
 
@@ -761,25 +765,7 @@ function Details() {
 
 
 
-  const gogootp = () => {
-    const otp = Math.floor(1000 + Math.random() * 9000);
-    setotp(otp)
-    const eata = {
-      otp: otp,
-      orderid: data.id
-    }
-    axios.post(`${Base_Url}/getotpapp`, eata)
-      .then((res) => {
-        console.log(res.data.message);
 
-        if (res.data.message == 'done') {
-          setotppart(false)
-        }
-      })
-      .catch((err) => {
-        console.log(err)
-      })
-  }
 
 
   const formatDate1 = (dateString) => {
@@ -846,12 +832,14 @@ function Details() {
         if (response.data[0].customer_id == 'null' || response.data[0].customer_id == null) {
           alert("New serial no")
           getspare(response.data[0].ModelNumber)
+          getprice(response.data[0].ModelNumber)
           setModelNumber(response.data[0].ModelNumber)
           setallocation(response.data[0].allocation)
         }
         else if (response.data[0].customer_id == data.customer_id) {
           alert("Serial no matched")
           getspare(response.data[0].ModelNumber)
+          getprice(response.data[0].ModelNumber)
           setModelNumber(response.data[0].ModelNumber)
         }
         else {
@@ -915,7 +903,7 @@ function Details() {
           warranty_status: "OUT OF WARRANTY",
           purchase_date: value
         }))
- 
+
 
 
         axios.post(`${Base_Url}/updatewarrentystate`, { warrenty: 'OUT OF WARRANTY', ticket_no: String(data.id) }, {
@@ -1195,7 +1183,7 @@ function Details() {
                   {data.call_charges == 'Yes' ? <div class="mb-3">
                     <div class="form-group">
                       <label for="val-actioncode">Service Charges</label>
-                      <input type="text" onChange={handleChange} class="form-control" name="service_charges" id="service_charges" disabled />
+                      <input type="text" onChange={handleChange} class="form-control" value={Value.service_charges} name="service_charges" id="service_charges" disabled />
                     </div>
                   </div> : null}
 

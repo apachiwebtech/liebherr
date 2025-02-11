@@ -3461,7 +3461,7 @@ app.get("/getcomplaintview/:complaintid", authenticateToken, async (req, res) =>
 app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
   const { ticket_no, note, created_by, call_status, call_status_id, sub_call_status, group_code, site_defect, defect_type, activity_code, serial_no, ModelNumber, purchase_date, warrenty_status, engineerdata, engineername, ticket_type, call_city, ticket_start_date, mandaysprice, gas_chargs, gas_transportation, transportation_charge, visit_count } = req.body;
 
-  console.log(mandaysprice, "RR")
+
 
 
 
@@ -3491,6 +3491,8 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
 
   ].filter(Boolean).join(' , ');
 
+
+  console.log(engineer_id, "^^&&*")
 
 
   try {
@@ -9594,7 +9596,7 @@ app.get("/getserial/:serial", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
 
 
- const sql = `select serial_no , DESCRIPTION as ModelNumber , ACCOUNT as customer_id , ALLOCATIONSTATUS as allocation , CUSTOMERCLASSIFICATION as customerClassification ,spm.SalesPartner ,spm.SalesAM from LHI_Licare_data as lhi LEFT JOIN SalesPartnerMaster AS spm  ON lhi.DealerCode = spm.BPcode where serial_no = @serial`
+    const sql = `select serial_no , DESCRIPTION as ModelNumber , ACCOUNT as customer_id , ALLOCATIONSTATUS as allocation , CUSTOMERCLASSIFICATION as customerClassification ,spm.SalesPartner ,spm.SalesAM from LHI_Licare_data as lhi LEFT JOIN SalesPartnerMaster AS spm  ON lhi.DealerCode = spm.BPcode where serial_no = @serial`
 
     const result = await pool.request()
       .input('serial', serial)
@@ -13695,7 +13697,7 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
   { name: 'spare_doc_two', maxCount: 1 },
   { name: 'spare_doc_three', maxCount: 1 },
 ]), async (req, res) => {
-  let { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode, activitycode, com_id, warranty_status, spare_detail, ticket_no, user_id, serial_no, ModelNumber, sub_call_status, allocation, serial_data ,picking_damages,product_damages,missing_part,leg_adjustment,water_connection,abnormal_noise,ventilation_top,ventilation_bottom,ventilation_back,voltage_supply,earthing,gas_charges,transpotation ,purchase_date  } = req.body;
+  let { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode, activitycode, com_id, warranty_status, spare_detail, ticket_no, user_id, serial_no, ModelNumber, sub_call_status, allocation, serial_data, picking_damages, product_damages, missing_part, leg_adjustment, water_connection, abnormal_noise, ventilation_top, ventilation_bottom, ventilation_back, voltage_supply, earthing, gas_charges, transpotation, purchase_date , } = req.body;
 
 
   const data_serial = JSON.parse(serial_data);
@@ -14231,10 +14233,11 @@ app.post("/getServiceCharges", authenticateToken, async (req, res) => {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
 
-    const sql = `update complaint_ticket set visit_count = '${count}' where ticket_no = '${ticket_no}'`;
+    const sql = `SELECT top 1 p.item_code, m.warrenty_year, m.compressor_warrenty, m.warrenty_amount FROM product_master as p 
+LEFT JOIN Master_warrenty as m on m.product_line = p.productLine
+where p.item_description = '${ModelNumber}'`;
 
     const result = await pool.request().query(sql);
-
 
 
     return res.json(result.recordset);
