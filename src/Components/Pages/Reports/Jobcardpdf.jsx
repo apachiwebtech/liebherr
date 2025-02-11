@@ -904,14 +904,7 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer, attachments }) => {
                             <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>Images, If any:</Text>
                         </View>
 
-                        {attachments
-                            .filter(item => {
-                                // Check if the file extension indicates it's an image
-                                const validImageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-                                const fileExtension = item.attachment.split('.').pop().toLowerCase();
-                                return validImageExtensions.includes(fileExtension);
-                            })
-                            .map((item) => {
+                        {attachments.map((item) => {
                                 return (
                                     <Image
                                         key={item.attachment} // Add a unique key to each image
