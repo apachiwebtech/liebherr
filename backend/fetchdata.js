@@ -884,11 +884,6 @@ app.post("/fetchshipment_Parts", async (req, res) => {
 
 
 
-
-
-
-
-
 app.post("/fetchspareprice", async (req, res) => {
   const apiKey = req.header("x-api-key"); // Get API key from request header
 

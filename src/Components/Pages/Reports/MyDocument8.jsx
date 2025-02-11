@@ -130,80 +130,28 @@ const MyDocument8 = ({ data, spare , csp}) => {
     return (
         <Document>
             <Page size="A4" style={styles.page}>
+                
                 <View style={styles.header}>
                     <Image src={Liebherrlogo} style={styles.image} />
-                    <View style={styles.headerRight}>
-                        <Text style={{ fontSize: '16px', marginTop: 15, marginLeft: 40, fontWeight: '800', color: "#000" }}>Quotation Contract</Text>
+                    <View style={{flex : '20'}}>
+                        <Text style={{ fontSize: '10px', marginTop: 15, marginLeft: 40, fontWeight: '900', color: "#000" }}>QUOTATION_SPARE PART & CONTRACT</Text>
                     </View>
                     <View style={styles.headerRight}>
-                        <Text style={{ fontSize: '10px', marginLeft: 130, marginTop: 20, color: "#000" }}>FO_1632 LHI</Text>
+                        <Text style={{ fontSize: '10px', marginLeft: 130, marginTop: 20, color: "#000" }}>FO_1631 LHI</Text>
                     </View>
 
                 </View>
 
-                <View style={styles.Course}>
-                    <div style={{ height: "20px", margin: "0 0 0 0" }}>
 
-                    </div>
-                    <View style={[styles.tableCol12, { width: '50%' }]}>
-                        <Text style={{ fontSize: '10px', marginTop: 5, color: '#000' }}></Text>
-                    </View>
-                    <View style={[styles.tableCol11, { width: '50%' }]}>
-                        <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Quotation Number : {data.quotationNumber}</Text>
-
-                    </View>
-
-                </View>
-                <View style={styles.Course}>
-                    <div style={{ height: "20px", margin: "0 0 0 0" }}>
-
-                    </div>
-                    <View style={[styles.tableCol12, { width: '50%' }]}>
-                        <Text style={{ fontSize: '10px', marginTop: 5, color: '#000' }}></Text>
-                    </View>
-                    <View style={[styles.tableCol11, { width: '50%' }]}>
-                        <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Quotation Date : {formatDate(data.created_date)}</Text>
-
-                    </View>
-
+                <View >
+                    <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Customer Details</Text>
                 </View>
                 <View style={{ border: "2px solid black" }}>
 
 
 
-                    <View style={styles.Course}>
-                        <div style={{ height: "20px", margin: "0 0 0 0" }}>
 
-                        </div>
-                        <View style={[styles.tableCol13, { width: '50%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000', fontWeight: 1600 }}>Customer Details</Text>
-                        </View>
-                        <View style={[styles.tableCol13, { width: '50%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Authorized Service Partner </Text>
 
-                        </View>
-
-                    </View>
-                    <View style={styles.Course}>
-                        <div style={{ height: "20px", margin: "0 0 0 0" }}>
-
-                        </div>
-                        <View style={[styles.tableCol, { width: '20%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Customer ID</Text>
-                        </View>
-                        <View style={[styles.tableCol, { width: '30%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.customer_id}</Text>
-
-                        </View>
-                        <View style={[styles.tableCol, { width: '20%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Service Partner Code</Text>
-                        </View>
-                        <View style={[styles.tableCol, { width: '30%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{csp.licare_code}</Text>
-
-                        </View>
-
-                    </View>
                     <View style={styles.Course}>
                         <div style={{ height: "20px", margin: "0 0 0 0" }}>
 
@@ -215,6 +163,7 @@ const MyDocument8 = ({ data, spare , csp}) => {
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.CustomerName}</Text>
 
                         </View>
+
                         <View style={[styles.tableCol, { width: '20%' }]}>
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Service Partner</Text>
                         </View>
@@ -335,7 +284,7 @@ const MyDocument8 = ({ data, spare , csp}) => {
 
                         </div>
                         <View style={[styles.tableCol, { width: '20%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Duration for Contract : </Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Model No : </Text>
                         </View>
                         <View style={[styles.tableCol, { width: '80%' }]}>
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
@@ -348,18 +297,22 @@ const MyDocument8 = ({ data, spare , csp}) => {
                         <div style={{ height: "30px", margin: "0 0 0 0" }}>
 
                         </div>
-                        <View style={[styles.tableCol14, { width: '25%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 15, color: '#fff', fontWeight: 1600 }}>Model Number</Text>
+                        <View style={[styles.tableCol14, { width: '15%' }]}>
+                            <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 15, color: '#fff', fontWeight: 1600 }}>Article No.</Text>
                         </View>
-                        <View style={[styles.tableCol14, { width: '25%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 15, color: '#fff', fontWeight: 1600 }}>Serial Number</Text>
+                        <View style={[styles.tableCol14, { width: '35%' }]}>
+                            <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 15, color: '#fff', fontWeight: 1600 }}>Description</Text>
 
                         </View>
-                        <View style={[styles.tableCol14, { width: '15%' }]}>
+                        <View style={[styles.tableCol14, { width: '10%' }]}>
                             <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 15, color: '#fff', fontWeight: 1600 }}>Price </Text>
 
                         </View>
-                        <View style={[styles.tableCol14, { width: '15%' }]}>
+                        <View style={[styles.tableCol14, { width: '10%' }]}>
+                            <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 15, color: '#fff', fontWeight: 1600 }}>Quantity</Text>
+
+                        </View>
+                        <View style={[styles.tableCol14, { width: '10%' }]}>
                             <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 5, color: '#fff', fontWeight: 1600 }}>Total Amount</Text>
 
                         </View>
@@ -378,24 +331,28 @@ const MyDocument8 = ({ data, spare , csp}) => {
                                 <div style={{ height: "20px", margin: "0 0 0 0" }}>
 
                                 </div>
+                                <View style={[styles.tableCol, { width: '15%' }]}>
+                                    <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 15, color: '#000' }}>{item.article_code}</Text>
+
+                                </View>
                                 <View style={[styles.tableCol, { width: '35%' }]}>
-                                    <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000',textOverflow : 'ellipsis',whiteSpace: 'pre-wrap',lineHeight: 15 }}>{item.article_description}</Text>
+                                    <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 15, color: '#000',lineHeight: 15 }}>{item.article_description}</Text>
 
                                 </View>
                                  
                                 <View style={[styles.tableCol, { width: '15%' }]}>
-                                    <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{item.article_code}</Text>
-
+                                    <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 15, color: '#000' }}>{item.price}</Text>
                                 </View>
                                 <View style={[styles.tableCol, { width: '15%' }]}>
-                                    <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{item.price}</Text>
-                                </View>
-                                <View style={[styles.tableCol, { width: '15%' }]}>
-                                    <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{item.price * item.quantity} </Text>
+                                    <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 15, color: '#000' }}>{item.price * item.quantity} </Text>
 
                                 </View>
                                 <View style={[styles.tableCol, { width: '20%' }]}>
-                                    <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                                    <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 5, color: '#000' }}></Text>
+
+                                </View>
+                                <View style={[styles.tableCol, { width: '20%' }]}>
+                                    <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 15, color: '#000' }}></Text>
 
                                 </View>
 
@@ -455,7 +412,7 @@ const MyDocument8 = ({ data, spare , csp}) => {
 
                     </div>
                     <View style={[styles.tableCol15, { width: '100%', borderLeft: '1px solid black' }]}>
-                        <Text style={{ fontSize: '10px', marginLeft: 5, marginTop: 5, color: '#000' }}>Taxes Extra as Applicable</Text>
+                        <Text style={{ fontSize: '10px', marginLeft: 5, marginTop: 5, color: '#000' }}>1. Labour Cost & Taxes extra as applicable</Text>
 
 
                     </View>
@@ -465,7 +422,7 @@ const MyDocument8 = ({ data, spare , csp}) => {
 
                     </div>
                     <View style={[styles.tableCol15, { width: '100%', borderLeft: '1px solid black' }]}>
-                        <Text style={{ fontSize: '10px', marginLeft: 5, marginTop: 5, color: '#000' }}>Quotation valid till 15 day from the Quotation date</Text>
+                        <Text style={{ fontSize: '10px', marginLeft: 5, marginTop: 5, color: '#000' }}>2. Quotation vaild till 30 day from the Quotation date</Text>
                     </View>
                 </View>
                 <View style={styles.Course}>
@@ -473,7 +430,7 @@ const MyDocument8 = ({ data, spare , csp}) => {
 
                     </div>
                     <View style={[styles.tableCol15, { width: '100%', borderLeft: '1px solid black' }]}>
-                        <Text style={{ fontSize: '10px', marginLeft: 5, marginTop: 5, color: '#000' }}>This is tentative estimate, if further spares need to be replace on extra cost</Text>
+                        <Text style={{ fontSize: '10px', marginLeft: 5, marginTop: 5, color: '#000' }}>3. This is tentative estimate, if further spares need to be replace on extra cost</Text>
                     </View>
                 </View>
                 <View style={styles.Course}>
@@ -481,7 +438,7 @@ const MyDocument8 = ({ data, spare , csp}) => {
 
                     </div>
                     <View style={[styles.tableCol15, { width: '100%', borderLeft: '1px solid black', borderBottom: '1px solid black' }]}>
-                        <Text style={{ fontSize: '10px', marginLeft: 5, marginTop: 5, color: '#000' }}>Advance Payment will be collected in prior to provision of services/goods described in this quotation</Text>
+                        <Text style={{ fontSize: '10px', marginLeft: 5, marginTop: 5, color: '#000' }}>4. Advance Payment will be collected in prior to provision of services/goods described in this quotation</Text>
                     </View>
                 </View>
                 <View style={styles.Course}>
@@ -490,7 +447,8 @@ const MyDocument8 = ({ data, spare , csp}) => {
                     </div>
                     <View style={[{ width: '100%', }]}>
 
-                        <Text style={{ fontSize: '10px', marginTop: 10, color: '#000', backgroundColor: '#D3D3D3' }}>For any Enquiries regarding this quote, feel free to reach out to us at 7038 100 400 or email us at customercare.lhi@liebherr.com</Text>
+                        <Text style={{ fontSize: '10px', marginTop: 10, color: '#000', backgroundColor: '#D3D3D3' }}>Should you have any enquiries concerning this quote, please contact 7038 100 400 or write to customercare.lhi@liebherr.com</Text>
+                        <Text style={{ fontSize: '10px', marginTop: 10, color: '#000', backgroundColor: '#D3D3D3' }}>This is a record of Quotation & Kindly ask a VALID TAX INVOICE against any payment made.</Text>
 
                     </View>
                 </View>

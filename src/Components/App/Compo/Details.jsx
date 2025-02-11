@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Header from './Header';
 import axios from 'axios';
 import { Base_Url } from '../../Utils/Base_Url';
+import { Complaintview } from '../../Pages/Complaint/Complaintview';
+import DatePicker from 'react-datepicker';
 
 function Details() {
   const navigate = useNavigate();
@@ -27,6 +29,7 @@ function Details() {
   const token = localStorage.getItem("token"); // Get token from localStorage
   const [otp, setotp] = useState([]);
   const [serial_no, setserial] = useState('');
+  const [purchase_date, setPurchaseDate] = useState('');
   const [allocation, setallocation] = useState('');
   const [modelno, setModelNumber] = useState('');
   const [errors, setErrors] = useState({})
@@ -79,7 +82,8 @@ function Details() {
     serial_no: '',
     ModelNumber: '',
     call_remark: '',
-    spare_qty: ''
+    spare_qty: '',
+    purchase_date: ''
   })
 
 
@@ -111,6 +115,26 @@ function Details() {
     }));
   };
 
+
+  async function getprice(params) {
+
+    axios.post(`${Base_Url}/getServiceCharges`, { ModelNumber: Value.ModelNumber }, {
+      headers: {
+        Authorization: token
+      }
+    })
+      .then((res) => {
+        console.log(res.data)
+      })
+  }
+
+  useEffect(() => {
+
+    if (Value.warranty_status == 'OUT OF WARRENTY' || data.warranty_status == 'OUT OF WARRENTY') {
+      getprice()
+    }
+
+  }, [])
 
 
 
@@ -253,6 +277,7 @@ function Details() {
           formData.append('warranty_status', Value.warranty_status);
           formData.append('com_id', data.id);
           formData.append('call_remark', Value.call_remark);
+          formData.append('purchase_date',Value.purchase_date &&  formatpurchasedate(Value.purchase_date));
           formData.append('ticket_no', data.ticket_no);
           formData.append('allocation', allocation);
           formData.append('ModelNumber', modelno || data.ModelNumber);
@@ -305,7 +330,7 @@ function Details() {
             .catch((err) => {
               console.log(err);
             });
-        }else{
+        } else {
           alert("Wrong Otp")
 
         }
@@ -323,6 +348,7 @@ function Details() {
         formData.append('call_type', Value.call_type);
         formData.append('other_charge', Value.other_charge);
         formData.append('warranty_status', Value.warranty_status);
+        formData.append('purchase_date', Value.purchase_date &&  formatpurchasedate(Value.purchase_date));
         formData.append('com_id', data.id);
         formData.append('call_remark', Value.call_remark);
         formData.append('ticket_no', data.ticket_no);
@@ -405,6 +431,7 @@ function Details() {
           getremark(res.data.data[0].ticket_no)
           getuniquespare(res.data.data[0].ticket_no)
           getspare(res.data.data[0].ModelNumber)
+          setPurchaseDate(res.data.data[0].purchase_date)
           // console.log(Value.symptomcode);
           if (res.data.data[0].group_code != "") {
             getDefectCodewisetype_app(res.data.data[0].group_code)
@@ -419,8 +446,9 @@ function Details() {
             call_type: res.data.data[0].ticket_type,
             warranty_status: res.data.data[0].warranty_status,
             call_status: res.data.data[0].call_status,
-
+            purchase_date : res.data.data[0].purchase_date
           })
+
 
           setChecklist({
             picking_damages: res.data.data[0].picking_damages,
@@ -754,7 +782,7 @@ function Details() {
   }
 
 
-  const formatDate = (dateString) => {
+  const formatDate1 = (dateString) => {
     if (!dateString) {
       return dateString; // Return an empty string or a placeholder if dateString is undefined or null
     }
@@ -766,6 +794,26 @@ function Details() {
 
     return `${day}-${month}-${year}`;
   };
+
+  const formatpurchasedate = (dateString) => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+
+    return `${year}-${month}-${day}`;
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+
+    return `${day}-${month}-${year}`;
+  };
+
+
 
 
   const handlegetmodel = async (value) => {
@@ -839,6 +887,83 @@ function Details() {
   }
 
 
+  const getDateAfterOneYear = (value) => {
+
+    try {
+      // Ensure value is in a recognized format
+      const purchase_date = new Date(value);
+
+      if (isNaN(purchase_date)) {
+        throw new Error("Invalid date format");
+      }
+
+      // Add one year to the date
+      purchase_date.setFullYear(purchase_date.getFullYear() + 1);
+
+      // Format the date as YYYY-MM-DD
+      const lastDate = purchase_date.toISOString().split('T')[0];
+
+      // Get current date and subtract one day
+      const currentDate = new Date();
+      currentDate.setDate(currentDate.getDate());
+      const currentDateMinusOneDay = currentDate.toISOString().split('T')[0];
+
+      // Compare lastDate and currentDateMinusOneDay
+      if (lastDate < currentDateMinusOneDay) {
+        setValue((prev) => ({
+          ...prev,
+          warranty_status: "OUT OF WARRANTY",
+          purchase_date: value
+        }))
+ 
+
+
+        axios.post(`${Base_Url}/updatewarrentystate`, { warrenty: 'OUT OF WARRANTY', ticket_no: String(data.id) }, {
+          headers: {
+            Authorization: token
+          }
+        })
+          .then((res) => {
+            if (res.data && res.data[0].warranty_status) {
+              setValue((prev) => ({
+                ...prev,
+                warranty_status: res.data[0].warranty_status
+              }))
+            }
+          })
+      } else {
+
+        setValue((prev) => ({
+          ...prev,
+          purchase_date: value,
+          warranty_status: "WARRANTY"
+        }))
+
+
+        axios.post(`${Base_Url}/updatewarrentystate`, { warrenty: 'WARRANTY', ticket_no: String(data.id) }, {
+          headers: {
+            Authorization: token
+          }
+        })
+          .then((res) => {
+            if (res.data && res.data[0].warranty_status) {
+              setValue((prev) => ({
+                ...prev,
+                warranty_status: res.data[0].warranty_status
+              }))
+
+            }
+          })
+      }
+
+    } catch (error) {
+      console.error("Error processing date:", error.message);
+      return null; // Return null for invalid dates
+    }
+  };
+
+
+
   return (
     <>
       <Header />
@@ -863,7 +988,7 @@ function Details() {
                   <h6 className="text-primary mb-0" style={{ fontWeight: 600 }}>
                     Complaint No: <span id="compaintno1">{data.ticket_no}</span>
                   </h6>
-                  <span className="text-muted small">{formatDate(data.co)}</span>
+                  <span className="text-muted small">{formatDate1(data.co)}</span>
                 </div>
 
                 {/* Name Section */}
@@ -926,17 +1051,35 @@ function Details() {
                 </div>
 
                 <div className=" mb-2">
-                  {/* <p className="mb-2 small">
-                    <strong>Call Type:</strong> {data.call_type}
-                  </p> */}
                   <p className="mb-0 small">
                     <strong>Customer Class:</strong> <span style={{ textTransform: "uppercase" }}> {data.customer_class}</span>
                   </p>
                 </div>
 
+
+                {purchase_date == null || purchase_date == '' ? <>
+                  <p className="mb-2 small"><strong>Purchase Date:</strong></p>
+                  <div>
+                    <DatePicker
+                      selected={Value.purchase_date}
+                      onChange={(date) => {
+
+                        getDateAfterOneYear(date);
+                      }}
+                      dateFormat="dd-MM-yyyy"
+                      placeholderText="DD-MM-YYYY"
+                      className='form-control'
+                      disabled={data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false}
+                      name="purchase_date"
+                      aria-describedby="Anidate"
+                      maxDate={new Date().toISOString().split("T")[0]}
+                    />
+                  </div>
+                </> : <><strong>Purchase Date:</strong> {formatDate(Value.purchase_date)} </>}
+
                 {/* Priority Section */}
-                <p className="mt-3 text-danger small" style={{ fontWeight: 600 }}>
-                  Call Priority: {data.call_priority}
+                <p className="mt-3  small" style={{ fontWeight: 600 }}>
+                  Call Priority: <span className='text-danger'>{data.call_priority}</span>
                 </p>
               </div>
             </div>

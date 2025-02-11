@@ -397,7 +397,7 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer, attachments }) => {
 
                         </View>
                         <View style={[styles.tableCol, { width: '25%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.sales_partner} {data.sales_partner2}</Text>
 
                         </View>
 

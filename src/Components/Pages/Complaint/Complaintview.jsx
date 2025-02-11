@@ -86,8 +86,8 @@ export function Complaintview(params) {
     csp: "",
     customer_class : "",
     customer_id : '',
-    gascheck : '',
-    transportcheck : ''
+    gascheck : 'No',
+    transportcheck : 'No'
   });
 
 
@@ -238,7 +238,7 @@ export function Complaintview(params) {
         }))
         setWarranty_status_data("WARRANTY");
 
-        axios.post(`${Base_Url}/updatewarrentystate`, { warrenty: 'WARRANTY', ticket_no: complaintid }, {
+        axios.post(`${Base_Url}/updatewarrentystate`, { warrenty: 'WARRANTY', ticket_no: String(complaintid) }, {
           headers: {
             Authorization: token
           }

@@ -13560,11 +13560,11 @@ app.get('/getcomplaint/:en_id/:page/:limit', authenticateToken, async (req, res)
     const offset = (page - 1) * limit;
 
 
-    console.log(`SELECT t.*, c.alt_mobileno FROM ( SELECT * FROM complaint_ticket WHERE engineer_id LIKE '${en_id}' ) AS t LEFT JOIN awt_customer AS c ON t.customer_id = c.customer_id CROSS APPLY STRING_SPLIT(t.engineer_id, ',') AS split_values WHERE split_values.value = '${en_id}' ORDER BY t.id DESC OFFSET ${offset} ROWS FETCH NEXT ${limit} ROWS ONLY;`);
+    console.log(`SELECT t.*, c.alt_mobileno FROM ( SELECT * FROM complaint_ticket WHERE engineer_id LIKE '%${en_id}%' ) AS t LEFT JOIN awt_customer AS c ON t.customer_id = c.customer_id CROSS APPLY STRING_SPLIT(t.engineer_id, ',') AS split_values WHERE split_values.value = '${en_id}' ORDER BY t.id DESC OFFSET ${offset} ROWS FETCH NEXT ${limit} ROWS ONLY;`);
 
 
     const result = await pool.request()
-      .query(`SELECT t.*, c.alt_mobileno FROM ( SELECT * FROM complaint_ticket WHERE engineer_id LIKE '${en_id}' ) AS t LEFT JOIN awt_customer AS c ON t.customer_id = c.customer_id CROSS APPLY STRING_SPLIT(t.engineer_id, ',') AS split_values WHERE split_values.value = '${en_id}' ORDER BY t.id DESC OFFSET ${offset} ROWS FETCH NEXT ${limit} ROWS ONLY;`);
+      .query(`SELECT t.*, c.alt_mobileno FROM ( SELECT * FROM complaint_ticket WHERE engineer_id LIKE '%${en_id}%' ) AS t LEFT JOIN awt_customer AS c ON t.customer_id = c.customer_id CROSS APPLY STRING_SPLIT(t.engineer_id, ',') AS split_values WHERE split_values.value = '${en_id}' ORDER BY t.id DESC OFFSET ${offset} ROWS FETCH NEXT ${limit} ROWS ONLY;`);
 
 
 
@@ -13695,7 +13695,7 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
   { name: 'spare_doc_two', maxCount: 1 },
   { name: 'spare_doc_three', maxCount: 1 },
 ]), async (req, res) => {
-  let { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode, activitycode, com_id, warranty_status, spare_detail, ticket_no, user_id, serial_no, ModelNumber, sub_call_status, allocation, serial_data ,picking_damages,product_damages,missing_part,leg_adjustment,water_connection,abnormal_noise,ventilation_top,ventilation_bottom,ventilation_back,voltage_supply,earthing,gas_charges,transpotation   } = req.body;
+  let { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode, activitycode, com_id, warranty_status, spare_detail, ticket_no, user_id, serial_no, ModelNumber, sub_call_status, allocation, serial_data ,picking_damages,product_damages,missing_part,leg_adjustment,water_connection,abnormal_noise,ventilation_top,ventilation_bottom,ventilation_back,voltage_supply,earthing,gas_charges,transpotation ,purchase_date  } = req.body;
 
 
   const data_serial = JSON.parse(serial_data);
@@ -13727,7 +13727,8 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
     service_charges && service_charges !== 'undefined' ? `Price: ${service_charges}` : '',
     other_charge && other_charge !== 'undefined' ? `Other Charges: ${other_charge}` : '',
     serial_no && serial_no !== 'undefined' ? `Serial No: ${serial_no}` : '',
-    ModelNumber && ModelNumber !== 'undefined' ? `Model Number: ${ModelNumber}` : ''
+    ModelNumber && ModelNumber !== 'undefined' ? `Model Number: ${ModelNumber}` : '',
+    purchase_date && purchase_date !== 'undefined' ? `purchase Date: ${purchase_date}` : '',
   ].filter(Boolean).join(', ');
 
 
@@ -13755,6 +13756,7 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
       .input('spare_detail', sql.VarChar, spare_detail != 'undefined' ? spare_detail : null)
       .input('serial_no', sql.VarChar, serial_no != 'undefined' ? serial_no : null)
       .input('ModelNumber', sql.VarChar, ModelNumber != 'undefined' ? ModelNumber : '')
+      .input('purchase_date', sql.VarChar, purchase_date != 'undefined' ? purchase_date : '')
       .input('picking_damages', sql.VarChar, picking_damages)
       .input('product_damages', sql.VarChar, product_damages)
       .input('missing_part', sql.VarChar, missing_part)
@@ -13768,7 +13770,7 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
       .input('earthing', sql.VarChar, earthing)
       .input('gas_charges', sql.VarChar, gas_charges)
       .input('transpotation', sql.VarChar, transpotation)
-      .query('UPDATE complaint_ticket SET warranty_status = @warranty_status, group_code = @symptomcode, defect_type = @causecode, site_defect = @actioncode,activity_code = @activitycode,service_charges = @service_charges, call_status = @call_status,sub_call_status = @sub_call_status, call_type = @call_type, other_charges = @other_charge, spare_doc_path = @spare_doc_path, spare_detail = @spare_detail , ModelNumber = @ModelNumber , serial_no = @serial_no ,picking_damages = @picking_damages,product_damages = @product_damages,missing_part = @missing_part,leg_adjustment = @leg_adjustment,water_connection = @water_connection, abnormal_noise = @abnormal_noise,ventilation_top = @ventilation_top,ventilation_bottom = @ventilation_bottom,ventilation_back = @ventilation_back,voltage_supply = @voltage_supply , earthing = @earthing ,gascheck = @gas_charges , transportcheck = @transpotation WHERE id = @com_id');
+      .query('UPDATE complaint_ticket SET warranty_status = @warranty_status, group_code = @symptomcode, defect_type = @causecode, site_defect = @actioncode,activity_code = @activitycode,service_charges = @service_charges, call_status = @call_status,sub_call_status = @sub_call_status, call_type = @call_type, other_charges = @other_charge, spare_doc_path = @spare_doc_path, spare_detail = @spare_detail , ModelNumber = @ModelNumber , serial_no = @serial_no ,picking_damages = @picking_damages,product_damages = @product_damages,missing_part = @missing_part,leg_adjustment = @leg_adjustment,water_connection = @water_connection, abnormal_noise = @abnormal_noise,ventilation_top = @ventilation_top,ventilation_bottom = @ventilation_bottom,ventilation_back = @ventilation_back,voltage_supply = @voltage_supply , earthing = @earthing ,gascheck = @gas_charges , transportcheck = @transpotation ,purchase_date = @purchase_date  WHERE id = @com_id');
 
     // Check if any rows were updated
 
@@ -14202,6 +14204,28 @@ app.post("/getcspdetails", authenticateToken, async (req, res) => {
 app.post("/updatevisitcount", authenticateToken, async (req, res) => {
 
   let { count, ticket_no } = req.body;
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    const sql = `update complaint_ticket set visit_count = '${count}' where ticket_no = '${ticket_no}'`;
+
+    const result = await pool.request().query(sql);
+
+
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json(err);
+  }
+});
+
+
+app.post("/getServiceCharges", authenticateToken, async (req, res) => {
+
+  let { ModelNumber } = req.body;
 
   try {
     // Use the poolPromise to get the connection pool
