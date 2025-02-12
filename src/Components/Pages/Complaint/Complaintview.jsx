@@ -717,7 +717,11 @@ export function Complaintview(params) {
 
 
 
-    const finaldata = { data: newPart, ticket_no: complaintview.ticket_no }
+    let finaldata = { data: newPart, ticket_no: complaintview.ticket_no }
+
+    finaldata = JSON.stringify(finaldata)
+
+     
 
     const data = {
       finaldata: finaldata,

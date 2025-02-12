@@ -10117,7 +10117,10 @@ app.get("/getquotationcsplist", authenticateToken, async (req, res) => {
 
 app.post('/add_uniqsparepart', authenticateToken, async (req, res) => {
   try {
-    const { finaldata } = req.body;
+    let { finaldata } = req.body;
+
+    finaldata = JSON.parse(finaldata)
+
 
     const pool = await poolPromise;
     const newdata = finaldata.data;
