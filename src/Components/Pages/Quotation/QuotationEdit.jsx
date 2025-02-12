@@ -129,7 +129,7 @@ const QuotationEdit = () => {
         return `${day}-${month}-${year}`;
     };
 
-    // code for pdf 
+    // code for pdf
 
     async function downloadPDF(id) {
         Blob(value)
