@@ -137,7 +137,7 @@ const MyDocument8 = ({ data, spare , csp}) => {
                         <Text style={{ fontSize: '10px', marginTop: 15, marginLeft: 40, fontWeight: '900', color: "#000" }}>QUOTATION_SPARE PART & CONTRACT</Text>
                     </View>
                     <View style={styles.headerRight}>
-                        <Text style={{ fontSize: '10px', marginLeft: 130, marginTop: 20, color: "#000" }}>FO_1631 LHI</Text>
+                        <Text style={{ fontSize: '10px', marginLeft: 90, marginTop: 20, color: "#000" }}>FO_1631 LHI</Text>
                     </View>
 
                 </View>
@@ -309,7 +309,7 @@ const MyDocument8 = ({ data, spare , csp}) => {
 
                         </View>
                         <View style={[styles.tableCol14, { width: '10%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 15, color: '#fff', fontWeight: 1600 }}>Quantity</Text>
+                            <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 5, color: '#fff', fontWeight: 1600 }}>Quantity</Text>
 
                         </View>
                         <View style={[styles.tableCol14, { width: '10%' }]}>
@@ -340,14 +340,14 @@ const MyDocument8 = ({ data, spare , csp}) => {
 
                                 </View>
                                  
-                                <View style={[styles.tableCol, { width: '15%' }]}>
+                                <View style={[styles.tableCol, { width: '10%' }]}>
                                     <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 15, color: '#000' }}>{item.price}</Text>
                                 </View>
-                                <View style={[styles.tableCol, { width: '15%' }]}>
+                                <View style={[styles.tableCol, { width: '10%' }]}>
                                     <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 15, color: '#000' }}>{item.price * item.quantity} </Text>
 
                                 </View>
-                                <View style={[styles.tableCol, { width: '20%' }]}>
+                                <View style={[styles.tableCol, { width: '10%' }]}>
                                     <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 5, color: '#000' }}></Text>
 
                                 </View>
