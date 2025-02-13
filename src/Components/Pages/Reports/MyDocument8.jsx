@@ -344,11 +344,11 @@ const MyDocument8 = ({ data, spare , csp}) => {
                                     <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 15, color: '#000' }}>{item.price}</Text>
                                 </View>
                                 <View style={[styles.tableCol, { width: '10%' }]}>
-                                    <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 15, color: '#000' }}>{item.price * item.quantity} </Text>
+                                    <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 15, color: '#000' }}>{item.quantity} </Text>
 
                                 </View>
                                 <View style={[styles.tableCol, { width: '10%' }]}>
-                                    <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 5, color: '#000' }}></Text>
+                                    <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 5, color: '#000' }}>{item.price * item.quantity} </Text>
 
                                 </View>
                                 <View style={[styles.tableCol, { width: '20%' }]}>

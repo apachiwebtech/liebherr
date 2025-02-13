@@ -838,7 +838,7 @@ export function Registercomplaint(params) {
 
 
               handleAttachment2Submit(res.data.ticket_no)
-              alert(res.data.ticket_no)
+              alert(`Ticket Has been generated successfully. Ticket no is  ${res.data.ticket_no}`)
               notify();
               setTimeout(() => {
                 navigate('/complaintlist');

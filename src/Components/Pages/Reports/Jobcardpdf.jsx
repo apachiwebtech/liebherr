@@ -107,10 +107,11 @@ const styles = StyleSheet.create({
     },
 });
 
-const Jobcardpdf = ({ data, duplicate, spare, engineer, attachments }) => {
+const Jobcardpdf = ({ data, duplicate, spare, engineer, attachments ,engremark }) => {
 
 
-    console.log(data,"%%")
+    console.log(engremark.checkremark.remark,"%%")
+    console.log(engremark.remark.remark,"%%")
 
 
 
@@ -376,8 +377,7 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer, attachments }) => {
                             <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>Otp Received</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '25%' }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.totp}</Text>
-
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.state_id}</Text>
                         </View>
 
                     </View>
@@ -706,7 +706,7 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer, attachments }) => {
                             <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.ventilation_top == 'No'? 'No' : null }</Text>
                         </View>
                         <View style={[{ width: '25%' }, { borderRight: "1px" }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 15, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 15, color: '#000' }}>{engremark.checkremark.remark}</Text>
                         </View>
 
 
@@ -877,8 +877,7 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer, attachments }) => {
                             <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>Engineer Remarks / Recommendations</Text>
                         </View>
                         <View style={[{ width: '70%' }, { borderBottom: "1px" }, { borderRight: "1px" }]}>
-                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
-
+                            <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>{engremark.remark.remark}</Text>
                         </View>
 
 

@@ -83,7 +83,8 @@ function Details() {
     ModelNumber: '',
     call_remark: '',
     spare_qty: '',
-    purchase_date: ''
+    purchase_date: '',
+    check_remark : ''
   })
 
 
@@ -280,6 +281,7 @@ function Details() {
           formData.append('warranty_status', Value.warranty_status);
           formData.append('com_id', data.id);
           formData.append('call_remark', Value.call_remark);
+          formData.append('check_remark', Value.check_remark);
           formData.append('purchase_date', Value.purchase_date && formatpurchasedate(Value.purchase_date));
           formData.append('ticket_no', data.ticket_no);
           formData.append('allocation', allocation);
@@ -287,19 +289,22 @@ function Details() {
           formData.append('serial_no', serial_no || data.serial_no);
           formData.append('user_id', localStorage.getItem('userid'));
           formData.append('serial_data', JSON.stringify(data));
-          formData.append('picking_damages', checklist.picking_damages);
-          formData.append('product_damages', checklist.product_damages);
-          formData.append('missing_part', checklist.missing_part);
-          formData.append('leg_adjustment', checklist.leg_adjustment);
-          formData.append('water_connection', checklist.water_connection);
-          formData.append('abnormal_noise', checklist.abnormal_noise);
-          formData.append('ventilation_top', checklist.ventilation_top);
-          formData.append('ventilation_bottom', checklist.ventilation_bottom);
-          formData.append('ventilation_back', checklist.ventilation_back);
-          formData.append('voltage_supply', checklist.voltage_supply);
-          formData.append('earthing', checklist.earthing);
-          formData.append('gas_charges', checklist.gas_charges);
-          formData.append('transpotation', checklist.transpotation);
+          formData.append('picking_damages', checklist.picking_damages == 'null' ? 'No' : checklist.picking_damages);
+          formData.append('product_damages', checklist.product_damages == 'null' ? 'No' : checklist.product_damages);
+          formData.append('missing_part', checklist.missing_part == 'null' ? 'No' : checklist.missing_part);
+          formData.append('leg_adjustment', checklist.leg_adjustment == 'null' ? 'No' : checklist.leg_adjustment);
+          formData.append('water_connection', checklist.water_connection == 'null' ? 'No' : checklist.water_connection);
+          formData.append('abnormal_noise', checklist.abnormal_noise == 'null' ? 'No' : checklist.abnormal_noise);
+          formData.append('ventilation_top', checklist.ventilation_top == 'null' ? 'No' : checklist.ventilation_top);
+          formData.append('ventilation_bottom', checklist.ventilation_bottom == 'null' ? 'No' : checklist.ventilation_bottom);
+          formData.append('ventilation_back', checklist.ventilation_back == 'null' ? 'No' : checklist.ventilation_back);
+          formData.append('voltage_supply', checklist.voltage_supply == 'null' ? 'No' : checklist.voltage_supply);
+          formData.append('earthing', checklist.earthing == 'null' ? 'No' : checklist.earthing);
+          formData.append('gas_charges', checklist.gas_charges == 'null' ? 'No' : checklist.gas_charges);
+          formData.append('transpotation', checklist.transpotation == 'null' ? 'No' : checklist.transpotation);
+          
+
+
           if (Value.spare_required) {
             formData.append('spare_detail', Value.spare_detail);
           }
@@ -354,25 +359,27 @@ function Details() {
         formData.append('purchase_date', Value.purchase_date && formatpurchasedate(Value.purchase_date));
         formData.append('com_id', data.id);
         formData.append('call_remark', Value.call_remark);
+        formData.append('check_remark', Value.check_remark);
         formData.append('ticket_no', data.ticket_no);
         formData.append('allocation', allocation);
         formData.append('ModelNumber', modelno || data.ModelNumber);
         formData.append('serial_no', serial_no || data.serial_no);
         formData.append('user_id', localStorage.getItem('userid'));
         formData.append('serial_data', JSON.stringify(data));
-        formData.append('picking_damages', checklist.picking_damages);
-        formData.append('product_damages', checklist.product_damages);
-        formData.append('missing_part', checklist.missing_part);
-        formData.append('leg_adjustment', checklist.leg_adjustment);
-        formData.append('water_connection', checklist.water_connection);
-        formData.append('abnormal_noise', checklist.abnormal_noise);
-        formData.append('ventilation_top', checklist.ventilation_top);
-        formData.append('ventilation_bottom', checklist.ventilation_bottom);
-        formData.append('ventilation_back', checklist.ventilation_back);
-        formData.append('voltage_supply', checklist.voltage_supply);
-        formData.append('earthing', checklist.earthing);
-        formData.append('gas_charges', checklist.gas_charges);
-        formData.append('transpotation', checklist.transpotation);
+        formData.append('picking_damages', checklist.picking_damages == 'null' ? 'No' : checklist.picking_damages);
+        formData.append('product_damages', checklist.product_damages == 'null' ? 'No' : checklist.product_damages);
+        formData.append('missing_part', checklist.missing_part == 'null' ? 'No' : checklist.missing_part);
+        formData.append('leg_adjustment', checklist.leg_adjustment == 'null' ? 'No' : checklist.leg_adjustment);
+        formData.append('water_connection', checklist.water_connection == 'null' ? 'No' : checklist.water_connection);
+        formData.append('abnormal_noise', checklist.abnormal_noise == 'null' ? 'No' : checklist.abnormal_noise);
+        formData.append('ventilation_top', checklist.ventilation_top == 'null' ? 'No' : checklist.ventilation_top);
+        formData.append('ventilation_bottom', checklist.ventilation_bottom == 'null' ? 'No' : checklist.ventilation_bottom);
+        formData.append('ventilation_back', checklist.ventilation_back == 'null' ? 'No' : checklist.ventilation_back);
+        formData.append('voltage_supply', checklist.voltage_supply == 'null' ? 'No' : checklist.voltage_supply);
+        formData.append('earthing', checklist.earthing == 'null' ? 'No' : checklist.earthing);
+        formData.append('gas_charges', checklist.gas_charges == 'null' ? 'No' : checklist.gas_charges);
+        formData.append('transpotation', checklist.transpotation == 'null' ? 'No' : checklist.transpotation);
+        
         if (Value.spare_required) {
           formData.append('spare_detail', Value.spare_detail);
         }
@@ -577,7 +584,8 @@ function Details() {
       ItemDescription: sparedata[Value.spare].article_description,
       title: sparedata[Value.spare].article_code,
       product_code: sparedata[Value.spare].spareId,
-      spare_qty: Value.spare_qty
+      spare_qty: Value.spare_qty,
+      price : sparedata[Value.spare].price
     }
     // console.log(data);
 
@@ -1229,7 +1237,7 @@ function Details() {
                           <option value="">Select Spare Details Type</option>
                           {sparedata.map((item, key) => {
                             return (
-                              <option value={key}>{item.article_description}</option>
+                              <option value={key}>{item.article_code}-{item.article_description}</option>
                             )
                           })}
                         </select>
@@ -1334,13 +1342,13 @@ function Details() {
                     </div>
                     <div className='row mt-2'>
                       <div class="form-group col-6">
-                        <input type="checkbox" onChange={handleCheckChange} name="picking_damages" checked={checklist.picking_damages == 'Yes' ? true : false} disabled={data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false} /> <label>Any Picking Damages</label>
+                        <input type="checkbox" onChange={handleCheckChange}  name="picking_damages" checked={checklist.picking_damages == 'Yes' ? true : false} disabled={data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false} /> <label>Any Picking Damages</label>
                       </div>
                       <div class="form-group col-6">
                         <input type="checkbox" onChange={handleCheckChange} name="product_damages" checked={checklist.product_damages == 'Yes' ? true : false} disabled={data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false} /> <label>Any Product Damages </label>
                       </div>
                       <div class="form-group col-6">
-                        <input type="checkbox" onChange={handleCheckChange} name="missing_part" checked={checklist.missing_part == 'Yes' ? true : false} disabled={data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false} /> <label>Any Missing Parts</label>
+                        <input type="checkbox" onChange={handleCheckChange}  name="missing_part" checked={checklist.missing_part == 'Yes' ? true : false} disabled={data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false} /> <label>Any Missing Parts</label>
                       </div>
                       <div class="form-group col-6">
                         <input type="checkbox" onChange={handleCheckChange} name="leg_adjustment" checked={checklist.leg_adjustment == 'Yes' ? true : false} disabled={data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false} /> <label>Leg Adjustment Done</label>
@@ -1392,6 +1400,14 @@ function Details() {
 
                   <div class="mb-3">
                     <div class="form-group">
+                      <label for="val-spare_remark">Checklist Remark</label>
+                      <textarea class="form-control" onChange={handleChange} name="check_remark" id="check_remark" rows="3" disabled={data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false}></textarea>
+                      {errors.check_remark && <span className='text-danger'>{errors.check_remark}</span>}
+                    </div>
+                  </div>
+
+                  <div class="mb-3">
+                    <div class="form-group">
                       <label for="val-spare_remark">Technician Feedback<span className='text-danger'>*</span></label>
                       <textarea class="form-control" onChange={handleChange} name="call_remark" id="call_remark" rows="3" disabled={data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false}></textarea>
                       {errors.call_remark && <span className='text-danger'>{errors.call_remark}</span>}
@@ -1421,7 +1437,7 @@ function Details() {
 
                       {Value.call_status == 'Completed' && <div class="mb-3">
                         <div class="form-group">
-                          <label for="val-actioncode">Enter OTP - {data.totp}</label>
+                          <label for="val-actioncode">Enter OTP </label>
                           <input type="text" onChange={handleChange} value={Value.otps} class="form-control" name="otps" id="otps" disabled={data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false} />
                           {errors.otps && <span className='text-danger'>{errors.otps}</span>}
                         </div>

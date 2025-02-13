@@ -14,10 +14,12 @@ const RateCardExcel = require('./Routes/Utils/RateCardExcel')
 const CryptoJS = require('crypto-js');
 const nodemailer = require('nodemailer');
 const axios = require("axios");
-// Secret key for JWT
-const JWT_SECRET = "Lh!_Login_123"; // Replace with a strong, secret key
-const API_KEY = "a8f2b3c4-d5e6-7f8g-h9i0-12345jklmn67";
-const secretKey = 'licare'
+
+require('dotenv').config();
+const JWT_SECRET = process.env.JWT_SECRET; 
+const API_KEY = process.env.API_KEY;
+const secretKey = process.env.SECRET_KEY
+
 app.use(cors({ origin: "*" }));
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ extended: true, limit: '100mb' }));
@@ -9886,7 +9888,7 @@ app.get("/getSpareParts/:model", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
     // Parameterized query
     const sql = `
-      SELECT sp.id, sp.ModelNumber, sp.title as article_code ,sp.ProductCode as spareId, sp.ItemDescription as article_description , spt.Price_group as price FROM Spare_parts as sp left join Spare_partprice as spt on sp.title = spt.Item  WHERE sp.deleted = 0  AND ModelNumber = @model
+      SELECT sp.id, sp.ModelNumber, sp.title as article_code ,sp.ProductCode as spareId, sp.ItemDescription as article_description , spt.MRPQuotation as price FROM Spare_parts as sp left join priceGroup as spt on sp.PriceGroup = spt.PriceGroup  WHERE sp.deleted = 0  AND ModelNumber = @model
     `;
 
     const result = await pool.request()
@@ -13700,7 +13702,7 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
   { name: 'spare_doc_two', maxCount: 1 },
   { name: 'spare_doc_three', maxCount: 1 },
 ]), async (req, res) => {
-  let { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode, activitycode, com_id, warranty_status, spare_detail, ticket_no, user_id, serial_no, ModelNumber, sub_call_status, allocation, serial_data, picking_damages, product_damages, missing_part, leg_adjustment, water_connection, abnormal_noise, ventilation_top, ventilation_bottom, ventilation_back, voltage_supply, earthing, gas_charges, transpotation, purchase_date , } = req.body;
+  let { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode, activitycode, com_id, warranty_status, spare_detail, ticket_no, user_id, serial_no, ModelNumber, sub_call_status, allocation, serial_data, picking_damages, product_damages, missing_part, leg_adjustment, water_connection, abnormal_noise, ventilation_top, ventilation_bottom, ventilation_back, voltage_supply, earthing, gas_charges, transpotation, purchase_date ,otp , check_remark } = req.body;
 
 
   const data_serial = JSON.parse(serial_data);
@@ -13726,6 +13728,7 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
 
   const finalremark = [
     call_remark && call_remark !== 'undefined' ? `Remark: ${call_remark}` : '',
+    check_remark && check_remark !== 'undefined' ? `Checklist Remark: ${check_remark}` : '',
     call_type && call_type !== 'undefined' ? `Call Type: ${call_type}` : '',
     `Warranty Status: ${warranty_status ? warranty_status : "NA"}`,
     call_status && call_status !== 'undefined' ? `Call Status: ${call_status}` : '',
@@ -13775,7 +13778,8 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
       .input('earthing', sql.VarChar, earthing)
       .input('gas_charges', sql.VarChar, gas_charges)
       .input('transpotation', sql.VarChar, transpotation)
-      .query('UPDATE complaint_ticket SET warranty_status = @warranty_status, group_code = @symptomcode, defect_type = @causecode, site_defect = @actioncode,activity_code = @activitycode,service_charges = @service_charges, call_status = @call_status,sub_call_status = @sub_call_status, call_type = @call_type, other_charges = @other_charge, spare_doc_path = @spare_doc_path, spare_detail = @spare_detail , ModelNumber = @ModelNumber , serial_no = @serial_no ,picking_damages = @picking_damages,product_damages = @product_damages,missing_part = @missing_part,leg_adjustment = @leg_adjustment,water_connection = @water_connection, abnormal_noise = @abnormal_noise,ventilation_top = @ventilation_top,ventilation_bottom = @ventilation_bottom,ventilation_back = @ventilation_back,voltage_supply = @voltage_supply , earthing = @earthing ,gascheck = @gas_charges , transportcheck = @transpotation ,purchase_date = @purchase_date  WHERE id = @com_id');
+      .input('otp', sql.Int,  Number(otp))
+      .query('UPDATE complaint_ticket SET warranty_status = @warranty_status, group_code = @symptomcode, defect_type = @causecode, site_defect = @actioncode,activity_code = @activitycode,service_charges = @service_charges, call_status = @call_status,sub_call_status = @sub_call_status, call_type = @call_type, other_charges = @other_charge, spare_doc_path = @spare_doc_path, spare_detail = @spare_detail , ModelNumber = @ModelNumber , serial_no = @serial_no ,picking_damages = @picking_damages,product_damages = @product_damages,missing_part = @missing_part,leg_adjustment = @leg_adjustment,water_connection = @water_connection, abnormal_noise = @abnormal_noise,ventilation_top = @ventilation_top,ventilation_bottom = @ventilation_bottom,ventilation_back = @ventilation_back,voltage_supply = @voltage_supply , earthing = @earthing ,gascheck = @gas_charges , transportcheck = @transpotation ,purchase_date = @purchase_date  , state_id = @otp WHERE id = @com_id');
 
     // Check if any rows were updated
 
@@ -13821,10 +13825,27 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
     if (result.rowsAffected[0] > 0) {
 
 
+      const concheck = `Checklist Remark: ${check_remark}`
+
+      
+      const updatecheckremark= `
+      INSERT INTO awt_complaintremark (ticket_no, remark, created_by,updated_by,created_date)
+      VALUES (@ticket_no_c, @remark_c, @created_by_c,@updated_by_c ,@created_date_c);
+  `;
+
+       await pool.request()
+        .input('ticket_no_c', sql.VarChar, ticket_no)
+        .input('remark_c', sql.VarChar, concheck)
+        .input('created_by_c', sql.VarChar, user_id)
+        .input('updated_by_c', sql.VarChar, 'Check')
+        .input('created_date_c', sql.DateTime, date)
+        .query(updatecheckremark);
+
+
 
       const updateremarkQuery = `
-      INSERT INTO awt_complaintremark (ticket_no, remark, created_by, created_date)
-      VALUES (@ticket_no, @remark, @created_by, GETDATE());
+      INSERT INTO awt_complaintremark (ticket_no, remark, created_by,updated_by , created_date)
+      VALUES (@ticket_no, @remark, @created_by,@updated_by, @created_date);
       SELECT SCOPE_IDENTITY() AS remark_id;
   `;
 
@@ -13832,7 +13853,12 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
         .input('ticket_no', sql.VarChar, ticket_no)
         .input('remark', sql.VarChar, finalremark)
         .input('created_by', sql.VarChar, user_id)
+        .input('updated_by', sql.VarChar, 'Eng')
+        .input('created_date', sql.DateTime, date)
         .query(updateremarkQuery);
+
+
+
 
       const remark_id = result.recordset[0].remark_id;
 
@@ -13996,7 +14022,7 @@ app.get("/getSpareParts_app/:model", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
     // Parameterized query
     const sql = `
-          SELECT sp.id, sp.ModelNumber, sp.title as article_code ,sp.ProductCode as spareId, sp.ItemDescription as article_description , spt.Price_group as price FROM Spare_parts as sp left join Spare_partprice as spt on sp.title = spt.Item  WHERE sp.deleted = 0  AND ModelNumber = @model
+          SELECT sp.id, sp.ModelNumber, sp.title as article_code ,sp.ProductCode as spareId, sp.ItemDescription as article_description , spt.MRPQuotation as price FROM Spare_parts as sp left join priceGroup as spt on sp.PriceGroup = spt.PriceGroup  WHERE sp.deleted = 0  AND ModelNumber = @model
         `;
 
     const result = await pool.request()
@@ -14012,13 +14038,13 @@ app.get("/getSpareParts_app/:model", authenticateToken, async (req, res) => {
 
 
 app.post("/addspareapp", authenticateToken, async (req, res) => {
-  const { ItemDescription, title, product_code, ticket_no, spare_qty } = req.body;
+  const { ItemDescription, title, product_code, ticket_no, spare_qty ,price} = req.body;
 
   try {
     const pool = await poolPromise;
 
     // Check if a record with the same ticketId already exists
-    const checkDuplicateQuery = `SELECT * FROM awt_uniquespare WHERE ticketId = '${ticket_no}'`;
+    const checkDuplicateQuery = `SELECT * FROM awt_uniquespare WHERE ticketId = '${ticket_no}' AND article_code = '${title}'`;
     const duplicateResult = await pool.request().query(checkDuplicateQuery);
 
     if (duplicateResult.recordset.length > 0) {
@@ -14026,15 +14052,15 @@ app.post("/addspareapp", authenticateToken, async (req, res) => {
       const updateSpareQuery = `
         UPDATE awt_uniquespare
         SET spareId = '${product_code}', article_code = '${title}', 
-            article_description = '${ItemDescription}', quantity = '${spare_qty}'
+            article_description = '${ItemDescription}', quantity = '${spare_qty}' , deleted = 0
         WHERE ticketId = '${ticket_no}' and article_code = '${title}'`;
       await pool.request().query(updateSpareQuery);
       return res.json({ message: 'Quantity updated for existing ticket' });
     } else {
       // If the record does not exist, insert a new record
       const addSpareQuery = `
-        INSERT INTO awt_uniquespare (ticketId, spareId, article_code, article_description, quantity)
-        VALUES ('${ticket_no}', '${product_code}', '${title}', '${ItemDescription}','${spare_qty}')`;
+        INSERT INTO awt_uniquespare (ticketId, spareId, article_code, article_description, quantity , price)
+        VALUES ('${ticket_no}', '${product_code}', '${title}', '${ItemDescription}','${spare_qty}' , '${price}')`;
       await pool.request().query(addSpareQuery);
       return res.json({ message: 'New spare added successfully' });
     }
@@ -14288,6 +14314,29 @@ app.post("/adduniqueengineer", authenticateToken, async (req, res) => {
   }
 });
 
+
+app.post("/getengineerremark", authenticateToken, async (req, res) => {
+
+  let { ticket_no } = req.body;
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    const Remark = `select top 1 *  from awt_complaintremark where ticket_no = '${ticket_no}' and updated_by = 'Eng' order by id desc`;
+
+    const CheckRemark = `select top 1 * from awt_complaintremark where ticket_no = '${ticket_no}' and updated_by = 'Check' order by id desc`;
+
+    const result = await pool.request().query(Remark);
+    const result2 = await pool.request().query(CheckRemark);
+
+
+    return res.json({remark :  result.recordset[0] ,checkremark : result2.recordset[0] });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json(err);
+  }
+});
 
 
 
