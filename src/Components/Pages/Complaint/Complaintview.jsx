@@ -22,12 +22,12 @@ import Jobcardpdf from "../Reports/Jobcardpdf";
 import { pdf } from '@react-pdf/renderer';
 import MyDocument8 from "../Reports/MyDocument8";
 
-
 export function Complaintview(params) {
 
   const token = localStorage.getItem("token");
   const [activeTicket, setActiveTicket] = useState(null);
   const [addedSpareParts, setAddedSpareParts] = useState([]);
+  const [uniquesparepart, setuniquesparepart] = useState([]);
   const [quotation, setQuotation] = useState([]);
   const [activity, setactivity] = useState([]);
   const [model, setModel] = useState('');
@@ -54,7 +54,6 @@ export function Complaintview(params) {
   const { loaders, axiosInstance } = useAxiosLoader();
   const [errors, setErrors] = useState({})
   const [complaintview, setComplaintview] = useState({
-
     ticket_no: '',
     customer_name: '',
     address: '',
@@ -147,6 +146,7 @@ export function Complaintview(params) {
     setComplaintview((prev) => ({ ...prev, [e.target.name]: e.target.value }))
 
 
+
     if (e.target.name == 'mandays') {
       setMandays(e.target.checked)
     }
@@ -156,7 +156,19 @@ export function Complaintview(params) {
     }
 
 
+
+    const { name, checked } = e.target;
+    setComplaintview((prev) => ({
+      ...prev,
+      [name]: checked ? 'Yes' : 'No',
+    }));
+
   }
+
+
+
+
+
 
 
   // const handlevisitchange = (e) => {
@@ -566,9 +578,10 @@ export function Complaintview(params) {
   }
 
   const getsubcallstatus = async (value) => {
+    setsubCallstatus([])
 
 
-    if (value) {
+    if (value != '') {
       try {
         const res = await axiosInstance.post(
           `${Base_Url}/getsubcallstatus`,
@@ -587,23 +600,24 @@ export function Complaintview(params) {
         console.error("Error fetching sub-call statuses via POST:", error);
         setsubCallstatus([]); // Set empty array on error
       }
-    }
-    //  else {
-    //   try {
-    //     const res = await axiosInstance.get(`${Base_Url}/getsubcallstatusdata`, {
-    //       headers: {
-    //         Authorization: token, // Send token in headers
-    //       },
-    //     });
+    } else {
 
-    //     if (res.data) {
-    //       setsubCallstatus(res.data); // Set sub-call statuses from GET response
-    //     }
-    //   } catch (error) {
-    //     console.error("Error fetching sub-call statuses via GET:", error);
-    //     setsubCallstatus([]); // Set empty array on error
-    //   }
-    // }
+      try {
+        const res = await axiosInstance.get(`${Base_Url}/getsubcallstatusdata`, {
+          headers: {
+            Authorization: token, // Send token in headers
+          },
+        });
+
+        if (res.data) {
+          setsubCallstatus(res.data); // Set sub-call statuses from GET response
+        }
+      } catch (error) {
+        console.error("Error fetching sub-call statuses via GET:", error);
+        setsubCallstatus([]); // Set empty array on error
+      }
+    }
+
   };
 
 
@@ -723,8 +737,6 @@ export function Complaintview(params) {
 
 
     setAddedSpareParts([newPart]);
-    console.log([newPart]);
-
 
 
 
@@ -872,7 +884,7 @@ export function Complaintview(params) {
       setUpdatedata(response.data)
       setComplaintview(response.data);
       setgroupstatusid(response.data.group_code)
-      getsubcallstatus(response.data.call_status_id)
+      // getsubcallstatus(response.data.call_status_id)
       setCloseStatus(response.data.call_status)
       setsubCloseStatus(response.data.sub_call_status)
       setActiveTicket(complaintid);
@@ -882,6 +894,14 @@ export function Complaintview(params) {
       if (response.data.engineer_id != null) {
         getupdateengineer(response.data.ticket_no)
       }
+
+
+      setComplaintview((prev) => ({
+        ...prev,
+        call_status: "",
+        sub_call_status: ""
+      }))
+
 
 
 
@@ -949,8 +969,8 @@ export function Complaintview(params) {
       .then((res) => {
 
         setAddedSpareParts(res.data)
-        console.log(res.data);
 
+        setuniquesparepart(res.data)
       })
   }
 
@@ -1040,41 +1060,20 @@ export function Complaintview(params) {
     }
   };
 
-  const handleModelChange = async (e) => {
+  const handleModelChange = (e) => {
     const { name, value } = e.target;
 
-    await setComplaintview(prev => ({ ...prev, [name]: value }));
+    setComplaintview(prev => ({ ...prev, [name]: value }));
 
-    console.log(name, value, "name,value");
 
-    console.log(complaintview.sub_call_status, 'complaintview.sub_call_status')
-    console.log(complaintview.call_status, 'complaintview.call_status')
-
-    setShow(false);
-    setShow1(false);
-    setShow2(false);
-    setShow3(false);
-    setquotationcheck(false)
-
-    // if (name == 'group_code' ||value != '' ) {
-    //   setShow2(true);
-    // }
-
-    if (value === 'Closed') {
-      setShow1(true);
-      setShow2(true);
-    }
-    if (value === 'Spares' || value === 'Customer Approval / Quotation') {
-      setquotationcheck(true)
-      setShow(true);
-    }
-    if (value === 'Customer Approval / Quotation') {
-      setShow3(true)
-    }
     if (name === 'serial_no') {
       if (value.length === 9) { // Check if the value has exactly 9 digits
         handlegetmodel(value);
       }
+    }
+
+    if (name == 'call_status' && value == 'Approve') {
+      setShow(true)
     }
 
 
@@ -1240,9 +1239,9 @@ export function Complaintview(params) {
   };
 
   const handleSubmit = async (e) => {
+
     e.preventDefault();
     setErrorMessage("");
-
 
     const isValidValue = (value) => value !== null && value !== 'null' && value !== '';
 
@@ -1317,8 +1316,10 @@ export function Complaintview(params) {
               Authorization: token, // Send token in headers
             },
           });
+
         if (remarkResponse.data) {
           fetchComplaintview(complaintid)
+          window.location.reload()
         }
 
         const remarkId = remarkResponse.data.remark_id;
@@ -1353,13 +1354,8 @@ export function Complaintview(params) {
         }
 
         alert("Ticket remark and files submitted successfully!");
-        if (quotationcheck == true) {
-          GenerateQuotation()
-        }
 
         fetchComplaintDetails();
-
-        window.location.reload()
       } catch (error) {
         console.error("Error submitting ticket remark or files:", error);
         alert(
@@ -1646,7 +1642,7 @@ export function Complaintview(params) {
   };
 
 
-  // Role Right
+  // Role Right 
 
 
   const Decrypt = (encrypted) => {
@@ -1691,7 +1687,6 @@ export function Complaintview(params) {
       console.error('Error generating PDF:', err);
     }
   };
-
 
 
   async function getquotedetails123(oid) {
@@ -1769,7 +1764,8 @@ export function Complaintview(params) {
     }
   };
 
-  // console.log(addedSpareParts,"addedSpareParts");
+
+
 
 
   return (
@@ -2262,10 +2258,6 @@ export function Complaintview(params) {
                                       setCallstatusid(selectedname)
                                       setCallid(selectedid)
                                       handleModelChange(e)
-
-
-
-
                                     }}
                                   >
                                     <option value="">Select </option>
@@ -2279,9 +2271,7 @@ export function Complaintview(params) {
                                 </div>
                                 <div className="mb-3 col-lg-6">
                                   <h4 className="pname" style={{ fontSize: "14px" }}>Sub Call Status</h4>
-                                  <select name="sub_call_status"
-                                    // value={complaintview.sub_call_status}
-                                    disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false} className="form-control" style={{ fontSize: "14px" }} onChange={handleModelChange}>
+                                  <select name="sub_call_status" disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false} className="form-control" style={{ fontSize: "14px" }} onChange={handleModelChange}>
                                     <option value="" >Select </option>
                                     {subcallstatus.map((item) => {
                                       return (
@@ -2293,130 +2283,122 @@ export function Complaintview(params) {
 
                                   </select>
                                 </div>
-                                {
+                                {(complaintview.call_status == 'Spares' || ((complaintview.call_status == 'Approval' && complaintview.sub_call_status == 'Customer Approval / Quotation' ))) &&
+
+                                  <div className=" py-1 my-2">
+                                    <h4 className="pname" style={{ fontSize: "14px" }}>Spare Parts:</h4>
+                                    <div className="row align-items-center">
 
 
-                                  show == true ? (
+                                      <div className="col-lg-6">
+                                        <Autocomplete
+                                          size="small"
+                                          options={spare || []}
+                                          getOptionLabel={(option) =>
+                                            option.article_code + " - " + option.article_description
+                                          }
+                                          value={
+                                            spare.find((part) => part.id === spareid) || null
+                                          } // Set the selected value
+                                          onChange={(event, newValue) =>
+                                            handlesparechange(newValue ? newValue.id : "")
+                                          }
+                                          disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
+                                          renderInput={(params) => (
+                                            <TextField
+                                              {...params}
+                                              label="Select Spare Part"
+                                              variant="outlined"
+                                              fullWidth
+
+                                            />
+                                          )}
+                                          noOptionsText="No spare parts available"
+                                          sx={{
+                                            background: "#fff"
+                                          }}
+
+                                        />
+                                      </div>
+
+                                      <div className="col-lg-4 ">
+                                        <input
+                                          type="number"
+                                          className="form-control"
+                                          name="quantity"
+                                          placeholder="Qty"
+                                          value={quantity}
+                                          onChange={(e) => setQuantity(e.target.value)}
+                                          disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
+                                          min="1"
+                                        />
+                                      </div>
+
+                                      <div className="col-lg-2 ">
+
+                                        {roleaccess > 2 ? <button
+                                          className="btn btn-primary btn-sm"
+                                          disabled={closestatus == "Closed" && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
+                                          onClick={handleAddSparePart}
+                                        >
+                                          Add
+                                        </button> : null}
+
+                                      </div>
+                                    </div>
+
+                                    <div className="mt-3" style={{ overflowX: "scroll" }}>
+                                      <h4 className="pname" style={{ fontSize: "14px" }}>Added Spare Parts:</h4>
+                                      <table className="table table-bordered" style={{ fontSize: "12px" }}>
+                                        <thead>
+                                          <tr>
+                                            <th>Spare Part</th>
+                                            <th>Quantity</th>
+                                            <th>Action</th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
 
 
-                                    // (complaintview.call_status === 'Approval' && complaintview.sub_call_status === 'Customer Approval / Quotation' || complaintview.call_status === 'Spares') &&
-                                    <div className=" py-1 my-2">
-                                      <h4 className="pname" style={{ fontSize: "14px" }}>Spare Parts:</h4>
-                                      <div className="row align-items-center">
-
-
-                                        <div className="col-lg-6">
-                                          <Autocomplete
-                                            size="small"
-                                            options={spare || []}
-                                            getOptionLabel={(option) =>
-                                              option.article_code + " - " + option.article_description
+                                          {addedSpareParts.filter(part => {
+                                            if (uniqueParts.has(part.article_code)) {
+                                              return false; // Skip duplicate
                                             }
-                                            value={
-                                              spare.find((part) => part.id === spareid) || null
-                                            } // Set the selected value
-                                            onChange={(event, newValue) => {
-                                              handlesparechange(newValue ? newValue.id : "");
-
-                                            }}
-
-                                            disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
-                                            renderInput={(params) => (
-                                              <TextField
-                                                {...params}
-                                                label="Select Spare Part"
-                                                variant="outlined"
-                                                fullWidth
-
-                                              />
-                                            )}
-                                            noOptionsText="No spare parts available"
-                                            sx={{
-                                              background: "#fff"
-                                            }}
-
-                                          />
-                                        </div>
-
-                                        <div className="col-lg-4 ">
-                                          <input
-                                            type="number"
-                                            className="form-control"
-                                            name="quantity"
-                                            placeholder="Qty"
-                                            value={quantity}
-                                            onChange={(e) => setQuantity(e.target.value)}
-                                            disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
-                                            min="1"
-                                          />
-                                        </div>
-
-                                        <div className="col-lg-2 ">
-
-                                          {roleaccess > 2 ? <button
-                                            className="btn btn-primary btn-sm"
-                                            disabled={closestatus == "Closed" && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
-                                            onClick={handleAddSparePart}
-                                          >
-                                            Add
-                                          </button> : null}
-
-                                        </div>
-                                      </div>
-
-                                      <div className="mt-3" style={{ overflowX: "scroll" }}>
-                                        <h4 className="pname" style={{ fontSize: "14px" }}>Added Spare Parts:</h4>
-                                        <table className="table table-bordered" style={{ fontSize: "12px" }}>
-                                          <thead>
-                                            <tr>
-                                              <th>Spare Part</th>
-                                              <th>Quantity</th>
-                                              <th>Action</th>
-                                            </tr>
-                                          </thead>
-                                          <tbody>
-
-                                            {addedSpareParts.filter(part => {
-                                              console.log(addedSpareParts, 'addedSpareParts');
-
-                                              if (uniqueParts.has(part.article_code)) {
-                                                return false; // Skip duplicate
-                                              }
-                                              uniqueParts.add(part.article_code);
-                                              return true; // Include unique
-                                            }).map((part) => {
-                                              return (
-                                                <tr key={part.id}>
-                                                  <td>{part.article_code} - {part.article_description}</td>
-                                                  <td>{part.quantity || 0}</td>
-                                                  <td>
-                                                    <button
-                                                      className="btn btn-sm btn-danger"
-                                                      style={{ padding: "0.2rem 0.5rem" }}
-                                                      disabled={closestatus === 'Closed' && subclosestatus === 'Fully' || closestatus === 'Cancelled'}
-                                                      onClick={() => handleRemoveSparePart(part.id)}
-                                                    >
-                                                      ✖
-                                                    </button>
-                                                  </td>
-                                                </tr>
-                                              );
-                                            })}
+                                            uniqueParts.add(part.article_code);
+                                            return true; // Include unique
+                                          }).map((part) => {
+                                            return (
+                                              <tr key={part.id}>
+                                                <td>{part.article_code} - {part.article_description}</td>
+                                                <td>{part.quantity || 0}</td>
+                                                <td>
+                                                  <button
+                                                    className="btn btn-sm btn-danger"
+                                                    style={{ padding: "0.2rem 0.5rem" }}
+                                                    disabled={closestatus === 'Closed' && subclosestatus === 'Fully' || closestatus === 'Cancelled'}
+                                                    onClick={() => handleRemoveSparePart(part.id)}
+                                                  >
+                                                    ✖
+                                                  </button>
+                                                </td>
+                                              </tr>
+                                            );
+                                          })}
 
 
-                                          </tbody>
-                                        </table>
-                                      </div>
-                                      {show3 == true ? (
+                                        </tbody>
+                                      </table>
+                                      {complaintview.call_status == 'Approval' && complaintview.sub_call_status == 'Customer Approval / Quotation' ? (
                                         <>
                                           <input type="checkbox" name="quotationcheck" checked={quotationcheck} id="quotationcheck" onChange={(e) => setquotationcheck(e.target.checked)} className="" /> <span>Generate Quotation</span>
                                         </>
                                       ) : null}
                                     </div>
-                                  ) : null}
+                                  </div>
 
-                                {/* {(complaintview.call_status == 'Closed' || (complaintview.group_code != null && complaintview.group_code != "")) && */}
-                                {show1 == true ? (
+                                }
+
+                                {(complaintview.call_status == 'Closed' || (complaintview.group_code != null && complaintview.group_code != "")) &&
                                   <div className=" py-1 my-2">
                                     <div className="row">
                                       <hr />
@@ -2512,10 +2494,9 @@ export function Complaintview(params) {
 
 
                                   </div>
-                                ) : null}
+                                }
 
-                                {/* {(complaintview.call_status == 'Closed') && */}
-                                {show2 == true ? (
+                                {(complaintview.call_status == 'Closed') &&
                                   <>
                                     <div className="my-3 col-lg-6">
                                       <input type="checkbox" onChange={handleChange} name="gascheck" checked={complaintview.gascheck == 'Yes' ? true : false} /> <label>Gas Charges</label>
@@ -2524,6 +2505,7 @@ export function Complaintview(params) {
                                     <div className="my-3 col-lg-6">
                                       <input type="checkbox" onChange={handleChange} name="transportcheck" checked={complaintview.transportcheck == 'Yes' ? true : false} /> <label>Gas Transport Charges</label>
                                     </div>
+
                                     <div className="my-3 col-lg-6">
                                       <input type="checkbox" onChange={handleChange} name="mandays" /> <label>Mandays</label>
                                       {mandays && <input
@@ -2565,7 +2547,7 @@ export function Complaintview(params) {
                                       </select>
                                     </div>
                                   </>
-                                ) : null}
+                                }
 
 
                                 <div className="form-outline mb-2">
@@ -2983,7 +2965,7 @@ export function Complaintview(params) {
                   </div>
 
                   <div className="d-flex justify-content-end py-2">
-                    {/*
+                    {/* 
                     {roleaccess > 2 ?
                       <button
                         type="submit"
@@ -3128,71 +3110,10 @@ export function Complaintview(params) {
                 </div>
               </div>
 
-              {(addedSpareParts.length > 0) && <div className="card mb-3">
+              {(uniquesparepart.length > 0) && <div className="card mb-3">
                 <div className="card-body">
 
                   <div className="mt-3" >
-                    {/* {closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? null : <h4 className="pname" style={{ fontSize: "14px" }}>Spare Parts:</h4>} */}
-
-                    {/* {closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? null :
-                      <div className="row align-items-center">
-
-
-                        <div className="col-lg-12">
-                          <Autocomplete
-                            size="small"
-                            options={spare || []}
-                            getOptionLabel={(option) =>
-                              option.article_code + " - " + option.article_description
-                            }
-                            value={
-                              spare.find((part) => part.id === spareid) || null
-                            } // Set the selected value
-                            onChange={(event, newValue) =>
-                              handlesparechange(newValue ? newValue.id : "")
-                            }
-                            disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                label="Select Spare Part"
-                                variant="outlined"
-                                fullWidth
-
-                              />
-                            )}
-                            noOptionsText="No spare parts available"
-
-                          />
-                        </div>
-
-                        <div className="col-lg-9 mt-2">
-                          <input
-                            type="number"
-                            className="form-control"
-                            name="quantity"
-                            placeholder="Qty"
-                            value={quantity}
-                            onChange={(e) => setQuantity(e.target.value)}
-                            disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
-                            min="1"
-                          />
-                        </div>
-
-                        <div className="col-lg-3 mt-2">
-
-                          {roleaccess > 2 ? <button
-                            className="btn btn-primary btn-sm"
-                            disabled={closestatus == "Closed" && subclosestatus == 'Fully' || !quantity || closestatus == 'Cancelled'}
-                            onClick={handleAddSparePart}
-                          >
-                            Add
-                          </button> : null}
-
-                        </div>
-                      </div>
-                    } */}
-
 
                     {/* Display added spare parts */}
                     <div className="mt-3" style={{ overflowX: "scroll" }}>
@@ -3208,52 +3129,24 @@ export function Complaintview(params) {
                         <tbody>
 
 
-                          {(() => {
-                            // Ensure addedSpareParts is always an array
-                            let partsArray = Array.isArray(addedSpareParts)
-                              ? [...addedSpareParts]  // Clone array to prevent reference issues
-                              : Object.values(addedSpareParts || {});
-
-                            console.log("Processed Parts Array:", JSON.stringify(partsArray, null, 2));
-
-                            // Create a new Set to store unique article codes
-                            let uniqueParts = new Set();
-
-                            return partsArray.length > 0 ? ( // Only render if there's data
-                              partsArray
-                                .filter((part) => {
-                                  if (!part || !part.article_code) return false; // Handle undefined/null entries
-
-                                  if (uniqueParts.has(part.article_code)) {
-                                    return false; // Skip duplicates
-                                  }
-
-                                  uniqueParts.add(part.article_code);
-                                  return true;
-                                })
-                                .map((part) => (
-                                  <tr key={part.id}>
-                                    <td>{part.article_code} - {part.article_description}</td>
-                                    <td>{part.quantity || 0}</td>
-                                    <td>
-                                      <button
-                                        className="btn btn-sm btn-danger"
-                                        style={{ padding: "0.2rem 0.5rem" }}
-                                        disabled={(closestatus === 'Closed' && subclosestatus === 'Fully') || closestatus === 'Cancelled'}
-                                        onClick={() => handleRemoveSparePart(part.id)}
-                                      >
-                                        ✖
-                                      </button>
-                                    </td>
-                                  </tr>
-                                ))
-                            ) : (
-                              <tr>
-                                <td colSpan="3" style={{ textAlign: "center" }}>No Spare Parts Added</td>
+                          {uniquesparepart.map((part) => {
+                            return (
+                              <tr key={part.id}>
+                                <td>{part.article_code} - {part.article_description}</td>
+                                <td>{part.quantity || 0}</td>
+                                <td>
+                                  <button
+                                    className="btn btn-sm btn-danger"
+                                    style={{ padding: "0.2rem 0.5rem" }}
+                                    disabled={closestatus === 'Closed' && subclosestatus === 'Fully' || closestatus === 'Cancelled'}
+                                    onClick={() => handleRemoveSparePart(part.id)}
+                                  >
+                                    ✖
+                                  </button>
+                                </td>
                               </tr>
-                            ); // Show message when no data is available
-                          })()}
-
+                            );
+                          })}
 
 
                         </tbody>
@@ -3261,8 +3154,8 @@ export function Complaintview(params) {
                     </div>
 
                     {addedSpareParts.length > 0 &&
-                      <div className="d-flex justify-content-end py-2" >
-                        {/* <button
+                      <div className="d-flex justify-content-end py-2">
+                        <button
                           type="submit"
                           className="btn btn-primary"
                           style={{ fontSize: "14px" }}
@@ -3270,9 +3163,10 @@ export function Complaintview(params) {
                           disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
                         >
                           Generate Quotation
-                        </button> */}
+                        </button>
                       </div>
                     }
+
                   </div>
                 </div>
               </div>}
