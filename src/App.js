@@ -169,7 +169,7 @@ const Router = createBrowserRouter([
   },
   {
     path: "/dash",
-    element: <Dash />,
+    element: <ProtectedRoute><Dash /></ProtectedRoute>,
 
   },
   {
@@ -197,35 +197,35 @@ const Router = createBrowserRouter([
 
       {
         path: "/msp/ticketlistmsp",
-        element: <Ticketlistmsp />,
+        element: <ProtectedRoute><Ticketlistmsp /></ProtectedRoute>,
       },
       {
         path: "/msp/csplist",
-        element: <Csplisting />,
+        element:<ProtectedRoute><Csplisting /></ProtectedRoute> ,
       },
       {
         path: "/msp/complaintviewmsp/:complaintid",
-        element: <Complaintviewmsp />,
+        element: <ProtectedRoute><Complaintviewmsp /></ProtectedRoute>,
       },
       {
         path: "/msp/dashboard",
-        element: <MspDashboard />,
+        element: <ProtectedRoute><MspDashboard /></ProtectedRoute>,
       },
       {
         path: "/msp/addusertab",
-        element: <MspAddtab />,
+        element: <ProtectedRoute><MspAddtab /></ProtectedRoute>,
       },
       {
         path: "/msp/addusers",
-        element: <AddMspUser />,
+        element:<ProtectedRoute> <AddMspUser /></ProtectedRoute>,
       },
       {
         path: "/msp/roleassign",
-        element: <MspAddtab />,
+        element: <ProtectedRoute><MspAddtab /></ProtectedRoute>,
       },
       {
         path: "/msp/roleright",
-        element: <MspAddtab />,
+        element: <ProtectedRoute><MspAddtab /></ProtectedRoute>,
       },
      
 
@@ -248,78 +248,78 @@ const Router = createBrowserRouter([
 
       {
         path: "/csp/ticketlist",
-        element: <Ticketlistcsp />,
+        element:<ProtectedRoute> <Ticketlistcsp /></ProtectedRoute>,
 
       },
       {
         path: "/csp/engineeringlist",
-        element: <Engineeringlist />,
+        element: <ProtectedRoute><Engineeringlist /></ProtectedRoute>,
 
       },
       {
         path: "/csp/ticketview/:complaintid",
-        element: <CspTicketView />,
+        element: <ProtectedRoute><CspTicketView /></ProtectedRoute>,
 
       },
       {
         path: "/csp/adduser",
-        element: <AddCspUser />,
+        element: <ProtectedRoute><AddCspUser /></ProtectedRoute>,
       },
       {
         path:"/csp/rolerights",
-        element: <CspRoleright />,
+        element: <ProtectedRoute><CspRoleright /></ProtectedRoute>,
       },
       {
         path:"/csp/roleassign",
-        element: <RoleassignCsp />,
+        element: <ProtectedRoute><RoleassignCsp /></ProtectedRoute>,
       },
       {
         path: "/csp/mspdata",
-        element: <Mspdata />,
+        element: <ProtectedRoute><Mspdata /></ProtectedRoute>,
       },
       {
         path: "/csp/creategrn",
-        element: <CreateGrn />,
+        element: <ProtectedRoute><CreateGrn /></ProtectedRoute>,
       },
       {
         path: "/csp/grnlisting",
-        element: <GrnList />
+        element: <ProtectedRoute><GrnList /></ProtectedRoute>
       },
       {
         path: "/csp/grnview/:grn_no",
-        element: <Grndetailspage />
+        element:<ProtectedRoute><Grndetailspage /></ProtectedRoute> 
       },
       {
         path: "/csp/issueview/:issue_no",
-        element: <Sparedetailpage />
+        element: <ProtectedRoute><Sparedetailpage /></ProtectedRoute>
       },
       {
         path: "/csp/spareoutward",
-        element: <Spareoutward /> 
+        element: <ProtectedRoute><Spareoutward /></ProtectedRoute> 
       },
       {
         path: "/csp/grnoutward",
-        element: <Grnoutward />
+        element: <ProtectedRoute><Grnoutward /></ProtectedRoute>
       },
       {
         path: "/csp/cspstock",
-        element: <CspStock />
+        element:<ProtectedRoute> <CspStock /></ProtectedRoute>
       },
       {
         path: "/csp/dashboard",
-        element: <CspDashboard />
+        element: <ProtectedRoute><CspDashboard /></ProtectedRoute>
       },
       {
         path: "/csp/quotationlist",
         element: (
-          <Suspense fallback={<div>Loading data...</div>}>
+          <ProtectedRoute>
             <CspQuotationlist />
-          </Suspense>
+          </ProtectedRoute>
         )
       },
       {
         path: "/csp/quotation/:qid",
-        element: <CspQuotationEdit />
+        element: <ProtectedRoute><CspQuotationEdit /></ProtectedRoute>
       },
       
     ],
@@ -331,7 +331,7 @@ const Router = createBrowserRouter([
 
       {
         path: "/trainer/engineerlist",
-        element: <Engineers />,
+        element:<ProtectedRoute><Engineers /></ProtectedRoute> ,
 
       }
     ],
@@ -343,35 +343,35 @@ const Router = createBrowserRouter([
 
       {
         path: "/mobapp/dash",
-        element: <Dashbord />,
+        element: <ProtectedRoute><Dashbord /></ProtectedRoute>,
       },
       {
         path: '/mobapp/details',
-        element: <Details />,
+        element: <ProtectedRoute><Details /></ProtectedRoute>,
       },
       {
         path: '/mobapp/details/:id',
-        element: <Details />,
+        element:<ProtectedRoute><Details /></ProtectedRoute> ,
       },
       {
         path: '/mobapp/history/:id',
-        element: <History />,
+        element: <ProtectedRoute><History /></ProtectedRoute>,
       },
       {
         path: '/mobapp/offline',
-        element: <Data_lost />,
+        element:<ProtectedRoute><Data_lost /></ProtectedRoute> ,
       },
       {
         path: '/mobapp/mobile',
-        element: <Mobile />,
+        element:<ProtectedRoute> <Mobile /></ProtectedRoute>,
       },
       {
         path: '/mobapp/stock',
-        element: <EngineerStock />,
+        element:<ProtectedRoute><EngineerStock /></ProtectedRoute> ,
       },
       {
         path: '/mobapp/applogin',
-        element: <AppLogin />,
+        element: <ProtectedRoute><AppLogin /></ProtectedRoute>,
       },
     ],
   },
@@ -383,135 +383,135 @@ const Router = createBrowserRouter([
 
       {
         path: "/area",
-        element: <Area />,
+        element: <ProtectedRoute><Area /></ProtectedRoute>,
 
       },
       {
         path: "/callstatus",
-        element: <Callstatus />,
+        element:<ProtectedRoute> <Callstatus /></ProtectedRoute>,
 
       },
       {
         path: "/promaster",
-        element: <ProMaster />,
+        element:<ProtectedRoute><ProMaster /></ProtectedRoute>,
 
       },
       {
         path: "/category",
-        element: <Category />,
+        element: <ProtectedRoute><Category /></ProtectedRoute>,
 
       },
       {
         path: "/locationtabs",
-        element: <LocationTabs />,
+        element: <ProtectedRoute><LocationTabs /></ProtectedRoute>,
 
       },
       {
         path: "/regions",
-        element: <Regions />,
+        element:<ProtectedRoute><Regions /></ProtectedRoute> ,
 
       },
       {
         path: "/location",
-        element: <Location />,
+        element: <ProtectedRoute><Location /></ProtectedRoute>,
 
       },
       {
         path: "/pincode_allocation",
-        element: <PincodeAllocation />,
+        element:<ProtectedRoute><PincodeAllocation /></ProtectedRoute> ,
 
       },
       {
         path: "/channelpartner",
-        element: <Channelpartner />,
+        element: <ProtectedRoute><Channelpartner /></ProtectedRoute>,
 
       },
       {
         path: "/channelpartnertabs",
-        element: <Channelpartnertabs />,
+        element: <ProtectedRoute><Channelpartnertabs /></ProtectedRoute>,
 
       },
       {
         path: "/DefectGroup",
-        element: <Complaintcode />,
+        element: <ProtectedRoute><Complaintcode /></ProtectedRoute>,
 
       },
       {
         path: "/faultcodetabs",
-        element: <Complainttabs />,
+        element: <ProtectedRoute><Complainttabs /></ProtectedRoute>,
 
       },
       {
         path: "/TypeOfDefect",
-        element: <ReasonCode />,
+        element:<ProtectedRoute> <ReasonCode /></ProtectedRoute>,
 
 
       },
       {
         path: "/SiteDefect",
-        element: <ActionCode />,
+        element: <ProtectedRoute><ActionCode /></ProtectedRoute>,
 
       },
       {
         path: "/Activity",
-        element: <Activity />,
+        element:<ProtectedRoute> <Activity /></ProtectedRoute>,
 
       },
       {
         path: "/complaint-grid",
-        element: <Complaintgrid />,
+        element: <ProtectedRoute><Complaintgrid /></ProtectedRoute>,
 
       },
       {
         path: "/complaintlist",
-        element: <Complaintlist />,
+        element:<ProtectedRoute> <Complaintlist /></ProtectedRoute>,
 
       },
       {
         path: "/complaint-view",
-        element: <Complaintview />,
+        element: <ProtectedRoute><Complaintview /></ProtectedRoute>,
 
       },
       {
         path: "/country",
-        element: <Country />,
+        element: <ProtectedRoute><Country /></ProtectedRoute>,
 
       },
       {
         path: "/callstatuscodetabs",
-        element: <Callstatuscodetabs />,
+        element:<ProtectedRoute><Callstatuscodetabs /></ProtectedRoute> ,
 
       },
       {
         path: "/callstatus",
-        element: <Callstatus />,
+        element: <ProtectedRoute><Callstatus /></ProtectedRoute>,
 
       },
       {
         path: "/customerlocation",
-        element: <Customerlocation />,
+        element:<ProtectedRoute><Customerlocation /></ProtectedRoute> ,
 
       },
       {
         path: "/customerlocation/:customer_id",
-        element: <Customerlocation />
+        element: <ProtectedRoute><Customerlocation /></ProtectedRoute>
       },
       {
         path: "/customer/:customerid",
-        element: <Customer />
+        element: <ProtectedRoute><Customer /></ProtectedRoute>
       },
       {
         path: "/uniqueproduct/:customer_id",
-        element: <Uniqueproduct />
+        element: <ProtectedRoute><Uniqueproduct /></ProtectedRoute>
       },
       {
         path: "/Customerlist",
-        element: <Customerlist />
+        element:<ProtectedRoute> <Customerlist /></ProtectedRoute>
 
       },
       {
         path: "/Customer",
-        element: <Customer />,
+        element:<ProtectedRoute> <Customer /></ProtectedRoute>,
 
       },
       {
@@ -526,284 +526,284 @@ const Router = createBrowserRouter([
       },
       {
         path: "/endcustomer",
-        element: <Endcustomertabs />,
+        element: <ProtectedRoute><Endcustomertabs /></ProtectedRoute>,
 
       },
       {
         path: "/geocity",
-        element: <Geocity />,
+        element:<ProtectedRoute><Geocity /></ProtectedRoute> ,
 
       },
       {
         path: "/geostate",
-        element: <Geostate />,
+        element: <ProtectedRoute><Geostate /></ProtectedRoute>,
 
       },
       {
         path: "/lhiuser",
-        element: <Lhiuser />,
+        element: <ProtectedRoute><Lhiuser /></ProtectedRoute>,
 
       },
       {
         path: "/lhiusertabs",
-        element: <Lhiusertabs />,
+        element: <ProtectedRoute><Lhiusertabs /></ProtectedRoute>,
 
       },
       {
         path: "/Roleright",
-        element: <Roleright />,
+        element:<ProtectedRoute><Roleright /></ProtectedRoute> ,
 
       },
       {
         path: "/Roleassign",
-        element: <Roleassign />,
+        element: <ProtectedRoute><Roleassign /></ProtectedRoute>,
 
       },
       {
         path: "/lhiuser",
-        element: <Lhiuser />,
+        element: <ProtectedRoute><Lhiuser /></ProtectedRoute>,
 
       },
       {
         path: "/linklocation",
-        element: <Linklocation />,
+        element: <ProtectedRoute><Linklocation /></ProtectedRoute>,
 
       },
       {
         path: "/pincode",
-        element: <Pincode />,
+        element:<ProtectedRoute><Pincode /></ProtectedRoute> ,
 
       }, {
         path: "/products",
-        element: <Products />
+        element: <ProtectedRoute><Products /></ProtectedRoute>
       },
       {
         path: "/productspare",
-        element: <Productspare />,
+        element:<ProtectedRoute><Productspare /></ProtectedRoute> ,
 
       },
       {
         path: "/ratecard",
-        element: <Ratecard />,
+        element:<ProtectedRoute><Ratecard /></ProtectedRoute> ,
 
       },
       {
         path: "/ratecardtabs",
-        element: <Ratecardtabs />,
+        element:<ProtectedRoute> <Ratecardtabs /></ProtectedRoute>,
 
       },
       {
         path: "/master_warrenty",
-        element: <Master_Warrenty />,
+        element: <ProtectedRoute><Master_Warrenty /></ProtectedRoute>,
 
       },
       {
         path: "/post_sale_warrenty",
-        element: <PostSaleWarrenty />,
+        element:<ProtectedRoute><PostSaleWarrenty /></ProtectedRoute> ,
 
       },
       {
         path: "/register-complaint",
-        element: <Registercomplaint />,
+        element:<ProtectedRoute><Registercomplaint /></ProtectedRoute> ,
 
       },
       {
         path: "/serviceagent",
-        element: <Serviceagent />,
+        element: <ProtectedRoute><Serviceagent /></ProtectedRoute>,
 
       },
       {
         path: "/serviceagenttabs",
-        element: <Serviceagenttabs />,
+        element: <ProtectedRoute><Serviceagenttabs /></ProtectedRoute>,
 
       },
       {
         path: "/serviceproduct",
-        element: <Serviceproduct />,
+        element:<ProtectedRoute><Serviceproduct /></ProtectedRoute> ,
 
       },
       {
         path: "/serviceproducttabs",
-        element: <Serviceproducttabs />,
+        element:<ProtectedRoute><Serviceproducttabs /></ProtectedRoute> ,
 
       },
       {
         path: "/subcategory",
-        element: <Subcategory />,
+        element: <ProtectedRoute><Subcategory /></ProtectedRoute>,
 
       },
       {
         path: "/producttype",
-        element: <ProductType />,
+        element:<ProtectedRoute><ProductType /></ProtectedRoute> ,
 
       },
       {
         path: "/franchisemaster",
-        element: <Franchisemaster />,
+        element:<ProtectedRoute> <Franchisemaster /></ProtectedRoute>,
 
       },
       {
         path: "/childFranchiselist",
-        element: <ChildFranchiselist />
+        element: <ProtectedRoute><ChildFranchiselist /></ProtectedRoute>
       },
       {
         path: "/engineermaster",
-        element: <EngineerMaster />,
+        element: <ProtectedRoute><EngineerMaster /></ProtectedRoute>,
 
       },
       {
         path: "/franchisemasterlist",
-        element: <Franchisemasterlist />
+        element:<ProtectedRoute><Franchisemasterlist /></ProtectedRoute> 
       },
       {
         path: "/MasterFranchise",
-        element: <MasterFranchise />,
+        element:<ProtectedRoute><MasterFranchise /></ProtectedRoute> ,
 
       },
       {
         path: "/Masterfranchise/:masterid",
-        element: <MasterFranchise />,
+        element: <ProtectedRoute><MasterFranchise /></ProtectedRoute>,
       },
       {
         path: "/Childfranchisemaster",
-        element: <Childfranchisemaster />,
+        element:<ProtectedRoute><Childfranchisemaster /></ProtectedRoute> ,
 
       },
       {
         path: "/Childfranchisemaster/:childid",
-        element: <Childfranchisemaster />,
+        element: <ProtectedRoute><Childfranchisemaster /></ProtectedRoute>,
 
       },
       {
         path: "/registercomaplaint",
-        element: <Registercomplaint />,
+        element: <ProtectedRoute><Registercomplaint /></ProtectedRoute>,
 
       },
       {
         path: "/registercomaplaint/:Comp_id",
-        element: <Registercomplaint />,
+        element:<ProtectedRoute><Registercomplaint /></ProtectedRoute> ,
 
       },
       {
         path: "/complaintview/:complaintid",
-        element: <Complaintview />,
+        element:<ProtectedRoute> <Complaintview /></ProtectedRoute>,
       },
       {
         path: "/groupmaster",
-        element: <Groupmaster />,
+        element:<ProtectedRoute><Groupmaster /></ProtectedRoute> ,
 
       },
       {
         path: "/productline",
-        element: <ProductLine />,
+        element:<ProtectedRoute><ProductLine /></ProtectedRoute> ,
 
       },
       {
         path: "/material",
-        element: <Material />,
+        element: <ProtectedRoute><Material /></ProtectedRoute>,
       },
       {
         path: "/manufacturer",
-        element: <Manufacturer />,
+        element:<ProtectedRoute><Manufacturer /></ProtectedRoute> ,
       },
       {
         path: "/addproduct/:productid",
-        element: <AddProduct />,
+        element:<ProtectedRoute><AddProduct /></ProtectedRoute> ,
       },
       {
         path: "/engineermaster/:engineerid",
-        element: <EngineerMaster />,
+        element:<ProtectedRoute> <EngineerMaster /></ProtectedRoute>,
       },
 
 
       {
         path: "/engineer",
-        element: <Engineer />,
+        element: <ProtectedRoute><Engineer /></ProtectedRoute>,
       },
       {
         path: "/engineerlist",
-        element: <Engineerlist />
+        element: <ProtectedRoute><Engineerlist /></ProtectedRoute>
       },
       {
         path: "/complaintreporttabs",
-        element: <Complaintreporttabs />
+        element:<ProtectedRoute> <Complaintreporttabs /></ProtectedRoute>
       },
       {
         path: "/complaintreport",
-        element: <Complaintreport />
+        element:<ProtectedRoute><Complaintreport /></ProtectedRoute> 
       },
       {
         path: "/claimreporttabs",
-        element: <Claimreporttabs />
+        element: <ProtectedRoute><Claimreporttabs /></ProtectedRoute>
       },
       {
         path: "/servicecontract",
-        element: <Servicecontract />
+        element:<ProtectedRoute><Servicecontract /></ProtectedRoute> 
       },
       {
         path: "/Servicecontract/:serviceid/:view",
-        element: <Servicecontract />
+        element:<ProtectedRoute> <Servicecontract /></ProtectedRoute>
       },
       {
         path: "/servicecontracttabs",
-        element: <Servicecontracttabs />
+        element: <ProtectedRoute><Servicecontracttabs /></ProtectedRoute>
       },
       {
         path: "/servicecontractlist",
-        element: <Servicecontractlist />
+        element: <ProtectedRoute><Servicecontractlist /></ProtectedRoute>
       },
       {
         path: "claimreport",
-        element: <Claimreport />
+        element:<ProtectedRoute> <Claimreport /></ProtectedRoute>
       },
       {
         path: "Feedbackreportlist",
-        element: <FeedBackreport />
+        element: <ProtectedRoute><FeedBackreport /></ProtectedRoute>
       },
       {
         path: "/addenquiry",
-        element: <EnquiryForm />
+        element: <ProtectedRoute><EnquiryForm /></ProtectedRoute>
       },
       {
         path: "enuiry",
-        element: <EnquiryTabs />
+        element: <ProtectedRoute><EnquiryTabs /></ProtectedRoute>
       },
       {
         path: "/datatable",
-        element: <DataTable />
+        element:<ProtectedRoute><DataTable /></ProtectedRoute> 
       },
 
       {
         path: "/quotationlist",
         element: (
-          <Suspense fallback={<div>Loading data...</div>}>
+          <ProtectedRoute>
             <Quotationlist />
-          </Suspense>
+          </ProtectedRoute>
         )
       },
       {
         path: "/quotation/:qid",
-        element: <QuotationEdit />
+        element: <ProtectedRoute><QuotationEdit /></ProtectedRoute>
       },
       {
         path: "/enquiryListing",
-        element: <EnquiryListing />
+        element: <ProtectedRoute><EnquiryListing /></ProtectedRoute>
       },
       {
         path: "/enquiryListing/:enquiryid",
-        element: <EnquiryForm />
+        element:<ProtectedRoute><EnquiryForm /></ProtectedRoute> 
       },
       {
         path: "/shipment_fg",
-        element: <Shipment_fg />
+        element:<ProtectedRoute><Shipment_fg /></ProtectedRoute> 
       },
       {
         path: "shipmentparts",
-        element: <Shipment_parts />
+        element: <ProtectedRoute><Shipment_parts /></ProtectedRoute>
       },
       { 
         path: "/business_partner",
-        element: <BussinePartner />
+        element:<ProtectedRoute><BussinePartner /></ProtectedRoute> 
       }
 
 
