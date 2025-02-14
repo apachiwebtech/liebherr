@@ -57,9 +57,6 @@ const Authenticate = () => {
 
           const role = res.data[0].role
 
-
-
-
           if (res.data[0].userrole == 'lhi_user') {
             localStorage.setItem('licare_code', res.data[0].usercode)
             localStorage.setItem('Userrole', Encrypt(role))

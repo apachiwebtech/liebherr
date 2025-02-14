@@ -4,6 +4,7 @@ import './App.css';
 import React, { Suspense, useState } from 'react';
 import {
   createBrowserRouter,
+  Navigate,
   Outlet,
   RouterProvider,
   useLocation,
@@ -97,7 +98,6 @@ import { Complaintviewmsp } from './Components/Pages/Master/Complaintviewmsp';
 import { CspTicketView } from './Components/Pages/Master/CspTicketView';
 import NotAuthenticate from './Components/Authenticate/NotAuthenticate';
 import AppLogin from './Components/App/Compo/Login';
-import ProtectedRoute from './Components/Authenticate/ProtectedRoute';
 import Activity from './Components/Pages/Master/Activity';
 import { Csplisting } from './Components/Pages/Master/Csplisting';
 import Engineeringlist from './Components/Pages/Master/Engineeringlist';
@@ -118,7 +118,6 @@ import CspRoleright from './Components/Pages/Master/CspRoleRights';
 import AddEnquiry from './Components/Pages/Master/AddEnquiry';
 import EnquiryTabs from './Components/Pages/Master/EnquiryTabs';
 import CreateGrn from './Components/Pages/Master/CreateGrn';
-
 import Grndetailspage from './Components/Pages/Master/Grndetailspage';
 import { GrnList } from './Components/Pages/Master/GrnList';
 import { Grnoutward } from './Components/Pages/Master/Grnoutward';
@@ -143,20 +142,16 @@ import CspQuotationEdit from './Components/Pages/Master/CspQuotationEdit';
 
 
 
+
+// Mock function to check authentication (Replace it with your actual auth logic)
 const isAuthenticated = () => {
-  const token = localStorage.getItem('token');
-
-  alert(token)
-
-  if (!token) {
-    return false; // No token found, user is not authenticated
-
-  } else {
-    return true
-  }
-
+  return localStorage.getItem("token"); // Example: Using token stored in localStorage
 };
 
+// Protected Route Component
+const ProtectedRoute = ({ children }) => {
+  return isAuthenticated() ? children : <Navigate to="/login" replace />;
+};
 
 
 
@@ -521,12 +516,12 @@ const Router = createBrowserRouter([
       },
       {
         path: "/Uniqueproduct",
-        element: <Uniqueproduct />,
+        element: <ProtectedRoute><Uniqueproduct /></ProtectedRoute>,
 
       },
       {
         path: "/dashboard",
-        element: <Dashboard />,
+        element: <ProtectedRoute><Dashboard /></ProtectedRoute>,
 
       },
       {
