@@ -11749,7 +11749,7 @@ app.post("/postenquiry", authenticateToken, async (req, res) => {
 
     const formatDate = `${(new Date().getMonth() + 1).toString().padStart(2, '0')}${new Date().getDate().toString().padStart(2, '0')}`;
 
-    const Enquiry_no = `E${formatDate}-${newcount.toString().padStart(4, "0")}`;
+    const Enquiry_no = `EH${formatDate}-${newcount.toString().padStart(4, "0")}`;
 
 
 
