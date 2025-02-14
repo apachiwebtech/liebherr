@@ -835,7 +835,7 @@ const Jobcardpdf = ({ data, duplicate, spare, engineer, attachments ,engremark }
                         <div style={{ height: "25px", margin: "0 0 0 0" }}>
 
                         </div>
-                        <View style={[styles.tableCol, { width: '25%' },{borderRight: '1px'}]}>
+                        <View style={[styles.tableCol, { width: '25%' }]}>
                             <Text style={{ fontSize: '8px', marginTop: 5, marginLeft: 5, color: '#000' }}>Any abnormal noise </Text>
                         </View>
                         <View style={[styles.tableCol, { width: '7.5%' }]}>
