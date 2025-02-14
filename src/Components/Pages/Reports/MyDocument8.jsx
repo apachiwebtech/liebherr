@@ -120,6 +120,34 @@ const MyDocument8 = ({ data, spare , csp}) => {
         return `${day}-${month}-${year}`;
     };
 
+    function numberToWords(num) {
+        if (num === 0) return "";
+
+        const belowTwenty = [
+            "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten",
+            "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen",
+            "Eighteen", "Nineteen"
+        ];
+        const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+        const thousands = ["", "Thousand", "Million", "Billion"];
+
+        function helper(n) {
+            if (n === 0) return "";
+            else if (n < 20) return belowTwenty[n - 1] + " ";
+            else if (n < 100) return tens[Math.floor(n / 10)] + " " + helper(n % 10);
+            else if (n < 1000) return belowTwenty[Math.floor(n / 100) - 1] + " hundred " + helper(n % 100);
+            else {
+                for (let i = 0, unit = 1000; unit <= Math.pow(10, 12); unit *= 1000, i++) {
+                    if (n < unit * 1000) {
+                        return helper(Math.floor(n / unit)) + thousands[i] + " " + helper(n % unit);
+                    }
+                }
+            }
+        }
+
+        return helper(num).trim();
+    }
+
 
     const grandtotal = spare.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
@@ -365,7 +393,7 @@ const MyDocument8 = ({ data, spare , csp}) => {
 
                         </div>
                         <View style={[styles.tableCol, { width: '65%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Total Value in Words :</Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Total Value in Words :{numberToWords(grandtotal)} {numberToWords(grandtotal) == '' ? null : "Rupees Only."}</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '15%' }]}>
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Grand Amount</Text>
