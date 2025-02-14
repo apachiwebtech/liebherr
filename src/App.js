@@ -143,6 +143,7 @@ import CspQuotationEdit from './Components/Pages/Master/CspQuotationEdit';
 
 
 
+
 // Mock function to check authentication (Replace it with your actual auth logic)
 const isAuthenticated = () => {
   return localStorage.getItem("token"); // Example: Using token stored in localStorage
@@ -150,7 +151,7 @@ const isAuthenticated = () => {
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
-  return isAuthenticated() ? children : <Navigate to="/login" replace />;
+  return isAuthenticated() ? children : <Navigate to="/VerifyUser" replace />;
 };
 
 
@@ -516,7 +517,7 @@ const Router = createBrowserRouter([
       },
       {
         path: "/Uniqueproduct",
-        element: <ProtectedRoute><Uniqueproduct /></ProtectedRoute>,
+        element: <Uniqueproduct />,
 
       },
       {
