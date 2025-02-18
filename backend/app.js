@@ -16,7 +16,7 @@ const nodemailer = require('nodemailer');
 const axios = require("axios");
 
 require('dotenv').config();
-const JWT_SECRET = process.env.JWT_SECRET; 
+const JWT_SECRET = process.env.JWT_SECRET;
 const API_KEY = process.env.API_KEY;
 const secretKey = process.env.SECRET_KEY
 
@@ -13702,7 +13702,7 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
   { name: 'spare_doc_two', maxCount: 1 },
   { name: 'spare_doc_three', maxCount: 1 },
 ]), async (req, res) => {
-  let { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode, activitycode, com_id, warranty_status, spare_detail, ticket_no, user_id, serial_no, ModelNumber, sub_call_status, allocation, serial_data, picking_damages, product_damages, missing_part, leg_adjustment, water_connection, abnormal_noise, ventilation_top, ventilation_bottom, ventilation_back, voltage_supply, earthing, gas_charges, transpotation, purchase_date ,otp , check_remark } = req.body;
+  let { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode, activitycode, com_id, warranty_status, spare_detail, ticket_no, user_id, serial_no, ModelNumber, sub_call_status, allocation, serial_data, picking_damages, product_damages, missing_part, leg_adjustment, water_connection, abnormal_noise, ventilation_top, ventilation_bottom, ventilation_back, voltage_supply, earthing, gas_charges, transpotation, purchase_date, otp, check_remark } = req.body;
 
 
   const data_serial = JSON.parse(serial_data);
@@ -13778,7 +13778,7 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
       .input('earthing', sql.VarChar, earthing)
       .input('gas_charges', sql.VarChar, gas_charges)
       .input('transpotation', sql.VarChar, transpotation)
-      .input('otp', sql.Int,  Number(otp))
+      .input('otp', sql.Int, Number(otp))
       .query('UPDATE complaint_ticket SET warranty_status = @warranty_status, group_code = @symptomcode, defect_type = @causecode, site_defect = @actioncode,activity_code = @activitycode,service_charges = @service_charges, call_status = @call_status,sub_call_status = @sub_call_status, call_type = @call_type, other_charges = @other_charge, spare_doc_path = @spare_doc_path, spare_detail = @spare_detail , ModelNumber = @ModelNumber , serial_no = @serial_no ,picking_damages = @picking_damages,product_damages = @product_damages,missing_part = @missing_part,leg_adjustment = @leg_adjustment,water_connection = @water_connection, abnormal_noise = @abnormal_noise,ventilation_top = @ventilation_top,ventilation_bottom = @ventilation_bottom,ventilation_back = @ventilation_back,voltage_supply = @voltage_supply , earthing = @earthing ,gascheck = @gas_charges , transportcheck = @transpotation ,purchase_date = @purchase_date  , state_id = @otp WHERE id = @com_id');
 
     // Check if any rows were updated
@@ -13827,13 +13827,13 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
 
       const concheck = `Checklist Remark: ${check_remark}`
 
-      
-      const updatecheckremark= `
+
+      const updatecheckremark = `
       INSERT INTO awt_complaintremark (ticket_no, remark, created_by,updated_by,created_date)
       VALUES (@ticket_no_c, @remark_c, @created_by_c,@updated_by_c ,@created_date_c);
   `;
 
-       await pool.request()
+      await pool.request()
         .input('ticket_no_c', sql.VarChar, ticket_no)
         .input('remark_c', sql.VarChar, concheck)
         .input('created_by_c', sql.VarChar, user_id)
@@ -14038,7 +14038,7 @@ app.get("/getSpareParts_app/:model", authenticateToken, async (req, res) => {
 
 
 app.post("/addspareapp", authenticateToken, async (req, res) => {
-  const { ItemDescription, title, product_code, ticket_no, spare_qty ,price} = req.body;
+  const { ItemDescription, title, product_code, ticket_no, spare_qty, price } = req.body;
 
   try {
     const pool = await poolPromise;
@@ -14331,7 +14331,7 @@ app.post("/getengineerremark", authenticateToken, async (req, res) => {
     const result2 = await pool.request().query(CheckRemark);
 
 
-    return res.json({remark :  result.recordset[0] ,checkremark : result2.recordset[0] });
+    return res.json({ remark: result.recordset[0], checkremark: result2.recordset[0] });
   } catch (err) {
     console.error(err);
     return res.status(500).json(err);
@@ -14408,6 +14408,104 @@ app.get("/getsmsapi", async (req, res) => {
     console.error('Error hitting SMS API (token):', error.response?.data || error.message);
   }
 });
+
+// FETCH ANNEXTURE DATA 
+
+app.post("/getannexturedata", authenticateToken, async (req, res) => {
+  const { startDate, endDate, msp } = req.body;
+
+  try {
+    const pool = await poolPromise;
+
+    let sql = `SELECT id, ticket_no, created_date, ticket_type, customer_id, customer_name, state, 
+                      pincode,call_status,mother_branch, msp, sevice_partner, csp, child_service_partner,customer_class,
+                      ModelNumber, serial_no, invoice_date, warranty_status,closed_date,sales_partner, assigned_to, 
+                      class_city,visit_count,gas_charges,transport_charge,service_charges
+               FROM complaint_ticket 
+               WHERE deleted = 0 
+               AND ticket_date >= @startDate 
+               AND ticket_date <= @endDate`;
+
+    if (msp) {
+      sql += " AND msp = @msp"; // Add MSP filter if selected
+    }
+
+    const request = pool.request();
+    request.input("startDate", startDate); 
+      request.input("endDate", endDate);
+    if (msp) request.input("msp", msp);
+
+    const result = await request.query(sql);
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "An error occurred while fetching data" });
+  }
+});
+
+
+// get msp for annexture data
+
+// Fetch MSP list from awt_franchisemaster
+app.get("/getmsplist", authenticateToken, async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    const sql = `
+      SELECT DISTINCT ct.msp, mf.title 
+      FROM complaint_ticket ct
+      JOIN awt_franchisemaster mf ON ct.msp = mf.licarecode
+      WHERE ct.msp IS NOT NULL
+      ORDER BY mf.title`;
+
+    const result = await pool.request().query(sql);
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Database Error:", err);
+    return res.status(500).json({ error: "Failed to fetch MSPs", details: err.message });
+  }
+});
+
+app.post("/getannexturereport", authenticateToken, async (req, res) => {
+  const { startDate, endDate, msp } = req.body;
+
+  try {
+    const pool = await poolPromise;
+
+    let sql = `
+      SELECT ct.id, ct.ticket_no, ct.created_date, ct.ticket_type, ct.customer_id, ct.customer_name, ct.state, 
+             ct.pincode, ct.call_status, ct.mother_branch, ct.msp, ct.sevice_partner, ct.csp, 
+             ct.child_service_partner, ct.customer_class, ct.ModelNumber, ct.serial_no, ct.invoice_date, 
+             ct.warranty_status, ct.closed_date, ct.sales_partner, ct.assigned_to, ct.class_city, 
+             ct.visit_count, ct.gas_charges, ct.transport_charge, ct.service_charges,
+             aus.ticketId, aus.quantity, aus.article_description,aus.price, 
+             pm.PriceGroup
+      FROM complaint_ticket ct
+      LEFT JOIN awt_uniquespare aus ON ct.ticket_no = aus.ticketId
+      LEFT JOIN Spare_parts pm ON ct.ModelNumber = pm.ModelNumber
+      WHERE ct.deleted = 0 
+      AND ct.ticket_date >= @startDate 
+      AND ct.ticket_date <= @endDate`;
+
+    if (msp) {
+      sql += " AND ct.msp = @msp"; // Add MSP filter if selected
+    }
+
+    const request = pool.request();
+    request.input("startDate", startDate);
+    request.input("endDate", endDate);
+    if (msp) request.input("msp", msp);
+
+    const result = await request.query(sql);
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Database Error:", err);
+    return res.status(500).json({ error: "An error occurred while fetching data", details: err.message });
+  }
+});
+
+
+
+
 
 
 

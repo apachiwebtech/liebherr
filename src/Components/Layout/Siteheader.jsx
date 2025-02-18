@@ -146,6 +146,8 @@ export function Siteheader() {
                   <Link className="dropdown-item" to="/claimreport">Claim Report</Link></li>
                 <li>
                   <Link className="dropdown-item" to="/feedbackreportlist">FeedBack Report</Link></li>
+                <li>
+                  <Link className="dropdown-item" to="/annexturelist">Annexture Report</Link></li>
               </ul>
             </li>
           </ul>

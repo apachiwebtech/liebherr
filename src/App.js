@@ -137,6 +137,7 @@ import  EnquiryListing  from './Components/Pages/Master/EnquiryListing';
 import { EngineerStock } from './Components/App/Compo/EngineerStock';
 import { CspQuotationlist } from './Components/Pages/Master/CspQuotationlist';
 import CspQuotationEdit from './Components/Pages/Master/CspQuotationEdit';
+import AnnextureReport from './Components/Pages/Reports/Annexturereport';
 
 
 
@@ -805,6 +806,10 @@ const Router = createBrowserRouter([
       { 
         path: "/business_partner",
         element:<ProtectedRoute><BussinePartner /></ProtectedRoute> 
+      },
+      {
+        path: "/annexturelist",
+        element:<ProtectedRoute><AnnextureReport/></ProtectedRoute>
       }
 
 
