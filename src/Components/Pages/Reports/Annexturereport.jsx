@@ -45,41 +45,47 @@ const AnnextureReport = () => {
 
     const fetchData = async () => {
         setError(''); // Clear any previous errors
-    
+
         if (!startDate || !endDate) {
             setError('Both start and end dates are required.');
             return;
         }
-    
+
+        if (!selectedMsp) {
+            setError('Please select an MSP.');
+            return;
+        }
+
         if (startDate > endDate) {
             setError('Start date cannot be later than end date.');
             return;
         }
-    
+
         const data = {
             startDate: startDate,
             endDate: endDate,
-            msp: selectedMsp || null,
+            msp: selectedMsp ? selectedMsp.msp : null,  // Extract msp properly
         };
-    
+
         try {
             setLoading(true); // Show loading indicator
             const response = await axiosInstance.post(`${Base_Url}/getannexturedata`, data, {
                 headers: { Authorization: token },
             });
-    
+
             console.log("API Response:", response.data);
-    
+
             if (response.data && response.data.length > 0) {
                 setColumns(Object.keys(response.data[0])); // Extract column names
-    
+
                 await exportToExcel(response.data); // Export data to Excel
+
+                // Reset form only after successful processing
+                resetForm();
             } else {
                 setError("No data available for the selected date range.");
             }
-    
-            // Reset state after successful submission
-            resetForm();
+
         } catch (error) {
             console.error("Error fetching data:", error);
             setError("Failed to fetch data. Please try again.");
@@ -89,41 +95,47 @@ const AnnextureReport = () => {
     };
     const fetchData2 = async () => {
         setError(''); // Clear any previous errors
-    
+
         if (!startDate || !endDate) {
             setError('Both start and end dates are required.');
             return;
         }
-    
+
+        if (!selectedMsp) {
+            setError('Please select an MSP.');
+            return;
+        }
+
         if (startDate > endDate) {
             setError('Start date cannot be later than end date.');
             return;
         }
-    
+
         const data = {
             startDate: startDate,
             endDate: endDate,
-            msp: selectedMsp || null,
+            msp: selectedMsp ? selectedMsp.msp : null,  // Extract msp properly
         };
-    
+
         try {
             setLoading(true); // Show loading indicator
             const response = await axiosInstance.post(`${Base_Url}/getannexturereport`, data, {
                 headers: { Authorization: token },
             });
-    
+
             console.log("API Response:", response.data);
-    
+
             if (response.data && response.data.length > 0) {
                 setColumns(Object.keys(response.data[0])); // Extract column names
-    
+
                 await exportToExcel(response.data); // Export data to Excel
+
+                // Reset form only after successful processing
+                resetForm();
             } else {
                 setError("No data available for the selected date range.");
             }
-    
-            // Reset state after successful submission
-            resetForm();
+
         } catch (error) {
             console.error("Error fetching data:", error);
             setError("Failed to fetch data. Please try again.");
@@ -131,9 +143,6 @@ const AnnextureReport = () => {
             setLoading(false); // Hide loading indicator
         }
     };
-
-
-
 
     const exportToExcel = (exceldata) => {
         if (!exceldata || exceldata.length === 0) {
@@ -203,12 +212,18 @@ const AnnextureReport = () => {
                                 <Autocomplete
                                     options={mspList}
                                     getOptionLabel={(option) => option.title || ""}
-                                    value={selectedMsp}
-                                    onChange={(event, newValue) => setSelectedMsp(newValue ? newValue.msp : null)}
+                                    value={selectedMsp}  // Ensure value is the full object
+                                    onChange={(event, newValue) => setSelectedMsp(newValue)} // Store full object
                                     renderInput={(params) => (
-                                        <TextField {...params} variant="outlined" placeholder="Select MSP" fullWidth />
+                                        <TextField
+                                            {...params}
+                                            variant="outlined"
+                                            placeholder="Select MSP"
+                                            fullWidth
+                                        />
                                     )}
                                 />
+
                             </div>
                             <div className="mb-3">
                                 <label>Start Date</label>

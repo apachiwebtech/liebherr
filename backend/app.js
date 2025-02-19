@@ -14478,8 +14478,9 @@ app.post("/getannexturereport", authenticateToken, async (req, res) => {
              ct.warranty_status, ct.closed_date, ct.sales_partner, ct.assigned_to, ct.class_city, 
              ct.visit_count, ct.gas_charges, ct.transport_charge, ct.service_charges,
              aus.ticketId, aus.quantity, aus.article_description,aus.price, 
-             pm.PriceGroup
-      FROM complaint_ticket ct
+             pm.PriceGroup,
+            (COALESCE(TRY_CAST(aus.price AS INT), 0) * COALESCE(TRY_CAST(aus.quantity AS INT), 0)) AS total_cost
+      FROM complaint_ticket ct    
       LEFT JOIN awt_uniquespare aus ON ct.ticket_no = aus.ticketId
       LEFT JOIN Spare_parts pm ON ct.ModelNumber = pm.ModelNumber
       WHERE ct.deleted = 0 
