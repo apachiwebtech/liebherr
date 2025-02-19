@@ -21,8 +21,8 @@ const API_KEY = process.env.API_KEY;
 const secretKey = process.env.SECRET_KEY
 
 app.use(cors({ origin: "*" }));
-app.use(express.json({ limit: '100mb' }));
-app.use(express.urlencoded({ extended: true, limit: '100mb' }));
+app.use(express.json({ limit: '1000mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1000mb' }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
 
@@ -3584,7 +3584,7 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
 
             const updategascharges = `update complaint_ticket  set gas_charges = '${gascharges}' where ticket_no = '${ticket_no}'`;
 
-            console.log(updategascharges, "3")
+            
 
 
             await pool.request().query(updategascharges);
@@ -3595,7 +3595,7 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
           if (gas_transportation == 'on') {
 
             const gastransport = getresult.recordset[0].transportation;
-            console.log(gastransport, "2")
+           
 
             const updategastransportcharges = `update complaint_ticket  set gas_transoprt = '${gastransport}' where ticket_no = '${ticket_no}'`;
 
@@ -10628,7 +10628,7 @@ app.post("/query", authenticateToken, async (req, res) => {
 
 
     const result = await request.query(decryptedQuery);
-    res.json(result);
+    res.json(result.recordset);
   } catch (error) {
     console.error("Error in /query", error);
     return res.json(error)
@@ -14502,6 +14502,8 @@ app.post("/getannexturereport", authenticateToken, async (req, res) => {
     return res.status(500).json({ error: "An error occurred while fetching data", details: err.message });
   }
 });
+
+
 
 
 

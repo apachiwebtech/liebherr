@@ -37,6 +37,22 @@ const QueryPage = ()=>{
         })
     }
 
+    const handleExport = () => {
+        if (!result) return;
+        
+        const jsonData = JSON.stringify(result, null, 2);
+        const blob = new Blob([jsonData], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "exported_data.json";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
+
     return (
     <div className="p-3 d-flex flex-column gap-4">
         <form onSubmit={handleSubmit} className="d-flex flex-column">
@@ -45,21 +61,19 @@ const QueryPage = ()=>{
             </textarea>
             <button type="submit" className="btn btn-primary align-self-center">Submit</button>
         </form>
-        {
-            result?
+        {result ? (
                 <div className="p-4 rounded-0 border border-dark">
-                    <pre>
-                        {JSON.stringify(result,null, 2)}
-                    </pre>
-                </div>:
-            error?
+                          <button className="btn btn-success mt-3" onClick={handleExport}>
+                        Export as JSON
+                    </button>
+                    <pre>{JSON.stringify(result, null, 2)}</pre>
+              
+                </div>
+            ) : error ? (
                 <div className="p-4 rounded-0 border border-dark">
-                    <pre>
-                        {JSON.stringify(error,null, 2)}
-                    </pre>
-                </div>:
-            null
-        }    
+                    <pre>{JSON.stringify(error, null, 2)}</pre>
+                </div>
+            ) : null}
     </div>
     )
 }

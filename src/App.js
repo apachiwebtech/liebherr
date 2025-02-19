@@ -138,6 +138,7 @@ import { EngineerStock } from './Components/App/Compo/EngineerStock';
 import { CspQuotationlist } from './Components/Pages/Master/CspQuotationlist';
 import CspQuotationEdit from './Components/Pages/Master/CspQuotationEdit';
 import AnnextureReport from './Components/Pages/Reports/Annexturereport';
+import JsonToSql from './Components/Utils/JsonToSql';
 
 
 
@@ -189,6 +190,10 @@ const Router = createBrowserRouter([
   {
     path: "/query",
     element: <QueryPage />
+  },
+  {
+    path: "/jsontosql",
+    element: <JsonToSql />
   },
 
 
@@ -886,8 +891,9 @@ function App() {
       }
     });
 
+    window.addEventListener("contextmenu", (event) => event.preventDefault());
 
-    
+
 
   }, [])
 
