@@ -15,6 +15,7 @@ const CryptoJS = require('crypto-js');
 const nodemailer = require('nodemailer');
 const axios = require("axios");
 
+
 require('dotenv').config();
 const JWT_SECRET = process.env.JWT_SECRET;
 const API_KEY = process.env.API_KEY;
@@ -3584,7 +3585,7 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
 
             const updategascharges = `update complaint_ticket  set gas_charges = '${gascharges}' where ticket_no = '${ticket_no}'`;
 
-            
+
 
 
             await pool.request().query(updategascharges);
@@ -3595,7 +3596,7 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
           if (gas_transportation == 'on') {
 
             const gastransport = getresult.recordset[0].transportation;
-           
+
 
             const updategastransportcharges = `update complaint_ticket  set gas_transoprt = '${gastransport}' where ticket_no = '${ticket_no}'`;
 
@@ -4470,63 +4471,18 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
 
       if (1 === 1) {
-        const auth = {
-          username: "rohit.jape@liebherr.com",
-          password: "W3W_4wbaiF2JzNn",
-        };
+
+        const username = process.env.TATA_USER;
+        const password = process.env.PASSWORD;
+        const temp_id = '1207173530305447084'
 
         try {
-          const tokenResponse = await axios.post(
-            'https://cts.myvi.in:8443/SMS/api/token',
-            auth
+          const tokenResponse = await axios.get(
+            `https://smsgw.tatatel.co.in:9095/campaignService/campaigns/qs?recipient=${mobile}&dr=false&msg=Dear Customer, Greetings from Liebherr! Your Ticket Number is ${ticket_no}. Please share OTP ${otp} with the engineer once the ticket is resolved.&user=${username}&pswd=${password}&sender=LICARE&PE_ID=1201159257274643113&Template_ID=${temp_id}`
           );
 
-          if (tokenResponse.data) {
-            const token = tokenResponse.data.token;
+          console.log(tokenResponse.data)
 
-
-            const smsPayload = {
-              pingBackType: "0",
-              pingBackId: "-1",
-              jsonData: {
-                senderId: "LICARE",
-                TemplateID: "1207173530305447084",
-                templateName: "welcomemsg",
-                unicodeStatus: 0,
-                messages: [
-                  {
-                    msisdn: mobile,
-                    message:
-                      `Dear Customer, Greetings from Liebherr! Your Ticket Number is ${ticket_no}. Please share OTP ${otp} with the engineer once the ticket is resolved.`,
-                    customerReferenceId: "1",
-                  },
-                ],
-              },
-              validationFlag: "1",
-              validatyPeriod: null,
-            };
-
-            try {
-              const smsResponse = await axios.post(
-                'https://cts.myvi.in:8443/SMS/api/broadcast',
-                smsPayload,
-                {
-                  headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`, // Ensure the token is correctly prefixed
-                  },
-                }
-              );
-
-              if (smsResponse.status === 200) {
-                console.log('SMS sent successfully:', smsResponse.data);
-              } else {
-                console.error('Failed to send SMS:', smsResponse.data);
-              }
-            } catch (error) {
-              console.error('Error hitting SMS API (broadcast):', error.response?.data || error.message);
-            }
-          }
         } catch (error) {
           console.error('Error hitting SMS API (token):', error.response?.data || error.message);
         }
@@ -14341,74 +14297,39 @@ app.post("/getengineerremark", authenticateToken, async (req, res) => {
 
 
 app.get("/getsmsapi", async (req, res) => {
+  const ticket_no = 'SH234';
+  const otp = '1234';
+  const mobile = '9326476448';
 
-  let ticket_no = 'SH234';
-  let otp = '1234';
-  let mobile = '9326476448'
+  // const username = process.env.TATA_USER;
+  // const password = process.env.PASSWORD;
 
 
-  const auth = {
-    username: "rohit.jape@liebherr.com",
-    password: "W3W_4wbaiF2JzNn",
-  };
+  const username = "LIEBHERR";
+  const password = "Liebh@01";
+
+
+
+
+
+  const temp_id = '1207173530305447084';
+
+  const msg = encodeURIComponent(
+    `Dear Customer, Greetings from Liebherr! Your Ticket Number is ${ticket_no}. Please share OTP ${otp} with the engineer once the ticket is resolved.`
+  );
+
+  const apiUrl = `https://smsgw.tatatel.co.in:9095/campaignService/campaigns/qs?recipient=${mobile}&dr=false&msg=${msg}&user=${username}&pswd=${password}&sender=LICARE&PE_ID=1201159257274643113&Template_ID=${temp_id}`;
 
   try {
-    const tokenResponse = await axios.post(
-      'https://cts.myvi.in:8443/SMS/api/token',
-      auth
-    );
-
-    if (tokenResponse.data) {
-      const token = tokenResponse.data.token;
-
-
-      const smsPayload = {
-        pingBackType: "0",
-        pingBackId: "-1",
-        jsonData: {
-          senderId: "LICARE",
-          TemplateID: "1207173530305447084",
-          templateName: "welcomemsg",
-          unicodeStatus: 0,
-          messages: [
-            {
-              msisdn: mobile,
-              message:
-                `Dear Customer, Greetings from Liebherr! Your Ticket Number is ${ticket_no}. Please share OTP ${otp} with the engineer once the ticket is resolved.`,
-              customerReferenceId: "1",
-            },
-          ],
-        },
-        validationFlag: "1",
-        validatyPeriod: null,
-      };
-
-      try {
-        const smsResponse = await axios.post(
-          'https://cts.myvi.in:8443/SMS/api/broadcast',
-          smsPayload,
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`, // Ensure the token is correctly prefixed
-            },
-          }
-        );
-
-        if (smsResponse.status === 200) {
-          console.log('SMS sent successfully:', smsResponse.data);
-        } else {
-          console.error('Failed to send SMS:', smsResponse.data);
-        }
-      } catch (error) {
-        console.error('Error hitting SMS API (broadcast):', error.response?.data || error.message);
-      }
+    const response = await axios.get(apiUrl); // Remove httpsAgent unless absolutely needed
+    if (response.data) {
+      return res.json({ message: "Success", data: response.data });
     }
   } catch (error) {
-    console.error('Error hitting SMS API (token):', error.response?.data || error.message);
+    console.error('Error hitting SMS API:', error.response?.data || error.message);
+    return res.status(500).json({ message: 'Failed to send SMS', error: error.message });
   }
 });
-
 // FETCH ANNEXTURE DATA 
 
 app.post("/getannexturedata", authenticateToken, async (req, res) => {
@@ -14431,8 +14352,8 @@ app.post("/getannexturedata", authenticateToken, async (req, res) => {
     }
 
     const request = pool.request();
-    request.input("startDate", startDate); 
-      request.input("endDate", endDate);
+    request.input("startDate", startDate);
+    request.input("endDate", endDate);
     if (msp) request.input("msp", msp);
 
     const result = await request.query(sql);
@@ -14504,6 +14425,675 @@ app.post("/getannexturereport", authenticateToken, async (req, res) => {
   }
 });
 
+//For data migration
+
+app.post('/uploadtickets', authenticateToken, async (req, res) => {
+  let { jsonData } = req.body;
+  let excelData = JSON.parse(jsonData);
+
+
+  const logFilePath = path.join(__dirname, 'ticket_log.txt');
+  const logStream = fs.createWriteStream(logFilePath, { flags: 'a' }); // Append mode
+
+  try {
+    const pool = await poolPromise;
+    pool.config.options.requestTimeout = 6000000;
+
+    for (const item of excelData) {
+
+      console.log(excelData)
+      try {
+        await pool.request()
+          .input('ticket_no', sql.VarChar, item.ticket_no)
+          .input('ticket_date', sql.DateTime, item.ticket_date || null)
+          .input('customer_id', sql.VarChar, item.customer_id)
+          .input('salutation', sql.VarChar, item.salutation)
+          .input('customer_name', sql.VarChar, item.customer_name)
+          .input('alt_mobile', sql.VarChar, item.alt_mobile)
+          .input('customer_mobile', sql.VarChar, item.customer_mobile)
+          .input('customer_email', sql.VarChar, item.customer_email)
+          .input('ModelNumber', sql.VarChar, item.ModelNumber)
+          .input('serial_no', Number(item.serial_no))
+          .input('address', sql.VarChar, item.address)
+          .input('region', sql.VarChar, item.region)
+          .input('state', sql.VarChar, item.state)
+          .input('city', sql.VarChar, item.city)
+          .input('area', sql.VarChar, item.area)
+          .input('pincode', sql.VarChar, item.pincode)
+          .input('child_service_partner', sql.VarChar, item.child_service_partner)
+          .input('msp', sql.VarChar, item.msp)
+          .input('csp', sql.VarChar, item.csp)
+          .input('sales_partner', sql.VarChar, item.sales_partner)
+          .input('assigned_to', sql.VarChar, item.assigned_to)
+          .input('old_engineer', sql.VarChar, item.old_engineer)
+          .input('engineer_code', sql.VarChar, item.engineer_code)
+          .input('engineer_id', sql.VarChar, item.engineer_id)
+          .input('ticket_type', sql.VarChar, item.ticket_type)
+          .input('call_type', sql.VarChar, item.call_type)
+          .input('sub_call_status', sql.VarChar, item.sub_call_status)
+          .input('call_status', sql.VarChar, item.call_status)
+          .input('symptom_code', sql.VarChar, item.symptom_code)
+          .input('cause_code', sql.VarChar, item.cause_code)
+          .input('action_code', sql.VarChar, item.action_code)
+          .input('service_charges', sql.VarChar, item.service_charges)
+          .input('other_charges', sql.VarChar, item.other_charges)
+          .input('warranty_status', sql.VarChar, item.warranty_status)
+          .input('invoice_date', sql.DateTime, item.invoice_date || null)
+          .input('call_charges', sql.VarChar, item.call_charges)
+          .input('mode_of_contact', sql.VarChar, item.mode_of_contact)
+          .input('created_date', sql.DateTime, item.created_date || null)
+          .input('created_by', sql.VarChar, item.created_by)
+          .input('deleted', Number(item.deleted) || 0)
+          .input('updated_by', sql.VarChar, item.updated_by)
+          .input('updated_date', sql.VarChar, item.updated_date || null)
+          .input('contact_person', sql.VarChar, item.contact_person)
+          .input('purchase_date', sql.VarChar, item.purchase_date || null)
+          .input('specification', sql.VarChar, item.specification)
+          .input('ageing', Number(item.ageing))
+          .input('area_id', Number(item.area_id))
+          .input('state_id', Number(item.state_id))
+          .input('city_id', Number(item.city_id))
+          .input('pincode_id', Number(item.pincode_id))
+          .input('closed_date', sql.DateTime, item.closed_date || null)
+          .input('customer_class', sql.VarChar, item.customer_class)
+          .input('call_priority', sql.VarChar, item.call_priority)
+          .input('spare_doc_path', sql.VarChar, item.spare_doc_path)
+          .input('call_remark', sql.Text, item.call_remark)
+          .input('spare_detail', sql.VarChar, item.spare_detail)
+          .input('group_code', sql.VarChar, item.group_code)
+          .input('defect_type', sql.VarChar, item.defect_type)
+          .input('site_defect', sql.VarChar, item.site_defect)
+          .input('activity_code', sql.VarChar, item.activity_code)
+          .input('spare_part_id', sql.VarChar, item.spare_part_id)
+          .input('totp', sql.VarChar, item.totp)
+          .input('requested_by', sql.VarChar, item.requested_by)
+          .input('requested_email', sql.VarChar, item.requested_email)
+          .input('requested_mobile', sql.VarChar, item.requested_mobile)
+          .input('sales_partner2', sql.VarChar, item.sales_partner2)
+          .input('mwhatsapp', Number(item.mwhatsapp))
+          .input('awhatsapp', Number(item.awhatsapp))
+          .query(`
+          INSERT INTO complaint_ticket_new_dummy  (
+            ticket_no, ticket_date, customer_id, salutation, customer_name, alt_mobile, customer_mobile, customer_email, ModelNumber, serial_no, 
+            address, region, state, city, area, pincode,child_service_partner, msp, csp, sales_partner, assigned_to, old_engineer, 
+            engineer_code, engineer_id, ticket_type, call_type, sub_call_status, call_status, symptom_code, cause_code, action_code, service_charges, 
+            other_charges, warranty_status, invoice_date, call_charges, mode_of_contact, created_date, created_by, deleted, updated_by, updated_date, 
+            contact_person, purchase_date, specification, ageing, area_id, state_id, city_id, pincode_id, closed_date, customer_class, call_priority, 
+            spare_doc_path, call_remark, spare_detail, group_code, defect_type, site_defect, activity_code, spare_part_id, totp, requested_by, 
+            requested_email, requested_mobile, sales_partner2, mwhatsapp, awhatsapp
+          ) 
+          VALUES (
+            @ticket_no, @ticket_date, @customer_id, @salutation, @customer_name, @alt_mobile, @customer_mobile, @customer_email, @ModelNumber, @serial_no, 
+            @address, @region, @state, @city, @area, @pincode, @child_service_partner, @msp, @csp, @sales_partner, @assigned_to, 
+            @old_engineer, @engineer_code, @engineer_id, @ticket_type, @call_type, @sub_call_status, @call_status, @symptom_code, @cause_code, @action_code, 
+            @service_charges, @other_charges, @warranty_status, @invoice_date, @call_charges, @mode_of_contact, @created_date, @created_by, @deleted, 
+            @updated_by, @updated_date, @contact_person, @purchase_date, @specification, @ageing, @area_id, @state_id, @city_id, @pincode_id, @closed_date, 
+            @customer_class, @call_priority, @spare_doc_path, @call_remark, @spare_detail, @group_code, @defect_type, @site_defect, @activity_code, 
+            @spare_part_id, @totp, @requested_by, @requested_email, @requested_mobile, @sales_partner2, @mwhatsapp, @awhatsapp
+          )
+        `);
+
+
+        // Log successful insertion
+        logStream.write(`[${new Date().toISOString()}] SUCCESS: Ticket ${item.ticket_no} inserted successfully.\n`);
+      } catch {
+        // Log failed insertion
+        logStream.write(`[${new Date().toISOString()}] FAILED: Ticket ${item.ticket_no} - ${err.message}\n`);
+      }
+
+    }
+
+    logStream.end(); // Close stream
+
+    return res.json({ message: 'Data inserted successfully' });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while inserting data' });
+  }
+});
+
+app.post('/uploadremarks', authenticateToken, async (req, res) => {
+  let { jsonData } = req.body;
+  let excelData = JSON.parse(jsonData);
+
+  const logFilePath = path.join(__dirname, 'remark_log.txt');
+  const logStream = fs.createWriteStream(logFilePath, { flags: 'a' }); // Append mode
+
+  try {
+    const pool = await poolPromise;
+    pool.config.options.requestTimeout = 6000000;
+
+    for (const item of excelData) {
+
+      try {
+        await pool.request()
+          .input('ticket_no', sql.VarChar, item.ticket_no)
+          .input('remark', sql.VarChar, item.remark)
+          .input('created_date', sql.DateTime, item.created_date)
+          .input('deleted', 0)
+          .query(`
+            INSERT INTO awt_complaintremark (
+              ticket_no, remark, created_date, deleted
+            ) 
+            VALUES (
+              @ticket_no, @remark, @created_date, @deleted
+            )
+          `);
+
+        // Log successful insertion
+        logStream.write(`[${new Date().toISOString()}] SUCCESS: Ticket ${item.ticket_no} inserted successfully.\n`);
+      } catch (err) {
+        // Log failed insertion
+        logStream.write(`[${new Date().toISOString()}] FAILED: Ticket ${item.ticket_no} - ${err.message}\n`);
+      }
+    }
+
+    logStream.end(); // Close stream
+    return res.json({ message: 'Data insertion process completed. Check upload_log.txt for details.' });
+
+  } catch (err) {
+    console.error(err);
+    logStream.write(`[${new Date().toISOString()}] ERROR: Database connection issue - ${err.message}\n`);
+    logStream.end();
+    return res.status(500).json({ error: 'An error occurred while inserting data' });
+  }
+});
+
+app.post('/uploadcustomer', authenticateToken, async (req, res) => {
+
+  let { jsonData } = req.body;
+  let excelData = JSON.parse(jsonData);
+
+  const logFilePath = path.join(__dirname, 'customer_log.txt');
+  const logStream = fs.createWriteStream(logFilePath, { flags: 'a' }); // Append mode
+
+  try {
+    const pool = await poolPromise;
+    pool.config.options.requestTimeout = 6000000;
+
+    for (const item of excelData) {
+
+      try {
+        await pool.request()
+          .input('customer_id', sql.VarChar, item.customer_id)
+          .input('salutation', sql.VarChar, item.salutation)
+          .input('customer_name', sql.VarChar, item.customer_name)
+          .input('customer_type', sql.VarChar, item.customer_type)
+          .input('customer_classification', sql.VarChar, item.customer_classification)
+          .input('mobile_no', sql.VarChar, item.mobile_no)
+          .input('m_whatsapp', sql.VarChar, item.m_whatsapp)
+          .input('alternate_mobile', sql.VarChar, item.alternate_mobile)
+          .input('a_whatsapp', sql.VarChar, item.a_whatsapp)
+          .input('email', sql.VarChar, item.email)
+          .input('date_of_birth',  item.date_of_birth)
+          .input('anniversary_date',  item.anniversary_date)
+          .query(`
+            INSERT INTO awt_customer (
+              customer_id, salutation, customer_fname, customer_type ,customer_classification,mobileno,m_whatsapp,alt_mobileno,a_whatsapp,email,dateofbirth,anniversary_date 
+            ) 
+            VALUES (
+              @customer_id, @salutation, @customer_name, @customer_type ,@customer_classification,@mobile_no,@m_whatsapp,@alternate_mobile,@a_whatsapp,@email,@date_of_birth,@anniversary_date
+            )
+          `);
+
+        // Log successful insertion
+        logStream.write(`[${new Date().toISOString()}] SUCCESS: Ticket ${item.customer_id} inserted successfully.\n`);
+      } catch (err) {
+        // Log failed insertion
+        logStream.write(`[${new Date().toISOString()}] FAILED: Ticket ${item.customer_id} - ${err.message}\n`);
+      }
+    }
+
+    logStream.end(); // Close stream
+    return res.json({ message: 'Data insertion process completed. Check customer_log.txt for details.' });
+
+  } catch (err) {
+    console.error(err);
+    logStream.write(`[${new Date().toISOString()}] ERROR: Database connection issue - ${err.message}\n`);
+    logStream.end();
+    return res.status(500).json({ error: 'An error occurred while inserting data' });
+  }
+});
+
+app.post('/uploadaddress', authenticateToken, async (req, res) => {
+
+  let { jsonData } = req.body;
+  let excelData = JSON.parse(jsonData);
+
+  const logFilePath = path.join(__dirname, 'address_log.txt');
+  const logStream = fs.createWriteStream(logFilePath, { flags: 'a' }); // Append mode
+
+  try {
+    const pool = await poolPromise;
+    pool.config.options.requestTimeout = 6000000;
+
+    for (const item of excelData) {
+
+      try {
+        await pool.request()
+          .input('customer_id', sql.VarChar, item.customer_id)
+          .input('address', sql.VarChar, item.address)
+          .input('pincode_id', sql.VarChar, item.pincode_id)
+          .input('geocity_id', sql.VarChar, item.geocity_id)
+          .input('geostate_id', sql.VarChar, item.geostate_id)
+          .input('district_id', sql.VarChar, item.district_id)
+          .query(`
+            INSERT INTO awt_customerlocation (
+              customer_id, address, pincode_id, geocity_id ,geostate_id,district_id
+            ) 
+            VALUES (
+              @customer_id, @address, @pincode_id, @geocity_id ,@geostate_id,@district_id
+            )
+          `);
+
+        // Log successful insertion
+        logStream.write(`[${new Date().toISOString()}] SUCCESS: Ticket ${item.customer_id} inserted successfully.\n`);
+      } catch (err) {
+        // Log failed insertion
+        logStream.write(`[${new Date().toISOString()}] FAILED: Ticket ${item.customer_id} - ${err.message}\n`);
+      }
+    }
+
+    logStream.end(); // Close stream
+    return res.json({ message: 'Data insertion process completed. Check customer_log.txt for details.' });
+
+  } catch (err) {
+    console.error(err);
+    logStream.write(`[${new Date().toISOString()}] ERROR: Database connection issue - ${err.message}\n`);
+    logStream.end();
+    return res.status(500).json({ error: 'An error occurred while inserting data' });
+  }
+});
+
+
+app.post('/uploadproduct', authenticateToken, async (req, res) => {
+
+  let { jsonData } = req.body;
+  let excelData = JSON.parse(jsonData);
+
+  const logFilePath = path.join(__dirname, 'customerproduct_log.txt');
+  const logStream = fs.createWriteStream(logFilePath, { flags: 'a' }); // Append mode
+
+  try {
+    const pool = await poolPromise;
+    pool.config.options.requestTimeout = 6000000;
+
+    for (const item of excelData) {
+
+      console.log(excelData)
+
+      try {
+        await pool.request()
+          .input('CustomerID', sql.VarChar, item.CustomerID)
+          .input('CustomerName', sql.VarChar, item.CustomerName)
+          .input('ModelNumber', sql.VarChar, item.ModelNumber)
+          .input('serial_no', sql.VarChar, item.serial_no)
+          .input('address', sql.VarChar, item.address)
+          .input('pincode', sql.VarChar, item.pincode)
+          .input('created_date', sql.VarChar, item.created_date)
+          .input('purchase_date', sql.VarChar, item.purchase_date)
+          .input('warrenty_sdate', sql.VarChar, item.warrenty_sdate)
+          .input('warrenty_edate', sql.VarChar, item.warrenty_edate)
+          .input('InvoiceDate', sql.VarChar, item.InvoiceDate)
+          .input('InvoiceNumber',sql.VarChar,  item.InvoiceNumber)
+          .input('ModelName',sql.VarChar,  item.ModelName)
+          .input('Short_model_no',sql.VarChar,  item.Short_model_no)
+          .input('SerialStatus',sql.VarChar,  item.SerialStatus)
+          .input('Notes', sql.VarChar, item.Notes)
+          .input('BranchName',sql.VarChar,  item.BranchName)
+          .input('CustomerAccountStatus',sql.VarChar,  item.CustomerAccountStatus)
+          .input('SalesDealer',sql.VarChar,  item.SalesDealer)
+          .input('SubDealer',sql.VarChar,  item.SubDealer)
+          .input('customer_classification',sql.VarChar,  item.customer_classification)
+          .query(`
+            INSERT INTO awt_uniqueproductmaster (
+              CustomerID, CustomerName, ModelNumber, serial_no ,address,pincode,created_date,purchase_date,warranty_sdate,warranty_edate,InvoiceDate,InvoiceNumber,ModelName,Short_model_no,SerialStatus,Notes,BranchName,CustomerAccountStatus,SalesDealer,SubDealer,customer_classification
+            ) 
+            VALUES (
+              @CustomerID,@CustomerName,@ModelNumber,@serial_no ,@address,@pincode,@created_date,@purchase_date,@warrenty_sdate,@warrenty_edate,@InvoiceDate,@InvoiceNumber,@ModelName,@Short_model_no,@SerialStatus,@Notes,@BranchName,@CustomerAccountStatus,@SalesDealer,@SubDealer,@customer_classification
+            )
+          `);
+
+        // Log successful insertion
+        logStream.write(`[${new Date().toISOString()}] SUCCESS: Ticket ${item.customer_id} inserted successfully.\n`);
+      } catch (err) {
+        // Log failed insertion
+        logStream.write(`[${new Date().toISOString()}] FAILED: Ticket ${item.customer_id} - ${err.message}\n`);
+      }
+    }
+
+    logStream.end(); // Close stream
+    return res.json({ message: 'Data insertion process completed. Check customerproduct_log.txt for details.' });
+
+  } catch (err) {
+    console.error(err);
+    logStream.write(`[${new Date().toISOString()}] ERROR: Database connection issue - ${err.message}\n`);
+    logStream.end();
+    return res.status(500).json({ error: 'An error occurred while inserting data' });
+  }
+});
+
+
+
+
+const convertExcelDate = (excelDate) => {
+  // Excel uses 1900-01-01 as the base date, so we create that as a JavaScript Date object
+  const excelBaseDate = new Date(1900, 0, 1); // January 1, 1900
+  // Excel date system has a bug where it treats 1900 as a leap year, so we adjust for that
+  const adjustedExcelDate = excelDate - 2; // Adjust for the leap year bug in Excel
+
+  // Convert the serial date to milliseconds and add it to the base date
+  const date = new Date(excelBaseDate.getTime() + adjustedExcelDate * 24 * 60 * 60 * 1000);
+
+  // Format the date as YYYY-MM-DD
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+};
+
+
+app.post('/uplaodratecardexcel', authenticateToken, async (req, res) => {
+  let { excelData, created_by = "1" } = req.body;
+
+  excelData = JSON.parse(excelData)
+
+
+  try {
+    const pool = await poolPromise;
+    pool.config.options.requestTimeout = 600000;
+
+    for (const item of excelData) {
+      const result = await pool.request()
+        .input('call_type', sql.VarChar, item.call_type)
+        .input('sub_call_type', sql.VarChar, item.sub_call_type)
+        .input('warranty_type', sql.VarChar, item.warranty_type)
+        .input('item_code', sql.Int, item.item_code)
+        .input('class_city', sql.VarChar, item.class_city)
+        .input('engineer_level', sql.VarChar, item.engineer_level)
+        .input('ProductType', sql.VarChar, item.ProductType)
+        .input('ProductLine', sql.VarChar, item.ProductLine)
+        .input('ProductClass', sql.VarChar, item.ProductClass)
+        .input('Within24Hours', sql.Int, item["Within 24 Hours"])
+        .input('Within48Hours', sql.Int, item["Within 48 Hours"])
+        .input('Within96Hours', sql.Int, item["Within 96 Hours"])
+        .input('MoreThan96Hours', sql.Int, item["> 96 Hours"])
+        .input('gas_charging', sql.Int, item.gas_charging)
+        .input('transportation', sql.Int, item.transportation)
+        .input('csp_code', sql.VarChar, "A12334")
+        .input('created_by', sql.VarChar, created_by)
+        .input('created_date', sql.DateTime, new Date())
+        .query(`
+            INSERT INTO rate_card 
+            (csp_code,call_type, sub_call_type, warranty_type, item_code, class_city, engineer_level, ProductType, ProductLine, ProductClass, Within_24_Hours, Within_48_Hours, Within_96_Hours, MoreThan96_Hours, gas_charging, transportation, created_by , created_date) 
+            VALUES (
+              @csp_code, 
+              @call_type, 
+              @sub_call_type, 
+              @warranty_type, 
+              @item_code, 
+              @class_city, 
+              @engineer_level, 
+              @ProductType, 
+              @ProductLine, 
+              @ProductClass, 
+              @Within24Hours, 
+              @Within48Hours, 
+              @Within96Hours, 
+              @MoreThan96Hours, 
+              @gas_charging, 
+              @transportation,
+              @created_by,
+              @created_date
+
+            )
+          `);
+
+      console.log(result, "$%%^^")
+    }
+
+    return res.json({ message: 'Data inserted successfully' });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while inserting data' });
+  }
+});
+
+app.post('/uploadmasterwarrantyexcel',authenticateToken, async (req, res) => {
+  let { excelData, created_by = "1" } = req.body;
+
+  excelData = JSON.parse(excelData)
+
+  try {
+    const pool = await poolPromise;
+
+    // Set request timeout to handle large datasets
+    pool.config.options.requestTimeout = 600000;
+
+
+
+    // Loop through the rows and insert them
+    for (const item of excelData) {
+
+      console.log(item, "$$$");
+
+      await pool.request()
+        .input('item_code', sql.Int, item.item_code)
+        .input('ProductType', sql.VarChar, item.ProductType)
+        .input('ProductLine', sql.VarChar, item.ProductLine)
+        .input('ProductClass', sql.VarChar, item.ProductClass)
+        .input('ServiceType', sql.VarChar, item.ServiceType)
+        .input('warranty_year', sql.Int, item.warranty_year)
+        .input('compressor_warranty', sql.Int, item.compressor_warranty)
+        .input('warranty_amount', sql.Int, item.warranty_amount)
+        .input('is_scheme', sql.VarChar, item.is_scheme)
+        .input('scheme_name', sql.VarChar, item.scheme_name)
+        .input('scheme_startdate', sql.DateTime, item.scheme_startdate ? convertExcelDate(item.scheme_startdate) : null)
+        .input('scheme_enddate', sql.DateTime, item.scheme_enddate ? convertExcelDate(item.scheme_enddate) : null)
+        .input('csp_code', sql.VarChar, "NULL")
+        .input('created_by', sql.VarChar, created_by)
+        .input('created_date', sql.DateTime, new Date())
+        .query(`
+            INSERT INTO Master_warrenty 
+            (csp_code,item_code, Product_Type, Product_Line, Product_Class, Service_Type, warrenty_year, compressor_warrenty, warrenty_amount, is_scheme, scheme_name, scheme_startdate, scheme_enddate , created_date, created_by) 
+            VALUES 
+            (@csp_code,@item_code, @ProductType, @ProductLine, @ProductClass, @ServiceType, @warranty_year, @compressor_warranty, @warranty_amount, @is_scheme, @scheme_name, @scheme_startdate, @scheme_enddate ,@created_date , @created_by)
+          `);
+    }
+
+    return res.json({ message: 'Data inserted successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'An error occurred while inserting data' });
+  }
+});
+
+app.post('/uploadpostwarrentyexcel',authenticateToken, async (req, res) => {
+  let { excelData, created_by = "1" } = req.body;
+
+  // Parse the incoming JSON data for excelData
+  excelData = JSON.parse(excelData);
+
+  try {
+    const pool = await poolPromise;
+
+    // Set request timeout to handle large datasets
+    pool.config.options.requestTimeout = 600000;
+
+    // Loop through the rows and insert them into the database
+    for (const item of excelData) {
+      await pool.request()
+        .input('item_code', sql.Int, item.item_code)
+        .input('serial_no', sql.VarChar, item.serial_no)
+        .input('customer_name', sql.VarChar, item.customer_name)
+        .input('customer_email', sql.VarChar, item.customer_email)
+        .input('customer_mobile', sql.VarChar, item.customer_mobile)
+        .input('ProductType', sql.VarChar, item.ProductType)
+        .input('ProductLine', sql.VarChar, item.ProductLine)
+        .input('ProductClass', sql.VarChar, item.ProductClass)
+        .input('ServiceType', sql.VarChar, item.ServiceType)
+        .input('warranty_year', item.warranty_year ? item.warranty_year : null)
+        .input('compressor_warranty', sql.Int, item.compressor_warranty)
+        .input('warranty_amount', sql.Int, item.warranty_amount)
+        .input('is_scheme', sql.VarChar, item.is_scheme)
+        .input('scheme_name', sql.VarChar, item.scheme_name)
+        .input('scheme_startdate', sql.DateTime, item.scheme_startdate ? convertExcelDate(item.scheme_startdate) : null)
+        .input('scheme_enddate', sql.DateTime, item.scheme_enddate ? convertExcelDate(item.scheme_enddate) : null)
+        .input('created_by', sql.VarChar, created_by)
+        .input('created_date', sql.DateTime, new Date())
+        .query(`
+            INSERT INTO post_sale_warrenty
+            (item_code, serial_no, customer_name, customer_email, customer_mobile, ProductType, ProductLine, 
+            ProductClass, ServiceType, warranty_year, compressor_warranty, warranty_amount, 
+            is_scheme, scheme_name, scheme_startdate, scheme_enddate, created_by ,created_date)
+            VALUES
+            (@item_code, @serial_no, @customer_name, @customer_email, @customer_mobile, @ProductType, @ProductLine, 
+            @ProductClass, @ServiceType, @warranty_year, @compressor_warranty, @warranty_amount, 
+            @is_scheme, @scheme_name, @scheme_startdate, @scheme_enddate, @created_by , @created_date)
+          `);
+    }
+
+    return res.json({ message: 'Data inserted successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'An error occurred while inserting data' });
+  }
+});
+
+app.post('/uploadpinexcel',authenticateToken, async (req, res) => {
+
+
+  let { jsonData } = req.body;
+  let excelData = JSON.parse(jsonData);
+
+
+  try {
+    const pool = await poolPromise;
+    pool.config.options.requestTimeout = 600000;
+
+    for (const item of excelData) {
+      const result = await pool.request()
+        .input('pincode', sql.Int, item.pincode)
+        .input('country', sql.VarChar, item.country)
+        .input('region', sql.VarChar, item.region)
+        .input('state', sql.VarChar, item.state)
+        .input('city', sql.VarChar, item.city)
+        .input('mother_branch', sql.VarChar, item.mother_branch)
+        .input('resident_branch', sql.VarChar, item.resident_branch)
+        .input('area_manager', sql.VarChar, item.area_manager)
+        .input('local_manager', sql.VarChar, item.local_manager)
+        .input('customer_classification', sql.VarChar, item.customer_classification)
+        .input('class_city', sql.VarChar, item.class_of_city)
+        .input('csp_name', sql.VarChar, item.child_service_partner_name)
+        .input('msp_name', sql.VarChar, item.master_service_partner_name)
+        .input('call_type', sql.VarChar, item.call_type)
+        .input('msp_code', sql.Int, item.master_service_partner_code)
+        .input('csp_code', item.child_service_partner_code)
+        .query(`INSERT INTO pincode_allocation 
+              (pincode, country, region, state, city, mother_branch, resident_branch, area_manager, local_manager, customer_classification, class_city, csp_name, msp_name, call_type, msp_code, csp_code) 
+              VALUES (
+                @pincode, 
+                @country, 
+                @region, 
+                @state, 
+                @city, 
+                @mother_branch, 
+                @resident_branch, 
+                @area_manager, 
+                @local_manager, 
+                @customer_classification, 
+                @class_city, 
+                @csp_name, 
+                @msp_name, 
+                @call_type,
+                @msp_code,
+                @csp_code
+              )
+
+          `);
+    }
+
+
+    return res.json({ message: 'Data inserted successfully' });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while inserting data' });
+  }
+});
+
+
+
+
+
+
+app.post('/uploadspareexcel', async (req, res) => {
+  let { jsonData } = req.body;
+  let excelData = JSON.parse(jsonData);
+
+  try {
+    const pool = await poolPromise;
+    pool.config.options.requestTimeout = 600000;
+
+    // Truncate Spare_parts table before inserting new records
+    // await pool.request().query("TRUNCATE TABLE Spare_parts");
+
+    for (const item of excelData) {
+      // Insert new record in Spare_parts table
+      await pool.request()
+        .input('ProductCode', sql.VarChar, item.ProductCode)
+        .input('ModelNumber', sql.VarChar, item.ModelNumber)
+        .input('title', sql.VarChar, item.title)
+        .input('ItemDescription', sql.VarChar, item.ItemDescription)
+        .input('Manufactured', sql.VarChar, item.Manufactured)
+        .input('BOMQty', sql.VarChar, item.BOMQty)
+        .input('PriceGroup', sql.VarChar, item.PriceGroup)
+        .input('Status', sql.VarChar, item.Status)
+        .input('ProductType', sql.VarChar, item.ProductType)
+        .input('Model', sql.VarChar, item.Model)
+        .input('Index1', sql.VarChar, item.Index1)
+        .input('PartNature', sql.VarChar, item.PartNature)
+        .input('Warranty', sql.VarChar, item.Warranty)
+        .input('HSN', sql.VarChar, item.HSN)
+        .input('Packed', sql.VarChar, item.Packed)
+        .input('Returnable', sql.VarChar, item.Returnable)
+        .input('ProductLine', sql.VarChar, item.ProductLine)
+        .input('ProductClass', sql.VarChar, item.ProductClass)
+        .input('Serialized', sql.VarChar, item.Serialized)
+        .query(`
+          INSERT INTO Spare_parts 
+            (ProductCode, ModelNumber, title, ItemDescription, Manufactured, BOMQty, PriceGroup, Status, ProductType, Model, Index1, PartNature, Warranty, HSN, Packed, Returnable, ProductClass, ProductLine, Serialized) 
+          VALUES (
+            @ProductCode, 
+            @ModelNumber, 
+            @title, 
+            @ItemDescription, 
+            @Manufactured, 
+            @BOMQty, 
+            @PriceGroup, 
+            @Status, 
+            @ProductType, 
+            @Model, 
+            @Index1, 
+            @PartNature, 
+            @Warranty, 
+            @HSN,
+            @Packed,
+            @Returnable,
+            @ProductClass,
+            @ProductLine,
+            @Serialized
+          )
+        `);
+    }
+
+    return res.status(200).json({ message: 'Data processed successfully' });
+
+  } catch (err) {
+    console.error("Error inserting data:", err);
+    return res.status(500).json({ error: 'An error occurred while processing data' });
+  }
+});
 
 
 

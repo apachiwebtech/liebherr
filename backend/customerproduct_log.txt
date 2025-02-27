@@ -1,0 +1,6 @@
+[2025-02-27T10:21:49.672Z] FAILED: Ticket A0000131 - Invalid column name 'SubDealer'.
+[2025-02-27T10:21:49.974Z] FAILED: Ticket A0000132 - Invalid column name 'SubDealer'.
+[2025-02-27T10:23:24.695Z] SUCCESS: Ticket A0000131 inserted successfully.
+[2025-02-27T10:23:24.900Z] SUCCESS: Ticket A0000132 inserted successfully.
+[2025-02-27T16:48:08.679Z] SUCCESS: Ticket undefined inserted successfully.
+[2025-02-27T16:48:08.828Z] SUCCESS: Ticket undefined inserted successfully.

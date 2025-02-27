@@ -1,0 +1,62 @@
+  if (1 === 1) {
+        const auth = {
+          username: "rohit.jape@liebherr.com",
+          password: "W3W_4wbaiF2JzNn",
+        };
+
+        try {
+          const tokenResponse = await axios.post(
+            'https://cts.myvi.in:8443/SMS/api/token',
+            auth
+          );
+
+          if (tokenResponse.data) {
+            const token = tokenResponse.data.token;
+
+
+            const smsPayload = {
+              pingBackType: "0",
+              pingBackId: "-1",
+              jsonData: {
+                senderId: "LICARE",
+                TemplateID: "1207173530305447084",
+                templateName: "welcomemsg",
+                unicodeStatus: 0,
+                messages: [
+                  {
+                    msisdn: mobile,
+                    message:
+                      `Dear Customer, Greetings from Liebherr! Your Ticket Number is ${ticket_no}. Please share OTP ${otp} with the engineer once the ticket is resolved.`,
+                    customerReferenceId: "1",
+                  },
+                ],
+              },
+              validationFlag: "1",
+              validatyPeriod: null,
+            };
+
+            try {
+              const smsResponse = await axios.post(
+                'https://cts.myvi.in:8443/SMS/api/broadcast',
+                smsPayload,
+                {
+                  headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`, // Ensure the token is correctly prefixed
+                  },
+                }
+              );
+
+              if (smsResponse.status === 200) {
+                console.log('SMS sent successfully:', smsResponse.data);
+              } else {
+                console.error('Failed to send SMS:', smsResponse.data);
+              }
+            } catch (error) {
+              console.error('Error hitting SMS API (broadcast):', error.response?.data || error.message);
+            }
+          }
+        } catch (error) {
+          console.error('Error hitting SMS API (token):', error.response?.data || error.message);
+        }
+      }

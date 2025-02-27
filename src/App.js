@@ -139,9 +139,15 @@ import { CspQuotationlist } from './Components/Pages/Master/CspQuotationlist';
 import CspQuotationEdit from './Components/Pages/Master/CspQuotationEdit';
 import AnnextureReport from './Components/Pages/Reports/Annexturereport';
 import JsonToSql from './Components/Utils/JsonToSql';
-
-
-
+import ExcelToJson from './Components/Utils/ExcelTojson';
+import ExcelforRemarks from './Components/Utils/ExcelforRemarks';
+import UploadRemarks from './Components/Utils/UploadRemarks';
+import ExceltoCustomer from './Components/Utils/ExceltoCustomer';
+import ExceltoAddress from './Components/Utils/ExporttoAddress';
+import ExporttoProduct from './Components/Utils/ExporttoProduct';
+import UploadCustomer from './Components/Utils/UploadCustomer';
+import UploadAddress from './Components/Utils/UploadAddress';
+import UploadProducts from './Components/Utils/UploadProducts';
 
 
 
@@ -192,8 +198,45 @@ const Router = createBrowserRouter([
     element: <QueryPage />
   },
   {
-    path: "/jsontosql",
+    path: "/uploadcomplaint",
     element: <JsonToSql />
+  },
+
+  {
+    path: "/uploadremarks",
+    element: <UploadRemarks />
+  },
+  {
+    path: "/uploadcustomer",
+    element: <UploadCustomer />
+  },
+  {
+    path: "/uploadaddress",
+    element: <UploadAddress />
+  },
+  {
+    path: "/uploadproducts",
+    element: <UploadProducts />
+  },
+  {
+    path: "/exceltoremark",
+    element: <ExcelforRemarks />
+  },
+  {
+    path: "/exceltocustomer",
+    element: <ExceltoCustomer />
+  },
+  {
+    path: "/exceltoaddress",
+    element: <ExceltoAddress />
+  },
+  {
+    path: "/exceltoproduct",
+    element: <ExporttoProduct />
+  },
+  {
+    path: "/exceltojson",
+    element: <ExcelToJson />
   },
 
 

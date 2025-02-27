@@ -4,12 +4,11 @@ import { Base_Url } from "./Base_Url";
 import { useAxiosLoader } from "../Layout/UseAxiosLoader";
 import { SyncLoader } from "react-spinners";
 
-function JsonToSql() {
+function UploadRemarks() {
   const [file, setFile] = useState(null);
-  const [tableName, setTableName] = useState("complaint_ticket");
-  const { loaders, axiosInstance } = useAxiosLoader();
+  const [tableName, setTableName] = useState("awt_complaintremark");
   const token = localStorage.getItem("token");
-
+   const { loaders, axiosInstance } = useAxiosLoader();
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
   };
@@ -50,7 +49,7 @@ function JsonToSql() {
         const finalData = JSON.stringify(transformData(jsonData));
   
         // Send parsed data to the backend for bulk insertion
-        const response = await axiosInstance.post(`${Base_Url}/uploadtickets`, {
+        const response = await axiosInstance.post(`${Base_Url}/uploadremarks`, {
           jsonData: finalData, // Ensure the data is an array of complaint_ticket objects
         }, {
           headers: {
@@ -78,7 +77,7 @@ function JsonToSql() {
 
   return (
     <div style={{ padding: "20px", maxWidth: "400px", margin: "auto", textAlign: "center" }}>
-               {loaders && (
+                {loaders && (
           <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <SyncLoader loading={loaders} color="#FFFFFF" />
           </div>
@@ -107,4 +106,4 @@ function JsonToSql() {
   );
 }
 
-export default JsonToSql;
+export default UploadRemarks;

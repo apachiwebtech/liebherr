@@ -544,6 +544,7 @@ app.post("/fetchbussiness_partner", async (req, res) => {
 //This is for Shipment FG
 
 app.post("/fetchshipment_fg", async (req, res) => {
+
   const apiKey = req.header("x-api-key"); // Get API key from request header
 
   if (apiKey !== API_KEY) {
@@ -638,7 +639,7 @@ app.post("/fetchshipment_fg", async (req, res) => {
         IF EXISTS (
           SELECT 1 
           FROM Shipment_Fg 
-          WHERE Serial_no = @S AND Item_Code = @Item_Code AND InvoiceNumber = @InvoiceNumber
+          WHERE Serial_no = @Serial_no AND Item_Code = @Item_Code AND InvoiceNumber = @InvoiceNumber
         )
         BEGIN
           UPDATE Shipment_Fg
@@ -679,6 +680,42 @@ app.post("/fetchshipment_fg", async (req, res) => {
           )
         END
       `);
+
+
+
+
+
+      const insertintoserial = `
+IF NOT EXISTS (
+    SELECT 1 FROM awt_serial_list
+    WHERE serial_no = @Serial_no_s
+      AND ItemNumber = @ItemNumber_s
+      AND InvoiceNumber = @InvoiceNumber_S
+)
+BEGIN
+    INSERT INTO awt_serial_list(serial_no, ModelNumber, Artikel_PPS_Artikel_Nr, Artikel_PPS_Artikel, InvoiceNumber, Description, ItemNumber, SeriesNo, Manufacture, CountryofOrigin, PrimarySalesDealer)
+    VALUES (@Serial_no_s, @Model_no_s, @Artikel_PPS_Artikel_Nr_s, @Artikel_PPS_Artikel_s, @InvoiceNumber_S, @Description_s, @ItemNumber_s, @SeriesNo_s, @Manufacture_s, @CountryofOrigin_S, @PrimarySalesDealer_s)
+END;
+`;
+
+const result2 = await pool.request()
+  .input("Serial_no_s", sql.VarChar, Serial_no)
+  .input("Model_no_s", sql.VarChar, Item_Description)
+  .input("Artikel_PPS_Artikel_Nr_s", sql.VarChar, lot_number)
+  .input("Artikel_PPS_Artikel_s", sql.VarChar, Item_Description)
+  .input("InvoiceNumber_S", sql.VarChar, InvoiceNumber)
+  .input("Description_s", sql.VarChar, Item_Description)
+  .input("ItemNumber_s", sql.VarChar, Item_Code)
+  .input("SeriesNo_s", sql.VarChar, lot_number)
+  .input("Manufacture_s", sql.VarChar, 'LHI')
+  .input("CountryofOrigin_S", sql.VarChar, customer_classification)
+  .input("PrimarySalesDealer_s", sql.VarChar, Invoice_bpcode)
+  .query(insertintoserial);
+
+
+
+
+
 
     return res.json({
       message: "Operation completed successfully!",
@@ -817,44 +854,44 @@ app.post("/fetchshipment_Parts", async (req, res) => {
     } else {
       // Insert new record
       await pool.request()
-      .input("InvoiceNumber", sql.VarChar, InvoiceNumber)
-      .input("InvoiceDate", sql.VarChar, InvoiceDate)
-      .input("Invoice_bpcode", sql.VarChar, Invoice_bpcode)
-      .input("Invoice_bpName", sql.VarChar, Invoice_bpName)
-      .input("Invoice_city", sql.VarChar, Invoice_city)
-      .input("Invoice_state", sql.VarChar, Invoice_state)
-      .input("orderType_desc", sql.VarChar, orderType_desc)
-      .input("Customer_Po", sql.VarChar, Customer_Po)
-      .input("Item_Code", sql.VarChar, Item_Code)
-      .input("Item_Description", sql.VarChar, Item_Description)
-      .input("Invoice_qty", sql.VarChar, Invoice_qty)
-      .input("hsn_code", sql.VarChar, hsn_code)
-      .input("Basic_rate", sql.VarChar, Basic_rate)
-      .input("compressor_bar", sql.VarChar, compressor_bar)
-      .input("Vehicle_no", sql.VarChar, Vehicle_no)
-      .input("Vehicale_Type", sql.VarChar, Vehicale_Type)
-      .input("Transporter_name", sql.VarChar, Transporter_name)
-      .input("Lr_number", sql.VarChar, Lr_number)
-      .input("Lr_date", sql.VarChar, Lr_date)
-      .input("Address_code", sql.VarChar, Address_code)
-      .input("Address", sql.VarChar, Address)
-      .input("Pincode", sql.VarChar, Pincode)
-      .input("Licare_code", sql.VarChar, Licare_code)
-      .input("Licare_Address", sql.VarChar, Licare_Address)
-      .input("Shipment_id", sql.VarChar, Shipment_id)
-      .input("Ship_date", sql.VarChar, Ship_date)
-      .input("Transaction_Type", sql.VarChar, Transaction_Type)
-      .input("Product_Choice", sql.VarChar, Product_Choice)
-      .input("Serial_Indentity", sql.VarChar, Serial_Indentity)
-      .input("Serial_no", sql.VarChar, Serial_no)
-      .input("Lot_Number", sql.VarChar, Lot_Number)
-      .input("Order_Number", sql.VarChar, Order_Number)
-      .input("Order_Line_Number", sql.VarChar, Order_Line_Number)
-      .input("Warehouse", sql.VarChar, Warehouse)
-      .input("Service_Type", sql.VarChar, Service_Type)
-      .input("Manufactured_Date", sql.VarChar, Manufactured_Date)
-      .input("created_date", sql.VarChar, created_date)
-      .query(`
+        .input("InvoiceNumber", sql.VarChar, InvoiceNumber)
+        .input("InvoiceDate", sql.VarChar, InvoiceDate)
+        .input("Invoice_bpcode", sql.VarChar, Invoice_bpcode)
+        .input("Invoice_bpName", sql.VarChar, Invoice_bpName)
+        .input("Invoice_city", sql.VarChar, Invoice_city)
+        .input("Invoice_state", sql.VarChar, Invoice_state)
+        .input("orderType_desc", sql.VarChar, orderType_desc)
+        .input("Customer_Po", sql.VarChar, Customer_Po)
+        .input("Item_Code", sql.VarChar, Item_Code)
+        .input("Item_Description", sql.VarChar, Item_Description)
+        .input("Invoice_qty", sql.VarChar, Invoice_qty)
+        .input("hsn_code", sql.VarChar, hsn_code)
+        .input("Basic_rate", sql.VarChar, Basic_rate)
+        .input("compressor_bar", sql.VarChar, compressor_bar)
+        .input("Vehicle_no", sql.VarChar, Vehicle_no)
+        .input("Vehicale_Type", sql.VarChar, Vehicale_Type)
+        .input("Transporter_name", sql.VarChar, Transporter_name)
+        .input("Lr_number", sql.VarChar, Lr_number)
+        .input("Lr_date", sql.VarChar, Lr_date)
+        .input("Address_code", sql.VarChar, Address_code)
+        .input("Address", sql.VarChar, Address)
+        .input("Pincode", sql.VarChar, Pincode)
+        .input("Licare_code", sql.VarChar, Licare_code)
+        .input("Licare_Address", sql.VarChar, Licare_Address)
+        .input("Shipment_id", sql.VarChar, Shipment_id)
+        .input("Ship_date", sql.VarChar, Ship_date)
+        .input("Transaction_Type", sql.VarChar, Transaction_Type)
+        .input("Product_Choice", sql.VarChar, Product_Choice)
+        .input("Serial_Indentity", sql.VarChar, Serial_Indentity)
+        .input("Serial_no", sql.VarChar, Serial_no)
+        .input("Lot_Number", sql.VarChar, Lot_Number)
+        .input("Order_Number", sql.VarChar, Order_Number)
+        .input("Order_Line_Number", sql.VarChar, Order_Line_Number)
+        .input("Warehouse", sql.VarChar, Warehouse)
+        .input("Service_Type", sql.VarChar, Service_Type)
+        .input("Manufactured_Date", sql.VarChar, Manufactured_Date)
+        .input("created_date", sql.VarChar, created_date)
+        .query(`
         INSERT INTO Shipment_parts (
           InvoiceNumber, InvoiceDate, Invoice_bpcode, Invoice_bpName, 
           Invoice_city, Invoice_state, orderType_desc, Customer_Po, Item_Code,
@@ -906,7 +943,7 @@ app.post("/fetchspareprice", async (req, res) => {
       SELECT COUNT(*) AS count 
       FROM Spare_partprice
       WHERE Item = @Item AND Product_code = @Product_code
-    `; 
+    `;
 
     const duplicateCheckResult = await pool.request()
       .input('Item', sql.VarChar(50), Item)
@@ -920,7 +957,7 @@ app.post("/fetchspareprice", async (req, res) => {
     const duplicateCount = duplicateCheckResult.recordset[0].count;
 
 
-    if(duplicateCount > 0) {
+    if (duplicateCount > 0) {
       const updateQuery = ` UPDATE Spare_partprice
         SET 
           Product_descV1 = @Product_descV1,
@@ -938,7 +975,7 @@ app.post("/fetchspareprice", async (req, res) => {
         WHERE Product_code = @Product_code`;
 
 
-        await pool.request()
+      await pool.request()
         .input('Product_descV1', sql.Text, Product_descV1)
         .input('item_description', sql.Text, item_description)
         .input('Manufactured', sql.VarChar(50), Manufactured)
