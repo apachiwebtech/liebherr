@@ -68,12 +68,20 @@ const PostSaleWarrenty = () => {
 
   const uploadexcel = () => {
 
+    const transformData = (data) => {
+      return data.map((item) => {
+        return Object.fromEntries(
+          Object.entries(item).map(([key, value]) => [key, value !== null ? String(value) : ""])
+        );
+      });
+    };
+
     const data = {
-      excelData: JSON.stringify(excelData),
+      excelData: JSON.stringify(transformData(excelData)),
       created_by: localStorage.getItem("licare_code")
     };
 
-    axios.post(`${Base_Url}/uploadpostwarrentyexcel`, data,{
+    axiosInstance.post(`${Base_Url}/uploadpostwarrentyexcel`, data,{
       headers: {
         Authorization: token, // Send token in headers
       },

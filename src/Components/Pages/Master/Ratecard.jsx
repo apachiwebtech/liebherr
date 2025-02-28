@@ -227,7 +227,7 @@ const Ratecard = () => {
       created_by: localStorage.getItem("licare_code")
     }
 
-    axios.post(`${Base_Url}/uplaodratecardexcel`, data,{
+    axiosInstance.post(`${Base_Url}/uplaodratecardexcel`, data,{
       headers: {
         Authorization: token, // Send token in headers
       },

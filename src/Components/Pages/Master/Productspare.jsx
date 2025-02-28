@@ -210,6 +210,8 @@ export function Productspare() {
     const uploadexcel = () => {
         setLoader(true);
 
+
+        
         try {
             // Ensure excelData is converted to JSON string before encryption
             const jsonData = JSON.stringify(excelData);

@@ -14805,6 +14805,9 @@ app.post('/uplaodratecardexcel', authenticateToken, async (req, res) => {
     pool.config.options.requestTimeout = 600000;
 
     for (const item of excelData) {
+
+      console.log(excelData)
+
       const result = await pool.request()
         .input('call_type', sql.VarChar, item.call_type)
         .input('sub_call_type', sql.VarChar, item.sub_call_type)
@@ -14972,9 +14975,12 @@ app.post('/uploadpinexcel',authenticateToken, async (req, res) => {
     const pool = await poolPromise;
     pool.config.options.requestTimeout = 600000;
 
+
+    
     for (const item of excelData) {
+      console.log(excelData)
       const result = await pool.request()
-        .input('pincode', sql.Int, item.pincode)
+        .input('pincode', sql.Int, item.pin_code)
         .input('country', sql.VarChar, item.country)
         .input('region', sql.VarChar, item.region)
         .input('state', sql.VarChar, item.state)
@@ -14990,8 +14996,10 @@ app.post('/uploadpinexcel',authenticateToken, async (req, res) => {
         .input('call_type', sql.VarChar, item.call_type)
         .input('msp_code', sql.Int, item.master_service_partner_code)
         .input('csp_code', item.child_service_partner_code)
+        .input('producttype', item.producttype)
+        .input('productline', item.productline)
         .query(`INSERT INTO pincode_allocation 
-              (pincode, country, region, state, city, mother_branch, resident_branch, area_manager, local_manager, customer_classification, class_city, csp_name, msp_name, call_type, msp_code, csp_code) 
+              (pincode, country, region, state, city, mother_branch, resident_branch, area_manager, local_manager, customer_classification, class_city, csp_name, msp_name, call_type, msp_code, csp_code,ProductType,ProductLine) 
               VALUES (
                 @pincode, 
                 @country, 
@@ -15008,7 +15016,9 @@ app.post('/uploadpinexcel',authenticateToken, async (req, res) => {
                 @msp_name, 
                 @call_type,
                 @msp_code,
-                @csp_code
+                @csp_code,
+                @producttype,
+                @productline
               )
 
           `);

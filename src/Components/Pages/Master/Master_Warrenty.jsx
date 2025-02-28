@@ -71,12 +71,21 @@ const Master_Warrenty = () => {
 
   const uploadexcel = () => {
     // Convert excelData to a string (assuming it's an array or object)
+
+    const transformData = (data) => {
+      return data.map((item) => {
+        return Object.fromEntries(
+          Object.entries(item).map(([key, value]) => [key, value !== null ? String(value) : ""])
+        );
+      });
+    };
+
     const data = {
-      excelData: JSON.stringify(excelData),
+      excelData: JSON.stringify(transformData(excelData)),
       created_by: localStorage.getItem("licare_code")
     };
 
-    axios.post(`${Base_Url}/uploadmasterwarrantyexcel`, data,{
+    axiosInstance.post(`${Base_Url}/uploadmasterwarrantyexcel`, data,{
       headers: {
         Authorization: token, // Send token in headers
       },
