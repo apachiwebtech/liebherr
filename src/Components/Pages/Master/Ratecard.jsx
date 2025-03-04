@@ -223,9 +223,9 @@ const Ratecard = () => {
     };
 
     const data = {
-      excelData: JSON.stringify(transformData(excelData)),
-      created_by: localStorage.getItem("licare_code")
-    }
+      excelData: transformData(excelData), // Keeping JSON.stringify
+      created_by: localStorage.getItem("licare_code"),
+    };
 
     axiosInstance.post(`${Base_Url}/uplaodratecardexcel`, data,{
       headers: {

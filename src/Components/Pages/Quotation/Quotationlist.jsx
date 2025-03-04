@@ -14,6 +14,7 @@ export function Quotationlist(params) {
     const { loaders, axiosInstance } = useAxiosLoader();
     const [Quotationdata, setQuotationdata] = useState([]);
     const token = localStorage.getItem("token");
+    const licare_code = localStorage.getItem("licare_code");
     const [filteredData, setFilteredData] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
@@ -53,6 +54,7 @@ export function Quotationlist(params) {
             // Add the page and pageSize parameters
             params.append('page', page || 1); // Current page number
             params.append('pageSize', pageSize); // Page size
+            params.append('licare_code', licare_code); // Page size
 
 
             // Add all filters to params if they have values
@@ -91,6 +93,10 @@ export function Quotationlist(params) {
                     params.append(key, value);
                 }
             });
+
+            if (licare_code) {
+                params.append('licare_code', licare_code);
+            }
 
             console.log('Sending params:', params.toString()); // Debug log
 

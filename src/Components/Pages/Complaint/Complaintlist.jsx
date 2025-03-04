@@ -17,6 +17,7 @@ export function Complaintlist(params) {
   const [filteredData, setFilteredData] = useState([]);
   const [isEdit, setIsEdit] = useState(false);
   const token = localStorage.getItem("token"); // Get token from localStorage
+  const licare_code = localStorage.getItem("licare_code"); // Get token from localStorage
   const [currentPage, setCurrentPage] = useState(1);
   const [excelData, setExcelData] = useState([]);
   const [pageSize, setPageSize] = useState(10);
@@ -71,8 +72,9 @@ export function Complaintlist(params) {
     try {
       // Build the params object dynamically
       const params = {
-        page: page, // Current page number
-        pageSize: pageSize, // Page size
+        page: page, 
+        pageSize: pageSize, 
+        licare_code : licare_code
       };
 
       // Add search filters dynamically to params
@@ -340,8 +342,9 @@ export function Complaintlist(params) {
           Authorization: token,
         },
         params: {
-          pageSize: totalCount, // Fetch all data
-          page: 1, // Start from the first page
+          pageSize: totalCount, 
+          page: 1,
+          licare_code : licare_code 
         },
       });
 

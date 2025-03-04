@@ -88,10 +88,10 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 //
 const dbConfig = {
-  user: "sa",
-  password: "8$E5r6p8%8KH#F6V",
-  server: "103.101.58.207",
-  database: "licare",
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  server: process.env.DB_SERVER,
+  database: process.env.DB_DATABASE,
   options: {
     encrypt: true, // for Azure
     trustServerCertificate: true,
@@ -8818,6 +8818,7 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
       pageSize = 10,
       csp,
       msp,
+      licare_code,
       mode_of_contact,
       customer_class,
       Priority,
@@ -8828,20 +8829,52 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
 
     const currentDate = new Date().toISOString().split('T')[0]
 
-    // console.log(currentDate, "$$$")
+    const getcsp = `select * from lhi_user where Usercode = '${licare_code}'`
+
+    console.log(getcsp, "csp")
+
+    const getcspresilt = await pool.request().query(getcsp)
+
+
+
+
+    const assigncsp = getcspresilt.recordset[0].assigncsp
+
+
+
+
+
+
 
     let sql = `
-        SELECT c.*,
-               DATEDIFF(DAY, c.ticket_date, GETDATE()) AS ageingdays
-        FROM complaint_ticket AS c
-        WHERE c.deleted = 0`;
+    SELECT c.*,
+           DATEDIFF(DAY, c.ticket_date, GETDATE()) AS ageingdays
+    FROM complaint_ticket AS c
+    WHERE c.deleted = 0`;
 
     let countSql = `
-        SELECT COUNT(*) AS totalCount
-        FROM complaint_ticket AS c
-        WHERE c.deleted = 0`;
+    SELECT COUNT(*) AS totalCount
+    FROM complaint_ticket AS c
+    WHERE c.deleted = 0`;
+
+
+
+
+
+
 
     let params = [];
+
+    if (assigncsp !== 'ALL') {
+      // Convert to an array and wrap each value in single quotes
+      const formattedCspList = assigncsp.split(",").map(csp => `'${csp.trim()}'`).join(",");
+    
+      // Directly inject the formatted values into the SQL query
+      sql += ` AND c.csp IN (${formattedCspList})`;
+      countSql += ` AND c.csp IN (${formattedCspList})`;
+    }
+    
+
 
     // Filtering conditions
     if (fromDate && toDate) {
@@ -8986,6 +9019,8 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
     }
 
 
+
+    console.log(sql)
 
 
     // Execute queries
@@ -9910,6 +9945,7 @@ app.get("/getquotationlist", authenticateToken, async (req, res) => {
       price,
       quotationNumber,
       assignedEngineer,
+      licare_code,
       CustomerName,
       page = 1, // Default to page 1 if not provided
       pageSize = 10, // Default to 10 items per page if not provided
@@ -9917,8 +9953,25 @@ app.get("/getquotationlist", authenticateToken, async (req, res) => {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
 
+    const getcsp = `select * from lhi_user where Usercode = '${licare_code}'`
+
+
+    const getcspresilt = await pool.request().query(getcsp)
+
+    const assigncsp = getcspresilt.recordset[0].assigncsp
+
     // Directly use the query (no parameter binding)
     let sql = `SELECT q.* FROM awt_quotation as q WHERE 1=1`;
+
+    
+    if (assigncsp !== 'ALL') {
+      // Convert to an array and wrap each value in single quotes
+      const formattedCspList = assigncsp.split(",").map(csp => `'${csp.trim()}'`).join(",");
+    
+      // Directly inject the formatted values into the SQL query
+      sql += ` AND q.csp_code IN (${formattedCspList})`;
+    }
+    
 
     if (ticket_no) {
       sql += ` AND q.ticketId LIKE '%${ticket_no}%'`;
@@ -14367,8 +14420,50 @@ app.post("/getannexturedata", authenticateToken, async (req, res) => {
 
 // get msp for annexture data
 
+// app.post("/getmsplist", authenticateToken, async (req, res) => {
+//   try {
+//     const { licare_code } = req.body;
+//     const pool = await poolPromise;
+
+//     const getcsp = `SELECT * FROM lhi_user WHERE Usercode = @licare_code`;
+//     const getcspResult = await pool.request()
+//       .input("licare_code", sql.VarChar, licare_code)
+//       .query(getcsp);
+
+//     if (getcspResult.recordset.length === 0) {
+//       return res.status(404).json({ error: "User not found" });
+//     }
+
+//     const assigncsp = getcspResult.recordset[0].assigncsp;
+//     let sqlQuery = `
+//       SELECT DISTINCT ct.msp, mf.title 
+//       FROM complaint_ticket ct
+//       JOIN awt_franchisemaster mf ON ct.msp = mf.licarecode
+//       WHERE ct.msp IS NOT NULL
+//     `;
+
+//     if (assigncsp != "ALL") {
+//       // Securely format CSP list
+//       const formattedCspList = assigncsp.split(",").map(csp => `'${csp.trim()}'`).join(",");
+//       sqlQuery += ` AND mf.licarecode IN (${formattedCspList})`;
+//     }
+
+//     sqlQuery += ` ORDER BY mf.title`;
+
+//     console.log(sqlQuery)
+
+//     const result = await pool.request().query(  sqlQuery);
+//     return res.json(result.recordset);
+//   } catch (err) {
+//     console.error("Database Error:", err);
+//     return res.status(500).json({ error: "Failed to fetch MSPs", details: err.message });
+//   }
+// });
+
 // Fetch MSP list from awt_franchisemaster
 app.get("/getmsplist", authenticateToken, async (req, res) => {
+
+  
   try {
     const pool = await poolPromise;
     const sql = `
@@ -14432,8 +14527,6 @@ app.post('/uploadtickets', authenticateToken, async (req, res) => {
   let excelData = JSON.parse(jsonData);
 
 
-  const logFilePath = path.join(__dirname, 'ticket_log.txt');
-  const logStream = fs.createWriteStream(logFilePath, { flags: 'a' }); // Append mode
 
   try {
     const pool = await poolPromise;
@@ -14513,9 +14606,9 @@ app.post('/uploadtickets', authenticateToken, async (req, res) => {
           .input('mwhatsapp', Number(item.mwhatsapp))
           .input('awhatsapp', Number(item.awhatsapp))
           .query(`
-          INSERT INTO complaint_ticket_new_dummy  (
+          INSERT INTO complaint_ticket  (
             ticket_no, ticket_date, customer_id, salutation, customer_name, alt_mobile, customer_mobile, customer_email, ModelNumber, serial_no, 
-            address, region, state, city, area, pincode,child_service_partner, msp, csp, sales_partner, assigned_to, old_engineer, 
+            address, region, state, city, area, pincode,child_service_partner, msp, csp, sales_partner, assigned_to,  
             engineer_code, engineer_id, ticket_type, call_type, sub_call_status, call_status, symptom_code, cause_code, action_code, service_charges, 
             other_charges, warranty_status, invoice_date, call_charges, mode_of_contact, created_date, created_by, deleted, updated_by, updated_date, 
             contact_person, purchase_date, specification, ageing, area_id, state_id, city_id, pincode_id, closed_date, customer_class, call_priority, 
@@ -14525,7 +14618,7 @@ app.post('/uploadtickets', authenticateToken, async (req, res) => {
           VALUES (
             @ticket_no, @ticket_date, @customer_id, @salutation, @customer_name, @alt_mobile, @customer_mobile, @customer_email, @ModelNumber, @serial_no, 
             @address, @region, @state, @city, @area, @pincode, @child_service_partner, @msp, @csp, @sales_partner, @assigned_to, 
-            @old_engineer, @engineer_code, @engineer_id, @ticket_type, @call_type, @sub_call_status, @call_status, @symptom_code, @cause_code, @action_code, 
+             @engineer_code, @engineer_id, @ticket_type, @call_type, @sub_call_status, @call_status, @symptom_code, @cause_code, @action_code, 
             @service_charges, @other_charges, @warranty_status, @invoice_date, @call_charges, @mode_of_contact, @created_date, @created_by, @deleted, 
             @updated_by, @updated_date, @contact_person, @purchase_date, @specification, @ageing, @area_id, @state_id, @city_id, @pincode_id, @closed_date, 
             @customer_class, @call_priority, @spare_doc_path, @call_remark, @spare_detail, @group_code, @defect_type, @site_defect, @activity_code, 
@@ -14534,16 +14627,13 @@ app.post('/uploadtickets', authenticateToken, async (req, res) => {
         `);
 
 
-        // Log successful insertion
-        logStream.write(`[${new Date().toISOString()}] SUCCESS: Ticket ${item.ticket_no} inserted successfully.\n`);
       } catch {
-        // Log failed insertion
-        logStream.write(`[${new Date().toISOString()}] FAILED: Ticket ${item.ticket_no} - ${err.message}\n`);
+        console.log("err")
       }
 
     }
 
-    logStream.end(); // Close stream
+
 
     return res.json({ message: 'Data inserted successfully' });
   } catch (err) {
@@ -14556,8 +14646,7 @@ app.post('/uploadremarks', authenticateToken, async (req, res) => {
   let { jsonData } = req.body;
   let excelData = JSON.parse(jsonData);
 
-  const logFilePath = path.join(__dirname, 'remark_log.txt');
-  const logStream = fs.createWriteStream(logFilePath, { flags: 'a' }); // Append mode
+
 
   try {
     const pool = await poolPromise;
@@ -14580,21 +14669,15 @@ app.post('/uploadremarks', authenticateToken, async (req, res) => {
             )
           `);
 
-        // Log successful insertion
-        logStream.write(`[${new Date().toISOString()}] SUCCESS: Ticket ${item.ticket_no} inserted successfully.\n`);
       } catch (err) {
-        // Log failed insertion
-        logStream.write(`[${new Date().toISOString()}] FAILED: Ticket ${item.ticket_no} - ${err.message}\n`);
+        console.log("err")
       }
     }
 
-    logStream.end(); // Close stream
     return res.json({ message: 'Data insertion process completed. Check upload_log.txt for details.' });
 
   } catch (err) {
     console.error(err);
-    logStream.write(`[${new Date().toISOString()}] ERROR: Database connection issue - ${err.message}\n`);
-    logStream.end();
     return res.status(500).json({ error: 'An error occurred while inserting data' });
   }
 });
@@ -14604,8 +14687,7 @@ app.post('/uploadcustomer', authenticateToken, async (req, res) => {
   let { jsonData } = req.body;
   let excelData = JSON.parse(jsonData);
 
-  const logFilePath = path.join(__dirname, 'customer_log.txt');
-  const logStream = fs.createWriteStream(logFilePath, { flags: 'a' }); // Append mode
+
 
   try {
     const pool = await poolPromise;
@@ -14625,8 +14707,8 @@ app.post('/uploadcustomer', authenticateToken, async (req, res) => {
           .input('alternate_mobile', sql.VarChar, item.alternate_mobile)
           .input('a_whatsapp', sql.VarChar, item.a_whatsapp)
           .input('email', sql.VarChar, item.email)
-          .input('date_of_birth',  item.date_of_birth)
-          .input('anniversary_date',  item.anniversary_date)
+          .input('date_of_birth', item.date_of_birth)
+          .input('anniversary_date', item.anniversary_date)
           .query(`
             INSERT INTO awt_customer (
               customer_id, salutation, customer_fname, customer_type ,customer_classification,mobileno,m_whatsapp,alt_mobileno,a_whatsapp,email,dateofbirth,anniversary_date 
@@ -14636,21 +14718,17 @@ app.post('/uploadcustomer', authenticateToken, async (req, res) => {
             )
           `);
 
-        // Log successful insertion
-        logStream.write(`[${new Date().toISOString()}] SUCCESS: Ticket ${item.customer_id} inserted successfully.\n`);
+
       } catch (err) {
-        // Log failed insertion
-        logStream.write(`[${new Date().toISOString()}] FAILED: Ticket ${item.customer_id} - ${err.message}\n`);
+        console.log(err)
       }
     }
 
-    logStream.end(); // Close stream
     return res.json({ message: 'Data insertion process completed. Check customer_log.txt for details.' });
 
   } catch (err) {
     console.error(err);
-    logStream.write(`[${new Date().toISOString()}] ERROR: Database connection issue - ${err.message}\n`);
-    logStream.end();
+
     return res.status(500).json({ error: 'An error occurred while inserting data' });
   }
 });
@@ -14660,8 +14738,7 @@ app.post('/uploadaddress', authenticateToken, async (req, res) => {
   let { jsonData } = req.body;
   let excelData = JSON.parse(jsonData);
 
-  const logFilePath = path.join(__dirname, 'address_log.txt');
-  const logStream = fs.createWriteStream(logFilePath, { flags: 'a' }); // Append mode
+
 
   try {
     const pool = await poolPromise;
@@ -14686,21 +14763,17 @@ app.post('/uploadaddress', authenticateToken, async (req, res) => {
             )
           `);
 
-        // Log successful insertion
-        logStream.write(`[${new Date().toISOString()}] SUCCESS: Ticket ${item.customer_id} inserted successfully.\n`);
+
       } catch (err) {
-        // Log failed insertion
-        logStream.write(`[${new Date().toISOString()}] FAILED: Ticket ${item.customer_id} - ${err.message}\n`);
+        console.log(err)
       }
     }
 
-    logStream.end(); // Close stream
     return res.json({ message: 'Data insertion process completed. Check customer_log.txt for details.' });
 
   } catch (err) {
     console.error(err);
-    logStream.write(`[${new Date().toISOString()}] ERROR: Database connection issue - ${err.message}\n`);
-    logStream.end();
+
     return res.status(500).json({ error: 'An error occurred while inserting data' });
   }
 });
@@ -14711,16 +14784,13 @@ app.post('/uploadproduct', authenticateToken, async (req, res) => {
   let { jsonData } = req.body;
   let excelData = JSON.parse(jsonData);
 
-  const logFilePath = path.join(__dirname, 'customerproduct_log.txt');
-  const logStream = fs.createWriteStream(logFilePath, { flags: 'a' }); // Append mode
+
 
   try {
     const pool = await poolPromise;
     pool.config.options.requestTimeout = 6000000;
 
     for (const item of excelData) {
-
-      console.log(excelData)
 
       try {
         await pool.request()
@@ -14735,16 +14805,16 @@ app.post('/uploadproduct', authenticateToken, async (req, res) => {
           .input('warrenty_sdate', sql.VarChar, item.warrenty_sdate)
           .input('warrenty_edate', sql.VarChar, item.warrenty_edate)
           .input('InvoiceDate', sql.VarChar, item.InvoiceDate)
-          .input('InvoiceNumber',sql.VarChar,  item.InvoiceNumber)
-          .input('ModelName',sql.VarChar,  item.ModelName)
-          .input('Short_model_no',sql.VarChar,  item.Short_model_no)
-          .input('SerialStatus',sql.VarChar,  item.SerialStatus)
+          .input('InvoiceNumber', sql.VarChar, item.InvoiceNumber)
+          .input('ModelName', sql.VarChar, item.ModelName)
+          .input('Short_model_no', sql.VarChar, item.Short_model_no)
+          .input('SerialStatus', sql.VarChar, item.SerialStatus)
           .input('Notes', sql.VarChar, item.Notes)
-          .input('BranchName',sql.VarChar,  item.BranchName)
-          .input('CustomerAccountStatus',sql.VarChar,  item.CustomerAccountStatus)
-          .input('SalesDealer',sql.VarChar,  item.SalesDealer)
-          .input('SubDealer',sql.VarChar,  item.SubDealer)
-          .input('customer_classification',sql.VarChar,  item.customer_classification)
+          .input('BranchName', sql.VarChar, item.BranchName)
+          .input('CustomerAccountStatus', sql.VarChar, item.CustomerAccountStatus)
+          .input('SalesDealer', sql.VarChar, item.SalesDealer)
+          .input('SubDealer', sql.VarChar, item.SubDealer)
+          .input('customer_classification', sql.VarChar, item.customer_classification)
           .query(`
             INSERT INTO awt_uniqueproductmaster (
               CustomerID, CustomerName, ModelNumber, serial_no ,address,pincode,created_date,purchase_date,warranty_sdate,warranty_edate,InvoiceDate,InvoiceNumber,ModelName,Short_model_no,SerialStatus,Notes,BranchName,CustomerAccountStatus,SalesDealer,SubDealer,customer_classification
@@ -14754,21 +14824,18 @@ app.post('/uploadproduct', authenticateToken, async (req, res) => {
             )
           `);
 
-        // Log successful insertion
-        logStream.write(`[${new Date().toISOString()}] SUCCESS: Ticket ${item.customer_id} inserted successfully.\n`);
+
       } catch (err) {
-        // Log failed insertion
-        logStream.write(`[${new Date().toISOString()}] FAILED: Ticket ${item.customer_id} - ${err.message}\n`);
+        console.log(err)
       }
     }
 
-    logStream.end(); // Close stream
+
     return res.json({ message: 'Data insertion process completed. Check customerproduct_log.txt for details.' });
 
   } catch (err) {
     console.error(err);
-    logStream.write(`[${new Date().toISOString()}] ERROR: Database connection issue - ${err.message}\n`);
-    logStream.end();
+
     return res.status(500).json({ error: 'An error occurred while inserting data' });
   }
 });
@@ -14797,7 +14864,7 @@ const convertExcelDate = (excelDate) => {
 app.post('/uplaodratecardexcel', authenticateToken, async (req, res) => {
   let { excelData, created_by = "1" } = req.body;
 
-  excelData = JSON.parse(excelData)
+
 
 
   try {
@@ -14863,10 +14930,10 @@ app.post('/uplaodratecardexcel', authenticateToken, async (req, res) => {
   }
 });
 
-app.post('/uploadmasterwarrantyexcel',authenticateToken, async (req, res) => {
+app.post('/uploadmasterwarrantyexcel', authenticateToken, async (req, res) => {
   let { excelData, created_by = "1" } = req.body;
 
-  excelData = JSON.parse(excelData)
+
 
   try {
     const pool = await poolPromise;
@@ -14912,11 +14979,10 @@ app.post('/uploadmasterwarrantyexcel',authenticateToken, async (req, res) => {
   }
 });
 
-app.post('/uploadpostwarrentyexcel',authenticateToken, async (req, res) => {
+app.post('/uploadpostwarrentyexcel', authenticateToken, async (req, res) => {
   let { excelData, created_by = "1" } = req.body;
 
-  // Parse the incoming JSON data for excelData
-  excelData = JSON.parse(excelData);
+
 
   try {
     const pool = await poolPromise;
@@ -14964,7 +15030,7 @@ app.post('/uploadpostwarrentyexcel',authenticateToken, async (req, res) => {
   }
 });
 
-app.post('/uploadpinexcel',authenticateToken, async (req, res) => {
+app.post('/uploadpinexcel', authenticateToken, async (req, res) => {
 
 
   let { jsonData } = req.body;
@@ -14976,7 +15042,7 @@ app.post('/uploadpinexcel',authenticateToken, async (req, res) => {
     pool.config.options.requestTimeout = 600000;
 
 
-    
+
     for (const item of excelData) {
       console.log(excelData)
       const result = await pool.request()

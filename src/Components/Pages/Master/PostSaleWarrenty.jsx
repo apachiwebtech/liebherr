@@ -77,7 +77,7 @@ const PostSaleWarrenty = () => {
     };
 
     const data = {
-      excelData: JSON.stringify(transformData(excelData)),
+      excelData: transformData(excelData),
       created_by: localStorage.getItem("licare_code")
     };
 

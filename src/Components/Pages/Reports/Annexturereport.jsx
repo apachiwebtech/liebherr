@@ -19,11 +19,13 @@ const AnnextureReport = () => {
     const [selectedMsp, setSelectedMsp] = useState([]);
     const [error, setError] = useState('');
     const token = localStorage.getItem("token");
+    const licare_code = localStorage.getItem("licare_code");
 
     useEffect(() => {
         const fetchMsps = async () => {
+            
             try {
-                const response = await axiosInstance.get(`${Base_Url}/getmsplist`, {
+                const response = await axiosInstance.post(`${Base_Url}/getmsplist`, {
                     headers: { Authorization: token },
                 });
                 setMspList(response.data);
