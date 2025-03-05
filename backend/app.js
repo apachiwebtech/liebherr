@@ -7836,6 +7836,7 @@ app.post("/postlhidata", authenticateToken, async (req, res) => {
     Role,
     Reporting_to,
     Designation,
+    assigncsp,
 
 
   } = JSON.parse(decryptedData);
@@ -7879,13 +7880,14 @@ app.post("/postlhidata", authenticateToken, async (req, res) => {
 
 
         // Step 3: Insert new entry if no duplicates found
-        sql = `INSERT INTO lhi_user (Lhiuser,password,remarks,Usercode,mobile_no,email,status,Role,Reporting_to,Designation) VALUES ('${Lhiuser}','${password}','${remarks}','${licarecode}','${mobile_no}','${email}','${status}','${Role}','${Reporting_to}','${Designation}')`
+        sql = `INSERT INTO lhi_user (Lhiuser,password,remarks,Usercode,mobile_no,email,status,Role,Reporting_to,Designation,assigncsp) VALUES ('${Lhiuser}','${password}','${remarks}','${licarecode}','${mobile_no}','${email}','${status}','${Role}','${Reporting_to}','${Designation}','${assigncsp}')`
         await pool.request().query(sql);
+        
 
         return res.json({ message: "Lhiuser added successfully!" });
       }
     }
-  } catch (err) {
+  } catch (err) { 
     console.error(err);
     return res.status(500).json({ message: "An error occurred while processing the request" });
   }
@@ -7916,7 +7918,7 @@ app.post("/putlhidata", authenticateToken, async (req, res) => {
   const { encryptedData } = req.body;
   const decryptedData = decryptData(encryptedData, secretKey)
   const {
-    Lhiuser, id, updated_by, mobile_no, Usercode, password, status, email, remarks, Role, Designation, Reporting_to
+    Lhiuser, id, updated_by, mobile_no, Usercode, password, status, email, remarks, Role, Designation, Reporting_to,assigncsp,
   } = JSON.parse(decryptedData);
 
 
@@ -7951,7 +7953,8 @@ app.post("/putlhidata", authenticateToken, async (req, res) => {
           remarks = '${remarks}',
           Role = '${Role}',
           Designation = '${Designation}',
-          Reporting_to = '${Reporting_to}'
+          Reporting_to = '${Reporting_to}',
+          assigncsp = '${assigncsp}'
         WHERE id = '${id}'
       `;
       await pool.request().query(updateSql);

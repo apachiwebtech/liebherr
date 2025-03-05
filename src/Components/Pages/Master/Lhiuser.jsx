@@ -12,6 +12,7 @@ import Lhiusertabs from './Lhiusertabs';
 import { useSelector } from 'react-redux';
 import { useDispatch } from "react-redux";
 import { getRoleData } from "../../Store/Role/role-action";
+import { MultiSelect } from 'react-multi-select-component';
 
 const Lhiuser = () => {
   // Step 1: Add this state to track errors
@@ -21,6 +22,9 @@ const Lhiuser = () => {
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
+  const [selected, setSelected] = useState([]);
+  const [cspvalue, setCspvalue] = useState()
+  const [csp, setCsp] = useState([])
   const [isEdit, setIsEdit] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -41,6 +45,7 @@ const Lhiuser = () => {
     Role: "",
     Designation: "",
     Reporting_to: "",
+    assigncsp: "",
   });
 
 
@@ -63,6 +68,26 @@ const Lhiuser = () => {
       console.error("Error fetching countries:", error);
     }
   };
+
+  const fetchCsp = async () => {
+
+    const ressponse = await axiosInstance.get(`${Base_Url}/getcsp`, {
+      headers: {
+        Authorization: token,
+      },
+    })
+      .then((res) => {
+        setCsp(
+          res.data.map(item => ({ label: item.title, value: item.id, licare_code: item.licare_code }))
+        );
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+
+  }
+
+  console.log(csp, "TTT")
 
 
   const fetchReporting = async () => {
@@ -105,6 +130,7 @@ const Lhiuser = () => {
     fetchUsers();
     fetchRoles();
     fetchReporting();
+    fetchCsp();
   }, []);
 
   const handleChange = (e) => {
@@ -181,6 +207,7 @@ const Lhiuser = () => {
       password: md5(formData.password),
       updated_by: updatedBy,
       created_by: String(createdBy),
+      assigncsp: cspvalue,
 
     }
 
@@ -221,10 +248,12 @@ const Lhiuser = () => {
                   Role: "",
                   Designation: "",
                   Reporting_to: "",
+                  assigncsp: "",
 
 
                 });
                 fetchUsers();
+                fetchCsp();
                 setIsEdit(false);
               })
               .catch((error) => {
@@ -246,7 +275,9 @@ const Lhiuser = () => {
                 })
               .then((response) => {
 
-                alert("User Added")
+                alert("User Added");
+                setSelected([]);
+                setCspvalue(''); 
                 setFormData({
                   Lhiuser: "",
                   Usercode: "",
@@ -258,8 +289,10 @@ const Lhiuser = () => {
                   Role: "",
                   Designation: "",
                   Reporting_to: "",
+                  assigncsp: "",
                 });
                 fetchUsers();
+                fetchCsp();
 
               })
               .catch((error) => {
@@ -298,6 +331,18 @@ const Lhiuser = () => {
       });
       setFormData(response.data);
 
+      const userData = response.data;
+
+      // Split the assigncsp values (comma-separated licare_codes)
+      const selectedLicareCodes = userData.assigncsp ? userData.assigncsp.split(',') : [];
+
+      // Map the selected licare_codes to the corresponding options in the csp array
+      const selectedOptions = csp.filter(option => selectedLicareCodes.includes(option.licare_code));
+
+      // Set the selected options in state
+      setSelected(selectedOptions);
+      setCspvalue(userData.assigncsp);
+
       setIsEdit(true);
       console.log(response.data);
 
@@ -322,6 +367,20 @@ const Lhiuser = () => {
     }
 
   };
+
+  const handleselect = (value) => {
+    setSelected(value);
+
+
+    // Get the licare_codes from the selected items
+    const licareCodes = value.map((item) => item.licare_code).join(',');
+
+    // Set the comma-separated licare_codes value to be sent to the backend
+    setCspvalue(licareCodes);
+
+    console.log(licareCodes, "%^&*"); // This will log the comma-separated licare_codes
+  }
+
 
   const indexOfLastUser = (currentPage + 1) * itemsPerPage;
   const indexOfFirstUser = indexOfLastUser - itemsPerPage;
@@ -619,6 +678,19 @@ const Lhiuser = () => {
                         {/* Show duplicate error */}
                       </div>
 
+                    </div>
+                    {console.log(selected)}
+                    <div className="col-4">
+                      <div className="mb-3">
+                        <label htmlFor="LhiuserInput" className="input-field">
+                          Assign Csp <span className="text-danger">*</span>
+                        </label>
+                        <MultiSelect options={csp} value={selected}
+                          onChange={(value) => handleselect(value)}
+                          labelledBy='Select All' name="selected"
+                          closeOnSelect={false}
+                          isClearable={true} ></MultiSelect>
+                      </div>
                     </div>
                   </div>
                   <div className='row'>
