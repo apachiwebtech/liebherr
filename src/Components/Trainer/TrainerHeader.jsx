@@ -1,6 +1,7 @@
 import React from "react";
 import { Link,useNavigate } from "react-router-dom";
 import Logo from '../../images/Liebherr-logo-768x432.png'
+import { App_Url } from "../Utils/Base_Url";
 
 
 const TrainerHeader = (params) => {
@@ -11,7 +12,7 @@ const TrainerHeader = (params) => {
       const clearLocal = async () => {
         try {
           localStorage.clear();
-          navigate('/trainer/login');
+          window.location.href = App_Url
         }
         catch (error) {
           console.error('error signing out', error)

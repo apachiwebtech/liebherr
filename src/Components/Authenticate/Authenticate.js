@@ -81,7 +81,7 @@ const Authenticate = () => {
             localStorage.setItem('licare_code', res.data[0].usercode)
             localStorage.setItem('Userrole', Encrypt(role))
             setLoading(false)
-            window.location.pathname = '/trainer/login'
+            window.location.pathname = '/trainer/engineerlist'
           }
 
         })

@@ -887,14 +887,14 @@ function TrainerApp() {
 function checkLocalStorageAndRedirect(navigate) {
   const user_id = localStorage.getItem('userId')
   if (user_id == null) {
-    navigate('/login'); // Redirect to dashboard if id exists in localStorage
+    window.location.href = App_Url
   }
 }
 
 function checkLocalStorageAndRedirectCSP(navigate) {
   const user_id = localStorage.getItem('licare_code')
   if (user_id == null) {
-    navigate('/csp/csplogin'); // Redirect to dashboard if id exists in localStorage
+    window.location.href = App_Url
   }
 }
 

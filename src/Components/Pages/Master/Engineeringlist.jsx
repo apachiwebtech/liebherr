@@ -139,7 +139,7 @@ export function Engineeringlist(params) {
       console.error('Error fetching Ticketdata:', error);
       setComplaintdata([]);
       setFilteredData([]);
-      navigate('/login')
+      // navigate('/login')
     }
   };
 

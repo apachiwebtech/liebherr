@@ -164,7 +164,7 @@ const Loginheader = (params) => {
               <li className="dropdown-item" role="button">
                 <Link className="dropdown-item" to="/csp/mspdata">MSP Data</Link></li>
               <li className="dropdown-item" role="button">
-                <Link className="dropdown-item" to="/login" tabIndex="0" onClick={clearLocal}>Sign out</Link></li>
+                <Link className="dropdown-item"  tabIndex="0" onClick={clearLocal}>Sign out</Link></li>
             </ul>
           </div>
         </div>
