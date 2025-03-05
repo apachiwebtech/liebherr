@@ -148,6 +148,7 @@ import ExporttoProduct from './Components/Utils/ExporttoProduct';
 import UploadCustomer from './Components/Utils/UploadCustomer';
 import UploadAddress from './Components/Utils/UploadAddress';
 import UploadProducts from './Components/Utils/UploadProducts';
+import Subcallstatus from './Components/Pages/Master/Subcallstatus';
 
 
 
@@ -531,11 +532,6 @@ const Router = createBrowserRouter([
 
       },
       {
-        path: "/callstatus",
-        element: <ProtectedRoute><Callstatus /></ProtectedRoute>,
-
-      },
-      {
         path: "/customerlocation",
         element:<ProtectedRoute><Customerlocation /></ProtectedRoute> ,
 
@@ -856,6 +852,10 @@ const Router = createBrowserRouter([
       {
         path: "/annexturelist",
         element:<ProtectedRoute><AnnextureReport/></ProtectedRoute>
+      },
+      {
+        path: "/subcallstatus",
+        element: <ProtectedRoute><Subcallstatus /></ProtectedRoute>
       }
 
 

@@ -248,12 +248,13 @@ const Callstatus = () => {
 
   return (
     <div className="tab-content">
-      <Callstatuscodetabs />
+      
       {loaders && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
       )}
+      <Callstatuscodetabs />
       {roleaccess > 1 ? <div className="row mp0">
         <div className="col-12">
           <div className="card mb-3 tab_box">

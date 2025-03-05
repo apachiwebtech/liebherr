@@ -1,4 +1,4 @@
-import React, { useEffect,useState } from "react";
+import React, { useEffect, useState } from "react";
 
 
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -6,7 +6,7 @@ import Callstatus from "./Callstatus";
 import { Link } from 'react-router-dom';
 
 function Callstatuscodetabs() {
-  const [activeTab, setActiveTab] = useState("Callstatus");
+  const [activeTab, setActiveTab] = useState("/callstatus");
 
   useEffect(() => {
 
@@ -45,7 +45,7 @@ function Callstatuscodetabs() {
       <div className="container-fluid p-0">
         {/* Top Header */}
         <div className="text-left headings">
-          <span style={{ paddingLeft: "20px",color:'#FFFFFF' }}>Call Status Code Master </span>
+          <span style={{ paddingLeft: "20px", color: '#FFFFFF' }}>Call Status Code Master </span>
         </div>
 
         {/* Nav Tabs */}
@@ -62,14 +62,22 @@ function Callstatuscodetabs() {
                 }}
               >
                 <ul className="nav nav-tabs ">
-                <Link to={`/callstatus`}> <li className="nav-item">
+                  <Link to={`/callstatus`}> <li className="nav-item">
                     <button
-                      className={`nav-link ${
-                        activeTab === "Callstatus" ? "active" : "onClick={() => setActiveTab('Callstatus')}"
-                      }`}
-                      
+                      className={`nav-link ${activeTab === "/callstatus" ? "active" : "onClick={() => setActiveTab('callstatus')}"
+                        }`}
+
                     >
                       CALL STATUS CODE
+                    </button>
+                  </li></Link>
+                  <Link to={`/subcallstatus`}><li className="nav-item">
+                    <button
+                      className={`nav-link ${activeTab === "/subcallstatus" ? "active" : "onClick={() => setActiveTab('subcallstatus')}"
+                        }`}
+
+                    >
+                      SUB CALL STATUS
                     </button>
                   </li></Link>
                 </ul>
@@ -83,7 +91,7 @@ function Callstatuscodetabs() {
             >
               <div className="tab-content">
                 {/* {renderTabContent()} */}
-                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -8868,12 +8868,12 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
     if (assigncsp !== 'ALL') {
       // Convert to an array and wrap each value in single quotes
       const formattedCspList = assigncsp.split(",").map(csp => `'${csp.trim()}'`).join(",");
-    
+
       // Directly inject the formatted values into the SQL query
       sql += ` AND c.csp IN (${formattedCspList})`;
       countSql += ` AND c.csp IN (${formattedCspList})`;
     }
-    
+
 
 
     // Filtering conditions
@@ -9709,7 +9709,7 @@ app.get("/getcallstatus", authenticateToken,
     try {
       const pool = await poolPromise;
       // Modified SQL query using parameterized query
-      const sql = "select id, Callstatus from call_status where deleted = 0";
+      const sql = "select * from call_status where deleted = 0";
 
       const result = await pool.request().query(sql);
 
@@ -9757,6 +9757,177 @@ app.get("/getsubcallstatusdata", authenticateToken,
     }
   });
 
+
+
+app.get("/getsubcallstatus1", authenticateToken, async (req, res) => {
+  try {
+    // Access the connection pool using poolPromise
+    const pool = await poolPromise;
+
+    // Direct SQL query without parameter binding
+    const sql = `
+         SELECT r.*,
+            c.Callstatus as Callstatus_title
+      FROM sub_call_status r
+      JOIN call_status c ON r.Callstatus_Id = c.id
+      WHERE r.deleted = 0
+      `;
+
+    // Execute the query and get the results
+    const result = await pool.request().query(sql);
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
+
+    // Return only the recordset from the result
+    return res.json({ encryptedData });
+  } catch (err) {
+    console.error("Error fetching subcallstatus:", err); // Log error for debugging
+    return res.status(500).json({ message: "Error fetching subcallstatus" });
+  }
+});
+
+
+app.post("/putsubcallstatus", authenticateToken, async (req, res) => {
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { SubCallstatus, id, Callstatus_Id } = JSON.parse(decryptedData);
+  try {
+
+
+    // Access the connection pool using poolPromise
+    const pool = await poolPromise;
+
+    // Step 1: Check if the same title exists for another record (other than the current one) and is not soft-deleted
+    const checkDuplicateSql = `
+        SELECT *
+        FROM sub_call_status
+        WHERE SubCallstatus = '${SubCallstatus}'AND Callstatus_Id = '${Callstatus_Id}' AND id != ${id} AND deleted = 0
+      `;
+    const checkDuplicateResult = await pool.request().query(checkDuplicateSql);
+
+    if (checkDuplicateResult.recordset.length > 0) {
+      // If a duplicate exists (other than the current record)
+      return res.status(409).json({ message: "Duplicate entry, subcallstatus already exists!" });
+    } else {
+      // Step 2: Update the record if no duplicates are found
+      const updateSql = `
+          UPDATE sub_call_status
+          SET SubCallstatus = '${SubCallstatus}', Callstatus_Id = ${Callstatus_Id}
+          WHERE id = ${id}
+        `;
+      await pool.request().query(updateSql);
+      return res.json({ message: "subcat updated successfully!" });
+    }
+  } catch (err) {
+    console.error("Error updating subcategory:", err); // Log error for debugging
+    return res.status(500).json({ message: "Error updating subcallstatus" });
+  }
+});
+
+app.post("/postsubcallstatus", authenticateToken, async (req, res) => {
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { SubCallstatus, Callstatus_Id } = JSON.parse(decryptedData);
+  try {
+
+
+    // Access the connection pool using poolPromise
+    const pool = await poolPromise;
+
+    // Step 1: Check if the same SubCallstatus exists and is not soft-deleted
+    const checkDuplicateSql = `
+      SELECT *
+      FROM sub_call_status
+      WHERE SubCallstatus = '${SubCallstatus}' AND Callstatus_Id = '${Callstatus_Id}' AND deleted = 0
+    `;
+    const checkDuplicateResult = await pool.request().query(checkDuplicateSql);
+
+    if (checkDuplicateResult.recordset.length > 0) {
+      // If duplicate data exists (not soft-deleted)
+      return res.status(409).json({ message: "Duplicate entry, subcat already exists!" });
+    } else {
+      // Step 2: Check if the same SubCallstatus exists but is soft-deleted
+      const checkSoftDeletedSql = `
+        SELECT *
+        FROM sub_call_status
+        WHERE SubCallstatus = '${SubCallstatus}' AND deleted = 1
+      `;
+      const checkSoftDeletedResult = await pool.request().query(checkSoftDeletedSql);
+
+      if (checkSoftDeletedResult.recordset.length > 0) {
+        // If soft-deleted data exists, restore the entry
+        const restoreSoftDeletedSql = `
+          UPDATE sub_call_status
+          SET deleted = 0
+          WHERE SubCallstatus = '${SubCallstatus}'
+        `;
+        await pool.request().query(restoreSoftDeletedSql);
+        return res.json({ message: "Soft-deleted subcat restored successfully!" });
+      } else {
+        // Step 3: Insert new entry if no duplicates found
+        const insertSql = `
+          INSERT INTO sub_call_status (SubCallstatus, Callstatus_Id)
+          VALUES ('${SubCallstatus}', ${Callstatus_Id})
+        `;
+        await pool.request().query(insertSql);
+        return res.json({ message: "subcat added successfully!" });
+      }
+    }
+  } catch (err) {
+    console.error("Error processing subcallstatus:", err); // Log error for debugging
+    return res.status(500).json({ message: "Error processing subcallstatus" });
+  }
+});
+
+app.get("/requestsubcall/:id", authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Access the connection pool using poolPromise
+    const pool = await poolPromise;
+
+
+    const sql = `
+      SELECT *
+      FROM sub_call_status
+      WHERE id = ${id} AND deleted = 0
+    `;
+
+    // Execute the query and get the results
+    const result = await pool.request().query(sql);
+
+    // Return the first record from the recordset if it exists, else return an empty object
+    return res.json(result.recordset[0] || {});
+  } catch (err) {
+    console.error("Error fetching subcallstatus by ID:", err); // Log error for debugging
+    return res.status(500).json({ message: "Error fetching subcallstatus" });
+  }
+});
+
+app.post("/deletesubcall", authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.body;
+
+    // Access the connection pool using poolPromise
+    const pool = await poolPromise;
+
+
+    const sql = `
+      UPDATE sub_call_status
+      SET deleted = 1
+      WHERE id = ${id}
+    `;
+
+    // Execute the query
+    const result = await pool.request().query(sql);
+
+    return res.json(result);
+  } catch (err) {
+    console.error("Error updating subcallstatus:", err); // Log error for debugging
+    return res.status(500).json({ message: "Error updating subcallstatus" });
+  }
+});
 app.post("/getupdateengineer", authenticateToken,
   async (req, res) => {
 
@@ -9963,15 +10134,15 @@ app.get("/getquotationlist", authenticateToken, async (req, res) => {
     // Directly use the query (no parameter binding)
     let sql = `SELECT q.* FROM awt_quotation as q WHERE 1=1`;
 
-    
+
     if (assigncsp !== 'ALL') {
       // Convert to an array and wrap each value in single quotes
       const formattedCspList = assigncsp.split(",").map(csp => `'${csp.trim()}'`).join(",");
-    
+
       // Directly inject the formatted values into the SQL query
       sql += ` AND q.csp_code IN (${formattedCspList})`;
     }
-    
+
 
     if (ticket_no) {
       sql += ` AND q.ticketId LIKE '%${ticket_no}%'`;
@@ -14463,7 +14634,7 @@ app.post("/getannexturedata", authenticateToken, async (req, res) => {
 // Fetch MSP list from awt_franchisemaster
 app.get("/getmsplist", authenticateToken, async (req, res) => {
 
-  
+
   try {
     const pool = await poolPromise;
     const sql = `
