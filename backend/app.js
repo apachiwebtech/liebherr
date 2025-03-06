@@ -7882,12 +7882,12 @@ app.post("/postlhidata", authenticateToken, async (req, res) => {
         // Step 3: Insert new entry if no duplicates found
         sql = `INSERT INTO lhi_user (Lhiuser,password,remarks,Usercode,mobile_no,email,status,Role,Reporting_to,Designation,assigncsp) VALUES ('${Lhiuser}','${password}','${remarks}','${licarecode}','${mobile_no}','${email}','${status}','${Role}','${Reporting_to}','${Designation}','${assigncsp}')`
         await pool.request().query(sql);
-        
+
 
         return res.json({ message: "Lhiuser added successfully!" });
       }
     }
-  } catch (err) { 
+  } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "An error occurred while processing the request" });
   }
@@ -7918,7 +7918,7 @@ app.post("/putlhidata", authenticateToken, async (req, res) => {
   const { encryptedData } = req.body;
   const decryptedData = decryptData(encryptedData, secretKey)
   const {
-    Lhiuser, id, updated_by, mobile_no, Usercode, password, status, email, remarks, Role, Designation, Reporting_to,assigncsp,
+    Lhiuser, id, updated_by, mobile_no, Usercode, password, status, email, remarks, Role, Designation, Reporting_to, assigncsp,
   } = JSON.parse(decryptedData);
 
 
@@ -9053,8 +9053,59 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
 });
 
 
+app.get("/getcomplaintexcel", authenticateToken, async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    const { fromDate, toDate, licare_code } = req.query;  // Only fromDate, toDate, and licare_code are expected.
 
+    // Check if both fromDate and toDate are provided
+    if (!fromDate || !toDate) {
+      return res.status(400).json({
+        message: "Both 'fromDate' and 'toDate' are required."
+      });
+    }
 
+    const currentDate = new Date().toISOString().split('T')[0];  // Current date to be used for filter if needed.
+
+    // SQL query to fetch complaint tickets with fromDate and toDate filter only.
+    let sql = `
+      SELECT c.*, DATEDIFF(DAY, c.ticket_date, GETDATE()) AS ageingdays
+      FROM complaint_ticket AS c
+      WHERE c.deleted = 0
+      AND CAST(c.ticket_date AS DATE) BETWEEN @fromDate AND @toDate
+    `;
+
+    // Define the parameters for the query.
+    let params = [
+      { name: "fromDate", value: fromDate },
+      { name: "toDate", value: toDate }
+    ];
+
+    // Execute the SQL query
+    const request = pool.request();
+    params.forEach((param) => request.input(param.name, param.value));
+    const result = await request.query(sql);
+
+    // If no records are found, return an appropriate message
+    if (result.recordset.length === 0) {
+      return res.status(404).json({
+        message: "No records found for the given date range."
+      });
+    }
+
+    // Return the data as JSON to the frontend
+    return res.json({
+      data: result.recordset
+    });
+
+  } catch (err) {
+    console.error("Error fetching complaint data for Excel export:", err.message);
+    return res.status(500).json({
+      message: "An error occurred while fetching complaint data for Excel export.",
+      err: err.message
+    });
+  }
+});
 
 // CSP complaint list
 

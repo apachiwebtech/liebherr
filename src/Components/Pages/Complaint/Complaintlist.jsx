@@ -72,9 +72,9 @@ export function Complaintlist(params) {
     try {
       // Build the params object dynamically
       const params = {
-        page: page, 
-        pageSize: pageSize, 
-        licare_code : licare_code
+        page: page,
+        pageSize: pageSize,
+        licare_code: licare_code
       };
 
       // Add search filters dynamically to params
@@ -124,7 +124,7 @@ export function Complaintlist(params) {
         }
       });
 
-      params.append('licare_code' , licare_code)
+      params.append('licare_code', licare_code)
 
 
 
@@ -337,18 +337,31 @@ export function Complaintlist(params) {
 
   // export to excel 
   const exportToExcel = async () => {
+    // Check if From and To Dates are selected
+    if (!searchFilters.fromDate || !searchFilters.toDate) {
+      alert("Please select both From Date and To Date.");
+      return;
+    }
+
     try {
-      // Fetch all ticket data without pagination
-      const response = await axiosInstance.get(`${Base_Url}/getcomplainlist`, {
+      // Convert From and To Date to the desired format (if necessary)
+      const fromDate = new Date(searchFilters.fromDate).toISOString().split('T')[0];
+      const toDate = new Date(searchFilters.toDate).toISOString().split('T')[0];
+
+      // Fetch all ticket data based on From and To Date filter, without pagination
+      const response = await axiosInstance.get(`${Base_Url}/getcomplaintexcel`, {
         headers: {
           Authorization: token,
         },
         params: {
-          pageSize: totalCount, 
-          page: 1,
-          licare_code : licare_code 
+          pageSize: 10000, // Large page size to fetch all records without pagination (you can adjust this)
+          page: 1,         // Fetch from page 1
+          fromDate: fromDate,
+          toDate: toDate,
+          licare_code: licare_code, // Ensure licare_code is sent as before
         },
       });
+
 
       const allTicketData = response.data.data;
 
@@ -356,55 +369,57 @@ export function Complaintlist(params) {
       const workbook = XLSX.utils.book_new();
 
       // Convert data to a worksheet
-      const worksheet = XLSX.utils.json_to_sheet(allTicketData.map(user => ({
-        "TicketNo": user.ticket_no,
-        "TicketDate": user.ticket_date,
-        "CustomerId": user.customer_id,
-        "Salutation": user.salutation,
-        "CustomerName": user.customer_name,
-        "CustomerMobile": user.customer_mobile,
-        "CustomerEmail": user.customer_email,
-        "ModelNumber": user.ModelNumber,
-        "SerialNo": user.serial_no,
-        "Address": user.address,
-        "Region": user.region,
-        "State": user.state,
-        "City": user.city,
-        "District": user.area,
-        "Pincode": user.pincode,
-        "ServicePartner": user.service_partner,
-        "msp": user.msp,
-        "csp": user.csp,
-        "SalesPartner": user.sales_partner,
-        "AssignedTo": user.assigned_to,
-        "OldEngineer": user.old_engineer,
-        "EngineerCode": user.engineer_code,
-        "EngineerId": user.engineer_id,
-        "TicketType": user.ticket_type,
-        "CallType": user.call_type,
-        "SubCallStatus": user.sub_call_status,
-        "CallStatus": user.call_status,
-        "WarrantyStatus": user.warranty_status,
-        "InvoiceDate": user.invoice_date,
-        "ModeofContact": user.mode_of_contact,
-        "CallCharges": user.call_charges,
-        "ContactPerson": user.contact_person,
-        "PurchaseDate": user.purchase_date,
-        "CustomerClass": user.customer_class,
-        "CallPriority": user.call_priority,
-        "SpareDocPath": user.spare_doc_path,
-        "CallRemark": user.call_remark,
-        "SpareDetails": user.spare_detail,
-        "GroupCode": user.group_code,
-        "DefectType": user.defect_type,
-        "SiteDefect": user.site_defect,
-        "SparePartID": user.spare_part_id,
-        "TOTP": user.totp,
-        "RequestedBY": user.requested_by,
-        "RequestedEmail": user.requested_email,
-        "RequestedMobile": user.requested_mobile,
-        "SalesPartner2": user.sales_partner2,
-      })));
+      const worksheet = XLSX.utils.json_to_sheet(
+        allTicketData.map((item) => ({
+          TicketNo: item.ticket_no,
+          TicketDate: item.ticket_date,
+          CustomerId: item.customer_id,
+          Salutation: item.salutation,
+          CustomerName: item.customer_name,
+          CustomerMobile: item.customer_mobile,
+          CustomerEmail: item.customer_email,
+          ModelNumber: item.ModelNumber,
+          SerialNo: item.serial_no,
+          Address: item.address,
+          Region: item.region,
+          State: item.state,
+          City: item.city,
+          District: item.area,
+          Pincode: item.pincode,
+          ServicePartner: item.service_partner,
+          msp: item.msp,
+          csp: item.csp,
+          SalesPartner: item.sales_partner,
+          AssignedTo: item.assigned_to,
+          OldEngineer: item.old_engineer,
+          EngineerCode: item.engineer_code,
+          EngineerId: item.engineer_id,
+          TicketType: item.ticket_type,
+          CallType: item.call_type,
+          SubCallStatus: item.sub_call_status,
+          CallStatus: item.call_status,
+          WarrantyStatus: item.warranty_status,
+          InvoiceDate: item.invoice_date,
+          ModeofContact: item.mode_of_contact,
+          CallCharges: item.call_charges,
+          ContactPerson: item.contact_person,
+          PurchaseDate: item.purchase_date,
+          CustomerClass: item.customer_class,
+          CallPriority: item.call_priority,
+          SpareDocPath: item.spare_doc_path,
+          CallRemark: item.call_remark,
+          SpareDetails: item.spare_detail,
+          GroupCode: item.group_code,
+          DefectType: item.defect_type,
+          SiteDefect: item.site_defect,
+          SparePartID: item.spare_part_id,
+          TOTP: item.totp,
+          RequestedBY: item.requested_by,
+          RequestedEmail: item.requested_email,
+          RequestedMobile: item.requested_mobile,
+          SalesPartner2: item.sales_partner2,
+        }))
+      );
 
       // Append the worksheet to the workbook
       XLSX.utils.book_append_sheet(workbook, worksheet, "TicketList");
@@ -701,7 +716,7 @@ export function Complaintlist(params) {
               </div>
 
               <div className="col-md-12 d-flex justify-content-end align-items-center mt-3 "  >
-       
+
                 <div className="form-group ">
                   {/* <input type="file" accept=".xlsx, .xls" onChange={importexcel} />
                   <button className="btn btn-primary" onClick={uploadexcel}
