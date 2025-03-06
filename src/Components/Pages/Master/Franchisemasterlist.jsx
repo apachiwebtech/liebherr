@@ -123,9 +123,9 @@ export function Franchisemasterlist(params) {
       }
       );
       // Decrypt the response data
-            const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
-            const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
-            const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+      const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+      const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+      const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
       setFranchisemasterdata(decryptedData);
       setFilteredData(decryptedData);
       setTotalCount(response.data.totalCount);
@@ -200,7 +200,9 @@ export function Franchisemasterlist(params) {
           page: 1, // Start from the first page
         },
       });
-      const allMasterFranchiseData = response.data.data;
+
+      const decryptedData = CryptoJS.AES.decrypt(response.data.encryptedData, secretKey).toString(CryptoJS.enc.Utf8);
+      const allMasterFranchiseData =JSON.parse(decryptedData);
       // Create a new workbook
       const workbook = XLSX.utils.book_new();
 

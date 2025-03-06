@@ -239,8 +239,8 @@ export function Customerlist(params) {
                     page: 1, // Start from the first page
                 },
             });
-
-            const allCustomerData = response.data.data;
+            const decryptedData = CryptoJS.AES.decrypt(response.data.encryptedData, secretKey).toString(CryptoJS.enc.Utf8);
+            const allCustomerData = JSON.parse(decryptedData);
 
             // Create a new workbook
             const workbook = XLSX.utils.book_new();

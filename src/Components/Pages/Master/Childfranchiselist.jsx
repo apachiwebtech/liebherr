@@ -181,7 +181,9 @@ export function ChildFranchiselist(params) {
                     page: 1, // Start from the first page
                 },
             });
-            const allChildFranchiseData = response.data.data;
+
+            const decryptedData = CryptoJS.AES.decrypt(response.data.encryptedData, secretKey).toString(CryptoJS.enc.Utf8);
+            const allChildFranchiseData = JSON.parse(decryptedData);;
 
             // Create a new workbook
             const workbook = XLSX.utils.book_new();

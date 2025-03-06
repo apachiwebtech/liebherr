@@ -187,8 +187,9 @@ export function Engineerlist(params) {
                     page: 1, // Optional: Start from the first page
                 },
             });
+            const decryptedData = CryptoJS.AES.decrypt(response.data.encryptedData, secretKey).toString(CryptoJS.enc.Utf8);
 
-            const allEngineerData = response.data.data;
+            const allEngineerData = JSON.parse(decryptedData);
 
             // Create a new workbook
             const workbook = XLSX.utils.book_new();

@@ -146,7 +146,8 @@ const PincodeAllocation = () => {
           page: 1, // Start from the first page
         },
       });
-      const allPincodedata = response.data.data;
+      const decryptedData = CryptoJS.AES.decrypt(response.data.encryptedData, secretKey).toString(CryptoJS.enc.Utf8);
+      const allPincodedata = JSON.parse(decryptedData);
       // Create a new workbook
       const workbook = XLSX.utils.book_new();
 
@@ -265,7 +266,7 @@ const PincodeAllocation = () => {
 
 
 
-      axios.post(`${Base_Url}/uploadpinexcel`, { jsonData: jsonData },{
+      axios.post(`${Base_Url}/uploadpinexcel`, { jsonData: jsonData }, {
         headers: {
           Authorization: token, // Send token in headers
         },
