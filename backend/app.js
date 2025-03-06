@@ -14786,6 +14786,7 @@ app.post('/uploadtickets', authenticateToken, async (req, res) => {
           .input('area', sql.VarChar, item.area)
           .input('pincode', sql.VarChar, item.pincode)
           .input('child_service_partner', sql.VarChar, item.child_service_partner)
+          .input('sevice_partner', sql.VarChar, item.sevice_partner)
           .input('msp', sql.VarChar, item.msp)
           .input('csp', sql.VarChar, item.csp)
           .input('sales_partner', sql.VarChar, item.sales_partner)
@@ -14840,7 +14841,7 @@ app.post('/uploadtickets', authenticateToken, async (req, res) => {
           .query(`
           INSERT INTO complaint_ticket  (
             ticket_no, ticket_date, customer_id, salutation, customer_name, alt_mobile, customer_mobile, customer_email, ModelNumber, serial_no, 
-            address, region, state, city, area, pincode,child_service_partner, msp, csp, sales_partner, assigned_to,  
+            address, region, state, city, area, pincode,sevice_partner,child_service_partner, msp, csp, sales_partner, assigned_to,  
             engineer_code, engineer_id, ticket_type, call_type, sub_call_status, call_status, symptom_code, cause_code, action_code, service_charges, 
             other_charges, warranty_status, invoice_date, call_charges, mode_of_contact, created_date, created_by, deleted, updated_by, updated_date, 
             contact_person, purchase_date, specification, ageing, area_id, state_id, city_id, pincode_id, closed_date, customer_class, call_priority, 
@@ -14849,7 +14850,7 @@ app.post('/uploadtickets', authenticateToken, async (req, res) => {
           ) 
           VALUES (
             @ticket_no, @ticket_date, @customer_id, @salutation, @customer_name, @alt_mobile, @customer_mobile, @customer_email, @ModelNumber, @serial_no, 
-            @address, @region, @state, @city, @area, @pincode, @child_service_partner, @msp, @csp, @sales_partner, @assigned_to, 
+            @address, @region, @state, @city, @area, @pincode, @sevice_partner,@child_service_partner, @msp, @csp, @sales_partner, @assigned_to, 
              @engineer_code, @engineer_id, @ticket_type, @call_type, @sub_call_status, @call_status, @symptom_code, @cause_code, @action_code, 
             @service_charges, @other_charges, @warranty_status, @invoice_date, @call_charges, @mode_of_contact, @created_date, @created_by, @deleted, 
             @updated_by, @updated_date, @contact_person, @purchase_date, @specification, @ageing, @area_id, @state_id, @city_id, @pincode_id, @closed_date, 
