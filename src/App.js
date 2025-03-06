@@ -149,6 +149,8 @@ import UploadCustomer from './Components/Utils/UploadCustomer';
 import UploadAddress from './Components/Utils/UploadAddress';
 import UploadProducts from './Components/Utils/UploadProducts';
 import Subcallstatus from './Components/Pages/Master/Subcallstatus';
+import ExceltoScript from './Components/Utils/ExceltoScript';
+import ExceltoEngScript from './Components/Utils/ExceltoEngScript';
 
 
 
@@ -238,6 +240,14 @@ const Router = createBrowserRouter([
   {
     path: "/exceltojson",
     element: <ExcelToJson />
+  },
+  {
+    path: "/exceltoscript",
+    element: <ExceltoScript />
+  },
+  {
+    path: "/exceltoengscript",
+    element: <ExceltoEngScript />
   },
   {
     path: "/msp",

@@ -124,6 +124,8 @@ export function Complaintlist(params) {
         }
       });
 
+      params.append('licare_code' , licare_code)
+
 
 
       const response = await axiosInstance.get(`${Base_Url}/getcomplainlist?${params}`, {
