@@ -8825,7 +8825,8 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
       mode_of_contact,
       customer_class,
       Priority,
-      upcoming = 'current'
+      upcoming = 'current',
+      ticket_type,
     } = req.query;
 
     const offset = (page - 1) * pageSize;
@@ -8952,6 +8953,12 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
       params.push({ name: "customer_class", value: `%${customer_class}%` });
     }
 
+    if(ticket_type) {
+      sql += `AND c.ticket_type LIKE @ticket_type`;
+      countSql += `AND c.ticket_type LIKE @ticket_type`;
+      params.push ({ name: "ticket_type", value: `%${ticket_type}%` });
+    }
+
     if (status) {
       sql += ` AND c.call_status = @status`;
       countSql += ` AND c.call_status = @status`;
@@ -8959,7 +8966,7 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
     } else {
       // Check if any filter is applied
       if (!customerName && !customerEmail && !serialNo && !productCode && !customerMobile &&
-        !ticketno && !customerID && !csp && !msp && !mode_of_contact && !customer_class) {
+        !ticketno && !customerID && !csp && !msp && !mode_of_contact && !customer_class && !ticket_type) {
         sql += ` AND c.call_status != 'Closed' AND c.call_status != 'Cancelled'`;
         countSql += ` AND c.call_status != 'Closed' AND c.call_status != 'Cancelled'`;
       }

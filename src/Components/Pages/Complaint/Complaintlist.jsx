@@ -54,7 +54,8 @@ export function Complaintlist(params) {
     msp: '',
     mode_of_contact: '',
     customer_class: '',
-    upcoming: ''
+    upcoming: '',
+    ticket_type: '',
 
   });
 
@@ -711,6 +712,25 @@ export function Complaintlist(params) {
                     <option value=""> SELECT</option>
                     <option value="upcoming">Yes</option>
                     <option value="current">no</option>
+                  </select>
+                </div>
+              </div>
+              <div className="col-md-2">
+                <div className="form-group">
+                  <label>Ticket Type</label>
+                  <select
+                    className="form-control"
+                    name="ticket_type"
+                    value={searchFilters.ticket_type}
+                    onChange={handleFilterChange}
+                  >
+                    <option value=""> SELECT</option>
+                    <option value="INSTALLATION">INSTALLATION</option>
+                    <option value="BREAKDOWN">BREAKDOWN</option>
+                    <option value="VISIT">VISIT</option>
+                    <option value="DEMO">DEMO</option>
+                    <option value="MAINTENANCE">MAINTENANCE</option>
+                    <option value="HELPDESK">HELPDESK</option>
                   </select>
                 </div>
               </div>
