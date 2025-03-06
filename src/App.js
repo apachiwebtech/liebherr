@@ -151,6 +151,8 @@ import UploadProducts from './Components/Utils/UploadProducts';
 import Subcallstatus from './Components/Pages/Master/Subcallstatus';
 import ExceltoScript from './Components/Utils/ExceltoScript';
 import ExceltoEngScript from './Components/Utils/ExceltoEngScript';
+import Exceltomobile from './Components/Utils/Exceltomobile';
+import UploadMobile from './Components/Utils/UploadMobile';
 
 
 
@@ -248,6 +250,14 @@ const Router = createBrowserRouter([
   {
     path: "/exceltoengscript",
     element: <ExceltoEngScript />
+  },
+  {
+    path: "/exceltomobile",
+    element: <Exceltomobile />
+  },
+  {
+    path: "/uploadmobile",
+    element: <UploadMobile />
   },
   {
     path: "/msp",
