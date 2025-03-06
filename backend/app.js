@@ -14888,7 +14888,8 @@ app.post('/uploadmobile', authenticateToken, async (req, res) => {
           .input('ticket_no', sql.VarChar, item.ticket_no)
           .input('alt_mobile', sql.VarChar, item.alt_mobile)
           .input('customer_mobile', sql.VarChar, item.customer_mobile)
-          .query(`UPDATE complaint_ticket SET customer_mobile = @customer_mobile ,alt_mobile = @alt_mobile WHERE ticket_no = @ticket_no`);
+          .input('sevice_partner', sql.VarChar, item.sevice_partner)
+          .query(`UPDATE complaint_ticket SET customer_mobile = @customer_mobile ,alt_mobile = @alt_mobile , sevice_partner = @sevice_partner WHERE ticket_no = @ticket_no`);
       } catch (error) {
         console.error("Error updating record:", error);
       }

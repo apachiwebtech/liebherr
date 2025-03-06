@@ -32,7 +32,8 @@ const Exceltomobile = () => {
       const selectedColumns = parsedData.map((row) => ({
         ticket_no: row.ticket_no,
         alt_mobile: row.alternate_no,
-        customer_mobile: row.mobile_no
+        customer_mobile: row.mobile_no,
+        sevice_partner: row["Master Service Partner Name"]
       }));
 
       setJsonData(selectedColumns);
