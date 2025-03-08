@@ -43,19 +43,10 @@ const ExceltoCustomer = () => {
                 anniversary_date: row.anniversary_date || null,
             }));
     
-            // Remove duplicate customer_id
-            const uniqueData = [];
-            const seenIds = new Set();
+        
     
-            selectedColumns.forEach((item) => {
-                if (!seenIds.has(item.customer_id)) {
-                    seenIds.add(item.customer_id);
-                    uniqueData.push(item);
-                }
-            });
-    
-            setJsonData(uniqueData);
-            exportJson(uniqueData);
+            setJsonData(selectedColumns);
+            exportJson(selectedColumns);
         };
         reader.readAsArrayBuffer(file);
     };

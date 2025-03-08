@@ -800,7 +800,10 @@ export function Complaintview(params) {
       .then((response) => {
 
         alert("Quotation generated")
-        window.location.reload()
+        setTimeout(() => {
+          
+          window.location.reload()
+        }, 1000);
 
       })
       .catch((error) => {
@@ -1325,7 +1328,11 @@ export function Complaintview(params) {
 
         if (remarkResponse.data) {
           fetchComplaintview(complaintid)
-          window.location.reload()
+          // window.location.reload()
+        }
+
+        if (quotationcheck == true) {
+          GenerateQuotation()
         }
 
    
@@ -1361,9 +1368,7 @@ export function Complaintview(params) {
           fileInputRef2.current.value = ""; // Reset the file input for remarks
         }
 
-        if (quotationcheck == true) {
-          GenerateQuotation()
-        }
+     
 
         alert("Ticket remark and files submitted successfully!");
 

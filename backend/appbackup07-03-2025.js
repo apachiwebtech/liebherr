@@ -1,37 +1,31 @@
-require('dotenv').config();
-const express = require('express');
 const sql = require("mssql");
+const express = require('express');
 const app = express();
-const PORT = process.env.PORT || 8081;
+const cors = require('cors');
+const Category = require("./Routes/ProductMaster/Category");
 const multer = require("multer");
 const bodyParser = require("body-parser");
 const path = require("path");
-const cors = require('cors');
 const fs = require("fs");
 const jwt = require("jsonwebtoken");
-const MobApp = require("./Routes/MobApp");
+const MobApp = require('./Routes/MobApp')
 const fetchdata = require('./fetchdata')
-// const RateCardExcel = require('./Routes/Utils/RateCardExcel')
+const RateCardExcel = require('./Routes/Utils/RateCardExcel')
 const CryptoJS = require('crypto-js');
 const nodemailer = require('nodemailer');
 const axios = require("axios");
-const https = require('https');
 
-// Secret key for JWT
-const JWT_SECRET = process.env.JWT_SECRET; 
+
+require('dotenv').config();
+const JWT_SECRET = process.env.JWT_SECRET;
 const API_KEY = process.env.API_KEY;
 const secretKey = process.env.SECRET_KEY
 
-
-
-//middleware
-app.use(cors({ origin: process.env.ORIGIN }));
- //app.use(cors({ origin: "*" }));
-
-app.use(express.json({ limit: '500mb' }));
-app.use(express.urlencoded({ extended: true, limit: '500mb' }));
+app.use(cors({ origin: "*" }));
+app.use(express.json({ limit: '1000mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1000mb' }));
 app.use(bodyParser.urlencoded({ extended: true }));
-//app.use(fileUpload());
+
 
 const authenticateToken = (req, res, next) => {
 
@@ -49,6 +43,7 @@ const authenticateToken = (req, res, next) => {
     req.user = user; // Attach user info to request
     next();
   });
+
 };
 
 function decryptData(encryptedData, secretKey) {
@@ -67,14 +62,23 @@ function decryptData(encryptedData, secretKey) {
   }
 }
 
+// this is for use routing
+
+
+app.use("/", Category);
 app.use("/", MobApp);
 app.use("/", fetchdata);
-// app.use("/", RateCardExcel)
+app.use("/", RateCardExcel)
+
+
+
+const uploadDir = path.join(__dirname, 'uploads');
+
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "./uploads"); // Folder where images will be saved
+    cb(null, uploadDir); // Absolute path to 'uploads' folder
   },
   filename: (req, file, cb) => {
     cb(null, `${Date.now()}-${file.originalname}`);
@@ -82,7 +86,7 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
-
+//
 const dbConfig = {
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
@@ -100,40 +104,22 @@ const poolPromise = new sql.ConnectionPool(dbConfig).connect()
 
   .catch(err => console.error("Database Connection Pool Error:", err));
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+
+
+
+app.listen(8081, () => {
+  console.log('Server is running on http://localhost:8081');
 });
 
-//Country Master Start
-//app.get("/", async (req, res) => {
-//  try {
-//     Use the poolPromise to get the connection pool
-//    const pool = await poolPromise;
- //   const result = await pool.request().query("SELECT * FROM awt_country WHERE deleted = 0");
-//    return res.json(result.recordset);
-//  } catch (err) {
-//    console.error(err);
-//    return res.status(500).json({ error: 'An error occurred while fetching data' });
-//  }
-//});
 
-app.get("/", async (req, res) => {
-  try {
-    // Check if the database is connected
-    await poolPromise; // This will throw an error if not connected
-    return res.json({ 
-      message: 'Welcome to our Liebherr API!', 
-      databaseStatus: 'Database is running'
-    });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ 
-      error: 'An error occurred', 
-      databaseStatus: 'Database connection error' 
-    });
-  }
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'zeliant997@gmail.com', // Replace with your email
+    pass: 'zazb zhkl khsn jehv', // Replace with your email password or app password
+  },
 });
+
 
 app.get('/send-otp', authenticateToken, async (req, res) => {
   // const { email, otp } = req.body;
@@ -4495,7 +4481,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
             `https://smsgw.tatatel.co.in:9095/campaignService/campaigns/qs?recipient=${mobile}&dr=false&msg=Dear Customer, Greetings from Liebherr! Your Ticket Number is ${ticket_no}. Please share OTP ${otp} with the engineer once the ticket is resolved.&user=${username}&pswd=${password}&sender=LICARE&PE_ID=1201159257274643113&Template_ID=${temp_id}`
           );
 
-          console.log(tokenResponse.data)
+          
 
         } catch (error) {
           console.error('Error hitting SMS API (token):', error.response?.data || error.message);
@@ -9577,9 +9563,9 @@ app.get("/getmultiplelocation/:pincode/:classification/:ticket_type", authentica
     LEFT JOIN awt_district as d on p.area_id = d.id
     LEFT JOIN awt_geocity as c on p.geocity_id = c.id
     LEFT JOIN pincode_allocation as o on p.pincode = o.pincode
-  LEFT JOIN awt_franchisemaster as f on f.licarecode =  o.msp_code
-  LEFT JOIN awt_childfranchisemaster as fm on fm.licare_code =  o.csp_code
-  where p.pincode = ${pincode} and o.customer_classification = '${classification}' and o.call_type = '${ticket_type}'`
+    LEFT JOIN awt_franchisemaster as f on f.licarecode =  o.msp_code
+    LEFT JOIN awt_childfranchisemaster as fm on fm.licare_code =  o.csp_code
+    where p.pincode = ${pincode} and o.customer_classification = '${classification}' and o.call_type = '${ticket_type}'`
 
     const result = await pool.request().query(sql);
 
@@ -15446,3 +15432,11 @@ app.post('/uploadspareexcel', async (req, res) => {
     return res.status(500).json({ error: 'An error occurred while processing data' });
   }
 });
+
+
+
+
+
+
+
+

@@ -29,7 +29,7 @@ const ExcelforRemarks = () => {
   
       // Transform data to separate remarks while keeping ticketno common
       const transformedData = parsedData.flatMap((row) => [
-        { ticket_no: row.ticket_no, remark: row.fault_description ,created_date : row.ticket_date ? convertExcelSerialToDateTime(row.ticket_date) : null },
+        { ticket_no: row.ticket_no, remark: row.fault_description ,created_date : row.ticket_date ? convertExcelSerialToDateTime(row.ticket_date) : null ,test_data1: "1",test_data2: null,test_data3: null,test_data4: null,test_data5: null,test_data6: null,test_data7: null,test_data8: null,test_data9: null,test_data10: null,test_data11: null,test_data1: null,test_data12: null,test_data1: null  },
         { ticket_no: row.ticket_no, remark: row.remarks ,created_date : row.ticket_date ? convertExcelSerialToDateTime(row.ticket_date) : null }
       ]);
   

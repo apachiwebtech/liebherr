@@ -735,7 +735,7 @@ export function Registercomplaint(params) {
             email: res.data.information[0].email,
             mobile: res.data.information[0].mobileno,
             address: res.data.information[0].address,
-            customer_id: res.data.information[0].id,
+            customer_id: res.data.information[0].customer_id,
             custo_id: res.data.information[0].customer_id,
             customerEndId: customerInfo.customer_id,
             pincode: res.data.information[0].pincode,
@@ -1205,7 +1205,7 @@ export function Registercomplaint(params) {
           email: data.email || "",
           address: data.address || "",
           customer_id: data.customer_id || "",
-          pincode : data.pincode || '',
+          pincode : data.pincode_id || '',
           
       }));
       }
@@ -1301,8 +1301,8 @@ export function Registercomplaint(params) {
           setValue((prevState) => ({
             ...prevState, // Spread existing state
             mobile: customerInfo.mobileno,
-            cust_type: customerInfo.customer_type
-
+            cust_type: customerInfo.customer_type,
+            salutation : customerInfo.salutation
           }));
 
         } else {

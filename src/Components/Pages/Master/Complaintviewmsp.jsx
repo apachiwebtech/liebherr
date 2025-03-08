@@ -22,14 +22,15 @@ import Jobcardpdf from "../Reports/Jobcardpdf";
 import { pdf } from '@react-pdf/renderer';
 import MyDocument8 from "../Reports/MyDocument8";
 
-
 export function Complaintviewmsp(params) {
 
   const token = localStorage.getItem("token");
   const [activeTicket, setActiveTicket] = useState(null);
   const [addedSpareParts, setAddedSpareParts] = useState([]);
+  const [uniquesparepart, setuniquesparepart] = useState([]);
   const [quotation, setQuotation] = useState([]);
   const [activity, setactivity] = useState([]);
+  const [engremark, setEngRemark] = useState([]);
   const [model, setModel] = useState('');
   let { complaintid } = useParams();
   const [data, setData] = useState([])
@@ -54,7 +55,6 @@ export function Complaintviewmsp(params) {
   const { loaders, axiosInstance } = useAxiosLoader();
   const [errors, setErrors] = useState({})
   const [complaintview, setComplaintview] = useState({
-
     ticket_no: '',
     customer_name: '',
     address: '',
@@ -112,6 +112,7 @@ export function Complaintviewmsp(params) {
   const [groupstatusid, setgroupstatusid] = useState("");
   const [groupdefect, setGroupDefect] = useState([]);
   const [addedEngineers, setAddedEngineers] = useState([]);
+  const [updatedeng, setEngList] = useState([]);
   const [files2, setFiles2] = useState([]); // New state for Attachment 2 files
   const fileInputRef = useRef(); // Ref for Attachment 1 input
   const fileInputRef2 = useRef(); // Create a ref for the file input
@@ -130,7 +131,7 @@ export function Complaintviewmsp(params) {
   const [GroupDefecttype, setGroupDefecttype] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [spare12, setSpare12] = useState([]) // for quatation pdf
-  const [csp, setCsp] = useState([]) // for quatation pdf
+  const [cspdata, setCsp] = useState({}) // for quatation pdf
   const [show, setShow] = useState(false)
   const [show1, setShow1] = useState(false)
   const [show2, setShow2] = useState(false)
@@ -147,6 +148,7 @@ export function Complaintviewmsp(params) {
     setComplaintview((prev) => ({ ...prev, [e.target.name]: e.target.value }))
 
 
+
     if (e.target.name == 'mandays') {
       setMandays(e.target.checked)
     }
@@ -156,7 +158,19 @@ export function Complaintviewmsp(params) {
     }
 
 
+
+    const { name, checked } = e.target;
+    setComplaintview((prev) => ({
+      ...prev,
+      [name]: checked ? 'Yes' : 'No',
+    }));
+
   }
+
+
+
+
+
 
 
   // const handlevisitchange = (e) => {
@@ -225,7 +239,7 @@ export function Complaintviewmsp(params) {
           purchase_date: value
         }))
 
-        axios.post(`${Base_Url}/updatewarrentystate`, { warrenty: 'OUT OF WARRANTY', ticket_no: String(complaintid) }, {
+        axiosInstance.post(`${Base_Url}/updatewarrentystate`, { warrenty: 'OUT OF WARRANTY', ticket_no: String(complaintid) }, {
           headers: {
             Authorization: token
           }
@@ -246,7 +260,7 @@ export function Complaintviewmsp(params) {
         }))
         setWarranty_status_data("WARRANTY");
 
-        axios.post(`${Base_Url}/updatewarrentystate`, { warrenty: 'WARRANTY', ticket_no: String(complaintid) }, {
+        axiosInstance.post(`${Base_Url}/updatewarrentystate`, { warrenty: 'WARRANTY', ticket_no: String(complaintid) }, {
           headers: {
             Authorization: token
           }
@@ -566,9 +580,10 @@ export function Complaintviewmsp(params) {
   }
 
   const getsubcallstatus = async (value) => {
+    setsubCallstatus([])
 
 
-    if (value) {
+    if (value != '') {
       try {
         const res = await axiosInstance.post(
           `${Base_Url}/getsubcallstatus`,
@@ -587,23 +602,24 @@ export function Complaintviewmsp(params) {
         console.error("Error fetching sub-call statuses via POST:", error);
         setsubCallstatus([]); // Set empty array on error
       }
-    }
-    //  else {
-    //   try {
-    //     const res = await axiosInstance.get(`${Base_Url}/getsubcallstatusdata`, {
-    //       headers: {
-    //         Authorization: token, // Send token in headers
-    //       },
-    //     });
+    } else {
 
-    //     if (res.data) {
-    //       setsubCallstatus(res.data); // Set sub-call statuses from GET response
-    //     }
-    //   } catch (error) {
-    //     console.error("Error fetching sub-call statuses via GET:", error);
-    //     setsubCallstatus([]); // Set empty array on error
-    //   }
-    // }
+      try {
+        const res = await axiosInstance.get(`${Base_Url}/getsubcallstatusdata`, {
+          headers: {
+            Authorization: token, // Send token in headers
+          },
+        });
+
+        if (res.data) {
+          setsubCallstatus(res.data); // Set sub-call statuses from GET response
+        }
+      } catch (error) {
+        console.error("Error fetching sub-call statuses via GET:", error);
+        setsubCallstatus([]); // Set empty array on error
+      }
+    }
+
   };
 
 
@@ -628,9 +644,11 @@ export function Complaintviewmsp(params) {
     })
       .then((res) => {
         console.log("test")
+
+        getupdateengineer(complaintview.ticket_no)
       })
 
-    if (
+    if (  
       selectedEngineer &&
       !addedEngineers.some((eng) => eng.id === selectedEngineer.id)
     ) {
@@ -723,8 +741,6 @@ export function Complaintviewmsp(params) {
 
 
     setAddedSpareParts([newPart]);
-    console.log([newPart]);
-
 
 
 
@@ -872,7 +888,8 @@ export function Complaintviewmsp(params) {
       setUpdatedata(response.data)
       setComplaintview(response.data);
       setgroupstatusid(response.data.group_code)
-      getsubcallstatus(response.data.call_status_id)
+      // getsubcallstatus(response.data.call_status_id)
+      getEngineerRemark(response.data.ticket_no)
       setCloseStatus(response.data.call_status)
       setsubCloseStatus(response.data.sub_call_status)
       setActiveTicket(complaintid);
@@ -882,6 +899,14 @@ export function Complaintviewmsp(params) {
       if (response.data.engineer_id != null) {
         getupdateengineer(response.data.ticket_no)
       }
+
+
+      setComplaintview((prev) => ({
+        ...prev,
+        call_status: "",
+        sub_call_status: "",
+      }))
+
 
 
 
@@ -921,6 +946,7 @@ export function Complaintviewmsp(params) {
       .then((res) => {
 
         setAddedEngineers(res.data)
+        setEngList(res.data)
       })
       .then((err) => {
         console.log(err)
@@ -949,8 +975,8 @@ export function Complaintviewmsp(params) {
       .then((res) => {
 
         setAddedSpareParts(res.data)
-        console.log(res.data);
 
+        setuniquesparepart(res.data)
       })
   }
 
@@ -1040,47 +1066,20 @@ export function Complaintviewmsp(params) {
     }
   };
 
-  const handleModelChange = async (e) => {
+  const handleModelChange = (e) => {
     const { name, value } = e.target;
 
-    await setComplaintview(prev => ({ ...prev, [name]: value }));
+    setComplaintview(prev => ({ ...prev, [name]: value }));
 
-    console.log(name, value, "name,value");
 
-    console.log(complaintview.sub_call_status, 'complaintview.sub_call_status')
-    console.log(complaintview.call_status, 'complaintview.call_status')
-
-    setShow(false);
-    setShow1(false);
-
-    // setShow2(false);
-    // setShow3(false);
-if(name === 'call_status' && value != 'Closed'){
-    setShow2(false);
-    setShow3(false);
-}
-
-    setquotationcheck(false)
-
-    // if (name == 'group_code' ||value != '' ) {
-    //   setShow2(true);
-    // }
-
-    if (value === 'Closed') {
-      setShow1(true);
-      setShow2(true);
-    }
-    if (value === 'Spares' || value === 'Customer Approval / Quotation') {
-      setquotationcheck(true)
-      setShow(true);
-    }
-    if (value === 'Customer Approval / Quotation') {
-      setShow3(true)
-    }
     if (name === 'serial_no') {
       if (value.length === 9) { // Check if the value has exactly 9 digits
         handlegetmodel(value);
       }
+    }
+
+    if (name == 'call_status' && value == 'Approve') {
+      setShow(true)
     }
 
 
@@ -1150,88 +1149,87 @@ if(name === 'call_status' && value != 'Closed'){
 
 
 
-
   //handlesubmitticketdata strat for serial no,model number, engineer_id and call_status and form data
-  const handleSubmitTicketFormData = (e) => {
-    e.preventDefault();
+  // const handleSubmitTicketFormData = (e) => {
+  //   e.preventDefault();
 
 
-    if (addedEngineers.length > 0) {
+  //   if (addedEngineers.length > 0) {
 
-      const data = {
-        serial_no: String(complaintview.serial_no) || '',
-        ModelNumber: complaintview.ModelNumber || '',
-        engineer_id: complaintview.engineer_id || '',
-        call_status: callstatusid || '',
-        sub_call_status: complaintview.sub_call_status || '',
-        updated_by: created_by || '',
-        ticket_no: complaintview.ticket_no || '',
-        group_code: groupstatusid || '',
-        site_defect: complaintview.site_defect || '',
-        defect_type: complaintview.defect_type || '',
-        engineerdata: addedEngineers.map((item) => item.engineer_id),
-        engineername: addedEngineers.map((item) => item.title),
-        activity_code: complaintview.activity_code || ''
-      };
+  //     const data = {
+  //       serial_no: String(complaintview.serial_no) || '',
+  //       ModelNumber: complaintview.ModelNumber || '',
+  //       engineer_id: complaintview.engineer_id || '',
+  //       call_status: callstatusid || '',
+  //       sub_call_status: complaintview.sub_call_status || '',
+  //       updated_by: created_by || '',
+  //       ticket_no: complaintview.ticket_no || '',
+  //       group_code: groupstatusid || '',
+  //       site_defect: complaintview.site_defect || '',
+  //       defect_type: complaintview.defect_type || '',
+  //       engineerdata: addedEngineers.map((item) => item.engineer_id),
+  //       engineername: addedEngineers.map((item) => item.title),
+  //       activity_code: complaintview.activity_code || ''
+  //     };
 
-      axiosInstance.post(`${Base_Url}/ticketFormData`, data, {
-        headers: {
-          Authorization: token, // Send token in headers
-        },
-      })
-        .then((response) => {
-          // setComplaintview({
-          //   ...complaintview,
-          //   serial_no: '',
-          //   ModelNumber: '',
-          //   engineer_id: '',
-          //   call_status: '',
-          // });
-          // fetchComplaintview(complaintid);
-          fetchComplaintDetails(complaintid)
+  //     axiosInstance.post(`${Base_Url}/ticketFormData`, data, {
+  //       headers: {
+  //         Authorization: token, // Send token in headers
+  //       },
+  //     })
+  //       .then((response) => {
+  //         // setComplaintview({
+  //         //   ...complaintview,
+  //         //   serial_no: '',
+  //         //   ModelNumber: '',
+  //         //   engineer_id: '',
+  //         //   call_status: '',
+  //         // });
+  //         // fetchComplaintview(complaintid);
+  //         fetchComplaintDetails(complaintid)
 
-          setTicketUpdateSuccess({
-            message: 'Enginerer added successfully!',
-            visible: true,
-            type: 'success',
-          });
+  //         setTicketUpdateSuccess({
+  //           message: 'Enginerer added successfully!',
+  //           visible: true,
+  //           type: 'success',
+  //         });
 
-          // Hide the message after 3 seconds
-          setTimeout(() => {
-            setTicketUpdateSuccess({
-              message: '',
-              visible: false,
-              type: 'success',
-            });
-          }, 3000);
-        })
-        .catch((error) => {
-          console.error('Error updating ticket:', error);
-          setTicketUpdateSuccess({
-            message: 'Error updating ticket. Please try again.',
-            visible: true,
-            type: 'error',
-          });
+  //         // Hide the message after 3 seconds
+  //         setTimeout(() => {
+  //           setTicketUpdateSuccess({
+  //             message: '',
+  //             visible: false,
+  //             type: 'success',
+  //           });
+  //         }, 3000);
+  //       })
+  //       .catch((error) => {
+  //         console.error('Error updating ticket:', error);
+  //         setTicketUpdateSuccess({
+  //           message: 'Error updating ticket. Please try again.',
+  //           visible: true,
+  //           type: 'error',
+  //         });
 
-          setTimeout(() => {
-            setTicketUpdateSuccess({
-              message: '',
-              visible: false,
-              type: 'error',
-            });
-          }, 3000);
-        });
-    } else {
-
-
-      if (addedEngineers.length === 0) {
-        alert('Please Add the Engineer');
-      }
-    }
+  //         setTimeout(() => {
+  //           setTicketUpdateSuccess({
+  //             message: '',
+  //             visible: false,
+  //             type: 'error',
+  //           });
+  //         }, 3000);
+  //       });
+  //   } else {
 
 
+  //     if (addedEngineers.length === 0) {
+  //       alert('Please Add the Engineer');
+  //     }
+  //   }
 
-  };
+
+
+  // };
 
   //handkesubmitticketdata end
 
@@ -1246,9 +1244,10 @@ if(name === 'call_status' && value != 'Closed'){
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setErrorMessage("");
 
+    e.preventDefault();
+
+    setErrorMessage("");
 
     const isValidValue = (value) => value !== null && value !== 'null' && value !== '';
 
@@ -1323,9 +1322,13 @@ if(name === 'call_status' && value != 'Closed'){
               Authorization: token, // Send token in headers
             },
           });
+
         if (remarkResponse.data) {
           fetchComplaintview(complaintid)
+          window.location.reload()
         }
+
+   
 
         const remarkId = remarkResponse.data.remark_id;
 
@@ -1358,15 +1361,13 @@ if(name === 'call_status' && value != 'Closed'){
           fileInputRef2.current.value = ""; // Reset the file input for remarks
         }
 
-        alert("Ticket remark and files submitted successfully!");
-        
         if (quotationcheck == true) {
           GenerateQuotation()
         }
 
-        fetchComplaintDetails();
+        alert("Ticket remark and files submitted successfully!");
 
-        window.location.reload()
+        fetchComplaintDetails();
       } catch (error) {
         console.error("Error submitting ticket remark or files:", error);
         alert(
@@ -1466,11 +1467,6 @@ if(name === 'call_status' && value != 'Closed'){
     getsitecode()
   }, [])
 
-  const handleAttachmentClick = (attachment) => {
-
-    setCurrentAttachment(attachment);
-    setIsModalOpen(true);
-  };
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -1653,7 +1649,7 @@ if(name === 'call_status' && value != 'Closed'){
   };
 
 
-  // Role Right
+  // Role Right 
 
 
   const Decrypt = (encrypted) => {
@@ -1679,6 +1675,22 @@ if(name === 'call_status' && value != 'Closed'){
   }, [])
 
 
+  async function  getEngineerRemark(ticket_no) {
+    
+    axios.post(`${Base_Url}/getengineerremark` , {ticket_no : ticket_no} , {
+      headers : {
+        Authorization : token 
+      }
+    })
+    .then((res) =>{
+      setEngRemark(res.data)
+    })
+    .then((err) =>{
+      console.log(err)
+    })
+  }
+
+
   //For Pdf
 
   async function downloadPDF(id) {
@@ -1690,7 +1702,7 @@ if(name === 'call_status' && value != 'Closed'){
   const Blob = async () => {
 
     try {
-      const blob = await pdf(<Jobcardpdf attachments={attachments} data={updatedata} duplicate={duplicate} spare={addedSpareParts} engineer={addedEngineers} />).toBlob();
+      const blob = await pdf(<Jobcardpdf attachments={attachments} data={updatedata} duplicate={duplicate} spare={addedSpareParts} engineer={addedEngineers} engremark = {engremark} />).toBlob();
       const url = URL.createObjectURL(blob);
       window.open(url);
       URL.revokeObjectURL(url);
@@ -1698,7 +1710,6 @@ if(name === 'call_status' && value != 'Closed'){
       console.error('Error generating PDF:', err);
     }
   };
-
 
 
   async function getquotedetails123(oid) {
@@ -1708,25 +1719,23 @@ if(name === 'call_status' && value != 'Closed'){
           Authorization: token, // Send token in headers
         },
       });
-
+  
       // Decrypt the response data
       const encryptedData = res.data.encryptedData; // Assuming response contains { encryptedData }
       const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
       const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
-
-      await getquotespare(decryptedData[0].quotationNumber)
-
-      await getcspformticket(decryptedData[0].ticketId)
-
-      await Blobs(decryptedData[0])
-
-
-
-
+  
+      const spareData = await getquotespare(decryptedData[0].quotationNumber);
+      const cspData = await getcspformticket(decryptedData[0].ticketId);
+  
+      // Pass all data to Blobs
+      await Blobs(decryptedData[0], spareData, cspData);
+  
     } catch (error) {
       console.error('Error fetching quote details:', error);
     }
   }
+  
   async function getquotespare(quote_id) {
     try {
       const res = await axiosInstance.post(`${Base_Url}/getquotationspare`, { quote_id: quote_id }, {
@@ -1734,40 +1743,47 @@ if(name === 'call_status' && value != 'Closed'){
           Authorization: token, // Send token in headers
         },
       });
+  
       // Decrypt the response data
-      const encryptedData = res.data.encryptedData; // Assuming response contains { encryptedData }
+      const encryptedData = res.data.encryptedData;
       const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
       const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
-      setSpare12(decryptedData);
 
+  
+      return decryptedData;
+  
     } catch (error) {
-      console.error('Error fetching quote details:', error);
+      console.error('Error fetching quote spare details:', error);
+      return null; // Return null in case of error to avoid breaking execution
     }
   }
-
+  
   async function getcspformticket(ticketId) {
-
-    axiosInstance.post(`${Base_Url}/getcspformticket`, { ticket_no: ticketId }, {
-      headers: {
-        Authorization: token
-      }
-    })
-      .then((res) => {
-        // Decrypt the response data
-        const encryptedData = res.data.encryptedData; // Assuming response contains { encryptedData }
-        const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
-        const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
-        setCsp(decryptedData)
-      })
-      .catch((err) => {
-        console.log(err)
-      })
-  }
-
-  const Blobs = async (data) => {
-
     try {
-      const blob = await pdf(<MyDocument8 data={data} spare={spare12} csp={csp} />).toBlob();
+      const res = await axiosInstance.post(`${Base_Url}/getcspformticket`, { ticket_no: ticketId }, {
+        headers: {
+          Authorization: token
+        }
+      });
+  
+      // Decrypt the response data
+      const encryptedData = res.data.encryptedData;
+      const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+      const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+  
+      return decryptedData[0]; // Assuming you need the first object
+  
+    } catch (error) {
+      console.error('Error fetching CSP form ticket:', error);
+      return null;
+    }
+  }
+  
+  const Blobs = async (data, spare112, cspdata1) => {
+    try {
+
+  
+      const blob = await pdf(<MyDocument8 data={data} spare={spare112} csp={cspdata1} />).toBlob();
       const url = URL.createObjectURL(blob);
       window.open(url);
       URL.revokeObjectURL(url);
@@ -1775,8 +1791,10 @@ if(name === 'call_status' && value != 'Closed'){
       console.error('Error generating PDF:', err);
     }
   };
+  
 
-  // console.log(addedSpareParts,"addedSpareParts");
+
+
 
 
   return (
@@ -2269,10 +2287,6 @@ if(name === 'call_status' && value != 'Closed'){
                                       setCallstatusid(selectedname)
                                       setCallid(selectedid)
                                       handleModelChange(e)
-
-
-
-
                                     }}
                                   >
                                     <option value="">Select </option>
@@ -2286,9 +2300,7 @@ if(name === 'call_status' && value != 'Closed'){
                                 </div>
                                 <div className="mb-3 col-lg-6">
                                   <h4 className="pname" style={{ fontSize: "14px" }}>Sub Call Status</h4>
-                                  <select name="sub_call_status"
-                                    // value={complaintview.sub_call_status}
-                                    disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false} className="form-control" style={{ fontSize: "14px" }} onChange={handleModelChange}>
+                                  <select name="sub_call_status" disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false} className="form-control" style={{ fontSize: "14px" }} onChange={handleModelChange}>
                                     <option value="" >Select </option>
                                     {subcallstatus.map((item) => {
                                       return (
@@ -2300,132 +2312,122 @@ if(name === 'call_status' && value != 'Closed'){
 
                                   </select>
                                 </div>
-                                {
+                                {(complaintview.call_status == 'Spares' || ((complaintview.call_status == 'Approval' && complaintview.sub_call_status == 'Customer Approval / Quotation' ))) &&
+
+                                  <div className=" py-1 my-2">
+                                    <h4 className="pname" style={{ fontSize: "14px" }}>Spare Parts:</h4>
+                                    <div className="row align-items-center">
 
 
-                                  show == true ? (
+                                      <div className="col-lg-6">
+                                        <Autocomplete
+                                          size="small"
+                                          options={spare || []}
+                                          getOptionLabel={(option) =>
+                                            option.article_code + " - " + option.article_description
+                                          }
+                                          value={
+                                            spare.find((part) => part.id === spareid) || null
+                                          } // Set the selected value
+                                          onChange={(event, newValue) =>
+                                            handlesparechange(newValue ? newValue.id : "")
+                                          }
+                                          disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
+                                          renderInput={(params) => (
+                                            <TextField
+                                              {...params}
+                                              label="Select Spare Part"
+                                              variant="outlined"
+                                              fullWidth
+
+                                            />
+                                          )}
+                                          noOptionsText="No spare parts available"
+                                          sx={{
+                                            background: "#fff"
+                                          }}
+
+                                        />
+                                      </div>
+
+                                      <div className="col-lg-4 ">
+                                        <input
+                                          type="number"
+                                          className="form-control"
+                                          name="quantity"
+                                          placeholder="Qty"
+                                          value={quantity}
+                                          onChange={(e) => setQuantity(e.target.value)}
+                                          disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
+                                          min="1"
+                                        />
+                                      </div>
+
+                                      <div className="col-lg-2 ">
+
+                                        {roleaccess > 2 ? <button
+                                          className="btn btn-primary btn-sm"
+                                          disabled={closestatus == "Closed" && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
+                                          onClick={handleAddSparePart}
+                                        >
+                                          Add
+                                        </button> : null}
+
+                                      </div>
+                                    </div>
+
+                                    <div className="mt-3" style={{ overflowX: "scroll" }}>
+                                      <h4 className="pname" style={{ fontSize: "14px" }}>Added Spare Parts:</h4>
+                                      <table className="table table-bordered" style={{ fontSize: "12px" }}>
+                                        <thead>
+                                          <tr>
+                                            <th>Spare Part</th>
+                                            <th>Quantity</th>
+                                            <th>Action</th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
 
 
-                                    // (complaintview.call_status === 'Approval' && complaintview.sub_call_status === 'Customer Approval / Quotation' || complaintview.call_status === 'Spares') &&
-                                    <div className=" py-1 my-2">
-                                      <h4 className="pname" style={{ fontSize: "14px" }}>Spare Parts:</h4>
-                                      <div className="row align-items-center">
-
-
-                                        <div className="col-lg-6">
-                                          <Autocomplete
-                                            size="small"
-                                            options={spare || []}
-                                            getOptionLabel={(option) =>
-                                              option.article_code + " - " + option.article_description
+                                          {addedSpareParts.filter(part => {
+                                            if (uniqueParts.has(part.article_code)) {
+                                              return false; // Skip duplicate
                                             }
-                                            value={
-                                              spare.find((part) => part.id === spareid) || null
-                                            } // Set the selected value
-                                            onChange={(event, newValue) => {
-                                              handlesparechange(newValue ? newValue.id : "");
-
-                                            }}
-
-                                            disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
-                                            renderInput={(params) => (
-                                              <TextField
-                                                {...params}
-                                                label="Select Spare Part"
-                                                variant="outlined"
-                                                fullWidth
-
-                                              />
-                                            )}
-                                            noOptionsText="No spare parts available"
-                                            sx={{
-                                              background: "#fff"
-                                            }}
-
-                                          />
-                                        </div>
-
-                                        <div className="col-lg-4 ">
-                                          <input
-                                            type="number"
-                                            className="form-control"
-                                            name="quantity"
-                                            placeholder="Qty"
-                                            value={quantity}
-                                            onChange={(e) => setQuantity(e.target.value)}
-                                            disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
-                                            min="1"
-                                          />
-                                        </div>
-
-                                        <div className="col-lg-2 ">
-
-                                          {roleaccess > 2 ? <button
-                                            className="btn btn-primary btn-sm"
-                                            disabled={closestatus == "Closed" && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
-                                            onClick={handleAddSparePart}
-                                          >
-                                            Add
-                                          </button> : null}
-
-                                        </div>
-                                      </div>
-
-                                      <div className="mt-3" style={{ overflowX: "scroll" }}>
-                                        <h4 className="pname" style={{ fontSize: "14px" }}>Added Spare Parts:</h4>
-                                        <table className="table table-bordered" style={{ fontSize: "12px" }}>
-                                          <thead>
-                                            <tr>
-                                              <th>Spare Part</th>
-                                              <th>Quantity</th>
-                                              <th>Action</th>
-                                            </tr>
-                                          </thead>
-                                          <tbody>
-
-                                            {addedSpareParts.filter(part => {
-                                              console.log(addedSpareParts, 'addedSpareParts');
-
-                                              if (uniqueParts.has(part.article_code)) {
-                                                return false; // Skip duplicate
-                                              }
-                                              uniqueParts.add(part.article_code);
-                                              return true; // Include unique
-                                            }).map((part) => {
-                                              return (
-                                                <tr key={part.id}>
-                                                  <td>{part.article_code} - {part.article_description}</td>
-                                                  <td>{part.quantity || 0}</td>
-                                                  <td>
-                                                    <button
-                                                      className="btn btn-sm btn-danger"
-                                                      style={{ padding: "0.2rem 0.5rem" }}
-                                                      disabled={closestatus === 'Closed' && subclosestatus === 'Fully' || closestatus === 'Cancelled'}
-                                                      onClick={() => handleRemoveSparePart(part.id)}
-                                                    >
-                                                      ✖
-                                                    </button>
-                                                  </td>
-                                                </tr>
-                                              );
-                                            })}
+                                            uniqueParts.add(part.article_code);
+                                            return true; // Include unique
+                                          }).map((part) => {
+                                            return (
+                                              <tr key={part.id}>
+                                                <td>{part.article_code} - {part.article_description}</td>
+                                                <td>{part.quantity || 0}</td>
+                                                <td>
+                                                  <button
+                                                    className="btn btn-sm btn-danger"
+                                                    style={{ padding: "0.2rem 0.5rem" }}
+                                                    disabled={closestatus === 'Closed' && subclosestatus === 'Fully' || closestatus === 'Cancelled'}
+                                                    onClick={() => handleRemoveSparePart(part.id)}
+                                                  >
+                                                    ✖
+                                                  </button>
+                                                </td>
+                                              </tr>
+                                            );
+                                          })}
 
 
-                                          </tbody>
-                                        </table>
-                                      </div>
-
-                                      {show3 == true ? (
+                                        </tbody>
+                                      </table>
+                                      {complaintview.call_status == 'Approval' && complaintview.sub_call_status == 'Customer Approval / Quotation' ? (
                                         <>
                                           <input type="checkbox" name="quotationcheck" checked={quotationcheck} id="quotationcheck" onChange={(e) => setquotationcheck(e.target.checked)} className="" /> <span>Generate Quotation</span>
                                         </>
                                       ) : null}
-
                                     </div>
-                                  ) : null}
+                                  </div>
 
-                                {/* {(complaintview.call_status == 'Closed' || (complaintview.group_code != null && complaintview.group_code != "")) && */}
-                                {show1 == true ? (
+                                }
+
+                                {(complaintview.call_status == 'Closed') &&
                                   <div className=" py-1 my-2">
                                     <div className="row">
                                       <hr />
@@ -2521,10 +2523,9 @@ if(name === 'call_status' && value != 'Closed'){
 
 
                                   </div>
-                                ) : null}
+                                }
 
-                                {/* {(complaintview.call_status == 'Closed') && */}
-                                {show2 == true ? (
+                                {(complaintview.call_status == 'Closed') &&
                                   <>
                                     <div className="my-3 col-lg-6">
                                       <input type="checkbox" onChange={handleChange} name="gascheck" checked={complaintview.gascheck == 'Yes' ? true : false} /> <label>Gas Charges</label>
@@ -2533,6 +2534,7 @@ if(name === 'call_status' && value != 'Closed'){
                                     <div className="my-3 col-lg-6">
                                       <input type="checkbox" onChange={handleChange} name="transportcheck" checked={complaintview.transportcheck == 'Yes' ? true : false} /> <label>Gas Transport Charges</label>
                                     </div>
+
                                     <div className="my-3 col-lg-6">
                                       <input type="checkbox" onChange={handleChange} name="mandays" /> <label>Mandays</label>
                                       {mandays && <input
@@ -2574,7 +2576,7 @@ if(name === 'call_status' && value != 'Closed'){
                                       </select>
                                     </div>
                                   </>
-                                ) : null}
+                                }
 
 
                                 <div className="form-outline mb-2">
@@ -2992,7 +2994,7 @@ if(name === 'call_status' && value != 'Closed'){
                   </div>
 
                   <div className="d-flex justify-content-end py-2">
-                    {/*
+                    {/* 
                     {roleaccess > 2 ?
                       <button
                         type="submit"
@@ -3014,7 +3016,7 @@ if(name === 'call_status' && value != 'Closed'){
                       className="form-control"
                       disabled
                       style={{ fontSize: "14px" }}
-                      value={complaintview.visit_count}
+                      value={updatedata.visit_count}
                       onChange={handleModelChange}
                     >
                       <option value='0'>0</option>
@@ -3039,10 +3041,9 @@ if(name === 'call_status' && value != 'Closed'){
                           // disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
                           disabled
                           style={{ fontSize: "14px" }}
-                          value={groupstatusid}
+                          value={updatedata.group_code}
                           onChange={(e) => {
                             const selectedcode = e.target.value; // Get the id
-                            // const selectedid = groupdefect.find(item => item.Callstatus == selectedname)?.id; // Find the corresponding Callstatus value
                             getdefecttype(selectedcode); // Send the id to fetch sub-call statuses
                             getsitecode(selectedcode); // Send the id to fetch sub-call statuses
                             setgroupstatusid(selectedcode)
@@ -3065,7 +3066,7 @@ if(name === 'call_status' && value != 'Closed'){
                           // disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
                           disabled
                           style={{ fontSize: "14px" }}
-                          value={complaintview.defect_type}
+                          value={updatedata.defect_type}
                           onChange={handleModelChange}
                         >
                           <option value="">Select </option>
@@ -3085,7 +3086,7 @@ if(name === 'call_status' && value != 'Closed'){
                           // disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
                           disabled
                           style={{ fontSize: "14px" }}
-                          value={complaintview.site_defect}
+                          value={updatedata.site_defect}
                           onChange={handleModelChange}
                         >
                           <option value="">Select </option>
@@ -3106,7 +3107,7 @@ if(name === 'call_status' && value != 'Closed'){
                           // }
                           disabled
                           style={{ fontSize: "14px" }}
-                          value={complaintview.activity_code}
+                          value={updatedata.activity_code}
                           onChange={handleModelChange}
                         >
                           <option value="">Select</option>
@@ -3137,71 +3138,10 @@ if(name === 'call_status' && value != 'Closed'){
                 </div>
               </div>
 
-              {(addedSpareParts.length > 0) && <div className="card mb-3">
+              {(uniquesparepart.length > 0) && <div className="card mb-3">
                 <div className="card-body">
 
                   <div className="mt-3" >
-                    {/* {closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? null : <h4 className="pname" style={{ fontSize: "14px" }}>Spare Parts:</h4>} */}
-
-                    {/* {closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? null :
-                      <div className="row align-items-center">
-
-
-                        <div className="col-lg-12">
-                          <Autocomplete
-                            size="small"
-                            options={spare || []}
-                            getOptionLabel={(option) =>
-                              option.article_code + " - " + option.article_description
-                            }
-                            value={
-                              spare.find((part) => part.id === spareid) || null
-                            } // Set the selected value
-                            onChange={(event, newValue) =>
-                              handlesparechange(newValue ? newValue.id : "")
-                            }
-                            disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                label="Select Spare Part"
-                                variant="outlined"
-                                fullWidth
-
-                              />
-                            )}
-                            noOptionsText="No spare parts available"
-
-                          />
-                        </div>
-
-                        <div className="col-lg-9 mt-2">
-                          <input
-                            type="number"
-                            className="form-control"
-                            name="quantity"
-                            placeholder="Qty"
-                            value={quantity}
-                            onChange={(e) => setQuantity(e.target.value)}
-                            disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
-                            min="1"
-                          />
-                        </div>
-
-                        <div className="col-lg-3 mt-2">
-
-                          {roleaccess > 2 ? <button
-                            className="btn btn-primary btn-sm"
-                            disabled={closestatus == "Closed" && subclosestatus == 'Fully' || !quantity || closestatus == 'Cancelled'}
-                            onClick={handleAddSparePart}
-                          >
-                            Add
-                          </button> : null}
-
-                        </div>
-                      </div>
-                    } */}
-
 
                     {/* Display added spare parts */}
                     <div className="mt-3" style={{ overflowX: "scroll" }}>
@@ -3217,59 +3157,44 @@ if(name === 'call_status' && value != 'Closed'){
                         <tbody>
 
 
-                          {(() => {
-                            // Ensure addedSpareParts is always an array
-                            let partsArray = Array.isArray(addedSpareParts)
-                              ? [...addedSpareParts]  // Clone array to prevent reference issues
-                              : Object.values(addedSpareParts || {});
-
-                            // console.log("Processed Parts Array:", JSON.stringify(partsArray, null, 2));
-
-                            // Create a new Set to store unique article codes
-                            let uniqueParts = new Set();
-
-                            return partsArray.length > 0 ? ( // Only render if there's data
-                              partsArray
-                                .filter((part) => {
-                                  if (!part || !part.article_code) return false; // Handle undefined/null entries
-
-                                  if (uniqueParts.has(part.article_code)) {
-                                    return false; // Skip duplicates
-                                  }
-
-                                  uniqueParts.add(part.article_code);
-                                  return true;
-                                })
-                                .map((part) => (
-                                  <tr key={part.id}>
-                                    <td>{part.article_code} - {part.article_description}</td>
-                                    <td>{part.quantity || 0}</td>
-                                    <td>
-                                      <button
-                                        className="btn btn-sm btn-danger"
-                                        style={{ padding: "0.2rem 0.5rem" }}
-                                        disabled={(closestatus === 'Closed' && subclosestatus === 'Fully') || closestatus === 'Cancelled'}
-                                        onClick={() => handleRemoveSparePart(part.id)}
-                                      >
-                                        ✖
-                                      </button>
-                                    </td>
-                                  </tr>
-                                ))
-                            ) : (
-                              <tr>
-                                <td colSpan="3" style={{ textAlign: "center" }}>No Spare Parts Added</td>
+                          {uniquesparepart.map((part) => {
+                            return (
+                              <tr key={part.id}>
+                                <td>{part.article_code} - {part.article_description}</td>
+                                <td>{part.quantity || 0}</td>
+                                <td>
+                                  <button
+                                    className="btn btn-sm btn-danger"
+                                    style={{ padding: "0.2rem 0.5rem" }}
+                                    disabled={closestatus === 'Closed' && subclosestatus === 'Fully' || closestatus === 'Cancelled'}
+                                    onClick={() => handleRemoveSparePart(part.id)}
+                                  >
+                                    ✖
+                                  </button>
+                                </td>
                               </tr>
-                            ); // Show message when no data is available
-                          })()}
-
+                            );
+                          })}
 
 
                         </tbody>
                       </table>
                     </div>
 
-             
+                    {/* {addedSpareParts.length > 0 &&
+                      <div className="d-flex justify-content-end py-2">
+                        <button
+                          type="submit"
+                          className="btn btn-primary"
+                          style={{ fontSize: "14px" }}
+                          onClick={GenerateQuotation}
+                          disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
+                        >
+                          Generate Quotation
+                        </button>
+                      </div>
+                    } */}
+
                   </div>
                 </div>
               </div>}
