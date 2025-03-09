@@ -4484,23 +4484,23 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
         .query(complaintSQL);
 
 
-      if (1 === 1) {
+      // if (1 === 1) {
 
-        const username = process.env.TATA_USER;
-        const password = process.env.PASSWORD;
-        const temp_id = '1207173530305447084'
+      //   const username = process.env.TATA_USER;
+      //   const password = process.env.PASSWORD;
+      //   const temp_id = '1207173530305447084'
 
-        try {
-          const tokenResponse = await axios.get(
-            `https://smsgw.tatatel.co.in:9095/campaignService/campaigns/qs?recipient=${mobile}&dr=false&msg=Dear Customer, Greetings from Liebherr! Your Ticket Number is ${ticket_no}. Please share OTP ${otp} with the engineer once the ticket is resolved.&user=${username}&pswd=${password}&sender=LICARE&PE_ID=1201159257274643113&Template_ID=${temp_id}`
-          );
+      //   try {
+      //     const tokenResponse = await axios.get(
+      //       `https://smsgw.tatatel.co.in:9095/campaignService/campaigns/qs?recipient=${mobile}&dr=false&msg=Dear Customer, Greetings from Liebherr! Your Ticket Number is ${ticket_no}. Please share OTP ${otp} with the engineer once the ticket is resolved.&user=${username}&pswd=${password}&sender=LICARE&PE_ID=1201159257274643113&Template_ID=${temp_id}`
+      //     );
 
-          console.log(tokenResponse.data)
+      //     console.log(tokenResponse.data)
 
-        } catch (error) {
-          console.error('Error hitting SMS API (token):', error.response?.data || error.message);
-        }
-      }
+      //   } catch (error) {
+      //     console.error('Error hitting SMS API (token):', error.response?.data || error.message);
+      //   }
+      // }
 
 
 
@@ -10542,7 +10542,24 @@ app.post(`/add_quotation`, authenticateToken, async (req, res) => {
 
   } catch (error) {
     console.error("Error inserting data:", error);
-    res.status(500).json({ message: "Error inserting data", error });
+
+    // Insert error into `error_log` table
+    const errorLogQuery = `
+      INSERT INTO error_log (api_name, error_desc, created_date)
+      VALUES (@api_name, @error_desc, @created_date)
+    `;
+
+    try {
+      await pool.request()
+        .input('api_name', sql.NVarChar, '/add_quotation')
+        .input('error_desc', sql.NVarChar, error.message)
+        .input('created_date', sql.NVarChar, new Date().toISOString())
+        .query(errorLogQuery);
+    } catch (logError) {
+      console.error("Error logging to error_log:", logError);
+    }
+
+    res.status(500).json({ message: "Error inserting data", error: error.message });
   }
 });
 
