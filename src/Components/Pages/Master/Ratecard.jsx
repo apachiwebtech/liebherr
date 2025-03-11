@@ -253,6 +253,7 @@ const Ratecard = () => {
 
       "RateCardMatrix": user.Ratecard,
       "CspCode": user.csp_code,
+      "call_type" : user.call_type,
       "Sub_Call_Type": user.sub_call_type,
       "Warranty_Type": user.warranty_type,
       "ItemCode": user.item_code,

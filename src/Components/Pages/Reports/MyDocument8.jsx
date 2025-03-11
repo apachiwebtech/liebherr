@@ -152,6 +152,13 @@ const MyDocument8 = ({ data, spare , csp}) => {
     const grandtotal = spare.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
 
+    const qfor = spare.map((item) => item.article_description).join(', ')
+
+
+    console.log(data,csp,spare)
+
+
+
 
 
 
@@ -301,7 +308,7 @@ const MyDocument8 = ({ data, spare , csp}) => {
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Quotation for : </Text>
                         </View>
                         <View style={[styles.tableCol, { width: '80%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{qfor}</Text>
 
                         </View>
 
@@ -315,9 +322,15 @@ const MyDocument8 = ({ data, spare , csp}) => {
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Model No : </Text>
                         </View>
                         <View style={[styles.tableCol, { width: '80%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.ModelNumber}</Text>
 
                         </View>
+                        <View style={[styles.tableCol, { width: '80%' }]}>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Serial No : {data.serial_no}</Text>
+
+
+                        </View>
+            
 
 
                     </View>
@@ -476,7 +489,7 @@ const MyDocument8 = ({ data, spare , csp}) => {
                     <View style={[{ width: '100%', }]}>
 
                         <Text style={{ fontSize: '10px', marginTop: 10, color: '#000', backgroundColor: '#D3D3D3' }}>Should you have any enquiries concerning this quote, please contact 7038 100 400 or write to customercare.lhi@liebherr.com</Text>
-                        <Text style={{ fontSize: '10px', marginTop: 10, color: '#000', backgroundColor: '#D3D3D3' }}>This is a record of Quotation & Kindly ask a VALID TAX INVOICE against any payment made.</Text>
+                        <Text style={{ fontSize: '10px', marginTop: 0, color: '#000', backgroundColor: '#D3D3D3' }}>This is a record of Quotation & Kindly ask a VALID TAX INVOICE against any payment made.</Text>
 
                     </View>
                 </View>

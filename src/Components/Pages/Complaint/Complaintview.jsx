@@ -342,6 +342,33 @@ export function Complaintview(params) {
 
   }
 
+  async function getHelplhi(params) {
+
+    try {
+      const res = await axiosInstance.get(`${Base_Url}/gethelplhi`, {
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+
+      });
+
+
+      if (res.data && Array.isArray(res.data)) {
+        setEngineer(res.data);
+      } else {
+        console.error("Expected array from API but got:", typeof res.data);
+        setEngineer([]); // Set empty array as fallback
+      }
+
+
+    } catch (error) {
+      console.error("Error fetching engineers:", error);
+      setEngineer([]); // Set empty array on error
+    }
+
+
+  }
+
 
   async function getSpare(params) {
 
@@ -1448,13 +1475,24 @@ export function Complaintview(params) {
 
   }, [complaintid, complaintview.ticket_no, complaintview.customer_mobile]);
 
+
+  console.log(complaintview.ticket_type , "%%^&&^")
+
   useEffect(() => {
     if (engtype == "Franchisee") {
 
       getEngineer();
     } else if (engtype == "LHI") {
 
-      getLHIEngineer();
+      if(complaintview.ticket_type == 'HELPDESK'){
+
+        getHelplhi()
+
+      }else{
+
+        getLHIEngineer();
+      }
+
 
     } else {
       setEngineer([])

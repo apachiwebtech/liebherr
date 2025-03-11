@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const sql = require("mssql");
 const app = express();
-const PORT = process.env.PORT || 8081;
+const PORT = process.env.PORT;
 const multer = require("multer");
 const bodyParser = require("body-parser");
 const path = require("path");
@@ -133,6 +133,14 @@ app.get("/", async (req, res) => {
       databaseStatus: 'Database connection error' 
     });
   }
+});
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'zeliant997@gmail.com', // Replace with your email
+    pass: 'zazb zhkl khsn jehv', // Replace with your email password or app password
+  },
 });
 
 app.get('/send-otp', authenticateToken, async (req, res) => {
@@ -3857,6 +3865,9 @@ app.get("/getAttachment2Details/:ticket_no",
       ORDER BY created_date DESC
     `;
 
+
+    console.log(sql, "%%%")
+
       // Execute the query
       const result = await pool.request().query(sql);
 
@@ -3893,6 +3904,28 @@ app.get("/getcvengineer/:pincode/:msp/:csp", authenticateToken, async (req, res)
     return res.status(500).json({ error: "Database error occurred" });
   }
 });
+
+
+
+app.get("/gethelplhi", authenticateToken, async (req, res) => {
+
+  try {
+    const pool = await poolPromise;
+
+    const sql = `select Lhiuser as title , Usercode as engineer_id from lhi_user where assigncsp like '%9999999%' and deleted = '0' and status = '1'`
+    console.log(sql)
+    // Execute the query
+    const result = await pool.request().query(sql);
+
+    // Return the entire array of data
+    return res.json(result.recordset);
+
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred" });
+  }
+});
+
 
 app.get("/getlhiengineer", authenticateToken, async (req, res) => {
 
@@ -8849,7 +8882,7 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
 
     const getcsp = `select * from lhi_user where Usercode = '${licare_code}'`
 
-    console.log(getcsp, "csp")
+
 
     const getcspresilt = await pool.request().query(getcsp)
 
@@ -9044,7 +9077,6 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
 
 
 
-    console.log(sql)
 
 
     // Execute queries
@@ -10615,7 +10647,7 @@ app.post('/getquotedetails', authenticateToken, async (req, res) => {
 
   try {
     // Use parameterized query to prevent SQL Injection
-    const query = `select aq.* , ct.address,ct.customer_mobile,ct.customer_email , ct.assigned_to from  awt_quotation as aq left join complaint_ticket as ct on ct.ticket_no = aq.ticketId WHERE aq.id = @quote_id`;
+    const query = `select aq.* , ct.address,ct.customer_mobile,ct.customer_email , ct.assigned_to , ct.serial_no from  awt_quotation as aq left join complaint_ticket as ct on ct.ticket_no = aq.ticketId WHERE aq.id = @quote_id`;
 
 
 
@@ -13286,29 +13318,40 @@ app.post("/getmodelno", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
-    // Parameterized query with a limit
     const sql = `
-    SELECT TOP 20 id, ModelNumber
-    FROM Spare_parts
-    WHERE ModelNumber LIKE @param AND deleted = 0
-    ORDER BY ModelNumber;
+      SELECT TOP 20 id, ModelNumber
+      FROM Spare_parts
+      WHERE ModelNumber LIKE @param AND deleted = 0
+      ORDER BY ModelNumber;
     `;
 
     const result = await pool.request()
-      .input('param', `%${param}%`)
+      .input("param", `%${param}%`)
       .query(sql);
 
     if (result.recordset.length === 0) {
       return res.status(404).json({ message: "No results found" });
     }
+
+    // Filter out duplicate ModelNumbers
+    const uniqueRecords = [];
+    const modelNumbers = new Set();
+
+    result.recordset.forEach((item) => {
+      if (!modelNumbers.has(item.ModelNumber)) {
+        modelNumbers.add(item.ModelNumber);
+        uniqueRecords.push(item);
+      }
+    });
+
     // Convert data to JSON string and encrypt it
-    const jsonData = JSON.stringify(result.recordset);
+    const jsonData = JSON.stringify(uniqueRecords);
     const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
 
     return res.json({ encryptedData });
   } catch (err) {
     console.error("Error fetching data:", err);
-    return res.status(500).json({ message: "Internal Server Error", error: err });
+    return res.status(500).json({ message: "Internal Server Error", error: err.message });
   }
 });
 

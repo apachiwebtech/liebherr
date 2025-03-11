@@ -177,8 +177,8 @@ export function Registercomplaint(params) {
     requested_by: "",
     requested_email: "",
     requested_mobile: "",
-    class_city :"",
-    mother_branch : ""
+    class_city: "",
+    mother_branch: ""
   })
 
   const handleDateChange = (date) => {
@@ -194,12 +194,12 @@ export function Registercomplaint(params) {
   const handleDateChange2 = (date) => {
     if (date) {
       const formattedDate = formatDate(date);
-  
+
       setValue((prevState) => ({
         ...prevState, // Preserve existing values
         complaint_date: formattedDate  // Update only complaint_date
       }));
-  
+
       setDate(formattedDate);  // Set formatted date correctly
     }
   };
@@ -210,7 +210,7 @@ export function Registercomplaint(params) {
       // Ensure value is in a recognized format
       const purchase_date = new Date(value);
 
-      console.log(value,"RRR")
+      console.log(purchase_date , "Date")
 
       if (isNaN(purchase_date)) {
         throw new Error("Invalid date format");
@@ -224,7 +224,7 @@ export function Registercomplaint(params) {
 
       // Get current date and subtract one day
       const currentDate = new Date();
-      currentDate.setDate(currentDate.getDate() );
+      currentDate.setDate(currentDate.getDate());
       const currentDateMinusOneDay = currentDate.toISOString().split('T')[0];
 
       // Compare lastDate and currentDateMinusOneDay
@@ -252,16 +252,16 @@ export function Registercomplaint(params) {
     const newErrors = { ...errors };
 
 
-    if (!value.customer_name ) {
+    if (!value.customer_name) {
       isValid = false;
       newErrors.customer_name = "Name is required";
     }
 
-    if (!value.salutation ) {
+    if (!value.salutation) {
       isValid = false;
       newErrors.salutation = "Salutation is required";
     }
-    if (!value.contact_person ) {
+    if (!value.contact_person) {
       isValid = false;
       newErrors.contact_person = "Contact Person is required";
     }
@@ -269,7 +269,7 @@ export function Registercomplaint(params) {
 
     const validateMobile = (mobile) => mobileRegex.test(mobile);
 
-    if (!value.mobile ) {
+    if (!value.mobile) {
       isValid = false;
       newErrors.mobile = "Mobile is required";
     } else if (value.mobile && !validateMobile(value.mobile)) {
@@ -288,27 +288,27 @@ export function Registercomplaint(params) {
     }
 
 
-    if (!value.address ) {
+    if (!value.address) {
       isValid = false;
       newErrors.address = "Address is required";
     }
-    if (!value.pincode ) {
+    if (!value.pincode) {
       isValid = false;
       newErrors.pincode = "Pincode is required";
     }
-    if (!value.mode_of_contact ) {
+    if (!value.mode_of_contact) {
       isValid = false;
       newErrors.mode_of_contact = "This is required";
     }
-    if (!value.ticket_type ) {
+    if (!value.ticket_type) {
       isValid = false;
       newErrors.ticket_type = "Ticket is required";
     }
-    if (!value.cust_type ) {
+    if (!value.cust_type) {
       isValid = false;
       newErrors.cust_type = "Type is required";
     }
-    if (!value.call_charge ) {
+    if (!value.call_charge) {
       isValid = false;
       newErrors.call_charge = "This is required";
     }
@@ -318,7 +318,7 @@ export function Registercomplaint(params) {
       newErrors.requested_mobile = "Please enter a valid 10-digit mobile number.";
     }
 
-    if (!value.classification ) {
+    if (!value.classification) {
       isValid = false;
       newErrors.classification = "Classification is required";
     }
@@ -636,7 +636,7 @@ export function Registercomplaint(params) {
             call_charge: res.data[0].call_charges,
             purchase_date: res.data[0].purchase_date || "",
             serial: res.data[0].serial_no || "",
-            master_service_partner: res.data[0].service_partner || "",
+            master_service_partner: res.data[0].sevice_partner || "",
             child_service_partner: res.data[0].child_service_partner || "",
             model: res.data[0].ModelNumber,
             msp: res.data[0].franchisee,
@@ -760,6 +760,8 @@ export function Registercomplaint(params) {
 
   }
 
+  console.log(value.customer_id, "Customer_id")
+
 
 
   const notify = () => toast.success('Data Submitted..');
@@ -819,7 +821,7 @@ export function Registercomplaint(params) {
         mwhatsapp: String(checkboxes.mwhatsapp),
         awhatsapp: String(checkboxes.awhatsaap),
         ticket_id: String(ticketid),
-        mother_branch : value.mother_branch || ''
+        mother_branch: value.mother_branch || ''
       };
 
 
@@ -843,7 +845,7 @@ export function Registercomplaint(params) {
               setTimeout(() => {
                 navigate('/complaintlist');
               }, 300);
-            }else{
+            } else {
               alert(res.data.message)
             }
           })
@@ -903,7 +905,7 @@ export function Registercomplaint(params) {
       mwhatsapp: checkboxes.mwhatsapp || 0,
       awhatsapp: checkboxes.awhatsaap || 0,
       ticket_no: Comp_id,
-      mother_branch : value.mother_branch || ''
+      mother_branch: value.mother_branch || ''
     };
 
 
@@ -916,10 +918,12 @@ export function Registercomplaint(params) {
       },
     })
       .then((res) => {
-        if (res.data) {
-          notify();
-
-        }
+        handleAttachment2Submit(ticketno)
+        alert(`Ticket is updated`)
+        notify();
+        setTimeout(() => {
+          navigate('/complaintlist');
+        }, 300);
       })
       .catch(error => {
         console.error("Error submitting form:", error);
@@ -1060,8 +1064,8 @@ export function Registercomplaint(params) {
             child_service_partner: response.data[0].cspname,
             csp: response.data[0].csp,
             msp: response.data[0].msp,
-            class_city : response.data[0].class_city,
-            mother_branch : response.data[0].mother_branch
+            class_city: response.data[0].class_city,
+            mother_branch: response.data[0].mother_branch
           })
 
         }
@@ -1081,24 +1085,24 @@ export function Registercomplaint(params) {
 
     setValue(
       {
-        ...value ,
-        model:  "", // Default to an empty string if null/undefined
-        sales_partner:  "",
-        classification:  "",
-        salutation:  "",
-        customer_name:  "",
-        cust_type:  "",
-        mobile:  "",
+        ...value,
+        model: "", // Default to an empty string if null/undefined
+        sales_partner: "",
+        classification: "",
+        salutation: "",
+        customer_name: "",
+        cust_type: "",
+        mobile: "",
         alt_mobile: "",
         email: "",
-        address:  "",
+        address: "",
         customer_id: "",
-        pincode :  '',
-        state : '',
-        city : '',
-        msp : '',
-        csp : '',
-        area : "",
+        pincode: '',
+        state: '',
+        city: '',
+        msp: '',
+        csp: '',
+        area: "",
 
 
       }
@@ -1116,16 +1120,24 @@ export function Registercomplaint(params) {
       );
 
       setClassification(response.data[0].customerClassification)
-      
+
       const purchase_date = response.data[0].purchase_date
-      
+
       if (purchase_date) {
         setpurchseHide(response.data[0].purchase_date)
         const date = new Date(purchase_date);
         // Format the date as YYYY-MM-DD
         const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
+        const date2 = new Date(purchase_date);
+    
+        // Set time to midnight (00:00:00)
+        date2.setHours(0, 0, 0, 0);
+
+
+        const formattedDate2 = date2.toString(); 
         setpurchase_data(formattedDate);
-        getDateAfterOneYear(formattedDate)
+        getDateAfterOneYear(formattedDate2)
       } else {
         setpurchase_data('');  // or handle it accordingly (e.g., leave it as null)
       }
@@ -1148,7 +1160,7 @@ export function Registercomplaint(params) {
           email: data.email || "",
           address: data.address || "",
           customer_id: data.CustomerID || "",
-          pincode : data.pincode || ''
+          pincode: data.pincode || ''
         });
       }
 
@@ -1180,7 +1192,7 @@ export function Registercomplaint(params) {
     //   city : '',
     //   area : '',
     // })
-    
+
     try {
       const response = await axiosInstance.get(
         `${Base_Url}/fetchfrommobile/${mobile || value.mobile}`, {
@@ -1205,9 +1217,9 @@ export function Registercomplaint(params) {
           email: data.email || "",
           address: data.address || "",
           customer_id: data.customer_id || "",
-          pincode : data.pincode_id || '',
-          
-      }));
+          pincode: data.pincode_id || '',
+
+        }));
       }
 
 
@@ -1234,7 +1246,7 @@ export function Registercomplaint(params) {
     }
 
 
-  }, [value.pincode, value.classification ,value.ticket_type])
+  }, [value.pincode, value.classification, value.ticket_type])
 
 
 
@@ -1249,7 +1261,7 @@ export function Registercomplaint(params) {
       contact_person: searchdata.contact_person || '',
       email: searchdata.email || '',
       mobile: searchdata.mobile || '',
-      cust_id: String(searchdata.id) || '',
+      cust_id: String(searchdata.customer_id) || '',
       serial_no: String(searchdata.serial_no) || '',
       state: searchdata.state || '',
       city: searchdata.city || '',
@@ -1302,7 +1314,7 @@ export function Registercomplaint(params) {
             ...prevState, // Spread existing state
             mobile: customerInfo.mobileno,
             cust_type: customerInfo.customer_type,
-            salutation : customerInfo.salutation
+            salutation: customerInfo.salutation
           }));
 
         } else {
@@ -1315,6 +1327,7 @@ export function Registercomplaint(params) {
     setValue({
       model: add_new_ticketdata.ModelNumber,
       customer_name: add_new_ticketdata.customer_name,
+      customer_id: add_new_ticketdata.customer_id,
       state: add_new_ticketdata.state,
       city: add_new_ticketdata.city,
       area: add_new_ticketdata.area,
@@ -1605,7 +1618,7 @@ export function Registercomplaint(params) {
                                   ...prevState,
                                   model: ""
                                 }));
-                              } 
+                              }
                             }}
                             onKeyDown={handleKeyDown}
                             className="form-control"
@@ -1650,25 +1663,25 @@ export function Registercomplaint(params) {
                           {errors.purchase_date && <span style={{ fontSize: "12px" }} className="text-danger">{errors.purchase_date}</span>}
                         </div> : <div>{purchase_data == (null || '') ? null : formatpurDate(purchase_data)}</div>} */}
 
-                        {!p_date ? 
+                      {!p_date ?
                         <div className="mb-3">
-                        <DatePicker
-                          selected={purchase_data}
-                          onChange={(date) =>{
-                            handleDateChange(date)
-                            getDateAfterOneYear(date);
-                           }}
-                          dateFormat="dd-MM-yyyy"
-                          placeholderText="DD-MM-YYYY"
-                          className='form-control'
-                          name="purchase_date"
-                          aria-describedby="Anidate"
-                          disabled={purchasehide == '' ? false : true}
-                          maxDate={new Date().toISOString().split("T")[0]}
-                        /> 
-                           {errors.purchase_date && <span style={{ fontSize: "12px" }} className="text-danger">{errors.purchase_date}</span>}
-                        </div>: <div>{purchase_data == (null || '') ? null : formatpurDate(purchase_data)}</div>}
-                        
+                          <DatePicker
+                            selected={purchase_data}
+                            onChange={(date) => {
+                              handleDateChange(date)
+                              getDateAfterOneYear(date);
+                            }}
+                            dateFormat="dd-MM-yyyy"
+                            placeholderText="DD-MM-YYYY"
+                            className='form-control'
+                            name="purchase_date"
+                            aria-describedby="Anidate"
+                            disabled={purchasehide == '' ? false : true}
+                            maxDate={new Date().toISOString().split("T")[0]}
+                          />
+                          {errors.purchase_date && <span style={{ fontSize: "12px" }} className="text-danger">{errors.purchase_date}</span>}
+                        </div> : <div>{purchase_data == (null || '') ? null : formatpurDate(purchase_data)}</div>}
+
 
 
                     </div>
@@ -1769,20 +1782,20 @@ export function Registercomplaint(params) {
                         {errors.email && <span style={{ fontSize: "12px" }} className="text-danger">{errors.email}</span>}
                       </div>
                     </div>
-                    
+
                     <div className="col-md-4">
                       <div className="mb-3">
                         <label htmlFor="exampleFormControlInput1" className="form-label">Mobile No.  <span className="text-danger">*</span>
-                        <input type="checkbox" name='mwhatsapp' onChange={oncheckchange} checked={checkboxes.mwhatsapp === 1} />Whatsapp</label>
+                          <input type="checkbox" name='mwhatsapp' onChange={oncheckchange} checked={checkboxes.mwhatsapp === 1} />Whatsapp</label>
                         <input type="number" onKeyDown={handleKeyDown} value={value.mobile} name="mobile" onChange={(e) => {
                           if (e.target.value.length <= 10) {
                             onHandleChange(e);
                           }
-                        }}  onBlur={(e) => {
+                        }} onBlur={(e) => {
                           if (e.target.value.length === 10) {
                             // Call your API function here
                             fetchfrommobile()
-                          } 
+                          }
                         }} className="form-control" placeholder="Enter Mobile" />
                         {errors.mobile && <span style={{ fontSize: "12px" }} className="text-danger">{errors.mobile}</span>}
                       </div>
@@ -1802,7 +1815,7 @@ export function Registercomplaint(params) {
                     <div className="col-md-4">
                       <div className="mb-3">
                         <label className="form-label">Customer Classification <span className="text-danger">*</span></label>
-                        <select className="form-control" onChange={onHandleChange} value={value.classification} name="classification" disabled={!value.classification || value.serial == undefined || value.serial == ''  ? false : true}>
+                        <select className="form-control" onChange={onHandleChange} value={value.classification} name="classification" disabled={!value.classification || value.serial == undefined || value.serial == '' ? false : true}>
                           <option value="">Select</option>
                           <option value="Consumer">Consumer</option>
                           <option value="Import">Import</option>
@@ -2059,7 +2072,7 @@ export function Registercomplaint(params) {
                       </div>
                     </div>
 
-          
+
                     <div className="col-md-4">
                       <div className="mb-3">
                         <label className="form-label">Priority<span className="text-danger">*</span></label>
