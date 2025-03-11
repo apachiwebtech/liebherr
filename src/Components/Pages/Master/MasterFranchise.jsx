@@ -36,6 +36,13 @@ const MasterFranchise = (params) => {
   const [duplicateError, setDuplicateError] = useState(""); // State to track duplicate error
   const token = localStorage.getItem("token"); // Get token from localStorage
   const created_by = localStorage.getItem("id");
+  const [locations, setlocations] = useState({
+    country: '',
+    region: '',
+    state: '',
+    district: '',
+    city: '',
+  });
   const [formData, setFormData] = useState({
     title: "",
     password: "",
@@ -67,24 +74,29 @@ const MasterFranchise = (params) => {
 
   });
 
-  
-       try{
-        masterid = masterid.replace(/-/g, '+').replace(/_/g, '/');
-          const bytes = CryptoJS.AES.decrypt(masterid, secretKey);
-          const decrypted = bytes.toString(CryptoJS.enc.Utf8);
-          masterid = parseInt(decrypted, 10)
-      }catch(error){
-          console.log("Error".error)
-      }
+
+  try {
+    masterid = masterid.replace(/-/g, '+').replace(/_/g, '/');
+    const bytes = CryptoJS.AES.decrypt(masterid, secretKey);
+    const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+    masterid = parseInt(decrypted, 10)
+  } catch (error) {
+    console.log("Error".error)
+  }
 
   const fetchUsers = async () => {
     try {
-      const response = await axiosInstance.get(`${Base_Url}/getfranchisedata`,{
+      const response = await axiosInstance.get(`${Base_Url}/getfranchisedata`, {
         headers: {
-           Authorization: token, // Send token in headers
-         },
-       });
-      console.log(response.data);
+          Authorization: token, // Send token in headers
+        },
+      });
+
+      const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+      const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+      const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+      console.log(decryptedData);
+      setUsers(decryptedData);
       setUsers(response.data);
       setFilteredUsers(response.data);
     } catch (error) {
@@ -100,94 +112,16 @@ const MasterFranchise = (params) => {
       console.error(errorMessage, error);
     }
   };
-  const fetchcountries = async () => {
-    try {
-      const response = await axiosInstance.get(`${Base_Url}/getcountries`,{
-        headers: {
-           Authorization: token, // Send token in headers
-         },
-       });
-      setCountries(response.data);
-    } catch (error) {
-      console.error("Error fetching Countries:", error);
-    }
-  };
 
-  //region
-  const fetchregion = async (country_id) => {
-    try {
-      const response = await axiosInstance.get(`${Base_Url}/getregionscity/${country_id}`,{
-        headers: {
-           Authorization: token, // Send token in headers
-         },
-       });
-      setRegions(response.data);
-    } catch (error) {
-      console.error("Error fetching Regions:", error);
-    }
-  };
-
-  //geostate
-  const fetchState = async (region_id) => {
-    try {
-      const response = await axiosInstance.get(`${Base_Url}/getgeostatescity/${region_id}`,{
-        headers: {
-           Authorization: token, // Send token in headers
-         },
-       });
-      setState(response.data);
-    } catch (error) {
-      console.error("Error fetching Geo State:", error);
-    }
-  };
-
-  const fetchdistricts = async (geostateID) => {
-    try {
-      const response = await axiosInstance.get(`${Base_Url}/getdistrictcity/${geostateID}`,{
-        headers: {
-           Authorization: token, // Send token in headers
-         },
-       });
-      setdistricts(response.data);
-    } catch (error) {
-      console.error("Error fetching districts:", error);
-    }
-  };
-
-  const fetchCity = async (area_id) => {
-    try {
-      const response = await axiosInstance.get(`${Base_Url}/getgeocities_p/${area_id}`,{
-        headers: {
-           Authorization: token, // Send token in headers
-         },
-       });
-      setCity(response.data);
-    } catch (error) {
-      console.error("Error fetching City:", error);
-    }
-  };
-
-  const fetchpincode = async (cityid) => {
-    try {
-      const response = await axiosInstance.get(`${Base_Url}/getpincodebyid/${cityid}`,{
-        headers: {
-           Authorization: token, // Send token in headers
-         },
-       });
-      setPincode(response.data);
-    } catch (error) {
-      console.error("Error fetching pincode:", error);
-    }
-  };
 
   const fetchFranchisemasterpopulate = async (masterid) => {
 
     try {
-      const response = await axiosInstance.get(`${Base_Url}/getmasterfranchisepopulate/${masterid}`,{
+      const response = await axiosInstance.get(`${Base_Url}/getmasterfranchisepopulate/${masterid}`, {
         headers: {
-           Authorization: token, // Send token in headers
-         },
-       });
+          Authorization: token, // Send token in headers
+        },
+      });
       setFormData({
         ...response.data[0],
         // Rename keys to match your formData structure
@@ -218,24 +152,17 @@ const MasterFranchise = (params) => {
         withliebher: response.data[0].withliebher
       });
 
+      setlocations({
+        country: response.data[0].country_id,
+        region: response.data[0].region_id,
+        state: response.data[0].geostate_id,
+        district: response.data[0].area_id,
+        city: response.data[0].geocity_id
+      });
+
 
       setIsEdit(true);
 
-      if (response.data[0].country_id) {
-        fetchregion(response.data[0].country_id);
-      }
-      if (response.data[0].region_id) {
-        fetchState(response.data[0].region_id);
-      }
-      if (response.data[0].geostate_id) {
-        fetchdistricts(response.data[0].geostate_id);
-      }
-      if (response.data[0].area_id) {
-        fetchCity(response.data[0].area_id);
-      }
-      if (response.data[0].geocity_id) {
-        fetchpincode(response.data[0].geocity_id);
-      }
 
     } catch (error) {
       console.error('Error fetching franchisemasterdata:', error);
@@ -245,7 +172,6 @@ const MasterFranchise = (params) => {
 
   useEffect(() => {
     fetchUsers();
-    fetchcountries();
 
     if (masterid != 0) {
       fetchFranchisemasterpopulate(masterid);
@@ -256,30 +182,54 @@ const MasterFranchise = (params) => {
   }, []);
 
   const handleChange = (e) => {
-   const { name, value } = e.target;
-   setFormData(prevState => ({
-    ...prevState,
-    [name]: value
-  }));
-
+    const { name, value } = e.target;
+    setFormData(prevState => ({
+      ...prevState,
+      [name]: value
+    }));
     switch (name) {
-      case "country_id":
-        fetchregion(value);
-        break;
-      case "region_id":
-        fetchState(value);
-        break;
-      case "state":
-        fetchdistricts(value);
-        break;
-      case "area":
-        fetchCity(value);
-        break;
-      case "city":
-        fetchpincode(value);
+      case "pincode_id":
+        fetchlocations(value);
         break;
       default:
         break;
+    }
+
+  };
+
+
+  const fetchlocations = async (pincode) => {
+    try {
+      const response = await axiosInstance.get(
+        `${Base_Url}/getdatafrompincode/${pincode}`, {
+        headers: {
+          Authorization: token,
+        },
+      }
+      );
+
+      if (response.data && response.data[0]) {
+        // Update locations display state
+        setlocations({
+          region: response.data[0].region,
+          state: response.data[0].state,
+          district: response.data[0].district,
+          city: response.data[0].city,
+          country: response.data[0].country
+        });
+
+        // Update formData with the new location values
+        setFormData(prevState => ({
+          ...prevState,
+          country_id: response.data[0].country,
+          region_id: response.data[0].region,
+          state: response.data[0].state,
+          area: response.data[0].district,
+          city: response.data[0].city,
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching complaint details:", error);
     }
   };
 
@@ -356,11 +306,11 @@ const MasterFranchise = (params) => {
         if (isEdit) {
           // For update, include duplicate check
           await axios
-            .post(`${Base_Url}/putfranchisedata`, { ...hashedFormData, created_by },{
+            .post(`${Base_Url}/putfranchisedata`, { ...hashedFormData, created_by }, {
               headers: {
-                 Authorization: token, // Send token in headers
-               },
-             })
+                Authorization: token, // Send token in headers
+              },
+            })
             .then((response) => {
               setFormData({
                 title: "",
@@ -404,11 +354,11 @@ const MasterFranchise = (params) => {
         } else {
           // For insert, include duplicate check
           await axios
-            .post(`${Base_Url}/postfranchisedata`, { ...formData, created_by },{
+            .post(`${Base_Url}/postfranchisedata`, { ...formData, created_by }, {
               headers: {
-                 Authorization: token, // Send token in headers
-               },
-             })
+                Authorization: token, // Send token in headers
+              },
+            })
             .then((response) => {
               //const newpassword = md5(formData.password)
 
@@ -461,32 +411,32 @@ const MasterFranchise = (params) => {
   const indexOfFirstUser = indexOfLastUser - itemsPerPage;
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
-   // Role Right 
-    
-    
-     const Decrypt = (encrypted) => {
-      encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
-      const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
-      return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
-    };
-  
-    const storedEncryptedRole = localStorage.getItem("Userrole");
-    const decryptedRole = Decrypt(storedEncryptedRole);
-  
-    const roledata = {
-      role: decryptedRole,
-      pageid: String(19)
-    }
-  
-    const dispatch = useDispatch()
-    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
-  
-  
-    useEffect(() => {
-      dispatch(getRoleData(roledata))
-    }, [])
-  
-    // Role Right End
+  // Role Right 
+
+
+  const Decrypt = (encrypted) => {
+    encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+    const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+    return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+  };
+
+  const storedEncryptedRole = localStorage.getItem("Userrole");
+  const decryptedRole = Decrypt(storedEncryptedRole);
+
+  const roledata = {
+    role: decryptedRole,
+    pageid: String(19)
+  }
+
+  const dispatch = useDispatch()
+  const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+
+
+  useEffect(() => {
+    dispatch(getRoleData(roledata))
+  }, [])
+
+  // Role Right End
 
   return (
 
@@ -497,7 +447,7 @@ const MasterFranchise = (params) => {
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
       )}
-    {roleaccess > 1 ?    <div className="row mp0">
+      {roleaccess > 1 ? <div className="row mp0">
         <div className="col-12">
           <div className="card mb-3 tab_box">
             <div
@@ -613,7 +563,7 @@ const MasterFranchise = (params) => {
                       >
                         Master Service Partner (Mobile Number)<span className="text-danger">*</span>
                       </label>
-                      <input  disabled
+                      <input disabled
                         type="tel" // Changed type to 'tel' for mobile number input
                         className="form-control"
                         name="mobile_no"
@@ -678,116 +628,76 @@ const MasterFranchise = (params) => {
                       )}
                       {/* Show duplicate error */}
                     </div>
-                    <div className="col-md-3">
-                      <label htmlFor="country" className="input-field">
-                        Country<span className="text-danger">*</span>
-                      </label>
-                      <select disabled
-                        id="country"
+                    <div className="col-md-3" hidden>
+                      <label className="input-field">Country</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={locations.country}
                         name="country_id"
-                        className="form-select"
-                        aria-label=".form-select-lg example"
-                        value={formData.country_id}
                         onChange={handleChange}
-                      >
-                        <option value="">Select Country</option>
-                        {countries.map((country) => (
-                          <option key={country.id} value={country.id}>
-                            {country.title}
-                          </option>
-                        ))}
-                      </select>
-                      {errors.country_id && (
-                        <small className="text-danger">
-                          {errors.country_id}
-                        </small>
-                      )}
+                        placeholder="Country"
+                        readOnly
+                      />
+                      {errors.country_id && <small className="text-danger">{errors.country_id}</small>}
                     </div>
-                    <div className="col-md-3 mb-3">
-                      <label htmlFor="region" className="input-field">
-                        Region<span className="text-danger">*</span>
-                      </label>
-                      <select disabled
-                        id="region"
+                    <div className="col-md-3">
+                      <label className="input-field">Region</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={locations.region}
                         name="region_id"
-                        className="form-select"
-                        aria-label=".form-select-lg example"
-                        value={formData.region_id}
                         onChange={handleChange}
-                      >
-                        <option value="">Select Region</option>
-                        {regions.map((region) => (
-                          <option key={region.id} value={region.id}>
-                            {region.title}
-                          </option>
-                        ))}
-                      </select>
-                      {errors.region_id && (
-                        <small className="text-danger">
-                          {errors.region_id}
-                        </small>
-                      )}
+                        placeholder="Region"
+                        readOnly
+                      />
+                      {errors.region_id && <small className="text-danger">{errors.region_id}</small>}
                     </div>
 
                     {/* Geo State Dropdown */}
                     <div className="col-md-3">
-                      <label htmlFor="geostate" className="input-field">
-                        Geo State<span className="text-danger">*</span>
-                      </label>
-                      <select  disabled
-                      className="form-select" value={formData.state} name="state" onChange={handleChange}>
-                        <option value="">Select State</option>
-                        {state.map((item) => {
-                          return (
-
-                            <option value={item.id}>{item.title}</option>
-                          )
-                        })}
-                      </select>
-                      {errors.state && (
-                        <small className="text-danger">
-                          {errors.state}
-                        </small>
-                      )}
+                      <label className="input-field">Geo State</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={locations.state}
+                        name="state"
+                        onChange={handleChange}
+                        placeholder="State"
+                        readOnly
+                      />
+                      {errors.state && <small className="text-danger">{errors.state}</small>}
                     </div>
 
                     {/* Geo District Dropdown **/}
                     <div className="col-md-3">
-                      <label htmlFor="area" className="input-field">
-                        District<span className="text-danger">*</span>
-                      </label>
-
-                      <select disabled className="form-select" onChange={handleChange} name="area" value={formData.area}>
-                        <option value="">Select District</option>
-                        {area.map((item) => {
-                          return (
-                            <option value={item.id} key={item.id}>{item.title}</option>
-                          );
-                        })}
-                      </select>
-                      {errors.area && (
-                        <small className="text-danger">{errors.area}</small>
-                      )}
+                      <label className="input-field">District</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={locations.district}
+                        name="area"
+                        onChange={handleChange}
+                        placeholder="District"
+                        readOnly
+                      />
+                      {errors.state && <small className="text-danger">{errors.state}</small>}
                     </div>
 
                     {/* Geo City Dropdown */}
                     <div className="col-md-3">
-                      <label htmlFor="geocity" className="input-field">
-                        Geo City<span className="text-danger">*</span>
-                      </label>
-                      <select disabled className="form-select" value={formData.city} name="city" onChange={handleChange}>
-                        <option value="">Select City</option>
-                        {city.map((item) => {
-                          return (
-                            <option value={item.id} key={item.id}>{item.title}</option>
-                          );
-                        })}
-                      </select>
-                      {errors.city && (
-                        <small className="text-danger">
-                          {errors.city}
-                        </small>
-                      )}
+                      <label className="input-field">Geo City</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={locations.city}
+                        name="city"
+                        onChange={handleChange}
+                        placeholder="City"
+                        readOnly
+                      />
+                      {errors.city && <small className="text-danger">{errors.city}</small>}
                     </div>
 
 
@@ -795,22 +705,10 @@ const MasterFranchise = (params) => {
                     <div className="col-md-3">
                       <label htmlFor="area" className="input-field">
                         Pincode<span className="text-danger">*</span>
+
                       </label>
-                      <select disabled
-                        id="pincode"
-                        name="pincode_id"
-                        className="form-select"
-                        aria-label=".form-select-lg example"
-                        value={formData.pincode_id}
-                        onChange={handleChange}
-                      >
-                        <option value="">Select Pincode</option>
-                        {pincode.map((geoPincode) => (
-                          <option key={geoPincode.id} value={geoPincode.id}>
-                            {geoPincode.pincode}
-                          </option>
-                        ))}
-                      </select>
+
+                      <input type="text" className="form-control" value={formData.pincode_id} name="pincode_id" onChange={handleChange} placeholder="Enter Pincode" readOnly />
                       {errors.pincode_id && (
                         <small className="text-danger">{errors.pincode_id}</small>
                       )}
@@ -1079,7 +977,7 @@ const MasterFranchise = (params) => {
 
 
 
-                    {roleaccess > 2 ?   <div className="text-right">
+                    {roleaccess > 2 ? <div className="text-right">
                       <button hidden
                         className="btn btn-liebherr"
                         type="submit"
@@ -1087,7 +985,7 @@ const MasterFranchise = (params) => {
                       >
                         {isEdit ? "Update" : "Submit"}
                       </button>
-                    </div> : null } 
+                    </div> : null}
                   </div>
                 </form>
 
@@ -1098,7 +996,7 @@ const MasterFranchise = (params) => {
           </div>
         </div>
       </div> : null}
-      </div>
+    </div>
   );
 };
 

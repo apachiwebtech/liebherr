@@ -5864,7 +5864,9 @@ app.get("/getfranchisedata", authenticateToken, async (req, res) => {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
     const result = await pool.request().query("SELECT * FROM awt_franchisemaster WHERE deleted = 0");
-    return res.json(result.recordset);
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
+    return res.json(encryptedData);
   } catch (err) {
     console.error(err); return res.status(500).json({ error: 'An error occurred while fetching franchise data' });
   }
