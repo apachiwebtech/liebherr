@@ -99,10 +99,21 @@ const Roleassign = () => {
                 roleid: item.roleid.toString(),
                 pageid: item.pageid.toString(),
                 accessid: item.accessid.toString(),
-                deleted: item.deleted.toString()
+                deleted: item.deleted.toString(),
+                test1 : "1",
+                test2 : "1",
+                test3 : "1",
+                test4 : "1",
+                test5 : "1",
+                test6 : "1",
+                test8 : "1",
+                test9 : "1",
+                test10 : "1",
                 // You can add other properties you want to ensure are strings
             };
         });
+
+      
 
         axiosInstance.post(`${Base_Url}/assign_role`, updatedRolePages, {
             headers: {

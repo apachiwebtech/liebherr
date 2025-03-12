@@ -74,7 +74,7 @@ app.use("/", fetchdata);
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "./uploads"); // Folder where images will be saved
+    cb(null, "../Licare2Frontend/wwwroot/uploads"); // Folder where images will be saved
   },
   filename: (req, file, cb) => {
     cb(null, `${Date.now()}-${file.originalname}`);
@@ -11230,8 +11230,14 @@ app.post('/getRoleData', authenticateToken, async (req, res) => {
   }
 });
 
+
+
 app.post('/assign_role', authenticateToken, async (req, res) => {
-  const rolePages = req.body;
+
+  let rolePages = req.body;
+
+  
+
 
   // Validate the input
   if (!Array.isArray(rolePages) || rolePages.length === 0) {

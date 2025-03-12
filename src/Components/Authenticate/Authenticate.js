@@ -55,31 +55,39 @@ const Authenticate = () => {
           }
 
 
+
+
           const role = res.data[0].role
 
           if (res.data[0].userrole == 'lhi_user') {
             localStorage.setItem('licare_code', res.data[0].usercode)
             localStorage.setItem('Userrole', Encrypt(role))
+            localStorage.setItem('User_id', res.data[0].id)
+            
             setLoading(false)
             window.location.pathname = '/dashboard'
           } else if (res.data[0].userrole == 'awt_franchisemaster') {
             localStorage.setItem('licare_code', res.data[0].usercode)
             localStorage.setItem('Userrole', Encrypt(role))
+            localStorage.setItem('User_id', res.data[0].id)
             setLoading(false)
             window.location.pathname = '/msp/ticketlistmsp'
           } else if (res.data[0].userrole == 'awt_childfranchisemaster') {
             localStorage.setItem('licare_code', res.data[0].usercode)
             localStorage.setItem('Userrole', Encrypt(role))
+            localStorage.setItem('User_id', res.data[0].id)
             setLoading(false)
             window.location.pathname = '/csp/ticketlist'
           } else if (res.data[0].userrole == 'awt_engineermaster') {
             localStorage.setItem('userid', res.data[0].usercode)
             localStorage.setItem('Userrole', Encrypt(role))
+            localStorage.setItem('User_id', res.data[0].id)
             setLoading(false)
             window.location.pathname = '/mobapp/dash'
           } else if (res.data[0].userrole == 'lhi_trainer') {
             localStorage.setItem('licare_code', res.data[0].usercode)
             localStorage.setItem('Userrole', Encrypt(role))
+            localStorage.setItem('User_id', res.data[0].id)
             setLoading(false)
             window.location.pathname = '/trainer/engineerlist'
           }
