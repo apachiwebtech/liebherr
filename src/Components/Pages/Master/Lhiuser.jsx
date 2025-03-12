@@ -205,7 +205,7 @@ const Lhiuser = () => {
     const payload = {
       ...formData,
       password: md5(formData.password),
-      updated_by: updatedBy,
+      updated_by: String(updatedBy),
       created_by: String(createdBy),
       assigncsp: cspvalue,
 
