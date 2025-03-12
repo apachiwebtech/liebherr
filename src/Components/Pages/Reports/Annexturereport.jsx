@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { Base_Url } from "../../Utils/Base_Url";
+import { Base_Url, secretKey } from "../../Utils/Base_Url";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import { useSelector } from 'react-redux';
 import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 import { SyncLoader } from "react-spinners";
 import DatePicker from "react-datepicker";
+import CryptoJS from 'crypto-js';
 import { Autocomplete, TextField } from "@mui/material";
+import { useDispatch } from "react-redux";
+import { getRoleData } from "../../Store/Role/role-action";
 
 const AnnextureReport = () => {
     const { loaders, axiosInstance } = useAxiosLoader();
@@ -23,7 +27,7 @@ const AnnextureReport = () => {
 
     useEffect(() => {
         const fetchMsps = async () => {
-            
+
             try {
                 const response = await axiosInstance.post(`${Base_Url}/getmsplist`, {
                     headers: { Authorization: token },
@@ -183,6 +187,33 @@ const AnnextureReport = () => {
         setEnddate(date ? formatDate(date) : '');
     };
 
+    // Role Right 
+
+
+    const Decrypt = (encrypted) => {
+        encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+        const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+        return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+    };
+
+    const storedEncryptedRole = localStorage.getItem("Userrole");
+    const decryptedRole = Decrypt(storedEncryptedRole);
+
+    const roledata = {
+        role: decryptedRole,
+        pageid: String(53)
+    }
+
+    const dispatch = useDispatch()
+    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+
+
+    useEffect(() => {
+        dispatch(getRoleData(roledata))
+    }, [])
+
+    // Role Right End 
+
     return (
         <div className="tab-content">
             {loaders && (
@@ -203,6 +234,7 @@ const AnnextureReport = () => {
                     <SyncLoader loading={loaders} color="#FFFFFF" />
                 </div>
             )}
+             {roleaccess > 1 ?
 
             <div className="row mp0">
                 <div className="col-12">
@@ -259,7 +291,7 @@ const AnnextureReport = () => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> : null}
 
         </div>
     );

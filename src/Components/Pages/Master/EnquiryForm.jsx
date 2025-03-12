@@ -4,6 +4,10 @@ import DatePicker from "react-datepicker";
 import { Base_Url, secretKey } from "../../Utils/Base_Url";
 import { useNavigate, useParams } from "react-router-dom";
 import CryptoJS from 'crypto-js';
+import { useSelector } from 'react-redux';
+import { useDispatch } from "react-redux";
+import { getRoleData } from "../../Store/Role/role-action";
+
 
 export function EnquiryForm(params) {
 
@@ -358,12 +362,40 @@ export function EnquiryForm(params) {
         }
     }
 
+    // Role Right 
+
+
+    const Decrypt = (encrypted) => {
+        encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+        const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+        return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+    };
+
+    const storedEncryptedRole = localStorage.getItem("Userrole");
+    const decryptedRole = Decrypt(storedEncryptedRole);
+
+    const roledata = {
+        role: decryptedRole,
+        pageid: String(55)
+    }
+
+    const dispatch = useDispatch()
+    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+
+
+    useEffect(() => {
+        dispatch(getRoleData(roledata))
+    }, [])
+
+    // Role Right End 
+
 
 
 
     return (
         <>
-            < div className="p-3">
+
+            {roleaccess > 1 ? < div className="p-3">
 
                 <div className="row ">
                     <div className="complbread">
@@ -407,6 +439,7 @@ export function EnquiryForm(params) {
                                                 type="submit"
                                                 className="btn btn-liebherr"
                                                 onClick={handlesearchenquiry}
+                                                disabled={roleaccess > 2 ? false : true}
                                             >
                                                 Search
                                             </button>
@@ -861,7 +894,8 @@ export function EnquiryForm(params) {
 
 
                                     <div className="col-md-12">
-                                        <button style={{ float: "right" }} type="submit" className="btn btn-liebherr">Submit</button>
+                                        <button style={{ float: "right" }} type="submit" className="btn btn-liebherr"
+                                            disabled={roleaccess > 2 ? false : true}>Submit</button>
                                     </div>
                                 </form>
                             </div>
@@ -939,7 +973,7 @@ export function EnquiryForm(params) {
 
 
 
-            </div>
+            </div> : null}
 
         </>
     )

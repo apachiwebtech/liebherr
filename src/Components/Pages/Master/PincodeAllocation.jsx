@@ -301,7 +301,7 @@ const PincodeAllocation = () => {
   const decryptedRole = Decrypt(storedEncryptedRole);
   const roledata = {
     role: decryptedRole,
-    pageid: String(37)
+    pageid: String(48)
   }
   const dispatch = useDispatch()
   const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);

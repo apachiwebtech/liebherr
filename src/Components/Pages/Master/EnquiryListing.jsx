@@ -155,7 +155,7 @@ const EnquiryListing = () => {
     const decryptedRole = Decrypt(storedEncryptedRole);
     const roledata = {
         role: decryptedRole,
-        pageid: String(50)
+        pageid: String(54)
     }
     const dispatch = useDispatch()
     const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
@@ -173,7 +173,7 @@ const EnquiryListing = () => {
                 </div>
             )}
 
-            <div className="row mp0">
+            {roleaccess > 1 ? <div className="row mp0">
                 <div className="searchFilter">
 
                     <div className="m-3">
@@ -404,7 +404,7 @@ const EnquiryListing = () => {
                                                             onClick={() => sendtoedit(item.id)}
                                                             title="Edit"
                                                             style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                                                        // disabled={roleaccess > 3 ? false : true}
+                                                         disabled={roleaccess > 3 ? false : true}
                                                         >
                                                             <FaPencilAlt />
                                                         </button>
@@ -457,7 +457,7 @@ const EnquiryListing = () => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> : null}
         </div>
     );
 };

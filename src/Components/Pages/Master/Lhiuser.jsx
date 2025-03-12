@@ -211,6 +211,8 @@ const Lhiuser = () => {
 
     }
 
+    console.log(payload,'data')
+
     const encryptedData = CryptoJS.AES.encrypt(
       JSON.stringify(payload),
       secretKey
@@ -308,19 +310,6 @@ const Lhiuser = () => {
     }
   };
 
-  // const deleted = async (id) => {
-  //   try {
-  //     const response = await axiosInstance.post(`${Base_Url}/deletelhidata`, { id }, {
-  //       headers: {
-  //         Authorization: token, // Send token in headers
-  //       },
-  //     });
-
-  //     window.location.reload();
-  //   } catch (error) {
-  //     console.error("Error deleting user:", error);
-  //   }
-  // };
 
   const edit = async (id) => {
     try {
