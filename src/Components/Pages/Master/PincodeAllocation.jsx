@@ -465,7 +465,7 @@ const PincodeAllocation = () => {
             </div>
             <div className="row mb-3">
               <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
-                <div className="form-group">
+                {roleaccess >2 ?<div className="form-group">
                   <input type="file" accept=".xlsx, .xls" onChange={importexcel} />
                   <button className="btn btn-primary" onClick={uploadexcel}
                     style={{
@@ -474,7 +474,7 @@ const PincodeAllocation = () => {
                     Import Pincode Allocation
                   </button>
 
-                </div>
+                </div> : null}
                 <div className="form-group">
                   <button
                     className="btn btn-primary"

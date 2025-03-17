@@ -541,12 +541,12 @@ const Geocity = () => {
                     <thead className="thead-light">
                       <tr>
                         <th scope="col" width="10%" className="text-center">#</th>
-                        <th scope="col" width="18%" className="text-center">Country</th>
-                        <th scope="col" width="19%" className="text-center">Region</th>
+                        <th scope="col" width="11%" className="text-center">Country</th>
+                        <th scope="col" width="10%" className="text-center">Region</th>
                         <th scope="col" width="19%" className="text-center">Geo State</th>
                         <th scope="col" width="19%" className="text-center">District</th>
                         <th scope="col" width="19%" className="text-center">Geo City</th>
-                        <th scope="col" width="15%" className="text-center">Actions</th>
+                        <th scope="col" width="25%" className="text-center">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -561,69 +561,92 @@ const Geocity = () => {
                             <td className="text-center">{user.district_title}</td>
                             <td className="text-center">{user.title}</td>
                             <td className='text-center'>
-                              <FaPencilAlt style={{ cursor: 'pointer', color: 'blue', marginRight: '10px' }} onClick={() => edit(user.id)} disabled={roleaccess > 3 ? false : true} />
-                              <FaTrash style={{ cursor: 'pointer', color: 'red' }} onClick={() => deleted(user.id)} disabled={roleaccess > 4 ? false : true} />
-                            </td>
+                              <button className="btn"
+                                style={{
+                                  backgroundColor: "transparent",
+                                  border: "none",
+                                  color: "blue",
+                                  fontSize: "20px",
+                                }}
+                                onClick={() => edit(user.id)}
+                                disabled={roleaccess > 3 ? false : true}
+                              >
+                                <FaPencilAlt />
+                              </button>
+                              <button
+                              className="btn"
+                              style={{
+                                backgroundColor: "transparent",
+                                border: "none",
+                                color: "red",
+                                fontSize: "20px",
+                              }}
+                              onClick={() => deleted(user.id)}
+                              disabled={roleaccess > 4 ? false : true}>
+                              <FaTrash style={{ cursor: 'pointer', color: 'red' }} />
+                            </button>
+                          </td>
                           </tr>
                         ))}
-                    </tbody>
-                  </table>
+                  </tbody>
+                </table>
 
-                  <div
-                    className="d-flex justify-content-between"
-                    style={{ marginTop: "10px" }}
-                  >
-                    <div>
-                      Showing {indexOfFirstUser + 1} to{" "}
-                      {Math.min(indexOfLastUser, filteredUsers.length)} of{" "}
-                      {filteredUsers.length} entries
-                    </div>
+                <div
+                  className="d-flex justify-content-between"
+                  style={{ marginTop: "10px" }}
+                >
+                  <div>
+                    Showing {indexOfFirstUser + 1} to{" "}
+                    {Math.min(indexOfLastUser, filteredUsers.length)} of{" "}
+                    {filteredUsers.length} entries
+                  </div>
 
-                    <div className="pagination" style={{ marginLeft: "auto" }}>
-                      <button
-                        onClick={() => setCurrentPage(currentPage - 1)}
-                        disabled={currentPage === 0}
-                      >
-                        {"<"}
-                      </button>
-                      {Array.from(
-                        {
-                          length: Math.min(3, Math.ceil(filteredUsers.length / itemsPerPage)), // Limit to 3 buttons
-                        },
-                        (_, index) => {
-                          const pageIndex = Math.max(0, currentPage - 1) + index; // Adjust index for sliding window
-                          if (pageIndex >= Math.ceil(filteredUsers.length / itemsPerPage)) return null; // Skip invalid pages
+                  <div className="pagination" style={{ marginLeft: "auto" }}>
+                    <button
+                      onClick={() => setCurrentPage(currentPage - 1)}
+                      disabled={currentPage === 0}
+                    >
+                      {"<"}
+                    </button>
+                    {Array.from(
+                      {
+                        length: Math.min(3, Math.ceil(filteredUsers.length / itemsPerPage)), // Limit to 3 buttons
+                      },
+                      (_, index) => {
+                        const pageIndex = Math.max(0, currentPage - 1) + index; // Adjust index for sliding window
+                        if (pageIndex >= Math.ceil(filteredUsers.length / itemsPerPage)) return null; // Skip invalid pages
 
-                          return (
-                            <button
-                              key={pageIndex}
-                              onClick={() => setCurrentPage(pageIndex)}
-                              className={currentPage === pageIndex ? "active" : ""}
-                            >
-                              {pageIndex + 1}
-                            </button>
-                          );
-                        }
-                      )}
+                        return (
+                          <button
+                            key={pageIndex}
+                            onClick={() => setCurrentPage(pageIndex)}
+                            className={currentPage === pageIndex ? "active" : ""}
+                          >
+                            {pageIndex + 1}
+                          </button>
+                        );
+                      }
+                    )}
 
-                      <button
-                        onClick={() => setCurrentPage(currentPage + 1)}
-                        disabled={
-                          currentPage ===
-                          Math.ceil(filteredUsers.length / itemsPerPage) - 1
-                        }
-                      >
-                        {">"}
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => setCurrentPage(currentPage + 1)}
+                      disabled={
+                        currentPage ===
+                        Math.ceil(filteredUsers.length / itemsPerPage) - 1
+                      }
+                    >
+                      {">"}
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div> : null}
-    </div>
+      </div>
+      </div> : null
+}
+    </div >
   );
 };
 

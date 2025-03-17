@@ -550,11 +550,32 @@ const Area = () => {
                             <td className='text-center'>{area.geostate_title}</td>
                             <td className='text-center'>{area.title}</td>
                             <td className='text-center'>
-                              <FaPencilAlt style={{ cursor: 'pointer', color: 'blue' }} onClick={() => edit(area.id)} disabled={roleaccess > 3 ? false : true} />
+                              <button className="btn"
+                                style={{
+                                  backgroundColor: "transparent",
+                                  border: "none",
+                                  color: "blue",
+                                  fontSize: "20px",
+                                }}
+                                onClick={() => edit(area.id)}
+                                disabled={roleaccess > 3 ? false : true}
+                              >
+                                <FaPencilAlt />
+                              </button>
                             </td>
                             <td className='text-center'>
-                              <FaTrash style={{ cursor: 'pointer', color: 'red' }} onClick={() => deleted(area.id)} disabled={roleaccess > 4 ? false : true} />
-                            </td>
+                              <button
+                                className="btn"
+                                style={{
+                                  backgroundColor: "transparent",
+                                  border: "none",
+                                  color: "red",
+                                  fontSize: "20px",
+                                }}
+                                onClick={() => deleted(area.id)}
+                                disabled={roleaccess > 4 ? false : true}>
+                                <FaTrash style={{ cursor: 'pointer', color: 'red' }} />
+                              </button></td>
                           </tr>
                         ))}
                     </tbody>

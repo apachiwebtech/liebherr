@@ -352,7 +352,7 @@ const Location = () => {
                           <th scope="col" width="15%" className="text-center">
                             Edit
                           </th>
-                          <th scope="col" width="15%" className="text-center">
+                          <th scope="col" width="15%" className="text-center" disabled={roleaccess > 4 ? false : true}>
                             Delete
                           </th>
                         </tr>

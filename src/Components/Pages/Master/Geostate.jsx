@@ -390,10 +390,32 @@ const Geostate = () => {
                           <td className='text-center'>{user.region_title}</td>
                           <td className='text-center'>{user.title}</td>
                           <td className='text-center'>
-                            <FaPencilAlt style={{ cursor: 'pointer', color: 'blue' }} onClick={() => edit(user.id)} disabled={roleaccess > 3 ? false : true} />
+                            <button className="btn"
+                              style={{
+                                backgroundColor: "transparent",
+                                border: "none",
+                                color: "blue",
+                                fontSize: "20px",
+                              }}
+                              onClick={() => edit(user.id)}
+                              disabled={roleaccess > 3 ? false : true}
+                            >
+                              <FaPencilAlt />
+                            </button>
                           </td>
                           <td className='text-center'>
-                            <FaTrash style={{ cursor: 'pointer', color: 'red' }} onClick={() => deleted(user.id)} disabled={roleaccess > 4 ? false : true} />
+                            <button
+                              className="btn"
+                              style={{
+                                backgroundColor: "transparent",
+                                border: "none",
+                                color: "red",
+                                fontSize: "20px",
+                              }}
+                              onClick={() => deleted(user.id)}
+                              disabled={roleaccess > 4 ? false : true}>
+                              <FaTrash style={{ cursor: 'pointer', color: 'red' }} />
+                            </button>
                           </td>
                         </tr>
                       ))}

@@ -11,6 +11,7 @@ import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 import CryptoJS from 'crypto-js';
 import { useDispatch } from "react-redux";
 import { getRoleData } from "../../Store/Role/role-action";
+import { useSelector } from 'react-redux';
 
 export function Servicecontractlist(params) {
     const { loaders, axiosInstance } = useAxiosLoader();
@@ -228,6 +229,33 @@ export function Servicecontractlist(params) {
 
     // export to excel end 
 
+    // Role Right 
+    
+    
+        const Decrypt = (encrypted) => {
+            encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+            const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+            return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+        };
+    
+        const storedEncryptedRole = localStorage.getItem("Userrole");
+        const decryptedRole = Decrypt(storedEncryptedRole);
+    
+        const roledata = {
+            role: decryptedRole,
+            pageid: String(31)
+        }
+    
+        const dispatch = useDispatch()
+        const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+    
+    
+        useEffect(() => {
+            dispatch(getRoleData(roledata))
+        }, [])
+    
+        // Role Right End
+
     return (
         <div className="tab-content">
             <Servicecontracttabs />
@@ -237,7 +265,7 @@ export function Servicecontractlist(params) {
                 </div>
             )}
             <div className="row mp0" >
-                <div className="col-md-12 col-12">
+            {roleaccess > 1 ? <div className="col-md-12 col-12">
                     <div className="card mb-3 tab_box">
 
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
@@ -398,7 +426,8 @@ export function Servicecontractlist(params) {
                                                             data-id={item.id}
                                                             checked={item.status == 1 ? 'checked' : ''}
                                                             className="status"
-                                                        />
+                                                            disabled={roleaccess > 3 ? false : true}
+                                                         />
 
 
                                                         <span class="slider round"></span>
@@ -412,6 +441,7 @@ export function Servicecontractlist(params) {
                                                         onClick={() => sendtoedit(item.id, 0)}
                                                         title="Edit"
                                                         style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                                                        disabled={roleaccess > 3 ? false : true}
                                                     >
                                                         <FaPencilAlt />
                                                     </button>
@@ -422,6 +452,7 @@ export function Servicecontractlist(params) {
                                                         onClick={() => sendtoedit(item.id, 1)}
                                                         title="View"
                                                         style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                                                        
                                                     >
                                                         <FaEye />
                                                     </button>
@@ -432,6 +463,7 @@ export function Servicecontractlist(params) {
                                                         onClick={() => deleted(item.id)}
                                                         title="Delete"
                                                         style={{ backgroundColor: 'transparent', border: 'none', color: 'red', fontSize: '20px' }}
+                                                        disabled={roleaccess > 4 ? false : true}
                                                     >
                                                         <FaTrash />
                                                     </button>
@@ -482,7 +514,7 @@ export function Servicecontractlist(params) {
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> : null}
             </div>
         </div>
     )
