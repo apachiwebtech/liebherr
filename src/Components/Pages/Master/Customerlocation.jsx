@@ -741,20 +741,20 @@ const Customerlocation = () => {
                         <th scope="col">Contact Person</th>
                         <th scope="col" width='23%'>Customer ID</th>
                         <th scope="col" width='25%'>Address</th>
-                        <th
+                        {roleaccess > 3 ? <th
                           scope="col"
                           width="13%"
                           style={{ textAlign: "center" }}
                         >
                           Edit
-                        </th>
-                        <th
+                        </th> : null}
+                        {roleaccess > 4 ?<th
                           scope="col"
                           width="13%"
                           style={{ textAlign: "center" }}
                         >
                           Delete
-                        </th>
+                        </th> : null}
                       </tr>
                     </thead>
                     <tbody>
@@ -767,7 +767,7 @@ const Customerlocation = () => {
                           <td>{item.ccperson}</td>
                           <td>{item.customer_id}</td>
                           <td>{item.address}</td>
-                          <td className="text-center">
+                          {roleaccess > 3 ?<td className="text-center">
                             <button
                               className="btn btn-link text-primary"
                               onClick={() => edit(item.id)}
@@ -776,8 +776,8 @@ const Customerlocation = () => {
                             >
                               <FaPencilAlt />
                             </button>
-                          </td>
-                          <td className="text-center">
+                          </td> : null}
+                          {roleaccess > 4 ?<td className="text-center">
                             <button
                               className="btn btn-link text-danger"
                               onClick={() => deleted(item.id)}
@@ -786,7 +786,7 @@ const Customerlocation = () => {
                             >
                               <FaTrash />
                             </button>
-                          </td>
+                          </td> : null}
                         </tr>
                       ))}
                     </tbody>

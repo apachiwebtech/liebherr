@@ -468,20 +468,20 @@ const Uniqueproduct = () => {
                         <th scope="col">Product Name</th>
                         <th scope="col">Serial No.</th>
                         <th scope="col">Delivered Location</th>
-                        <th
+                        {roleaccess > 3 ? <th
                           scope="col"
                           width="15%"
                           style={{ textAlign: "center" }}
                         >
                           Edit
-                        </th>
-                        <th
+                        </th> : null}
+                        {roleaccess > 4 ? <th
                           scope="col"
                           width="15%"
                           style={{ textAlign: "center" }}
                         >
                           Delete
-                        </th>
+                        </th> : null}
                       </tr>
                     </thead>
                     <tbody>
@@ -492,27 +492,26 @@ const Uniqueproduct = () => {
                           <td>{item.ModelNumber}</td>
                           <td>{item.serial_no}</td>
                           <td>{item.address}</td>
-                          <td className="text-center">
+                          {roleaccess > 3 ? <td className="text-center">
                             <button
                               className="btn btn-link text-primary"
                               onClick={() => edit(item.id)}
                               title="Edit"
-                              disabled={roleaccess > 3 ? false : true}
+
                             >
                               <FaPencilAlt />
                             </button>
-                          </td>
+                          </td> : null}
                           {/* kjkbvskd */}
-                          <td className="text-center">
+                          {roleaccess > 4 ? <td className="text-center">
                             <button
                               className="btn btn-link text-danger"
                               onClick={() => deleted(item.id)}
                               title="Delete"
-                              disabled={roleaccess > 4 ? false : true}
                             >
                               <FaTrash />
                             </button>
-                          </td>
+                          </td> : null}
                         </tr>
                       ))}
                     </tbody>
