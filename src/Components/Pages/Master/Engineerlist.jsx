@@ -398,7 +398,7 @@ export function Engineerlist(params) {
                                         <th width="8%">Email</th>
                                         <th width="20%">Mobile Number</th>
                                         <th width="10%">Employee Code</th>
-                                        {roleaccess > 3 ?<th width="5%">Edit</th> : null}
+                                       <th width="5%">Edit</th>
                                         {/* <th width="5%">View</th> */}
                                        {roleaccess > 3 ? <th width="5%">Status</th> : null}
                                     </tr>
@@ -415,7 +415,7 @@ export function Engineerlist(params) {
                                                 <td >{item.mobile_no}</td>
                                                 <td >{item.employee_code}</td>
 
-                                                {roleaccess > 3 ?<td >
+                                               <td >
                                                     <Link to={`/engineermaster/${item.id}`}> <button
                                                         className='btn'
                                                         title="Edit"
@@ -424,7 +424,7 @@ export function Engineerlist(params) {
                                                     >
                                                         <FaPencilAlt />
                                                     </button></Link>
-                                                </td> : null}
+                                                </td>
                                                 {roleaccess > 3 ?<td style={{ padding: "10px" }}>
                                                     <label class="switch">
                                                         <input

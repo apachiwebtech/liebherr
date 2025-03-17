@@ -398,7 +398,7 @@ export function Servicecontractlist(params) {
                                         <th width="10%">End Date</th>
                                         {/* <th width="8%">Approval Status</th> */}
                                         {roleaccess > 3 ? <th width="8%">Contract Status</th> : null}
-                                        {roleaccess > 3 ? <th width="5%">Edit</th> : null}
+                                         <th width="5%">Edit</th>
                                         {/* <th width="5%">View</th> */}
                                         {roleaccess > 4 ? <th width="5%">Delete</th> : null}
                                     </tr>
@@ -435,7 +435,7 @@ export function Servicecontractlist(params) {
 
                                                 </td> : null}
 
-                                                {roleaccess > 3 ?<td >
+                                               <td >
                                                     <button
                                                         className='btn'
                                                         onClick={() => sendtoedit(item.id, 0)}
@@ -445,7 +445,7 @@ export function Servicecontractlist(params) {
                                                     >
                                                         <FaPencilAlt />
                                                     </button>
-                                                </td> : null}
+                                                </td> 
                                                 {/* <td >
                                                     <button
                                                         className='btn'

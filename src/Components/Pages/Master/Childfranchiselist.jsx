@@ -456,7 +456,7 @@ export function ChildFranchiselist(params) {
                                                             className='btn'
                                                             onClick={() => sendtoedit(item.id)}
                                                             title="Edit"
-                                                            disabled={roleaccess > 3 ? false : true}
+                                                            
                                                             style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
                                                         >
                                                             <FaPencilAlt />

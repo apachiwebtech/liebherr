@@ -177,7 +177,7 @@ const EnquiryListing = () => {
                 <div className="searchFilter">
 
                     <div className="m-3">
-                    {roleaccess > 2 ? <div className='my-2 text-end'>
+                        {roleaccess > 2 ? <div className='my-2 text-end'>
                             <button className='btn btn-primary ' onClick={() => {
                                 navigate('/addenquiry')
                             }}>Add Enquiry</button>
@@ -374,7 +374,7 @@ const EnquiryListing = () => {
                                             <th width="5%">Priority</th>
                                             <th width="10%">Model Number</th>
                                             <th width="10%">Lead Status</th>
-                                            {roleaccess > 3 ?<th width="5%">Edit</th> : null}
+                                            <th width="5%">Edit</th>
 
                                         </tr>
                                     </thead>
@@ -397,19 +397,19 @@ const EnquiryListing = () => {
                                                     <td>
                                                         {item.leadstatus}
                                                     </td>
-                                                    {roleaccess > 3 ?<td>
+                                                    <td>
 
                                                         <button
                                                             className='btn'
                                                             onClick={() => sendtoedit(item.id)}
                                                             title="Edit"
                                                             style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                                                    
+
                                                         >
                                                             <FaPencilAlt />
                                                         </button>
 
-                                                    </td> : null}
+                                                    </td>
                                                 </tr>
                                             )
                                         })}
