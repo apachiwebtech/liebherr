@@ -385,8 +385,8 @@ const SubCallstatus = () => {
                                                 <th width="10%" className="text-center">#</th>
                                                 <th width="30%" className="text-left">Call Status</th>
                                                 <th width="30%" className="text-left">Sub Call Status</th>
-                                                <th width="15%" className="text-center">Edit</th>
-                                                <th width="15%" className="text-center">Delete</th>
+                                                {roleaccess > 3 ? <th width="15%" className="text-center">Edit</th> : null}
+                                                 {roleaccess > 4 ?<th width="15%" className="text-center">Delete</th> : null}
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -395,28 +395,26 @@ const SubCallstatus = () => {
                                                     <td className="text-center">{index + 1 + indexOfFirstUser}</td>
                                                     <td>{item.Callstatus_title}</td>
                                                     <td>{item.SubCallstatus}</td>
-                                                    <td className="text-center">
+                                                    {roleaccess > 3 ?<td className="text-center">
                                                         <button
                                                             className="btn btn-link text-primary"
                                                             onClick={() => {
                                                                 edit(item.id);
                                                             }}
-                                                            disabled={roleaccess > 3 ? false : true}
                                                             title="Edit"
                                                         >
                                                             <FaPencilAlt />
                                                         </button>
-                                                    </td>
-                                                    <td className="text-center">
+                                                    </td> : null}
+                                                     {roleaccess > 4 ?<td className="text-center">
                                                         <button
                                                             className="btn btn-link text-danger"
                                                             onClick={() => deleted(item.id)}
                                                             title="Delete"
-                                                            disabled={roleaccess > 4 ? false : true}
                                                         >
                                                             <FaTrash />
                                                         </button>
-                                                    </td>
+                                                    </td> : null}
                                                 </tr>
                                             ))}
                                         </tbody>
