@@ -1583,11 +1583,11 @@ export function Registercomplaint(params) {
               </div>
 
             </div> : <div className="card">
-              <div className="card-body">
+            {roleaccess > 2 ?<div className="card-body">
                 {/* Only show "No Result Found" if a search was performed and no results were found */}
                 {hasSearched && searchdata.length === 0 && <p className="text-danger ">No Result Found</p>}
                 <button onClick={() => setForm(true)} className="btn btn-sm btn-primary">New Ticket</button>
-              </div>
+              </div> : null}
 
 
             </div>}
