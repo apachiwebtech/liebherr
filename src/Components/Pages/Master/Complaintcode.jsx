@@ -405,8 +405,8 @@ const ComplaintCode = () => {
                         <th className="text-center">Defect Group Code</th>
                         <th className="text-center">Defect Group Title</th>
                         <th className="text-center">Description</th>
-                        <th className="text-center">Edit</th>
-                        <th className="text-center">Delete</th>
+                        {roleaccess > 3 ?<th className="text-center">Edit</th> : null}
+                        {roleaccess > 4 ?<th className="text-center">Delete</th> : null}
                       </tr>
                     </thead>
                     <tbody>
@@ -417,26 +417,24 @@ const ComplaintCode = () => {
                           <td>{item.defectgroupcode}</td>
                           <td>{item.defectgrouptitle}</td>
                           <td>{item.description}</td>
-                          <td className="text-center">
+                          {roleaccess > 3 ? <td className="text-center">
                             <button
                               className="btn btn-link text-primary"
                               onClick={() => edit(item.id)}
                               style={{ fontSize: "20px" }}
-                              disabled={roleaccess > 3 ? false : true}
                             >
                               <FaPencilAlt />
                             </button>
-                          </td>
-                          <td className="text-center">
+                          </td> : null}
+                          {roleaccess > 4 ?<td className="text-center">
                             <button
                               className="btn btn-link text-danger"
                               onClick={() => deleted(item.id)}
                               style={{ fontSize: "20px" }}
-                              disabled={roleaccess > 4 ? false : true}
                             >
                               <FaTrash />
                             </button>
-                          </td>
+                          </td> : null}
                         </tr>
                       ))}
                     </tbody>

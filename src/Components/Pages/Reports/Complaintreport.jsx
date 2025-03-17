@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Base_Url } from "../../Utils/Base_Url";
+import { Base_Url,secretKey } from "../../Utils/Base_Url";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 import { SyncLoader } from "react-spinners";
 import DatePicker from "react-datepicker";
+import CryptoJS from 'crypto-js';
+import { useSelector } from 'react-redux';
+import { useDispatch } from "react-redux";
+import { getRoleData } from "../../Store/Role/role-action"
 
 const Complaintreport = () => {
   const { loaders, axiosInstance } = useAxiosLoader();
@@ -87,7 +91,7 @@ const Complaintreport = () => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0'); // Ensure two-digit month
     const day = String(date.getDate()).padStart(2, '0'); // Ensure two-digit day
-  
+
     return `${year}-${month}-${day}`;
   };
 
@@ -99,7 +103,7 @@ const Complaintreport = () => {
       setStartdate('');
     }
   };
-  
+
   const handleEndDateChange = (date) => {
     if (date) {
       const formattedDate = formatDate(date);
@@ -108,6 +112,33 @@ const Complaintreport = () => {
       setEnddate('');
     }
   };
+
+  // Role Right 
+
+
+  const Decrypt = (encrypted) => {
+    encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+    const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+    return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+  };
+
+  const storedEncryptedRole = localStorage.getItem("Userrole");
+  const decryptedRole = Decrypt(storedEncryptedRole);
+
+  const roledata = {
+    role: decryptedRole,
+    pageid: String(46)
+  }
+
+  const dispatch = useDispatch()
+  const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+
+
+  useEffect(() => {
+    dispatch(getRoleData(roledata))
+  }, [])
+
+  // Role Right End 
 
   return (
     <div className="tab-content">
@@ -130,7 +161,7 @@ const Complaintreport = () => {
         </div>
       )}
 
-      <div className="row mp0">
+     {roleaccess > 1 ? <div className="row mp0">
         <div className="col-12">
           <div className="card mt-3 mb-3">
             <div className="card-body">
@@ -161,7 +192,7 @@ const Complaintreport = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> : null}
 
     </div>
   );

@@ -137,7 +137,7 @@ const Roleassign = () => {
     useEffect(() => {
         dispatch(getRoleData(roledata))
     }, [])
-
+console.log (roleaccess, "roleaccess")
 
     return (
         <div className="tab-content">
@@ -150,7 +150,7 @@ const Roleassign = () => {
                 reverseOrder={false} />
 
             <Lhiusertabs />
-            <div className="row mp0">
+            {roleaccess > 1 ?   <div className="row mp0">
                 <div className="col-12">
                     <div className="card mb-3 tab_box">
                         <div
@@ -265,7 +265,8 @@ const Roleassign = () => {
                         </div>
                     </div>
                 </div>
-            </div></div>
+            </div> : null}
+            </div>
     );
 };
 

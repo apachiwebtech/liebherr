@@ -439,7 +439,7 @@ export function EnquiryForm(params) {
                                                 type="submit"
                                                 className="btn btn-liebherr"
                                                 onClick={handlesearchenquiry}
-                                                disabled={roleaccess > 2 ? false : true}
+                                               
                                             >
                                                 Search
                                             </button>
@@ -478,10 +478,10 @@ export function EnquiryForm(params) {
                                                     <tr>
                                                         <td>{custinfo.customer_name}</td>
                                                         <td>
-                                                            <div className="text-right pb-2">
+                                                        {roleaccess > 2 ?<div className="text-right pb-2">
                                                                 <button className="btn btn-sm btn-primary generateTicket" onClick={populatedata} >New Enquiry</button>
-                                                            </div>
-                                                        </td>
+                                                            </div> : null}
+                                                        </td> 
                                                     </tr>
 
                                                 </tbody>
@@ -534,11 +534,11 @@ export function EnquiryForm(params) {
                             </div>
 
                         </div> : <div className="card">
-                            <div className="card-body">
+                           {roleaccess > 2 ? <div className="card-body">
                                 {/* Only show "No Result Found" if a search was performed and no results were found */}
                                 {previousinfo.length == 0 && <p className="text-danger ">No Result Found</p>}
                                 <button className="btn btn-sm btn-primary">New Enquiry</button>
-                            </div>
+                            </div> : null}
 
 
                         </div>}
@@ -893,10 +893,10 @@ export function EnquiryForm(params) {
 
 
 
-                                    <div className="col-md-12">
+                                   {roleaccess > 2 ? <div className="col-md-12">
                                         <button style={{ float: "right" }} type="submit" className="btn btn-liebherr"
-                                            disabled={roleaccess > 2 ? false : true}>Submit</button>
-                                    </div>
+                                            >Submit</button>
+                                    </div> : null}
                                 </form>
                             </div>
                         </div>
@@ -933,9 +933,9 @@ export function EnquiryForm(params) {
 
                                     </div>
 
-                                    <div className="mb-3 text-right">
+                                    {roleaccess > 2 ?<div className="mb-3 text-right">
                                         <button type="submit" class="btn btn-sm btn-primary">Submit Remarks</button>
-                                    </div>
+                                    </div> : null}
                                 </form>
                             </div>
 

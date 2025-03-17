@@ -441,8 +441,8 @@ const ActionCode = () => {
                         <th style={{ padding: '12px 15px', textAlign: 'center' }}>Site Defect Code</th>
                         <th style={{ padding: '12px 15px', textAlign: 'center' }}>Defect Type Title</th>
                         <th style={{ padding: '12px 15px', textAlign: 'center' }}>Description</th>
-                        <th style={{ padding: '0px 0px', textAlign: 'center' }}>Edit</th>
-                        <th style={{ padding: '0px 0px', textAlign: 'center' }}>Delete</th>
+                        {roleaccess > 3 ? <th style={{ padding: '12px 15px', textAlign: 'center' }}>Edit</th> : null}
+                        {roleaccess > 4 ?<th style={{ padding: '12px 15px', textAlign: 'center' }}>Delete</th> : null}
                       </tr>
                     </thead>
                     <tbody>
@@ -453,7 +453,7 @@ const ActionCode = () => {
                           <td style={{ padding: '10px' }}>{item.dsite_code}</td>
                           <td style={{ padding: '10px' }}>{item.dsite_title}</td>
                           <td style={{ padding: '10px' }}>{item.description}</td>
-                          <td style={{ padding: '0px', textAlign: 'center' }}>
+                          {roleaccess > 3 ? <td style={{ padding: '0px', textAlign: 'center' }}>
                             <button
                               className='btn'
                               onClick={() => {
@@ -466,8 +466,8 @@ const ActionCode = () => {
                             >
                               <FaPencilAlt />
                             </button>
-                          </td>
-                          <td style={{ padding: '0px', textAlign: 'center' }}>
+                          </td> : null}
+                          {roleaccess > 4 ? <td style={{ padding: '0px', textAlign: 'center' }}>
                             <button
                               className='btn'
                               onClick={() => deleted(item.id)}
@@ -477,7 +477,7 @@ const ActionCode = () => {
                             >
                               <FaTrash />
                             </button>
-                          </td>
+                          </td> : null}
                         </tr>
                       ))}
                     </tbody>

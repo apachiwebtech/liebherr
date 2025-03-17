@@ -396,7 +396,7 @@ export function Quotationlist(params) {
                                             <th width="10%">Customer Name</th>
                                             <th width="15%">ModelNumber</th>
                                             <th width="10%">Status</th>
-                                            <th width="10%">Edit</th>
+                                            {roleaccess > 3 ?<th width="10%">Edit</th> : null}
 
                                         </tr>
                                     </thead>
@@ -415,7 +415,7 @@ export function Quotationlist(params) {
                                                     <td style={{ padding: '0px', textAlign: 'center' }}>
                                                         {item.status}
                                                     </td>
-                                                    <td>
+                                                    {roleaccess > 3 ? <td>
 
                                                         <button
                                                             className='btn'
@@ -427,7 +427,7 @@ export function Quotationlist(params) {
                                                             <FaPencilAlt />
                                                         </button>
 
-                                                    </td>
+                                                    </td> : null}
                                                 </tr>
                                             )
                                         })}

@@ -5,10 +5,13 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 import CryptoJS from 'crypto-js';
+import { useSelector } from 'react-redux';
 import { error } from 'jquery';
 import { IoArrowBack } from 'react-icons/io5';
 import MyDocument8 from '../Reports/MyDocument8';
 import { pdf } from '@react-pdf/renderer';
+import { useDispatch } from "react-redux";
+import { getRoleData } from "../../Store/Role/role-action";
 
 const QuotationEdit = () => {
     const token = localStorage.getItem("token"); // Get token from localStorage
@@ -170,6 +173,33 @@ const QuotationEdit = () => {
         setSpare(updatedSpare);
     };
 
+    // Role Right 
+    
+    
+      const Decrypt = (encrypted) => {
+        encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+        const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+        return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+      };
+    
+      const storedEncryptedRole = localStorage.getItem("Userrole");
+      const decryptedRole = Decrypt(storedEncryptedRole);
+    
+      const roledata = {
+        role: decryptedRole,
+        pageid: String(45)
+      }
+    
+      const dispatch = useDispatch()
+      const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+    
+    
+      useEffect(() => {
+        dispatch(getRoleData(roledata))
+      }, [])
+    
+      // Role Right End 
+
     return (
         <div className="tab-content">
             {loaders && (
@@ -177,7 +207,7 @@ const QuotationEdit = () => {
                     <SyncLoader loading={loaders} color="#FFFFFF" />
                 </div>
             )}
-            <div className="row mt-1 mp0">
+            {roleaccess > 1 ?<div className="row mt-1 mp0">
                 <div className="col-12">
                     <div className="card mb-3 tab_box">
                         <div className="card-body">
@@ -186,8 +216,8 @@ const QuotationEdit = () => {
                         </div>
                     </div>
                 </div>
-            </div>
-            <div className="row mp0">
+            </div> : null}
+            {roleaccess > 1 ? <div className="row mp0">
                 <div className="col-12">
                     <div className="card mb-3 tab_box">
                         <div className="card-body">
@@ -299,7 +329,7 @@ const QuotationEdit = () => {
                                                                         placeholder="Enter Quantity"
                                                                         style={{ fontSize: "14px", width: "100%" }}
                                                                         className='form-control'
-                                                                        disabled
+                                                                        disabled 
                                                                     />
                                                                 </td>
                                                                 <td>
@@ -313,6 +343,7 @@ const QuotationEdit = () => {
                                                                         onChange={(e) =>
                                                                             handlePriceChange(index, e.target.value)
                                                                         }
+                                                                        disabled={roleaccess > 3 ? false : true}
                                                                     />
                                                                 </td>
 
@@ -325,9 +356,9 @@ const QuotationEdit = () => {
                                                 </tbody>
                                             </table>
 
-                                            <div>
+                                            {roleaccess > 3 ?<div>
                                                 <button className='btn btn-sm btn-primary float-end' disabled={value.status == 'Approved' ? true : false} onClick={() => ApproveQuotation()}>{value.status == 'Approved' ? 'Approved' : 'Approve quotation'}</button>
-                                            </div>
+                                            </div> : null}
                                         </div>
                                     </div>
                                 </div>
@@ -338,7 +369,8 @@ const QuotationEdit = () => {
 
                     </div>
                 </div>
-            </div></div>
+            </div> : null }
+            </div>
 
     );
 };

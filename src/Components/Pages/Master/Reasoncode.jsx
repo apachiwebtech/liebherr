@@ -436,8 +436,8 @@ const ReasonCode = () => {
                                                 <th style={{ padding: '12px 15px', textAlign: 'center' }}>Defect Type Code</th>
                                                 <th style={{ padding: '12px 15px', textAlign: 'center' }}>Defect Type Title</th>
                                                 <th style={{ padding: '12px 15px', textAlign: 'center' }}>Description</th>
-                                                <th style={{ padding: '0px 0px', textAlign: 'center' }}>Edit</th>
-                                                <th style={{ padding: '0px 0px', textAlign: 'center' }}>Delete</th>
+                                                {roleaccess > 3 ? <th style={{ padding: '0px 0px', textAlign: 'center' }}>Edit</th> : null}
+                                                {roleaccess > 4 ? <th style={{ padding: '0px 0px', textAlign: 'center' }}>Delete</th> : null}
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -448,7 +448,7 @@ const ReasonCode = () => {
                                                     <td style={{ padding: '10px' }}>{item.defect_code}</td>
                                                     <td style={{ padding: '10px' }}>{item.defect_title}</td>
                                                     <td style={{ padding: '10px' }}>{item.description}</td>
-                                                    <td style={{ padding: '0px', textAlign: 'center' }}>
+                                                    {roleaccess > 3 ? <td style={{ padding: '0px', textAlign: 'center' }}>
                                                         <button
                                                             className='btn'
                                                             onClick={() => {
@@ -457,22 +457,22 @@ const ReasonCode = () => {
                                                             }}
                                                             reasoncode="Edit"
                                                             style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                                                            disabled={roleaccess > 3 ? false : true}
+
                                                         >
                                                             <FaPencilAlt />
                                                         </button>
-                                                    </td>
-                                                    <td style={{ padding: '0px', textAlign: 'center' }}>
+                                                    </td> : null}
+                                                    {roleaccess > 4 ? <td style={{ padding: '0px', textAlign: 'center' }}>
                                                         <button
                                                             className='btn'
                                                             onClick={() => deleted(item.id)}
                                                             reasoncode="Delete"
                                                             style={{ backgroundColor: 'transparent', border: 'none', color: 'red', fontSize: '20px' }}
-                                                            disabled={roleaccess > 4 ? false : true}
+
                                                         >
                                                             <FaTrash />
                                                         </button>
-                                                    </td>
+                                                    </td> : null}
                                                 </tr>
                                             ))}
                                         </tbody>

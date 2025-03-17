@@ -144,15 +144,15 @@ const Master_Warrenty = () => {
               className="card-body"
               style={{ flex: "1 1 auto", padding: "13px 28px" }}
             >
-              <div>
+              {roleaccess > 2 ?<div>
                 <input type="file" accept=".xlsx, .xls" onChange={importexcel} />
                 <button className="btn btn-primary" onClick={uploadexcel}>
                   Import Rate Card
                 </button>
 
-              </div>
+              </div> : null}
 
-              <pre>{JSON.stringify(excelData, null, 2)}</pre>
+  
               <div className='table-responsive'>
                 <table id="example" className="table table-striped">
                   <thead>

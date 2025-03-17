@@ -398,7 +398,7 @@ const Subcategory = () => {
                               onClick={() => {
                                 edit(item.id);
                               }}
-                              disabled={roleaccess > 3 ? false : true}
+                         
                               title="Edit"
                             >
                               <FaPencilAlt />
@@ -409,7 +409,7 @@ const Subcategory = () => {
                               className="btn btn-link text-danger"
                               onClick={() => deleted(item.id)}
                               title="Delete"
-                              disabled={roleaccess > 4 ? false : true}
+                              
                             >
                               <FaTrash />
                             </button>

@@ -323,13 +323,13 @@ const Ratecard = () => {
               className="card-body"
               style={{ flex: "1 1 auto", padding: "13px 28px" }}
             >
-              <div>
+             {roleaccess > 2 ? <div>
                 <input type="file" accept=".xlsx, .xls" onChange={importexcel} />
                 <button className="btn btn-primary" onClick={uploadexcel}>
                   Import Rate Card
                 </button>
 
-              </div>
+              </div> : null}
               <div className='table-responsive'>
                 <button
                   className="btn btn-primary"

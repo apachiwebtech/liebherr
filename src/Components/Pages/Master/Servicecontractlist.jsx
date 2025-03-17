@@ -230,31 +230,31 @@ export function Servicecontractlist(params) {
     // export to excel end 
 
     // Role Right 
-    
-    
-        const Decrypt = (encrypted) => {
-            encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
-            const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
-            return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
-        };
-    
-        const storedEncryptedRole = localStorage.getItem("Userrole");
-        const decryptedRole = Decrypt(storedEncryptedRole);
-    
-        const roledata = {
-            role: decryptedRole,
-            pageid: String(31)
-        }
-    
-        const dispatch = useDispatch()
-        const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
-    
-    
-        useEffect(() => {
-            dispatch(getRoleData(roledata))
-        }, [])
-    
-        // Role Right End
+
+
+    const Decrypt = (encrypted) => {
+        encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+        const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+        return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+    };
+
+    const storedEncryptedRole = localStorage.getItem("Userrole");
+    const decryptedRole = Decrypt(storedEncryptedRole);
+
+    const roledata = {
+        role: decryptedRole,
+        pageid: String(31)
+    }
+
+    const dispatch = useDispatch()
+    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+
+
+    useEffect(() => {
+        dispatch(getRoleData(roledata))
+    }, [])
+
+    // Role Right End
 
     return (
         <div className="tab-content">
@@ -265,19 +265,19 @@ export function Servicecontractlist(params) {
                 </div>
             )}
             <div className="row mp0" >
-            {roleaccess > 1 ? <div className="col-md-12 col-12">
+                {roleaccess > 1 ? <div className="col-md-12 col-12">
                     <div className="card mb-3 tab_box">
 
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
 
-                            <div className="p-1 text-right">
+                            {roleaccess > 2 ? <div className="p-1 text-right">
                                 <button
                                     className="btn btn-primary"
                                     onClick={() => navigate("/Servicecontract")}
                                 >
                                     Add Service Contract Registration
                                 </button>
-                            </div>
+                            </div> : null}
                             <div className="row mb-3">
 
                                 <div className="col-md-3">
@@ -397,10 +397,10 @@ export function Servicecontractlist(params) {
                                         <th width="10%">Start Date</th>
                                         <th width="10%">End Date</th>
                                         {/* <th width="8%">Approval Status</th> */}
-                                        <th width="8%">Contract Status</th>
-                                        <th width="5%">Edit</th>
-                                        <th width="5%">View</th>
-                                        <th width="5%">Delete</th>
+                                        {roleaccess > 3 ? <th width="8%">Contract Status</th> : null}
+                                        {roleaccess > 3 ? <th width="5%">Edit</th> : null}
+                                        {/* <th width="5%">View</th> */}
+                                        {roleaccess > 4 ? <th width="5%">Delete</th> : null}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -418,7 +418,7 @@ export function Servicecontractlist(params) {
                                                 <td >{formatDate(item.endDate)}</td>
 
 
-                                                <td >
+                                                {roleaccess > 3 ? <td >
                                                     <label class="switch">
                                                         <input
                                                             type="checkbox"
@@ -427,15 +427,15 @@ export function Servicecontractlist(params) {
                                                             checked={item.status == 1 ? 'checked' : ''}
                                                             className="status"
                                                             disabled={roleaccess > 3 ? false : true}
-                                                         />
+                                                        />
 
 
                                                         <span class="slider round"></span>
                                                     </label>
 
-                                                </td>
+                                                </td> : null}
 
-                                                <td >
+                                                {roleaccess > 3 ?<td >
                                                     <button
                                                         className='btn'
                                                         onClick={() => sendtoedit(item.id, 0)}
@@ -445,8 +445,8 @@ export function Servicecontractlist(params) {
                                                     >
                                                         <FaPencilAlt />
                                                     </button>
-                                                </td>
-                                                <td >
+                                                </td> : null}
+                                                {/* <td >
                                                     <button
                                                         className='btn'
                                                         onClick={() => sendtoedit(item.id, 1)}
@@ -456,8 +456,8 @@ export function Servicecontractlist(params) {
                                                     >
                                                         <FaEye />
                                                     </button>
-                                                </td>
-                                                <td >
+                                                </td> */}
+                                                {roleaccess > 4 ?<td >
                                                     <button
                                                         className='btn'
                                                         onClick={() => deleted(item.id)}
@@ -467,7 +467,7 @@ export function Servicecontractlist(params) {
                                                     >
                                                         <FaTrash />
                                                     </button>
-                                                </td>
+                                                </td> : null}
 
                                             </tr>
                                         )

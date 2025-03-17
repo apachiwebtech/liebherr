@@ -177,11 +177,11 @@ const EnquiryListing = () => {
                 <div className="searchFilter">
 
                     <div className="m-3">
-                        <div className='my-2 text-end'>
+                    {roleaccess > 2 ? <div className='my-2 text-end'>
                             <button className='btn btn-primary ' onClick={() => {
                                 navigate('/addenquiry')
                             }}>Add Enquiry</button>
-                        </div>
+                        </div> : null}
 
                         <div className="row mb-3">
 
@@ -374,7 +374,7 @@ const EnquiryListing = () => {
                                             <th width="5%">Priority</th>
                                             <th width="10%">Model Number</th>
                                             <th width="10%">Lead Status</th>
-                                            <th width="5%">Edit</th>
+                                            {roleaccess > 3 ?<th width="5%">Edit</th> : null}
 
                                         </tr>
                                     </thead>
@@ -397,19 +397,19 @@ const EnquiryListing = () => {
                                                     <td>
                                                         {item.leadstatus}
                                                     </td>
-                                                    <td>
+                                                    {roleaccess > 3 ?<td>
 
                                                         <button
                                                             className='btn'
                                                             onClick={() => sendtoedit(item.id)}
                                                             title="Edit"
                                                             style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                                                         disabled={roleaccess > 3 ? false : true}
+                                                    
                                                         >
                                                             <FaPencilAlt />
                                                         </button>
 
-                                                    </td>
+                                                    </td> : null}
                                                 </tr>
                                             )
                                         })}

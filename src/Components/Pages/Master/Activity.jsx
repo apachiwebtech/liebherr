@@ -428,9 +428,9 @@ const Activity = () => {
                       <tr>
                         <th style={{ padding: '12px 15px', textAlign: 'center' }}>#</th>
                         <th style={{ padding: '12px 15px', textAlign: 'center' }}>Code</th>
-                        <th style={{ padding: '12px 15px', textAlign: 'center' }}>Title</th>
-                        <th style={{ padding: '0px 0px', textAlign: 'center' }}>Edit</th>
-                        <th style={{ padding: '0px 0px', textAlign: 'center' }}>Delete</th>
+                        <th style={{ padding: '12px 15px', textAlign: 'center' }}>Title</th> 
+                        {roleaccess > 3 ? <th style={{ padding: '0px 0px', textAlign: 'center' }}>Edit</th> : null}
+                        {roleaccess > 4 ?<th style={{ padding: '0px 0px', textAlign: 'center' }}>Delete</th> : null}
                       </tr>
                     </thead>
                     <tbody>
@@ -439,7 +439,7 @@ const Activity = () => {
                           <td style={{ padding: '2px', textAlign: 'center' }}>{index + 1 + indexOfFirstUser}</td>
                           <td style={{ padding: '10px' }}>{item.code}</td>
                           <td style={{ padding: '10px' }}>{item.title}</td>
-                          <td style={{ padding: '0px', textAlign: 'center' }}>
+                          {roleaccess > 3 ?<td style={{ padding: '0px', textAlign: 'center' }}>
                             <button
                               className='btn'
                               onClick={() => {
@@ -452,8 +452,8 @@ const Activity = () => {
                             >
                               <FaPencilAlt />
                             </button>
-                          </td>
-                          <td style={{ padding: '0px', textAlign: 'center' }}>
+                          </td> : null}
+                          {roleaccess > 4 ?<td style={{ padding: '0px', textAlign: 'center' }}>
                             <button
                               className='btn'
                               onClick={() => deleted(item.id)}
@@ -463,7 +463,7 @@ const Activity = () => {
                             >
                               <FaTrash />
                             </button>
-                          </td>
+                          </td> : null}
                         </tr>
                       ))}
                     </tbody>
