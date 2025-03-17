@@ -1,14 +1,55 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import CryptoJS from 'crypto-js';
+import axios from "axios";
+import { Base_Url, secretKey } from '../../Utils/Base_Url';
 
 function AllocationTab() {
 
   const [activeTab, setActiveTab] = useState('/pincode_allocation');
+  const token = localStorage.getItem("token");
+  const [status, setStatus] = useState([])
 
   useEffect(() => {
     setActiveTab(window.location.pathname);
+    getpageroledata()
   }, [window.location.pathname]);
+
+
+  const Decrypt = (encrypted) => {
+    encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+    const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+    return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+  };
+
+
+  async function getpageroledata() {
+
+    const storedEncryptedRole = localStorage.getItem("Userrole");
+    const decryptedRole = Decrypt(storedEncryptedRole);
+
+    const data = {
+      role: decryptedRole,
+      allocationpage: '48',
+      shipmentfgpage: '49',
+      shipmentpartpage: '50',
+    }
+
+
+    axios.post(`${Base_Url}/getallocationroledata`, data, {
+      headers: {
+        Authorization: token, // Send token in headers
+      },
+    })
+      .then((res) => {
+        setStatus(res.data)
+      })
+      .then((err) => {
+        console.log(err)
+      })
+  }
+
 
   return (
     <>
@@ -47,36 +88,43 @@ function AllocationTab() {
             <div className="col-sm-6 p-0" style={{ width: '100%' }}>
               <div className="tabsMenu" style={{ fontSize: "14px", marginLeft: "12px", fontWeight: "600", fontFamily: "Nunito" }}>
                 <ul className="nav nav-tabs">
-                  <li className="nav-item">
-                    <Link to="/pincode_allocation">
-                      <button
-                        className={`nav-link ${activeTab === '/pincode_allocation' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('/pincode_allocation')}
-                      >
-                        Pincode Allocation
-                      </button>
-                    </Link>
-                  </li>
-                  <li className="nav-item">
-                    <Link to="/shipment_fg">
-                      <button
-                        className={`nav-link ${activeTab === '/shipment_fg' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('/shipment_fg')}
-                      >
-                       Shipment FG
-                      </button>
-                    </Link>
-                  </li>
-                  <li className="nav-item">
-                    <Link to="/shipmentparts">
-                      <button
-                        className={`nav-link ${activeTab === '/shipmentparts' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('/shipmentparts')}
-                      >
-                       Shipment Parts
-                      </button>
-                    </Link>
-                  </li>
+                  {status.allocationpage == 1 &&
+                    <li className="nav-item">
+                      <Link to="/pincode_allocation">
+                        <button
+                          className={`nav-link ${activeTab === '/pincode_allocation' ? 'active' : ''}`}
+                          onClick={() => setActiveTab('/pincode_allocation')}
+                        >
+                          Pincode Allocation
+                        </button>
+                      </Link>
+                    </li>
+                  }
+                  {status.shipmentfgpage == 1 &&
+                    <li className="nav-item">
+                      <Link to="/shipment_fg">
+                        <button
+                          className={`nav-link ${activeTab === '/shipment_fg' ? 'active' : ''}`}
+                          onClick={() => setActiveTab('/shipment_fg')}
+                        >
+                          Shipment FG
+                        </button>
+                      </Link>
+                    </li>
+                  }
+                  {status.shipmentpartpage == 1 &&
+                    <li className="nav-item">
+                      <Link to="/shipmentparts">
+                        <button
+                          className={`nav-link ${activeTab === '/shipmentparts' ? 'active' : ''}`}
+                          onClick={() => setActiveTab('/shipmentparts')}
+                        >
+                          Shipment Parts
+                        </button>
+                      </Link>
+                    </li>
+                  }
+
                   {/* <li className="nav-item">
                     <Link to="/business_partner">
                       <button

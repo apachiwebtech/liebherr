@@ -2805,7 +2805,9 @@ export function Complaintview(params) {
                                               {result} {/* Display the new file name */}
                                             </span>
                                             <a
-                                              onClick={() => downloadFile(trimmedFileName)}
+                                              href={`${Base_Url}/uploads/${fileName}`}
+                                              download
+                                              target="_blank"
                                               style={{
                                                 marginLeft: "10px",
                                                 textDecoration: "none",

@@ -25,18 +25,23 @@ const AnnextureReport = () => {
     const token = localStorage.getItem("token");
     const licare_code = localStorage.getItem("licare_code");
 
-    useEffect(() => {
-        const fetchMsps = async () => {
 
-            try {
-                const response = await axiosInstance.post(`${Base_Url}/getmsplist`, {
-                    headers: { Authorization: token },
-                });
-                setMspList(response.data);
-            } catch (error) {
-                console.error("Error fetching MSPs:", error);
-            }
-        };
+    const fetchMsps = async () => {
+
+        try {
+            const response = await axiosInstance.post(`${Base_Url}/getmsplist`, {data : "1"},{
+                headers: {
+                    Authorization: token
+                },
+            });
+            setMspList(response.data);
+        } catch (error) {
+            console.error("Error fetching MSPs:", error);
+        }
+    };
+
+
+    useEffect(() => {
 
         fetchMsps();
     }, []);
@@ -234,64 +239,64 @@ const AnnextureReport = () => {
                     <SyncLoader loading={loaders} color="#FFFFFF" />
                 </div>
             )}
-             {roleaccess > 1 ?
+            {roleaccess > 1 ?
 
-            <div className="row mp0">
-                <div className="col-12">
-                    <div className="card mt-3 mb-3">
-                        <div className="card-body">
+                <div className="row mp0">
+                    <div className="col-12">
+                        <div className="card mt-3 mb-3">
+                            <div className="card-body">
 
-                            <div className="mb-3">
-                                <label>Select MSP</label>
-                                <Autocomplete
-                                    options={mspList}
-                                    getOptionLabel={(option) => option.title || ""}
-                                    value={selectedMsp}  // Ensure value is the full object
-                                    onChange={(event, newValue) => setSelectedMsp(newValue)} // Store full object
-                                    renderInput={(params) => (
-                                        <TextField
-                                            {...params}
-                                            variant="outlined"
-                                            placeholder="Select MSP"
-                                            fullWidth
-                                        />
-                                    )}
-                                />
+                                <div className="mb-3">
+                                    <label>Select MSP</label>
+                                    <Autocomplete
+                                        options={mspList}
+                                        getOptionLabel={(option) => option.title || ""}
+                                        value={selectedMsp}  // Ensure value is the full object
+                                        onChange={(event, newValue) => setSelectedMsp(newValue)} // Store full object
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                variant="outlined"
+                                                placeholder="Select MSP"
+                                                fullWidth
+                                            />
+                                        )}
+                                    />
 
+                                </div>
+                                <div className="mb-3">
+                                    <label>Start Date</label>
+                                    <DatePicker
+                                        selected={startDate ? new Date(startDate) : null}
+                                        onChange={handleStartDateChange}
+                                        dateFormat="dd-MM-yyyy"
+                                        placeholderText="DD-MM-YYYY"
+                                        className="form-control"
+                                    />
+                                </div>
+                                <div className="mb-3">
+                                    <label>End Date</label>
+                                    <DatePicker
+                                        selected={endDate ? new Date(endDate) : null}
+                                        onChange={handleEndDateChange}
+                                        dateFormat="dd-MM-yyyy"
+                                        placeholderText="DD-MM-YYYY"
+                                        className="form-control"
+                                    />
+                                </div>
+
+
+                                {error && <p className="text-danger">{error}</p>}
+                                <button className="btn btn-primary" onClick={fetchData}>
+                                    Annexture Report 1
+                                </button>
+                                <button className="btn btn-primary" style={{ marginLeft: '10px' }} onClick={fetchData2}>
+                                    Annexture Report 2
+                                </button>
                             </div>
-                            <div className="mb-3">
-                                <label>Start Date</label>
-                                <DatePicker
-                                    selected={startDate ? new Date(startDate) : null}
-                                    onChange={handleStartDateChange}
-                                    dateFormat="dd-MM-yyyy"
-                                    placeholderText="DD-MM-YYYY"
-                                    className="form-control"
-                                />
-                            </div>
-                            <div className="mb-3">
-                                <label>End Date</label>
-                                <DatePicker
-                                    selected={endDate ? new Date(endDate) : null}
-                                    onChange={handleEndDateChange}
-                                    dateFormat="dd-MM-yyyy"
-                                    placeholderText="DD-MM-YYYY"
-                                    className="form-control"
-                                />
-                            </div>
-
-
-                            {error && <p className="text-danger">{error}</p>}
-                            <button className="btn btn-primary" onClick={fetchData}>
-                                Annexture Report 1
-                            </button>
-                            <button className="btn btn-primary" style={{ marginLeft: '10px' }} onClick={fetchData2}>
-                                Annexture Report 2
-                            </button>
                         </div>
                     </div>
-                </div>
-            </div> : null}
+                </div> : null}
 
         </div>
     );

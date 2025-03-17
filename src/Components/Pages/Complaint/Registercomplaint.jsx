@@ -191,6 +191,8 @@ export function Registercomplaint(params) {
 
   };
 
+  // console.log(purchase_data,value.purchase_date , "$%^")
+
   const handleDateChange2 = (date) => {
     if (date) {
       const formattedDate = formatDate(date);
@@ -208,9 +210,12 @@ export function Registercomplaint(params) {
   const getDateAfterOneYear = (value) => {
     try {
       // Ensure value is in a recognized format
+
       const purchase_date = new Date(value);
 
-      console.log(purchase_date , "Date")
+
+      console.log(purchase_date, "23456789")
+
 
       if (isNaN(purchase_date)) {
         throw new Error("Invalid date format");
@@ -230,9 +235,9 @@ export function Registercomplaint(params) {
       // Compare lastDate and currentDateMinusOneDay
       if (lastDate < currentDateMinusOneDay) {
         setWarranty_status_data("OUT OF WARRANTY");
-        setpurchase_data(value);
+        // setpurchase_data(value);
       } else {
-        setpurchase_data(value);
+        // setpurchase_data(value);
         setWarranty_status_data("WARRANTY");
       }
 
@@ -720,8 +725,6 @@ export function Registercomplaint(params) {
 
         if (res.data.information && res.data.information.length > 0) {
           const customerInfo = res.data.information[0];
-          // console.log(res.data,"Search Data")
-          // console.log(res.data[0],"Hide Ticket")
           setDuplicateCustomerNumber(res.data.information[0].customer_mobile);
           setSearchData(res.data.information[0])
           setProductCustomer(res.data.product)
@@ -760,13 +763,16 @@ export function Registercomplaint(params) {
 
   }
 
-  console.log(value.customer_id, "Customer_id")
+
 
 
 
   const notify = () => toast.success('Data Submitted..');
 
   const navigate = useNavigate()
+
+
+  console.log(value.customer_id , "cuys")
 
 
   const handlesubmit = (e) => {
@@ -883,7 +889,7 @@ export function Registercomplaint(params) {
       warrenty_status: value.warrenty_status || "",
       invoice_date: value.invoice_date || "",
       call_charge: value.call_charge || "",
-      cust_id: String(value.customer_id) || "", // Fix customer ID handling
+      // cust_id: String(value.customer_id) || "",
       model: value.model || "",
       serial: String(value.serial),
       purchase_date: value.purchase_date || "",
@@ -977,7 +983,7 @@ export function Registercomplaint(params) {
   const onHandleChange = (e) => {
     const { name, value: inputValue } = e.target;
 
-    console.log(value);
+
 
 
     setValue(prevState => ({
@@ -1136,6 +1142,7 @@ export function Registercomplaint(params) {
 
 
         const formattedDate2 = date2.toString(); 
+
         setpurchase_data(formattedDate);
         getDateAfterOneYear(formattedDate2)
       } else {
@@ -1144,7 +1151,7 @@ export function Registercomplaint(params) {
 
       if (response.data && response.data[0]) {
 
-        console.log("serial")
+
         const data = response.data[0];
         setValue({
           ...value,
@@ -1159,7 +1166,7 @@ export function Registercomplaint(params) {
           alt_mobile: data.alt_mobileno || "",
           email: data.email || "",
           address: data.address || "",
-          customer_id: data.CustomerID || "",
+          customer_id: data.customer_id || "",
           pincode: data.pincode || ''
         });
       }
@@ -1169,6 +1176,9 @@ export function Registercomplaint(params) {
       console.error("Error fetching serial details:", error);
     }
   };
+
+
+  
 
 
   const fetchfrommobile = async (mobile) => {
@@ -1205,7 +1215,7 @@ export function Registercomplaint(params) {
 
       if (response.data && response.data[0]) {
 
-        console.log("serial")
+
         const data = response.data[0];
         setValue((prevValue) => ({
           ...prevValue,

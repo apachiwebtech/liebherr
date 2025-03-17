@@ -60,3 +60,14 @@
           console.error('Error hitting SMS API (token):', error.response?.data || error.message);
         }
       }
+
+
+      {
+        "role": "2",
+        "countrypage": "1",
+        "regionpage": "2",
+        "geostatepage": "3",
+        "districtpage": "4",
+        "geocitypage": "5",
+        "pincodepage": "6"
+      }

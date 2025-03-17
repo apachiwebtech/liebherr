@@ -21,41 +21,39 @@ const Roleassign = () => {
     const token = localStorage.getItem("token");
     const notify = () => toast.success('Data Submitted..');
     // Function to handle changes in the enable/disable state for an ID
-    const handleRadioChange = (event, indexToUpdate) => {
-        const newAccessid = +event.target.value;
-        const updatedRow = { 
-            ...rolePages[indexToUpdate], 
-            accessid: newAccessid 
-        };
-
-        console.log(updatedRow.id[0] , "@#$%^")
-    
-        // Convert all values to strings before sending
-        const formattedRow = {
-            id: updatedRow.id[0].toString(),
-            roleid: updatedRow.roleid.toString(),
-            pageid: updatedRow.pageid.toString(),
-            accessid: updatedRow.accessid.toString(),
-            deleted: updatedRow.deleted.toString(),
-        };
-    
-        // Send only the updated row to the backend
-        axiosInstance.post(`${Base_Url}/assign_role`, formattedRow, {
-            headers: { Authorization: token },
-        })
-        .then((res) => {
-            toast.success('Role updated successfully!');
-            
-            // Update local state to reflect the change
-            setRolePages(prevState => prevState.map((item, index) => 
-                index === indexToUpdate ? updatedRow : item
-            ));
-        })
-        .catch((err) => {
-            console.error('Error updating role:', err);
-            toast.error('Failed to update role.');
-        });
+const handleRadioChange = (event, indexToUpdate) => {
+    const newAccessid = +event.target.value;
+    const updatedRow = { 
+        ...rolePages[indexToUpdate], 
+        accessid: newAccessid 
     };
+
+    // Convert all values to strings before sending
+    const formattedRow = {
+        id: updatedRow.id.toString(),
+        roleid: updatedRow.roleid.toString(),
+        pageid: updatedRow.pageid.toString(),
+        accessid: updatedRow.accessid.toString(),
+        deleted: updatedRow.deleted.toString(),
+    };
+
+    // Send only the updated row to the backend
+    axiosInstance.post(`${Base_Url}/assign_role`, formattedRow, {
+        headers: { Authorization: token },
+    })
+    .then((res) => {
+        toast.success('Role updated successfully!');
+        
+        // Update local state to reflect the change
+        setRolePages(prevState => prevState.map((item, index) => 
+            index === indexToUpdate ? updatedRow : item
+        ));
+    })
+    .catch((err) => {
+        console.error('Error updating role:', err);
+        toast.error('Failed to update role.');
+    });
+};
 
 
     async function getRole() {
@@ -112,7 +110,35 @@ const Roleassign = () => {
             })
     }
 
+    const handlesubmit = (e) => {
+        e.preventDefault()
 
+        // Convert all values in rolePages to strings
+        const updatedRolePages = rolePages.map(item => {
+            return {
+                ...item,
+                id: item.id.toString(),
+                roleid: item.roleid.toString(),
+                pageid: item.pageid.toString(),
+                accessid: item.accessid.toString(),
+                deleted: item.deleted.toString(),
+                // You can add other properties you want to ensure are strings
+            };
+        });
+
+      
+
+        axiosInstance.post(`${Base_Url}/assign_role`, updatedRolePages, {
+            headers: {
+                Authorization: token, // Send token in headers
+            },
+        })
+            .then((res) => {
+                if (res.data) {
+                    notify()
+                }
+            })
+    }
 
 
 
@@ -159,7 +185,7 @@ const Roleassign = () => {
                         >
 
                             <h4 class="card-title">Select Role</h4>
-                            <form class="forms-sample pt-3" >
+                            <form class="forms-sample pt-3" onSubmit={handlesubmit}>
                                 <div className='d-flex justify-content-between my-2'>
                                     <div class="form-group col-lg-6">
                                         <Autocomplete
@@ -177,7 +203,9 @@ const Roleassign = () => {
                                         />
                                     </div>
 
-                   
+                                    <div>
+                                        <button className='btn btn-primary'>Submit</button>
+                                    </div>
                                 </div>
 
                                 {roleId === true && <div class="form-group" >

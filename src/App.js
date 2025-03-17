@@ -892,6 +892,19 @@ function TrainerApp() {
     checkLocalStorageAndRedirect(navigate);
   }, [navigate])
 
+  React.useEffect(() => {
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'token') {
+        window.location.reload()
+      }
+    });
+
+    window.addEventListener("contextmenu", (event) => event.preventDefault());
+
+
+
+  }, [])
+
 
 
   return (
@@ -994,7 +1007,21 @@ function CSPAPP() {
 
   React.useEffect(() => {
     checkLocalStorageAndRedirectCSP(navigate)
+
   }, [navigate])
+
+  React.useEffect(() => {
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'token') {
+        window.location.reload()
+      }
+    });
+
+    window.addEventListener("contextmenu", (event) => event.preventDefault());
+
+
+
+  }, [])
 
 
 
@@ -1015,6 +1042,21 @@ function MSPAPP() {
   React.useEffect(() => {
     checkLocalStorageAndRedirect(navigate);
   }, [navigate])
+
+
+
+  React.useEffect(() => {
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'token') {
+        window.location.reload()
+      }
+    });
+
+    window.addEventListener("contextmenu", (event) => event.preventDefault());
+
+
+
+  }, [])
 
 
 

@@ -61,7 +61,7 @@ const Lhiuser = () => {
       const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
       const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
       const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
-      console.log(decryptedData);
+
 
       setRoles(decryptedData);
     } catch (error) {
@@ -87,7 +87,6 @@ const Lhiuser = () => {
 
   }
 
-  console.log(csp, "TTT")
 
 
   const fetchReporting = async () => {
@@ -101,7 +100,7 @@ const Lhiuser = () => {
       const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
       const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
       const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
-      console.log(decryptedData);
+   
       setReporting(decryptedData);
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -118,7 +117,7 @@ const Lhiuser = () => {
       const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
       const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
       const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
-      console.log(decryptedData);
+ 
       setUsers(decryptedData);
       setFilteredUsers(decryptedData);
     } catch (error) {
@@ -202,14 +201,16 @@ const Lhiuser = () => {
       return;
     }
 
-    const payload = {
-      ...formData,
-      password: md5(formData.password),
-      updated_by: String(updatedBy),
-      created_by: String(createdBy),
-      assigncsp: cspvalue,
-
-    }
+    const payload = Object.fromEntries(
+      Object.entries({
+        ...formData,
+        password: md5(formData.password),
+        updated_by: updatedBy,
+        created_by: createdBy,
+        assigncsp: cspvalue,
+      }).map(([key, value]) => [key, String(value)])
+    );
+    
 
     console.log(payload,'data')
 
@@ -333,7 +334,7 @@ const Lhiuser = () => {
       setCspvalue(userData.assigncsp);
 
       setIsEdit(true);
-      console.log(response.data);
+
 
     } catch (error) {
       console.error("Error editing user:", error);
@@ -367,7 +368,7 @@ const Lhiuser = () => {
     // Set the comma-separated licare_codes value to be sent to the backend
     setCspvalue(licareCodes);
 
-    console.log(licareCodes, "%^&*"); // This will log the comma-separated licare_codes
+
   }
 
 
@@ -668,7 +669,7 @@ const Lhiuser = () => {
                       </div>
 
                     </div>
-                    {console.log(selected)}
+      
                     <div className="col-4">
                       <div className="mb-3">
                         <label htmlFor="LhiuserInput" className="input-field">
