@@ -349,12 +349,12 @@ const Location = () => {
                           <th scope="col" width="60%" className="text-left">
                             Title
                           </th>
-                          <th scope="col" width="15%" className="text-center">
+                          {roleaccess > 3 ?<th scope="col" width="15%" className="text-center">
                             Edit
-                          </th>
-                          <th scope="col" width="15%" className="text-center" disabled={roleaccess > 4 ? false : true}>
+                          </th> : null}
+                         {roleaccess > 4 ? <th scope="col" width="15%" className="text-center" disabled={roleaccess > 4 ? false : true}>
                             Delete
-                          </th>
+                          </th> : null}
                         </tr>
                       </thead>
                       <tbody>
@@ -364,28 +364,26 @@ const Location = () => {
                               {index + 1 + indexOfFirstUser}
                             </td>
                             <td className="align-middle">{item.title}</td>
-                            <td className="text-center align-middle">
+                            {roleaccess > 3 ?<td className="text-center align-middle">
                               <button
                                 className="btn btn-link text-primary"
                                 onClick={() => {
                                   edit(item.id);
                                 }}
-                                disabled={roleaccess > 3 ? false : true}
                                 title="Edit"
                               >
                                 <FaPencilAlt />
                               </button>
-                            </td>
-                            <td className="text-center align-middle">
+                            </td> : null}
+                            {roleaccess > 4 ? <td className="text-center align-middle">
                               <button
                                 className="btn btn-link text-danger"
                                 onClick={() => deleted(item.id)}
                                 title="Delete"
-                                disabled={roleaccess > 4 ? false : true}
                               >
                                 <FaTrash />
                               </button>
-                            </td>
+                            </td> : null}
                           </tr>
                         ))}
                       </tbody>

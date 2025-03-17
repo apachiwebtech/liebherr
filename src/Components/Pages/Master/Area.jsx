@@ -535,8 +535,8 @@ const Area = () => {
                         <th scope="col" width="14%" className='text-center'>Region</th>
                         <th scope="col" width="14%" className='text-center'>Geo State</th>
                         <th scope="col" width="14%" className='text-center'>District</th>
-                        <th scope="col" width="15%" className='text-center'>Edit</th>
-                        <th scope="col" width="15%" className='text-center'>Delete</th>
+                        {roleaccess > 3 ?<th scope="col" width="15%" className='text-center'>Edit</th> : null}
+                        {roleaccess > 4 ?<th scope="col" width="15%" className='text-center'>Delete</th> : null}
                       </tr>
                     </thead>
                     <tbody>
@@ -549,7 +549,7 @@ const Area = () => {
                             <td className='text-center'>{area.region_title}</td>
                             <td className='text-center'>{area.geostate_title}</td>
                             <td className='text-center'>{area.title}</td>
-                            <td className='text-center'>
+                            {roleaccess > 3 ?<td className='text-center'>
                               <button className="btn"
                                 style={{
                                   backgroundColor: "transparent",
@@ -562,8 +562,8 @@ const Area = () => {
                               >
                                 <FaPencilAlt />
                               </button>
-                            </td>
-                            <td className='text-center'>
+                            </td> : null}
+                           {roleaccess > 4 ? <td className='text-center'>
                               <button
                                 className="btn"
                                 style={{
@@ -575,7 +575,7 @@ const Area = () => {
                                 onClick={() => deleted(area.id)}
                                 disabled={roleaccess > 4 ? false : true}>
                                 <FaTrash style={{ cursor: 'pointer', color: 'red' }} />
-                              </button></td>
+                              </button></td> : null}
                           </tr>
                         ))}
                     </tbody>

@@ -38,10 +38,10 @@ const ProductType = () => {
           Authorization: token, // Send token in headers
         },
       });
-     // Decrypt the response data
-           const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
-           const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
-           const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+      // Decrypt the response data
+      const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+      const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+      const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
 
       console.log(decryptedData);
       setUsers(decryptedData);
@@ -353,8 +353,8 @@ const ProductType = () => {
                       <tr>
                         <th width="10%" className="text-center">#</th>
                         <th width="60%" className="text-left">Product Type</th>
-                        <th width="15%" className="text-center">Edit</th>
-                        <th width="15%" className="text-center">Delete</th>
+                        {roleaccess > 3 ?<th width="15%" className="text-center">Edit</th> : null}
+                        {roleaccess > 4 ?<th width="15%" className="text-center">Delete</th> : null}
                       </tr>
                     </thead>
                     <tbody>
@@ -362,17 +362,19 @@ const ProductType = () => {
                         <tr key={item.id}>
                           <td className="text-center">{index + 1 + indexOfFirstUser}</td>
                           <td>{item.product_type}</td>
-                          <td className="text-center">
+                          {roleaccess > 3 ? <td className="text-center">
                             <button
                               className="btn btn-link text-primary"
-                              onClick={() => edit(item.id)}
-                              title="Edit"
+                              onClick={() => {
+                                edit(item.id);
+                              }}
                               disabled={roleaccess > 3 ? false : true}
+                              title="Edit"
                             >
                               <FaPencilAlt />
                             </button>
-                          </td>
-                          <td className="text-center">
+                          </td> : null}
+                          {roleaccess > 4 ? <td className="text-center">
                             <button
                               className="btn btn-link text-danger"
                               onClick={() => deleted(item.id)}
@@ -381,7 +383,7 @@ const ProductType = () => {
                             >
                               <FaTrash />
                             </button>
-                          </td>
+                          </td> : null}
                         </tr>
                       ))}
                     </tbody>

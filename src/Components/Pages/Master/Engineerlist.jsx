@@ -269,14 +269,14 @@ export function Engineerlist(params) {
 
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
 
-                            <div className="p-1 text-right">
+                           {roleaccess > 2 ?<div className="p-1 text-right">
                                 <button
                                     className="btn btn-primary"
                                     onClick={() => navigate("/EngineerMaster")}
                                 >
                                     Add Engineer
                                 </button>
-                            </div>
+                            </div> : null}
                             <div className="row mb-3">
 
                                 <div className="col-md-2">
@@ -398,9 +398,9 @@ export function Engineerlist(params) {
                                         <th width="8%">Email</th>
                                         <th width="20%">Mobile Number</th>
                                         <th width="10%">Employee Code</th>
-                                        <th width="5%">Edit</th>
+                                        {roleaccess > 3 ?<th width="5%">Edit</th> : null}
                                         {/* <th width="5%">View</th> */}
-                                        <th width="5%">Status</th>
+                                       {roleaccess > 3 ? <th width="5%">Status</th> : null}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -415,7 +415,7 @@ export function Engineerlist(params) {
                                                 <td >{item.mobile_no}</td>
                                                 <td >{item.employee_code}</td>
 
-                                                <td >
+                                                {roleaccess > 3 ?<td >
                                                     <Link to={`/engineermaster/${item.id}`}> <button
                                                         className='btn'
                                                         title="Edit"
@@ -424,8 +424,8 @@ export function Engineerlist(params) {
                                                     >
                                                         <FaPencilAlt />
                                                     </button></Link>
-                                                </td>
-                                                <td style={{ padding: "10px" }}>
+                                                </td> : null}
+                                                {roleaccess > 3 ?<td style={{ padding: "10px" }}>
                                                     <label class="switch">
                                                         <input
                                                             type="checkbox"
@@ -439,7 +439,7 @@ export function Engineerlist(params) {
                                                         <span class="slider round"></span>
                                                     </label>
 
-                                                </td>
+                                                </td> : null}
                                             </tr>
                                         )
                                     })}

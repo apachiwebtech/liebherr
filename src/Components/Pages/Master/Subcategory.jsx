@@ -382,8 +382,8 @@ const Subcategory = () => {
                         <th width="10%" className="text-center">#</th>
                         <th width="30%" className="text-left">Category</th>
                         <th width="30%" className="text-left">Subcategory</th>
-                        <th width="15%" className="text-center">Edit</th>
-                        <th width="15%" className="text-center">Delete</th>
+                        {roleaccess > 3 ?<th width="15%" className="text-center">Edit</th> : null}
+                        {roleaccess > 4 ?<th width="15%" className="text-center">Delete</th> : null}
                       </tr>
                     </thead>
                     <tbody>
@@ -392,7 +392,7 @@ const Subcategory = () => {
                           <td className="text-center">{index + 1 + indexOfFirstUser}</td>
                           <td>{item.category_title}</td>
                           <td>{item.title}</td>
-                          <td className="text-center">
+                          {roleaccess > 3 ?<td className="text-center">
                             <button
                               className="btn btn-link text-primary"
                               onClick={() => {
@@ -403,8 +403,8 @@ const Subcategory = () => {
                             >
                               <FaPencilAlt />
                             </button>
-                          </td>
-                          <td className="text-center">
+                          </td> : null}
+                          {roleaccess > 4 ?<td className="text-center">
                             <button
                               className="btn btn-link text-danger"
                               onClick={() => deleted(item.id)}
@@ -413,7 +413,7 @@ const Subcategory = () => {
                             >
                               <FaTrash />
                             </button>
-                          </td>
+                          </td> : null}
                         </tr>
                       ))}
                     </tbody>

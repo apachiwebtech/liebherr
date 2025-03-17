@@ -367,8 +367,8 @@ const ProductLine = () => {
                         <th width="10%" className="text-center">#</th>
                         <th width="20%" className="text-left">Pline Code</th>
                         <th width="40%" className="text-left">Product Line</th>
-                        <th width="15%" className="text-center">Edit</th>
-                        <th width="15%" className="text-center">Delete</th>
+                        {roleaccess > 3 ? <th width="15%" className="text-center">Edit</th> : null}
+                        {roleaccess > 4 ? <th width="15%" className="text-center">Delete</th> : null}
                       </tr>
                     </thead>
                     <tbody>
@@ -377,17 +377,19 @@ const ProductLine = () => {
                           <td className="text-center">{index + 1 + indexOfFirstUser}</td>
                           <td>{item.pline_code}</td>
                           <td>{item.product_line}</td>
-                          <td className="text-center">
+                          {roleaccess > 3 ? <td className="text-center">
                             <button
                               className="btn btn-link text-primary"
-                              onClick={() => edit(item.id)}
-                              title="Edit"
+                              onClick={() => {
+                                edit(item.id);
+                              }}
                               disabled={roleaccess > 3 ? false : true}
+                              title="Edit"
                             >
                               <FaPencilAlt />
                             </button>
-                          </td>
-                          <td className="text-center">
+                          </td> : null}
+                          {roleaccess > 4 ? <td className="text-center">
                             <button
                               className="btn btn-link text-danger"
                               onClick={() => deleted(item.id)}
@@ -396,7 +398,7 @@ const ProductLine = () => {
                             >
                               <FaTrash />
                             </button>
-                          </td>
+                          </td> : null}
                         </tr>
                       ))}
                     </tbody>

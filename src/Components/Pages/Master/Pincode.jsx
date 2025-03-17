@@ -508,12 +508,8 @@ const Pincode = () => {
                         <th scope="col" width="12%" className='text-center'>District</th>
                         <th scope="col" width="11%" className='text-center'>Geo City</th>
                         <th scope="col" width="12%" className='text-center'>Pincode</th>
-                        <th scope="col" width="15%" className='text-center'>
-                          Edit
-                        </th>
-                        <th scope="col" width="15%" className='text-center'>
-                          Delete
-                        </th>
+                        {roleaccess > 3 ?<th scope='col' width="15%" className='text-center'>Edit</th> : null}
+                        {roleaccess > 4 ?<th scope='col' width="15%" className='text-center'>Delete</th> : null}
                       </tr>
                     </thead>
                     <tbody>
@@ -545,12 +541,33 @@ const Pincode = () => {
                             <td className="text-center">
                               {pincode.pincode}
                             </td>
-                            <td className='text-center'>
-                              <FaPencilAlt style={{ cursor: 'pointer', color: 'blue' }} onClick={() => edit(pincode.id)} disabled={roleaccess > 3 ? false : true} />
-                            </td>
-                            <td className='text-center'>
-                              <FaTrash style={{ cursor: 'pointer', color: 'red' }} onClick={() => deleted(pincode.id)} disabled={roleaccess > 4 ? false : true} />
-                            </td>
+                            {roleaccess > 3 ? <td className='text-center'>
+                              <button className="btn"
+                                style={{
+                                  backgroundColor: "transparent",
+                                  border: "none",
+                                  color: "blue",
+                                  fontSize: "20px",
+                                }}
+                                onClick={() => edit(pincode.id)}
+                              >
+                                <FaPencilAlt />
+                              </button>
+                            </td> : null}
+                            {roleaccess > 4 ? <td className='text-center'>
+                              <button
+                                className="btn"
+                                style={{
+                                  backgroundColor: "transparent",
+                                  border: "none",
+                                  color: "red",
+                                  fontSize: "20px",
+                                }}
+                                onClick={() => deleted(pincode.id)}
+                              >
+                                <FaTrash style={{ cursor: 'pointer', color: 'red' }} />
+                              </button>
+                            </td> : null}
                           </tr>
                         ))}
                     </tbody>

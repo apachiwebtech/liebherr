@@ -427,7 +427,7 @@ export function Franchisemasterlist(params) {
                     <th width="8%">Region</th>
                     <th width="8%">State</th>
                     <th width="8%">District</th>
-                    <th width="5%">Edit</th>
+                    <th width="5%">View</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -453,7 +453,7 @@ export function Franchisemasterlist(params) {
                             onClick={() => sendtoedit(item.id)}
                             title="Edit"
                             style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                            disabled={roleaccess > 3 ? false : true}
+                            
                           >
                             <FaEye />
                           </button>

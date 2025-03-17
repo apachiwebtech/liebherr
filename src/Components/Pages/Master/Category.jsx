@@ -323,8 +323,8 @@ const Category = () => {
                       <tr>
                         <th width="10%" className="text-center">#</th>
                         <th width="60%" className="text-left">Title</th>
-                        <th width="10%" className="text-center">Edit</th>
-                        <th width="10%" className="text-center">Delete</th>
+                        {roleaccess > 3 ? <th width="10%" className="text-center">Edit</th> : null}
+                        {roleaccess > 4 ? <th width="10%" className="text-center">Delete</th> : null}
                       </tr>
                     </thead>
                     <tbody>
@@ -332,29 +332,29 @@ const Category = () => {
                         <tr key={item.id}>
                           <td className="text-center">{index + 1 + indexOfFirstUser}</td>
                           <td>{item.title}</td>
-                          <td className="text-center">
+                          {roleaccess > 3 ? <td className="text-center">
                             <button
                               className="btn btn-link text-primary"
                               onClick={() => {
                                 edit(item.id);
                               }}
-                              disabled={roleaccess > 3 ? false : true}
+
 
                               title="Edit"
                             >
                               <FaPencilAlt />
                             </button>
-                          </td>
-                          <td className="text-center">
+                          </td> : null}
+                          {roleaccess > 4 ? <td className="text-center">
                             <button
                               className="btn btn-link text-danger"
                               onClick={() => deleted(item.id)}
                               title="Delete"
-                              disabled={roleaccess > 4 ? false : true}
+
                             >
                               <FaTrash />
                             </button>
-                          </td>
+                          </td> : null}
                         </tr>
                       ))}
                     </tbody>

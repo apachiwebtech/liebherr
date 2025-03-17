@@ -826,7 +826,7 @@ export function Complaintlist(params) {
                       <th>Assigned Users</th>
                       <th>Status</th>
                       <th>Call Priority</th>
-                      <th>Edit</th>
+                      {roleaccess > 3 ? <th>Edit</th> : null}
                       <th>View</th>
                     </tr>
                   </thead>
@@ -849,8 +849,8 @@ export function Complaintlist(params) {
                           <td style={rowStyle}>{item.assigned_to}</td>
                           <td style={rowStyle}>{item.call_status}</td>
                           <td style={rowStyle}>{item.call_priority}</td>
-                          <td style={rowStyle}>
-                            {roleaccess > 3 ? <button
+                          {roleaccess > 3 ? <td style={rowStyle}>
+                            <button
                               className='btn'
                               // onClick={() => navigate(`/registercomaplaint/${item.ticket_no}`)}
                               onClick={() => sendtoedit(item.ticket_no)}
@@ -866,8 +866,8 @@ export function Complaintlist(params) {
 
                             >
                               <FaPencilAlt />
-                            </button> : null}
-                          </td>
+                            </button>
+                          </td> : null}
                           <td style={rowStyle}>
                             <button
                               className='btn'

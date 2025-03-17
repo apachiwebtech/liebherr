@@ -546,7 +546,7 @@ const Geocity = () => {
                         <th scope="col" width="19%" className="text-center">Geo State</th>
                         <th scope="col" width="19%" className="text-center">District</th>
                         <th scope="col" width="19%" className="text-center">Geo City</th>
-                        <th scope="col" width="25%" className="text-center">Actions</th>
+                       {roleaccess > 3 ?<th scope="col" width="25%" className='text-center'>Actions</th> : null}
                       </tr>
                     </thead>
                     <tbody>
@@ -560,8 +560,8 @@ const Geocity = () => {
                             <td className="text-center">{user.geostate_title}</td>
                             <td className="text-center">{user.district_title}</td>
                             <td className="text-center">{user.title}</td>
-                            <td className='text-center'>
-                              <button className="btn"
+                            {roleaccess > 3 ?<td className='text-center'>
+                              {roleaccess > 3 ?<button className="btn"
                                 style={{
                                   backgroundColor: "transparent",
                                   border: "none",
@@ -572,8 +572,8 @@ const Geocity = () => {
                                 disabled={roleaccess > 3 ? false : true}
                               >
                                 <FaPencilAlt />
-                              </button>
-                              <button
+                              </button> : null}
+                              {roleaccess > 4 ? <button
                               className="btn"
                               style={{
                                 backgroundColor: "transparent",
@@ -584,8 +584,8 @@ const Geocity = () => {
                               onClick={() => deleted(user.id)}
                               disabled={roleaccess > 4 ? false : true}>
                               <FaTrash style={{ cursor: 'pointer', color: 'red' }} />
-                            </button>
-                          </td>
+                            </button> : null}
+                          </td> : null}
                           </tr>
                         ))}
                   </tbody>

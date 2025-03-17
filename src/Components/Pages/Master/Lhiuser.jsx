@@ -769,17 +769,17 @@ const Lhiuser = () => {
                           Full Name
                         </th>
 
-                        <th style={{ padding: "12px 0px", textAlign: "center" }}>
+                        {roleaccess > 3 ?<th style={{ padding: "12px 0px", textAlign: "center" }}>
                           Status
-                        </th>
+                        </th> : null}
                         <th style={{ padding: "12px 0px", textAlign: "center" }}>
                           Activation date
                         </th>
 
 
-                        <th style={{ padding: "12px 0px", textAlign: "center" }}>
+                       {roleaccess > 3 ?<th style={{ padding: "12px 0px", textAlign: "center" }}>
                           Edit
-                        </th>
+                        </th> : null}
 
                       </tr>
                     </thead>
@@ -794,7 +794,7 @@ const Lhiuser = () => {
 
                           <td style={{ padding: "10px" }}>{item.Lhiuser}</td>
 
-                          <td style={{ padding: "10px" }}>
+                          {roleaccess > 3 ?<td style={{ padding: "10px" }}>
                             <label class="switch">
                               <input
                                 type="checkbox"
@@ -808,11 +808,11 @@ const Lhiuser = () => {
                               <span class="slider round"></span>
                             </label>
 
-                          </td>
+                          </td> : null}
                           <td style={{ padding: "10px" }}>{item.Lhiuser}</td>
 
 
-                          <td style={{ padding: "0px", textAlign: "center" }}>
+                          { roleaccess > 3 ?<td style={{ padding: "0px", textAlign: "center" }}>
                             <button
                               className="btn"
                               onClick={() => {
@@ -826,11 +826,10 @@ const Lhiuser = () => {
                                 color: "blue",
                                 fontSize: "20px",
                               }}
-                              disabled={roleaccess > 3 ? false : true}
-                            >
+                              >
                               <FaPencilAlt />
                             </button>
-                          </td>
+                          </td> : null}
 
                         </tr>
                       ))}
