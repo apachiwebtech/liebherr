@@ -1,17 +1,59 @@
-import React, { useEffect,useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import Lhiuser from "./Lhiuser";
 import { Link } from "react-router-dom";
+import { Base_Url, secretKey } from '../../Utils/Base_Url';
+import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
+import CryptoJS from 'crypto-js';
+import axios from "axios";
 
 function Lhiusertabs() {
   const [activeTab, setActiveTab] = useState('/Lhiuser');
- 
-   useEffect(() => {
- 
-     setActiveTab(window.location.pathname);
- 
-   }, [window.location.pathname]);
+  const [status, setStatus] = useState([])
+  const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    getpageroledata()
+    setActiveTab(window.location.pathname);
+
+  }, [window.location.pathname]);
+
+
+
+  const Decrypt = (encrypted) => {
+    encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+    const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+    return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+  };
+
+
+  async function getpageroledata() {
+
+    const storedEncryptedRole = localStorage.getItem("Userrole");
+    const decryptedRole = Decrypt(storedEncryptedRole);
+
+    const data = {
+      role: decryptedRole,
+      lhiuserpage: '27',
+      rolepage: '28',
+      roleassignpage: '29',
+    }
+
+
+    axios.post(`${Base_Url}/getlhiuserroledata`, data, {
+      headers: {
+        Authorization: token, // Send token in headers
+      },
+    })
+      .then((res) => {
+        setStatus(res.data)
+      })
+      .then((err) => {
+        console.log(err)
+      })
+  }
+
 
   return (
     <>
@@ -41,65 +83,69 @@ function Lhiusertabs() {
         `}
       </style>
 
-    <div className="container-fluid p-0">
-           {/* Top Header */}
-           <div className="text-left headings">
-             <span style={{ paddingLeft: "20px",color:'#FFFFFF' }}>LHI USER MASTER</span>
-           </div>
-   
-           {/* Nav Tabs */}
-           <div class="row">
-             <div className="container-fluid">
-               <div className="col-sm-6 p-0" style={{ width: "100%" }}>
-                 <div
-                   className="tabsMenu"
-                   style={{
-                     fontSize: "14px",
-                     marginLeft: "12px",
-                     fontWeight: "600",
-                     fontFamily: "Nunito",
-                   }}
-                 >
-                   <ul className="nav nav-tabs ">
-                     <li className="nav-item">
-                       <Link to={`/Lhiuser`}><button
-                         className={`nav-link ${
-                           activeTab === "/Lhiuser" ? "active" : "onClick={() => setActiveTab('Lhiuser')}"
-                         }`}
-                         
-                       >
-                         LHI USER
-                       </button></Link>
-                     </li>
-                     <li className="nav-item">
-                     <Link to={`/Roleright`}><button
-                         className={`nav-link ${
-                           activeTab === "/Roleright" ? "active" : "onClick={() => setActiveTab('Roleright')}"
-                         }`}
-                         
-                       >
-                         ROLE RIGHTS
-                       </button></Link>
-                     </li>
-                    
-                     <li className="nav-item">
-                     <Link to={`/Roleassign`}><button
-                         className={`nav-link ${
-                           activeTab === "/Roleassign" ? "active" : "onClick={() => setActiveTab('Roleassign')}"
-                         }`}
-                         
-                       >
+      <div className="container-fluid p-0">
+        {/* Top Header */}
+        <div className="text-left headings">
+          <span style={{ paddingLeft: "20px", color: '#FFFFFF' }}>LHI USER MASTER</span>
+        </div>
+
+        {/* Nav Tabs */}
+        <div class="row">
+          <div className="container-fluid">
+            <div className="col-sm-6 p-0" style={{ width: "100%" }}>
+              <div
+                className="tabsMenu"
+                style={{
+                  fontSize: "14px",
+                  marginLeft: "12px",
+                  fontWeight: "600",
+                  fontFamily: "Nunito",
+                }}
+              >
+                <ul className="nav nav-tabs ">
+                  {status.lhiuserpage == 1 &&
+                    <li className="nav-item">
+                      <Link to={`/Lhiuser`}><button
+                        className={`nav-link ${activeTab === "/Lhiuser" ? "active" : "onClick={() => setActiveTab('Lhiuser')}"
+                          }`}
+
+                      >
+                        LHI USER
+                      </button></Link>
+                    </li>
+                  }
+                  {status.rolepage == 1 &&
+                    <li className="nav-item">
+                      <Link to={`/Roleright`}><button
+                        className={`nav-link ${activeTab === "/Roleright" ? "active" : "onClick={() => setActiveTab('Roleright')}"
+                          }`}
+
+                      >
+                        ROLE RIGHTS
+                      </button></Link>
+                    </li>
+                  }
+
+                  {status.roleassignpage == 1 &&
+                    <li className="nav-item">
+                      <Link to={`/Roleassign`}><button
+                        className={`nav-link ${activeTab === "/Roleassign" ? "active" : "onClick={() => setActiveTab('Roleassign')}"
+                          }`}
+
+                      >
                         ROLE ASSIGN
-                       </button></Link>
-                     </li>
-                   </ul>
-                 </div>
-   
-   
-               </div>
-             </div>
-           </div>
-         </div>
+                      </button></Link>
+                    </li>
+                  }
+
+                </ul>
+              </div>
+
+
+            </div>
+          </div>
+        </div>
+      </div>
     </>
   );
 }

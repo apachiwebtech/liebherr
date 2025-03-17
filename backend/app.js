@@ -28,7 +28,7 @@ const secretKey = process.env.SECRET_KEY
 app.use(cors({ origin: process.env.ORIGIN }));
 //app.use(cors({ origin: "*" }));
 
-app.use(express.json({ limit: '500mb' , strict : false }));
+app.use(express.json({ limit: '500mb', strict: false }));
 app.use(express.urlencoded({ extended: true, limit: '500mb' }));
 app.use(bodyParser.urlencoded({ extended: true }));
 //app.use(fileUpload());
@@ -407,7 +407,7 @@ app.get('/send-spare', authenticateToken, async (req, res) => {
 
 
 app.post("/loginuser", async (req, res) => {
-  
+
   const { Lhiuser, password } = req.body;
 
   try {
@@ -4294,7 +4294,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
 
 
-          const productSQL = `INSERT INTO awt_uniqueproductmaster (
+        const productSQL = `INSERT INTO awt_uniqueproductmaster (
         CustomerID, ModelNumber, serial_no,  pincode ,address,state,city,district ,purchase_date, created_date, created_by,customer_classification
        )
        VALUES (
@@ -4303,21 +4303,21 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
 
 
-          await pool.request()
-            .input('customer_id', newcustid)
-            .input('model', model)
-            .input('created_by', created_by)
-            .input('serial', serial)
-            .input('purchase_date', purchase_date)
-            .input('pincode', pincode)
-            .input('formattedDate', formattedDate)
-            .input('address', address)
-            .input('area', area)
-            .input('state', state)
-            .input('city', city)
-            .input('customer_classification', classification)
-            .query(productSQL);
-        
+        await pool.request()
+          .input('customer_id', newcustid)
+          .input('model', model)
+          .input('created_by', created_by)
+          .input('serial', serial)
+          .input('purchase_date', purchase_date)
+          .input('pincode', pincode)
+          .input('formattedDate', formattedDate)
+          .input('address', address)
+          .input('area', area)
+          .input('state', state)
+          .input('city', city)
+          .input('customer_classification', classification)
+          .query(productSQL);
+
       }
 
       if ((cust_id == '' || cust_id == 'undefined')) {
@@ -11230,7 +11230,7 @@ app.post('/getRoleData', authenticateToken, async (req, res) => {
 });
 
 
-app.post('/getpageroledata', authenticateToken,async (req, res) => {
+app.post('/getpageroledata', authenticateToken, async (req, res) => {
   const {
     role,
     masterpageid, ticketpageid, quotationpageid, enquirypageid, reportpageid,
@@ -11309,8 +11309,8 @@ app.post('/getpageroledata', authenticateToken,async (req, res) => {
   }
 });
 
-app.post('/getlocationroledata',authenticateToken ,async (req, res) => {
-  const {role,countrypage, regionpage, geostatepage, districtpage, geocitypage,pincodepage} = req.body;
+app.post('/getlocationroledata', authenticateToken, async (req, res) => {
+  const { role, countrypage, regionpage, geostatepage, districtpage, geocitypage, pincodepage } = req.body;
 
   // Function to convert comma-separated strings into arrays
   const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
@@ -11367,8 +11367,8 @@ app.post('/getlocationroledata',authenticateToken ,async (req, res) => {
   }
 });
 
-app.post('/getallocationroledata',authenticateToken ,async (req, res) => {
-  const {role,allocationpage,shipmentfgpage,shipmentpartpage} = req.body;
+app.post('/getallocationroledata', authenticateToken, async (req, res) => {
+  const { role, allocationpage, shipmentfgpage, shipmentpartpage } = req.body;
 
   // Function to convert comma-separated strings into arrays
   const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
@@ -11423,8 +11423,335 @@ app.post('/getallocationroledata',authenticateToken ,async (req, res) => {
   }
 });
 
-app.post('/getproductroledata',authenticateToken ,async (req, res) => {
-  const {role,categorypage,subcatpage,producttypepage,productlinepage,materialpage,manufacturerpage,productspage} = req.body;
+app.post('/getcustomerroledata', authenticateToken, async (req, res) => {
+  const { role, customerpage, customerlistpage } = req.body;
+
+  // Function to convert comma-separated strings into arrays
+  const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
+
+  // Convert all page IDs from strings to arrays
+  const pageTypes = {
+    customerlistpage: parseIds(customerlistpage),
+    customerpage: parseIds(customerpage),
+  };
+
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+    request.input("roleid", sql.Int, role);
+
+    let queryParts = [];
+    let index = 0;
+
+    for (const [pageType, pageIds] of Object.entries(pageTypes)) {
+      if (pageIds.length > 0) {
+        let pageParams = pageIds.map((_, i) => `@pageid${index + i}`).join(",");
+        queryParts.push(`
+          SELECT '${pageType}' AS pageType, COUNT(*) AS count
+          FROM pagerole
+          WHERE roleid = @roleid AND pageid IN (${pageParams}) AND accessid > 1
+        `);
+        pageIds.forEach((id, i) => request.input(`pageid${index + i}`, sql.Int, id));
+        index += pageIds.length;
+      }
+    }
+
+    if (queryParts.length === 0) {
+      return res.json(Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])));
+    }
+
+    const query = queryParts.join(" UNION ALL ");
+    const result = await request.query(query);
+
+    // Convert results to a key-value format
+    const response = Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])); // Default all pages to 0
+
+    result.recordset.forEach(row => {
+      response[row.pageType] = row.count > 0 ? 1 : 0;
+    });
+
+    return res.json(response);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
+
+app.post('/getbussinessroledata', authenticateToken, async (req, res) => {
+  const { role, bussinesspage } = req.body;
+
+  // Function to convert comma-separated strings into arrays
+  const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
+
+  // Convert all page IDs from strings to arrays
+  const pageTypes = {
+    bussinesspage: parseIds(bussinesspage),
+  };
+
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+    request.input("roleid", sql.Int, role);
+
+    let queryParts = [];
+    let index = 0;
+
+    for (const [pageType, pageIds] of Object.entries(pageTypes)) {
+      if (pageIds.length > 0) {
+        let pageParams = pageIds.map((_, i) => `@pageid${index + i}`).join(",");
+        queryParts.push(`
+          SELECT '${pageType}' AS pageType, COUNT(*) AS count
+          FROM pagerole
+          WHERE roleid = @roleid AND pageid IN (${pageParams}) AND accessid > 1
+        `);
+        pageIds.forEach((id, i) => request.input(`pageid${index + i}`, sql.Int, id));
+        index += pageIds.length;
+      }
+    }
+
+    if (queryParts.length === 0) {
+      return res.json(Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])));
+    }
+
+    const query = queryParts.join(" UNION ALL ");
+    const result = await request.query(query);
+
+    // Convert results to a key-value format
+    const response = Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])); // Default all pages to 0
+
+    result.recordset.forEach(row => {
+      response[row.pageType] = row.count > 0 ? 1 : 0;
+    });
+
+    return res.json(response);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
+
+app.post('/getfranchiseroledata', authenticateToken, async (req, res) => {
+  const { role, masterfpage, childfpage, childlistpage, engineerpage, engineerlistpage } = req.body;
+
+  // Function to convert comma-separated strings into arrays
+  const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
+
+  // Convert all page IDs from strings to arrays
+  const pageTypes = {
+    masterfpage: parseIds(masterfpage),
+    childfpage: parseIds(childfpage),
+    childlistpage: parseIds(childlistpage),
+    engineerpage: parseIds(engineerpage),
+    engineerlistpage: parseIds(engineerlistpage),
+  };
+
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+    request.input("roleid", sql.Int, role);
+
+    let queryParts = [];
+    let index = 0;
+
+    for (const [pageType, pageIds] of Object.entries(pageTypes)) {
+      if (pageIds.length > 0) {
+        let pageParams = pageIds.map((_, i) => `@pageid${index + i}`).join(",");
+        queryParts.push(`
+          SELECT '${pageType}' AS pageType, COUNT(*) AS count
+          FROM pagerole
+          WHERE roleid = @roleid AND pageid IN (${pageParams}) AND accessid > 1
+        `);
+        pageIds.forEach((id, i) => request.input(`pageid${index + i}`, sql.Int, id));
+        index += pageIds.length;
+      }
+    }
+
+    if (queryParts.length === 0) {
+      return res.json(Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])));
+    }
+
+    const query = queryParts.join(" UNION ALL ");
+    const result = await request.query(query);
+
+    // Convert results to a key-value format
+    const response = Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])); // Default all pages to 0
+
+    result.recordset.forEach(row => {
+      response[row.pageType] = row.count > 0 ? 1 : 0;
+    });
+
+    return res.json(response);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
+
+app.post('/getcallstatusroledata', authenticateToken, async (req, res) => {
+  const { role, callstatuspage, subcallstatuspage } = req.body;
+
+  // Function to convert comma-separated strings into arrays
+  const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
+
+  // Convert all page IDs from strings to arrays
+  const pageTypes = {
+    callstatuspage: parseIds(callstatuspage),
+    subcallstatuspage: parseIds(subcallstatuspage),
+  };
+
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+    request.input("roleid", sql.Int, role);
+
+    let queryParts = [];
+    let index = 0;
+
+    for (const [pageType, pageIds] of Object.entries(pageTypes)) {
+      if (pageIds.length > 0) {
+        let pageParams = pageIds.map((_, i) => `@pageid${index + i}`).join(",");
+        queryParts.push(`
+          SELECT '${pageType}' AS pageType, COUNT(*) AS count
+          FROM pagerole
+          WHERE roleid = @roleid AND pageid IN (${pageParams}) AND accessid > 1
+        `);
+        pageIds.forEach((id, i) => request.input(`pageid${index + i}`, sql.Int, id));
+        index += pageIds.length;
+      }
+    }
+
+    if (queryParts.length === 0) {
+      return res.json(Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])));
+    }
+
+    const query = queryParts.join(" UNION ALL ");
+    const result = await request.query(query);
+
+    // Convert results to a key-value format
+    const response = Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])); // Default all pages to 0
+
+    result.recordset.forEach(row => {
+      response[row.pageType] = row.count > 0 ? 1 : 0;
+    });
+
+    return res.json(response);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
+
+app.post('/getlhiuserroledata', authenticateToken, async (req, res) => {
+  const { role, lhiuserpage, rolepage, roleassignpage } = req.body;
+
+  // Function to convert comma-separated strings into arrays
+  const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
+
+  // Convert all page IDs from strings to arrays
+  const pageTypes = {
+    lhiuserpage: parseIds(lhiuserpage),
+    rolepage: parseIds(rolepage),
+    roleassignpage: parseIds(roleassignpage)
+  };
+
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+    request.input("roleid", sql.Int, role);
+
+    let queryParts = [];
+    let index = 0;
+
+    for (const [pageType, pageIds] of Object.entries(pageTypes)) {
+      if (pageIds.length > 0) {
+        let pageParams = pageIds.map((_, i) => `@pageid${index + i}`).join(",");
+        queryParts.push(`
+          SELECT '${pageType}' AS pageType, COUNT(*) AS count
+          FROM pagerole
+          WHERE roleid = @roleid AND pageid IN (${pageParams}) AND accessid > 1
+        `);
+        pageIds.forEach((id, i) => request.input(`pageid${index + i}`, sql.Int, id));
+        index += pageIds.length;
+      }
+    }
+
+    if (queryParts.length === 0) {
+      return res.json(Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])));
+    }
+
+    const query = queryParts.join(" UNION ALL ");
+    const result = await request.query(query);
+
+    // Convert results to a key-value format
+    const response = Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])); // Default all pages to 0
+
+    result.recordset.forEach(row => {
+      response[row.pageType] = row.count > 0 ? 1 : 0;
+    });
+
+    return res.json(response);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
+
+app.post('/getserviceroledata', authenticateToken, async (req, res) => {
+  const { role, servicecontractpage, servicelistpage } = req.body;
+
+  // Function to convert comma-separated strings into arrays
+  const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
+
+  // Convert all page IDs from strings to arrays
+  const pageTypes = {
+    servicecontractpage: parseIds(servicecontractpage),
+    servicelistpage: parseIds(servicelistpage),
+  };
+
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+    request.input("roleid", sql.Int, role);
+
+    let queryParts = [];
+    let index = 0;
+
+    for (const [pageType, pageIds] of Object.entries(pageTypes)) {
+      if (pageIds.length > 0) {
+        let pageParams = pageIds.map((_, i) => `@pageid${index + i}`).join(",");
+        queryParts.push(`
+          SELECT '${pageType}' AS pageType, COUNT(*) AS count
+          FROM pagerole
+          WHERE roleid = @roleid AND pageid IN (${pageParams}) AND accessid > 1
+        `);
+        pageIds.forEach((id, i) => request.input(`pageid${index + i}`, sql.Int, id));
+        index += pageIds.length;
+      }
+    }
+
+    if (queryParts.length === 0) {
+      return res.json(Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])));
+    }
+
+    const query = queryParts.join(" UNION ALL ");
+    const result = await request.query(query);
+
+    // Convert results to a key-value format
+    const response = Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])); // Default all pages to 0
+
+    result.recordset.forEach(row => {
+      response[row.pageType] = row.count > 0 ? 1 : 0;
+    });
+
+    return res.json(response);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
+
+app.post('/getproductroledata', authenticateToken, async (req, res) => {
+  const { role, categorypage, subcatpage, producttypepage, productlinepage, materialpage, manufacturerpage, productspage } = req.body;
 
   // Function to convert comma-separated strings into arrays
   const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
@@ -11438,6 +11765,115 @@ app.post('/getproductroledata',authenticateToken ,async (req, res) => {
     materialpage: parseIds(materialpage),
     manufacturerpage: parseIds(manufacturerpage),
     productspage: parseIds(productspage),
+  };
+
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+    request.input("roleid", sql.Int, role);
+
+    let queryParts = [];
+    let index = 0;
+
+    for (const [pageType, pageIds] of Object.entries(pageTypes)) {
+      if (pageIds.length > 0) {
+        let pageParams = pageIds.map((_, i) => `@pageid${index + i}`).join(",");
+        queryParts.push(`
+          SELECT '${pageType}' AS pageType, COUNT(*) AS count
+          FROM pagerole
+          WHERE roleid = @roleid AND pageid IN (${pageParams}) AND accessid > 1
+        `);
+        pageIds.forEach((id, i) => request.input(`pageid${index + i}`, sql.Int, id));
+        index += pageIds.length;
+      }
+    }
+
+    if (queryParts.length === 0) {
+      return res.json(Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])));
+    }
+
+    const query = queryParts.join(" UNION ALL ");
+    const result = await request.query(query);
+
+    // Convert results to a key-value format
+    const response = Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])); // Default all pages to 0
+
+    result.recordset.forEach(row => {
+      response[row.pageType] = row.count > 0 ? 1 : 0;
+    });
+
+    return res.json(response);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
+app.post('/getfaultroledata', authenticateToken, async (req, res) => {
+  const { role, defectgrouppage, typedefectpage, sitedefectpage, activitypage } = req.body;
+
+  // Function to convert comma-separated strings into arrays
+  const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
+
+  // Convert all page IDs from strings to arrays
+  const pageTypes = {
+    defectgrouppage: parseIds(defectgrouppage),
+    typedefectpage: parseIds(typedefectpage),
+    sitedefectpage: parseIds(sitedefectpage),
+    activitypage: parseIds(activitypage),
+  };
+
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+    request.input("roleid", sql.Int, role);
+
+    let queryParts = [];
+    let index = 0;
+
+    for (const [pageType, pageIds] of Object.entries(pageTypes)) {
+      if (pageIds.length > 0) {
+        let pageParams = pageIds.map((_, i) => `@pageid${index + i}`).join(",");
+        queryParts.push(`
+          SELECT '${pageType}' AS pageType, COUNT(*) AS count
+          FROM pagerole
+          WHERE roleid = @roleid AND pageid IN (${pageParams}) AND accessid > 1
+        `);
+        pageIds.forEach((id, i) => request.input(`pageid${index + i}`, sql.Int, id));
+        index += pageIds.length;
+      }
+    }
+
+    if (queryParts.length === 0) {
+      return res.json(Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])));
+    }
+
+    const query = queryParts.join(" UNION ALL ");
+    const result = await request.query(query);
+
+    // Convert results to a key-value format
+    const response = Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])); // Default all pages to 0
+
+    result.recordset.forEach(row => {
+      response[row.pageType] = row.count > 0 ? 1 : 0;
+    });
+
+    return res.json(response);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
+app.post('/getratecardroledata', authenticateToken, async (req, res) => {
+  const { role, ratecardpage, masterpage, postsalepage } = req.body;
+
+  // Function to convert comma-separated strings into arrays
+  const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
+
+  // Convert all page IDs from strings to arrays
+  const pageTypes = {
+    ratecardpage: parseIds(ratecardpage),
+    masterpage: parseIds(masterpage),
+    postsalepage: parseIds(postsalepage),
   };
 
   try {
@@ -11495,7 +11931,7 @@ app.post('/assign_role', authenticateToken, async (req, res) => {
     // Prepare values for bulk insert
     const updatesql = `update pagerole set accessid = '${accessid}' ,pageid = '${pageid}',roleid = '${roleid}' where id = ${id}`;
 
-    console.log(updatesql , "#$%^&")
+    console.log(updatesql, "#$%^&")
 
     await pool.request().query(updatesql)
 
@@ -11578,14 +12014,31 @@ app.post('/assign_role', authenticateToken, async (req, res) => {
 
 app.post("/getcomplainticketdump", authenticateToken, async (req, res) => {
 
-  const { startDate, endDate } = req.body;
+  const { startDate, endDate, licare_code } = req.body;
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
+    const getcsp = `select * from lhi_user where Usercode = '${licare_code}'`
 
-    const sql = `Select id,ticket_no,ticket_date,customer_id,customer_name,customer_mobile,alt_mobile,customer_email,ModelNumber,serial_no, address, region, state, city, area, pincode, sevice_partner, msp, csp, sales_partner, assigned_to, engineer_code, engineer_id, ticket_type, call_type , sub_call_status, call_status, warranty_status, invoice_date, mode_of_contact, customer_class, call_priority, closed_date, created_date, created_by,deleted From complaint_ticket where deleted = 0  AND ticket_date >= '${startDate}' AND ticket_date <= '${endDate}'`
 
-    console.log(sql, "$$$")
+    const getcspresilt = await pool.request().query(getcsp)
+
+    const assigncsp = getcspresilt.recordset[0].assigncsp
+
+    let sql;
+
+
+    sql = `Select id,ticket_no,ticket_date,customer_id,customer_name,customer_mobile,alt_mobile,customer_email,ModelNumber,serial_no, address, region, state, city, area, pincode, sevice_partner, msp, csp, sales_partner, assigned_to, engineer_code, engineer_id, ticket_type, call_type , sub_call_status, call_status, warranty_status, invoice_date, mode_of_contact, customer_class, call_priority, closed_date, created_date, created_by,deleted From complaint_ticket where deleted = 0  AND ticket_date >= '${startDate}' AND ticket_date <= '${endDate}'`
+
+
+    if (assigncsp !== 'ALL') {
+      // Convert to an array and wrap each value in single quotes
+      const formattedCspList = assigncsp.split(",").map(csp => `'${csp.trim()}'`).join(",");
+
+      // Directly inject the formatted values into the SQL query
+      sql += ` AND csp IN (${formattedCspList})`;
+    }
+
 
 
     const result = await pool.request().query(sql);

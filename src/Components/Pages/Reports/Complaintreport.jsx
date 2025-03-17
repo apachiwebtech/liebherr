@@ -19,6 +19,7 @@ const Complaintreport = () => {
   const [columns, setColumns] = useState([]);
   const [error, setError] = useState('');
   const token = localStorage.getItem("token");
+  const licare_code = localStorage.getItem("licare_code");
 
   const fetchData = async () => {
     setError(''); // Clear any previous errors
@@ -35,7 +36,8 @@ const Complaintreport = () => {
 
     const data = {
       startDate: startDate,
-      endDate: endDate
+      endDate: endDate,
+      licare_code : licare_code
     };
 
     try {

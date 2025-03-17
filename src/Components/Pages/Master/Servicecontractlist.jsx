@@ -441,7 +441,7 @@ export function Servicecontractlist(params) {
                                                         onClick={() => sendtoedit(item.id, 0)}
                                                         title="Edit"
                                                         style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                                                        disabled={roleaccess > 3 ? false : true}
+                                                        
                                                     >
                                                         <FaPencilAlt />
                                                     </button>

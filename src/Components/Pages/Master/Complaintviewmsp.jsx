@@ -1804,7 +1804,7 @@ export function Complaintviewmsp(params) {
 
   return (
     <>
-      {roleaccess > 1 ?
+  
         <div className="p-3">
           {loaders && (
             <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -2370,13 +2370,13 @@ export function Complaintviewmsp(params) {
 
                                       <div className="col-lg-2 ">
 
-                                        {roleaccess > 2 ? <button
+                                         <button
                                           className="btn btn-primary btn-sm"
                                           disabled={closestatus == "Closed" && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
                                           onClick={handleAddSparePart}
                                         >
                                           Add
-                                        </button> : null}
+                                        </button> 
 
                                       </div>
                                     </div>
@@ -2637,7 +2637,7 @@ export function Complaintviewmsp(params) {
                                 <div className="d-flex justify-content-end">
 
 
-                                  {roleaccess > 2 ? <button
+                                   <button
                                     type="submit"
                                     className="btn btn-primary"
                                     style={{ fontSize: "14px" }}
@@ -2645,7 +2645,7 @@ export function Complaintviewmsp(params) {
                                     disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
                                   >
                                     Upload Remark
-                                  </button> : null}
+                                  </button> 
 
                                 </div>
                               </div>
@@ -2954,13 +2954,13 @@ export function Complaintviewmsp(params) {
 
                       <div className="col-lg-3">
 
-                        {roleaccess > 2 ? <button
+                        <button
                           className="btn btn-primary btn-sm"
                           disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
                           onClick={AddEngineer}
                         >
                           Add
-                        </button> : null}
+                        </button> 
                       </div>
                     </div>
                   }
@@ -3252,7 +3252,7 @@ export function Complaintviewmsp(params) {
 
             </div>
           </div>
-        </div> : null}
+        </div> 
 
     </>
 

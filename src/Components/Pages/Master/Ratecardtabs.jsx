@@ -3,16 +3,55 @@ import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Ratecard from "./Ratecard";
 import { Link } from 'react-router-dom';
+import { Base_Url, secretKey } from '../../Utils/Base_Url';
+import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
+import CryptoJS from 'crypto-js';
+import axios from "axios";
 
 function Ratecardtabs() {
   const [activeTab, setActiveTab] = useState("Ratecard");
-
+  const [status, setStatus] = useState([])
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
-
+    getpageroledata()
     setActiveTab(window.location.pathname);
 
   }, [window.location.pathname]);
+
+
+  const Decrypt = (encrypted) => {
+    encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+    const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+    return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+  };
+
+
+  async function getpageroledata() {
+
+    const storedEncryptedRole = localStorage.getItem("Userrole");
+    const decryptedRole = Decrypt(storedEncryptedRole);
+
+    const data = {
+      role: decryptedRole,
+      ratecardpage: '37',
+      masterpage: '38',
+      postsalepage: '39',
+    }
+
+
+    axios.post(`${Base_Url}/getratecardroledata`, data, {
+      headers: {
+        Authorization: token, // Send token in headers
+      },
+    })
+      .then((res) => {
+        setStatus(res.data)
+      })
+      .then((err) => {
+        console.log(err)
+      })
+  }
 
   return (
     <>
@@ -62,39 +101,46 @@ function Ratecardtabs() {
                 }}
               >
                 <ul className="nav nav-tabs ">
-                  <Link to={`/ratecard`}>
-                    <li className="nav-item">
-                      <button
-                        className={`nav-link ${activeTab === "/ratecard" ? "active" : "onClick={() => setActiveTab('Ratecard')}"
-                          }`}
+                  {status.ratecardpage == 1 &&
+                    <Link to={`/ratecard`}>
+                      <li className="nav-item">
+                        <button
+                          className={`nav-link ${activeTab === "/ratecard" ? "active" : "onClick={() => setActiveTab('Ratecard')}"
+                            }`}
 
-                      >
-                        RATE CARD MATRIX
-                      </button>
-                    </li
-                    ></Link>
-                  <Link to={`/master_warrenty`}>
-                    <li className="nav-item">
-                      <button
-                        className={`nav-link ${activeTab === "/master_warrenty" ? "active" : "onClick={() => setActiveTab('Ratecard')}"
-                          }`}
+                        >
+                          RATE CARD MATRIX
+                        </button>
+                      </li
+                      ></Link>
+                  }
+                  {status.masterpage == 1 &&
+                    <Link to={`/master_warrenty`}>
+                      <li className="nav-item">
+                        <button
+                          className={`nav-link ${activeTab === "/master_warrenty" ? "active" : "onClick={() => setActiveTab('Ratecard')}"
+                            }`}
 
-                      >
-                        Master Warrenty
-                      </button>
-                    </li
-                    ></Link>
-                  <Link to={`/post_sale_warrenty`}>
-                    <li className="nav-item">
-                      <button
-                        className={`nav-link ${activeTab === "/post_sale_warrenty" ? "active" : "onClick={() => setActiveTab('Ratecard')}"
-                          }`}
+                        >
+                          Master Warrenty
+                        </button>
+                      </li
+                      ></Link>
+                  }
+                  {status.postsalepage == 1 &&
+                    <Link to={`/post_sale_warrenty`}>
+                      <li className="nav-item">
+                        <button
+                          className={`nav-link ${activeTab === "/post_sale_warrenty" ? "active" : "onClick={() => setActiveTab('Ratecard')}"
+                            }`}
 
-                      >
-                        Post Sale Warrenty
-                      </button>
-                    </li
-                    ></Link>
+                        >
+                          Post Sale Warrenty
+                        </button>
+                      </li
+                      ></Link>
+                  }
+
                 </ul>
               </div>
             </div>

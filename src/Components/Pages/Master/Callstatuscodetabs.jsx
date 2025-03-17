@@ -4,15 +4,55 @@ import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Callstatus from "./Callstatus";
 import { Link } from 'react-router-dom';
+import { Base_Url, secretKey } from '../../Utils/Base_Url';
+import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
+import CryptoJS from 'crypto-js';
+import axios from "axios";
 
 function Callstatuscodetabs() {
   const [activeTab, setActiveTab] = useState("/callstatus");
+  const [status, setStatus] = useState([])
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
 
     setActiveTab(window.location.pathname);
-
+    getpageroledata()
   }, [window.location.pathname]);
+
+
+  const Decrypt = (encrypted) => {
+    encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+    const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+    return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+  };
+
+
+  async function getpageroledata() {
+
+    const storedEncryptedRole = localStorage.getItem("Userrole");
+    const decryptedRole = Decrypt(storedEncryptedRole);
+
+    const data = {
+      role: decryptedRole,
+      callstatuspage: '26',
+      subcallstatuspage: '51',
+    }
+
+
+    axios.post(`${Base_Url}/getcallstatusroledata`, data, {
+      headers: {
+        Authorization: token, // Send token in headers
+      },
+    })
+      .then((res) => {
+        setStatus(res.data)
+      })
+      .then((err) => {
+        console.log(err)
+      })
+  }
+
 
   return (
     <>
@@ -62,24 +102,30 @@ function Callstatuscodetabs() {
                 }}
               >
                 <ul className="nav nav-tabs ">
-                  <Link to={`/callstatus`}> <li className="nav-item">
-                    <button
-                      className={`nav-link ${activeTab === "/callstatus" ? "active" : "onClick={() => setActiveTab('callstatus')}"
-                        }`}
 
-                    >
-                      CALL STATUS CODE
-                    </button>
-                  </li></Link>
-                  <Link to={`/subcallstatus`}><li className="nav-item">
-                    <button
-                      className={`nav-link ${activeTab === "/subcallstatus" ? "active" : "onClick={() => setActiveTab('subcallstatus')}"
-                        }`}
+                  {status.callstatuspage == 1 &&
+                    <Link to={`/callstatus`}> <li className="nav-item">
+                      <button
+                        className={`nav-link ${activeTab === "/callstatus" ? "active" : "onClick={() => setActiveTab('callstatus')}"
+                          }`}
 
-                    >
-                      SUB CALL STATUS
-                    </button>
-                  </li></Link>
+                      >
+                        CALL STATUS CODE
+                      </button>
+                    </li></Link>
+                  }
+                  {status.subcallstatuspage == 1 &&
+                    <Link to={`/subcallstatus`}><li className="nav-item">
+                      <button
+                        className={`nav-link ${activeTab === "/subcallstatus" ? "active" : "onClick={() => setActiveTab('subcallstatus')}"
+                          }`}
+
+                      >
+                        SUB CALL STATUS
+                      </button>
+                    </li></Link>
+                  }
+
                 </ul>
               </div>
             </div>

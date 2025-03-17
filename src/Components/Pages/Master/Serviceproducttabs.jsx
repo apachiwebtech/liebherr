@@ -3,14 +3,54 @@ import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Serviceproduct from "./Serviceproduct";
 import { Link } from "react-router-dom";
+import { Base_Url, secretKey } from '../../Utils/Base_Url';
+import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
+import CryptoJS from 'crypto-js';
+import axios from "axios";
 
 function Serviceproducttabs() {
   const [activeTab, setActiveTab] = useState("Serviceproduct");
-  useEffect(() => {
+  const [status, setStatus] = useState([])
+  const token = localStorage.getItem("token");
 
+  useEffect(() => {
+    getpageroledata()
     setActiveTab(window.location.pathname);
 
   }, [window.location.pathname]);
+
+
+   const Decrypt = (encrypted) => {
+      encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+      const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+      return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+    };
+  
+  
+    async function getpageroledata() {
+  
+      const storedEncryptedRole = localStorage.getItem("Userrole");
+      const decryptedRole = Decrypt(storedEncryptedRole);
+  
+      const data = {
+        role: decryptedRole,
+        servicecontractpage: '30',
+        servicelistpage: '31',
+      }
+  
+  
+      axios.post(`${Base_Url}/getserviceroledata`, data, {
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      })
+        .then((res) => {
+          setStatus(res.data)
+        })
+        .then((err) => {
+          console.log(err)
+        })
+    }
 
   return (
     <>
@@ -43,7 +83,7 @@ function Serviceproducttabs() {
       <div className="container-fluid p-0">
         {/* Top Header */}
         <div className="text-left headings">
-          <span style={{ paddingLeft: "20px",color:'#FFFFFF' }}>SERVICE PRODUCT Master </span>
+          <span style={{ paddingLeft: "20px", color: '#FFFFFF' }}>SERVICE PRODUCT Master </span>
         </div>
 
         {/* Nav Tabs */}
@@ -60,12 +100,11 @@ function Serviceproducttabs() {
                 }}
               >
                 <ul className="nav nav-tabs ">
-                <Link to={`/Serviceproduct`}><li className="nav-item">
+                  <Link to={`/Serviceproduct`}><li className="nav-item">
                     <button
-                      className={`nav-link ${
-                        activeTab === "Serviceproduct" ? "active" : "onClick={() => setActiveTab('Serviceproduct')}"
-                      }`}
-                      
+                      className={`nav-link ${activeTab === "Serviceproduct" ? "active" : "onClick={() => setActiveTab('Serviceproduct')}"
+                        }`}
+
                     >
                       SERVICE PRODUCT
                     </button>

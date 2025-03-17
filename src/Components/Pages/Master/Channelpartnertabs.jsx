@@ -3,15 +3,51 @@ import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Channelpartner from "./Channelpartner";
 import { Link } from 'react-router-dom';
+import CryptoJS from 'crypto-js';
+import axios from "axios";
+import { Base_Url, secretKey } from '../../Utils/Base_Url';
 
 function Channelpartnertabs() {
   const [activeTab, setActiveTab] = useState("business_partner");
+  const token = localStorage.getItem("token");
+  const [status, setStatus] = useState([])
 
   useEffect(() => {
 
     setActiveTab(window.location.pathname);
-
+    getpageroledata()
   }, [window.location.pathname]);
+
+
+  const Decrypt = (encrypted) => {
+    encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+    const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+    return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+  };
+
+  async function getpageroledata() {
+
+    const storedEncryptedRole = localStorage.getItem("Userrole");
+    const decryptedRole = Decrypt(storedEncryptedRole);
+
+    const data = {
+      role: decryptedRole,
+      bussinesspage: '18',
+    }
+
+
+    axios.post(`${Base_Url}/getbussinessroledata`, data, {
+      headers: {
+        Authorization: token, // Send token in headers
+      },
+    })
+      .then((res) => {
+        setStatus(res.data)
+      })
+      .then((err) => {
+        console.log(err)
+      })
+  }
 
   return (
     <>
@@ -61,26 +97,19 @@ function Channelpartnertabs() {
                 }}
               >
                 <ul className="nav nav-tabs ">
-                  {/* <li className="nav-item">
-                    <Link to="/channelpartner">
-                      <button
-                        className={`nav-link ${activeTab === '/channelpartner' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('/channelpartner')}
-                      >
-                        Channel Partner
-                      </button>
-                    </Link>
-                  </li> */}
-                  <li className="nav-item">
-                    <Link to="/business_partner">
-                      <button
-                        className={`nav-link ${activeTab === '/business_partner' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('/business_partner')}
-                      >
-                        Business Partner
-                      </button>
-                    </Link>
-                  </li>
+                  {status.bussinesspage == 1 &&
+                    <li className="nav-item">
+                      <Link to="/business_partner">
+                        <button
+                          className={`nav-link ${activeTab === '/business_partner' ? 'active' : ''}`}
+                          onClick={() => setActiveTab('/business_partner')}
+                        >
+                          Business Partner
+                        </button>
+                      </Link>
+                    </li>
+                  }
+
                 </ul>
               </div>
             </div>
