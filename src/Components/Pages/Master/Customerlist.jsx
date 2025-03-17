@@ -504,8 +504,8 @@ export function Customerlist(params) {
                                         <th width="15%">Customer Classification</th>
                                         <th width="20%">Customer Email</th>
 
-                                        {roleaccess > 2 ? <th width="15%">Add Location</th> : null}
-                                        {roleaccess > 2 ? <th width="10%">Add Product</th> : null}
+                                        <th width="15%">Add Location</th> 
+                                        <th width="10%">Add Product</th> 
                                         {roleaccess > 3 ? <th width="5%">Edit</th> : null}
                                         {roleaccess > 4 ? <th width="5%">Delete</th> : null}
                                     </tr>
@@ -525,7 +525,7 @@ export function Customerlist(params) {
                                                 <td >{item.customer_classification}</td>
                                                 <td >{item.email}</td>
 
-                                                {roleaccess > 2 ? <td>
+                                                 <td>
                                                     <Link to={`/Customerlocation/${item.customer_id}`}>
                                                         <button style={{ backgroundColor: '#0D6EFD', color: "white" }} className='btn'
                                                             onClick={() => {
@@ -533,8 +533,8 @@ export function Customerlist(params) {
                                                             }}>Add</button>
 
                                                     </Link>
-                                                </td> : null}
-                                                {roleaccess > 2 ? <td>
+                                                </td> 
+                                                 <td>
                                                     <Link to={`/uniqueproduct/${item.customer_id}`}>
                                                         <button style={{ backgroundColor: '#0D6EFD', color: 'white' }} className='btn'
                                                             onClick={() => {
@@ -542,7 +542,7 @@ export function Customerlist(params) {
                                                             }}>Add</button>
 
                                                     </Link>
-                                                </td> : null}
+                                                </td> 
 
                                                 {roleaccess > 3 ? <td >
                                                     <button
