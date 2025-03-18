@@ -4,7 +4,7 @@ import Customer from './Customer';
 import { Customerlist } from './Customerlist';
 import Uniqueproduct from './Uniqueproduct';
 import Customerlocation from './Customerlocation';
-import { Link } from 'react-router-dom';
+import { Link,useLocation } from 'react-router-dom';
 import CryptoJS from 'crypto-js';
 import axios from "axios";
 import { Base_Url, secretKey } from '../../Utils/Base_Url';
@@ -14,12 +14,17 @@ function Endcustomertabs() {
   const token = localStorage.getItem("token");
   const [status, setStatus] = useState([])
 
+  const location = useLocation();
+
   useEffect(() => {
-
-    setActiveTab(window.location.pathname);
     getpageroledata()
+    if (location.pathname.startsWith("/Customerlist")) {
+      setActiveTab("/Customerlist");
+    } else if (location.pathname.startsWith("/Customer")) {
+      setActiveTab("/Customer");
+    }
 
-  }, [window.location.pathname]);
+  }, [location.pathname]);
 
   const Decrypt = (encrypted) => {
     encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
@@ -97,10 +102,7 @@ function Endcustomertabs() {
                   {status.customerpage == 1 &&
                     <Link to={`/Customer`}>
                       <li className="nav-item">
-                        <button
-                          className={`nav-link ${activeTab === '/Customer' ? 'active' : 'onClick={() => setActiveTab("Customer")}'}`}
-
-                        >
+                      <button className={`nav-link ${activeTab === "/Customer" ? "active" : ""}`}>
                           CUSTOMER
                         </button>
                       </li>
@@ -108,40 +110,17 @@ function Endcustomertabs() {
                   }
                   {status.customerlistpage == 1 &&
                     <Link to={`/Customerlist`}><li className="nav-item">
-                      <button
-                        className={`nav-link ${activeTab === '/Customerlist' ? 'active' : 'onClick={() => setActiveTab("Customerlist")}'}`}
-
-                      >
+                      <button className={`nav-link ${activeTab === "/Customerlist" ? "active" : ""}`}>
                         CUSTOMER LIST
                       </button>
                     </li></Link>
                   }
-                  {/* <Link to={`/Customerlocation`}><li className="nav-item">
-                  <button
-                    className={`nav-link ${activeTab === '/Customerlocation' ? 'active' : 'onClick={() => setActiveTab("Customerlocation")}'}`}
-                    
-                  >
-                    CUSTOMER LOCATION MASTER
-                  </button>
-                </li></Link>
-                <Link to={`/Uniqueproduct`}><li className="nav-item">
-                  <button
-                    className={`nav-link ${activeTab === '/Uniqueproduct' ? 'active' : 'onClick={() => setActiveTab("Uniqueproduct")}'}`}
-                    
-                  >
-                    UNIQUE PRODUCT MASTER LINKED TO LOCATION
-                  </button>
-                </li></Link> */}
 
                 </ul>
               </div>
             </div>
-
-
-            {/* Tab Content */}
             <div className="col-12 col-custom" style={{ paddingLeft: "12px", paddingRight: "12px" }}>
               <div className="tab-content">
-                {/* {renderTabContent()} */}
               </div>
             </div>
           </div>
