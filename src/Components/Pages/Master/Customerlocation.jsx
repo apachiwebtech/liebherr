@@ -38,11 +38,11 @@ const Customerlocation = () => {
   const [locations, setlocations] = useState([])
 
   const [formData, setFormData] = useState({
-    country_id: "",
-    region_id: "",
-    geostate_id: "",
-    geocity_id: "",
-    area_id: "",
+    country_name: "",
+    region_name: "",
+    geostate_name: "",
+    geocity_name: "",
+    area_name: "",
     pincode_id: "",
     address: "",
     ccperson: "",
@@ -50,16 +50,6 @@ const Customerlocation = () => {
     address_type: "",
     customer_id: customer_id,
   });
-
-  // const fetchCustomermobile = async () => {
-  //   try {
-  //     const response = await axiosInstance.get(`${Base_Url}/getcustomer`);
-  //     console.log("pf",response.data);
-  //     setCustomernumber(response.data);
-  //   } catch (error) {
-  //     console.error("Error fetching Customer Mobileno:", error);
-  //   }
-  // };
 
   const fetchCustomermobile = async () => {
     try {
@@ -95,81 +85,6 @@ const Customerlocation = () => {
     }
   };
 
-  const fetchRegions = async (countryId) => {
-    try {
-      const response = await axiosInstance.get(`${Base_Url}/getregions/${countryId}`, {
-        headers: {
-          Authorization: token,
-        },
-      });
-      setRegions(response.data);
-    } catch (error) {
-      console.error("Error fetching regions:", error);
-    }
-  };
-
-  const fetchGeoStates = async (regionId) => {
-    try {
-      const response = await axiosInstance.get(`${Base_Url}/getgeostates/${regionId}`
-        , {
-          headers: {
-            Authorization: token,
-          },
-        });
-      setGeoStates(response.data);
-    } catch (error) {
-      console.error("Error fetching geo states:", error);
-    }
-  };
-
-  const fetchGeoCities = async (district_id) => {
-    try {
-      const response = await axiosInstance.get(
-        `${Base_Url}/getgeocities_a/${district_id}`, {
-        headers: {
-          Authorization: token,
-        },
-      }
-      );
-      console.log("Geo Cities:", response.data);
-      setGeoCities(response.data);
-    } catch (error) {
-      console.error("Error fetching geo cities:", error);
-    }
-  };
-
-
-  const fetchDistrict = async (geostate_id) => {
-    try {
-      const response = await axiosInstance.get(
-        `${Base_Url}/getareadrop/${geostate_id}`, {
-        headers: {
-          Authorization: token,
-        },
-      }
-      );
-      console.log("Area Dropdown:", response.data);
-      setGeoAreas(response.data);
-    } catch (error) {
-      console.error("Error fetching Area:", error);
-    }
-  };
-
-  const fetchPincodedrop = async (geocity_id) => {
-    try {
-      const response = await axiosInstance.get(
-        `${Base_Url}/getpincodedrop/${geocity_id}`, {
-        headers: {
-          Authorization: token,
-        },
-      }
-      );
-      console.log("Pincode Dropdown:", response.data);
-      setGeoPincodes(response.data);
-    } catch (error) {
-      console.error("Error fetching Pincode:", error);
-    }
-  };
 
   const fetchCustomerlocation = async () => {
     try {
@@ -224,7 +139,7 @@ const Customerlocation = () => {
     const payload = {
       ...formData,
     }
-
+    console.log(payload,'test')
     const encryptedData = CryptoJS.AES.encrypt(
       JSON.stringify(payload),
       secretKey
@@ -241,6 +156,8 @@ const Customerlocation = () => {
           encryptedData
           
         };
+        
+
         if (isEdit) {
           await axios
             .post(`${Base_Url}/putcustomerlocation`, { encryptedData }, {
@@ -250,11 +167,11 @@ const Customerlocation = () => {
             })
             .then((response) => {
               setFormData({
-                country_id: "",
-                region_id: "",
-                geostate_id: "",
-                geocity_id: "",
-                district_id: "",
+                country_name: "",
+                region_name: "",
+                geostate_name: "",
+                geocity_name: "",
+                area_name: "",
                 pincode_id: "",
                 address: "",
                 ccperson: "",
@@ -279,11 +196,11 @@ const Customerlocation = () => {
             })
             .then((response) => {
               setFormData({
-                country_id: "",
-                region_id: "",
-                geostate_id: "",
-                geocity_id: "",
-                district_id: "",
+                country_name: "",
+                region_name: "",
+                geostate_name: "",
+                geocity_name: "",
+                area_name: "",
                 pincode_id: "",
                 address: "",
                 ccperson: "",
@@ -307,6 +224,7 @@ const Customerlocation = () => {
     }
   };
 
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name === "pincode_id") {
@@ -329,7 +247,7 @@ const Customerlocation = () => {
   const fetchlocations = async (pincode) => {
     try {
       const response = await axiosInstance.get(
-        `${Base_Url}/getmultiplelocation/${pincode}`,
+        `${Base_Url}/getmultiplepincode/${pincode}`,
         {
           headers: {
             Authorization: token,
@@ -340,21 +258,21 @@ const Customerlocation = () => {
       if (response.data && response.data[0]) {
         const locationData = response.data[0];
         setlocations({
-          region: locationData.region,
-          state: locationData.state,
-          district: locationData.district,
-          city: locationData.city,
-          country: locationData.country
+          region_name: locationData.region_name,
+          geostate_name: locationData.geostate_name,
+          area_name: locationData.area_name,
+          geocity_name: locationData.geocity_name,
+          country_name: locationData.country_name
         });
 
         // Update formData with location values
         setFormData(prevState => ({
           ...prevState,
-          country_id: locationData.country_id || "",
-          region_id: locationData.region_id || "",
-          geostate_id: locationData.state_id || "",
-          district_id: locationData.district_id || "",
-          geocity_id: locationData.city_id || "",
+          country_name: locationData.country_name || "",
+          region_name: locationData.region_name || "",
+          geostate_name: locationData.geostate_name || "",
+          area_name: locationData.area_name || "",
+          geocity_name: locationData.geocity_name || "",
         }));
       }
     } catch (error) {
@@ -364,16 +282,18 @@ const Customerlocation = () => {
   const handleSearch = (e) => {
     const searchValue = e.target.value.toLowerCase();
     setSearchTerm(searchValue);
-    setFilteredAreas(
-      customerLocation.filter(
-        (area) =>
-          area.title.toLowerCase().includes(searchValue) ||
-          area.country_title.toLowerCase().includes(searchValue) ||
-          area.region_title.toLowerCase().includes(searchValue) ||
-          area.geostate_title.toLowerCase().includes(searchValue)
-      )
+  
+    const filtered = customerLocation.filter(
+      (area) =>
+        area.ccperson && area.ccperson.toLowerCase().includes(searchValue) ||
+        area.address && area.address.toLowerCase().includes(searchValue) // Include address in search
     );
+    console.log(customerLocation,'7')
+  
+    setFilteredAreas(filtered);
+    setCurrentPage(0); // Reset pagination when searching
   };
+  
 
   const validateForm = () => {
     let newErrors = {};
@@ -402,8 +322,6 @@ const Customerlocation = () => {
   };
 
 
-  console.log("locations data", locations)
-
   const deleted = async (id) => {
     try {
       await axiosInstance.post(`${Base_Url}/deletecustomerlocation`, { id }, {
@@ -412,11 +330,11 @@ const Customerlocation = () => {
         },
       });
       setFormData({
-        country_id: "",
-        region_id: "",
-        geostate_id: "",
-        geocity_id: "",
-        district_id: "",
+        country_name: "",
+        region_name: "",
+        geostate_name: "",
+        geocity_name: "",
+        area_name: "",
         pincode_id: "",
         address: "",
         ccperson: "",
@@ -519,11 +437,11 @@ const Customerlocation = () => {
                           Country
                         </label>
 
-                        <input type="text" className="form-control" value={locations.country} name="country_id" onChange={handleChange} placeholder="" disabled />
+                        <input type="text" className="form-control" value={locations.country_name} name="country_name" onChange={handleChange} placeholder="" disabled />
 
-                        {errors.country_id && (
+                        {errors.country_name && (
                           <small className="text-danger">
-                            {errors.country_id}
+                            {errors.country_name}
                           </small>
                         )}
                       </div>
@@ -531,11 +449,11 @@ const Customerlocation = () => {
                         <label htmlFor="region" className="form-label">
                           Region
                         </label>
-                        <input type="text" className="form-control" value={locations.region} name="region_id" onChange={handleChange} placeholder="" disabled />
+                        <input type="text" className="form-control" value={locations.region_name} name="region_name" onChange={handleChange} placeholder="" disabled />
 
-                        {errors.region_id && (
+                        {errors.region_name && (
                           <small className="text-danger">
-                            {errors.region_id}
+                            {errors.region_name}
                           </small>
                         )}
                       </div>
@@ -545,11 +463,11 @@ const Customerlocation = () => {
                         <label htmlFor="geostate" className="form-label">
                           Geo States
                         </label>
-                        <input type="text" className="form-control" value={locations.state} name="geostate_id" onChange={handleChange} placeholder="" disabled />
+                        <input type="text" className="form-control" value={locations.geostate_name} name="geostate_name" onChange={handleChange} placeholder="" disabled />
 
-                        {errors.geostate_id && (
+                        {errors.geostate_name && (
                           <small className="text-danger">
-                            {errors.geostate_id}
+                            {errors.geostate_name}
                           </small>
                         )}
                       </div>
@@ -560,10 +478,10 @@ const Customerlocation = () => {
                           District
                         </label>
 
-                        <input type="text" className="form-control" value={locations.district} name="area_id" onChange={handleChange} placeholder="" disabled />
+                        <input type="text" className="form-control" value={locations.area_name} name="area_name" onChange={handleChange} placeholder="" disabled />
 
-                        {errors.area_id && (
-                          <small className="text-danger">{errors.area_id}</small>
+                        {errors.area_name && (
+                          <small className="text-danger">{errors.area_name}</small>
                         )}
                       </div>
 
@@ -572,11 +490,11 @@ const Customerlocation = () => {
                         <label htmlFor="geocity" className="form-label">
                           Geo City
                         </label>
-                        <input type="text" className="form-control" value={locations.city} name="geocity_id" onChange={handleChange} placeholder="" disabled />
+                        <input type="text" className="form-control" value={locations.geocity_name} name="geocity_name" onChange={handleChange} placeholder="" disabled />
 
-                        {errors.geocity_id && (
+                        {errors.geocity_name && (
                           <small className="text-danger">
-                            {errors.geocity_id}
+                            {errors.geocity_name}
                           </small>
                         )}
                       </div>
@@ -758,7 +676,7 @@ const Customerlocation = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {customerLocation.map((item, index) => (
+                      {filteredAreas.map((item, index) => (
                         <tr key={item.id}>
                           <td style={{ padding: "2px", textAlign: "center" }}>
                             {index + 1 + indexOfFirstUser}
@@ -797,8 +715,8 @@ const Customerlocation = () => {
                   >
                     <div>
                       Showing {indexOfFirstUser + 1} to{" "}
-                      {Math.min(indexOfLastUser, filteredUsers.length)} of{" "}
-                      {filteredUsers.length} entries
+                      {Math.min(indexOfLastUser, customerLocation.length)} of{" "}
+                      {customerLocation.length} entries
                     </div>
 
                     <div className="pagination" style={{ marginLeft: "auto" }}>
@@ -810,7 +728,7 @@ const Customerlocation = () => {
                       </button>
                       {Array.from(
                         {
-                          length: Math.ceil(filteredUsers.length / itemsPerPage),
+                          length: Math.ceil(customerLocation.length / itemsPerPage),
                         },
                         (_, index) => (
                           <button
@@ -826,7 +744,7 @@ const Customerlocation = () => {
                         onClick={() => setCurrentPage(currentPage + 1)}
                         disabled={
                           currentPage ===
-                          Math.ceil(filteredUsers.length / itemsPerPage) - 1
+                          Math.ceil(customerLocation.length / itemsPerPage) - 1
                         }
                       >
                         {">"}
