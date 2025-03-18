@@ -675,7 +675,7 @@ export function Complaintview(params) {
         getupdateengineer(complaintview.ticket_no)
       })
 
-    if (  
+    if (
       selectedEngineer &&
       !addedEngineers.some((eng) => eng.id === selectedEngineer.id)
     ) {
@@ -828,7 +828,7 @@ export function Complaintview(params) {
 
         alert("Quotation generated")
         setTimeout(() => {
-          
+
           window.location.reload()
         }, 1000);
 
@@ -1282,6 +1282,13 @@ export function Complaintview(params) {
     const isValidValue = (value) => value !== null && value !== 'null' && value !== '';
 
 
+    // Make `sub_call_status` mandatory if `call_status` is selected
+    if (isValidValue(callstatusid) && !isValidValue(complaintview.sub_call_status)) {
+      alert("Please select the Sub Call Status");
+      return;
+    }
+
+
     if (complaintview.sub_call_status === 'Technician on-route') {
       if (addedEngineers.length === 0) {
         // Handle the case where no engineers are added
@@ -1289,6 +1296,8 @@ export function Complaintview(params) {
         return; // Prevent further execution if needed
       }
     }
+
+
 
 
 
@@ -1362,7 +1371,7 @@ export function Complaintview(params) {
           GenerateQuotation()
         }
 
-   
+
 
         const remarkId = remarkResponse.data.remark_id;
 
@@ -1395,7 +1404,7 @@ export function Complaintview(params) {
           fileInputRef2.current.value = ""; // Reset the file input for remarks
         }
 
-     
+
 
         alert("Ticket remark and files submitted successfully!");
 
@@ -1476,7 +1485,7 @@ export function Complaintview(params) {
   }, [complaintid, complaintview.ticket_no, complaintview.customer_mobile]);
 
 
-  console.log(complaintview.ticket_type , "%%^&&^")
+  console.log(complaintview.ticket_type, "%%^&&^")
 
   useEffect(() => {
     if (engtype == "Franchisee") {
@@ -1484,11 +1493,11 @@ export function Complaintview(params) {
       getEngineer();
     } else if (engtype == "LHI") {
 
-      if(complaintview.ticket_type == 'HELPDESK'){
+      if (complaintview.ticket_type == 'HELPDESK') {
 
         getHelplhi()
 
-      }else{
+      } else {
 
         getLHIEngineer();
       }
@@ -1718,19 +1727,19 @@ export function Complaintview(params) {
   }, [])
 
 
-  async function  getEngineerRemark(ticket_no) {
-    
-    axios.post(`${Base_Url}/getengineerremark` , {ticket_no : ticket_no} , {
-      headers : {
-        Authorization : token 
+  async function getEngineerRemark(ticket_no) {
+
+    axios.post(`${Base_Url}/getengineerremark`, { ticket_no: ticket_no }, {
+      headers: {
+        Authorization: token
       }
     })
-    .then((res) =>{
-      setEngRemark(res.data)
-    })
-    .then((err) =>{
-      console.log(err)
-    })
+      .then((res) => {
+        setEngRemark(res.data)
+      })
+      .then((err) => {
+        console.log(err)
+      })
   }
 
 
@@ -1745,7 +1754,7 @@ export function Complaintview(params) {
   const Blob = async () => {
 
     try {
-      const blob = await pdf(<Jobcardpdf attachments={attachments} data={updatedata} duplicate={duplicate} spare={addedSpareParts} engineer={addedEngineers} engremark = {engremark} />).toBlob();
+      const blob = await pdf(<Jobcardpdf attachments={attachments} data={updatedata} duplicate={duplicate} spare={addedSpareParts} engineer={addedEngineers} engremark={engremark} />).toBlob();
       const url = URL.createObjectURL(blob);
       window.open(url);
       URL.revokeObjectURL(url);
@@ -1762,23 +1771,23 @@ export function Complaintview(params) {
           Authorization: token, // Send token in headers
         },
       });
-  
+
       // Decrypt the response data
       const encryptedData = res.data.encryptedData; // Assuming response contains { encryptedData }
       const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
       const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
-  
+
       const spareData = await getquotespare(decryptedData[0].quotationNumber);
       const cspData = await getcspformticket(decryptedData[0].ticketId);
-  
+
       // Pass all data to Blobs
       await Blobs(decryptedData[0], spareData, cspData);
-  
+
     } catch (error) {
       console.error('Error fetching quote details:', error);
     }
   }
-  
+
   async function getquotespare(quote_id) {
     try {
       const res = await axiosInstance.post(`${Base_Url}/getquotationspare`, { quote_id: quote_id }, {
@@ -1786,21 +1795,21 @@ export function Complaintview(params) {
           Authorization: token, // Send token in headers
         },
       });
-  
+
       // Decrypt the response data
       const encryptedData = res.data.encryptedData;
       const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
       const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
 
-  
+
       return decryptedData;
-  
+
     } catch (error) {
       console.error('Error fetching quote spare details:', error);
       return null; // Return null in case of error to avoid breaking execution
     }
   }
-  
+
   async function getcspformticket(ticketId) {
     try {
       const res = await axiosInstance.post(`${Base_Url}/getcspformticket`, { ticket_no: ticketId }, {
@@ -1808,24 +1817,24 @@ export function Complaintview(params) {
           Authorization: token
         }
       });
-  
+
       // Decrypt the response data
       const encryptedData = res.data.encryptedData;
       const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
       const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
-  
+
       return decryptedData[0]; // Assuming you need the first object
-  
+
     } catch (error) {
       console.error('Error fetching CSP form ticket:', error);
       return null;
     }
   }
-  
+
   const Blobs = async (data, spare112, cspdata1) => {
     try {
 
-  
+
       const blob = await pdf(<MyDocument8 data={data} spare={spare112} csp={cspdata1} />).toBlob();
       const url = URL.createObjectURL(blob);
       window.open(url);
@@ -1834,7 +1843,7 @@ export function Complaintview(params) {
       console.error('Error generating PDF:', err);
     }
   };
-  
+
 
 
 
@@ -2355,7 +2364,7 @@ export function Complaintview(params) {
 
                                   </select>
                                 </div>
-                                {(complaintview.call_status == 'Spares' || ((complaintview.call_status == 'Approval' && complaintview.sub_call_status == 'Customer Approval / Quotation' ))) &&
+                                {(complaintview.call_status == 'Spares' || ((complaintview.call_status == 'Approval' && complaintview.sub_call_status == 'Customer Approval / Quotation'))) &&
 
                                   <div className=" py-1 my-2">
                                     <h4 className="pname" style={{ fontSize: "14px" }}>Spare Parts:</h4>

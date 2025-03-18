@@ -7871,7 +7871,6 @@ app.post("/postlhidata", authenticateToken, async (req, res) => {
   const decryptedData = decryptData(encryptedData, secretKey)
   const { Lhiuser,
     mobile_no,
-    password,
     UserCode,
     email,
     remarks,
@@ -7879,7 +7878,6 @@ app.post("/postlhidata", authenticateToken, async (req, res) => {
     Role,
     Reporting_to,
     Designation,
-    assigncsp,
 
 
   } = JSON.parse(decryptedData);
@@ -7909,21 +7907,25 @@ app.post("/postlhidata", authenticateToken, async (req, res) => {
         return res.json({ message: "Soft-deleted data restored successfully!" });
       } else {
 
-        const getcount = `SELECT COUNT(*) AS count FROM lhi_user`;
+        const getcount = `SELECT TOP 1 RIGHT(UserCode, 4) AS count FROM lhi_user WHERE UserCode LIKE 'LHI-EMP-%' ORDER BY CAST(SUBSTRING(UserCode, 9, LEN(UserCode)) AS INT) DESC;`;
 
         const getcountresult = await pool.request().query(getcount);
 
-        const newcount = getcountresult.recordset[0].count + 1;
+        console.log(getcountresult)
+        
+        const newcount = Number(getcountresult.recordset[0].count) + 1;
+        
+        console.log(newcount)
 
         // Format the newcount as LH0001
-        const licarecode = `LH${newcount.toString().padStart(4, '0')}`;
+        const licarecode = `LHI-EMP-${newcount.toString().padStart(4, '0')}`;
 
 
 
 
 
         // Step 3: Insert new entry if no duplicates found
-        sql = `INSERT INTO lhi_user (Lhiuser,password,remarks,Usercode,mobile_no,email,status,Role,Reporting_to,Designation,assigncsp) VALUES ('${Lhiuser}','${password}','${remarks}','${licarecode}','${mobile_no}','${email}','${status}','${Role}','${Reporting_to}','${Designation}','${assigncsp}')`
+        sql = `INSERT INTO lhi_user (Lhiuser,remarks,Usercode,mobile_no,email,status,Role,Reporting_to,Designation) VALUES ('${Lhiuser}','${remarks}','${licarecode}','${mobile_no}','${email}','${status}','${Role}','${Reporting_to}','${Designation}')`
         await pool.request().query(sql);
 
 
@@ -7961,7 +7963,7 @@ app.post("/putlhidata", authenticateToken, async (req, res) => {
   const { encryptedData } = req.body;
   const decryptedData = decryptData(encryptedData, secretKey)
   const {
-    Lhiuser, id, updated_by, mobile_no, Usercode, password, status, email, remarks, Role, Designation, Reporting_to, assigncsp,
+    Lhiuser, id, updated_by, mobile_no, Usercode, status, email, remarks, Role, Designation, Reporting_to,
   } = JSON.parse(decryptedData);
 
 
@@ -7990,14 +7992,12 @@ app.post("/putlhidata", authenticateToken, async (req, res) => {
           updated_date = GETDATE(),
           mobile_no = '${mobile_no}',
           Usercode = '${Usercode}',
-          password = '${password}',
           status = ${status},
           email = '${email}',
           remarks = '${remarks}',
           Role = '${Role}',
           Designation = '${Designation}',
-          Reporting_to = '${Reporting_to}',
-          assigncsp = '${assigncsp}'
+          Reporting_to = '${Reporting_to}'
         WHERE id = '${id}'
       `;
       await pool.request().query(updateSql);

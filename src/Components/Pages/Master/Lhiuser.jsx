@@ -37,7 +37,7 @@ const Lhiuser = () => {
   const [formData, setFormData] = useState({
     Lhiuser: "",
     Usercode: "",
-    password: "",
+    // password: "",
     mobile_no: "",
     email: "",
     status: "",
@@ -45,7 +45,7 @@ const Lhiuser = () => {
     Role: "",
     Designation: "",
     Reporting_to: "",
-    assigncsp: "",
+    // assigncsp: "",
   });
 
 
@@ -161,9 +161,9 @@ const Lhiuser = () => {
       newErrors.Lhiuser = "Lhiuser Field is required.";
     }
 
-    if (!formData.password || !formData.password.trim()) {
-      newErrors.password = "password Field is required.";
-    }
+    // if (!formData.password || !formData.password.trim()) {
+    //   newErrors.password = "password Field is required.";
+    // }
     if (!formData.mobile_no || !formData.mobile_no.trim()) {
       newErrors.mobile_no = "Mobile Number Field is required.";
     }
@@ -204,10 +204,8 @@ const Lhiuser = () => {
     const payload = Object.fromEntries(
       Object.entries({
         ...formData,
-        password: md5(formData.password),
         updated_by: updatedBy,
-        created_by: createdBy,
-        assigncsp: cspvalue,
+        created_by: createdBy
       }).map(([key, value]) => [key, String(value)])
     );
     
@@ -243,7 +241,6 @@ const Lhiuser = () => {
                 setFormData({
                   Lhiuser: "",
                   Usercode: "",
-                  password: "",
                   mobile_no: "",
                   email: "",
                   status: "",
@@ -251,7 +248,6 @@ const Lhiuser = () => {
                   Role: "",
                   Designation: "",
                   Reporting_to: "",
-                  assigncsp: "",
 
 
                 });
@@ -284,7 +280,6 @@ const Lhiuser = () => {
                 setFormData({
                   Lhiuser: "",
                   Usercode: "",
-                  password: "",
                   mobile_no: "",
                   email: "",
                   status: "",
@@ -292,7 +287,6 @@ const Lhiuser = () => {
                   Role: "",
                   Designation: "",
                   Reporting_to: "",
-                  assigncsp: "",
                 });
                 fetchUsers();
                 fetchCsp();
@@ -324,14 +318,14 @@ const Lhiuser = () => {
       const userData = response.data;
 
       // Split the assigncsp values (comma-separated licare_codes)
-      const selectedLicareCodes = userData.assigncsp ? userData.assigncsp.split(',') : [];
+      // const selectedLicareCodes = userData.assigncsp ? userData.assigncsp.split(',') : [];
 
       // Map the selected licare_codes to the corresponding options in the csp array
-      const selectedOptions = csp.filter(option => selectedLicareCodes.includes(option.licare_code));
+      // const selectedOptions = csp.filter(option => selectedLicareCodes.includes(option.licare_code));
 
       // Set the selected options in state
-      setSelected(selectedOptions);
-      setCspvalue(userData.assigncsp);
+      // setSelected(selectedOptions);
+      // setCspvalue(userData.assigncsp);
 
       setIsEdit(true);
 
@@ -505,7 +499,7 @@ const Lhiuser = () => {
                       </div>
                     </div>
 
-                    <div className="col-4">
+                    {/* <div className="col-4">
                       <div className="mb-3">
                         <label htmlFor="PassInput" className="input-field">
                           password<span className="text-danger">*</span>
@@ -525,8 +519,32 @@ const Lhiuser = () => {
                         {duplicateError && (
                           <small className="text-danger">{duplicateError}</small>
                         )}{" "}
+                 
+                      </div>
+                    </div> */}
+                            <div className="col-4">
+                      <div className="mb-3">
+                        <label htmlFor="DesignationInput" className="input-field">
+                          Designation<span className="text-danger">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          name="Designation"
+                          id="DesignationInput"
+                          value={formData.Designation}
+                          onChange={handleChange}
+                          placeholder="Enter Designation "
+                        />
+                        {errors.Designation && (
+                          <small className="text-danger">{errors.Designation}</small>
+                        )}
+                        {duplicateError && (
+                          <small Designation="text-danger">{duplicateError}</small>
+                        )}{" "}
                         {/* Show duplicate error */}
                       </div>
+
                     </div>
                   </div>
 
@@ -645,32 +663,9 @@ const Lhiuser = () => {
                       </div>
                     </div>
 
-                    <div className="col-4">
-                      <div className="mb-3">
-                        <label htmlFor="DesignationInput" className="input-field">
-                          Designation<span className="text-danger">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          name="Designation"
-                          id="DesignationInput"
-                          value={formData.Designation}
-                          onChange={handleChange}
-                          placeholder="Enter Designation "
-                        />
-                        {errors.Designation && (
-                          <small className="text-danger">{errors.Designation}</small>
-                        )}
-                        {duplicateError && (
-                          <small Designation="text-danger">{duplicateError}</small>
-                        )}{" "}
-                        {/* Show duplicate error */}
-                      </div>
-
-                    </div>
+            
       
-                    <div className="col-4">
+                    {/* <div className="col-4">
                       <div className="mb-3">
                         <label htmlFor="LhiuserInput" className="input-field">
                           Assign Csp <span className="text-danger">*</span>
@@ -681,7 +676,8 @@ const Lhiuser = () => {
                           closeOnSelect={false}
                           isClearable={true} ></MultiSelect>
                       </div>
-                    </div>
+                    </div> */}
+
                   </div>
                   <div className='row'>
                     <div className="col-12">
