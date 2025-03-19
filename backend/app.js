@@ -7833,7 +7833,7 @@ app.get("/getlhidata", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
 
     // SQL query to fetch lhi_user data where deleted is 0
-    const sql = "SELECT * FROM lhi_user WHERE deleted = 0 order by id desc";
+    const sql = "SELECT lh.* , rm.title as role_title FROM lhi_user as lh left join role_master as rm on lh.Role = rm.id WHERE lh.deleted = 0 order by lh.id desc";
     const result = await pool.request().query(sql);
     // Convert data to JSON string and encrypt it
     const jsonData = JSON.stringify(result.recordset);
