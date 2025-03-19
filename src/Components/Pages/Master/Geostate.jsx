@@ -101,7 +101,9 @@ const Geostate = () => {
     const value = e.target.value.toLowerCase();
     setSearchTerm(value);
     const filtered = users.filter((user) =>
-      user.title && user.title.toLowerCase().includes(value)
+      user.title && user.title.toLowerCase().includes(value) ||
+      user.country_title.toLowerCase().includes(value) ||
+      user.region_title.toLowerCase().includes(value)
     );
     setFilteredUsers(filtered);
     setCurrentPage(0);
@@ -378,8 +380,8 @@ const Geostate = () => {
                         <th scope='col' width="20%" className='text-left'>Country</th>
                         <th scope='col' width="20%" className='text-left'>Region</th>
                         <th scope='col' width="20%" className='text-left'>Geo State</th>
-                        {roleaccess > 3 ?<th scope='col' width="15%" className='text-center'>Edit</th> : null}
-                         {roleaccess > 4 ?<th scope='col' width="15%" className='text-center'>Delete</th> : null}
+                        {roleaccess > 3 ? <th scope='col' width="15%" className='text-center'>Edit</th> : null}
+                        {roleaccess > 4 ? <th scope='col' width="15%" className='text-center'>Delete</th> : null}
                       </tr>
                     </thead>
                     <tbody>
@@ -389,7 +391,7 @@ const Geostate = () => {
                           <td className='text-center'>{user.country_title}</td>
                           <td className='text-center'>{user.region_title}</td>
                           <td className='text-center'>{user.title}</td>
-                          {roleaccess > 3 ?<td className='text-center'>
+                          {roleaccess > 3 ? <td className='text-center'>
                             <button className="btn"
                               style={{
                                 backgroundColor: "transparent",
@@ -401,8 +403,8 @@ const Geostate = () => {
                             >
                               <FaPencilAlt />
                             </button>
-                          </td>: null}
-                          {roleaccess > 4 ?<td className='text-center'>
+                          </td> : null}
+                          {roleaccess > 4 ? <td className='text-center'>
                             <button
                               className="btn"
                               style={{
@@ -412,7 +414,7 @@ const Geostate = () => {
                                 fontSize: "20px",
                               }}
                               onClick={() => deleted(user.id)}
-                              >
+                            >
                               <FaTrash style={{ cursor: 'pointer', color: 'red' }} />
                             </button>
                           </td> : null}

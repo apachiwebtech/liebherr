@@ -62,7 +62,8 @@ const ProductLine = () => {
     const value = e.target.value.toLowerCase();
     setSearchTerm(value);
     const filtered = users.filter(
-      (user) => user.pline_code && user.pline_code.toLowerCase().includes(value)
+      (user) => user.pline_code && user.pline_code.toLowerCase().includes(value) ||
+        user.product_line && user.product_line.toLowerCase().includes(value)
     );
     setFilteredUsers(filtered);
     setCurrentPage(0);

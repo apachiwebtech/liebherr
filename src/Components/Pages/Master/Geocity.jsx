@@ -203,18 +203,21 @@ const Geocity = () => {
     }
   };
 
+
   const handleSearch = (e) => {
     const searchValue = e.target.value.toLowerCase();
     setSearchTerm(searchValue);
     setFilteredUsers(
       users.filter(
-        (user) =>
-          user.title.toLowerCase().includes(searchValue) ||
-          user.country_title.toLowerCase().includes(searchValue) ||
-          user.region_title.toLowerCase().includes(searchValue)
+        (users) =>
+           users.title && users.title.toLowerCase().includes(searchValue) ||
+          users.country_title && users.country_title.toLowerCase().includes(searchValue) ||
+          users.region_title && users.region_title.toLowerCase().includes(searchValue) ||
+          users.geostate_title && users.geostate_title.toLowerCase().includes(searchValue) 
       )
     );
   };
+  
 
   const validateForm = () => {
     const newErrors = {};

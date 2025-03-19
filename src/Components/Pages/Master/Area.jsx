@@ -195,7 +195,7 @@ const Area = () => {
     }
     // if (name === "geostate_id") {
     //   fetchGeoCities(value); // Fetch Geo Cities when Geo State is selected
-    // }
+    // }  
   };
 
   const handleSearch = (e) => {

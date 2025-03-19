@@ -426,7 +426,7 @@ const PincodeAllocation = () => {
                     <option value="Installation">INSTALLATION</option>
                     <option value="Breakdown">BREAKDOWN</option>
                     <option value="Visit">VISIT</option>
-                    <option value="Helpdesk">HELDESK</option>
+                    <option value="Helpdesk">HELPDESK</option>
                     <option value="Maintenance">MAINTENANCE</option>
                     <option value="Demo">DEMO</option>
 
