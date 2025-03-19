@@ -7967,6 +7967,9 @@ app.post("/putlhidata", authenticateToken, async (req, res) => {
   } = JSON.parse(decryptedData);
 
 
+
+
+
   try {
     const pool = await poolPromise;
 
@@ -10252,7 +10255,7 @@ app.get("/getquotationlist", authenticateToken, async (req, res) => {
 
     const getcspresilt = await pool.request().query(getcsp)
 
-    const assigncsp = getcspresilt.recordset[0].assigncsp
+    const assigncsp = getcspresilt.recordset[0] && getcspresilt.recordset[0].assigncsp
 
     // Directly use the query (no parameter binding)
     let sql = `SELECT q.* FROM awt_quotation as q WHERE 1=1`;
@@ -10759,7 +10762,7 @@ app.get("/getcsp", authenticateToken, async (req, res) => {
 
     // Execute the query
     const result = await pool.request().query(sql);
-    console.log(result)
+
 
     return res.json(result.recordset);
   } catch (err) {

@@ -13,6 +13,27 @@ import { useSelector } from 'react-redux';
 import { useDispatch } from "react-redux";
 import { getRoleData } from "../../Store/Role/role-action";
 import { MultiSelect } from 'react-multi-select-component';
+import Button from '@mui/material/Button';
+import { styled } from '@mui/material/styles';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
+import Typography from '@mui/material/Typography';
+import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
+import Checkbox from '@mui/material/Checkbox';
+const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
+
+const BootstrapDialog = styled(Dialog)(({ theme }) => ({
+  '& .MuiDialogContent-root': {
+    padding: theme.spacing(2),
+  },
+  '& .MuiDialogActions-root': {
+    padding: theme.spacing(1),
+  },
+}));
 
 const Lhiuser = () => {
   // Step 1: Add this state to track errors
@@ -25,6 +46,7 @@ const Lhiuser = () => {
   const [selected, setSelected] = useState([]);
   const [cspvalue, setCspvalue] = useState()
   const [csp, setCsp] = useState([])
+  const [search, setSearch] = useState('')
   const [isEdit, setIsEdit] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -33,6 +55,17 @@ const Lhiuser = () => {
   const [duplicateError, setDuplicateError] = useState(""); // State to track duplicate error
   const createdBy = 1; // Static value for created_by
   const updatedBy = 2; // Static value for updated_by
+  const [open, setOpen] = React.useState(false);
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const onhandleSearch = (e) => {
+    setSearch(e.target.value)
+  }
 
   const [formData, setFormData] = useState({
     Lhiuser: "",
@@ -77,9 +110,10 @@ const Lhiuser = () => {
       },
     })
       .then((res) => {
-        setCsp(
-          res.data.map(item => ({ label: item.title, value: item.id, licare_code: item.licare_code }))
-        );
+        // setCsp(
+        //   res.data.map(item => ({ label: item.title, value: item.id, licare_code: item.licare_code }))
+        // );
+        setCsp(res.data)
       })
       .catch((err) => {
         console.log(err)
@@ -100,7 +134,7 @@ const Lhiuser = () => {
       const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
       const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
       const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
-   
+
       setReporting(decryptedData);
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -117,7 +151,7 @@ const Lhiuser = () => {
       const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
       const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
       const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
- 
+
       setUsers(decryptedData);
       setFilteredUsers(decryptedData);
     } catch (error) {
@@ -165,18 +199,18 @@ const Lhiuser = () => {
     // if (!formData.password || !formData.password.trim()) {
     //   newErrors.password = "password Field is required.";
     // }
-    if (!formData.mobile_no || !formData.mobile_no.trim()) {
-      newErrors.mobile_no = "Mobile Number Field is required.";
-    }
+    // if (!formData.mobile_no || !formData.mobile_no.trim()) {
+    //   newErrors.mobile_no = "Mobile Number Field is required.";
+    // }
     if (!formData.email || !formData.email.trim()) {
       newErrors.email = "Email Field is required.";
     }
     if (!formData.Role || !formData.Role.trim()) {
       newErrors.Role = "Role Field is required.";
     }
-    if (!formData.Designation || !formData.Designation.trim()) {
-      newErrors.Designation = "Designation is required.";
-    }
+    // if (!formData.Designation || !formData.Designation.trim()) {
+    //   newErrors.Designation = "Designation is required.";
+    // }
 
 
 
@@ -209,9 +243,9 @@ const Lhiuser = () => {
         created_by: createdBy
       }).map(([key, value]) => [key, String(value)])
     );
-    
 
-    console.log(payload,'data')
+
+    console.log(payload, 'data')
 
     const encryptedData = CryptoJS.AES.encrypt(
       JSON.stringify(payload),
@@ -249,7 +283,7 @@ const Lhiuser = () => {
                   Role: "",
                   Designation: "",
                   Reporting_to: "",
-
+   
 
                 });
                 fetchUsers();
@@ -277,7 +311,7 @@ const Lhiuser = () => {
 
                 alert("User Added");
                 setSelected([]);
-                setCspvalue(''); 
+                setCspvalue('');
                 setFormData({
                   Lhiuser: "",
                   Usercode: "",
@@ -314,7 +348,18 @@ const Lhiuser = () => {
           Authorization: token, // Send token in headers
         },
       });
-      setFormData(response.data);
+      setFormData({
+        Lhiuser: response.data.Lhiuser,
+        Usercode: response.data.Usercode,
+        mobile_no: response.data.mobile_no,
+        email: response.data.email,
+        status: response.data.status,
+        remarks: response.data.remarks,
+        Role: response.data.Role,
+        Designation: response.data.Designation,
+        Reporting_to: response.data.Reporting_to,
+        id: response.data.id
+      });
 
       const userData = response.data;
 
@@ -523,10 +568,10 @@ const Lhiuser = () => {
                  
                       </div>
                     </div> */}
-                            <div className="col-4">
+                    <div className="col-4">
                       <div className="mb-3">
                         <label htmlFor="DesignationInput" className="input-field">
-                          Designation<span className="text-danger">*</span>
+                          Designation
                         </label>
                         <input
                           type="text"
@@ -553,7 +598,7 @@ const Lhiuser = () => {
                     <div className="col-4">
                       <div className="mb-3">
                         <label htmlFor="MobileInput" className="input-field">
-                          Mobile Number<span className="text-danger">*</span>
+                          Mobile Number
                         </label>
                         <input
                           type="tel"
@@ -664,8 +709,8 @@ const Lhiuser = () => {
                       </div>
                     </div>
 
-            
-      
+
+
                     {/* <div className="col-4">
                       <div className="mb-3">
                         <label htmlFor="LhiuserInput" className="input-field">
@@ -766,7 +811,7 @@ const Lhiuser = () => {
                           Full Name
                         </th>
 
-                        {roleaccess > 3 ?<th style={{ padding: "12px 0px", textAlign: "center" }}>
+                        {roleaccess > 3 ? <th style={{ padding: "12px 0px", textAlign: "center" }}>
                           Status
                         </th> : null}
                         <th style={{ padding: "12px 0px", textAlign: "center" }}>
@@ -774,8 +819,12 @@ const Lhiuser = () => {
                         </th>
 
 
-                       {roleaccess > 3 ?<th style={{ padding: "12px 0px", textAlign: "center" }}>
+                        {roleaccess > 3 ? <th style={{ padding: "12px 0px", textAlign: "center" }}>
                           Edit
+                        </th> : null}
+
+                        {roleaccess > 3 ? <th style={{ padding: "12px 0px", textAlign: "center" }}>
+                          Assign Csp
                         </th> : null}
 
                       </tr>
@@ -791,7 +840,7 @@ const Lhiuser = () => {
 
                           <td style={{ padding: "10px" }}>{item.Lhiuser}</td>
 
-                          {roleaccess > 3 ?<td style={{ padding: "10px" }}>
+                          {roleaccess > 3 ? <td style={{ padding: "10px" }}>
                             <label class="switch">
                               <input
                                 type="checkbox"
@@ -809,7 +858,7 @@ const Lhiuser = () => {
                           <td style={{ padding: "10px" }}>{item.Lhiuser}</td>
 
 
-                          { roleaccess > 3 ?<td style={{ padding: "0px", textAlign: "center" }}>
+                          {roleaccess > 3 ? <td style={{ padding: "0px", textAlign: "center" }}>
                             <button
                               className="btn"
                               onClick={() => {
@@ -823,10 +872,27 @@ const Lhiuser = () => {
                                 color: "blue",
                                 fontSize: "20px",
                               }}
-                              >
+                            >
                               <FaPencilAlt />
                             </button>
                           </td> : null}
+
+                          {roleaccess > 3 ?
+                            <td style={{ padding: "0px", textAlign: "center" }}>
+                              <button
+                                className="btn"
+                                onClick={handleClickOpen}
+                                Lhiuser="Edit"
+                                style={{
+                                  backgroundColor: "transparent",
+                                  border: "none",
+                                  color: "blue",
+                                  fontSize: "20px",
+                                }}
+                              >
+                                <RemoveRedEyeIcon />
+                              </button>
+                            </td> : null}
 
                         </tr>
                       ))}
@@ -880,6 +946,45 @@ const Lhiuser = () => {
                         {">"}
                       </button>
                     </div>
+                    <BootstrapDialog
+                      onClose={handleClose}
+                      aria-labelledby="customized-dialog-title"
+                      open={open}
+                    >
+                      <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
+                        Assign Csp
+                      </DialogTitle>
+                      <IconButton
+                        aria-label="close"
+                        onClick={handleClose}
+                        sx={(theme) => ({
+                          position: 'absolute',
+                          right: 8,
+                          top: 8,
+                          color: theme.palette.grey[500],
+                        })}
+                      >
+                        <CloseIcon />
+                      </IconButton>
+                      <DialogContent dividers>
+                        <div>
+
+                          <input type='text'  name='searchbox' onChange={onhandleSearch} value={search} />
+                          {csp.filter((item => item.title.toLowerCase().includes(search))).map((item, index) => {
+                            return (
+                              <div>
+                                 <p key={index} > <Checkbox value={item.licare_code} {...label}/> {item.title}</p>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </DialogContent>
+                      <DialogActions>
+                        <Button autoFocus onClick={handleClose}>
+                          Save changes
+                        </Button>
+                      </DialogActions>
+                    </BootstrapDialog>
                   </div>
                 </div>
               </div>
