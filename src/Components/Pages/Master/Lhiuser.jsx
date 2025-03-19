@@ -180,7 +180,8 @@ const Lhiuser = () => {
     setSearchTerm(value);
     const filtered = users.filter(
       (user) => user.Lhiuser && user.Lhiuser.toLowerCase().includes(value) || 
-      user.Usercode && user.Usercode.toLowerCase().includes(value)
+      user.Usercode && user.Usercode.toLowerCase().includes(value) ||
+      user.role_title && user.role_title.toLowerCase().includes(value)
     );
     setFilteredUsers(filtered);
     setCurrentPage(0);
@@ -800,30 +801,31 @@ const Lhiuser = () => {
                   >
                     <thead>
                       <tr>
-                        <th style={{ padding: "12px 15px", textAlign: "center" }}>
+                        <th style={{width:'50px', textAlign: "center" }}>
                           #
                         </th>
-                        <th style={{ padding: "12px 15px", textAlign: "center" }}>
+                        <th style={{width:'20%', textAlign: "center" }}>
                           Usercode
                         </th>
 
-                        <th style={{ padding: "12px 15px", textAlign: "center" }}>
+                        <th style={{width:'20%', textAlign: "center" }}>
                           Full Name
                         </th>
 
-                        {roleaccess > 3 ? <th style={{ padding: "12px 0px", textAlign: "center" }}>
+                        <th style={{ padding: "12px 0px", textAlign: "center" }}>
+                         Roles
+                        </th>
+                        
+                        {roleaccess > 3 ? <th style={{ width:'80px', textAlign: "center" }}>
                           Status
                         </th> : null}
-                        <th style={{ padding: "12px 0px", textAlign: "center" }}>
-                          Activation date
-                        </th>
 
 
-                        {roleaccess > 3 ? <th style={{ padding: "12px 0px", textAlign: "center" }}>
+                        {roleaccess > 3 ? <th style={{ width:'80px', textAlign: "center" }}>
                           Edit
                         </th> : null}
 
-                        {roleaccess > 3 ? <th style={{ padding: "12px 0px", textAlign: "center" }}>
+                        {roleaccess > 3 ? <th style={{ width:'80px', textAlign: "center" }}>
                           Assign Csp
                         </th> : null}
 
@@ -839,6 +841,7 @@ const Lhiuser = () => {
                           <td style={{ padding: "10px" }}>{item.Usercode}</td>
 
                           <td style={{ padding: "10px" }}>{item.Lhiuser}</td>
+                          <td style={{ padding: "10px" }}>{item.role_title}</td>
 
                           {roleaccess > 3 ? <td style={{ padding: "10px" }}>
                             <label class="switch">
@@ -855,7 +858,7 @@ const Lhiuser = () => {
                             </label>
 
                           </td> : null}
-                          <td style={{ padding: "10px" }}>{item.Lhiuser}</td>
+                          
 
 
                           {roleaccess > 3 ? <td style={{ padding: "0px", textAlign: "center" }}>
