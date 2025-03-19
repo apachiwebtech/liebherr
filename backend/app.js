@@ -7888,20 +7888,20 @@ app.post("/postlhidata", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
 
     // Step 1: Check if the same Lhiuser exists and is not soft-deleted
-    let sql = `SELECT * FROM lhi_user WHERE  Lhiuser = '${Lhiuser}' AND deleted = 0`;
+    let sql = `SELECT * FROM lhi_user WHERE  email = '${email}' AND deleted = 0`;
     const result = await pool.request().query(sql);
 
     if (result.recordset.length > 0) {
       // If duplicate data exists (not soft-deleted)
-      return res.status(409).json({ message: "Duplicate entry, Lhiuser already exists!" });
+      return res.status(409).json({ message: "Duplicate entry, Email already exists!" });
     } else {
       // Step 2: Check if the same Lhiuser exists but is soft-deleted
-      sql = `SELECT * FROM lhi_user WHERE Lhiuser = '${Lhiuser}' AND deleted = 1`;
+      sql = `SELECT * FROM lhi_user WHERE email = '${email}' AND deleted = 1`;
       const softDeletedData = await pool.request().query(sql);
 
       if (softDeletedData.recordset.length > 0) {
         // If soft-deleted data exists, restore the entry
-        sql = `UPDATE lhi_user SET deleted = 0 WHERE Lhiuser = '${Lhiuser}'`;
+        sql = `UPDATE lhi_user SET deleted = 0 WHERE email = '${email}'`;
         await pool.request().query(sql);
 
         return res.json({ message: "Soft-deleted data restored successfully!" });
@@ -7976,7 +7976,7 @@ app.post("/putlhidata", authenticateToken, async (req, res) => {
     // Step 1: Check if the same Lhiuser exists for another record (other than the current one) and is not soft-deleted
     const checkDuplicateSql = `
       SELECT * FROM lhi_user
-      WHERE Lhiuser = '${Lhiuser}'
+      WHERE email = '${email}'
       AND id != '${id}'
       AND deleted = 0
     `;
@@ -7984,7 +7984,7 @@ app.post("/putlhidata", authenticateToken, async (req, res) => {
 
     if (duplicateResult.recordset.length > 0) {
       // If a duplicate exists (other than the current record)
-      return res.status(409).json({ message: "Duplicate entry, Lhiuser already exists!" });
+      return res.status(409).json({ message: "Duplicate entry, Email already exists!" });
     } else {
       // Step 2: Update the record if no duplicates are found
       const updateSql = `

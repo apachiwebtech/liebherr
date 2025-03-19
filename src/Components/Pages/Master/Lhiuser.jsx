@@ -293,7 +293,7 @@ const Lhiuser = () => {
               })
               .catch((error) => {
                 if (error.response && error.response.status === 409) {
-                  setDuplicateError("Duplicate entry, Lhiuser already exists!"); // Show duplicate error for update
+                  setDuplicateError("Duplicate entry, Email already exists!"); // Show duplicate error for update
                 }
               });
           } else {
@@ -330,7 +330,7 @@ const Lhiuser = () => {
               })
               .catch((error) => {
                 if (error.response && error.response.status === 409) {
-                  setDuplicateError("Duplicate entry, Lhiuser already exists!"); // Show duplicate error for insert
+                  setDuplicateError("Duplicate entry, Email already exists!"); // Show duplicate error for insert
                 }
               });
           }
@@ -515,10 +515,7 @@ const Lhiuser = () => {
                         {errors.Lhiuser && (
                           <small className="text-danger">{errors.Lhiuser}</small>
                         )}
-                        {duplicateError && (
-                          <small className="text-danger">{duplicateError}</small>
-                        )}{" "}
-                        {/* Show duplicate error */}
+                        
                       </div>
 
                     </div>
@@ -539,10 +536,7 @@ const Lhiuser = () => {
                         {errors.Usercode && (
                           <small className="text-danger">{errors.Usercode}</small>
                         )}
-                        {duplicateError && (
-                          <small className="text-danger">{duplicateError}</small>
-                        )}{" "}
-                        {/* Show duplicate error */}
+                       
                       </div>
                     </div>
 
@@ -586,10 +580,7 @@ const Lhiuser = () => {
                         {errors.Designation && (
                           <small className="text-danger">{errors.Designation}</small>
                         )}
-                        {duplicateError && (
-                          <small Designation="text-danger">{duplicateError}</small>
-                        )}{" "}
-                        {/* Show duplicate error */}
+                       
                       </div>
 
                     </div>
