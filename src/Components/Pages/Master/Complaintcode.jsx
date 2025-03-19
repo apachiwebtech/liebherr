@@ -71,7 +71,8 @@ const ComplaintCode = () => {
     setSearchTerm(value);
     const filtered = users.filter(
       (user) =>
-        user.defectgroupcode && user.defectgroupcode.toLowerCase().includes(value)
+        user.defectgroupcode && user.defectgroupcode.toLowerCase().includes(value) ||
+        user.defectgrouptitle && user.defectgrouptitle.toLowerCase().includes(value)
     );
     setFilteredUsers(filtered);
     setCurrentPage(0);
@@ -405,13 +406,13 @@ const ComplaintCode = () => {
                         <th className="text-center">Defect Group Code</th>
                         <th className="text-center">Defect Group Title</th>
                         <th className="text-center">Description</th>
-                        {roleaccess > 3 ?<th className="text-center">Edit</th> : null}
-                        {roleaccess > 4 ?<th className="text-center">Delete</th> : null}
+                        {roleaccess > 3 ? <th className="text-center">Edit</th> : null}
+                        {roleaccess > 4 ? <th className="text-center">Delete</th> : null}
                       </tr>
                     </thead>
                     <tbody>
 
-                      {filteredUsers.map((item, index) => (
+                      {currentUsers.map((item, index) => (
                         <tr key={item.id}>
                           <td className="text-center">{index + 1 + indexOfFirstUser}</td>
                           <td>{item.defectgroupcode}</td>
@@ -426,7 +427,7 @@ const ComplaintCode = () => {
                               <FaPencilAlt />
                             </button>
                           </td> : null}
-                          {roleaccess > 4 ?<td className="text-center">
+                          {roleaccess > 4 ? <td className="text-center">
                             <button
                               className="btn btn-link text-danger"
                               onClick={() => deleted(item.id)}

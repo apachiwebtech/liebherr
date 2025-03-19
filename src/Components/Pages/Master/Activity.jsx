@@ -85,7 +85,8 @@ const Activity = () => {
     const value = e.target.value.toLowerCase();
     setSearchTerm(value);
     const filtered = users.filter((user) =>
-      user.reasoncode && user.reasoncode.toLowerCase().includes(value)
+      user.code && user.code.toLowerCase().includes(value) ||
+    user.title && user.title  .toLowerCase().includes(value)
     );
     setFilteredUsers(filtered);
     setCurrentPage(0);

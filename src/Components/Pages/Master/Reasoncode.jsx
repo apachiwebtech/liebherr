@@ -88,7 +88,8 @@ const ReasonCode = () => {
         const value = e.target.value.toLowerCase();
         setSearchTerm(value);
         const filtered = users.filter((user) =>
-            user.reasoncode && user.reasoncode.toLowerCase().includes(value)
+            user.defect_code && user.defect_code.toLowerCase().includes(value) ||
+        user.defect_title && user.defect_title.toLowerCase().includes(value)
         );
         setFilteredUsers(filtered);
         setCurrentPage(0);
