@@ -367,7 +367,7 @@ export function ChildFranchiselist(params) {
                                     <div className="form-group">
                                         <button className='btn btn-primary mx-2'
                                             onClick={() => navigate("/Childfranchisemaster")}
-                                            hidden = {roleaccess > 2 ? false : true} >
+                                            hidden={roleaccess > 2 ? false : true} >
                                             Add Partner</button>
                                         <button
                                             className="btn btn-primary"
@@ -430,7 +430,7 @@ export function ChildFranchiselist(params) {
                                             <th width="8%">Region</th>
                                             <th width="8%">State</th>
                                             <th width="5%">District</th>
-                                            <th width="5%">Edit</th>
+                                            <th width="5%">{roleaccess <= 3 ? "View" : "Edit"}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -451,17 +451,29 @@ export function ChildFranchiselist(params) {
                                                     <td >{item.geostate_id}</td>
                                                     <td >{item.area_id}</td>
 
-                                                    <td >
-                                                        <button
-                                                            className='btn'
-                                                            onClick={() => sendtoedit(item.id)}
-                                                            title="Edit"
-                                                            
-                                                            style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                                                        >
-                                                            <FaPencilAlt />
-                                                        </button>
+                                                    <td>
+                                                        {roleaccess > 3 ? (
+                                                            <button
+                                                                className='btn'
+                                                                onClick={() => sendtoedit(item.id, 0)}
+                                                                title="Edit"
+                                                                style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                                                            >
+                                                                <FaPencilAlt />
+                                                            </button>
+                                                        ) : roleaccess <= 3 ? (
+                                                            <button
+                                                                className='btn'
+                                                                onClick={() => sendtoedit(item.id, 1)}
+                                                                title="View"
+                                                                style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                                                            >
+                                                                <FaEye />
+                                                            </button>
+                                                        ) : null}
                                                     </td>
+
+
 
                                                 </tr>
                                             )

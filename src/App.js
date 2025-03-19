@@ -153,6 +153,7 @@ import ExceltoScript from './Components/Utils/ExceltoScript';
 import ExceltoEngScript from './Components/Utils/ExceltoEngScript';
 import Exceltomobile from './Components/Utils/Exceltomobile';
 import UploadMobile from './Components/Utils/UploadMobile';
+import JsontoExcel from './Components/Utils/JsontoExcel';
 
 
 
@@ -242,6 +243,10 @@ const Router = createBrowserRouter([
   {
     path: "/exceltojson",
     element: <ExcelToJson />
+  },
+  {
+    path: "/jsontoexcel",
+    element: <JsontoExcel />
   },
   {
     path: "/exceltoscript",

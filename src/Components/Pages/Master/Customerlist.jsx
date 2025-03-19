@@ -506,7 +506,7 @@ export function Customerlist(params) {
 
                                         <th width="15%">Add Location</th>
                                         <th width="10%">Add Product</th>
-                                        <th width="5%">Edit</th>
+                                        <th width="5%">{roleaccess <= 3 ? "View" : "Edit"}</th>
                                         {roleaccess > 4 ? <th width="5%">Delete</th> : null}
                                     </tr>
                                 </thead>
@@ -543,18 +543,29 @@ export function Customerlist(params) {
 
                                                     </Link>
                                                 </td>
-                                                <td >
-                                                    <button
-                                                        className='btn'
-                                                        onClick={() =>
-                                                            edit(item.id)
-                                                        }
-                                                        title="Edit"
-                                                        style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                                                    >
-                                                        <FaPencilAlt />
-                                                    </button>
+                                                <td>
+                                                    {roleaccess > 3 ? (
+                                                        <button
+                                                            className='btn'
+                                                            onClick={() => edit(item.id, 0)}
+                                                            title="Edit"
+                                                            style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                                                        >
+                                                            <FaPencilAlt />
+                                                        </button>
+                                                    ) : roleaccess <= 3 ? (
+                                                        <button
+                                                            className='btn'
+                                                            onClick={() => edit(item.id, 1)}
+                                                            title="View"
+                                                            style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                                                        >
+                                                            <FaEye />
+                                                        </button>
+                                                    ) : null}
                                                 </td>
+
+
                                                 {roleaccess > 4 ? <td style={{ padding: '0px', textAlign: 'center' }}>
                                                     <button
                                                         className='btn'

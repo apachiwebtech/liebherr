@@ -2,7 +2,7 @@ import axios from 'axios';
 import * as XLSX from "xlsx";
 import { Link, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
-import { FaPencilAlt, FaTrash } from 'react-icons/fa';
+import { FaPencilAlt, FaTrash , FaEye} from 'react-icons/fa';
 import { Base_Url, secretKey } from '../../Utils/Base_Url';
 import CryptoJS from 'crypto-js';
 import { useSelector } from 'react-redux';
@@ -374,7 +374,7 @@ const EnquiryListing = () => {
                                             <th width="5%">Priority</th>
                                             <th width="10%">Model Number</th>
                                             <th width="10%">Lead Status</th>
-                                            <th width="5%">Edit</th>
+                                            <th width="5%">{roleaccess <= 3 ? "View" : "Edit"}</th>
 
                                         </tr>
                                     </thead>
@@ -398,18 +398,27 @@ const EnquiryListing = () => {
                                                         {item.leadstatus}
                                                     </td>
                                                     <td>
-
-                                                        <button
-                                                            className='btn'
-                                                            onClick={() => sendtoedit(item.id)}
-                                                            title="Edit"
-                                                            style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-
-                                                        >
-                                                            <FaPencilAlt />
-                                                        </button>
-
+                                                        {roleaccess > 3 ? (
+                                                            <button
+                                                                className='btn'
+                                                                onClick={() => sendtoedit(item.id, 0)}
+                                                                title="Edit"
+                                                                style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                                                            >
+                                                                <FaPencilAlt />
+                                                            </button>
+                                                        ) : roleaccess <= 3 ? (
+                                                            <button
+                                                                className='btn'
+                                                                onClick={() => sendtoedit(item.id, 1)}
+                                                                title="View"
+                                                                style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                                                            >
+                                                                <FaEye />
+                                                            </button>
+                                                        ) : null}
                                                     </td>
+
                                                 </tr>
                                             )
                                         })}

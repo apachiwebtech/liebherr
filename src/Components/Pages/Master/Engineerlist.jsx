@@ -269,7 +269,7 @@ export function Engineerlist(params) {
 
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
 
-                           {roleaccess > 2 ?<div className="p-1 text-right">
+                            {roleaccess > 2 ? <div className="p-1 text-right">
                                 <button
                                     className="btn btn-primary"
                                     onClick={() => navigate("/EngineerMaster")}
@@ -398,9 +398,9 @@ export function Engineerlist(params) {
                                         <th width="8%">Email</th>
                                         <th width="20%">Mobile Number</th>
                                         <th width="10%">Employee Code</th>
-                                       <th width="5%">Edit</th>
+                                        <th width="5%">{roleaccess <= 3 ? "View" : "Edit"}</th>
                                         {/* <th width="5%">View</th> */}
-                                       {roleaccess > 3 ? <th width="5%">Status</th> : null}
+                                        {roleaccess > 3 ? <th width="5%">Status</th> : null}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -415,17 +415,28 @@ export function Engineerlist(params) {
                                                 <td >{item.mobile_no}</td>
                                                 <td >{item.employee_code}</td>
 
-                                               <td >
-                                                    <Link to={`/engineermaster/${item.id}`}> <button
-                                                        className='btn'
-                                                        title="Edit"
-                                                        style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                                                        disabled={roleaccess > 2 ? false : true}
-                                                    >
-                                                        <FaPencilAlt />
-                                                    </button></Link>
+                                                <td >
+                                                    {roleaccess > 3 ? (
+                                                        <Link to={`/engineermaster/${item.id}`}> <button
+                                                            className='btn'
+                                                            title="Edit"
+                                                            style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+
+                                                        >
+                                                            <FaPencilAlt />
+                                                        </button></Link>
+                                                    ) : roleaccess <= 3 ? (
+                                                        <Link to={`/engineermaster/${item.id}`}> <button
+                                                            className='btn'
+                                                            title="Edit"
+                                                            style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+
+                                                        >
+                                                            <FaEye />
+                                                        </button></Link>
+                                                    ) : null}
                                                 </td>
-                                                {roleaccess > 3 ?<td style={{ padding: "10px" }}>
+                                                {roleaccess > 3 ? <td style={{ padding: "10px" }}>
                                                     <label class="switch">
                                                         <input
                                                             type="checkbox"

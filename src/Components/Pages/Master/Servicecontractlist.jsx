@@ -398,7 +398,7 @@ export function Servicecontractlist(params) {
                                         <th width="10%">End Date</th>
                                         {/* <th width="8%">Approval Status</th> */}
                                         {roleaccess > 3 ? <th width="8%">Contract Status</th> : null}
-                                         <th width="5%">Edit</th>
+                                        <th width="5%">{roleaccess <= 3 ? "View" : "Edit"}</th>
                                         {/* <th width="5%">View</th> */}
                                         {roleaccess > 4 ? <th width="5%">Delete</th> : null}
                                     </tr>
@@ -435,29 +435,30 @@ export function Servicecontractlist(params) {
 
                                                 </td> : null}
 
-                                               <td >
-                                                    <button
-                                                        className='btn'
-                                                        onClick={() => sendtoedit(item.id, 0)}
-                                                        title="Edit"
-                                                        style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                                                        
-                                                    >
-                                                        <FaPencilAlt />
-                                                    </button>
-                                                </td> 
-                                                {/* <td >
-                                                    <button
-                                                        className='btn'
-                                                        onClick={() => sendtoedit(item.id, 1)}
-                                                        title="View"
-                                                        style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                                                        
-                                                    >
-                                                        <FaEye />
-                                                    </button>
-                                                </td> */}
-                                                {roleaccess > 4 ?<td >
+                                                <td>
+                                                    {roleaccess > 3 ? (
+                                                        <button
+                                                            className='btn'
+                                                            onClick={() => sendtoedit(item.id, 0)}
+                                                            title="Edit"
+                                                            style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                                                        >
+                                                            <FaPencilAlt />
+                                                        </button>
+                                                    ) : roleaccess <= 3 ? (
+                                                        <button
+                                                            className='btn'
+                                                            onClick={() => sendtoedit(item.id, 1)}
+                                                            title="View"
+                                                            style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                                                        >
+                                                            <FaEye />
+                                                        </button>
+                                                    ) : null}
+                                                </td>
+
+
+                                                {roleaccess > 4 ? <td >
                                                     <button
                                                         className='btn'
                                                         onClick={() => deleted(item.id)}

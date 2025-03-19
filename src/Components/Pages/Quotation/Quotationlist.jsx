@@ -1,7 +1,7 @@
 import * as XLSX from "xlsx";
 import { useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
-import { FaPencilAlt, FaTrash } from 'react-icons/fa';
+import { FaPencilAlt, FaTrash,FaEye } from 'react-icons/fa';
 import { Base_Url, secretKey } from '../../Utils/Base_Url';
 import CryptoJS from 'crypto-js';
 import { useSelector } from 'react-redux';
@@ -396,7 +396,7 @@ export function Quotationlist(params) {
                                             <th width="10%">Customer Name</th>
                                             <th width="15%">ModelNumber</th>
                                             <th width="10%">Status</th>
-                                           <th width="10%">Edit</th>
+                                            <th width="5%">{roleaccess <= 3 ? "View" : "Edit"}</th>
 
                                         </tr>
                                     </thead>
@@ -416,18 +416,26 @@ export function Quotationlist(params) {
                                                         {item.status}
                                                     </td>
                                                     <td>
-
-                                                        <button
-                                                            className='btn'
-                                                            onClick={() => sendtoedit(item.id)}
-                                                            title="Edit"
-                                                            style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                                                 
-                                                        >
-                                                            <FaPencilAlt />
-                                                        </button>
-
-                                                    </td> 
+                                                        {roleaccess > 3 ? (
+                                                            <button
+                                                                className='btn'
+                                                                onClick={() => sendtoedit(item.id, 0)}
+                                                                title="Edit"
+                                                                style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                                                            >
+                                                                <FaPencilAlt />
+                                                            </button>
+                                                        ) : roleaccess <= 3 ? (
+                                                            <button
+                                                                className='btn'
+                                                                onClick={() => sendtoedit(item.id, 1)}
+                                                                title="View"
+                                                                style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                                                            >
+                                                                <FaEye />
+                                                            </button>
+                                                        ) : null}
+                                                    </td>
                                                 </tr>
                                             )
                                         })}
