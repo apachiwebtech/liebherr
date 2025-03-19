@@ -145,7 +145,8 @@ const Lhiuser = () => {
     const value = e.target.value.toLowerCase();
     setSearchTerm(value);
     const filtered = users.filter(
-      (user) => user.Lhiuser && user.Lhiuser.toLowerCase().includes(value)
+      (user) => user.Lhiuser && user.Lhiuser.toLowerCase().includes(value) || 
+      user.Usercode && user.Usercode.toLowerCase().includes(value)
     );
     setFilteredUsers(filtered);
     setCurrentPage(0);
