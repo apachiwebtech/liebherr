@@ -526,22 +526,42 @@ export function Customerlist(params) {
                                                 <td >{item.email}</td>
 
                                                 <td>
-                                                    <Link to={`/Customerlocation/${item.customer_id}`}>
-                                                        <button style={{ backgroundColor: '#0D6EFD', color: "white" }} className='btn'
-                                                            onClick={() => {
-                                                                navigate(`/Customerlocation/${item.customer_id}`)
-                                                            }}>Add</button>
+                                                    {roleaccess > 3 ? (
+                                                        <Link to={`/Customerlocation/${item.customer_id}`}>
+                                                            <button style={{ backgroundColor: '#0D6EFD', color: "white" }} className='btn'
+                                                                onClick={() => {
+                                                                    navigate(`/Customerlocation/${item.customer_id}`)
+                                                                }}>Add</button>
 
-                                                    </Link>
+                                                        </Link>
+                                                    ) : roleaccess <= 3 ? (
+                                                        <Link to={`/Customerlocation/${item.customer_id}`}>
+                                                            <button style={{ backgroundColor: '#0D6EFD', color: "white" }} className='btn'
+                                                                onClick={() => {
+                                                                    navigate(`/Customerlocation/${item.customer_id}`)
+                                                                }}>View</button>
+
+                                                        </Link>
+                                                    ) : null}
                                                 </td>
                                                 <td>
-                                                    <Link to={`/uniqueproduct/${item.customer_id}`}>
-                                                        <button style={{ backgroundColor: '#0D6EFD', color: 'white' }} className='btn'
-                                                            onClick={() => {
-                                                                navigate(`/uniqueproduct/${item.customer_id}`)
-                                                            }}>Add</button>
+                                                    {roleaccess > 3 ? (
+                                                        <Link to={`/uniqueproduct/${item.customer_id}`}>
+                                                            <button style={{ backgroundColor: '#0D6EFD', color: 'white' }} className='btn'
+                                                                onClick={() => {
+                                                                    navigate(`/uniqueproduct/${item.customer_id}`)
+                                                                }}>Add</button>
 
-                                                    </Link>
+                                                        </Link>
+                                                    ) : roleaccess <= 3 ? (
+                                                        <Link to={`/uniqueproduct/${item.customer_id}`}>
+                                                            <button style={{ backgroundColor: '#0D6EFD', color: 'white' }} className='btn'
+                                                                onClick={() => {
+                                                                    navigate(`/uniqueproduct/${item.customer_id}`)
+                                                                }}>View</button>
+
+                                                        </Link>
+                                                    ) : null}
                                                 </td>
                                                 <td>
                                                     {roleaccess > 3 ? (
