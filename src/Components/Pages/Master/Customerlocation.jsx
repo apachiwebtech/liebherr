@@ -3,13 +3,14 @@ import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url, secretKey } from "../../Utils/Base_Url";
 import Endcustomertabs from "./Endcustomertabs";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { SyncLoader } from 'react-spinners';
 import CryptoJS from 'crypto-js';
 import { useSelector } from 'react-redux';
 import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 import { useDispatch } from "react-redux";
 import { getRoleData } from "../../Store/Role/role-action";
+import { IoArrowBack } from "react-icons/io5";
 const Customerlocation = () => {
   const [countries, setCountries] = useState([]);
   const { loaders, axiosInstance } = useAxiosLoader();
@@ -36,6 +37,8 @@ const Customerlocation = () => {
   const [successMessage, setSuccessMessage] = useState('');
 
   const [locations, setlocations] = useState([])
+
+  const navigate = useNavigate()
 
   const [formData, setFormData] = useState({
     country_name: "",
@@ -139,7 +142,7 @@ const Customerlocation = () => {
     const payload = {
       ...formData,
     }
-    console.log(payload,'test')
+    console.log(payload, 'test')
     const encryptedData = CryptoJS.AES.encrypt(
       JSON.stringify(payload),
       secretKey
@@ -154,9 +157,9 @@ const Customerlocation = () => {
       if (confirmSubmission) {
         const payload = {
           encryptedData
-          
+
         };
-        
+
 
         if (isEdit) {
           await axios
@@ -282,18 +285,18 @@ const Customerlocation = () => {
   const handleSearch = (e) => {
     const searchValue = e.target.value.toLowerCase();
     setSearchTerm(searchValue);
-  
+
     const filtered = customerLocation.filter(
       (area) =>
         area.ccperson && area.ccperson.toLowerCase().includes(searchValue) ||
         area.address && area.address.toLowerCase().includes(searchValue) // Include address in search
     );
-    console.log(customerLocation,'7')
-  
+    console.log(customerLocation, '7')
+
     setFilteredAreas(filtered);
     setCurrentPage(0); // Reset pagination when searching
   };
-  
+
 
   const validateForm = () => {
     let newErrors = {};
@@ -400,7 +403,15 @@ const Customerlocation = () => {
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
       )}
-      <Endcustomertabs></Endcustomertabs>
+      {roleaccess > 1 ? <div className="row mt-1 mp0">
+        <div className="col-12">
+          <div className="card mb-3 tab_box">
+            <div className="card-body">
+              <IoArrowBack onClick={() => navigate(-1)} style={{ fontSize: "25px",cursor:'pointer' }} />
+            </div>
+          </div>
+        </div>
+      </div> : null}
       {roleaccess > 1 ? <div className="row mp0">
         <div className="col-12">
           <div className="card mb-3 tab_box">
@@ -411,6 +422,8 @@ const Customerlocation = () => {
                 </div>
               )}
               <div className="row mp0">
+              <h2 className="pname" style={{ fontSize: "20px" }}>Cutomer Location:</h2>
+              <hr></hr>
                 <div className="col-6">
                   <form onSubmit={handleSubmit}>
                     <div className="row">
@@ -666,7 +679,7 @@ const Customerlocation = () => {
                         >
                           Edit
                         </th> : null}
-                        {roleaccess > 4 ?<th
+                        {roleaccess > 4 ? <th
                           scope="col"
                           width="13%"
                           style={{ textAlign: "center" }}
@@ -685,7 +698,7 @@ const Customerlocation = () => {
                           <td>{item.ccperson}</td>
                           <td>{item.customer_id}</td>
                           <td>{item.address}</td>
-                          {roleaccess > 3 ?<td className="text-center">
+                          {roleaccess > 3 ? <td className="text-center">
                             <button
                               className="btn btn-link text-primary"
                               onClick={() => edit(item.id)}
@@ -695,7 +708,7 @@ const Customerlocation = () => {
                               <FaPencilAlt />
                             </button>
                           </td> : null}
-                          {roleaccess > 4 ?<td className="text-center">
+                          {roleaccess > 4 ? <td className="text-center">
                             <button
                               className="btn btn-link text-danger"
                               onClick={() => deleted(item.id)}

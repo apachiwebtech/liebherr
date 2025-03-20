@@ -12,6 +12,7 @@ import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 import { useDispatch } from "react-redux";
 import { getRoleData } from "../../Store/Role/role-action";
+import { IoArrowBack } from "react-icons/io5";
 
 
 const MasterFranchise = (params) => {
@@ -36,6 +37,7 @@ const MasterFranchise = (params) => {
   const [duplicateError, setDuplicateError] = useState(""); // State to track duplicate error
   const token = localStorage.getItem("token"); // Get token from localStorage
   const created_by = localStorage.getItem("id");
+  const navigate = useNavigate();
   const [locations, setlocations] = useState({
     country: '',
     region: '',
@@ -441,12 +443,20 @@ const MasterFranchise = (params) => {
   return (
 
     <div className="tab-content">
-      <Franchisemaster />
       {loaders && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
       )}
+      {roleaccess > 1 ? <div className="row mt-1 mp0">
+        <div className="col-12">
+          <div className="card mb-3 tab_box">
+            <div className="card-body">
+              <IoArrowBack onClick={() => navigate(-1)} style={{ fontSize: "25px", cursor: 'pointer' }} />
+            </div>
+          </div>
+        </div>
+      </div> : null}
       {roleaccess > 1 ? <div className="row mp0">
         <div className="col-12">
           <div className="card mb-3 tab_box">
@@ -455,6 +465,8 @@ const MasterFranchise = (params) => {
               style={{ flex: "1 1 auto", padding: "13px 28px" }}
             >
               <div className="row mp0">
+                <h2 className="pname" style={{ fontSize: "20px" }}>Master Service Partner Details :</h2>
+                <hr></hr>
 
                 <form
                   onSubmit={handleSubmit}

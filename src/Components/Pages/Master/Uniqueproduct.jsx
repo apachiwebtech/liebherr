@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url, secretKey } from "../../Utils/Base_Url";
@@ -10,6 +10,7 @@ import CryptoJS from 'crypto-js';
 import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 import { useDispatch } from "react-redux";
 import { getRoleData } from "../../Store/Role/role-action";
+import { IoArrowBack } from "react-icons/io5";
 
 const Uniqueproduct = () => {
   const { customer_id } = useParams();
@@ -22,6 +23,8 @@ const Uniqueproduct = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [duplicateError, setDuplicateError] = useState("");
   const token = localStorage.getItem("token"); // Get token from localStorage
+
+  const navigate = useNavigate()
 
   const [formData, setFormData] = useState({
     product: "",
@@ -309,17 +312,27 @@ const Uniqueproduct = () => {
 
   return (
     <div className="tab-content">
-      <Endcustomertabs></Endcustomertabs>
       {loaders && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
       )}
+      {roleaccess > 1 ? <div className="row mt-1 mp0">
+        <div className="col-12">
+          <div className="card mb-3 tab_box">
+            <div className="card-body">
+              <IoArrowBack onClick={() => navigate(-1)} style={{ fontSize: "25px", cursor: 'pointer' }} />
+            </div>
+          </div>
+        </div>
+      </div> : null}
       {roleaccess > 1 ? <div className="row mp0">
         <div className="col-12">
           <div className="card mb-3 tab_box">
             <div className="card-body">
               <div className="row mp0">
+                <h2 className="pname" style={{ fontSize: "20px" }}>Cutomer Products:</h2>
+                <hr></hr>
                 <div className="col-4">
                   <form onSubmit={handleSubmit}>
                     <div className="row">
