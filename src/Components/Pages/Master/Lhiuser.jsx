@@ -56,15 +56,67 @@ const Lhiuser = () => {
   const createdBy = 1; // Static value for created_by
   const updatedBy = 2; // Static value for updated_by
   const [open, setOpen] = React.useState(false);
-  const handleClickOpen = () => {
+  const [usercode, setUsercode] = React.useState('');
+
+  const handleClickOpen = (usercode) => {
     setOpen(true);
+    setUsercode(usercode);
+
+    axios
+      .post(`${Base_Url}/getlhiassigncsp`, { Usercode: usercode }, {
+        headers: {
+          Authorization: token,
+        },
+      })
+      .then((res) => {
+        console.log(res.data);
+        const data = res.data[0]?.assigncsp;
+
+        if (data) {
+          const array = data.split(","); // Convert CSV to array
+          setSelected(array);
+        } else {
+          setSelected([]); // Handle empty data case
+        }
+      })
+      .catch((err) => console.error("Error fetching data:", err));
   };
+
+
+  console.log(selected, "#$%^&")
+
   const handleClose = () => {
     setOpen(false);
   };
 
   const onhandleSearch = (e) => {
     setSearch(e.target.value)
+  }
+
+  const oncheckchnage = (e) => {
+
+    const code = e.target.value;
+
+
+    const { value, checked } = e.target;
+
+    setSelected((prevSelected) =>
+      checked ? [...prevSelected, value] : prevSelected.filter((item) => item !== value)
+    );
+
+
+    axios.post(`${Base_Url}/updatecspcode`, { licare_code: code, Usercode: usercode, checked: String(checked) }, {
+      headers: {
+        Authorization: token
+      }
+    })
+      .then((res) => {
+        console.log(res.data)
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+
   }
 
   const [formData, setFormData] = useState({
@@ -140,6 +192,7 @@ const Lhiuser = () => {
       console.error("Error fetching users:", error);
     }
   };
+
   const fetchUsers = async () => {
     try {
       const response = await axiosInstance.get(`${Base_Url}/getlhidata`, {
@@ -179,9 +232,9 @@ const Lhiuser = () => {
     const value = e.target.value.toLowerCase();
     setSearchTerm(value);
     const filtered = users.filter(
-      (user) => user.Lhiuser && user.Lhiuser.toLowerCase().includes(value) || 
-      user.Usercode && user.Usercode.toLowerCase().includes(value) ||
-      user.role_title && user.role_title.toLowerCase().includes(value)
+      (user) => user.Lhiuser && user.Lhiuser.toLowerCase().includes(value) ||
+        user.Usercode && user.Usercode.toLowerCase().includes(value) ||
+        user.role_title && user.role_title.toLowerCase().includes(value)
     );
     setFilteredUsers(filtered);
     setCurrentPage(0);
@@ -284,7 +337,7 @@ const Lhiuser = () => {
                   Role: "",
                   Designation: "",
                   Reporting_to: "",
-   
+
 
                 });
                 fetchUsers();
@@ -311,7 +364,6 @@ const Lhiuser = () => {
               .then((response) => {
 
                 alert("User Added");
-                setSelected([]);
                 setCspvalue('');
                 setFormData({
                   Lhiuser: "",
@@ -365,7 +417,11 @@ const Lhiuser = () => {
       const userData = response.data;
 
       // Split the assigncsp values (comma-separated licare_codes)
-      // const selectedLicareCodes = userData.assigncsp ? userData.assigncsp.split(',') : [];
+      const selectedLicareCodes = userData.assigncsp ? userData.assigncsp.split(',') : [];
+
+      console.log(selectedLicareCodes, "selected")
+
+
 
       // Map the selected licare_codes to the corresponding options in the csp array
       // const selectedOptions = csp.filter(option => selectedLicareCodes.includes(option.licare_code));
@@ -399,18 +455,7 @@ const Lhiuser = () => {
 
   };
 
-  const handleselect = (value) => {
-    setSelected(value);
 
-
-    // Get the licare_codes from the selected items
-    const licareCodes = value.map((item) => item.licare_code).join(',');
-
-    // Set the comma-separated licare_codes value to be sent to the backend
-    setCspvalue(licareCodes);
-
-
-  }
 
 
   const indexOfLastUser = (currentPage + 1) * itemsPerPage;
@@ -792,31 +837,31 @@ const Lhiuser = () => {
                   >
                     <thead>
                       <tr>
-                        <th style={{width:'50px', textAlign: "center" }}>
+                        <th style={{ width: '50px', textAlign: "center" }}>
                           #
                         </th>
-                        <th style={{width:'20%', textAlign: "center" }}>
+                        <th style={{ width: '20%', textAlign: "center" }}>
                           Usercode
                         </th>
 
-                        <th style={{width:'20%', textAlign: "center" }}>
+                        <th style={{ width: '20%', textAlign: "center" }}>
                           Full Name
                         </th>
 
                         <th style={{ padding: "12px 0px", textAlign: "center" }}>
-                         Roles
+                          Roles
                         </th>
-                        
-                        {roleaccess > 3 ? <th style={{ width:'80px', textAlign: "center" }}>
+
+                        {roleaccess > 3 ? <th style={{ width: '80px', textAlign: "center" }}>
                           Status
                         </th> : null}
 
 
-                        {roleaccess > 3 ? <th style={{ width:'80px', textAlign: "center" }}>
+                        {roleaccess > 3 ? <th style={{ width: '80px', textAlign: "center" }}>
                           Edit
                         </th> : null}
 
-                        {roleaccess > 3 ? <th style={{ width:'80px', textAlign: "center" }}>
+                        {roleaccess > 3 ? <th style={{ width: '80px', textAlign: "center" }}>
                           Assign Csp
                         </th> : null}
 
@@ -849,7 +894,7 @@ const Lhiuser = () => {
                             </label>
 
                           </td> : null}
-                          
+
 
 
                           {roleaccess > 3 ? <td style={{ padding: "0px", textAlign: "center" }}>
@@ -875,7 +920,7 @@ const Lhiuser = () => {
                             <td style={{ padding: "0px", textAlign: "center" }}>
                               <button
                                 className="btn"
-                                onClick={handleClickOpen}
+                                onClick={() => handleClickOpen(item.Usercode)}
                                 Lhiuser="Edit"
                                 style={{
                                   backgroundColor: "transparent",
@@ -956,18 +1001,20 @@ const Lhiuser = () => {
                           right: 8,
                           top: 8,
                           color: theme.palette.grey[500],
+
                         })}
                       >
                         <CloseIcon />
                       </IconButton>
-                      <DialogContent dividers>
+                      <DialogContent dividers sx={{ width: "500px" }}>
                         <div>
-
-                          <input type='text'  name='searchbox' onChange={onhandleSearch} value={search} />
+                          <div className='mx-2 pb-5 '>
+                            <input className='p-2 ' style={{width : "400px" , backgroundColor : "white"}} type='text' placeholder='Search CSP' name='searchbox' onChange={onhandleSearch} value={search} />
+                          </div>
                           {csp.filter((item => item.title.toLowerCase().includes(search))).map((item, index) => {
                             return (
                               <div>
-                                 <p key={index} > <Checkbox value={item.licare_code} {...label}/> {item.title}</p>
+                                <p key={index} > <Checkbox value={item.licare_code} onChange={oncheckchnage} checked={selected.includes(item.licare_code)}  {...label} /> {item.title}</p>
                               </div>
                             )
                           })}

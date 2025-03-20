@@ -7371,6 +7371,67 @@ app.get("/getprodata", authenticateToken, async (req, res) => {
     return res.status(500).json({ message: "An error occurred while fetching product data" });
   }
 });
+// service product code start
+app.post("/getlhiassigncsp", authenticateToken, async (req, res) => {
+
+  let {Usercode} = req.body;
+
+  try {
+    const pool = await poolPromise;
+
+    // SQL query to fetch service product data where deleted is 0
+    const sql = `SELECT assigncsp FROM lhi_user WHERE Usercode = '${Usercode}'`;
+    const result = await pool.request().query(sql);
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "An error occurred while fetching product data" });
+  }
+});
+
+//update csp code
+
+app.post("/updatecspcode", authenticateToken, async (req, res) => {
+  let { licare_code, Usercode, checked } = req.body;
+
+  try {
+    const pool = await poolPromise;
+
+    // Fetch existing assigncsp value
+    const fetchSql = `SELECT assigncsp FROM lhi_user WHERE Usercode = '${Usercode}'`;
+    const fetchResult = await pool.request().query(fetchSql);
+    
+    let existingCspCodes = fetchResult.recordset[0]?.assigncsp || ""; // Get existing data or empty string
+    
+    // Convert existing codes into an array
+    let cspCodesArray = existingCspCodes ? existingCspCodes.split(",") : [];
+
+    if (checked) {
+      // Add new licare_code if not already present
+      if (!cspCodesArray.includes(licare_code)) {
+        cspCodesArray.push(licare_code);
+      }
+    } else {
+      // Remove licare_code if exists
+      cspCodesArray = cspCodesArray.filter(code => code !== licare_code);
+    }
+
+    // Convert array back to a comma-separated string
+    const updatedCspCodes = cspCodesArray.join(",");
+
+    // Update the database with the new value
+    const updateSql = `UPDATE lhi_user SET assigncsp = '${updatedCspCodes}' WHERE Usercode = '${Usercode}'`;
+    await pool.request().query(updateSql);
+
+    return res.json({ message: "CSP code updated successfully", assigncsp: updatedCspCodes });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "An error occurred while updating CSP codes" });
+  }
+});
+
+
 // Insert for Serviceproduct
 app.post("/postprodata", authenticateToken, async (req, res) => {
   const { Serviceproduct } = req.body;
