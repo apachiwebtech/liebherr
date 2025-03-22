@@ -89,7 +89,8 @@ export function Complaintview(params) {
     customer_class: "",
     customer_id: '',
     gascheck: 'No',
-    transportcheck: 'No'
+    transportcheck: 'No',
+    totp : ''
   });
 
 
@@ -1326,6 +1327,8 @@ export function Complaintview(params) {
       try {
         const complaintRemarkData = {
           ticket_no: complaintview.ticket_no,
+          customer_mobile: complaintview.customer_mobile,
+          totp: complaintview.totp,
           ticket_type: complaintview.ticket_type,
           ticket_start_date: complaintview.created_date,
           call_city: complaintview.class_city,

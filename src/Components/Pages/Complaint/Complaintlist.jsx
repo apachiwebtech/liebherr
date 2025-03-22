@@ -75,7 +75,8 @@ export function Complaintlist(params) {
       const params = {
         page: page,
         pageSize: pageSize,
-        licare_code: licare_code
+        licare_code: licare_code,
+        role : decryptedRole
       };
 
       // Add search filters dynamically to params
@@ -126,7 +127,7 @@ export function Complaintlist(params) {
       });
 
       params.append('licare_code', licare_code)
-
+      params.append('role', decryptedRole)
 
 
       const response = await axiosInstance.get(`${Base_Url}/getcomplainlist?${params}`, {

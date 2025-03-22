@@ -3484,10 +3484,62 @@ app.get("/getcomplaintview/:complaintid", authenticateToken, async (req, res) =>
 });
 
 app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
-  const { ticket_no, note, created_by, call_status, call_status_id, sub_call_status, group_code, site_defect, defect_type, activity_code, serial_no, ModelNumber, purchase_date, warrenty_status, engineerdata, engineername, ticket_type, call_city, ticket_start_date, mandaysprice, gas_chargs, gas_transportation, transportation_charge, visit_count } = req.body;
+  const { ticket_no, note, created_by, call_status, call_status_id, sub_call_status, group_code, site_defect, defect_type, activity_code, serial_no, ModelNumber, purchase_date, warrenty_status, engineerdata, engineername, ticket_type, call_city, ticket_start_date, mandaysprice, gas_chargs, gas_transportation, transportation_charge, visit_count ,customer_mobile,totp} = req.body;
+
+  const username = process.env.TATA_USER;
+  const password = process.env.PASSWORD;
 
 
 
+  let temp_id;
+  let temp_msg;
+
+  if(call_status == 'Open'){
+    temp_id = '1207173530305447084';
+    temp_msg = `Dear Customer, Greetings from Liebherr! Your Ticket Number is ${ticket_no}. Please share OTP ${totp} with the engineer once the ticket is resolved.`
+  }
+  else if(call_status == 'In Process'){
+    temp_id = '1207173530751596304';
+    temp_msg = `Dear Liebherr Customer, Your Ticket Number ${ticket_no} has been assigned to ${engineername} and will be contact shortly for appointment.`
+  }
+  else if(call_status == 'Appointment'){
+    temp_id = '1207173530643890095';
+    temp_msg = `Dear Liebherr Customer, Your Ticket Number ${ticket_no} has been successfully scheduled. Our Service engineer will attend as per the appointment.`
+  }
+  else if(call_status == 'Cancelled'){
+    temp_id = '1207173530833742041';
+    temp_msg =`Dear Customer, We regret to inform that the ticket registered with Liebherr is cancelled ${ticket_no}). To reschedule, please contact 7038100400`
+  }
+  else if(call_status == 'Closed'){
+    temp_id = '1207173530271700565';
+    temp_msg =`Dear Customer, Your Ticket Number ${ticket_no} has been successfully closed. Please contact 7038100400 for future assistance. Thank you for choosing Liebherr.`
+  }
+  else if(call_status == 'Approval'){
+    temp_id = '1207173530799359858';
+    temp_msg =`Dear Liebherr Customer, Ticket Number ${ticket_no} has been raised for quotation and will be processed once approved. For any query, please contact 7038100400`
+  }
+  else if(call_status == 'Spares' && sub_call_status == 'Spare Ordered'){
+    temp_id = '1207173530641222930';
+    temp_msg =`Dear Liebherr Customer, Ticket Number ${ticket_no} has been raised for a spare request and will be processed shortly. For any query, please contact 7038100400`
+  }
+  else if(call_status == 'Spares' && sub_call_status == 'Spare Required'){
+    temp_id = '1207173530641222930';
+    temp_msg =`Dear Liebherr Customer, Ticket Number ${ticket_no} has been raised for a spare request and will be processed shortly. For any query, please contact 7038100400`
+  }
+  else if(call_status == 'Spares' && sub_call_status == 'Spare in-transit'){
+    temp_id = '1207173530201018241';
+    temp_msg =`Dear Liebherr Customer, for your Ticket Number ${ticket_no}, spare parts are in-transit. For any query, please contact 7038100400`
+  }
+
+  else if(call_status == 'Spares' && sub_call_status == 'Spare Delivery Delayed'){
+    temp_id = '1207173530566445149';
+    temp_msg =`Dear Liebherr Customer, We apologize for the delay in Ticket Number${ticket_no} due to unforeseen challenges in part transit. We are on it right away.
+`
+  }
+  else if(call_status == 'Completed'){
+    temp_id = '1207173530028299875';
+    temp_msg =`Dear Liebherr Customer, Ticket Number ${ticket_no} has been successfully completed. For future assistance, please contact 7038100400`
+  }
 
 
 
@@ -3517,7 +3569,7 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
   ].filter(Boolean).join(' , ');
 
 
-  console.log(engineer_id, "^^&&*")
+
 
 
   try {
@@ -3573,6 +3625,15 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
       const getproductinfo = `select top 1 id, productType ,  productLine , productClass from product_master where item_description = '${ModelNumber}'`;
 
       const productresult = await pool.request().query(getproductinfo)
+
+
+
+
+      // const msg = encodeURIComponent(temp_msg);
+    
+      // const apiUrl = `https://smsgw.tatatel.co.in:9095/campaignService/campaigns/qs?recipient=${customer_mobile}&dr=false&msg=${msg}&user=${username}&pswd=${password}&sender=LICARE&PE_ID=1201159257274643113&Template_ID=${temp_id}`;
+
+      // const response = await axios.get(apiUrl); 
 
 
 
@@ -3647,6 +3708,9 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
 
           const finalresult = await pool.request().query(updatecomplaint);
 
+
+
+
           return res.json({
             hoursDifference, // Include the hours difference in the response
             rateCardData: finalresult.affectedRows,
@@ -3657,8 +3721,17 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
 
       }
 
+ 
 
 
+
+    }else{
+
+      // const msg = encodeURIComponent(temp_msg);
+    
+      // const apiUrl = `https://smsgw.tatatel.co.in:9095/campaignService/campaigns/qs?recipient=${customer_mobile}&dr=false&msg=${msg}&user=${username}&pswd=${password}&sender=LICARE&PE_ID=1201159257274643113&Template_ID=${temp_id}`;
+
+      // const response = await axios.get(apiUrl); 
     }
 
 
@@ -4525,11 +4598,15 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
       //   const temp_id = '1207173530305447084'
 
       //   try {
-      //     const tokenResponse = await axios.get(
-      //       `https://smsgw.tatatel.co.in:9095/campaignService/campaigns/qs?recipient=${mobile}&dr=false&msg=Dear Customer, Greetings from Liebherr! Your Ticket Number is ${ticket_no}. Please share OTP ${otp} with the engineer once the ticket is resolved.&user=${username}&pswd=${password}&sender=LICARE&PE_ID=1201159257274643113&Template_ID=${temp_id}`
+
+      //     const msg = encodeURIComponent(
+      //       `Dear Customer, Greetings from Liebherr! Your Ticket Number is ${ticket_no}. Please share OTP ${otp} with the engineer once the ticket is resolved.`
       //     );
 
-      //     console.log(tokenResponse.data)
+      //     const tokenResponse = await axios.get(
+      //       `https://smsgw.tatatel.co.in:9095/campaignService/campaigns/qs?recipient=${mobile}&dr=false&msg=${msg}&user=${username}&pswd=${password}&sender=LICARE&PE_ID=1201159257274643113&Template_ID=${temp_id}`
+      //     );
+
 
       //   } catch (error) {
       //     console.error('Error hitting SMS API (token):', error.response?.data || error.message);
@@ -7407,7 +7484,7 @@ app.post("/updatecspcode", authenticateToken, async (req, res) => {
     // Convert existing codes into an array
     let cspCodesArray = existingCspCodes ? existingCspCodes.split(",") : [];
 
-    if (checked) {
+    if (checked == 'true') {
       // Add new licare_code if not already present
       if (!cspCodesArray.includes(licare_code)) {
         cspCodesArray.push(licare_code);
@@ -7939,7 +8016,7 @@ app.post("/postlhidata", authenticateToken, async (req, res) => {
     Role,
     Reporting_to,
     Designation,
-
+    employee_type
 
   } = JSON.parse(decryptedData);
 
@@ -7968,18 +8045,20 @@ app.post("/postlhidata", authenticateToken, async (req, res) => {
         return res.json({ message: "Soft-deleted data restored successfully!" });
       } else {
 
-        const getcount = `SELECT TOP 1 RIGHT(UserCode, 4) AS count FROM lhi_user WHERE UserCode LIKE 'LHI-EMP-%' ORDER BY CAST(SUBSTRING(UserCode, 9, LEN(UserCode)) AS INT) DESC;`;
+
+
+        const getcount = `SELECT  max (right(REPLACE(REPLACE(REPLACE(usercode, CHAR(9), ''), CHAR(10), ''), CHAR(13), ''),4) )as  count  FROM lhi_user WHERE UserCode LIKE 'LHI-${employee_type}%' `;
 
         const getcountresult = await pool.request().query(getcount);
 
         console.log(getcountresult)
         
-        const newcount = Number(getcountresult.recordset[0].count) + 1;
+        const newcount = Number(getcountresult.recordset[0]?.count || 0) + 1;
         
         console.log(newcount)
 
         // Format the newcount as LH0001
-        const licarecode = `LHI-EMP-${newcount.toString().padStart(4, '0')}`;
+        const licarecode = `LHI-${employee_type}-${newcount.toString().padStart(4, '0')}`;
 
 
 
@@ -8934,6 +9013,7 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
       Priority,
       upcoming = 'current',
       ticket_type,
+      role
     } = req.query;
 
     const offset = (page - 1) * pageSize;
@@ -8942,12 +9022,7 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
 
     const getcsp = `select * from lhi_user where Usercode = '${licare_code}'`
 
-
-
     const getcspresilt = await pool.request().query(getcsp)
-
-
-
 
     const assigncsp = getcspresilt.recordset[0].assigncsp
 
@@ -8975,6 +9050,11 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
 
 
     let params = [];
+
+    if (role == '10') {
+      sql += ` AND call_status IN ('Spares', 'Closed')`;
+      countSql += ` AND call_status IN ('Spares', 'Closed')`;
+    }
 
     if (assigncsp !== 'ALL') {
       // Convert to an array and wrap each value in single quotes
@@ -11212,72 +11292,65 @@ app.post('/role_pages', authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
-    const sqlSelect = `
+    // Fetch pages already assigned to this role
+    const existingPagesQuery = `
+      SELECT pageid FROM pagerole WHERE roleid = @role_id
+    `;
+    const existingPagesResult = await pool.request()
+      .input("role_id", sql.Int, role_id)
+      .query(existingPagesQuery);
+    
+    const existingPageIds = new Set(existingPagesResult.recordset.map(row => row.pageid));
+
+    // Fetch all active pages from page_master
+    const fetchPageIdsQuery = `SELECT id AS pageid FROM page_master WHERE deleted = 0`;
+    const allPagesResult = await pool.request().query(fetchPageIdsQuery);
+    const allPageIds = allPagesResult.recordset.map(row => row.pageid);
+
+    // Identify missing pages
+    const missingPages = allPageIds.filter(pageid => !existingPageIds.has(pageid));
+
+    // Insert only missing pages
+    if (missingPages.length > 0) {
+      const transaction = new sql.Transaction(pool);
+      await transaction.begin();
+
+      try {
+        const request = transaction.request();
+        for (const page_id of missingPages) {
+          await request.query(`
+            INSERT INTO pagerole (roleid, pageid, accessid) 
+            VALUES (${role_id}, ${page_id}, 1)
+          `);
+        }
+
+        await transaction.commit();
+      } catch (err) {
+        await transaction.rollback();
+        console.error("Transaction error:", err);
+        return res.status(500).json({ error: "Failed to insert missing pages", details: err });
+      }
+    }
+
+    // Fetch updated list
+    const getDataQuery = `
       SELECT * 
       FROM pagerole AS pg 
       LEFT JOIN page_master AS pm ON pg.pageid = pm.id 
       WHERE pg.roleid = @role_id 
       ORDER BY pm.pagename ASC
     `;
-
-    const result = await pool.request()
+    const updatedData = await pool.request()
       .input("role_id", sql.Int, role_id)
-      .query(sqlSelect);
+      .query(getDataQuery);
 
-    const data = result.recordset;
-
-    if (data.length === 0) {
-      const fetchPageIds = `
-        SELECT id AS page_id 
-        FROM page_master 
-        WHERE deleted = 0
-      `;
-
-      const pageIdsResult = await pool.request().query(fetchPageIds);
-      const pageIds = pageIdsResult.recordset;
-
-      if (pageIds.length > 0) {
-        const transaction = new sql.Transaction(pool);
-        await transaction.begin();
-
-        try {
-          const request = transaction.request();
-          for (const { page_id } of pageIds) {
-            await request.query(`
-                INSERT INTO pagerole (roleid, pageid, accessid) 
-                VALUES (${role_id}, ${page_id},1)
-              `);
-          }
-
-          await transaction.commit();
-
-          const getData = `
-            SELECT * 
-            FROM pagerole AS pg 
-            LEFT JOIN page_master AS pm ON pg.pageid = pm.id 
-            WHERE pg.roleid = @role2_id 
-            ORDER BY pm.pagename ASC
-          `;
-
-          const newData = await pool.request()
-            .input("role2_id", sql.Int, role_id)
-            .query(getData);
-
-          return res.json(newData.recordset);
-        } catch (err) {
-          await transaction.rollback();
-          console.error("Transaction error:", err);
-          return res.status(500).json({ error: "Failed to insert rows", details: err });
-        }
-      }
-    } else {
-      return res.json(data);
-    }
+    return res.json(updatedData.recordset);
   } catch (err) {
     console.error("Database error:", err);
     return res.status(500).json({ error: "Database query failed", details: err });
   }
 });
+
 
 
 
@@ -11610,7 +11683,7 @@ app.post('/getbussinessroledata', authenticateToken, async (req, res) => {
 });
 
 app.post('/getfranchiseroledata', authenticateToken, async (req, res) => {
-  const { role, masterfpage, childfpage, childlistpage, engineerpage, engineerlistpage } = req.body;
+  const { role, masterfpage, childfpage, childlistpage, engineerpage, engineerlistpage,engineerapprovepage } = req.body;
 
   // Function to convert comma-separated strings into arrays
   const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
@@ -11622,6 +11695,7 @@ app.post('/getfranchiseroledata', authenticateToken, async (req, res) => {
     childlistpage: parseIds(childlistpage),
     engineerpage: parseIds(engineerpage),
     engineerlistpage: parseIds(engineerlistpage),
+    engineerapprovepage: parseIds(engineerapprovepage),
   };
 
   try {
@@ -14837,10 +14911,44 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
   { name: 'spare_doc_two', maxCount: 1 },
   { name: 'spare_doc_three', maxCount: 1 },
 ]), async (req, res) => {
-  let { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode, activitycode, com_id, warranty_status, spare_detail, ticket_no, user_id, serial_no, ModelNumber, sub_call_status, allocation, serial_data, picking_damages, product_damages, missing_part, leg_adjustment, water_connection, abnormal_noise, ventilation_top, ventilation_bottom, ventilation_back, voltage_supply, earthing, gas_charges, transpotation, purchase_date, otp, check_remark } = req.body;
+  let { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode, activitycode, com_id, warranty_status, spare_detail, ticket_no, user_id, serial_no, ModelNumber, sub_call_status, allocation, serial_data, picking_damages, product_damages, missing_part, leg_adjustment, water_connection, abnormal_noise, ventilation_top, ventilation_bottom, ventilation_back, voltage_supply, earthing, gas_charges, transpotation, purchase_date, otp, check_remark ,customer_mobile ='9326476448'} = req.body;
+
+  const username = process.env.TATA_USER;
+  const password = process.env.PASSWORD;
 
 
   const data_serial = JSON.parse(serial_data);
+
+  let temp_id;
+  let temp_msg;
+
+
+  console
+
+
+  if(call_status == 'Approval'){
+    temp_id = '1207173530799359858';
+    temp_msg =`Dear Liebherr Customer, Ticket Number ${ticket_no} has been raised for quotation and will be processed once approved. For any query, please contact 7038100400`
+  }
+  if(call_status == 'Approval-Int'){
+    temp_id = '1207173530799359858';
+    temp_msg =`Dear Liebherr Customer, Ticket Number ${ticket_no} has been raised for quotation and will be processed once approved. For any query, please contact 7038100400`
+  }
+  else if(call_status == 'Spares'){
+    temp_id = '1207173530641222930';
+    temp_msg =`Dear Liebherr Customer, Ticket Number ${ticket_no} has been raised for a spare request and will be processed shortly. For any query, please contact 7038100400`
+  }
+  else if(call_status == 'Completed'){
+    temp_id = '1207173530028299875';
+    temp_msg =`Dear Liebherr Customer, Ticket Number ${ticket_no} has been successfully completed. For future assistance, please contact 7038100400`
+  }
+
+
+  // const msg = encodeURIComponent(temp_msg);
+    
+  // const apiUrl = `https://smsgw.tatatel.co.in:9095/campaignService/campaigns/qs?recipient=${customer_mobile}&dr=false&msg=${msg}&user=${username}&pswd=${password}&sender=LICARE&PE_ID=1201159257274643113&Template_ID=${temp_id}`;
+
+  // const response = await axios.get(apiUrl); 
 
 
   if (call_status == 'Completed') {
@@ -14919,6 +15027,12 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
     // Check if any rows were updated
 
     const date = new Date()
+
+
+
+
+
+
 
 
     if (allocation == 'Available') {
@@ -15480,21 +15594,16 @@ app.get("/getsmsapi", async (req, res) => {
   const otp = '1234';
   const mobile = '9326476448';
 
-  // const username = process.env.TATA_USER;
-  // const password = process.env.PASSWORD;
-
-
-  const username = "LIEBHERR";
-  const password = "Liebh@01";
+  const username = process.env.TATA_USER;
+  const password = process.env.PASSWORD;
 
 
 
 
-
-  const temp_id = '1207173530305447084';
+  const temp_id = '1207173530566445149';
 
   const msg = encodeURIComponent(
-    `Dear Customer, Greetings from Liebherr! Your Ticket Number is ${ticket_no}. Please share OTP ${otp} with the engineer once the ticket is resolved.`
+    `Dear Liebherr Customer, We apologize for the delay in Ticket Number{#var#} due to unforeseen challenges in part transit. We are on it right away.`
   );
 
   const apiUrl = `https://smsgw.tatatel.co.in:9095/campaignService/campaigns/qs?recipient=${mobile}&dr=false&msg=${msg}&user=${username}&pswd=${password}&sender=LICARE&PE_ID=1201159257274643113&Template_ID=${temp_id}`;

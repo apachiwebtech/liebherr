@@ -36,11 +36,10 @@ const Customerlocation = () => {
   const [duplicateError, setDuplicateError] = useState("");
   const [successMessage, setSuccessMessage] = useState('');
 
-  const [locations, setlocations] = useState([])
-
   const navigate = useNavigate()
 
   const [formData, setFormData] = useState({
+    id:"",
     country_name: "",
     region_name: "",
     geostate_name: "",
@@ -260,13 +259,17 @@ const Customerlocation = () => {
 
       if (response.data && response.data[0]) {
         const locationData = response.data[0];
-        setlocations({
-          region_name: locationData.region_name,
-          geostate_name: locationData.geostate_name,
-          area_name: locationData.area_name,
-          geocity_name: locationData.geocity_name,
-          country_name: locationData.country_name
-        });
+
+        console.log(locationData, "#$%")
+        setFormData((prev) => ({
+          ...prev,
+          region_name: locationData.region_id,
+          geostate_name: locationData.geostate_id,
+          area_name: locationData.district_id,
+          geocity_name: locationData.geocity_id,
+          country_name: locationData.country_id,
+        }));
+        
 
         // Update formData with location values
         setFormData(prevState => ({
@@ -357,7 +360,21 @@ const Customerlocation = () => {
           Authorization: token, // Send token in headers
         },
       });
-      setFormData(response.data);
+      // setFormData(response.data);
+      setFormData({
+        country_name: response.data.country_id,
+        region_name: response.data.region_id,
+        geostate_name: response.data.geostate_id,
+        geocity_name: response.data.geocity_id,
+        area_name: response.data.district_id,
+        pincode_id: response.data.pincode_id,
+        address: response.data.address,
+        ccperson: response.data.ccperson,
+        ccnumber: response.data.ccnumber,
+        address_type: response.data.address_type,
+        customer_id: response.data.customer_id,
+        id : response.data.id
+      })
       console.log("Form Data", setFormData);
       setIsEdit(true);
     } catch (error) {
@@ -450,7 +467,7 @@ const Customerlocation = () => {
                           Country
                         </label>
 
-                        <input type="text" className="form-control" value={locations.country_name} name="country_name" onChange={handleChange} placeholder="" disabled />
+                        <input type="text" className="form-control" value={formData.country_name} name="country_name" onChange={handleChange} placeholder="" disabled />
 
                         {errors.country_name && (
                           <small className="text-danger">
@@ -462,7 +479,7 @@ const Customerlocation = () => {
                         <label htmlFor="region" className="form-label">
                           Region
                         </label>
-                        <input type="text" className="form-control" value={locations.region_name} name="region_name" onChange={handleChange} placeholder="" disabled />
+                        <input type="text" className="form-control" value={formData.region_name} name="region_name" onChange={handleChange} placeholder="" disabled />
 
                         {errors.region_name && (
                           <small className="text-danger">
@@ -476,7 +493,7 @@ const Customerlocation = () => {
                         <label htmlFor="geostate" className="form-label">
                           Geo States
                         </label>
-                        <input type="text" className="form-control" value={locations.geostate_name} name="geostate_name" onChange={handleChange} placeholder="" disabled />
+                        <input type="text" className="form-control" value={formData.geostate_name} name="geostate_name" onChange={handleChange} placeholder="" disabled />
 
                         {errors.geostate_name && (
                           <small className="text-danger">
@@ -491,7 +508,7 @@ const Customerlocation = () => {
                           District
                         </label>
 
-                        <input type="text" className="form-control" value={locations.area_name} name="area_name" onChange={handleChange} placeholder="" disabled />
+                        <input type="text" className="form-control" value={formData.area_name} name="area_name" onChange={handleChange} placeholder="" disabled />
 
                         {errors.area_name && (
                           <small className="text-danger">{errors.area_name}</small>
@@ -503,7 +520,7 @@ const Customerlocation = () => {
                         <label htmlFor="geocity" className="form-label">
                           Geo City
                         </label>
-                        <input type="text" className="form-control" value={locations.geocity_name} name="geocity_name" onChange={handleChange} placeholder="" disabled />
+                        <input type="text" className="form-control" value={formData.geocity_name} name="geocity_name" onChange={handleChange} placeholder="" disabled />
 
                         {errors.geocity_name && (
                           <small className="text-danger">

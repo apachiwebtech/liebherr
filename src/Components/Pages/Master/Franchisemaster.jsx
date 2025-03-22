@@ -28,6 +28,8 @@ function MasterFranchiseTabs() {
       setActiveTab("/EngineerMaster");
     } else if (location.pathname.startsWith("Engineerlist")) {
       setActiveTab("/Engineerlist");
+    }else if (location.pathname.startsWith("/engineerapprove")) {
+      setActiveTab("/engineerapprove");
     }
   }, [location.pathname]);
 
@@ -48,6 +50,7 @@ function MasterFranchiseTabs() {
       childlistpage: '22',
       engineerpage: '23',
       engineerlistpage: '24',
+      engineerapprovepage: '56',
     };
 
     axios.post(`${Base_Url}/getfranchiseroledata`, data, {
@@ -145,6 +148,15 @@ function MasterFranchiseTabs() {
                       <Link to={`/Engineerlist`}>
                         <button className={`nav-link ${activeTab === "/Engineerlist" ? "active" : ""}`}>
                           ENGINEER LIST
+                        </button>
+                      </Link>
+                    </li>
+                  }
+                  {status.engineerapprovepage == 1 &&
+                    <li className="nav-item">
+                      <Link to={`/engineerapprove`}>
+                        <button className={`nav-link ${activeTab === "/engineerapprove" ? "active" : ""}`}>
+                          ENGINEER APPROVE
                         </button>
                       </Link>
                     </li>

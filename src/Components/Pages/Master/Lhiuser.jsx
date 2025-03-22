@@ -57,6 +57,7 @@ const Lhiuser = () => {
   const updatedBy = 2; // Static value for updated_by
   const [open, setOpen] = React.useState(false);
   const [usercode, setUsercode] = React.useState('');
+  const [uid, setUid] = React.useState('');
 
   const handleClickOpen = (usercode) => {
     setOpen(true);
@@ -69,7 +70,7 @@ const Lhiuser = () => {
         },
       })
       .then((res) => {
-        console.log(res.data);
+        // console.log(res.data);
         const data = res.data[0]?.assigncsp;
 
         if (data) {
@@ -83,7 +84,7 @@ const Lhiuser = () => {
   };
 
 
-  console.log(selected, "#$%^&")
+  // console.log(selected, "#$%^&")
 
   const handleClose = () => {
     setOpen(false);
@@ -111,7 +112,7 @@ const Lhiuser = () => {
       }
     })
       .then((res) => {
-        console.log(res.data)
+        // console.log(res.data)
       })
       .catch((err) => {
         console.log(err)
@@ -130,6 +131,7 @@ const Lhiuser = () => {
     Role: "",
     Designation: "",
     Reporting_to: "",
+    employee_type: ""
     // assigncsp: "",
   });
 
@@ -262,9 +264,9 @@ const Lhiuser = () => {
     if (!formData.Role || !formData.Role.trim()) {
       newErrors.Role = "Role Field is required.";
     }
-    // if (!formData.Designation || !formData.Designation.trim()) {
-    //   newErrors.Designation = "Designation is required.";
-    // }
+    if (!formData.employee_type || !formData.employee_type.trim()) {
+      newErrors.employee_type = "Type is required.";
+    }
 
 
 
@@ -299,7 +301,7 @@ const Lhiuser = () => {
     );
 
 
-    console.log(payload, 'data')
+    // console.log(payload, 'data')
 
     const encryptedData = CryptoJS.AES.encrypt(
       JSON.stringify(payload),
@@ -401,6 +403,13 @@ const Lhiuser = () => {
           Authorization: token, // Send token in headers
         },
       });
+
+      const code = response.data.Usercode;
+
+      const extractedCode = code.split("-")[1];
+
+      setUid(response.data.id)
+
       setFormData({
         Lhiuser: response.data.Lhiuser,
         Usercode: response.data.Usercode,
@@ -411,7 +420,8 @@ const Lhiuser = () => {
         Role: response.data.Role,
         Designation: response.data.Designation,
         Reporting_to: response.data.Reporting_to,
-        id: response.data.id
+        id: response.data.id,
+        employee_type: extractedCode
       });
 
       const userData = response.data;
@@ -419,7 +429,7 @@ const Lhiuser = () => {
       // Split the assigncsp values (comma-separated licare_codes)
       const selectedLicareCodes = userData.assigncsp ? userData.assigncsp.split(',') : [];
 
-      console.log(selectedLicareCodes, "selected")
+      // console.log(selectedLicareCodes, "selected")
 
 
 
@@ -467,6 +477,8 @@ const Lhiuser = () => {
     // Create a new workbook
     const workbook = XLSX.utils.book_new();
 
+
+
     // Convert data to a worksheet
     const worksheet = XLSX.utils.json_to_sheet(filteredUsers.map(user => ({
       "Name": user.Lhiuser,
@@ -479,6 +491,7 @@ const Lhiuser = () => {
       "ReportingTo": user.Reporting_to,
       "Activation Date": user.activation_date,
       "DeActivationDate": user.deactivation_date,
+      "AssignCsp" : user.assigncsp
     })));
 
     // Append the worksheet to the workbook
@@ -560,7 +573,7 @@ const Lhiuser = () => {
                         {errors.Lhiuser && (
                           <small className="text-danger">{errors.Lhiuser}</small>
                         )}
-                        
+
                       </div>
 
                     </div>
@@ -581,7 +594,7 @@ const Lhiuser = () => {
                         {errors.Usercode && (
                           <small className="text-danger">{errors.Usercode}</small>
                         )}
-                       
+
                       </div>
                     </div>
 
@@ -625,7 +638,7 @@ const Lhiuser = () => {
                         {errors.Designation && (
                           <small className="text-danger">{errors.Designation}</small>
                         )}
-                       
+
                       </div>
 
                     </div>
@@ -742,6 +755,27 @@ const Lhiuser = () => {
                         </select>
                         {errors.Repoting_to && (
                           <small className="text-danger">{errors.Reporting_to}</small>
+                        )}
+                      </div>
+                    </div>
+                    <div className="col-4">
+                      <div className="mb-3">
+                        <label htmlFor="Reporting_to" className="form-label pb-0 dropdown-label"
+                        > Employee Type<span className="text-danger">*</span>
+                        </label>
+                        <select
+                          className={`form-select dropdown-select ${uid ? "bg-secondary-subtle" : "bg-light"}`}
+                          name="employee_type"
+                          value={formData.employee_type}
+                          onChange={handleChange}
+                          disabled={uid ? true : false}
+                        >
+                          <option value="">Select</option>
+                          <option value='EMP'>Employee</option>
+                          <option value='FSD'>Employee-SD</option>
+                        </select>
+                        {errors.employee_type && (
+                          <small className="text-danger">{errors.employee_type}</small>
                         )}
                       </div>
                     </div>
@@ -1009,15 +1043,16 @@ const Lhiuser = () => {
                       <DialogContent dividers sx={{ width: "500px" }}>
                         <div>
                           <div className='mx-2 pb-5 '>
-                            <input className='p-2 ' style={{width : "400px" , backgroundColor : "white"}} type='text' placeholder='Search CSP' name='searchbox' onChange={onhandleSearch} value={search} />
+                            <input className='p-2 ' style={{ width: "400px", backgroundColor: "white" }} type='text' placeholder='Search CSP' name='searchbox' onChange={onhandleSearch} value={search} />
                           </div>
-                          {csp.filter((item => item.title.toLowerCase().includes(search))).map((item, index) => {
-                            return (
-                              <div>
-                                <p key={index} > <Checkbox value={item.licare_code} onChange={oncheckchnage} checked={selected.includes(item.licare_code)}  {...label} /> {item.title}</p>
-                              </div>
-                            )
-                          })}
+                          {csp.filter((item => item.title.toLowerCase().includes(search.toLowerCase()) ||
+                            item.licare_code.toLowerCase().includes(search.toLowerCase()))).map((item, index) => {
+                              return (
+                                <div>
+                                  <p key={index} > <Checkbox value={item.licare_code} onChange={oncheckchnage} checked={selected.includes(item.licare_code)}  {...label} /> {item.title}-{item.licare_code}</p>
+                                </div>
+                              )
+                            })}
                         </div>
                       </DialogContent>
                       <DialogActions>

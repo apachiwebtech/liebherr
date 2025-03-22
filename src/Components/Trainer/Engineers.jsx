@@ -1,6 +1,6 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import { Base_Url } from '../Utils/Base_Url';
+import { Base_Url ,secretKey } from '../Utils/Base_Url';
 import { FaEye } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import Button from '@mui/material/Button';
@@ -14,7 +14,11 @@ import CloseIcon from '@mui/icons-material/Close';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
-
+import Franchisemaster from '../Pages/Master/Franchisemaster';
+import CryptoJS from 'crypto-js';
+import { useDispatch } from "react-redux";
+import { useSelector } from 'react-redux';
+import { getRoleData } from '../Store/Role/role-action';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -97,9 +101,9 @@ export function Engineers(params) {
     const data = {
       eng_id: id
     }
-    axios.post(`${Base_Url}/finalapproveenginner`, data , {
-      headers :{
-        Authorization : token
+    axios.post(`${Base_Url}/finalapproveenginner`, data, {
+      headers: {
+        Authorization: token
       }
     })
       .then((res) => {
@@ -117,120 +121,147 @@ export function Engineers(params) {
   }, [])
 
 
+
+  const Decrypt = (encrypted) => {
+    encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+    const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+    return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+  };
+
+  const storedEncryptedRole = localStorage.getItem("Userrole");
+  const decryptedRole = Decrypt(storedEncryptedRole);
+
+  const roledata = {
+    role: decryptedRole,
+    pageid: String(56)
+  }
+
+  const dispatch = useDispatch()
+  const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+
+
+  useEffect(() => {
+    dispatch(getRoleData(roledata))
+  }, [])
+
+
   return (
-    <div className="row mp0">
-      <div className="col-md-12 col-12">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Enginer_Id</th>
-              <th>Engineer_Name</th>
-              <th>MSP</th>
-              <th>CSP</th>
-              <th>Mobile</th>
-              <th>Email</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
+    <>
+      {roleaccess > 1 ?<div className="row mp0">
+        <Franchisemaster />
+        <div className="col-md-12 col-12">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Enginer_Id</th>
+                <th>Engineer_Name</th>
+                <th>MSP</th>
+                <th>CSP</th>
+                <th>Mobile</th>
+                <th>Email</th>
+                {roleaccess > 2 && <th>Action</th>}
+              </tr>
+            </thead>
+            <tbody>
 
-            {engineer.map((item, index) => {
-              return (
-                <tr key={item.id}>
-                  <td>{index + 1}</td>
-                  <td>{item.engineer_id}</td>
-                  <td>{item.title}</td>
-                  <td>{item.mfranchise_id}</td>
-                  <td>{item.cfranchise_id}</td>
-                  <td>{item.mobile_no}</td>
-                  <td>{item.email}</td>
-                  <td><FaEye style={{ cursor: "pointer" }} onClick={() => handleClickOpen(item.id, item.title, item.mfranchise_id, item.cfranchise_id)} /></td>
-                </tr>
-              )
-            })}
+              {engineer.map((item, index) => {
+                return (
+                  <tr key={item.id}>
+                    <td>{index + 1}</td>
+                    <td>{item.engineer_id}</td>
+                    <td>{item.title}</td>
+                    <td>{item.mfranchise_id}</td>
+                    <td>{item.cfranchise_id}</td>
+                    <td>{item.mobile_no}</td>
+                    <td>{item.email}</td>
+                    {roleaccess > 2 && <td><FaEye style={{ cursor: "pointer" }} onClick={() => handleClickOpen(item.id, item.title, item.mfranchise_id, item.cfranchise_id)} /></td>}
+                  </tr>
+                )
+              })}
 
 
-            <BootstrapDialog
-              onClose={handleClose}
-              aria-labelledby="customized-dialog-title"
-              open={open}
+              <BootstrapDialog
+                onClose={handleClose}
+                aria-labelledby="customized-dialog-title"
+                open={open}
 
-            >
-              <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
-                <p> {value.title}</p>
-              </DialogTitle>
-              <IconButton
-                aria-label="close"
-                onClick={handleClose}
-                sx={(theme) => ({
-                  position: 'absolute',
-                  right: 8,
-                  top: 8,
-                  color: theme.palette.grey[500],
-                })}
               >
-                <CloseIcon />
-              </IconButton>
-              <DialogContent dividers sx={{ width: "500px" }}>
+                <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
+                  <p> {value.title}</p>
+                </DialogTitle>
+                <IconButton
+                  aria-label="close"
+                  onClick={handleClose}
+                  sx={(theme) => ({
+                    position: 'absolute',
+                    right: 8,
+                    top: 8,
+                    color: theme.palette.grey[500],
+                  })}
+                >
+                  <CloseIcon />
+                </IconButton>
+                <DialogContent dividers sx={{ width: "500px" }}>
 
-                <div className="row mb-3">
-                  <div className="col-lg-12 my-2">
-                    <label>MSP</label>
-                    <Autocomplete
-                      disablePortal={false}
-                      options={msp} // Array of options
-                      size="small"
-                      getOptionLabel={(option) => option.title} // Specify how to extract the label from an option
-                      renderInput={(params) => <TextField {...params} label="Select MSP" />}
-                    />
+                  <div className="row mb-3">
+                    <div className="col-lg-12 my-2">
+                      <label>MSP</label>
+                      <Autocomplete
+                        disablePortal={false}
+                        options={msp} // Array of options
+                        size="small"
+                        getOptionLabel={(option) => option.title} // Specify how to extract the label from an option
+                        renderInput={(params) => <TextField {...params} label="Select MSP" />}
+                      />
 
-                  </div>
-                  <div className="col-md-12 my-2">
-                    <label>CSP</label>
-                    <Autocomplete
-                      disablePortal={false}
-                      options={csp} // Array of options
-                      size="small"
-
-                      getOptionLabel={(option) => option.title} // Specify how to extract the label from an option
-                      renderInput={(params) => <TextField {...params} label="Select CSP" />}
-                    />
-                  </div>
-
-                  <div className="col-md-12 my-2">
-                    <div className="form-group">
-                      <label>Level</label>
-                      <select
-                        className="form-control"
-                        name="status"
-                      >
-                        <option value="">Select Level</option>
-                        <option value="L1">L1</option>
-                        <option value="L2">L2</option>
-                        <option value="L3">L3</option>
-                        <option value="L4">L4</option>
-                        <option value="L5">L5</option>
-
-                      </select>
                     </div>
+                    <div className="col-md-12 my-2">
+                      <label>CSP</label>
+                      <Autocomplete
+                        disablePortal={false}
+                        options={csp} // Array of options
+                        size="small"
+
+                        getOptionLabel={(option) => option.title} // Specify how to extract the label from an option
+                        renderInput={(params) => <TextField {...params} label="Select CSP" />}
+                      />
+                    </div>
+
+                    <div className="col-md-12 my-2">
+                      <div className="form-group">
+                        <label>Level</label>
+                        <select
+                          className="form-control"
+                          name="status"
+                        >
+                          <option value="">Select Level</option>
+                          <option value="L1">L1</option>
+                          <option value="L2">L2</option>
+                          <option value="L3">L3</option>
+                          <option value="L4">L4</option>
+                          <option value="L5">L5</option>
+
+                        </select>
+                      </div>
+                    </div>
+
                   </div>
-
-                </div>
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={() => handleApprove(value.id)}>
-                  Approve
-                </Button>
-              </DialogActions>
-            </BootstrapDialog>
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={() => handleApprove(value.id)}>
+                    Approve
+                  </Button>
+                </DialogActions>
+              </BootstrapDialog>
 
 
 
-          </tbody>
-        </table>
-      </div>
-    </div>
+            </tbody>
+          </table>
+        </div>
+      </div> : null}
+    </>
   );
 }
 

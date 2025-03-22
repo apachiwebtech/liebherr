@@ -19,7 +19,7 @@ export const customerArray = "14,15"
 
 export const BussinessArray = "18"
 
-export const FranchiseArray = "19,20,21,22,23,24"
+export const FranchiseArray = "19,20,21,22,23,24,56"
 
 export const CallStatusArray = "51,26"
 
