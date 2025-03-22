@@ -10,6 +10,7 @@ import { SyncLoader } from "react-spinners";
 import { useDispatch } from "react-redux";
 import { getRoleData } from "../../Store/Role/role-action";
 import { useSelector } from 'react-redux';
+import Productsparetabs from "./Productsparetabs";
 
 export function Productspare() {
     const [text, setText] = useState("");
@@ -279,7 +280,10 @@ export function Productspare() {
                     <SyncLoader loading={loaders || loader} color="#FFFFFF" />
                 </div>
             )}
+            <Productsparetabs></Productsparetabs>
+            
             {roleaccess > 1 ?<div className="col-4">
+                
                 <div className="card mt-3 mb-3">
                     <div className="card-body">
                         <form onSubmit={handleSubmit} className="row">

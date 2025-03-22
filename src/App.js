@@ -133,7 +133,7 @@ import { BussinePartner } from './Components/Pages/Master/BussinePartner';
 import MspAddtab from './Components/Pages/Master/MspAddtab';
 import AddMspUser from './Components/Pages/Master/AddMspUser';
 import { EnquiryForm } from './Components/Pages/Master/EnquiryForm';
-import  EnquiryListing  from './Components/Pages/Master/EnquiryListing';
+import EnquiryListing from './Components/Pages/Master/EnquiryListing';
 import { EngineerStock } from './Components/App/Compo/EngineerStock';
 import { CspQuotationlist } from './Components/Pages/Master/CspQuotationlist';
 import CspQuotationEdit from './Components/Pages/Master/CspQuotationEdit';
@@ -154,6 +154,8 @@ import ExceltoEngScript from './Components/Utils/ExceltoEngScript';
 import Exceltomobile from './Components/Utils/Exceltomobile';
 import UploadMobile from './Components/Utils/UploadMobile';
 import JsontoExcel from './Components/Utils/JsontoExcel';
+import Productsparetabs from './Components/Pages/Master/Productsparetabs';
+import { Stock } from './Components/Pages/Master/Stock';
 
 
 
@@ -265,6 +267,7 @@ const Router = createBrowserRouter([
     element: <UploadMobile />
   },
 
+
   {
     path: "/msp",
     element: <MSPAPP />,
@@ -276,7 +279,7 @@ const Router = createBrowserRouter([
       },
       {
         path: "/msp/csplist",
-        element:<ProtectedRoute><Csplisting /></ProtectedRoute> ,
+        element: <ProtectedRoute><Csplisting /></ProtectedRoute>,
       },
       {
         path: "/msp/complaintviewmsp/:complaintid",
@@ -292,7 +295,7 @@ const Router = createBrowserRouter([
       },
       {
         path: "/msp/addusers",
-        element:<ProtectedRoute> <AddMspUser /></ProtectedRoute>,
+        element: <ProtectedRoute> <AddMspUser /></ProtectedRoute>,
       },
       {
         path: "/msp/roleassign",
@@ -302,7 +305,7 @@ const Router = createBrowserRouter([
         path: "/msp/roleright",
         element: <ProtectedRoute><MspAddtab /></ProtectedRoute>,
       },
-     
+
 
     ]
   },
@@ -323,7 +326,7 @@ const Router = createBrowserRouter([
 
       {
         path: "/csp/ticketlist",
-        element:<ProtectedRoute> <Ticketlistcsp /></ProtectedRoute>,
+        element: <ProtectedRoute> <Ticketlistcsp /></ProtectedRoute>,
 
       },
       {
@@ -341,11 +344,11 @@ const Router = createBrowserRouter([
         element: <ProtectedRoute><AddCspUser /></ProtectedRoute>,
       },
       {
-        path:"/csp/rolerights",
+        path: "/csp/rolerights",
         element: <ProtectedRoute><CspRoleright /></ProtectedRoute>,
       },
       {
-        path:"/csp/roleassign",
+        path: "/csp/roleassign",
         element: <ProtectedRoute><RoleassignCsp /></ProtectedRoute>,
       },
       {
@@ -362,7 +365,7 @@ const Router = createBrowserRouter([
       },
       {
         path: "/csp/grnview/:grn_no",
-        element:<ProtectedRoute><Grndetailspage /></ProtectedRoute> 
+        element: <ProtectedRoute><Grndetailspage /></ProtectedRoute>
       },
       {
         path: "/csp/issueview/:issue_no",
@@ -370,7 +373,7 @@ const Router = createBrowserRouter([
       },
       {
         path: "/csp/spareoutward",
-        element: <ProtectedRoute><Spareoutward /></ProtectedRoute> 
+        element: <ProtectedRoute><Spareoutward /></ProtectedRoute>
       },
       {
         path: "/csp/grnoutward",
@@ -378,7 +381,7 @@ const Router = createBrowserRouter([
       },
       {
         path: "/csp/cspstock",
-        element:<ProtectedRoute> <CspStock /></ProtectedRoute>
+        element: <ProtectedRoute> <CspStock /></ProtectedRoute>
       },
       {
         path: "/csp/dashboard",
@@ -396,7 +399,7 @@ const Router = createBrowserRouter([
         path: "/csp/quotation/:qid",
         element: <ProtectedRoute><CspQuotationEdit /></ProtectedRoute>
       },
-      
+
     ],
   },
   {
@@ -406,7 +409,7 @@ const Router = createBrowserRouter([
 
       {
         path: "/trainer/engineerlist",
-        element:<ProtectedRoute><Engineers /></ProtectedRoute> ,
+        element: <ProtectedRoute><Engineers /></ProtectedRoute>,
 
       }
     ],
@@ -426,7 +429,7 @@ const Router = createBrowserRouter([
       },
       {
         path: '/mobapp/details/:id',
-        element:<ProtectedRoute><Details /></ProtectedRoute> ,
+        element: <ProtectedRoute><Details /></ProtectedRoute>,
       },
       {
         path: '/mobapp/history/:id',
@@ -434,15 +437,15 @@ const Router = createBrowserRouter([
       },
       {
         path: '/mobapp/offline',
-        element:<ProtectedRoute><Data_lost /></ProtectedRoute> ,
+        element: <ProtectedRoute><Data_lost /></ProtectedRoute>,
       },
       {
         path: '/mobapp/mobile',
-        element:<ProtectedRoute> <Mobile /></ProtectedRoute>,
+        element: <ProtectedRoute> <Mobile /></ProtectedRoute>,
       },
       {
         path: '/mobapp/stock',
-        element:<ProtectedRoute><EngineerStock /></ProtectedRoute> ,
+        element: <ProtectedRoute><EngineerStock /></ProtectedRoute>,
       },
       {
         path: '/mobapp/applogin',
@@ -463,12 +466,12 @@ const Router = createBrowserRouter([
       },
       {
         path: "/callstatus",
-        element:<ProtectedRoute> <Callstatus /></ProtectedRoute>,
+        element: <ProtectedRoute> <Callstatus /></ProtectedRoute>,
 
       },
       {
         path: "/promaster",
-        element:<ProtectedRoute><ProMaster /></ProtectedRoute>,
+        element: <ProtectedRoute><ProMaster /></ProtectedRoute>,
 
       },
       {
@@ -483,7 +486,7 @@ const Router = createBrowserRouter([
       },
       {
         path: "/regions",
-        element:<ProtectedRoute><Regions /></ProtectedRoute> ,
+        element: <ProtectedRoute><Regions /></ProtectedRoute>,
 
       },
       {
@@ -493,7 +496,7 @@ const Router = createBrowserRouter([
       },
       {
         path: "/pincode_allocation",
-        element:<ProtectedRoute><PincodeAllocation /></ProtectedRoute> ,
+        element: <ProtectedRoute><PincodeAllocation /></ProtectedRoute>,
 
       },
       {
@@ -518,7 +521,7 @@ const Router = createBrowserRouter([
       },
       {
         path: "/TypeOfDefect",
-        element:<ProtectedRoute> <ReasonCode /></ProtectedRoute>,
+        element: <ProtectedRoute> <ReasonCode /></ProtectedRoute>,
 
 
       },
@@ -529,7 +532,7 @@ const Router = createBrowserRouter([
       },
       {
         path: "/Activity",
-        element:<ProtectedRoute> <Activity /></ProtectedRoute>,
+        element: <ProtectedRoute> <Activity /></ProtectedRoute>,
 
       },
       {
@@ -539,7 +542,7 @@ const Router = createBrowserRouter([
       },
       {
         path: "/complaintlist",
-        element:<ProtectedRoute> <Complaintlist /></ProtectedRoute>,
+        element: <ProtectedRoute> <Complaintlist /></ProtectedRoute>,
 
       },
       {
@@ -554,12 +557,12 @@ const Router = createBrowserRouter([
       },
       {
         path: "/callstatuscodetabs",
-        element:<ProtectedRoute><Callstatuscodetabs /></ProtectedRoute> ,
+        element: <ProtectedRoute><Callstatuscodetabs /></ProtectedRoute>,
 
       },
       {
         path: "/customerlocation",
-        element:<ProtectedRoute><Customerlocation /></ProtectedRoute> ,
+        element: <ProtectedRoute><Customerlocation /></ProtectedRoute>,
 
       },
       {
@@ -576,12 +579,12 @@ const Router = createBrowserRouter([
       },
       {
         path: "/Customerlist",
-        element:<ProtectedRoute> <Customerlist /></ProtectedRoute>
+        element: <ProtectedRoute> <Customerlist /></ProtectedRoute>
 
       },
       {
         path: "/Customer",
-        element:<ProtectedRoute> <Customer /></ProtectedRoute>,
+        element: <ProtectedRoute> <Customer /></ProtectedRoute>,
 
       },
       {
@@ -601,7 +604,7 @@ const Router = createBrowserRouter([
       },
       {
         path: "/geocity",
-        element:<ProtectedRoute><Geocity /></ProtectedRoute> ,
+        element: <ProtectedRoute><Geocity /></ProtectedRoute>,
 
       },
       {
@@ -621,7 +624,7 @@ const Router = createBrowserRouter([
       },
       {
         path: "/Roleright",
-        element:<ProtectedRoute><Roleright /></ProtectedRoute> ,
+        element: <ProtectedRoute><Roleright /></ProtectedRoute>,
 
       },
       {
@@ -641,7 +644,7 @@ const Router = createBrowserRouter([
       },
       {
         path: "/pincode",
-        element:<ProtectedRoute><Pincode /></ProtectedRoute> ,
+        element: <ProtectedRoute><Pincode /></ProtectedRoute>,
 
       }, {
         path: "/products",
@@ -649,17 +652,17 @@ const Router = createBrowserRouter([
       },
       {
         path: "/productspare",
-        element:<ProtectedRoute><Productspare /></ProtectedRoute> ,
+        element: <ProtectedRoute><Productspare /></ProtectedRoute>,
 
       },
       {
         path: "/ratecard",
-        element:<ProtectedRoute><Ratecard /></ProtectedRoute> ,
+        element: <ProtectedRoute><Ratecard /></ProtectedRoute>,
 
       },
       {
         path: "/ratecardtabs",
-        element:<ProtectedRoute> <Ratecardtabs /></ProtectedRoute>,
+        element: <ProtectedRoute> <Ratecardtabs /></ProtectedRoute>,
 
       },
       {
@@ -669,12 +672,12 @@ const Router = createBrowserRouter([
       },
       {
         path: "/post_sale_warrenty",
-        element:<ProtectedRoute><PostSaleWarrenty /></ProtectedRoute> ,
+        element: <ProtectedRoute><PostSaleWarrenty /></ProtectedRoute>,
 
       },
       {
         path: "/register-complaint",
-        element:<ProtectedRoute><Registercomplaint /></ProtectedRoute> ,
+        element: <ProtectedRoute><Registercomplaint /></ProtectedRoute>,
 
       },
       {
@@ -689,12 +692,12 @@ const Router = createBrowserRouter([
       },
       {
         path: "/serviceproduct",
-        element:<ProtectedRoute><Serviceproduct /></ProtectedRoute> ,
+        element: <ProtectedRoute><Serviceproduct /></ProtectedRoute>,
 
       },
       {
         path: "/serviceproducttabs",
-        element:<ProtectedRoute><Serviceproducttabs /></ProtectedRoute> ,
+        element: <ProtectedRoute><Serviceproducttabs /></ProtectedRoute>,
 
       },
       {
@@ -704,12 +707,12 @@ const Router = createBrowserRouter([
       },
       {
         path: "/producttype",
-        element:<ProtectedRoute><ProductType /></ProtectedRoute> ,
+        element: <ProtectedRoute><ProductType /></ProtectedRoute>,
 
       },
       {
         path: "/franchisemaster",
-        element:<ProtectedRoute> <Franchisemaster /></ProtectedRoute>,
+        element: <ProtectedRoute> <Franchisemaster /></ProtectedRoute>,
 
       },
       {
@@ -723,11 +726,11 @@ const Router = createBrowserRouter([
       },
       {
         path: "/franchisemasterlist",
-        element:<ProtectedRoute><Franchisemasterlist /></ProtectedRoute> 
+        element: <ProtectedRoute><Franchisemasterlist /></ProtectedRoute>
       },
       {
         path: "/MasterFranchise",
-        element:<ProtectedRoute><MasterFranchise /></ProtectedRoute> ,
+        element: <ProtectedRoute><MasterFranchise /></ProtectedRoute>,
 
       },
       {
@@ -736,7 +739,7 @@ const Router = createBrowserRouter([
       },
       {
         path: "/Childfranchisemaster",
-        element:<ProtectedRoute><Childfranchisemaster /></ProtectedRoute> ,
+        element: <ProtectedRoute><Childfranchisemaster /></ProtectedRoute>,
 
       },
       {
@@ -751,21 +754,21 @@ const Router = createBrowserRouter([
       },
       {
         path: "/registercomaplaint/:Comp_id",
-        element:<ProtectedRoute><Registercomplaint /></ProtectedRoute> ,
+        element: <ProtectedRoute><Registercomplaint /></ProtectedRoute>,
 
       },
       {
         path: "/complaintview/:complaintid",
-        element:<ProtectedRoute> <Complaintview /></ProtectedRoute>,
+        element: <ProtectedRoute> <Complaintview /></ProtectedRoute>,
       },
       {
         path: "/groupmaster",
-        element:<ProtectedRoute><Groupmaster /></ProtectedRoute> ,
+        element: <ProtectedRoute><Groupmaster /></ProtectedRoute>,
 
       },
       {
         path: "/productline",
-        element:<ProtectedRoute><ProductLine /></ProtectedRoute> ,
+        element: <ProtectedRoute><ProductLine /></ProtectedRoute>,
 
       },
       {
@@ -774,15 +777,15 @@ const Router = createBrowserRouter([
       },
       {
         path: "/manufacturer",
-        element:<ProtectedRoute><Manufacturer /></ProtectedRoute> ,
+        element: <ProtectedRoute><Manufacturer /></ProtectedRoute>,
       },
       {
         path: "/addproduct/:productid",
-        element:<ProtectedRoute><AddProduct /></ProtectedRoute> ,
+        element: <ProtectedRoute><AddProduct /></ProtectedRoute>,
       },
       {
         path: "/engineermaster/:engineerid",
-        element:<ProtectedRoute> <EngineerMaster /></ProtectedRoute>,
+        element: <ProtectedRoute> <EngineerMaster /></ProtectedRoute>,
       },
 
 
@@ -796,11 +799,11 @@ const Router = createBrowserRouter([
       },
       {
         path: "/complaintreporttabs",
-        element:<ProtectedRoute> <Complaintreporttabs /></ProtectedRoute>
+        element: <ProtectedRoute> <Complaintreporttabs /></ProtectedRoute>
       },
       {
         path: "/complaintreport",
-        element:<ProtectedRoute><Complaintreport /></ProtectedRoute> 
+        element: <ProtectedRoute><Complaintreport /></ProtectedRoute>
       },
       {
         path: "/claimreporttabs",
@@ -808,11 +811,11 @@ const Router = createBrowserRouter([
       },
       {
         path: "/servicecontract",
-        element:<ProtectedRoute><Servicecontract /></ProtectedRoute> 
+        element: <ProtectedRoute><Servicecontract /></ProtectedRoute>
       },
       {
         path: "/Servicecontract/:serviceid/:view",
-        element:<ProtectedRoute> <Servicecontract /></ProtectedRoute>
+        element: <ProtectedRoute> <Servicecontract /></ProtectedRoute>
       },
       {
         path: "/servicecontracttabs",
@@ -824,7 +827,7 @@ const Router = createBrowserRouter([
       },
       {
         path: "claimreport",
-        element:<ProtectedRoute> <Claimreport /></ProtectedRoute>
+        element: <ProtectedRoute> <Claimreport /></ProtectedRoute>
       },
       {
         path: "Feedbackreportlist",
@@ -840,7 +843,7 @@ const Router = createBrowserRouter([
       },
       {
         path: "/datatable",
-        element:<ProtectedRoute><DataTable /></ProtectedRoute> 
+        element: <ProtectedRoute><DataTable /></ProtectedRoute>
       },
 
       {
@@ -861,23 +864,23 @@ const Router = createBrowserRouter([
       },
       {
         path: "/enquiryListing/:enquiryid",
-        element:<ProtectedRoute><EnquiryForm /></ProtectedRoute> 
+        element: <ProtectedRoute><EnquiryForm /></ProtectedRoute>
       },
       {
         path: "/shipment_fg",
-        element:<ProtectedRoute><Shipment_fg /></ProtectedRoute> 
+        element: <ProtectedRoute><Shipment_fg /></ProtectedRoute>
       },
       {
         path: "shipmentparts",
         element: <ProtectedRoute><Shipment_parts /></ProtectedRoute>
       },
-      { 
+      {
         path: "/business_partner",
-        element:<ProtectedRoute><BussinePartner /></ProtectedRoute> 
+        element: <ProtectedRoute><BussinePartner /></ProtectedRoute>
       },
       {
         path: "/annexturelist",
-        element:<ProtectedRoute><AnnextureReport/></ProtectedRoute>
+        element: <ProtectedRoute><AnnextureReport /></ProtectedRoute>
       },
       {
         path: "/subcallstatus",
@@ -886,6 +889,14 @@ const Router = createBrowserRouter([
       {
         path: "/engineerapprove",
         element: <ProtectedRoute><Engineers /></ProtectedRoute>
+      },
+      {
+        path: "/stock",
+        element: <Stock />,
+      },
+      {
+        path: "/productsparetabs",
+        element: <Productsparetabs />
       },
 
 

@@ -5297,7 +5297,7 @@ app.post("/postcustomerlocation", authenticateToken, async (req, res) => {
     SELECT customer_id FROM awt_customer
     WHERE customer_id = '${customer_id}' AND deleted = 0
   `;
-console.log(area_name,'ty')
+    console.log(area_name, 'ty')
     const customerResult = await pool.request().query(checkCustomerSql);
 
 
@@ -7451,7 +7451,7 @@ app.get("/getprodata", authenticateToken, async (req, res) => {
 // service product code start
 app.post("/getlhiassigncsp", authenticateToken, async (req, res) => {
 
-  let {Usercode} = req.body;
+  let { Usercode } = req.body;
 
   try {
     const pool = await poolPromise;
@@ -7478,9 +7478,9 @@ app.post("/updatecspcode", authenticateToken, async (req, res) => {
     // Fetch existing assigncsp value
     const fetchSql = `SELECT assigncsp FROM lhi_user WHERE Usercode = '${Usercode}'`;
     const fetchResult = await pool.request().query(fetchSql);
-    
+
     let existingCspCodes = fetchResult.recordset[0]?.assigncsp || ""; // Get existing data or empty string
-    
+
     // Convert existing codes into an array
     let cspCodesArray = existingCspCodes ? existingCspCodes.split(",") : [];
 
@@ -11575,6 +11575,59 @@ app.post('/getallocationroledata', authenticateToken, async (req, res) => {
   }
 });
 
+app.post('/getproductspareroledata', authenticateToken, async (req, res) => {
+  const { role, productsparepage, stockpage } = req.body;
+
+  // Function to convert comma-separated strings into arrays
+  const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
+
+  // Convert all page IDs from strings to arrays
+  const pageTypes = {
+    stockpage: parseIds(stockpage),
+    productsparepage: parseIds(productsparepage),
+  };
+
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+    request.input("roleid", sql.Int, role);
+
+    let queryParts = [];
+    let index = 0;
+
+    for (const [pageType, pageIds] of Object.entries(pageTypes)) {
+      if (pageIds.length > 0) {
+        let pageParams = pageIds.map((_, i) => `@pageid${index + i}`).join(",");
+        queryParts.push(`
+          SELECT '${pageType}' AS pageType, COUNT(*) AS count
+          FROM pagerole
+          WHERE roleid = @roleid AND pageid IN (${pageParams}) AND accessid > 1
+        `);
+        pageIds.forEach((id, i) => request.input(`pageid${index + i}`, sql.Int, id));
+        index += pageIds.length;
+      }
+    }
+
+    if (queryParts.length === 0) {
+      return res.json(Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])));
+    }
+
+    const query = queryParts.join(" UNION ALL ");
+    const result = await request.query(query);
+
+    // Convert results to a key-value format
+    const response = Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])); // Default all pages to 0
+
+    result.recordset.forEach(row => {
+      response[row.pageType] = row.count > 0 ? 1 : 0;
+    });
+
+    return res.json(response);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
 app.post('/getcustomerroledata', authenticateToken, async (req, res) => {
   const { role, customerpage, customerlistpage } = req.body;
 
