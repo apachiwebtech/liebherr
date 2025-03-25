@@ -19,18 +19,29 @@ const ExcelToEngScript = () => {
       // Track unique emails to prevent duplicates
       const emailSet = new Set();
       
-      const selectedColumns = parsedData
-        .filter(row => {
-          const email = row['E-Mail']?.trim();
-          if (!email || emailSet.has(email)) return false; // Skip duplicate or empty emails
-          emailSet.add(email);
-          return true;
-        })
-        .map((row) => ({
+      // const selectedColumns = parsedData
+      //   .filter(row => {
+      //     const email = row['E-Mail']?.trim();
+      //     if (!email || emailSet.has(email)) return false; // Skip duplicate or empty emails
+      //     emailSet.add(email);
+      //     return true;
+      //   })
+      //   .map((row) => ({
+      //     mfranchise_id: row['MASTER SERVICE PARTNER CODE'],
+      //     cfranchise_id: row['CHILD SERVICE PARTNER CODE'],
+      //     engineer_id: row['Technician New ID'],
+      //     title: row['Technician New Name'],
+      //     mobile_no: row['Mobile'],
+      //     email: row['E-Mail'],
+      //     status: row['LiCare 2.0 Access 2'],
+      //     employee_code: row['Type'],
+      //     password: 'e10adc3949ba59abbe56e057f20f883e'
+      //   }));
+      const selectedColumns = parsedData.map((row) => ({
           mfranchise_id: row['MASTER SERVICE PARTNER CODE'],
           cfranchise_id: row['CHILD SERVICE PARTNER CODE'],
-          engineer_id: row['Technician New ID_01.01.2025'],
-          title: row['Technician New Name_01.01.2025'],
+          engineer_id: row['Technician New ID'],
+          title: row['Technician New Name'],
           mobile_no: row['Mobile'],
           email: row['E-Mail'],
           status: row['LiCare 2.0 Access 2'],

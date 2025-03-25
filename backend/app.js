@@ -3484,7 +3484,7 @@ app.get("/getcomplaintview/:complaintid", authenticateToken, async (req, res) =>
 });
 
 app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
-  const { ticket_no, note, created_by, call_status, call_status_id, sub_call_status, group_code, site_defect, defect_type, activity_code, serial_no, ModelNumber, purchase_date, warrenty_status, engineerdata, engineername, ticket_type, call_city, ticket_start_date, mandaysprice, gas_chargs, gas_transportation, transportation_charge, visit_count ,customer_mobile,totp} = req.body;
+  const { ticket_no, note, created_by, call_status, call_status_id, sub_call_status, group_code, site_defect, defect_type, activity_code, serial_no, ModelNumber, purchase_date, warrenty_status, engineerdata, engineername, ticket_type, call_city, ticket_start_date, mandaysprice, gas_chargs, gas_transportation, transportation_charge, visit_count, customer_mobile, totp } = req.body;
 
   const username = process.env.TATA_USER;
   const password = process.env.PASSWORD;
@@ -3494,51 +3494,51 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
   let temp_id;
   let temp_msg;
 
-  if(call_status == 'Open'){
+  if (call_status == 'Open') {
     temp_id = '1207173530305447084';
     temp_msg = `Dear Customer, Greetings from Liebherr! Your Ticket Number is ${ticket_no}. Please share OTP ${totp} with the engineer once the ticket is resolved.`
   }
-  else if(call_status == 'In Process'){
+  else if (call_status == 'In Process') {
     temp_id = '1207173530751596304';
     temp_msg = `Dear Liebherr Customer, Your Ticket Number ${ticket_no} has been assigned to ${engineername} and will be contact shortly for appointment.`
   }
-  else if(call_status == 'Appointment'){
+  else if (call_status == 'Appointment') {
     temp_id = '1207173530643890095';
     temp_msg = `Dear Liebherr Customer, Your Ticket Number ${ticket_no} has been successfully scheduled. Our Service engineer will attend as per the appointment.`
   }
-  else if(call_status == 'Cancelled'){
+  else if (call_status == 'Cancelled') {
     temp_id = '1207173530833742041';
-    temp_msg =`Dear Customer, We regret to inform that the ticket registered with Liebherr is cancelled ${ticket_no}). To reschedule, please contact 7038100400`
+    temp_msg = `Dear Customer, We regret to inform that the ticket registered with Liebherr is cancelled ${ticket_no}). To reschedule, please contact 7038100400`
   }
-  else if(call_status == 'Closed'){
+  else if (call_status == 'Closed') {
     temp_id = '1207173530271700565';
-    temp_msg =`Dear Customer, Your Ticket Number ${ticket_no} has been successfully closed. Please contact 7038100400 for future assistance. Thank you for choosing Liebherr.`
+    temp_msg = `Dear Customer, Your Ticket Number ${ticket_no} has been successfully closed. Please contact 7038100400 for future assistance. Thank you for choosing Liebherr.`
   }
-  else if(call_status == 'Approval'){
+  else if (call_status == 'Approval') {
     temp_id = '1207173530799359858';
-    temp_msg =`Dear Liebherr Customer, Ticket Number ${ticket_no} has been raised for quotation and will be processed once approved. For any query, please contact 7038100400`
+    temp_msg = `Dear Liebherr Customer, Ticket Number ${ticket_no} has been raised for quotation and will be processed once approved. For any query, please contact 7038100400`
   }
-  else if(call_status == 'Spares' && sub_call_status == 'Spare Ordered'){
+  else if (call_status == 'Spares' && sub_call_status == 'Spare Ordered') {
     temp_id = '1207173530641222930';
-    temp_msg =`Dear Liebherr Customer, Ticket Number ${ticket_no} has been raised for a spare request and will be processed shortly. For any query, please contact 7038100400`
+    temp_msg = `Dear Liebherr Customer, Ticket Number ${ticket_no} has been raised for a spare request and will be processed shortly. For any query, please contact 7038100400`
   }
-  else if(call_status == 'Spares' && sub_call_status == 'Spare Required'){
+  else if (call_status == 'Spares' && sub_call_status == 'Spare Required') {
     temp_id = '1207173530641222930';
-    temp_msg =`Dear Liebherr Customer, Ticket Number ${ticket_no} has been raised for a spare request and will be processed shortly. For any query, please contact 7038100400`
+    temp_msg = `Dear Liebherr Customer, Ticket Number ${ticket_no} has been raised for a spare request and will be processed shortly. For any query, please contact 7038100400`
   }
-  else if(call_status == 'Spares' && sub_call_status == 'Spare in-transit'){
+  else if (call_status == 'Spares' && sub_call_status == 'Spare in-transit') {
     temp_id = '1207173530201018241';
-    temp_msg =`Dear Liebherr Customer, for your Ticket Number ${ticket_no}, spare parts are in-transit. For any query, please contact 7038100400`
+    temp_msg = `Dear Liebherr Customer, for your Ticket Number ${ticket_no}, spare parts are in-transit. For any query, please contact 7038100400`
   }
 
-  else if(call_status == 'Spares' && sub_call_status == 'Spare Delivery Delayed'){
+  else if (call_status == 'Spares' && sub_call_status == 'Spare Delivery Delayed') {
     temp_id = '1207173530566445149';
-    temp_msg =`Dear Liebherr Customer, We apologize for the delay in Ticket Number${ticket_no} due to unforeseen challenges in part transit. We are on it right away.
+    temp_msg = `Dear Liebherr Customer, We apologize for the delay in Ticket Number${ticket_no} due to unforeseen challenges in part transit. We are on it right away.
 `
   }
-  else if(call_status == 'Completed'){
+  else if (call_status == 'Completed') {
     temp_id = '1207173530028299875';
-    temp_msg =`Dear Liebherr Customer, Ticket Number ${ticket_no} has been successfully completed. For future assistance, please contact 7038100400`
+    temp_msg = `Dear Liebherr Customer, Ticket Number ${ticket_no} has been successfully completed. For future assistance, please contact 7038100400`
   }
 
 
@@ -3630,7 +3630,7 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
 
 
       // const msg = encodeURIComponent(temp_msg);
-    
+
       // const apiUrl = `https://smsgw.tatatel.co.in:9095/campaignService/campaigns/qs?recipient=${customer_mobile}&dr=false&msg=${msg}&user=${username}&pswd=${password}&sender=LICARE&PE_ID=1201159257274643113&Template_ID=${temp_id}`;
 
       // const response = await axios.get(apiUrl); 
@@ -3721,14 +3721,14 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
 
       }
 
- 
 
 
 
-    }else{
+
+    } else {
 
       // const msg = encodeURIComponent(temp_msg);
-    
+
       // const apiUrl = `https://smsgw.tatatel.co.in:9095/campaignService/campaigns/qs?recipient=${customer_mobile}&dr=false&msg=${msg}&user=${username}&pswd=${password}&sender=LICARE&PE_ID=1201159257274643113&Template_ID=${temp_id}`;
 
       // const response = await axios.get(apiUrl); 
@@ -4007,7 +4007,11 @@ app.get("/getlhiengineer", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
-    const sql = `select * from awt_engineermaster where  deleted = 0 and status = 1 and employee_code = 'LHI'`
+    // const sql = `select * from awt_engineermaster where  deleted = 0 and status = 1 and employee_code = 'LHI'`
+
+    const sql = `SELECT id, Lhiuser as title, Usercode as engineer_id , 'LHI' as employee_code FROM lhi_user
+UNION
+SELECT id, title, engineer_id , employee_code FROM awt_engineermaster WHERE deleted = 0 AND status = 1 AND employee_code = 'LHI'`
     console.log(sql)
     // Execute the query
     const result = await pool.request().query(sql);
@@ -8052,9 +8056,9 @@ app.post("/postlhidata", authenticateToken, async (req, res) => {
         const getcountresult = await pool.request().query(getcount);
 
         console.log(getcountresult)
-        
+
         const newcount = Number(getcountresult.recordset[0]?.count || 0) + 1;
-        
+
         console.log(newcount)
 
         // Format the newcount as LH0001
@@ -9251,6 +9255,19 @@ app.get("/getcomplaintexcel", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
     const { fromDate, toDate, licare_code } = req.query;  // Only fromDate, toDate, and licare_code are expected.
 
+    let sql;
+
+    const getcsp = `select * from lhi_user where Usercode = '${licare_code}'`
+
+    const getcspresilt = await pool.request().query(getcsp)
+
+    const assigncsp = getcspresilt.recordset[0].assigncsp
+
+
+console.log(assigncsp, "#%")
+
+
+
     // Check if both fromDate and toDate are provided
     if (!fromDate || !toDate) {
       return res.status(400).json({
@@ -9261,7 +9278,7 @@ app.get("/getcomplaintexcel", authenticateToken, async (req, res) => {
     const currentDate = new Date().toISOString().split('T')[0];  // Current date to be used for filter if needed.
 
     // SQL query to fetch complaint tickets with fromDate and toDate filter only.
-    let sql = `
+    sql = `
       SELECT c.*, DATEDIFF(DAY, c.ticket_date, GETDATE()) AS ageingdays
       FROM complaint_ticket AS c
       WHERE c.deleted = 0
@@ -9274,10 +9291,22 @@ app.get("/getcomplaintexcel", authenticateToken, async (req, res) => {
       { name: "toDate", value: toDate }
     ];
 
+
+    if (assigncsp !== 'ALL') {
+      // Convert to an array and wrap each value in single quotes
+      const formattedCspList = assigncsp.split(",").map(csp => `'${csp.trim()}'`).join(",");
+
+      // Directly inject the formatted values into the SQL query
+      sql += ` AND c.csp IN (${formattedCspList})`;
+    }
+
+    console.log(sql)
     // Execute the SQL query
     const request = pool.request();
     params.forEach((param) => request.input(param.name, param.value));
     const result = await request.query(sql);
+
+    
 
     // If no records are found, return an appropriate message
     if (result.recordset.length === 0) {
@@ -10317,7 +10346,16 @@ app.get("/getSpareParts/:model", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
     // Parameterized query
     const sql = `
-      SELECT sp.id, sp.ModelNumber, sp.title as article_code ,sp.ProductCode as spareId, sp.ItemDescription as article_description , spt.MRPQuotation as price FROM Spare_parts as sp left join priceGroup as spt on sp.PriceGroup = spt.PriceGroup  WHERE sp.deleted = 0  AND ModelNumber = @model
+      SELECT sp.id, 
+       sp.ModelNumber, 
+       sp.title as article_code,
+       sp.ProductCode as spareId, 
+       sp.ItemDescription as article_description, 
+       spt.MRPQuotation as price
+FROM Spare_parts as sp 
+LEFT JOIN priceGroup as spt ON sp.PriceGroup = spt.PriceGroup
+WHERE sp.deleted = 0
+  AND REPLACE(REPLACE(REPLACE(sp.ModelNumber, '     ', '  '), '    ', '  '), '   ', '  ') = @model
     `;
 
     const result = await pool.request()
@@ -11299,7 +11337,7 @@ app.post('/role_pages', authenticateToken, async (req, res) => {
     const existingPagesResult = await pool.request()
       .input("role_id", sql.Int, role_id)
       .query(existingPagesQuery);
-    
+
     const existingPageIds = new Set(existingPagesResult.recordset.map(row => row.pageid));
 
     // Fetch all active pages from page_master
@@ -11736,7 +11774,7 @@ app.post('/getbussinessroledata', authenticateToken, async (req, res) => {
 });
 
 app.post('/getfranchiseroledata', authenticateToken, async (req, res) => {
-  const { role, masterfpage, childfpage, childlistpage, engineerpage, engineerlistpage,engineerapprovepage } = req.body;
+  const { role, masterfpage, childfpage, childlistpage, engineerpage, engineerlistpage, engineerapprovepage } = req.body;
 
   // Function to convert comma-separated strings into arrays
   const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
@@ -14266,9 +14304,9 @@ app.post("/getmodelno", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
 
     const sql = `
-      SELECT TOP 20 id, ModelNumber
+      SELECT id, ModelNumber
       FROM Spare_parts
-      WHERE ModelNumber LIKE @param AND deleted = 0
+      WHERE REPLACE(REPLACE(REPLACE(ModelNumber, '    ', ' '), '   ', ' '), '  ', ' ') LIKE @param AND deleted = 0 
       ORDER BY ModelNumber;
     `;
 
@@ -14964,7 +15002,7 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
   { name: 'spare_doc_two', maxCount: 1 },
   { name: 'spare_doc_three', maxCount: 1 },
 ]), async (req, res) => {
-  let { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode, activitycode, com_id, warranty_status, spare_detail, ticket_no, user_id, serial_no, ModelNumber, sub_call_status, allocation, serial_data, picking_damages, product_damages, missing_part, leg_adjustment, water_connection, abnormal_noise, ventilation_top, ventilation_bottom, ventilation_back, voltage_supply, earthing, gas_charges, transpotation, purchase_date, otp, check_remark ,customer_mobile ='9326476448'} = req.body;
+  let { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode, activitycode, com_id, warranty_status, spare_detail, ticket_no, user_id, serial_no, ModelNumber, sub_call_status, allocation, serial_data, picking_damages, product_damages, missing_part, leg_adjustment, water_connection, abnormal_noise, ventilation_top, ventilation_bottom, ventilation_back, voltage_supply, earthing, gas_charges, transpotation, purchase_date, otp, check_remark, customer_mobile = '9326476448' } = req.body;
 
   const username = process.env.TATA_USER;
   const password = process.env.PASSWORD;
@@ -14979,26 +15017,26 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
   console
 
 
-  if(call_status == 'Approval'){
+  if (call_status == 'Approval') {
     temp_id = '1207173530799359858';
-    temp_msg =`Dear Liebherr Customer, Ticket Number ${ticket_no} has been raised for quotation and will be processed once approved. For any query, please contact 7038100400`
+    temp_msg = `Dear Liebherr Customer, Ticket Number ${ticket_no} has been raised for quotation and will be processed once approved. For any query, please contact 7038100400`
   }
-  if(call_status == 'Approval-Int'){
+  if (call_status == 'Approval-Int') {
     temp_id = '1207173530799359858';
-    temp_msg =`Dear Liebherr Customer, Ticket Number ${ticket_no} has been raised for quotation and will be processed once approved. For any query, please contact 7038100400`
+    temp_msg = `Dear Liebherr Customer, Ticket Number ${ticket_no} has been raised for quotation and will be processed once approved. For any query, please contact 7038100400`
   }
-  else if(call_status == 'Spares'){
+  else if (call_status == 'Spares') {
     temp_id = '1207173530641222930';
-    temp_msg =`Dear Liebherr Customer, Ticket Number ${ticket_no} has been raised for a spare request and will be processed shortly. For any query, please contact 7038100400`
+    temp_msg = `Dear Liebherr Customer, Ticket Number ${ticket_no} has been raised for a spare request and will be processed shortly. For any query, please contact 7038100400`
   }
-  else if(call_status == 'Completed'){
+  else if (call_status == 'Completed') {
     temp_id = '1207173530028299875';
-    temp_msg =`Dear Liebherr Customer, Ticket Number ${ticket_no} has been successfully completed. For future assistance, please contact 7038100400`
+    temp_msg = `Dear Liebherr Customer, Ticket Number ${ticket_no} has been successfully completed. For future assistance, please contact 7038100400`
   }
 
 
   // const msg = encodeURIComponent(temp_msg);
-    
+
   // const apiUrl = `https://smsgw.tatatel.co.in:9095/campaignService/campaigns/qs?recipient=${customer_mobile}&dr=false&msg=${msg}&user=${username}&pswd=${password}&sender=LICARE&PE_ID=1201159257274643113&Template_ID=${temp_id}`;
 
   // const response = await axios.get(apiUrl); 
@@ -15323,8 +15361,20 @@ app.get("/getSpareParts_app/:model", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
     // Parameterized query
+    // const sql = `
+    //       SELECT sp.id, sp.ModelNumber, sp.title as article_code ,sp.ProductCode as spareId, sp.ItemDescription as article_description , spt.MRPQuotation as price FROM Spare_parts as sp left join priceGroup as spt on sp.PriceGroup = spt.PriceGroup  WHERE sp.deleted = 0  AND ModelNumber = @model
+    //     `;
     const sql = `
-          SELECT sp.id, sp.ModelNumber, sp.title as article_code ,sp.ProductCode as spareId, sp.ItemDescription as article_description , spt.MRPQuotation as price FROM Spare_parts as sp left join priceGroup as spt on sp.PriceGroup = spt.PriceGroup  WHERE sp.deleted = 0  AND ModelNumber = @model
+         SELECT sp.id, 
+       sp.ModelNumber, 
+       sp.title as article_code,
+       sp.ProductCode as spareId, 
+       sp.ItemDescription as article_description, 
+       spt.MRPQuotation as price
+FROM Spare_parts as sp 
+LEFT JOIN priceGroup as spt ON sp.PriceGroup = spt.PriceGroup
+WHERE sp.deleted = 0
+  AND REPLACE(REPLACE(REPLACE(sp.ModelNumber, '     ', '  '), '    ', '  '), '   ', '  ') = @model
         `;
 
     const result = await pool.request()

@@ -632,9 +632,10 @@ export function CspTicketView(params) {
 
     const payload = {
       ...selectedEngineer,
-      created_by,
-      complaintid: complaintview.ticket_no
-    };
+      id: String(selectedEngineer.id),  // Convert id to string if needed
+      created_by: String(created_by),
+      complaintid: String(complaintview.ticket_no)
+    }
 
 
     axios.post(`${Base_Url}/adduniqueengineer`, payload, {
