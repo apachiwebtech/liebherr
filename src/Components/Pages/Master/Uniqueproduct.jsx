@@ -11,6 +11,7 @@ import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 import { useDispatch } from "react-redux";
 import { getRoleData } from "../../Store/Role/role-action";
 import { IoArrowBack } from "react-icons/io5";
+import Select from "react-select";
 
 const Uniqueproduct = () => {
   const { customer_id } = useParams();
@@ -116,27 +117,45 @@ const Uniqueproduct = () => {
     fetchModelno();
   }, [customer_id]);
 
-  const handleChange = (e) => {
+  const [isProductDisabled, setIsProductDisabled] = useState(false);
+
+  const handleChange = async (e) => {
     const { name, value } = e.target;
 
-    // Check if e.target.options exists before accessing it
-    if (e.target.options) {
-      const selectedOption = e.target.options[e.target.selectedIndex];
-      const customername = selectedOption ? selectedOption.getAttribute("data-customername") : '';
+    setFormData({ ...formData, [name]: value });
 
-      setFormData({
-        ...formData,
-        [name]: value,
-        ...(customername ? { CustomerName: customername } : {})
-      });
-    } else {
-      // For input elements without options
-      setFormData({
-        ...formData,
-        [name]: value
-      });
+    // When serial number is entered, fetch model number
+    if (name === "serialnumber" && value.trim() !== "") {
+      try {
+        const response = await fetch(`${Base_Url}/getserial/${value}`, {
+          method: "GET",
+          headers: {
+            Authorization: token, // Replace with your authentication token if needed
+          },
+        });
+
+        const data = await response.json();
+
+        if (data.length > 0) {
+          setFormData((prev) => ({
+            ...prev,
+            product: data[0].ModelNumber, // Auto-fill product field with ModelNumber
+          }));
+          setIsProductDisabled(true);
+        } else {
+          setFormData((prev) => ({
+            ...prev,
+            product: "", // Clear product field if no match is found
+          }));
+          setIsProductDisabled(false);
+        }
+      } catch (error) {
+        console.error("Error fetching serial number details:", error);
+        setIsProductDisabled(false);
+      }
     }
   };
+
 
 
 
@@ -381,27 +400,42 @@ const Uniqueproduct = () => {
                         <label htmlFor="pname" className="form-label">
                           Product<span className="text-danger">*</span>
                         </label>
-                        <select
-                          className="form-control"
-                          onChange={handleChange}
-                          value={formData.product || ''}
-                          name="product"
-                        >
-                          <option value="">Select</option>
-                          {Model && Model.length > 0 ? (
-                            Model.map((item, index) => (
-                              <option key={index} value={item.item_description}>
-                                {item.item_description}
-                              </option>
-                            ))
-                          ) : (
-                            <option value="" disabled>No products available</option>
-                          )}
-                        </select>
-                        {errors.product && (
-                          <small className="text-danger">{errors.product}</small>
+
+                        {isProductDisabled ? (
+                          // Render input field when disabled
+                          <input
+                            type="text"
+                            className="form-control"
+                            value={formData.product || ""}
+                            readOnly // Prevent editing
+                          />
+                        ) : (
+                          // Render Select dropdown when enabled
+                          <Select
+                            options={
+                              Model && Model.length > 0
+                                ? Model.map((item) => ({
+                                  value: item.item_description,
+                                  label: item.item_description,
+                                }))
+                                : []
+                            }
+                            isSearchable
+                            onChange={(selectedOption) =>
+                              setFormData({ ...formData, product: selectedOption.value })
+                            }
+                            value={
+                              formData.product
+                                ? { value: formData.product, label: formData.product }
+                                : null
+                            }
+                            placeholder="Select Product"
+                          />
                         )}
+
+                        {errors.product && <small className="text-danger">{errors.product}</small>}
                       </div>
+
 
                       <div className="col-md-12 mb-3">
                         <label htmlFor="country" className="form-label pb-0 dropdown-label">
@@ -435,25 +469,6 @@ const Uniqueproduct = () => {
                           <small className="text-danger">{errors.location}</small>
                         )}
                       </div>
-
-
-                      {/* <div className="col-md-6 mb-3">
-                      <label htmlFor="locationc" className="form-label">
-                        Location
-                      </label>
-                      <input
-                        type="text"
-                        name="location"
-                        value={formData.location}
-                        onChange={handleChange}
-                        className="form-control"
-                        id="locationc"
-                        aria-describedby="locationc"
-                      />
-                       {errors.location && (
-                        <small className="text-danger">{errors.location}</small>
-                      )}
-                    </div> */}
 
                       {roleaccess > 2 ? <div className="col-md-12 text-right">
                         <button

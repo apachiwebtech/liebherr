@@ -9923,6 +9923,9 @@ WHERE au.serial_no = @serial `;
 });
 
 
+
+
+
 app.get("/getmobserial/:serial", authenticateToken, async (req, res) => {
   const { serial } = req.params;
 
