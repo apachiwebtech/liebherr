@@ -5424,11 +5424,11 @@ app.get("/requestproductunique/:id", authenticateToken, async (req, res) => {
 app.post("/postproductunique", authenticateToken, async (req, res) => {
   const { encryptedData } = req.body;
   const decryptedData = decryptData(encryptedData, secretKey)
-  const { product, location, date, serialnumber, CustomerID, CustomerName } = JSON.parse(decryptedData);
+  const { product, address, purchase_date, serial_no, CustomerID, CustomerName } = JSON.parse(decryptedData);
   try {
 
     const pool = await poolPromise;
-    const checkDuplicateSql = `SELECT * FROM awt_uniqueproductmaster WHERE CustomerID = '${CustomerID}'AND address = '${location}'AND ModelNumber = '${product}'AND deleted = 0`;
+    const checkDuplicateSql = `SELECT * FROM awt_uniqueproductmaster WHERE CustomerID = '${CustomerID}'AND address = '${address}'AND ModelNumber = '${product}'AND deleted = 0`;
     const duplicateResult = await pool.request().query(checkDuplicateSql);
     if (duplicateResult.recordset.length > 0) {
       return res.status(409).json({
@@ -5436,7 +5436,7 @@ app.post("/postproductunique", authenticateToken, async (req, res) => {
       });
     } else {
       const insertSql = `INSERT INTO awt_uniqueproductmaster (ModelNumber, address, purchase_date, serial_no,CustomerName,CustomerID)
-                        VALUES ('${product}', '${location}', '${date}', '${serialnumber}', '${CustomerName}', '${CustomerID}')`;
+                        VALUES ('${product}', '${address}', '${purchase_date}', '${serial_no}', '${CustomerName}', '${CustomerID}')`;
       await pool.request().query(insertSql);
       return res.json({ message: "Product added successfully!" });
     }
@@ -5447,35 +5447,64 @@ app.post("/postproductunique", authenticateToken, async (req, res) => {
 });
 
 app.post("/putproductunique", authenticateToken, async (req, res) => {
-  const { encryptedData } = req.body;
-  const decryptedData = decryptData(encryptedData, secretKey)
-  const { product, id, location, date, serialnumber } = JSON.parse(decryptedData);
-
   try {
-    // Use the poolPromise to get the connection pool
+    const { encryptedData } = req.body;
+    const decryptedData = decryptData(encryptedData, secretKey);
+    const { product, id, address, purchase_date, serial_no,  CustomerID } = JSON.parse(decryptedData);
+
+    console.log("Received Data:", { product, id, address, purchase_date, serial_no,  CustomerID });
+
+    // Validate ID
+    const parsedId = Number(id);
+    if (!parsedId || isNaN(parsedId)) {
+      return res.status(400).json({ error: "Invalid ID format" });
+    }
+
+    // Get database connection
     const pool = await poolPromise;
 
-    // Check for duplicates (excluding the current product) customer_ id will be add
-    const checkDuplicateSql = `SELECT * FROM awt_uniqueproductmaster WHERE serialnumber = '${serialnumber}' AND id != '${id}' AND deleted = 0`;
-    const duplicateResult = await pool.request().query(checkDuplicateSql);
+    // 🔹 Check for Duplicates (Use Parameterized Query)
+    const checkDuplicateSql = `SELECT * FROM awt_uniqueproductmaster 
+                               WHERE serial_no = @serial_no 
+                               AND id != @id 
+                               AND deleted = 0 
+                               AND CustomerID = @CustomerID`;  // Ensures duplicates only within the same customer
+    const duplicateResult = await pool.request()
+      .input('serial_no', sql.NVarChar, serial_no)
+      .input('id', sql.Int, parsedId)
+      .input('CustomerID', sql.NVarChar, CustomerID)
+      .query(checkDuplicateSql);
 
     if (duplicateResult.recordset.length > 0) {
       return res.status(409).json({
-        message: "Product with same customer Id and Location already exists!",
+        message: "Product with the same Serial Number and Customer ID already exists!",
       });
-    } else {
-      // Update the product if no duplicates are found
-      const updateSql = `UPDATE awt_uniqueproductmaster SET product = '${product}', location = '${location}', date = '${date}', serialnumber = '${serialnumber}' WHERE id = '${id}'`;
-
-      await pool.request().query(updateSql);
-
-      return res.json({ message: "Product updated successfully!" });
     }
+
+    // 🔹 Update the Product
+    const updateSql = `UPDATE awt_uniqueproductmaster 
+                       SET ModelNumber = @product, address = @address, 
+                           purchase_date = @purchase_date, serial_no = @serial_no, 
+                            CustomerID = @CustomerID, deleted = 0  
+                       WHERE id = @id`;
+
+    await pool.request()
+      .input('product', sql.NVarChar, product)
+      .input('address', sql.NVarChar, address)
+      .input('purchase_date', sql.NVarChar, purchase_date)
+      .input('serial_no', sql.NVarChar, serial_no)
+      .input('CustomerID', sql.NVarChar, CustomerID)
+      .input('id', sql.Int, parsedId)
+      .query(updateSql);
+
+    return res.json({ message: "Product updated successfully!" });
+
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'An error occurred while updating the product' });
+    console.error("Error:", err);
+    return res.status(500).json({ error: "An error occurred while updating the product" });
   }
 });
+
 
 app.post("/deleteproductunique", authenticateToken, async (req, res) => {
   const { id } = req.body;

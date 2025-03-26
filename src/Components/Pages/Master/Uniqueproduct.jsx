@@ -28,10 +28,11 @@ const Uniqueproduct = () => {
   const navigate = useNavigate()
 
   const [formData, setFormData] = useState({
+    id:"",
     product: "",
-    location: "",
-    date: "",
-    serialnumber: "",
+    address: "",
+    purchase_date: "",
+    serial_no: "",
     CustomerID: customer_id,
     CustomerName: "",
   });
@@ -40,20 +41,20 @@ const Uniqueproduct = () => {
   // Format date function
   const formatDate = (dateString) => {
     if (!dateString) return "";
-    const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
+    const purchase_date = new Date(dateString);
+    const day = String(purchase_date.getDate()).padStart(2, "0");
+    const month = String(purchase_date.getMonth() + 1).padStart(2, "0");
+    const year = purchase_date.getFullYear();
     return `${day}-${month}-${year}`;
   };
 
   // Format date for input field (MM/DD/YYYY)
   const formatDateForInput = (dateString) => {
     if (!dateString) return "";
-    const date = new Date(dateString);
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const year = date.getFullYear();
+    const purchase_date = new Date(dateString);
+    const month = String(purchase_date.getMonth() + 1).padStart(2, "0");
+    const day = String(purchase_date.getDate()).padStart(2, "0");
+    const year = purchase_date.getFullYear();
     return `${year}-${month}-${day}`; // This format works with the date input
   };
 
@@ -72,22 +73,19 @@ const Uniqueproduct = () => {
       } else {
         console.error('Unexpected data format:', response.data);
       }
-
-      console.log(response.data)
     } catch (error) {
       console.error("Error fetching customer location by ID:", error);
     }
   };
 
 
-  const fecthProduct = async (customer_id) => {
+  const fetchProduct = async (customer_id) => {
     try {
       const response = await axiosInstance.get(`${Base_Url}/getproductunique/${customer_id}`, {
         headers: {
           Authorization: token, // Send token in headers
         },
       });
-      console.log(response.data);
       setProduct(response.data);
     } catch (error) {
       console.error("Error fetching product:", error);
@@ -101,7 +99,6 @@ const Uniqueproduct = () => {
           Authorization: token, // Send token in headers
         },
       });
-      console.log(response.data);
       setModel(response.data);
     } catch (error) {
       console.error("Error fetching product:", error);
@@ -111,7 +108,7 @@ const Uniqueproduct = () => {
   useEffect(() => {
 
     if (customer_id) {
-      fecthProduct(customer_id);
+      fetchProduct(customer_id);
       fetchCustomerlocationById(customer_id);
     }
     fetchModelno();
@@ -125,7 +122,7 @@ const Uniqueproduct = () => {
     setFormData({ ...formData, [name]: value });
 
     // When serial number is entered, fetch model number
-    if (name === "serialnumber" && value.trim() !== "") {
+    if (name === "serial_no" && value.trim() !== "") {
       try {
         const response = await fetch(`${Base_Url}/getserial/${value}`, {
           method: "GET",
@@ -165,22 +162,20 @@ const Uniqueproduct = () => {
     if (!formData.product.trim()) {
       newErrors.product = "Product Name Field is required.";
     }
-
-    if (!formData.date) {
-      newErrors.date = "Date Field is required.";
+    if (!formData.purchase_date) {
+      newErrors.purchase_date = "Date Field is required.";
     }
-
-    if (!formData.location) {
-      newErrors.location = "Loaction Field is required.";
+    if (!formData.address) {
+      newErrors.address = "Location Field is required.";
     }
-
-    if (!formData.serialnumber) {
-      newErrors.serialnumber = "Serial Number Field is required.";
+    if (!formData.serial_no) {
+      newErrors.serial_no = "Serial Number Field is required.";
     }
-
+  
     setErrors(newErrors);
-    return newErrors;
+    return Object.keys(newErrors).length === 0;
   };
+  
 
   //handlesubmit form
   const handleSubmit = async (e) => {
@@ -191,10 +186,18 @@ const Uniqueproduct = () => {
       return;
     }
 
-    const payload = {
-      ...formData,
-    }
+    // const payload = {
+    //   ...formData,
+    //   CustomerID: customer_id,
+    // }
 
+    const payload = Object.fromEntries(
+      Object.entries({
+        ...formData,
+        CustomerID: customer_id
+      }).map(([key, value]) => [key, String(value)])
+    );
+  console.log(payload,'test')
     const encryptedData = CryptoJS.AES.encrypt(
       JSON.stringify(payload),
       secretKey
@@ -207,6 +210,8 @@ const Uniqueproduct = () => {
       );
       if (confirmSubmission) {
         if (isEdit) {
+        
+
           // For update, include duplicate check
           await axios
             .post(`${Base_Url}/putproductunique`, { encryptedData }, {
@@ -215,14 +220,14 @@ const Uniqueproduct = () => {
               },
             })
             .then((response) => {
-              console.log(response.data);
               setFormData({
                 product: "",
-                location: "",
-                date: "",
-                serialnumber: "",
+                address: "",
+                purchase_date: "",
+                serial_no: "",
+                CustomerID: customer_id,
               });
-              fecthProduct(customer_id);
+              fetchProduct(customer_id);
             })
             .catch((error) => {
               if (error.response && error.response.status === 409) {
@@ -242,11 +247,11 @@ const Uniqueproduct = () => {
             .then((response) => {
               setFormData({
                 product: "",
-                location: "",
-                date: "",
-                serialnumber: "",
+                address: "",
+                purchase_date: "",
+                serial_no: "",
               });
-              fecthProduct(customer_id);
+              fetchProduct(customer_id);
             })
             .catch((error) => {
               if (error.response && error.response.status === 409) {
@@ -262,17 +267,20 @@ const Uniqueproduct = () => {
     }
   };
 
-  const deleted = async (id) => {
+  const deleted = async (id) => { 
+    const confirm = window.confirm("Are you sure you want to delete this product?");
+    if (confirm) {
     try {
-      const response = await axiosInstance.post(`${Base_Url}/deleteproductunique`, { id }, {
+      const response = await axiosInstance.post(`${Base_Url}/deleteproductunique`, { id:String(id) }, {
         headers: {
           Authorization: token, // Send token in headers
         },
       });
-      fecthProduct(customer_id);
+      fetchProduct(customer_id);
     } catch (error) {
       console.error("Error deleting user:", error);
     }
+  }
   };
 
   const edit = async (id) => {
@@ -284,19 +292,18 @@ const Uniqueproduct = () => {
             Authorization: token, // Send token in headers
           },
         });
-      console.log("Original date:", response.data.date);
-
-      const formattedDate = formatDateForInput(response.data.date);
-      console.log("Formatted date for input:", formattedDate);
+      const formattedDate = formatDateForInput(response.data.purchase_date);
 
       const editData = {
-        ...response.data,
-        date: formattedDate,
+        id:response.data.id,
+        serial_no: response.data.serial_no,
+        product:response.data.ModelNumber,
+        purchase_date: formattedDate,
+        address: response.data.address,
       };
 
       setFormData(editData);
       setIsEdit(true);
-      console.log(editData);
     } catch (error) {
       console.error("Error editing user:", error);
     }
@@ -364,13 +371,13 @@ const Uniqueproduct = () => {
                           type="text"
                           className="form-control"
                           id="snumber"
-                          name="serialnumber"
-                          value={formData.serialnumber}
+                          name="serial_no"
+                          value={formData.serial_no}
                           onChange={handleChange}
                           aria-describedby="snumber"
                         />
-                        {errors.serialnumber && (
-                          <small className="text-danger">{errors.serialnumber}</small>
+                        {errors.serial_no && (
+                          <small className="text-danger">{errors.serial_no}</small>
                         )}
                         {duplicateError && (
                           <small className="text-danger">{duplicateError}</small>
@@ -384,15 +391,15 @@ const Uniqueproduct = () => {
                         </label>
                         <input
                           type="date"
-                          name="date"
+                          name="purchase_date"
                           className="form-control"
                           id="pdate"
-                          value={formData.date}
+                          value={formData.purchase_date}
                           onChange={handleChange}
                           aria-describedby="pdate"
                         />
-                        {errors.date && (
-                          <small className="text-danger">{errors.date}</small>
+                        {errors.purchase_date && (
+                          <small className="text-danger">{errors.purchase_date}</small>
                         )}
                       </div>
 
@@ -406,7 +413,7 @@ const Uniqueproduct = () => {
                           <input
                             type="text"
                             className="form-control"
-                            value={formData.product || ""}
+                            value={formData.product}
                             readOnly // Prevent editing
                           />
                         ) : (
@@ -443,8 +450,8 @@ const Uniqueproduct = () => {
                         </label>
                         <select
                           className="form-select dropdown-select"
-                          name="location"
-                          value={formData.customer_address}
+                          name="address"
+                          value={formData.address}
                           onChange={(e) => handleChange(e)}
                         >
                           <option value="">Select Customer Address</option>
@@ -465,8 +472,8 @@ const Uniqueproduct = () => {
                           )}
                         </select>
 
-                        {errors.location && (
-                          <small className="text-danger">{errors.location}</small>
+                        {errors.address && (
+                          <small className="text-danger">{errors.address}</small>
                         )}
                       </div>
 
