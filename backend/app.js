@@ -9326,8 +9326,10 @@ console.log(assigncsp, "#%")
       const formattedCspList = assigncsp.split(",").map(csp => `'${csp.trim()}'`).join(",");
 
       // Directly inject the formatted values into the SQL query
-      sql += ` AND c.csp IN (${formattedCspList})`;
+      sql += ` AND c.csp IN (${formattedCspList}) `;
     }
+
+    sql += `order by ticket_no asc`
 
     console.log(sql)
     // Execute the SQL query

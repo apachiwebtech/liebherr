@@ -1489,7 +1489,6 @@ export function Complaintview(params) {
   }, [complaintid, complaintview.ticket_no, complaintview.customer_mobile]);
 
 
-  console.log(complaintview.ticket_type, "%%^&&^")
 
   useEffect(() => {
     if (engtype == "Franchisee") {
@@ -1497,14 +1496,14 @@ export function Complaintview(params) {
       getEngineer();
     } else if (engtype == "LHI") {
 
-      if (complaintview.ticket_type == 'HELPDESK') {
+      // if (complaintview.ticket_type == 'HELPDESK') {
 
-        getHelplhi()
+      //   getHelplhi()
 
-      } else {
+      // } else {
 
-        getLHIEngineer();
-      }
+      // }
+      getLHIEngineer();
 
 
     } else {
@@ -1932,6 +1931,13 @@ export function Complaintview(params) {
                   <p style={{ fontSize: "14px" }}>
                     <b>Mother Branch</b> : {complaintview.mother_branch}
                   </p>
+                  <p style={{ fontSize: "14px" }}>
+                    <b>MSP</b> : {complaintview.sevice_partner}
+                  </p>
+                  <p style={{ fontSize: "14px" }}>
+                    <b>CSP</b> : {complaintview.child_service_partner}
+                  </p>
+                  <hr/>
                   <p style={{ fontSize: "14px" }}>
                     <b>Customer Id</b> : {complaintview.customer_id}
                   </p>

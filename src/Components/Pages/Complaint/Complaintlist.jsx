@@ -374,7 +374,7 @@ export function Complaintlist(params) {
       const worksheet = XLSX.utils.json_to_sheet(
         allTicketData.map((item) => ({
           TicketNo: item.ticket_no,
-          TicketDate: item.ticket_date,
+          TicketDate: formatDate(item.ticket_date),
           CustomerId: item.customer_id,
           Salutation: item.salutation,
           CustomerName: item.customer_name,
@@ -388,7 +388,9 @@ export function Complaintlist(params) {
           City: item.city,
           District: item.area,
           Pincode: item.pincode,
-          ServicePartner: item.service_partner,
+          MotherBranch: item.mother_branch,
+          ServicePartner: item.sevice_partner,
+          ChildServicePartner: item.child_service_partner,
           msp: item.msp,
           csp: item.csp,
           SalesPartner: item.sales_partner,

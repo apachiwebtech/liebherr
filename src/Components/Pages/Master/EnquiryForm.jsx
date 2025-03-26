@@ -29,7 +29,7 @@ export function EnquiryForm(params) {
 
     const [formData, setFormData] = useState({
         source: "",
-        enquiry_date: null,
+        enquiry_date: "",
         salutation: "",
         customer_name: "",
         email: "",
@@ -194,8 +194,20 @@ export function EnquiryForm(params) {
 
 
     const handleDateChange = (date) => {
-        setFormData({ ...formData, enquiry_date: date });
+        // Format the date to YYYY-MM-DD HH:mm:ss
+        const formattedDate = date.toISOString().split('T')[0] + ' ' + date.toISOString().split('T')[1].split('.')[0];
+    
+        setFormData((prevData) => ({
+            ...prevData,
+            enquiry_date: formattedDate,
+        }));
+    
+        console.log(formattedDate);
     };
+    
+    
+
+    console.log(formData , "sadssd")
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -346,13 +358,14 @@ export function EnquiryForm(params) {
 
 
 
-                setFormData({
-                    ...formData,
+                setFormData((prevData) => ({
+                    ...prevData,
                     state: response.data[0].state,
                     city: response.data[0].city,
                     district: response.data[0].district,
                     pincode: response.data[0].pincode
-                })
+                }));
+                
 
             }
 
