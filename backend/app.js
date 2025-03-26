@@ -4277,7 +4277,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
   // duplicate check
 
-  const duplicatecheck = `select * from complaint_ticket where customer_mobile = '${mobile}' and call_status = 'Open' `;
+  const duplicatecheck = `select * from complaint_ticket where customer_mobile = '${mobile}' and call_status = 'Open' and salutation ! = 'Dl'`;
 
 
   const dupresult = await pool.request().query(duplicatecheck);
