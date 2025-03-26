@@ -252,6 +252,7 @@ const Uniqueproduct = () => {
                 serial_no: "",
               });
               fetchProduct(customer_id);
+              setIsProductDisabled(false);
             })
             .catch((error) => {
               if (error.response && error.response.status === 409) {
