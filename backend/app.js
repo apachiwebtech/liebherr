@@ -5577,7 +5577,7 @@ app.get("/getengineer", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
     const {
       title,
-      employee_code,
+      engineer_id,
       mobile_no,
       email,
       page = 1, // Default to page 1 if not provided
@@ -5596,8 +5596,8 @@ app.get("/getengineer", authenticateToken, async (req, res) => {
     if (title) {
       sql += ` AND r.title LIKE '%${title}%'`;
     }
-    if (employee_code) {
-      sql += ` AND r.engineer_id LIKE '%${employee_code}%'`;
+    if (engineer_id) {
+      sql += ` AND r.engineer_id LIKE '%${engineer_id}%'`;
     }
     if (mobile_no) {
       sql += ` AND r.mobile_no LIKE '%${mobile_no}%'`;
@@ -5624,8 +5624,8 @@ app.get("/getengineer", authenticateToken, async (req, res) => {
     if (title) {
       countSql += ` AND r.title LIKE '%${title}%'`;
     }
-    if (employee_code) {
-      countSql += ` AND r.engineer_id LIKE '%${employee_code}%'`;
+    if (engineer_id) {
+      countSql += ` AND r.engineer_id LIKE '%${engineer_id}%'`;
     }
     if (mobile_no) {
       countSql += ` AND r.mobile_no LIKE '%${mobile_no}%'`;

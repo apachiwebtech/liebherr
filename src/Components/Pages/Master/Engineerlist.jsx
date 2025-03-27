@@ -296,13 +296,13 @@ export function Engineerlist(params) {
 
                                 <div className="col-md-2">
                                     <div className="form-group">
-                                        <label>Employee Code</label>
+                                        <label>Engineer ID</label>
                                         <input
                                             type="text"
                                             className="form-control"
-                                            name="employee_code"
-                                            value={searchFilters.employee_code}
-                                            placeholder="Search by Employee code"
+                                            name="engineer_id"
+                                            value={searchFilters.engineer_id}
+                                            placeholder="Search by Engineer ID"
                                             onChange={handleFilterChange}
                                         />
                                     </div>
@@ -397,7 +397,7 @@ export function Engineerlist(params) {
                                         <th width="7%">Name</th>
                                         <th width="8%">Email</th>
                                         <th width="20%">Mobile Number</th>
-                                        <th width="10%">Employee Code</th>
+                                        <th width="10%">Engineer ID</th>
                                         <th width="5%">{roleaccess <= 3 ? "View" : "Edit"}</th>
                                         {/* <th width="5%">View</th> */}
                                         {roleaccess > 3 ? <th width="5%">Status</th> : null}
@@ -413,7 +413,7 @@ export function Engineerlist(params) {
                                                 <td >{item.title}</td>
                                                 <td >{item.email}</td>
                                                 <td >{item.mobile_no}</td>
-                                                <td >{item.employee_code}</td>
+                                                <td >{item.engineer_id}</td>
 
                                                 <td >
                                                     {roleaccess > 3 ? (
