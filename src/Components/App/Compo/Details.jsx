@@ -84,7 +84,8 @@ function Details() {
     call_remark: '',
     spare_qty: '',
     purchase_date: '',
-    check_remark : ''
+    check_remark : '',
+    customer_mobile:''
   })
 
 
@@ -302,6 +303,7 @@ function Details() {
           formData.append('earthing', checklist.earthing == 'null' ? 'No' : checklist.earthing);
           formData.append('gas_charges', checklist.gas_charges == 'null' ? 'No' : checklist.gas_charges);
           formData.append('transpotation', checklist.transpotation == 'null' ? 'No' : checklist.transpotation);
+          formData.append('customer_mobile', Value.customer_mobile);
           
 
 
@@ -457,7 +459,8 @@ function Details() {
             call_type: res.data.data[0].ticket_type,
             warranty_status: res.data.data[0].warranty_status,
             call_status: res.data.data[0].call_status,
-            purchase_date: res.data.data[0].purchase_date
+            purchase_date: res.data.data[0].purchase_date,
+            customer_mobile : res.data.data[0].customer_mobile
           })
 
 

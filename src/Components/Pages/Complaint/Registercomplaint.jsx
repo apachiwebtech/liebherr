@@ -15,7 +15,7 @@ import DatePicker from "react-datepicker";
 
 
 export function Registercomplaint(params) {
-
+  const [isAddingNewAddress, setIsAddingNewAddress] = useState(false);
   const [customerEndId, setCustomerEndId] = useState('');
   const [addresses, setAddresses] = useState([]);
   const [hideticket, setHideticket] = useState(false)
@@ -52,6 +52,10 @@ export function Registercomplaint(params) {
     awhatsaap: 0,
     mwhatsapp: 0,
   });
+
+  const handleCheckboxChange = (e) => {
+    setIsAddingNewAddress(e.target.checked);
+  };
 
   const handleKeyDown = (e) => {
     // Prevent '+' and '-' keys
@@ -354,6 +358,9 @@ export function Registercomplaint(params) {
 
   // Function to handle the address change
   const handleAddressChange = (e) => {
+
+
+
     const { value } = e.target;
     setValue(prevState => ({
       ...prevState,
@@ -385,52 +392,105 @@ export function Registercomplaint(params) {
   // Function to handle the address selection from dropdown
   const handleExistingAddressChange = (e) => {
     const selected = e.target.value;
+    const selectedOption = e.target.options[e.target.selectedIndex];
+    const selAddress = selectedOption.getAttribute("data-address");
     setSelectedAddress(selected);
     setValue(prevState => ({
       ...prevState,
-      address: selected // Set the selected address to the input field
+      address: selAddress // Set the selected address to the input field
     }));
   };
 
   const handleNewAddressSubmit = async (event) => {
     event.preventDefault(); // Prevent the default form submission behavior
     try {
+
+
+
       // Prepare the payload with the new address and additional fields
       const payload = {
         address: newAddress,
         pincode_id: value.pincode || '',
-        ccperson: value.contact_person || '', // Extract contact person from form data
-        ccnumber: value.mobile || '', // Extract mobile from form data
-        customer_id: customerEndId, // Use customerEndId or send empty if not available
+        ccperson: value.contact_person || '',
+        ccnumber: value.mobile || '',
+        customer_id: value.customer_id,
+        geocity_name: value.city,
+        geostate_name: value.state,
+        area_name: value.area,
+        address_id: selectedAddress
       };
 
-      const response = await axiosInstance.post(`${Base_Url}/postcustomerlocation`, payload, {
-        headers: {
-          Authorization: token,
-        },
-      });
+      if (isAddingNewAddress == true) {
 
-      if (response.data) {
+        const response = await axiosInstance.post(`${Base_Url}/updatecustomerlocation`, payload, {
+          headers: {
+            Authorization: token,
+          },
+        });
 
+        if (response.data) {
 
-        // Optimistically update the addresses state
-        setAddresses(prevAddresses => [
-          ...prevAddresses,
-          { address: newAddress, id: response.data.newAddressId } // Assuming response contains the ID of the new address
-        ]);
+          setValue(prevState => ({
+            ...prevState,
+            address: newAddress // Set the selected address to the input field
+          }));
 
-        // Reset the new address input
-        setNewAddress('');
-        setPincode('');
-        closePopup();
-        alert("Data submitted")
+          // Reset the new address input
+          setNewAddress('');
+          setPincode('');
+          closePopup();
+          alert("Data submitted")
+        } else {
+          console.error("Error submitting new address:", response.data.message);
+        }
+
       } else {
-        console.error("Error submitting new address:", response.data.message);
+
+        try {
+          const response = await axiosInstance.post(`${Base_Url}/postcustomerlocation`, payload, {
+            headers: {
+              Authorization: token,
+            },
+          });
+
+          console.log(response)
+          if (response.data) {
+
+            setValue(prevState => ({
+              ...prevState,
+              address: newAddress // Set the selected address to the input field
+            }));
+
+            // Reset the new address input
+            setNewAddress('');
+            setPincode('');
+            closePopup();
+            alert("Data submitted")
+
+
+          } else {
+            console.error("Error submitting new address:", response.data.message);
+            alert("Please change contact person name")
+          }
+        } catch {
+          alert("Please change the contact person")
+        }
+
+
       }
+
+
+
     } catch (error) {
+
       console.error("Error submitting new address:", error);
     }
-    fetchAddresses(customerEndId);
+
+
+    fetchAddresses(value.customer_id);
+
+
+
   };
 
 
@@ -582,18 +642,7 @@ export function Registercomplaint(params) {
     }
   };
 
-  //Master Service Partner
-  /*async function getMasterPartner(params) {
 
-      axiosInstance.get(`${Base_Url}/getmasterpartner`)
-          .then((res) => {
-              if (res.data) {
-
-                  setMasterPartner(res.data)
-              }
-          })
-
-  }*/
 
 
 
@@ -618,6 +667,7 @@ export function Registercomplaint(params) {
           setSerialid(res.data[0].serial_no)
           setModelid(res.data[0].ModelNumber)
           setpdate(res.data[0].purchase_date)
+          setpurchase_data(res.data[0].purchase_date)
           getDateAfterOneYear(res.data[0].purchase_date)
           setValue({
             ...value,
@@ -659,8 +709,10 @@ export function Registercomplaint(params) {
             salutation: res.data[0].salutation
           })
 
-          setlocations({ childfranchiseem: res.data[0].child_service_partner, franchiseem: res.data[0].sevice_partner })
 
+
+          setlocations({ childfranchiseem: res.data[0].child_service_partner, franchiseem: res.data[0].sevice_partner })
+          fetchAddresses(res.data[0].customer_id)
           setCheckboxes({
             mwhatsapp: res.data[0].mwhatsapp,
             awhatsaap: res.data[0].awhatsapp
@@ -772,7 +824,7 @@ export function Registercomplaint(params) {
   const navigate = useNavigate()
 
 
-  console.log(value.customer_id , "cuys")
+  console.log(value.customer_id, "cuys")
 
 
   const handlesubmit = (e) => {
@@ -886,13 +938,13 @@ export function Registercomplaint(params) {
       mode_of_contact: value.mode_of_contact || "",
       ticket_type: value.ticket_type || "",
       cust_type: value.cust_type || "",
-      warrenty_status: value.warrenty_status || "",
+      warrenty_status: value.warrenty_status || warranty_status_data || '',
       invoice_date: value.invoice_date || "",
       call_charge: value.call_charge || "",
       // cust_id: String(value.customer_id) || "",
       model: value.model || "",
       serial: String(value.serial),
-      purchase_date: value.purchase_date || "",
+      purchase_date: purchase_data || value.purchase_date || '',
       master_service_partner: value.master_service_partner || "",
       child_service_partner: value.child_service_partner || "",
       additional_remarks: value.additional_remarks || "",
@@ -1136,12 +1188,12 @@ export function Registercomplaint(params) {
         const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 
         const date2 = new Date(purchase_date);
-    
+
         // Set time to midnight (00:00:00)
         date2.setHours(0, 0, 0, 0);
 
 
-        const formattedDate2 = date2.toString(); 
+        const formattedDate2 = date2.toString();
 
         setpurchase_data(formattedDate);
         getDateAfterOneYear(formattedDate2)
@@ -1178,7 +1230,7 @@ export function Registercomplaint(params) {
   };
 
 
-  
+
 
 
   const fetchfrommobile = async (mobile) => {
@@ -1521,9 +1573,10 @@ export function Registercomplaint(params) {
                               <tr key={index}>
                                 <td><div>{item.ModelNumber}</div></td>
                                 <td>
-                                  <div className="text-right pb-2">
+                                  {item.SerialStatus == 'Inactive' ? <div>Inactive</div> : <div className="text-right pb-2">
                                     {roleaccess > 2 ? <button onClick={() => addnewticket(item.ModelNumber)} className="btn btn-sm btn-primary generateTicket">New Ticket</button> : null}
-                                  </div>
+                                  </div>}
+
                                 </td>
                               </tr>
                             ))}
@@ -1583,7 +1636,7 @@ export function Registercomplaint(params) {
               </div>
 
             </div> : <div className="card">
-            {roleaccess > 2 ?<div className="card-body">
+              {roleaccess > 2 ? <div className="card-body">
                 {/* Only show "No Result Found" if a search was performed and no results were found */}
                 {hasSearched && searchdata.length === 0 && <p className="text-danger ">No Result Found</p>}
                 <button onClick={() => setForm(true)} className="btn btn-sm btn-primary">New Ticket</button>
@@ -1936,11 +1989,21 @@ export function Registercomplaint(params) {
                       {isPopupOpen && (
                         <div className="popup">
                           <div className="popup-content">
+
+                            <label>
+                              <input
+                                type="checkbox"
+                                checked={isAddingNewAddress}
+                                onChange={handleCheckboxChange}
+                              />
+                              Update Address
+                            </label>
+
                             <h3>Change Address</h3>
                             <select id="existingAddress" onChange={handleExistingAddressChange} value={selectedAddress}>
                               <option value="">Select Existing Address</option>
                               {addresses.map((addressItem) => (
-                                <option key={addressItem.id} value={addressItem.address}>
+                                <option key={addressItem.id} value={addressItem.id} data-address={addressItem.address}>
                                   {addressItem.address}
                                 </option>
                               ))}
@@ -1951,7 +2014,7 @@ export function Registercomplaint(params) {
                               value={newAddress}
                               onChange={(e) => {
                                 setNewAddress(e.target.value); // Update new address in state
-                                // onhashchange(e);
+
                               }}
                               placeholder="Enter New Address"
                             />

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import * as XLSX from "xlsx";
 
-const ExceltoScript = () => {
+const ExceltoUpdateScript = () => {
   const [fileData, setFileData] = useState([]);
   const [sqlScript, setSqlScript] = useState("");
 
@@ -98,4 +98,4 @@ const ExceltoScript = () => {
   );
 };
 
-export default ExceltoScript;
+export default ExceltoUpdateScript;

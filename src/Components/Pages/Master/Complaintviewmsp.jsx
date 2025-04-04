@@ -89,7 +89,8 @@ export function Complaintviewmsp(params) {
     customer_class: "",
     customer_id: '',
     gascheck: 'No',
-    transportcheck: 'No'
+    transportcheck: 'No',
+    closed_date: ''
   });
 
 
@@ -168,7 +169,12 @@ export function Complaintviewmsp(params) {
   }
 
 
-
+  const handlefeilddatechange = (date) => {
+    setComplaintview((prev) => ({
+      ...prev,
+      closed_date: date, // Ensure date is stored as a Date object
+    }));
+  };
 
 
 
@@ -1255,11 +1261,13 @@ export function Complaintviewmsp(params) {
 
     const isValidValue = (value) => value !== null && value !== 'null' && value !== '';
 
+
     // Make `sub_call_status` mandatory if `call_status` is selected
     if (isValidValue(callstatusid) && !isValidValue(complaintview.sub_call_status)) {
       alert("Please select the Sub Call Status");
       return;
     }
+
 
     if (complaintview.sub_call_status === 'Technician on-route') {
       if (addedEngineers.length === 0) {
@@ -1271,6 +1279,8 @@ export function Complaintviewmsp(params) {
 
 
 
+
+
     if (
 
       complaintview.call_status === 'Closed'
@@ -1279,9 +1289,10 @@ export function Complaintviewmsp(params) {
         (complaintview.ticket_type === 'MAINTENANCE' || isValidValue(complaintview.activity_code)) &&
         (complaintview.ticket_type === 'MAINTENANCE' || isValidValue(complaintview.visit_count)) &&
         (complaintview.ticket_type === 'MAINTENANCE' || groupstatusid) &&
-        (complaintview.ticket_type === 'VISIT' || isValidValue(complaintview.serial_no)) && // Adjusted for ticket_type = 'Visit'
-        isValidValue(complaintview.purchase_date) &&
-        addedEngineers.length > 0
+        (complaintview.ticket_type === 'VISIT' || isValidValue(complaintview.serial_no)) &&
+        (complaintview.ticket_type !== "VISIT" ? isValidValue(complaintview.purchase_date) : true) &&
+        addedEngineers.length > 0 &&
+        isValidValue(complaintview.closed_date)
         : true
     ) {
 
@@ -1296,6 +1307,9 @@ export function Complaintviewmsp(params) {
       try {
         const complaintRemarkData = {
           ticket_no: complaintview.ticket_no,
+          complete_date: complaintview.closed_date,
+          customer_mobile: complaintview.customer_mobile,
+          totp: complaintview.totp,
           ticket_type: complaintview.ticket_type,
           ticket_start_date: complaintview.created_date,
           call_city: complaintview.class_city,
@@ -1404,9 +1418,12 @@ export function Complaintviewmsp(params) {
         else if (complaintview.ticket_type !== 'MAINTENANCE' && isInvalidValue(complaintview.visit_count)) {
           alert('Please select visit count');
         }
+        else if (isInvalidValue(complaintview.closed_date)) {
+          alert('Please select complete date');
+        }
         else if (complaintview.ticket_type !== 'VISIT' && isInvalidValue(complaintview.serial_no)) {
           alert('Please select the Serial No');
-        } else if (!complaintview.purchase_date) {
+        } else if (complaintview.ticket_type !== 'VISIT' && !complaintview.purchase_date) {
           alert('Please select the Purchase Date');
         } else if (addedEngineers.length === 0) {  // Fixed validation here
           alert('Please add the engineer');
@@ -1418,6 +1435,7 @@ export function Complaintviewmsp(params) {
 
 
   };
+
 
 
 
@@ -2282,7 +2300,7 @@ export function Complaintviewmsp(params) {
                         <form onSubmit={handleSubmit}>
                           <div className="card-body p-4">
                             <div className="row">
-                              <div className="mb-3 col-lg-6">
+                              <div className="mb-3 col-lg-4">
                                 <h4 className="pname" style={{ fontSize: "14px" }}>Call Status</h4>
                                 <select
                                   name="call_status"
@@ -2309,7 +2327,7 @@ export function Complaintviewmsp(params) {
                                 </select>
 
                               </div>
-                              <div className="mb-3 col-lg-6">
+                              <div className="mb-3 col-lg-4">
                                 <h4 className="pname" style={{ fontSize: "14px" }}>Sub Call Status</h4>
                                 <select name="sub_call_status" disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false} className="form-control" style={{ fontSize: "14px" }} onChange={handleModelChange}>
                                   <option value="" >Select </option>
@@ -2322,6 +2340,23 @@ export function Complaintviewmsp(params) {
 
 
                                 </select>
+                              </div>
+
+                              <div className="mb-3 col-lg-4">
+                                <h4 className="pname" style={{ fontSize: "14px" }}>Field complete date</h4>
+                                <DatePicker
+                                  selected={complaintview.closed_date}
+                                  onChange={handlefeilddatechange}
+                                  dateFormat="dd-MM-yyyy"
+                                  placeholderText="DD-MM-YYYY"
+                                  className='form-control'
+                                  name="closed_date"
+                                  disabled={complaintview.call_status == 'Closed' ? false : true}
+                                  aria-describedby="Anidate"
+                                  minDate={complaintview.ticket_date}
+                                  maxDate={new Date().toISOString().split("T")[0]}
+                                />
+
                               </div>
                               {(complaintview.call_status == 'Spares' || ((complaintview.call_status == 'Approval' && complaintview.sub_call_status == 'Customer Approval / Quotation'))) &&
 

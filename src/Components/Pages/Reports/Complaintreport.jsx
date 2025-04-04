@@ -23,37 +23,43 @@ const Complaintreport = () => {
 
   const fetchData = async () => {
     setError(''); // Clear any previous errors
-
+  
     if (!startDate || !endDate) {
       setError('Both start and end dates are required.');
       return;
     }
-
+  
     if (startDate > endDate) {
       setError('Start date cannot be later than end date.');
       return;
     }
-
+  
     const data = {
       startDate: startDate,
       endDate: endDate,
-      licare_code : licare_code
+      licare_code: licare_code
     };
-
+  
     try {
       setLoading(true);  // Show loading indicator before making API call
       const response = await axiosInstance.post(`${Base_Url}/getcomplainticketdump`, data, {
         headers: { Authorization: token },
       });
-
+  
       console.log("API Response:", response.data);
-
+  
       if (response.data && response.data.length > 0) {
-        // Extract column names dynamically from the keys of the first object
-        setColumns(Object.keys(response.data[0]));
-
+        // Format date fields
+        const formattedData = response.data.map(item => ({
+          ...item,
+          ticket_date: item.ticket_date ? new Date(item.ticket_date).toLocaleDateString('en-GB') : '', // Change format as neededfield
+        }));
+  
+        // Extract and set column names dynamically
+        setColumns(Object.keys(formattedData[0]));
+  
         // Ensure all data is loaded before exporting
-        await exportToExcel(response.data);
+        await exportToExcel(formattedData);
       } else {
         setError("No data available for the selected date range.");
       }
@@ -64,6 +70,7 @@ const Complaintreport = () => {
       setLoading(false);  // Hide loading indicator after operation completes
     }
   };
+  
 
 
 

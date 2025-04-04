@@ -154,10 +154,10 @@ const Customerlocation = () => {
         "Do you want to submit the data?"
       );
       if (confirmSubmission) {
-        const payload = {
-          encryptedData
+        // const payload = {
+        //   encryptedData
 
-        };
+        // };
 
 
         if (isEdit) {
@@ -191,7 +191,7 @@ const Customerlocation = () => {
             });
         } else {
           await axios
-            .post(`${Base_Url}/postcustomerlocation`, { encryptedData }, {
+            .post(`${Base_Url}/postcustomerlocation`, payload , {
               headers: {
                 Authorization: token,
               },

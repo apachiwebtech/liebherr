@@ -23,10 +23,19 @@ export function Siteheader() {
     window.location.pathname = '/registercomaplaint'
   }
 
+  function clearAllCookies() {
+    document.cookie.split(";").forEach(cookie => {
+      let [name] = cookie.split("=");
+      document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+    });
+  }
+
   const clearLocal = async () => {
     try {
+
+      clearAllCookies();
       localStorage.clear();
-      window.location.href = App_Url
+      // window.location.href = App_Url
     }
     catch (error) {
       console.error('error signing out', error)

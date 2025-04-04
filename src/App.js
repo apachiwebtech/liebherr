@@ -156,6 +156,7 @@ import UploadMobile from './Components/Utils/UploadMobile';
 import JsontoExcel from './Components/Utils/JsontoExcel';
 import Productsparetabs from './Components/Pages/Master/Productsparetabs';
 import { Stock } from './Components/Pages/Master/Stock';
+import ExceltoUpdateScript from './Components/Utils/ExceltoupdateScript';
 
 
 
@@ -253,6 +254,10 @@ const Router = createBrowserRouter([
   {
     path: "/exceltoscript",
     element: <ExceltoScript />
+  },
+  {
+    path: "/exceltoupdatescript",
+    element: <ExceltoUpdateScript />
   },
   {
     path: "/exceltoengscript",

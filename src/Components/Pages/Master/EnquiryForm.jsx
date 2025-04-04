@@ -29,7 +29,7 @@ export function EnquiryForm(params) {
 
     const [formData, setFormData] = useState({
         source: "",
-        enquiry_date: "",
+        enquiry_date: new Date(),
         salutation: "",
         customer_name: "",
         email: "",
