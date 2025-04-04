@@ -108,7 +108,7 @@ const Loginheader = (params) => {
                 Quotationlist
               </Link>
             </li>
-            <li
+            {/* <li
               className={`nav-item dropdown ${location.pathname === "/csp/adduser" ? "active-class" : ""}`}
               style={location.pathname === "/csp/adduser" ? { background: '#0d6efd', borderRadius: '5px' } : {}}
             >
@@ -121,7 +121,7 @@ const Loginheader = (params) => {
               >
                 Add User
               </Link>
-            </li>
+            </li> */}
             <li
               className={`nav-item dropdown ${location.pathname === "/csp/creategrn" ? "active-class" : ""}`}
               style={location.pathname === "/csp/creategrn" ? { background: '#0d6efd', borderRadius: '5px' } : {}}

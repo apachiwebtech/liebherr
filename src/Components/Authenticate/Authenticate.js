@@ -63,6 +63,7 @@ const Authenticate = () => {
             localStorage.setItem('licare_code', res.data[0].usercode)
             localStorage.setItem('Userrole', Encrypt(role))
             localStorage.setItem('User_id', res.data[0].id)
+            localStorage.setItem('Access', res.data[0].userrole)
             
             setLoading(false)
             window.location.pathname = '/dashboard'
@@ -70,24 +71,28 @@ const Authenticate = () => {
             localStorage.setItem('licare_code', res.data[0].usercode)
             localStorage.setItem('Userrole', Encrypt(role))
             localStorage.setItem('User_id', res.data[0].id)
+            localStorage.setItem('Access', res.data[0].userrole)
             setLoading(false)
             window.location.pathname = '/msp/ticketlistmsp'
           } else if (res.data[0].userrole == 'awt_childfranchisemaster') {
             localStorage.setItem('licare_code', res.data[0].usercode)
             localStorage.setItem('Userrole', Encrypt(role))
             localStorage.setItem('User_id', res.data[0].id)
+            localStorage.setItem('Access', res.data[0].userrole)
             setLoading(false)
             window.location.pathname = '/csp/ticketlist'
           } else if (res.data[0].userrole == 'awt_engineermaster') {
             localStorage.setItem('userid', res.data[0].usercode)
             localStorage.setItem('Userrole', Encrypt(role))
             localStorage.setItem('User_id', res.data[0].id)
+            localStorage.setItem('Access', res.data[0].userrole)
             setLoading(false)
             window.location.pathname = '/mobapp/dash'
           } else if (res.data[0].userrole == 'lhi_trainer') {
             localStorage.setItem('licare_code', res.data[0].usercode)
             localStorage.setItem('Userrole', Encrypt(role))
             localStorage.setItem('User_id', res.data[0].id)
+            localStorage.setItem('Access', res.data[0].userrole)
             setLoading(false)
             window.location.pathname = '/trainer/engineerlist'
           }
