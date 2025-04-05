@@ -5643,7 +5643,7 @@ app.get("/getengineer", authenticateToken, async (req, res) => {
         FROM awt_engineermaster r
         INNER JOIN awt_childfranchisemaster c 
         ON r.cfranchise_id = c.licare_code
-        WHERE r.deleted = 0
+        WHERE r.deleted = 0 and employee_code is not null
       `;
 
     if (title) {
@@ -5672,7 +5672,7 @@ app.get("/getengineer", authenticateToken, async (req, res) => {
         FROM awt_engineermaster r
         INNER JOIN awt_childfranchisemaster c 
         ON r.cfranchise_id = c.licare_code
-        WHERE r.deleted = 0
+        WHERE r.deleted = 0  and employee_code is not null
       `;
     if (title) {
       countSql += ` AND r.title LIKE '%${title}%'`;
@@ -5743,15 +5743,19 @@ app.post("/postengineer",
       const pool = await poolPromise;
 
 
-      const getcount = `SELECT TOP 1 id FROM awt_engineermaster ORDER BY id DESC`;
+      const getcount = `SELECT TOP 1 RIGHT(engineer_id, 4) AS last_four_digits FROM awt_engineermaster ORDER BY RIGHT(engineer_id, 4) DESC`;
 
       const countResult = await pool.request().query(getcount);
 
-      const latestQuotation = countResult.recordset[0]?.id || 0;
+      const latestQuotation = countResult.recordset[0]?.last_four_digits || 0;
 
-      const newcount = latestQuotation + 1
+      console.log(latestQuotation , "#$%")
 
-      const engineercode = 'E' + newcount.toString().padStart(4, "0")
+      const newcount = Number(latestQuotation) + 1
+
+
+
+      const engineercode = 'SPT-TEC-' + newcount.toString().padStart(4, "0")
 
       // Check for duplicates using direct query injection
       const checkDuplicateSql = `SELECT * FROM awt_engineermaster WHERE mobile_no = '${mobile_no}' AND email = '${email}' AND deleted = 0`;
@@ -9722,13 +9726,13 @@ app.get("/getcomplainlistmsp", authenticateToken, async (req, res) => {
         SELECT c.*, e.title as assigned_name,
                DATEDIFF(day, (c.ticket_date), GETDATE()) AS ageingdays
         FROM complaint_ticket AS c
-        JOIN awt_engineermaster AS e ON c.engineer_id = e.engineer_id
+        LEFT JOIN awt_engineermaster AS e ON c.engineer_id = e.engineer_id
         WHERE c.deleted = 0 AND c.msp = '${licare_code}'
     `;
     let countSql = `
         SELECT COUNT(*) as totalCount
         FROM complaint_ticket AS c
-        JOIN awt_engineermaster AS e ON c.engineer_id = e.engineer_id
+        LEFT JOIN awt_engineermaster AS e ON c.engineer_id = e.engineer_id
         WHERE c.deleted = 0 AND c.msp = '${licare_code}'
     `;
 
@@ -9817,7 +9821,7 @@ app.get("/getcomplainlistmsp", authenticateToken, async (req, res) => {
 
 
 
-
+    console.log(sql, "@RD")
 
     // Execute the queries
     const dataResult = await pool.request().query(sql);
@@ -11048,11 +11052,11 @@ app.get("/getapproveEng", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
 
     // Directly use the query (no parameter binding)
-    const sql = `select * from awt_engineermaster where status != 1 AND deleted = 0`;
+    const sql = `select * from awt_engineermaster where status != 1 AND deleted = 0 AND employee_code is null`;
 
     // Execute the query
     const result = await pool.request().query(sql);
-    console.log(result)
+
 
     return res.json(result.recordset);
   } catch (err) {
@@ -11111,7 +11115,7 @@ app.post("/finalapproveenginner", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
 
     // Directly use the query (no parameter binding)
-    const sql = `update awt_engineermaster set status = 1 where id = '${eng_id}'`;
+    const sql = `update awt_engineermaster set status = 1 , employee_code = 'SRV' where id = '${eng_id}'`;
 
     // Execute the query
     const result = await pool.request().query(sql);

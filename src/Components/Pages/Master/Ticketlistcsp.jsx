@@ -377,6 +377,7 @@ const Ticketlistcsp = (params) => {
                                             value={searchFilters.status}
                                             onChange={handleFilterChange}
                                         >
+                                            <option value="">Select</option>
                                             <option value="Open">Open</option>
                                             <option value="Appointment">Appointment</option>
                                             <option value="Approval">Approval</option>
