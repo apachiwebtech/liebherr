@@ -92,7 +92,9 @@ export function Complaintview(params) {
     gascheck: 'No',
     transportcheck: 'No',
     totp: '',
-    closed_date: ""
+    closed_date: "",
+    area :'',
+    region : ''
   });
 
 
@@ -1148,7 +1150,11 @@ export function Complaintview(params) {
         return;
       }
 
+
+  
+
       const serialData = response.data[0];
+
 
       if (serialData?.ModelNumber) {
         if (!serialData.customer_id) {
@@ -1340,6 +1346,15 @@ export function Complaintview(params) {
           ticket_no: complaintview.ticket_no,
           complete_date: complaintview.closed_date,
           customer_mobile: complaintview.customer_mobile,
+          customer_id: complaintview.customer_id,
+          customer_name: complaintview.customer_name,
+          address: complaintview.address,
+          region: complaintview.region,
+          state: complaintview.state,
+          city: complaintview.city,
+          area: complaintview.area,
+          pincode: complaintview.pincode,
+          customer_class: complaintview.customer_class,
           totp: complaintview.totp,
           ticket_type: complaintview.ticket_type,
           ticket_start_date: complaintview.created_date,
@@ -1364,6 +1379,7 @@ export function Complaintview(params) {
           gas_transportation: complaintview.gas_transportation,
           transportation: complaintview.transportation,
           transportation_charge: complaintview.transportation_charge,
+          allocation: allocation,
           note,
           created_by,
         };
@@ -1533,13 +1549,14 @@ export function Complaintview(params) {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    
-    const day = String(date.getUTCDate()).padStart(2, "0"); // Use getUTCDate()
-    const month = String(date.getUTCMonth() + 1).padStart(2, "0"); // Use getUTCMonth()
-    const year = date.getUTCFullYear(); // Use getUTCFullYear()
-
+  
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+  
     return `${day}-${month}-${year}`;
-};
+  };
+  
 
   const formatDate1 = (dateString) => {
     const date = new Date(dateString);

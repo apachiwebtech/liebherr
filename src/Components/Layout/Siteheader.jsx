@@ -35,7 +35,7 @@ export function Siteheader() {
 
       clearAllCookies();
       localStorage.clear();
-      // window.location.href = App_Url
+      window.location.href = App_Url
     }
     catch (error) {
       console.error('error signing out', error)

@@ -3484,7 +3484,7 @@ app.get("/getcomplaintview/:complaintid", authenticateToken, async (req, res) =>
 });
 
 app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
-  const { ticket_no, note, created_by, call_status, call_status_id, sub_call_status, group_code, site_defect, defect_type, activity_code, serial_no, ModelNumber, purchase_date, warrenty_status, engineerdata, engineername, ticket_type, call_city, ticket_start_date, mandaysprice, gas_chargs, gas_transportation, transportation_charge, visit_count, customer_mobile, totp, complete_date } = req.body;
+  const { ticket_no, note, created_by, call_status, call_status_id, sub_call_status, group_code, site_defect, defect_type, activity_code, serial_no, ModelNumber, purchase_date, warrenty_status, engineerdata, engineername, ticket_type, call_city, ticket_start_date, mandaysprice, gas_chargs, gas_transportation, transportation_charge, visit_count, customer_mobile, totp, complete_date ,allocation} = req.body;
 
   const username = process.env.TATA_USER;
   const password = process.env.PASSWORD;
@@ -3601,6 +3601,42 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
 
     const remark_id = result.recordset[0]?.remark_id;
 
+
+    
+    if (allocation == 'Available') {
+      const {
+        customer_id,
+        customer_name,
+        ModelNumber,
+        address,
+        region,
+        state,
+        city,
+        area,
+        pincode,
+        customer_class
+      } = req.body;
+
+
+      const insertQuery = `INSERT INTO awt_uniqueproductmaster (CustomerID, CustomerName, ModelNumber, serial_no, address, region, state, district, city, pincode, created_by, created_date, customer_classification) VALUES (@CustomerID, @CustomerName, @ModelNumber, @SerialNo, @Address, @Region, @State, @District, @City, @Pincode, @CreatedBy, GETDATE(), @CustomerClassification);`;
+
+        await pool.request()
+        .input('CustomerID', sql.VarChar, customer_id)
+        .input('CustomerName', sql.VarChar, customer_name)
+        .input('ModelNumber', sql.VarChar, ModelNumber)
+        .input('SerialNo', sql.Int, serial_no)
+        .input('Address', sql.VarChar, address)
+        .input('Region', sql.VarChar, region)
+        .input('State', sql.VarChar, state)
+        .input('District', sql.VarChar, area) // Assuming area is district
+        .input('City', sql.VarChar, city)
+        .input('Pincode', sql.VarChar, pincode)
+        .input('CreatedBy', sql.VarChar, user_id) // Example for created_by
+        .input('CustomerClassification', sql.VarChar, customer_class) // Example classification
+        .query(insertQuery)
+
+
+    }
 
 
     if (call_status == 'Closed' && sub_call_status == 'Fully') {
@@ -12407,7 +12443,8 @@ app.post("/getcomplainticketdump", authenticateToken, async (req, res) => {
     let sql;
 
 
-    sql = `Select id,ticket_no,CONVERT(VARCHAR, ticket_date, 105) as ticket_date,customer_id,customer_name,customer_mobile,alt_mobile,customer_email,ModelNumber,serial_no, address, region, state, city, area, pincode, mother_branch,sevice_partner,child_service_partner, msp, csp, sales_partner, assigned_to, engineer_code, engineer_id, ticket_type, call_type , sub_call_status, call_status, warranty_status, invoice_date, mode_of_contact, customer_class, call_priority, closed_date, created_date, created_by,deleted From complaint_ticket where deleted = 0  AND ticket_date >= '${startDate}' AND ticket_date <= '${endDate}' order by RIGHT(ticket_no , 4) asc`
+    sql = `Select id,ticket_no,CONVERT(VARCHAR, ticket_date, 105) as ticket_date,customer_id,customer_name,customer_mobile,alt_mobile,customer_email,ModelNumber,serial_no, address, region, state, city, area, pincode, mother_branch,sevice_partner,child_service_partner, msp, csp, sales_partner, assigned_to, engineer_code, engineer_id, ticket_type, call_type , sub_call_status, call_status, warranty_status,CASE 
+    WHEN purchase_date != ''  THEN CONVERT(VARCHAR, CAST(purchase_date AS DATETIME), 105) ELSE NULL END AS purchase_date, mode_of_contact, customer_class, call_priority, closed_date,  created_date, created_by,deleted From complaint_ticket where deleted = 0  AND ticket_date >= '${startDate}' AND ticket_date <= '${endDate}' order by RIGHT(ticket_no , 4) asc`
 
 
     if (assigncsp !== 'ALL') {
