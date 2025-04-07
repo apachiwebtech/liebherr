@@ -28,13 +28,14 @@ const Uniqueproduct = () => {
   const navigate = useNavigate()
 
   const [formData, setFormData] = useState({
-    id:"",
+    id: "",
     product: "",
     address: "",
     purchase_date: "",
     serial_no: "",
     CustomerID: customer_id,
     CustomerName: "",
+    SerialStatus: "",
   });
 
 
@@ -171,11 +172,14 @@ const Uniqueproduct = () => {
     if (!formData.serial_no) {
       newErrors.serial_no = "Serial Number Field is required.";
     }
-  
+    if (!formData.SerialStatus) {
+      newErrors.SerialStatus = "Status Is Required";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-  
+
 
   //handlesubmit form
   const handleSubmit = async (e) => {
@@ -197,7 +201,7 @@ const Uniqueproduct = () => {
         CustomerID: customer_id
       }).map(([key, value]) => [key, String(value)])
     );
-  console.log(payload,'test')
+    console.log(payload, 'test')
     const encryptedData = CryptoJS.AES.encrypt(
       JSON.stringify(payload),
       secretKey
@@ -210,7 +214,7 @@ const Uniqueproduct = () => {
       );
       if (confirmSubmission) {
         if (isEdit) {
-        
+
 
           // For update, include duplicate check
           await axios
@@ -225,6 +229,7 @@ const Uniqueproduct = () => {
                 address: "",
                 purchase_date: "",
                 serial_no: "",
+                SerialStatus: "",
                 CustomerID: customer_id,
               });
               fetchProduct(customer_id);
@@ -250,6 +255,7 @@ const Uniqueproduct = () => {
                 address: "",
                 purchase_date: "",
                 serial_no: "",
+                SerialStatus: "",
               });
               fetchProduct(customer_id);
               setIsProductDisabled(false);
@@ -268,20 +274,20 @@ const Uniqueproduct = () => {
     }
   };
 
-  const deleted = async (id) => { 
+  const deleted = async (id) => {
     const confirm = window.confirm("Are you sure you want to delete this product?");
     if (confirm) {
-    try {
-      const response = await axiosInstance.post(`${Base_Url}/deleteproductunique`, { id:String(id) }, {
-        headers: {
-          Authorization: token, // Send token in headers
-        },
-      });
-      fetchProduct(customer_id);
-    } catch (error) {
-      console.error("Error deleting user:", error);
+      try {
+        const response = await axiosInstance.post(`${Base_Url}/deleteproductunique`, { id: String(id) }, {
+          headers: {
+            Authorization: token, // Send token in headers
+          },
+        });
+        fetchProduct(customer_id);
+      } catch (error) {
+        console.error("Error deleting user:", error);
+      }
     }
-  }
   };
 
   const edit = async (id) => {
@@ -296,11 +302,12 @@ const Uniqueproduct = () => {
       const formattedDate = formatDateForInput(response.data.purchase_date);
 
       const editData = {
-        id:response.data.id,
+        id: response.data.id,
         serial_no: response.data.serial_no,
-        product:response.data.ModelNumber,
+        product: response.data.ModelNumber,
         purchase_date: formattedDate,
         address: response.data.address,
+        SerialStatus: response.data.SerialStatus,
       };
 
       setFormData(editData);
@@ -404,7 +411,7 @@ const Uniqueproduct = () => {
                         )}
                       </div>
 
-                      <div className="col-md-12 mb-3">
+                      <div className="col-md-8 mb-3">
                         <label htmlFor="pname" className="form-label">
                           Product<span className="text-danger">*</span>
                         </label>
@@ -442,6 +449,28 @@ const Uniqueproduct = () => {
                         )}
 
                         {errors.product && <small className="text-danger">{errors.product}</small>}
+                      </div>
+
+                      <div className="col-md-4">
+                        <div className="mb-3">
+                          <label htmlFor="StatusInput" className="input-field">
+                            Serial Status
+                          </label>
+                          <select
+                            className="form-select"
+                            id="StatusInput"
+                            name="SerialStatus"
+                            value={formData.SerialStatus}
+                            onChange={handleChange}
+                          >
+                            <option value=''>Select Status</option>
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                          </select>
+                          {errors.SerialStatus && (
+                            <small className="text-danger">{errors.SerialStatus}</small>
+                          )}
+                        </div>
                       </div>
 
 

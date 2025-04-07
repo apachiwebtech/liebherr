@@ -5477,7 +5477,7 @@ app.get("/requestproductunique/:id", authenticateToken, async (req, res) => {
 app.post("/postproductunique", authenticateToken, async (req, res) => {
   const { encryptedData } = req.body;
   const decryptedData = decryptData(encryptedData, secretKey)
-  const { product, address, purchase_date, serial_no, CustomerID, CustomerName } = JSON.parse(decryptedData);
+  const { product, address, purchase_date, serial_no, CustomerID, CustomerName, SerialStatus } = JSON.parse(decryptedData);
   try {
 
     const pool = await poolPromise;
@@ -5488,8 +5488,8 @@ app.post("/postproductunique", authenticateToken, async (req, res) => {
         message: "Product with same customer Id and Location already exists!",
       });
     } else {
-      const insertSql = `INSERT INTO awt_uniqueproductmaster (ModelNumber, address, purchase_date, serial_no,CustomerName,CustomerID)
-                        VALUES ('${product}', '${address}', '${purchase_date}', '${serial_no}', '${CustomerName}', '${CustomerID}')`;
+      const insertSql = `INSERT INTO awt_uniqueproductmaster (ModelNumber, address, purchase_date, serial_no,CustomerName,CustomerID,SerialStatus)
+                        VALUES ('${product}', '${address}', '${purchase_date}', '${serial_no}', '${CustomerName}', '${CustomerID}','${SerialStatus}')`;
       await pool.request().query(insertSql);
       return res.json({ message: "Product added successfully!" });
     }
@@ -5503,9 +5503,9 @@ app.post("/putproductunique", authenticateToken, async (req, res) => {
   try {
     const { encryptedData } = req.body;
     const decryptedData = decryptData(encryptedData, secretKey);
-    const { product, id, address, purchase_date, serial_no, CustomerID } = JSON.parse(decryptedData);
+    const { product, id, address, purchase_date, serial_no, CustomerID , SerialStatus} = JSON.parse(decryptedData);
 
-    console.log("Received Data:", { product, id, address, purchase_date, serial_no, CustomerID });
+    console.log("Received Data:", { product, id, address, purchase_date, serial_no, CustomerID,SerialStatus });
 
     // Validate ID
     const parsedId = Number(id);
@@ -5538,7 +5538,7 @@ app.post("/putproductunique", authenticateToken, async (req, res) => {
     const updateSql = `UPDATE awt_uniqueproductmaster 
                        SET ModelNumber = @product, address = @address, 
                            purchase_date = @purchase_date, serial_no = @serial_no, 
-                            CustomerID = @CustomerID, deleted = 0  
+                            CustomerID = @CustomerID,SerialStatus = @SerialStatus, deleted = 0  
                        WHERE id = @id`;
 
     await pool.request()
@@ -5547,6 +5547,7 @@ app.post("/putproductunique", authenticateToken, async (req, res) => {
       .input('purchase_date', sql.NVarChar, purchase_date)
       .input('serial_no', sql.NVarChar, serial_no)
       .input('CustomerID', sql.NVarChar, CustomerID)
+      .input('SerialStatus', sql.NVarChar, SerialStatus)
       .input('id', sql.Int, parsedId)
       .query(updateSql);
 
