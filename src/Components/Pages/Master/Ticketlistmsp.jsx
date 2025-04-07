@@ -1,5 +1,6 @@
 import { SyncLoader } from 'react-spinners';
 import React, { useEffect, useState } from 'react';
+import * as XLSX from "xlsx";
 import axios from 'axios';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
@@ -95,7 +96,7 @@ export function Ticketlistmsp(params) {
       const params = {
         page: page, // Current page number
         pageSize: pageSize, // Page size
-        licare_code:licare_code,
+        licare_code: licare_code,
       };
 
       // Add search filters dynamically to params
@@ -128,13 +129,13 @@ export function Ticketlistmsp(params) {
       setFilteredData(response.data.data); // Filtered data
       setTotalCount(response.data.totalCount); // Total count
 
-    }catch (error) {
+    } catch (error) {
       console.error('Error fetching Ticketdata:', error);
       setComplaintdata([]);
       setFilteredData([]);
       // navigate('/login')
-    }
-  };
+    }
+  };
 
   const fetchFilteredData = async () => {
     try {
@@ -297,13 +298,114 @@ export function Ticketlistmsp(params) {
 
   const sendtoedit = async (id) => {
     // alert(id)
-      id = id.toString()
-      let  encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
-      encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-      // navigate(`/quotation/${encrypted}`)
-      navigate(`/msp/complaintviewmsp/${encrypted}`)
-  // navigate(`/msp/complaintviewmsp/${item.id}`)
-    };
+    id = id.toString()
+    let encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
+    encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    // navigate(`/quotation/${encrypted}`)
+    navigate(`/msp/complaintviewmsp/${encrypted}`)
+    // navigate(`/msp/complaintviewmsp/${item.id}`)
+  };
+
+  // export to excel 
+  const exportToExcel = async () => {
+    // Check if From and To Dates are selected
+    if (!searchFilters.fromDate || !searchFilters.toDate) {
+      alert("Please select both From Date and To Date.");
+      return;
+    }
+
+    try {
+      // Convert From and To Date to the desired format (if necessary)
+      const fromDate = new Date(searchFilters.fromDate).toISOString().split('T')[0];
+      const toDate = new Date(searchFilters.toDate).toISOString().split('T')[0];
+
+      // Fetch all ticket data based on From and To Date filter, without pagination
+      const response = await axiosInstance.get(`${Base_Url}/getmspticketexcel`, {
+        headers: {
+          Authorization: token,
+        },
+        params: {
+          pageSize: 10000, // Large page size to fetch all records without pagination (you can adjust this)
+          page: 1,         // Fetch from page 1
+          fromDate: fromDate,
+          toDate: toDate,
+          licare_code: licare_code, // Ensure licare_code is sent as before
+        },
+      });
+
+
+      const allTicketData = response.data.data;
+
+      // Create a new workbook
+      const workbook = XLSX.utils.book_new();
+
+      // Convert data to a worksheet
+      const worksheet = XLSX.utils.json_to_sheet(
+        allTicketData.map((item) => ({
+          TicketNo: item.ticket_no,
+          TicketDate: item.ticket_date ? formatDate(item.ticket_date) : '',
+          CustomerId: item.customer_id,
+          Salutation: item.salutation,
+          CustomerName: item.customer_name,
+          CustomerMobile: item.customer_mobile,
+          CustomerEmail: item.customer_email,
+          ModelNumber: item.ModelNumber,
+          SerialNo: item.serial_no,
+          Address: item.address,
+          Region: item.region,
+          State: item.state,
+          City: item.city,
+          District: item.area,
+          Pincode: item.pincode,
+          MotherBranch: item.mother_branch,
+          ServicePartner: item.sevice_partner,
+          ChildServicePartner: item.child_service_partner,
+          msp: item.msp,
+          csp: item.csp,
+          SalesPartner: item.sales_partner,
+          AssignedTo: item.assigned_to,
+          OldEngineer: item.old_engineer,
+          EngineerCode: item.engineer_code,
+          EngineerId: item.engineer_id,
+          TicketType: item.ticket_type,
+          CallType: item.call_type,
+          SubCallStatus: item.sub_call_status,
+          CallStatus: item.call_status,
+          WarrantyStatus: item.warranty_status,
+          InvoiceDate: item.invoice_date,
+          ModeofContact: item.mode_of_contact,
+          CallCharges: item.call_charges,
+          ContactPerson: item.contact_person,
+          PurchaseDate: item.purchase_date ? formatDate(item.purchase_date) : '',
+          CustomerClass: item.customer_class,
+          CallPriority: item.call_priority,
+          SpareDocPath: item.spare_doc_path,
+          CallRemark: item.call_remark,
+          SpareDetails: item.spare_detail,
+          GroupCode: item.group_code,
+          DefectType: item.defect_type,
+          SiteDefect: item.site_defect,
+          SparePartID: item.spare_part_id,
+          TOTP: item.totp,
+          RequestedBY: item.requested_by,
+          RequestedEmail: item.requested_email,
+          RequestedMobile: item.requested_mobile,
+          SalesPartner2: item.sales_partner2,
+        }))
+      );
+
+      // Append the worksheet to the workbook
+      XLSX.utils.book_append_sheet(workbook, worksheet, "TicketListMsp");
+
+      // Export the workbook
+      XLSX.writeFile(workbook, "TicketListMsp.xlsx");
+    } catch (error) {
+      console.error("Error exporting data to Excel:", error);
+    }
+  };
+
+
+  // export to excel end
 
   return (
 
@@ -428,8 +530,8 @@ export function Ticketlistmsp(params) {
                   value={searchFilters.status}
                   onChange={handleFilterChange}
                 >
-                    <option value="">Select</option>
-                    <option value="Open">Open</option>
+                  <option value="">Select</option>
+                  <option value="Open">Open</option>
                   <option value="Appointment">Appointment</option>
                   <option value="Approval">Approval</option>
                   <option value="Spares">Spares</option>
@@ -606,8 +708,20 @@ export function Ticketlistmsp(params) {
             <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
               <div className="form-group">
                 <button
+                  className="btn btn-primary"
+                  onClick={exportToExcel}
+                  style={{
+                    marginLeft: '5px',
+                  }}
+                >
+                  Export to Excel
+                </button>
+                <button
                   className="btn btn-primary mr-2"
                   onClick={applyFilters}
+                  style={{
+                    marginLeft: '5px',
+                  }}
                 >
                   Search
                 </button>

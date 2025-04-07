@@ -741,13 +741,6 @@ export function Complaintlist(params) {
               <div className="col-md-12 d-flex justify-content-end align-items-center mt-3 "  >
 
                 <div className="form-group ">
-                  {/* <input type="file" accept=".xlsx, .xls" onChange={importexcel} />
-                  <button className="btn btn-primary" onClick={uploadexcel}
-                    style={{
-                      marginLeft: '-100px',
-                    }}>
-                    Import Tickets
-                  </button> */}
                   <button
                     className="btn btn-primary"
                     onClick={exportToExcel}
