@@ -255,32 +255,27 @@ const Childfranchisemaster = () => {
   // Step 2: Add form validation function
   const validateForm = () => {
     const newErrors = {};
-
-    if (!formData.pfranchise_id) newErrors.pfranchise_id = "Parent Franchise selection is required.";
-    if (!formData.title.trim()) newErrors.title = "Child Franchise Field is required.";
-    if (!formData.contact_person.trim()) newErrors.contact_person = "Contact Person is required.";
-    if (!formData.email.trim()) newErrors.email = "Email is required.";
-    if (!formData.mobile_no.trim()) newErrors.mobile_no = "Mobile Number is required.";
-    if (!formData.password.trim()) newErrors.password = "Password is required.";
-    // if (!formData.country_id) newErrors.country_id = "Country selection is required.";
-    // if (!formData.region_id) newErrors.region_id = "Region selection is required.";
-    // if (!formData.state) newErrors.state = "State selection is required.";
-    // if (!formData.area) newErrors.area = "Area selection is required.";
-    // if (!formData.city) newErrors.city = "City selection is required.";
-    // if (!formData.pincode_id) newErrors.pincode_id = "Pincode selection is required.";
-    if (!formData.address.trim()) newErrors.address = "Address is required.";
-
-    // Add validations for new fields
-    // if (!formData.licare_code.trim()) newErrors.licare_code = "Licare Code is required.";
-    if (!formData.partner_name.trim()) newErrors.partner_name = "Partner Name is required.";
-    // if (!formData.gst_number.trim()) newErrors.gst_number = "GST Number is required.";
-    // if (!formData.pan_number.trim()) newErrors.pan_number = "PAN Number is required.";
-    // if (!formData.bank_name.trim()) newErrors.bank_name = "Bank Name is required.";
-    // if (!formData.bank_account_number.trim()) newErrors.bank_account_number = "Bank Account Number is required.";
-    // if (!formData.bank_ifsc_code.trim()) newErrors.bank_ifsc_code = "Bank IFSC Code is required.";
-
+  
+    const requiredFields = {
+      pfranchise_id: "Parent Franchise selection is required.",
+      title: "Child Franchise Field is required.",
+      contact_person: "Contact Person is required.",
+      email: "Email is required.",
+      mobile_no: "Mobile Number is required.",
+      password: "Password is required.",
+      address: "Address is required.",
+      partner_name: "Partner Name is required.",
+    };
+  
+    for (const key in requiredFields) {
+      if (!formData[key] || !formData[key].toString().trim()) {
+        newErrors[key] = requiredFields[key];
+      }
+    }
+  
     return newErrors;
   };
+  
 
   const navigate = useNavigate()
 
@@ -302,10 +297,20 @@ const Childfranchisemaster = () => {
         "Do you want to submit the data?"
       );
       if (confirmSubmission) {
-        const hashedFormData = {
-          ...formData,
-          password: md5(formData.password) // Hash the password using MD5
-        };
+        // const hashedFormData = {
+        //   ...formData,
+        //   password: md5(formData.password) // Hash the password using MD5
+        // };
+
+        const hashedFormData = Object.fromEntries(
+          Object.entries({
+            ...formData,
+            password: md5(formData.password || '') // Ensure password is not null before hashing
+          }).map(([key, value]) => [key, value == null ? '' : String(value)])
+        );
+        
+
+
         if (isEdit) {
           await axios
             .post(`${Base_Url}/putchildfranchise`, { ...hashedFormData, created_by }, {
@@ -314,7 +319,7 @@ const Childfranchisemaster = () => {
               },
             })
             .then((response) => {
-             
+
               setFormData({
                 title: "",
                 pfranchise_id: "",

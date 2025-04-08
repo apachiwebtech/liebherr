@@ -93,8 +93,8 @@ export function Complaintview(params) {
     transportcheck: 'No',
     totp: '',
     closed_date: "",
-    area :'',
-    region : ''
+    area: '',
+    region: ''
   });
 
 
@@ -1151,7 +1151,7 @@ export function Complaintview(params) {
       }
 
 
-  
+
 
       const serialData = response.data[0];
 
@@ -1164,7 +1164,17 @@ export function Complaintview(params) {
             ...prevstate,
             ModelNumber: serialData.ModelNumber,
           }));
-        } else if (serialData.customer_id == complaintview.customer_id) {
+
+        }
+        else if (serialData.salutation == 'Dl' && serialData.SerialStatus == 'Inactive' ) {
+          alert("Serial no transfer to customer")
+          setallocation('Available');
+          setComplaintview((prevstate) => ({
+            ...prevstate,
+            ModelNumber: serialData.ModelNumber,
+          }));
+        }
+        else if (serialData.customer_id == complaintview.customer_id) {
           alert("Serial no matched");
           setComplaintview((prevstate) => ({
             ...prevstate,
@@ -1549,14 +1559,14 @@ export function Complaintview(params) {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-  
+
     const day = String(date.getDate()).padStart(2, "0");
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const year = date.getFullYear();
-  
+
     return `${day}-${month}-${year}`;
   };
-  
+
 
   const formatDate1 = (dateString) => {
     const date = new Date(dateString);

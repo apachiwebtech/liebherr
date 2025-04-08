@@ -3614,25 +3614,29 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
         city,
         area,
         pincode,
-        customer_class
+        customer_class,
+        purchase_date
       } = req.body;
 
 
-      const insertQuery = `INSERT INTO awt_uniqueproductmaster (CustomerID, CustomerName, ModelNumber, serial_no, address, region, state, district, city, pincode, created_by, created_date, customer_classification) VALUES (@CustomerID, @CustomerName, @ModelNumber, @SerialNo, @Address, @Region, @State, @District, @City, @Pincode, @CreatedBy, GETDATE(), @CustomerClassification);`;
+
+
+      const insertQuery = `INSERT INTO awt_uniqueproductmaster (CustomerID, CustomerName, ModelNumber, serial_no, address, region, state, district, city, pincode, created_by, created_date, customer_classification,SerialStatus,purchase_date) VALUES (@CustomerID, @CustomerName, @ModelNumber, @SerialNo, @Address, @Region, @State, @District, @City, @Pincode, @CreatedBy, GETDATE(), @CustomerClassification , 'Active' , @PurchaseDate);`;
 
         await pool.request()
-        .input('CustomerID', sql.VarChar, customer_id)
-        .input('CustomerName', sql.VarChar, customer_name)
-        .input('ModelNumber', sql.VarChar, ModelNumber)
-        .input('SerialNo', sql.Int, serial_no)
-        .input('Address', sql.VarChar, address)
-        .input('Region', sql.VarChar, region)
-        .input('State', sql.VarChar, state)
-        .input('District', sql.VarChar, area) // Assuming area is district
-        .input('City', sql.VarChar, city)
-        .input('Pincode', sql.VarChar, pincode)
-        .input('CreatedBy', sql.VarChar, user_id) // Example for created_by
-        .input('CustomerClassification', sql.VarChar, customer_class) // Example classification
+        .input('CustomerID',  customer_id)
+        .input('CustomerName',  customer_name)
+        .input('ModelNumber',  ModelNumber)
+        .input('SerialNo',  serial_no)
+        .input('Address',  address)
+        .input('Region',  region)
+        .input('State',  state)
+        .input('District',  area) // Assuming area is district
+        .input('City',  city)
+        .input('Pincode',  pincode)
+        .input('CreatedBy',  created_by) // Example for created_by
+        .input('CustomerClassification',  customer_class) 
+        .input('PurchaseDate',  purchase_date) 
         .query(insertQuery)
 
 
@@ -15452,11 +15456,12 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
         city,
         area,
         pincode,
-        customer_class
+        customer_class,
+        purchase_date
       } = data_serial;
 
 
-      const insertQuery = `INSERT INTO awt_uniqueproductmaster (CustomerID, CustomerName, ModelNumber, serial_no, address, region, state, district, city, pincode, created_by, created_date, customer_classification) VALUES (@CustomerID, @CustomerName, @ModelNumber, @SerialNo, @Address, @Region, @State, @District, @City, @Pincode, @CreatedBy, GETDATE(), @CustomerClassification);`;
+      const insertQuery = `INSERT INTO awt_uniqueproductmaster (CustomerID, CustomerName, ModelNumber, serial_no, address, region, state, district, city, pincode, created_by, created_date, customer_classification , SerialStatus , purchase_date) VALUES (@CustomerID, @CustomerName, @ModelNumber, @SerialNo, @Address, @Region, @State, @District, @City, @Pincode, @CreatedBy, GETDATE(), @CustomerClassification , 'Active' , @PurchaseDate);`;
 
       const result = await pool.request()
         .input('CustomerID', sql.VarChar, customer_id)
@@ -15469,8 +15474,8 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
         .input('District', sql.VarChar, area) // Assuming area is district
         .input('City', sql.VarChar, city)
         .input('Pincode', sql.VarChar, pincode)
+        .input('PurchaseDate', sql.VarChar, purchase_date)
         .input('CreatedBy', sql.VarChar, user_id) // Example for created_by
-        // .input('Createddate', sql.DateTime, date) // Example for created_by
         .input('CustomerClassification', sql.VarChar, customer_class) // Example classification
         .query(insertQuery)
 
