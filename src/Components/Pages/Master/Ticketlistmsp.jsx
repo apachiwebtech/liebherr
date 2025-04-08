@@ -403,8 +403,6 @@ export function Ticketlistmsp(params) {
       console.error("Error exporting data to Excel:", error);
     }
   };
-
-
   // export to excel end
 
   return (

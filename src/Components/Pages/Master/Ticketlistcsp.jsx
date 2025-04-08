@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import * as XLSX from "xlsx";
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
 import { Base_Url, secretKey } from '../../Utils/Base_Url';
@@ -251,7 +252,104 @@ const Ticketlistcsp = (params) => {
     };
 
 
+    // export to excel 
+    const exportToExcel = async () => {
+        // Check if From and To Dates are selected
+        if (!searchFilters.fromDate || !searchFilters.toDate) {
+            alert("Please select both From Date and To Date.");
+            return;
+        }
 
+        try {
+            // Convert From and To Date to the desired format (if necessary)
+            const fromDate = new Date(searchFilters.fromDate).toISOString().split('T')[0];
+            const toDate = new Date(searchFilters.toDate).toISOString().split('T')[0];
+
+            // Fetch all ticket data based on From and To Date filter, without pagination
+            const response = await axiosInstance.get(`${Base_Url}/getcspticketexcel`, {
+                headers: {
+                    Authorization: token,
+                },
+                params: {
+                    pageSize: 10000, // Large page size to fetch all records without pagination (you can adjust this)
+                    page: 1,         // Fetch from page 1
+                    fromDate: fromDate,
+                    toDate: toDate,
+                    licare_code: licare_code, // Ensure licare_code is sent as before
+                },
+            });
+
+
+            const allTicketData = response.data.data;
+
+            // Create a new workbook
+            const workbook = XLSX.utils.book_new();
+
+            // Convert data to a worksheet
+            const worksheet = XLSX.utils.json_to_sheet(
+                allTicketData.map((item) => ({
+                    TicketNo: item.ticket_no,
+                    TicketDate: item.ticket_date ? formatDate(item.ticket_date) : '',
+                    CustomerId: item.customer_id,
+                    Salutation: item.salutation,
+                    CustomerName: item.customer_name,
+                    CustomerMobile: item.customer_mobile,
+                    CustomerEmail: item.customer_email,
+                    ModelNumber: item.ModelNumber,
+                    SerialNo: item.serial_no,
+                    Address: item.address,
+                    Region: item.region,
+                    State: item.state,
+                    City: item.city,
+                    District: item.area,
+                    Pincode: item.pincode,
+                    MotherBranch: item.mother_branch,
+                    ServicePartner: item.sevice_partner,
+                    ChildServicePartner: item.child_service_partner,
+                    msp: item.msp,
+                    csp: item.csp,
+                    SalesPartner: item.sales_partner,
+                    AssignedTo: item.assigned_to,
+                    OldEngineer: item.old_engineer,
+                    EngineerCode: item.engineer_code,
+                    EngineerId: item.engineer_id,
+                    TicketType: item.ticket_type,
+                    CallType: item.call_type,
+                    SubCallStatus: item.sub_call_status,
+                    CallStatus: item.call_status,
+                    WarrantyStatus: item.warranty_status,
+                    InvoiceDate: item.invoice_date,
+                    ModeofContact: item.mode_of_contact,
+                    CallCharges: item.call_charges,
+                    ContactPerson: item.contact_person,
+                    PurchaseDate: item.purchase_date ? formatDate(item.purchase_date) : '',
+                    CustomerClass: item.customer_class,
+                    CallPriority: item.call_priority,
+                    SpareDocPath: item.spare_doc_path,
+                    CallRemark: item.call_remark,
+                    SpareDetails: item.spare_detail,
+                    GroupCode: item.group_code,
+                    DefectType: item.defect_type,
+                    SiteDefect: item.site_defect,
+                    SparePartID: item.spare_part_id,
+                    TOTP: item.totp,
+                    RequestedBY: item.requested_by,
+                    RequestedEmail: item.requested_email,
+                    RequestedMobile: item.requested_mobile,
+                    SalesPartner2: item.sales_partner2,
+                }))
+            );
+
+            // Append the worksheet to the workbook
+            XLSX.utils.book_append_sheet(workbook, worksheet, "TicketListCsp");
+
+            // Export the workbook
+            XLSX.writeFile(workbook, "TicketListCsp.xlsx");
+        } catch (error) {
+            console.error("Error exporting data to Excel:", error);
+        }
+    };
+    // export to excel end
 
     return (
         <div className="row mp0">
@@ -480,8 +578,20 @@ const Ticketlistcsp = (params) => {
                                 <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
                                     <div className="form-group">
                                         <button
+                                            className="btn btn-primary"
+                                            onClick={exportToExcel}
+                                            style={{
+                                                marginLeft: '5px',
+                                            }}
+                                        >
+                                            Export to Excel
+                                        </button>
+                                        <button
                                             className="btn btn-primary mr-2"
                                             onClick={applyFilters}
+                                            style={{
+                                                marginLeft: '5px',
+                                            }}
                                         >
                                             Search
                                         </button>

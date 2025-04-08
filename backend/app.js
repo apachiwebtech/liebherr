@@ -9601,6 +9601,73 @@ app.get("/getcomplainlistcsp", authenticateToken, async (req, res) => {
     return res.status(500).json({ message: "An error occurred while fetching the complaint list" });
   }
 });
+app.get("/getcspticketexcel", authenticateToken, async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    const { fromDate, toDate, licare_code } = req.query;  // Only fromDate, toDate, and licare_code are expected.
+
+    let sql;
+
+
+
+
+    // Check if both fromDate and toDate are provided
+    if (!fromDate || !toDate) {
+      return res.status(400).json({
+        message: "Both 'fromDate' and 'toDate' are required."
+      });
+    }
+
+    const currentDate = new Date().toISOString().split('T')[0];  // Current date to be used for filter if needed.
+
+    // SQL query to fetch complaint tickets with fromDate and toDate filter only.
+    sql = `
+       SELECT c.*,
+        DATEDIFF(day, (c.ticket_date), GETDATE()) AS ageingdays
+        FROM complaint_ticket AS c
+        WHERE c.deleted = 0 AND c.csp = '${licare_code}'
+      AND CAST(c.ticket_date AS DATE) BETWEEN @fromDate AND @toDate
+    `;
+
+    // Define the parameters for the query.
+    let params = [
+      { name: "fromDate", value: fromDate },
+      { name: "toDate", value: toDate }
+    ];
+
+
+
+
+    sql += `order by RIGHT(ticket_no , 4) asc`
+
+    console.log(sql)
+    // Execute the SQL query
+    const request = pool.request();
+    params.forEach((param) => request.input(param.name, param.value));
+    const result = await request.query(sql);
+
+
+
+    // If no records are found, return an appropriate message
+    if (result.recordset.length === 0) {
+      return res.status(404).json({
+        message: "No records found for the given date range."
+      });
+    }
+
+    // Return the data as JSON to the frontend
+    return res.json({
+      data: result.recordset
+    });
+
+  } catch (err) {
+    console.error("Error fetching complaint data for Excel export:", err.message);
+    return res.status(500).json({
+      message: "An error occurred while fetching complaint data for Excel export.",
+      err: err.message
+    });
+  }
+});
 app.get("/getcsplistmsp", authenticateToken, async (req, res) => {
   const { licare_code, page = 1, pageSize = 10 } = req.query;
 
