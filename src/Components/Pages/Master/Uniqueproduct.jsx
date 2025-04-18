@@ -12,6 +12,12 @@ import { useDispatch } from "react-redux";
 import { getRoleData } from "../../Store/Role/role-action";
 import { IoArrowBack } from "react-icons/io5";
 import Select from "react-select";
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 
 const Uniqueproduct = () => {
   const { customer_id } = useParams();
@@ -21,9 +27,19 @@ const Uniqueproduct = () => {
   const [product, setProduct] = useState([]);
   const [Model, setModel] = useState([]);
   const [CustomerAddress, setCustomerAddress] = useState([]);
+  const [newCustomerAddress, setnewCustomerAddress] = useState([]);
   const [isEdit, setIsEdit] = useState(false);
   const [duplicateError, setDuplicateError] = useState("");
   const token = localStorage.getItem("token"); // Get token from localStorage
+  const [open, setOpen] = React.useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   const navigate = useNavigate()
 
@@ -36,6 +52,8 @@ const Uniqueproduct = () => {
     CustomerID: customer_id,
     CustomerName: "",
     SerialStatus: "",
+    customer_id: "",
+    newaddress: ""
   });
 
 
@@ -76,6 +94,27 @@ const Uniqueproduct = () => {
       }
     } catch (error) {
       console.error("Error fetching customer location by ID:", error);
+    }
+  };
+
+  const newfetchCustomerlocationById = async (customer_id) => {
+    try {
+      const response = await axiosInstance.get(`${Base_Url}/fetchcustomerlocationByCustomerid/${customer_id}`, {
+        headers: {
+          Authorization: token,
+        },
+      });
+
+      if (Array.isArray(response.data)) {
+        setnewCustomerAddress(response.data); // Handle as array
+      } else if (response.data && typeof response.data === 'object') {
+        setnewCustomerAddress([response.data]); // Wrap single object in an array
+      } else {
+        console.error('Unexpected data format:', response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching customer location by ID:", error);
+      setnewCustomerAddress([])
     }
   };
 
@@ -151,6 +190,10 @@ const Uniqueproduct = () => {
         console.error("Error fetching serial number details:", error);
         setIsProductDisabled(false);
       }
+    }
+
+    if (name == 'customer_id') {
+      newfetchCustomerlocationById(value)
     }
   };
 
@@ -318,6 +361,39 @@ const Uniqueproduct = () => {
   };
 
   // Role Right 
+
+  const handletransfer = () => {
+
+    if (formData.SerialStatus == 'Active') {
+      const payload = {
+        serial_no: formData.serial_no,
+        customer_id: formData.customer_id,
+        Modelno: formData.product,
+        product_id: String(formData.id),
+        newaddress: formData.newaddress,
+        oldcustid: formData.CustomerID
+      }
+
+      axios.post(`${Base_Url}/transferproduct`, payload, {
+        headers: {
+          Authorization: token
+        }
+      })
+        .then((res) => {
+          alert("Data Submitted")
+          setOpen(false)
+          setFormData(prev => ({
+            ...prev,
+            newaddress: '',
+            customer_id: '',
+          }))
+        })
+    }else{
+      alert("Serial status is inactive")
+    }
+
+
+  }
 
 
   const Decrypt = (encrypted) => {
@@ -506,6 +582,99 @@ const Uniqueproduct = () => {
                           <small className="text-danger">{errors.address}</small>
                         )}
                       </div>
+
+                      <div onClick={handleClickOpen} style={{ textDecoration: "underline", cursor: "pointer" }}>
+                        Transfer to customer
+                      </div>
+                      <Dialog
+                        open={open}
+                        onClose={handleClose}
+                        aria-labelledby="alert-dialog-title"
+                        aria-describedby="alert-dialog-description"
+                      >
+                        <DialogTitle id="alert-dialog-title">
+                          {"Transfer to customer"}
+                        </DialogTitle>
+                        <DialogContent style={{ width: "600px" }}>
+                          <div className="row">
+                            <div className="col-md-6 mb-3">
+                              <label htmlFor="snumber" className="form-label">
+                                Customer Id<span className="text-danger">*</span>
+                              </label>
+                              <input
+                                type="text"
+                                className="form-control"
+                                id="snumber"
+                                name="customer_id"
+                                value={formData.customer_id}
+                                onChange={handleChange}
+                                aria-describedby="snumber"
+                              />
+                              {errors.customer_id && (
+                                <small className="text-danger">{errors.customer_id}</small>
+                              )}
+
+                            </div>
+                            <div className="col-md-6 mb-3">
+                              <label htmlFor="snumber" className="form-label">
+                                Serial No<span className="text-danger">*</span>
+                              </label>
+                              <input
+                                type="text"
+                                className="form-control"
+                                id="snumber"
+                                name="serial_no"
+                                value={formData.serial_no}
+                                onChange={handleChange}
+                                aria-describedby="snumber"
+                                disabled
+                              />
+                              {errors.serial_no && (
+                                <small className="text-danger">{errors.serial_no}</small>
+                              )}
+
+                            </div>
+                            <div className="col-md-12 mb-3">
+                              <label htmlFor="country" className="form-label pb-0 dropdown-label">
+                                Customer Address<span className="text-danger">*</span>
+                              </label>
+                              <select
+                                className="form-select dropdown-select"
+                                name="newaddress"
+                                value={formData.newaddress}
+                                onChange={(e) => handleChange(e)}
+                              >
+                                <option value="">Select Customer Address</option>
+                                {newCustomerAddress.length > 0 ? (
+                                  newCustomerAddress.map((cust_add, index) => (
+                                    <option
+                                      key={index}
+                                      value={cust_add.id}
+                                      data-customername={cust_add.customername}
+                                    >
+                                      {cust_add.address}
+                                    </option>
+                                  ))
+                                ) : (
+                                  <option value="" disabled>
+                                    No addresses available
+                                  </option>
+                                )}
+                              </select>
+
+                              {errors.newaddress && (
+                                <small className="text-danger">{errors.newaddress}</small>
+                              )}
+                            </div>
+                          </div>
+                        </DialogContent>
+                        <DialogActions>
+                          <Button onClick={handleClose} autoFocus>
+                            Close
+                          </Button>
+                          <Button onClick={handletransfer}>Submit</Button>
+                        </DialogActions>
+                      </Dialog>
 
                       {roleaccess > 2 ? <div className="col-md-12 text-right">
                         <button

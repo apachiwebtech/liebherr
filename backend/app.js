@@ -22,7 +22,11 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const API_KEY = process.env.API_KEY;
 const secretKey = process.env.SECRET_KEY
 
-
+// Create HTTPS agent with self-signed certificate
+const httpsAgent = new https.Agent({
+  ca: fs.readFileSync(process.env.CERT_PATH), // Adjust path accordingly
+  rejectUnauthorized: false // Set to true if you trust the cert (recommended for production)
+});
 
 //middleware
 app.use(cors({ origin: process.env.ORIGIN }));
@@ -3484,7 +3488,7 @@ app.get("/getcomplaintview/:complaintid", authenticateToken, async (req, res) =>
 });
 
 app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
-  const { ticket_no, note, created_by, call_status, call_status_id, sub_call_status, group_code, site_defect, defect_type, activity_code, serial_no, ModelNumber, purchase_date, warrenty_status, engineerdata, engineername, ticket_type, call_city, ticket_start_date, mandaysprice, gas_chargs, gas_transportation, transportation_charge, visit_count, customer_mobile, totp, complete_date ,allocation} = req.body;
+  const { ticket_no, note, created_by, call_status, call_status_id, sub_call_status, group_code, site_defect, defect_type, activity_code, serial_no, ModelNumber, purchase_date, warrenty_status, engineerdata, engineername, ticket_type, call_city, ticket_start_date, mandaysprice, gas_chargs, gas_transportation, transportation_charge, visit_count, customer_mobile, totp, complete_date, allocation, dealercustid } = req.body;
 
   const username = process.env.TATA_USER;
   const password = process.env.PASSWORD;
@@ -3602,8 +3606,20 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
     const remark_id = result.recordset[0]?.remark_id;
 
 
-    
+
     if (allocation == 'Available') {
+
+      if (dealercustid) {
+
+
+        const updatestatus = `update awt_uniqueproductmaster set SerialStatus = 'Inactive' where CustomerID = '${dealercustid}'`;
+
+        await pool.request().query(updatestatus)
+
+        console.log("Yes")
+
+      }
+
       const {
         customer_id,
         customer_name,
@@ -3623,20 +3639,20 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
 
       const insertQuery = `INSERT INTO awt_uniqueproductmaster (CustomerID, CustomerName, ModelNumber, serial_no, address, region, state, district, city, pincode, created_by, created_date, customer_classification,SerialStatus,purchase_date) VALUES (@CustomerID, @CustomerName, @ModelNumber, @SerialNo, @Address, @Region, @State, @District, @City, @Pincode, @CreatedBy, GETDATE(), @CustomerClassification , 'Active' , @PurchaseDate);`;
 
-        await pool.request()
-        .input('CustomerID',  customer_id)
-        .input('CustomerName',  customer_name)
-        .input('ModelNumber',  ModelNumber)
-        .input('SerialNo',  serial_no)
-        .input('Address',  address)
-        .input('Region',  region)
-        .input('State',  state)
-        .input('District',  area) // Assuming area is district
-        .input('City',  city)
-        .input('Pincode',  pincode)
-        .input('CreatedBy',  created_by) // Example for created_by
-        .input('CustomerClassification',  customer_class) 
-        .input('PurchaseDate',  purchase_date) 
+      await pool.request()
+        .input('CustomerID', customer_id)
+        .input('CustomerName', customer_name)
+        .input('ModelNumber', ModelNumber)
+        .input('SerialNo', serial_no)
+        .input('Address', address)
+        .input('Region', region)
+        .input('State', state)
+        .input('District', area) // Assuming area is district
+        .input('City', city)
+        .input('Pincode', pincode)
+        .input('CreatedBy', created_by) // Example for created_by
+        .input('CustomerClassification', customer_class)
+        .input('PurchaseDate', purchase_date)
         .query(insertQuery)
 
 
@@ -3674,7 +3690,7 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
 
       // const apiUrl = `https://smsgw.tatatel.co.in:9095/campaignService/campaigns/qs?recipient=${customer_mobile}&dr=false&msg=${msg}&user=${username}&pswd=${password}&sender=LICARE&PE_ID=1201159257274643113&Template_ID=${temp_id}`;
 
-      // const response = await axios.get(apiUrl); 
+      // const response = await axios.get(apiUrl, { httpsAgent }); 
 
 
 
@@ -3684,19 +3700,19 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
       //   subject: 'Feedback form',
       //   html: `<div>This is nps form link  ${/nps/:email/:ticketNo/:customerId}</div>`,
       // };
-    
+
       // try {
       //   // Verify the transporter connection
       //   await transporter.verify();
       //   const info = await transporter.sendMail(mailOptions);
-    
-    
+
+
       //   res.status(200).json({ message: 'OTP sent successfully', info });
-    
-    
+
+
       // } catch (error) {
       //   console.error('Error sending email:', error);
-    
+
       // }
 
 
@@ -3795,7 +3811,7 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
 
       // const apiUrl = `https://smsgw.tatatel.co.in:9095/campaignService/campaigns/qs?recipient=${customer_mobile}&dr=false&msg=${msg}&user=${username}&pswd=${password}&sender=LICARE&PE_ID=1201159257274643113&Template_ID=${temp_id}`;
 
-      // const response = await axios.get(apiUrl); 
+      // const response = await axios.get(apiUrl, { httpsAgent }); 
     }
 
 
@@ -4349,93 +4365,93 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
   // if (dupresult.recordset.length == 0) {
 
-    const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
+  const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
-    let t_type;
+  let t_type;
 
-    if (ticket_type == 'BREAKDOWN') {
-      t_type = 'B'
+  if (ticket_type == 'BREAKDOWN') {
+    t_type = 'B'
+  }
+  else if (ticket_type == 'DEMO') {
+    t_type = 'D'
+
+  } else if (ticket_type == 'INSTALLATION') {
+    t_type = 'I'
+
+  } else if (ticket_type == 'MAINTENANCE') {
+    t_type = 'M'
+
+  } else if (ticket_type == 'HELPDESK') {
+    t_type = 'H'
+  }
+  else if (ticket_type == 'VISIT') {
+    t_type = 'V'
+  }
+
+
+  //Dynamic sms 
+
+
+  try {
+    const pool = await poolPromise;
+
+
+    // Split customer_name into customer_fname and customer_lname
+
+
+    const [customer_fname, ...customer_lnameArr] = customer_name.split(' ');
+    const customer_lname = customer_lnameArr.join(' ');
+
+
+    const getcustcount = `select top 1 id from awt_customer where customer_id is not null order by id desc`
+
+    const getcustresult = await pool.request().query(getcustcount)
+
+    const custcount = getcustresult.recordset[0].id;
+
+    const newcustid = 'B' + custcount.toString().padStart(7, "0")
+
+
+
+
+
+
+    if (ticket_id == '' && (cust_id == '' || cust_id == 'undefined')) {
+
+      // Insert into awt_customer
+      const customerSQL = `INSERT INTO awt_customer ( salutation,customer_id,customer_fname, customer_lname, email, mobileno, alt_mobileno, created_date, created_by)OUTPUT INSERTED.id VALUES ( @salutation, @customer_id,@customer_fname, @customer_lname, @email, @mobile, @alt_mobile, @formattedDate, @created_by)`;
+      // Debugging log
+
+      const customerResult = await pool.request()
+        .input('customer_fname', customer_fname)
+        .input('customer_id', newcustid)
+        .input('customer_lname', customer_lname)
+        .input('email', email)
+        .input('mobile', mobile)
+        .input('alt_mobile', alt_mobile)
+        .input('salutation', salutation)
+        .input('formattedDate', formattedDate)
+        .input('created_by', created_by)
+        .query(customerSQL);
+
+      const insertedCustomerId = customerResult.recordset;
+
+
+
+
     }
-    else if (ticket_type == 'DEMO') {
-      t_type = 'D'
-
-    } else if (ticket_type == 'INSTALLATION') {
-      t_type = 'I'
-
-    } else if (ticket_type == 'MAINTENANCE') {
-      t_type = 'M'
-
-    } else if (ticket_type == 'HELPDESK') {
-      t_type = 'H'
-    }
-    else if (ticket_type == 'VISIT') {
-      t_type = 'V'
-    }
-
-
-    //Dynamic sms 
-
-
-    try {
-      const pool = await poolPromise;
-
-
-      // Split customer_name into customer_fname and customer_lname
-
-
-      const [customer_fname, ...customer_lnameArr] = customer_name.split(' ');
-      const customer_lname = customer_lnameArr.join(' ');
-
-
-      const getcustcount = `select top 1 id from awt_customer where customer_id is not null order by id desc`
-
-      const getcustresult = await pool.request().query(getcustcount)
-
-      const custcount = getcustresult.recordset[0].id;
-
-      const newcustid = 'B' + custcount.toString().padStart(7, "0")
 
 
 
+    // Insert into awt_uniqueproductmaster using insertedCustomerId as customer_id
 
 
 
-      if (ticket_id == '' && (cust_id == '' || cust_id == 'undefined')) {
-
-        // Insert into awt_customer
-        const customerSQL = `INSERT INTO awt_customer ( salutation,customer_id,customer_fname, customer_lname, email, mobileno, alt_mobileno, created_date, created_by)OUTPUT INSERTED.id VALUES ( @salutation, @customer_id,@customer_fname, @customer_lname, @email, @mobile, @alt_mobile, @formattedDate, @created_by)`;
-        // Debugging log
-
-        const customerResult = await pool.request()
-          .input('customer_fname', customer_fname)
-          .input('customer_id', newcustid)
-          .input('customer_lname', customer_lname)
-          .input('email', email)
-          .input('mobile', mobile)
-          .input('alt_mobile', alt_mobile)
-          .input('salutation', salutation)
-          .input('formattedDate', formattedDate)
-          .input('created_by', created_by)
-          .query(customerSQL);
-
-        const insertedCustomerId = customerResult.recordset;
+    if ((cust_id == '' || cust_id == 'undefined') && model != "") {
 
 
 
-
-      }
-
-
-
-      // Insert into awt_uniqueproductmaster using insertedCustomerId as customer_id
-
-
-
-      if ((cust_id == '' || cust_id == 'undefined') && model != "") {
-
-
-
-        const productSQL = `INSERT INTO awt_uniqueproductmaster (
+      const productSQL = `INSERT INTO awt_uniqueproductmaster (
         CustomerID, ModelNumber, serial_no,  pincode ,address,state,city,district ,purchase_date, created_date, created_by,customer_classification
        )
        VALUES (
@@ -4444,26 +4460,26 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
 
 
-        await pool.request()
-          .input('customer_id', newcustid)
-          .input('model', model)
-          .input('created_by', created_by)
-          .input('serial', serial)
-          .input('purchase_date', purchase_date)
-          .input('pincode', pincode)
-          .input('formattedDate', formattedDate)
-          .input('address', address)
-          .input('area', area)
-          .input('state', state)
-          .input('city', city)
-          .input('customer_classification', classification)
-          .query(productSQL);
+      await pool.request()
+        .input('customer_id', newcustid)
+        .input('model', model)
+        .input('created_by', created_by)
+        .input('serial', serial)
+        .input('purchase_date', purchase_date)
+        .input('pincode', pincode)
+        .input('formattedDate', formattedDate)
+        .input('address', address)
+        .input('area', area)
+        .input('state', state)
+        .input('city', city)
+        .input('customer_classification', classification)
+        .query(productSQL);
 
-      }
+    }
 
-      if ((cust_id == '' || cust_id == 'undefined')) {
-        // Insert into awt_customerlocation using insertedCustomerId as customer_id
-        const customerLocationSQL = `
+    if ((cust_id == '' || cust_id == 'undefined')) {
+      // Insert into awt_customerlocation using insertedCustomerId as customer_id
+      const customerLocationSQL = `
         INSERT INTO awt_customerlocation (
       customer_id, geostate_id, geocity_id, district_id, pincode_id,
       created_date, created_by, ccperson, ccnumber, address , deleted
@@ -4475,23 +4491,21 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
 
 
-        await pool.request()
-          .input('customer_id', newcustid)
-          .input('state', state)
-          .input('city', city)
-          .input('area', area)
-          .input('created_by', created_by)
-          .input('pincode', pincode)
-          .input('formattedDate', formattedDate)
-          .input('customer_name', customer_name)
-          .input('mobile', mobile)
-          .input('address', address)
-          .input('deleted', '0')
-          .query(customerLocationSQL);
+      await pool.request()
+        .input('customer_id', newcustid)
+        .input('state', state)
+        .input('city', city)
+        .input('area', area)
+        .input('created_by', created_by)
+        .input('pincode', pincode)
+        .input('formattedDate', formattedDate)
+        .input('customer_name', customer_name)
+        .input('mobile', mobile)
+        .input('address', address)
+        .input('deleted', '0')
+        .query(customerLocationSQL);
 
-      }
-
-
+    }
 
 
 
@@ -4504,50 +4518,53 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
 
 
-      // this is for generating ticket no
-      // const checkResult = await pool.request()
-      //   .input('ticketType', sql.NVarChar, t_type)  // Define the parameter
-      //   .query(`
-      //   SELECT Top 1 ticket_no
-      //   FROM complaint_ticket
-      //   WHERE ticket_no LIKE @ticketType + 'H' + '%'
-      //     AND ticket_date >= CAST(DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0) AS DATE)
-      //     AND ticket_date < CAST(DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) + 1, 0) AS DATE)
-      //   ORDER BY ticket_no Desc;
-      // `);
 
 
-      const current_date = new Date().toISOString().split('T')[0]; // Formats date to YYYY-MM-DD
+    // this is for generating ticket no
+    // const checkResult = await pool.request()
+    //   .input('ticketType', sql.NVarChar, t_type)  // Define the parameter
+    //   .query(`
+    //   SELECT Top 1 ticket_no
+    //   FROM complaint_ticket
+    //   WHERE ticket_no LIKE @ticketType + 'H' + '%'
+    //     AND ticket_date >= CAST(DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0) AS DATE)
+    //     AND ticket_date < CAST(DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) + 1, 0) AS DATE)
+    //   ORDER BY ticket_no Desc;
+    // `);
 
-      console.log(current_date)
-      const checkResult = await pool.request()
-        .input('currentdate', sql.NVarChar, current_date)  // Pass formatted date
-        .query(`SELECT TOP 1 ticket_no
+
+    const current_date = new Date().toISOString().split('T')[0]; // Formats date to YYYY-MM-DD
+
+    console.log(current_date)
+    const checkResult = await pool.request()
+      .input('complaint_date', sql.NVarChar, complaint_date)  // Pass formatted date
+      .query(`SELECT TOP 1 ticket_no
                 FROM complaint_ticket
-                WHERE ticket_date = @currentdate
-                ORDER BY RIGHT(ticket_no, 4) Desc;;`);
+                WHERE ticket_date = @complaint_date
+                ORDER BY RIGHT(ticket_no, 4) Desc;`);
 
 
 
 
-      const count = checkResult.recordset[0] ? checkResult.recordset[0].ticket_no : 'H0000';
+    const count = checkResult.recordset[0] ? checkResult.recordset[0].ticket_no : 'H0000';
 
-      const lastFourDigits = count.slice(-4)
+    const lastFourDigits = count.slice(-4)
 
-      const newcount = Number(lastFourDigits) + 1
+    const newcount = Number(lastFourDigits) + 1
 
-      const formatDate = `${(new Date().getMonth() + 1).toString().padStart(2, '0')}${new Date().getDate().toString().padStart(2, '0')}`;
+    const tdate = new Date(complaint_date);
 
-
-
-      const ticket_no = `${t_type}H${formatDate}-${newcount.toString().padStart(4, "0")}`;
+    const formatDate = `${(new Date().getMonth() + 1).toString().padStart(2, '0')}${tdate.getDate().toString().padStart(2, '0')}`;
 
 
+    const ticket_no = `${t_type}H${formatDate}-${newcount.toString().padStart(4, "0")}`;
 
-      let complaintSQL
 
-      if (!ticket_id) {
-        complaintSQL = `
+
+    let complaintSQL
+
+    if (!ticket_id) {
+      complaintSQL = `
         INSERT INTO complaint_ticket (
           ticket_no, ticket_date, customer_name, customer_mobile, customer_email, address,
           state, city, area, pincode, customer_id, ModelNumber, ticket_type, call_type,
@@ -4561,8 +4578,8 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
           @contact_person,  @formattedDate, @created_by,  @purchase_date, @serial, @child_service_partner, @master_service_partner, @specification ,@classification , @priority ,@requested_mobile,@requested_email,@requested_by,@msp,@csp,@sales_partner,@sales_partner2,@call_remark,@salutation,@alt_mobile,@mwhatsapp,@awhatsapp,@class_city,@mother_branch,'1',@totp
         )
       `;
-      } else {
-        complaintSQL = `
+    } else {
+      complaintSQL = `
         UPDATE complaint_ticket
         SET
           ticket_no = @ticket_no,
@@ -4613,97 +4630,97 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
           WHERE
           id = @ticket_id
       `;
-      }
+    }
 
 
 
 
-      const resutlt = await pool.request()
-        .input('ticket_no', ticket_no)
-        .input('ticket_id', ticket_id)
-        .input('complaint_date', complaint_date)
-        .input('customer_name', customer_name)
-        .input('mobile', mobile)
-        .input('email', email)
-        .input('address', address)
-        .input('state', state)
-        .input('created_by', created_by)
-        .input('city', city)
-        .input('area', area)
-        .input('pincode', pincode)
-        .input('customer_id', cust_id == '' || cust_id == 'undefined' ? newcustid : cust_id)
-        .input('model', model)
-        .input('ticket_type', ticket_type)
-        .input('cust_type', cust_type)
-        .input('warranty_status', sql.NVarChar, warrenty_status)
-        .input('invoice_date', invoice_date)
-        .input('call_charge', call_charge)
-        .input('mode_of_contact', mode_of_contact)
-        .input('contact_person', contact_person)
-        .input('formattedDate', formattedDate)
-        .input('purchase_date', purchase_date)
-        .input('serial', serial)
-        .input('master_service_partner', master_service_partner)
-        .input('child_service_partner', child_service_partner)
-        .input('specification', specification)
-        .input('call_remark', additional_remarks)
-        .input('classification', classification)
-        .input('priority', priority)
-        .input('requested_by', requested_by)
-        .input('requested_email', requested_email)
-        .input('requested_mobile', requested_mobile)
-        .input('msp', msp)
-        .input('csp', csp)
-        .input('sales_partner', sales_partner)
-        .input('sales_partner2', sales_partner2)
-        .input('salutation', salutation)
-        .input('alt_mobile', alt_mobile)
-        .input('awhatsapp', awhatsapp)
-        .input('mwhatsapp', mwhatsapp)
-        .input('class_city', class_city)
-        .input('mother_branch', mother_branch)
-        .input('totp', otp)
-        .query(complaintSQL);
+    const resutlt = await pool.request()
+      .input('ticket_no', ticket_no)
+      .input('ticket_id', ticket_id)
+      .input('complaint_date', complaint_date)
+      .input('customer_name', customer_name)
+      .input('mobile', mobile)
+      .input('email', email)
+      .input('address', address)
+      .input('state', state)
+      .input('created_by', created_by)
+      .input('city', city)
+      .input('area', area)
+      .input('pincode', pincode)
+      .input('customer_id', cust_id == '' || cust_id == 'undefined' ? newcustid : cust_id)
+      .input('model', model)
+      .input('ticket_type', ticket_type)
+      .input('cust_type', cust_type)
+      .input('warranty_status', sql.NVarChar, warrenty_status)
+      .input('invoice_date', invoice_date)
+      .input('call_charge', call_charge)
+      .input('mode_of_contact', mode_of_contact)
+      .input('contact_person', contact_person)
+      .input('formattedDate', formattedDate)
+      .input('purchase_date', purchase_date)
+      .input('serial', serial)
+      .input('master_service_partner', master_service_partner)
+      .input('child_service_partner', child_service_partner)
+      .input('specification', specification)
+      .input('call_remark', additional_remarks)
+      .input('classification', classification)
+      .input('priority', priority)
+      .input('requested_by', requested_by)
+      .input('requested_email', requested_email)
+      .input('requested_mobile', requested_mobile)
+      .input('msp', msp)
+      .input('csp', csp)
+      .input('sales_partner', sales_partner)
+      .input('sales_partner2', sales_partner2)
+      .input('salutation', salutation)
+      .input('alt_mobile', alt_mobile)
+      .input('awhatsapp', awhatsapp)
+      .input('mwhatsapp', mwhatsapp)
+      .input('class_city', class_city)
+      .input('mother_branch', mother_branch)
+      .input('totp', otp)
+      .query(complaintSQL);
 
 
-      // if (1 === 1) {
+    // if (1 === 1) {
 
-      //   const username = process.env.TATA_USER;
-      //   const password = process.env.PASSWORD;
-      //   const temp_id = '1207173530305447084'
+    //   const username = process.env.TATA_USER;
+    //   const password = process.env.PASSWORD;
+    //   const temp_id = '1207173530305447084'
 
-      //   try {
+    //   try {
 
-      //     const msg = encodeURIComponent(
-      //       `Dear Customer, Greetings from Liebherr! Your Ticket Number is ${ticket_no}. Please share OTP ${otp} with the engineer once the ticket is resolved.`
-      //     );
+    //     const msg = encodeURIComponent(
+    //       `Dear Customer, Greetings from Liebherr! Your Ticket Number is ${ticket_no}. Please share OTP ${otp} with the engineer once the ticket is resolved.`
+    //     );
 
-      //     const tokenResponse = await axios.get(
-      //       `https://smsgw.tatatel.co.in:9095/campaignService/campaigns/qs?recipient=${mobile}&dr=false&msg=${msg}&user=${username}&pswd=${password}&sender=LICARE&PE_ID=1201159257274643113&Template_ID=${temp_id}`
-      //     );
-
-
-      //   } catch (error) {
-      //     console.error('Error hitting SMS API (token):', error.response?.data || error.message);
-      //   }
-      // }
+    //     const tokenResponse = await axios.get(
+    //       `https://smsgw.tatatel.co.in:9095/campaignService/campaigns/qs?recipient=${mobile}&dr=false&msg=${msg}&user=${username}&pswd=${password}&sender=LICARE&PE_ID=1201159257274643113&Template_ID=${temp_id}`
+    //     );
 
 
-
+    //   } catch (error) {
+    //     console.error('Error hitting SMS API (token):', error.response?.data || error.message);
+    //   }
+    // }
 
 
 
 
 
-      if (additional_remarks || specification) {
-        // Combine both remarks
-        const combinedRemarks = `
+
+
+
+    if (additional_remarks || specification) {
+      // Combine both remarks
+      const combinedRemarks = `
             ${additional_remarks ? `Additional Remark: ${additional_remarks}` : ''} 
             ${specification ? `Fault Description: ${specification}` : ''}
           `.trim(); // Trim to avoid unnecessary whitespace if one is empty
 
-        // Insert query for combined remarks
-        const remarksQuery = `
+      // Insert query for combined remarks
+      const remarksQuery = `
             INSERT INTO awt_complaintremark (
                 ticket_no, remark, created_date, created_by
             )
@@ -4711,41 +4728,41 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
                 @ticket_no, @combinedRemarks, @formattedDate, @created_by
             )`;
 
-        // Execute the query
-        await pool.request()
-          .input('ticket_no', ticket_no) // Use existing ticket_no from earlier query
-          .input('formattedDate', formattedDate) // Use current timestamp
-          .input('created_by', created_by) // Use current user ID
-          .input('combinedRemarks', combinedRemarks) // Combined remarks
-          .query(remarksQuery);
-      }
-
-
-      //Fault Description *************
-
-
-
-
-      // const mailOptions = {
-      //   from: 'zeliant997@gmail.com',
-      //   to: email,
-      //   subject: 'Welcome to Our Platform!',
-      //   html: `<a href='http://localhost:3000/nps/${email}/${ticket_no}/${cust_id == '' ? newcustid : cust_id}'>Click here to give us feedback</a>`,
-      // };
-
-
-
-      // await transporter.verify();
-      // const info = await transporter.sendMail(mailOptions);
-
-
-
-
-      return res.json({ message: 'Complaint added successfully!', ticket_no, cust_id });
-    } catch (err) {
-      console.error("Error inserting complaint:", err.stack);
-      return res.status(500).json({ error: 'An error occurred while adding the complaint', details: err.message });
+      // Execute the query
+      await pool.request()
+        .input('ticket_no', ticket_no) // Use existing ticket_no from earlier query
+        .input('formattedDate', formattedDate) // Use current timestamp
+        .input('created_by', created_by) // Use current user ID
+        .input('combinedRemarks', combinedRemarks) // Combined remarks
+        .query(remarksQuery);
     }
+
+
+    //Fault Description *************
+
+
+
+
+    // const mailOptions = {
+    //   from: 'zeliant997@gmail.com',
+    //   to: email,
+    //   subject: 'Welcome to Our Platform!',
+    //   html: `<a href='http://localhost:3000/nps/${email}/${ticket_no}/${cust_id == '' ? newcustid : cust_id}'>Click here to give us feedback</a>`,
+    // };
+
+
+
+    // await transporter.verify();
+    // const info = await transporter.sendMail(mailOptions);
+
+
+
+
+    return res.json({ message: 'Complaint added successfully!', ticket_no, cust_id });
+  } catch (err) {
+    console.error("Error inserting complaint:", err.stack);
+    return res.status(500).json({ error: 'An error occurred while adding the complaint', details: err.message });
+  }
 
   // } else {
   //   return res.json({ message: "Ticket is already created", ticket_no: 'Ticket is already created', cust_id: 'NA' })
@@ -5543,9 +5560,9 @@ app.post("/putproductunique", authenticateToken, async (req, res) => {
   try {
     const { encryptedData } = req.body;
     const decryptedData = decryptData(encryptedData, secretKey);
-    const { product, id, address, purchase_date, serial_no, CustomerID , SerialStatus} = JSON.parse(decryptedData);
+    const { product, id, address, purchase_date, serial_no, CustomerID, SerialStatus } = JSON.parse(decryptedData);
 
-    console.log("Received Data:", { product, id, address, purchase_date, serial_no, CustomerID,SerialStatus });
+    console.log("Received Data:", { product, id, address, purchase_date, serial_no, CustomerID, SerialStatus });
 
     // Validate ID
     const parsedId = Number(id);
@@ -5783,20 +5800,45 @@ app.post("/postengineer",
       // Use the poolPromise to get the connection pool
       const pool = await poolPromise;
 
-
-      const getcount = `SELECT TOP 1 RIGHT(engineer_id, 4) AS last_four_digits FROM awt_engineermaster ORDER BY RIGHT(engineer_id, 4) DESC`;
+     //this is for csp
+      const getcount = `SELECT TOP 1 RIGHT(engineer_id, 4) AS last_four_digits FROM awt_engineermaster where employee_code = '${employee_code}'  ORDER BY RIGHT(engineer_id, 4) DESC`;
 
       const countResult = await pool.request().query(getcount);
 
       const latestQuotation = countResult.recordset[0]?.last_four_digits || 0;
 
-      console.log(latestQuotation , "#$%")
+      console.log(latestQuotation, "#$%")
 
       const newcount = Number(latestQuotation) + 1
 
 
+     //this is for lhi
+      const getlhicount = `SELECT TOP 1 RIGHT(engineer_id, 4) AS last_four_digits FROM awt_engineermaster where employee_code = '${employee_code}'  ORDER BY RIGHT(engineer_id, 4) DESC`;
 
-      const engineercode = 'SPT-TEC-' + newcount.toString().padStart(4, "0")
+      console.log(getlhicount)
+
+      const countlhiResult = await pool.request().query(getlhicount);
+
+      const latestlhiQuotation = countlhiResult.recordset[0]?.last_four_digits || 0;
+
+      console.log(latestlhiQuotation, "#$%")
+
+      const newlhicount = Number(latestlhiQuotation) + 1
+
+
+      let engineercode;
+
+
+      if (employee_code == 'LHI') {
+
+        engineercode = 'LHI-TEC-' + newlhicount.toString().padStart(4, "0")
+
+
+      } else {
+        engineercode = 'SPT-TEC-' + newcount.toString().padStart(4, "0")
+
+      }
+
 
       // Check for duplicates using direct query injection
       const checkDuplicateSql = `SELECT * FROM awt_engineermaster WHERE mobile_no = '${mobile_no}' AND email = '${email}' AND deleted = 0`;
@@ -5819,8 +5861,8 @@ app.post("/postengineer",
           });
         } else {
           // Insert new engineer if no duplicate or soft-deleted found
-          const insertSql = `INSERT INTO awt_engineermaster (title,mfranchise_id, cfranchise_id, mobile_no, email, password,engineer_id,personal_email,personal_mobile,dob,blood_group,academic_qualification,joining_date,passport_picture,resume,photo_proof,address_proof,permanent_address,current_address)
-                           VALUES ('${title}','${mfranchise_id}', '${cfranchise_id}', '${mobile_no}', '${email}', '${password}', '${engineercode}', '${personal_email}', '${personal_mobile}', '${dob}', '${blood_group}', '${academic_qualification}', '${joining_date}', '${passport_picture}', '${resume}', '${photo_proof}', '${address_proof}', '${permanent_address}', '${current_address}')`;
+          const insertSql = `INSERT INTO awt_engineermaster (title,mfranchise_id, cfranchise_id, mobile_no, email, password,engineer_id,personal_email,personal_mobile,dob,blood_group,academic_qualification,joining_date,passport_picture,resume,photo_proof,address_proof,permanent_address,current_address,employee_code)
+                           VALUES ('${title}','${mfranchise_id}', '${cfranchise_id}', '${mobile_no}', '${email}', '${password}', '${engineercode}', '${personal_email}', '${personal_mobile}', '${dob}', '${blood_group}', '${academic_qualification}', '${joining_date}', '${passport_picture}', '${resume}', '${photo_proof}', '${address_proof}', '${permanent_address}', '${current_address}' , '${employee_code}')`;
           await pool.request().query(insertSql);
           return res.json({ message: "Engineer added successfully!" });
         }
@@ -5851,8 +5893,8 @@ app.post("/putengineer", authenticateToken, async (req, res) => {
       // Update the engineer record if no duplicates are found
       const updateSql = `UPDATE awt_engineermaster
                          SET title = '${title}',mfranchise_id = '${mfranchise_id}', cfranchise_id = '${cfranchise_id}', mobile_no = '${mobile_no}', email = '${email}', password = '${password}',
-                         personal_email = '${personal_email}', personal_mobile = '${personal_mobile}', dob = '${dob}',
-                         blood_group = '${blood_group}', academic_qualification = '${academic_qualification}', joining_date = '${joining_date}', passport_picture = '${passport_picture}',
+                         personal_email = '${personal_email}', personal_mobile = '${personal_mobile}', dob = '${dob ? dob : ''}',
+                         blood_group = '${blood_group}', academic_qualification = '${academic_qualification}', joining_date = '${joining_date ? joining_date : ''}', passport_picture = '${passport_picture}',
                          resume = '${resume}', photo_proof = '${photo_proof}', address_proof = '${address_proof}', permanent_address = '${permanent_address}', current_address = '${current_address}'
                          WHERE id = '${id}'`;
 
@@ -9828,16 +9870,14 @@ app.get("/getcomplainlistmsp", authenticateToken, async (req, res) => {
     const offset = (page - 1) * pageSize;
 
     let sql = `
-        SELECT c.*, e.title as assigned_name,
+        SELECT c.*, 
                DATEDIFF(day, (c.ticket_date), GETDATE()) AS ageingdays
         FROM complaint_ticket AS c
-        LEFT JOIN awt_engineermaster AS e ON c.engineer_id = e.engineer_id
         WHERE c.deleted = 0 AND c.msp = '${licare_code}'
     `;
     let countSql = `
         SELECT COUNT(*) as totalCount
         FROM complaint_ticket AS c
-        LEFT JOIN awt_engineermaster AS e ON c.engineer_id = e.engineer_id
         WHERE c.deleted = 0 AND c.msp = '${licare_code}'
     `;
 
@@ -10041,7 +10081,7 @@ app.get("/getmultiplelocation/:pincode/:classification/:ticket_type", authentica
     LEFT JOIN pincode_allocation as o on p.pincode = o.pincode
   LEFT JOIN awt_franchisemaster as f on f.licarecode =  o.msp_code
   LEFT JOIN awt_childfranchisemaster as fm on fm.licare_code =  o.csp_code
-  where p.pincode = ${pincode} and o.customer_classification = '${classification}' and o.call_type = '${ticket_type}'`
+  where p.pincode = ${pincode} and o.customer_classification = '${classification}' and o.call_type = '${ticket_type}' order by o.id desc`
 
     const result = await pool.request().query(sql);
 
@@ -10076,67 +10116,6 @@ app.get("/getmultiplepincode/:pincode", authenticateToken, async (req, res) => {
 
 
 
-// app.get("/getserial/:serial", authenticateToken, async (req, res) => {
-//   const { serial } = req.params;
-
-//   try {
-
-//     const pool = await poolPromise;
-
-//     const sql = `	SELECT
-//     asl.*,
-//     spm.SalesPartner,
-//     spm.SalesAM,
-//     CASE
-//         WHEN asl.CountryofOrigin = 'India' THEN 'Consumer'
-//         ELSE 'Import'
-//     END AS customerClassification
-// FROM
-//     awt_serial_list AS asl
-// LEFT JOIN
-//     SalesPartnerMaster AS spm
-// ON
-//     asl.PrimarySalesDealer = spm.BPcode
-// WHERE
-//     asl.serial_no = @serial;
-// `
-
-//     const result = await pool.request()
-//       .input('serial', serial)
-//       .query(sql);
-
-
-
-//     const fallbackSql = `SELECT ac.salutation , ac.customer_fname ,ac.customer_lname , ac.customer_type , ac.customer_classification , ac.mobileno , ac.alt_mobileno,ac.email ,
-// au.CustomerID , au.ModelNumber , au.address , au.region , au.state ,au.district , au.city , au.pincode ,au.purchase_date,au.SalesDealer as SalesPartner,au.serial_no , au.SubDealer as SalesAM ,au.ModelName as ItemNumber ,au.customer_classification as customerClassification
-// FROM awt_uniqueproductmaster as au
-// left join awt_customer as ac on ac.customer_id = au.CustomerID
-// WHERE au.serial_no = @serial order by au.id desc`;
-
-//     const fallbackResult = await pool.request()
-//       .input('serial', serial)
-//       .query(fallbackSql);
-
-//     if (fallbackResult.recordset.length !== 0) {
-
-//       return res.json(fallbackResult.recordset);
-
-//     } else {
-
-//       return res.json(result.recordset);
-
-//     }
-
-
-
-
-
-//   } catch (err) {
-//     console.error("Database error:", err);
-//     return res.status(500).json({ error: "Database error occurred", details: err.message });
-//   }
-// });
-
 
 app.get("/getserial/:serial", authenticateToken, async (req, res) => {
   const { serial } = req.params;
@@ -10158,21 +10137,38 @@ app.get("/getserial/:serial", authenticateToken, async (req, res) => {
 au.CustomerID as customer_id , au.ModelNumber , au.address , au.region , au.state ,au.district , au.city , au.pincode ,au.purchase_date,au.SalesDealer as SalesPartner,au.serial_no , au.SubDealer as SalesAM ,au.ModelName as ItemNumber ,au.customer_classification as customerClassification , au.SerialStatus
 FROM awt_uniqueproductmaster as au
 left join awt_customer as ac on ac.customer_id = au.CustomerID
-WHERE au.serial_no = @serial order by au.id asc`;
+WHERE au.serial_no = @serial and au.SerialStatus = 'Active' order by au.id asc `;
 
     const fallbackResult = await pool.request()
       .input('serial', serial)
       .query(fallbackSql);
 
+
+
+    const lastfallbacksql = `select serial_no ,ModelNumber,customer_classification as customerClassification,purchase_date from awt_uniqueproductmaster where serial_no = @serial`
+
+
+    const lastfallbackResult = await pool.request()
+      .input('serial', serial)
+      .query(lastfallbacksql);
+
+
+
+
     if (fallbackResult.recordset.length !== 0) {
 
       return res.json(fallbackResult.recordset);
 
-    } else {
+    } else if (lastfallbackResult.recordset.length !== 0) {
 
+      return res.json(lastfallbackResult.recordset);
+    }
+    else {
       return res.json(result.recordset);
 
     }
+
+
 
 
 
@@ -10200,9 +10196,8 @@ app.get("/getcheckserial/:serial", authenticateToken, async (req, res) => {
 
     const fallbackSql = `SELECT ac.salutation , ac.customer_fname ,ac.customer_lname , ac.customer_type , ac.customer_classification , ac.mobileno , ac.alt_mobileno,ac.email ,allocation = 'Allocated',
 au.CustomerID as customer_id , au.ModelNumber , au.address , au.region , au.state ,au.district , au.city , au.pincode ,au.purchase_date,au.SalesDealer as SalesPartner,au.serial_no , au.SubDealer as SalesAM ,au.ModelName as ItemNumber ,au.customer_classification as customerClassification , au.SerialStatus
-FROM awt_uniqueproductmaster as au
-left join awt_customer as ac on ac.customer_id = au.CustomerID
-WHERE au.serial_no = @serial order by au.id desc`;
+FROM awt_uniqueproductmaster as au left join awt_customer as ac on ac.customer_id = au.CustomerID
+WHERE au.serial_no = @serial and au.SerialStatus = 'Active' order by au.id desc`;
 
     const fallbackResult = await pool.request()
       .input('serial', serial)
@@ -10663,7 +10658,7 @@ app.get("/getSpareParts/:model", authenticateToken, async (req, res) => {
 FROM Spare_parts as sp 
 LEFT JOIN priceGroup as spt ON sp.PriceGroup = spt.PriceGroup
 WHERE sp.deleted = 0
-  AND REPLACE(REPLACE(REPLACE(sp.ModelNumber, '     ', '  '), '    ', '  '), '   ', '  ') = @model
+  AND TRIM(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(sp.ModelNumber, '     ', ' '), '    ', ' '), '   ', ' '), '  ', ' '), '  ', ' ')) = @model
     `;
 
     const result = await pool.request()
@@ -10687,7 +10682,7 @@ app.post("/getDefectCodewisetype", authenticateToken,
     try {
       const pool = await poolPromise;
       // Modified SQL query using parameterized query
-      const sql = `SELECT * FROM awt_typeofdefect  where groupdefect_code = ${defect_code}`;
+      const sql = `SELECT * FROM awt_typeofdefect  where groupdefect_code = ${defect_code} and deleted = 0`;
 
       const result = await pool.request().query(sql);
 
@@ -10706,7 +10701,7 @@ app.post("/getDefectCodewisesite", authenticateToken,
     try {
       const pool = await poolPromise;
       // Modified SQL query using parameterized query
-      const sql = `SELECT * FROM awt_site_defect  where defectgroupcode = ${defect_code}`;
+      const sql = `SELECT * FROM awt_site_defect  where defectgroupcode = ${defect_code} and deleted = 0`;
 
       const result = await pool.request().query(sql);
 
@@ -11226,7 +11221,7 @@ app.get("/getapproveEng", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
 
     // Directly use the query (no parameter binding)
-    const sql = `select * from awt_engineermaster where status != 1 AND deleted = 0 AND employee_code is null`;
+    const sql = `select * from awt_engineermaster where status != 1 AND deleted = 0 AND employee_code = 'SRV' AND approved_by is null`;
 
     // Execute the query
     const result = await pool.request().query(sql);
@@ -11280,7 +11275,7 @@ app.get("/getmsp", authenticateToken, async (req, res) => {
 
 app.post("/finalapproveenginner", authenticateToken, async (req, res) => {
 
-  const { eng_id } = req.body;
+  const { eng_id ,approve_by } = req.body;
 
 
 
@@ -11289,7 +11284,7 @@ app.post("/finalapproveenginner", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
 
     // Directly use the query (no parameter binding)
-    const sql = `update awt_engineermaster set status = 1 , employee_code = 'SRV' where id = '${eng_id}'`;
+    const sql = `update awt_engineermaster set status = 1 , approved_by = '${approve_by}' where id = '${eng_id}' `;
 
     // Execute the query
     const result = await pool.request().query(sql);
@@ -12580,8 +12575,8 @@ app.post("/getcomplainticketdump", authenticateToken, async (req, res) => {
     let sql;
 
 
-    sql = `Select id,ticket_no,CONVERT(VARCHAR, ticket_date, 105) as ticket_date,customer_id,customer_name,customer_mobile,alt_mobile,customer_email,ModelNumber,serial_no, address, region, state, city, area, pincode, mother_branch,sevice_partner,child_service_partner, msp, csp, sales_partner, assigned_to, engineer_code, engineer_id, ticket_type, call_type , sub_call_status, call_status, warranty_status,CASE 
-    WHEN purchase_date != ''  THEN CONVERT(VARCHAR, CAST(purchase_date AS DATETIME), 105) ELSE NULL END AS purchase_date, mode_of_contact, customer_class, call_priority, closed_date,  created_date, created_by,deleted From complaint_ticket where deleted = 0  AND ticket_date >= '${startDate}' AND ticket_date <= '${endDate}' order by RIGHT(ticket_no , 4) asc`
+    sql = `Select id,ticket_no, ticket_date,customer_id,customer_name,customer_mobile,alt_mobile,customer_email,ModelNumber,serial_no, address, region, state, city, area, pincode, mother_branch,sevice_partner,child_service_partner, msp, csp, sales_partner, assigned_to, engineer_code, engineer_id, ticket_type, call_type , sub_call_status, call_status, warranty_status, purchase_date, mode_of_contact, customer_class, call_priority, closed_date,  created_date, created_by,deleted From complaint_ticket where deleted = 0  AND ticket_date >= '${startDate}' AND ticket_date <= '${endDate}' order by RIGHT(ticket_no , 4) asc`
+
 
 
     if (assigncsp !== 'ALL') {
@@ -15348,7 +15343,7 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
 
   // const apiUrl = `https://smsgw.tatatel.co.in:9095/campaignService/campaigns/qs?recipient=${customer_mobile}&dr=false&msg=${msg}&user=${username}&pswd=${password}&sender=LICARE&PE_ID=1201159257274643113&Template_ID=${temp_id}`;
 
-  // const response = await axios.get(apiUrl); 
+  // const response = await axios.get(apiUrl, { httpsAgent }); 
 
 
   if (call_status == 'Completed') {
@@ -15433,12 +15428,12 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
 
     const date = new Date()
 
-   if(call_status == 'Completed'){
-    
-    const updatecloseddate = `update complaint_ticket set closed_date = '${closed_date}' where ticket_no ='${ticket_no}'`;
+    if (call_status == 'Completed') {
 
-    await pool.request().query(updatecloseddate);
-   }
+      const updatecloseddate = `update complaint_ticket set closed_date = '${closed_date}' where ticket_no ='${ticket_no}'`;
+
+      await pool.request().query(updatecloseddate);
+    }
 
 
 
@@ -15694,7 +15689,7 @@ app.get("/getSpareParts_app/:model", authenticateToken, async (req, res) => {
 FROM Spare_parts as sp 
 LEFT JOIN priceGroup as spt ON sp.PriceGroup = spt.PriceGroup
 WHERE sp.deleted = 0
-  AND REPLACE(REPLACE(REPLACE(sp.ModelNumber, '     ', '  '), '    ', '  '), '   ', '  ') = @model
+  AND TRIM(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(sp.ModelNumber, '     ', ' '), '    ', ' '), '   ', ' '), '  ', ' '), '  ', ' ')) = @model
         `;
 
     const result = await pool.request()
@@ -15926,22 +15921,61 @@ app.post("/updatevisitcount", authenticateToken, async (req, res) => {
 });
 
 
+// app.post("/getServiceCharges", authenticateToken, async (req, res) => {
+
+//   let { ModelNumber } = req.body;
+
+//   try {
+//     // Use the poolPromise to get the connection pool
+//     const pool = await poolPromise;
+
+//     const sql = `SELECT top 1 p.item_code, m.warrenty_year, m.compressor_warrenty, m.warrenty_amount FROM product_master as p 
+// LEFT JOIN Master_warrenty as m on m.product_line = p.productLine
+// where p.item_description = '${ModelNumber}'`;
+
+//     const result = await pool.request().query(sql);
+
+
+//     return res.json(result.recordset);
+//   } catch (err) {
+//     console.error(err);
+//     return res.status(500).json(err);
+//   }
+// });
+
 app.post("/getServiceCharges", authenticateToken, async (req, res) => {
 
-  let { ModelNumber } = req.body;
+  let { ModelNumber ,warrenty_status} = req.body;
 
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
 
-    const sql = `SELECT top 1 p.item_code, m.warrenty_year, m.compressor_warrenty, m.warrenty_amount FROM product_master as p 
-LEFT JOIN Master_warrenty as m on m.product_line = p.productLine
-where p.item_description = '${ModelNumber}'`;
+    const sql = `select top 1 id, productType ,  productLine , productClass from product_master where item_description = '${ModelNumber}'`;
 
     const result = await pool.request().query(sql);
 
 
-    return res.json(result.recordset);
+    if (result.recordset.length > 0) {
+
+      const productType = result.recordset[0].productType
+      const productclass = result.recordset[0].productClass
+      const productLine = result.recordset[0].productLine
+
+
+      const getprice = `select * from post_sale_warrenty where ProductClass = '${productclass}' and ProductLine = '${productLine}' and Producttype = '${productType}' and ServiceType = '${warrenty_status}'`;
+
+      console.log(getprice)
+
+
+      const getresult = await pool.request().query(getprice);
+
+      return res.json(getresult.recordset);
+    } else {
+      return res.json('No price available')
+    }
+
+
   } catch (err) {
     console.error(err);
     return res.status(500).json(err);
@@ -16012,6 +16046,8 @@ app.post("/getengineerremark", authenticateToken, async (req, res) => {
 
 
 
+
+
 app.get("/getsmsapi", async (req, res) => {
   const ticket_no = 'SH234';
   const otp = '1234';
@@ -16031,8 +16067,11 @@ app.get("/getsmsapi", async (req, res) => {
 
   const apiUrl = `https://smsgw.tatatel.co.in:9095/campaignService/campaigns/qs?recipient=${mobile}&dr=false&msg=${msg}&user=${username}&pswd=${password}&sender=LICARE&PE_ID=1201159257274643113&Template_ID=${temp_id}`;
 
+
+
+
   try {
-    const response = await axios.get(apiUrl); // Remove httpsAgent unless absolutely needed
+    const response = await axios.get(apiUrl, { httpsAgent });
     if (response.data) {
       return res.json({ message: "Success", data: response.data });
     }
@@ -16041,6 +16080,7 @@ app.get("/getsmsapi", async (req, res) => {
     return res.status(500).json({ message: 'Failed to send SMS', error: error.message });
   }
 });
+
 // FETCH ANNEXTURE DATA 
 
 app.post("/getannexturedata", authenticateToken, async (req, res) => {
@@ -16074,6 +16114,57 @@ app.post("/getannexturedata", authenticateToken, async (req, res) => {
     return res.status(500).json({ error: "An error occurred while fetching data" });
   }
 });
+
+app.post("/transferproduct", authenticateToken, async (req, res) => {
+  const { serial_no, customer_id, Modelno, product_id, newaddress } = req.body;
+
+  try {
+    const pool = await poolPromise;
+
+    // First, update SerialStatus to 'Inactive'
+    const updateResult = await pool.request()
+      .input("product_id", product_id)
+      .query(`UPDATE awt_uniqueproductmaster SET SerialStatus = 'Inactive' WHERE id = @product_id`);
+       
+ 
+    const getaddress = `select act.* , ac.customer_fname , ac.customer_classification from awt_customerlocation as act left join awt_customer as ac on ac.customer_id = act.customer_id where act.id = '${newaddress}'`  
+
+    const getaddressresult = await pool.request().query(getaddress)
+
+    if(getaddressresult.recordset.length > 0){
+
+      let { address , region_id , geostate_id,geocity_id, district_id ,pincode_id ,customer_fname ,customer_classification}  = getaddressresult.recordset[0];
+
+
+      const insertquery = `insert into awt_uniqueproductmaster(CustomerID , CustomerName ,ModelNumber , serial_no ,address , region , state ,district , city , pincode , SerialStatus ,customer_classification) values (@customer_id,@customer_fname,@Modelno,@serial_no,@address,@region_id,@geostate_id,@district_id,@geocity_id,@pincode_id,@status,@customer_classification)`
+
+      const insertproduct = await pool.request()
+      .input('customer_id' , customer_id)
+      .input('customer_fname' ,customer_fname) 
+      .input('Modelno' ,Modelno) 
+      .input('serial_no' ,serial_no) 
+      .input('address' ,address) 
+      .input('region_id' ,region_id) 
+      .input('geostate_id' ,geostate_id) 
+      .input('district_id' ,district_id) 
+      .input('geocity_id' ,geocity_id) 
+      .input('pincode_id' ,pincode_id) 
+      .input('status' ,'Active') 
+      .input('customer_classification' ,customer_classification) 
+      .query(insertquery)
+
+
+      return res.json(insertproduct)
+    }
+
+    return res.status(200).json({ message: "Product status updated successfully", result: updateResult.recordset });
+
+  } catch (err) {
+    console.error("Error during transfer:", err);
+    return res.status(500).json({ error: "An error occurred while updating product status" });
+  }
+});
+
 
 
 // get msp for annexture data
@@ -16175,6 +16266,40 @@ app.post("/getannexturereport", authenticateToken, async (req, res) => {
   } catch (err) {
     console.error("Database Error:", err);
     return res.status(500).json({ error: "An error occurred while fetching data", details: err.message });
+  }
+});
+
+
+app.post("/updateserialno", authenticateToken, async (req, res) => {
+
+  let { serial, ticket_no, modelnumber } = req.body;
+
+  try {
+    const pool = await poolPromise;
+    const sql = `update complaint_ticket set serial_no = '${serial}' , ModelNumber = '${modelnumber}'   where ticket_no = '${ticket_no}'`;
+
+    const result = await pool.request().query(sql);
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Database Error:", err);
+    return res.status(500).json({ error: "Failed to fetch MSPs", details: err.message });
+  }
+});
+
+
+app.post("/updatepurchasedate", authenticateToken, async (req, res) => {
+
+  let { ticket_no, warrenty_status, purchase_date } = req.body;
+
+  try {
+    const pool = await poolPromise;
+    const sql = `update complaint_ticket set purchase_date = '${purchase_date}' , warranty_status = '${warrenty_status}'   where ticket_no = '${ticket_no}'`;
+
+    const result = await pool.request().query(sql);
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Database Error:", err);
+    return res.status(500).json({ error: "Failed to fetch MSPs", details: err.message });
   }
 });
 
@@ -16858,3 +16983,4 @@ app.post('/uploadspareexcel', async (req, res) => {
     return res.status(500).json({ error: 'An error occurred while processing data' });
   }
 });
+

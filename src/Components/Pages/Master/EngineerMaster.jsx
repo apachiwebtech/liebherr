@@ -30,6 +30,7 @@ const EngineerMaster = () => {
   const [duplicateError, setDuplicateError] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
   const [joining_date, setJoiningDate] = useState('');
+  const [employee, setEmployee] = useState('');
   const created_by = localStorage.getItem("userId"); // Get user ID from localStorage
   const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
 
@@ -92,6 +93,7 @@ const EngineerMaster = () => {
 
       setSelectedDate(response.data[0].dob)
       setJoiningDate(response.data[0].joining_date)
+      setEmployee(response.data[0].employee_code)
       setFormData({
         ...response.data[0],
         // Rename keys to match your formData structure
@@ -264,6 +266,7 @@ const EngineerMaster = () => {
       password: md5(formData.password),
       created_by,
     }
+
 
     const encryptedData = CryptoJS.AES.encrypt(
       JSON.stringify(payload),
@@ -492,15 +495,19 @@ const EngineerMaster = () => {
                       </div>
                       <div className="col-md-3">
                         <label htmlFor="employeeCodeInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>Employee Code</label>
-                        <input disabled
-                          type="text"  // Changed to "text" for Employee Code
+                        <select
                           className="form-control"
                           name="employee_code"
                           id="employeeCodeInput"
-                          value={formData.employee_code}  // Updated value to match "employeeCode"
+                          value={formData.employee_code}
                           onChange={handleChange}
-                          placeholder="Enter Employee Code"
-                        />
+                          disabled={employee ? true : false}
+                          >
+                            
+                          <option value="">Select</option>
+                          <option value="LHI">LHI</option>
+                          <option value="SRV">CSP</option>
+                        </select>
                         {errors.employee_code && <small className="text-danger">{errors.employee_code}</small>}
                         {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
                       </div>
@@ -594,7 +601,7 @@ const EngineerMaster = () => {
                       </div>
 
                       <div className="col-md-3">
-                        <label htmlFor="dobInput" className="input-field d-block"  style={{ marginBottom: '15px', fontSize: '18px' }}>Date of Birth</label>
+                        <label htmlFor="dobInput" className="input-field d-block" style={{ marginBottom: '15px', fontSize: '18px' }}>Date of Birth</label>
                         <DatePicker
                           selected={selectedDate}
                           onChange={handleDateChange}

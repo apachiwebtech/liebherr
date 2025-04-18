@@ -118,9 +118,9 @@ function Details() {
   };
 
 
-  async function getprice(modelno) {
+  async function getprice(modelno ,warrenty_status ) {
 
-    axios.post(`${Base_Url}/getServiceCharges`, { ModelNumber:  modelno }, {
+    axios.post(`${Base_Url}/getServiceCharges`, { ModelNumber:  modelno , warrenty_status : warrenty_status}, {
       headers: {
         Authorization: token
       }
@@ -131,7 +131,7 @@ function Details() {
         if (res.data && res.data[0]) {
           setValue((prev) => ({
             ...prev,
-            service_charges: res.data[0].warrenty_amount
+            service_charges: res.data[0].warranty_amount
           }))
         }
 
@@ -443,7 +443,7 @@ function Details() {
           getremark(res.data.data[0].ticket_no)
           getuniquespare(res.data.data[0].ticket_no)
           getspare(res.data.data[0].ModelNumber)
-          getprice(res.data.data[0].ModelNumber)
+          getprice(res.data.data[0].ModelNumber , res.data.data[0].warranty_status)
           setPurchaseDate(res.data.data[0].purchase_date)
           // console.log(Value.symptomcode);
           if (res.data.data[0].group_code != "") {

@@ -123,7 +123,11 @@ export function Registercomplaint(params) {
 
 
   const formatpurDate = (dateString) => {
-    const [year, month, day] = dateString.split('-');
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+
     return `${day}-${month}-${year}`;
   };
 
@@ -266,6 +270,15 @@ export function Registercomplaint(params) {
       newErrors.customer_name = "Name is required";
     }
 
+    if (!value.master_service_partner) {
+      isValid = false;
+      newErrors.master_service_partner = "Msp is required";
+    }
+    if (!value.child_service_partner) {
+      isValid = false;
+      newErrors.child_service_partner = "Csp is required";
+    }
+
     if (!value.salutation) {
       isValid = false;
       newErrors.salutation = "Salutation is required";
@@ -297,13 +310,20 @@ export function Registercomplaint(params) {
     }
 
 
-    if (!value.address) {
-      isValid = false;
-      newErrors.address = "Address is required";
+    if (value.serial) {
+      if (!/^\d{9}$/.test(value.serial)) {
+        isValid = false;
+        newErrors.serial = "Serial No. Should be 9 digits";
+      }
     }
+    
+
     if (!value.pincode) {
       isValid = false;
       newErrors.pincode = "Pincode is required";
+    } else if (!/^\d{6}$/.test(value.pincode)) {
+      isValid = false;
+      newErrors.pincode = "Pincode should be 6 digits";
     }
     if (!value.mode_of_contact) {
       isValid = false;
@@ -358,7 +378,6 @@ export function Registercomplaint(params) {
 
   // Function to handle the address change
   const handleAddressChange = (e) => {
-
 
 
     const { value } = e.target;
@@ -694,8 +713,8 @@ export function Registercomplaint(params) {
             master_service_partner: res.data[0].sevice_partner || "",
             child_service_partner: res.data[0].child_service_partner || "",
             model: res.data[0].ModelNumber,
-            msp: res.data[0].franchisee,
-            csp: res.data[0].childPartner,
+            msp: res.data[0].msp,
+            csp: res.data[0].csp,
             sales_partner: res.data[0].sales_partner,
             sales_partner2: res.data[0].sales_partner2,
             classification: res.data[0].customer_class,
@@ -886,6 +905,7 @@ export function Registercomplaint(params) {
 
       if (validateForm()) {
 
+    
 
         axiosInstance.post(`${Base_Url}/add_complaintt`, data, {
           headers: {
@@ -1666,23 +1686,24 @@ export function Registercomplaint(params) {
                             name="serial"
                             value={value.serial}
                             onChange={(e) => {
-                              // Only update value if the serial number length is <= 9
-                              if (e.target.value.length <= 9) {
+                              const value = e.target.value;
+                              // Allow only numbers and limit to 9 digits
+                              if (/^\d{0,9}$/.test(value)) {
                                 onHandleChange(e);
                               }
                             }}
-                            onBlur={(e) => {
-                              if (e.target.value.length == 9) {
-                                // Call your API function here
-                                fetchserial(e.target.value)
+                            // onBlur={(e) => {
+                            //   if (e.target.value.length == 9) {
+                            //     // Call your API function here
+                            //     fetchserial(e.target.value)
 
-                                setpurchase_data("");
-                                setValue(prevState => ({
-                                  ...prevState,
-                                  model: ""
-                                }));
-                              }
-                            }}
+                            //     setpurchase_data("");
+                            //     setValue(prevState => ({
+                            //       ...prevState,
+                            //       model: ""
+                            //     }));
+                            //   }
+                            // }}
                             onKeyDown={handleKeyDown}
                             className="form-control"
                             placeholder="Enter.."
@@ -2030,7 +2051,11 @@ export function Registercomplaint(params) {
                       <div className="col-md-3">
                         <div className="mb-3">
                           <label htmlFor="exampleFormControlInput1" className="form-label">Pincode <span className="text-danger">*</span></label>
-                          <input type="number" className="form-control" value={value.pincode} onKeyDown={handleKeyDown} name="pincode" onChange={onHandleChange} placeholder="" />
+                          <input type="number" className="form-control" value={value.pincode} onKeyDown={handleKeyDown} name="pincode" onChange={(e) =>{
+                                if (e.target.value.length <= 6) {
+                                  onHandleChange(e);
+                                }
+                          }} placeholder="" />
                           {errors.pincode && <span style={{ fontSize: "12px" }} className="text-danger">{errors.pincode}</span>}
                         </div>
                       </div>
@@ -2174,11 +2199,11 @@ export function Registercomplaint(params) {
                 <div className="card mb-3" id="productInfo">
                   <div className="card-body">
 
-                    <h4 className="pname">Master Service Partner</h4>
+                    <h4 className="pname">Master Service Partner {errors.master_service_partner && <span style={{ fontSize: "12px" }} className="text-danger">{errors.master_service_partner}</span>}</h4>
                     <p>{locations.franchiseem}</p>
 
 
-                    <h4 className="pname">Child Service Partner</h4>
+                    <h4 className="pname">Child Service Partner {errors.child_service_partner && <span style={{ fontSize: "12px" }} className="text-danger">{errors.child_service_partner}</span>}</h4>
                     <p>{locations.childfranchiseem}</p>
 
                   </div>

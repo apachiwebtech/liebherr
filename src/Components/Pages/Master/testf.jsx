@@ -885,7 +885,7 @@ export function Complaintview(params) {
 
     try {
       const response = await axiosInstance.get(
-        `${Base_Url}/getserial/${value || value.serial_no}`, {
+        `${Base_Url}/getcheckserial/${value || value.serial_no}`, {
         headers: {
           Authorization: token, // Send token in headers
         },

@@ -21,6 +21,15 @@ const Complaintreport = () => {
   const token = localStorage.getItem("token");
   const licare_code = localStorage.getItem("licare_code");
 
+
+  function excelformatDate(dateStr) {
+    const date = new Date(dateStr);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  }
+
   const fetchData = async () => {
     setError(''); // Clear any previous errors
   
@@ -52,7 +61,8 @@ const Complaintreport = () => {
         // Format date fields
         const formattedData = response.data.map(item => ({
           ...item,
-          ticket_date: item.ticket_date ? new Date(item.ticket_date).toLocaleDateString('en-GB') : '', // Change format as neededfield
+          ticket_date: item.ticket_date ? excelformatDate(item.ticket_date) : '',
+          purchase_date : item.purchase_date ? excelformatDate(item.purchase_date) : ''
         }));
   
         // Extract and set column names dynamically

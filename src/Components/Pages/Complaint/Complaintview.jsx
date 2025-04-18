@@ -21,7 +21,13 @@ import DatePicker from "react-datepicker";
 import Jobcardpdf from "../Reports/Jobcardpdf";
 import { pdf } from '@react-pdf/renderer';
 import MyDocument8 from "../Reports/MyDocument8";
-
+import EditIcon from '@mui/icons-material/Edit';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import Button from '@mui/material/Button';
 export function Complaintview(params) {
 
   const token = localStorage.getItem("token");
@@ -31,12 +37,13 @@ export function Complaintview(params) {
   const [quotation, setQuotation] = useState([]);
   const [activity, setactivity] = useState([]);
   const [engremark, setEngRemark] = useState([]);
-  const [model, setModel] = useState('');
   let { complaintid } = useParams();
-  const [data, setData] = useState([])
+  const [open, setOpen] = React.useState(false);
+  const [open2, setOpen2] = React.useState(false);
   const [warranty_status_data, setWarranty_status_data] = useState('OUT OF WARRANTY')
   const uniqueParts = new Set();
   const [purchase_date, setpurchase_date] = useState('')
+  const [dealercustid, setDealercust] = useState('')
   try {
     complaintid = complaintid.replace(/-/g, '+').replace(/_/g, '/');
     const bytes = CryptoJS.AES.decrypt(complaintid, secretKey);
@@ -135,17 +142,81 @@ export function Complaintview(params) {
   const [GroupDefectsite, setGroupDefectsite] = useState([]);
   const [GroupDefecttype, setGroupDefecttype] = useState([]);
   const [inputValue, setInputValue] = useState("");
-  const [spare12, setSpare12] = useState([]) // for quatation pdf
   const [cspdata, setCsp] = useState({}) // for quatation pdf
   const [show, setShow] = useState(false)
-  const [show1, setShow1] = useState(false)
-  const [show2, setShow2] = useState(false)
-  const [show3, setShow3] = useState(false)
   const [TicketUpdateSuccess, setTicketUpdateSuccess] = useState({
     message: '',
     visible: false,
     type: 'success' // can be 'success' or 'error'
   });
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    window.location.reload()
+    setOpen(false);
+  };
+  const handleClickOpen2 = () => {
+    setOpen2(true);
+  };
+
+  const handleClose2 = () => {
+    window.location.reload()
+    setOpen(false);
+  };
+
+  //update serial no
+  const handleupdateserial = () => {
+
+    if(String(complaintview.serial_no).length !== 9) {
+      alert("Serial no should be 9 digits!");
+      return;
+    }
+
+    const data = {
+      serial : complaintview.serial_no,
+      ticket_no : complaintview.ticket_no,
+      modelnumber : complaintview.ModelNumber,
+    }
+     
+    axiosInstance.post(`${Base_Url}/updateserialno` , data , {
+      headers : {
+        Authorization : token
+      }
+    })
+    .then((res) =>{
+      setOpen(false)
+      fetchComplaintview(complaintid)
+    })
+    .catch((err) =>{
+      console.log(err)
+    })
+  };
+
+  //update purchase date
+  const handleupdatepurchase = () => {
+
+    const data = {
+      ticket_no : complaintview.ticket_no,
+      purchase_date : complaintview.purchase_date,
+      warrenty_status : complaintview.warranty_status,
+    }
+     
+    axiosInstance.post(`${Base_Url}/updatepurchasedate` , data , {
+      headers : {
+        Authorization : token
+      }
+    })
+    .then((res) =>{
+      setOpen2(false)
+      fetchComplaintview(complaintid)
+    })
+    .catch((err) =>{
+      console.log(err)
+    })
+  };
 
 
   const handlefeilddatechange = (date) => {
@@ -225,6 +296,8 @@ export function Complaintview(params) {
 
 
   const getDateAfterOneYear = (value) => {
+
+    console.log(value,"purchase")
     try {
       // Ensure value is in a recognized format
       const purchase_date = new Date(value);
@@ -1166,19 +1239,36 @@ export function Complaintview(params) {
           }));
 
         }
-        else if (serialData.salutation == 'Dl' && serialData.SerialStatus == 'Inactive' ) {
+        else if (serialData.salutation == 'Dl' ) {
           alert("Serial no transfer to customer")
           setallocation('Available');
+          setDealercust(serialData.customer_id)
+
+          const purchaseDate = new Date(serialData.purchase_date);
+          if (!isNaN(purchaseDate)) {
+            getDateAfterOneYear(purchaseDate);
+          } else {
+            console.error("Invalid purchase_date format", serialData.purchase_date);
+          }
           setComplaintview((prevstate) => ({
             ...prevstate,
             ModelNumber: serialData.ModelNumber,
+            purchase_date: serialData.purchase_date
           }));
         }
         else if (serialData.customer_id == complaintview.customer_id) {
           alert("Serial no matched");
+
+          const purchaseDate = new Date(serialData.purchase_date);
+          if (!isNaN(purchaseDate)) {
+            getDateAfterOneYear(purchaseDate);
+          } else {
+            console.error("Invalid purchase_date format", serialData.purchase_date);
+          }
           setComplaintview((prevstate) => ({
             ...prevstate,
             ModelNumber: serialData.ModelNumber,
+            purchase_date: serialData.purchase_date
           }));
         } else {
           alert("This serial no already allocated");
@@ -1316,6 +1406,12 @@ export function Complaintview(params) {
     }
 
 
+    if (complaintview.serial_no && String(complaintview.serial_no).length !== 9) {
+      alert("Serial number should be exactly 9 digits!");
+      return;
+    }
+    
+    
     if (complaintview.sub_call_status === 'Technician on-route') {
       if (addedEngineers.length === 0) {
         // Handle the case where no engineers are added
@@ -1357,6 +1453,7 @@ export function Complaintview(params) {
           complete_date: complaintview.closed_date,
           customer_mobile: complaintview.customer_mobile,
           customer_id: complaintview.customer_id,
+          dealercustid: dealercustid,
           customer_name: complaintview.customer_name,
           address: complaintview.address,
           region: complaintview.region,
@@ -2279,14 +2376,11 @@ export function Complaintview(params) {
                 <div className="card-body">
                   <div className="row ">
 
-                    {/* <div className="col-md-4">
-                                      <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Model</p>
-                                      <p style={{ fontSize: "14px"}}>{complaintview.ModelNumber}</p>
-                                  </div> */}
+
 
                     <div className="col-md-2">
-                      <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>
-                        Serial No
+                      <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold", display: "flex", alignItems: "center" }}>
+                        Serial No {roleaccess > 4 ? <span className="mx-1"><EditIcon onClick={handleClickOpen} style={{ fontSize: "13px" }} /></span>  : null}
                       </p>
                       {closestatus === "Closed" && subclosestatus === 'Fully' && sserial_no == 0 ? (
                         <p style={{ fontSize: "14px" }}>{complaintview.serial_no} </p>
@@ -2300,10 +2394,48 @@ export function Complaintview(params) {
                           value={complaintview.serial_no || ""}
                           placeholder="Enter Serial No"
                           style={{ fontSize: "14px", width: "100%" }}
-                          onChange={handleModelChange}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            // Allow only numbers and limit to 9 digits
+                            if (/^\d{0,9}$/.test(value)) {
+                              handleModelChange(e);
+                            }
+                          }}
                         />
                       )}
                     </div>
+                    <Dialog
+                      open={open}
+                      onClose={handleClose}
+                      aria-labelledby="alert-dialog-title"
+                      aria-describedby="alert-dialog-description"
+                    >
+                      <DialogTitle id="alert-dialog-title">
+                        {"Update Serial No."}
+                      </DialogTitle>
+                      <DialogContent>
+                      <input
+                          type="text"
+                          className="form-control"
+                          name="serial_no"
+                          value={complaintview.serial_no || ""}
+                          placeholder="Enter Serial No"
+                          style={{ fontSize: "14px", width: "100%" }}
+                              onChange={(e) => {
+                            const value = e.target.value;
+                            // Allow only numbers and limit to 9 digits
+                            if (/^\d{0,9}$/.test(value)) {
+                              handleModelChange(e);
+                            }
+                          }}
+                        />
+                      </DialogContent>
+                      <DialogActions>
+                        <Button onClick={handleupdateserial} autoFocus>
+                          Update 
+                        </Button>
+                      </DialogActions>
+                    </Dialog>
 
 
                     <div className="col-md-3">
@@ -2317,8 +2449,8 @@ export function Complaintview(params) {
 
 
                     <div className="col-md-4">
-                      <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Purchase Date</p>
-                      <p style={{ fontSize: "14px" }}>{purchase_date == null || purchase_date == '' ? <DatePicker
+                      <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Purchase Date {roleaccess > 4 ?<span className="mx-1"><EditIcon onClick={handleClickOpen2} style={{ fontSize: "13px" }} /></span> : null}</p>
+                      <p style={{ fontSize: "14px" }}>{purchase_date == null || purchase_date == '' || purchase_date == 'null' ? <DatePicker
                         selected={complaintview.purchase_date}
                         onChange={(date) => {
 
@@ -2331,9 +2463,39 @@ export function Complaintview(params) {
                         aria-describedby="Anidate"
 
                         maxDate={new Date().toISOString().split("T")[0]}
-                      /> : formatDate(complaintview.purchase_date)}</p>
+                      /> : formatDate(complaintview.purchase_date)} </p>
                     </div>
+                    <Dialog
+                      open={open2}
+                      onClose={handleClose2}
+                      aria-labelledby="alert-dialog-title"
+                      aria-describedby="alert-dialog-description"
+                    >
+                      <DialogTitle id="alert-dialog-title">
+                        {"Update Serial No."}
+                      </DialogTitle>
+                      <DialogContent style={{height : "300px"}}>
+                      <DatePicker
+                        selected={complaintview.purchase_date}
+                        onChange={(date) => {
 
+                          getDateAfterOneYear(date);
+                        }}
+                        dateFormat="dd-MM-yyyy"
+                        placeholderText="DD-MM-YYYY"
+                        className='form-control'
+                        name="purchase_date"
+                        aria-describedby="Anidate"
+
+                        maxDate={new Date().toISOString().split("T")[0]}
+                      />
+                      </DialogContent>
+                      <DialogActions>
+                        <Button onClick={handleupdatepurchase} autoFocus>
+                          Update 
+                        </Button>
+                      </DialogActions>
+                    </Dialog>
                     <div className="col-md-3">
                       <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Warranty Status</p>
                       <p style={{ fontSize: "14px" }}>{complaintview.warranty_status ? complaintview.warranty_status : warranty_status_data} </p>
@@ -2381,7 +2543,10 @@ export function Complaintview(params) {
                                       const selectedname = e.target.value; // Get the id
                                       const selectedid = callstatus.find(item => item.Callstatus == selectedname)?.id; // Find the corresponding Callstatus value
                                       getsubcallstatus(selectedid); // Send the id to fetch sub-call statuses
-                                      // Log or use the Callstatus value
+                                      setComplaintview((prev) =>({
+                                        ...prev,
+                                        sub_call_status : ""
+                                      }))
                                       setCallstatusid(selectedname)
                                       setCallid(selectedid)
                                       handleModelChange(e)
@@ -2728,7 +2893,7 @@ export function Complaintview(params) {
                                     className="form-label mp-0"
                                     style={{ fontSize: "14px" }}
                                   >
-                                    <b> Upload Files (Images, Videos, Audios)</b>
+                                    <b> Upload Files (Images, Videos, Audios)<span className="text-danger"> less than 4mb</span></b>
                                   </label>
                                   <input
                                     type="file"
@@ -2741,6 +2906,7 @@ export function Complaintview(params) {
                                     disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
                                     ref={fileInputRef2} // Attach the ref to the input
                                   />
+                                  <span className="text-danger">(.jpg ,.jpeg,.png,.mp3,.mp4,.)</span>
                                 </div>
 
 

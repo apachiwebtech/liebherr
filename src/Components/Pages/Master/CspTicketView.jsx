@@ -54,6 +54,7 @@ export function CspTicketView(params) {
   const [ticketTab, setTicketTab] = useState(JSON.parse(localStorage.getItem('tabticket')) || []);
   const { loaders, axiosInstance } = useAxiosLoader();
   const [errors, setErrors] = useState({})
+  const [dealercustid, setDealercust] = useState('')
   const [complaintview, setComplaintview] = useState({
     ticket_no: '',
     customer_name: '',
@@ -1101,7 +1102,7 @@ export function CspTicketView(params) {
     try {
       const serial = value?.serial_no || value;
 
-      const response = await axios.get(`${Base_Url}/getserial/${serial}`, {
+      const response = await axios.get(`${Base_Url}/getcheckserial/${serial}`, {
         headers: {
           Authorization: token, // Send token in headers
         },
@@ -1117,7 +1118,11 @@ export function CspTicketView(params) {
         return;
       }
 
+
+
+
       const serialData = response.data[0];
+
 
       if (serialData?.ModelNumber) {
         if (!serialData.customer_id) {
@@ -1127,11 +1132,38 @@ export function CspTicketView(params) {
             ...prevstate,
             ModelNumber: serialData.ModelNumber,
           }));
-        } else if (serialData.customer_id == complaintview.customer_id) {
-          alert("Serial no matched");
+
+        }
+        else if (serialData.salutation == 'Dl' ) {
+          alert("Serial no transfer to customer")
+          setallocation('Available');
+          setDealercust(serialData.customer_id)
+
+          const purchaseDate = new Date(serialData.purchase_date);
+          if (!isNaN(purchaseDate)) {
+            getDateAfterOneYear(purchaseDate);
+          } else {
+            console.error("Invalid purchase_date format", serialData.purchase_date);
+          }
           setComplaintview((prevstate) => ({
             ...prevstate,
             ModelNumber: serialData.ModelNumber,
+            purchase_date: serialData.purchase_date
+          }));
+        }
+        else if (serialData.customer_id == complaintview.customer_id) {
+          alert("Serial no matched");
+
+          const purchaseDate = new Date(serialData.purchase_date);
+          if (!isNaN(purchaseDate)) {
+            getDateAfterOneYear(purchaseDate);
+          } else {
+            console.error("Invalid purchase_date format", serialData.purchase_date);
+          }
+          setComplaintview((prevstate) => ({
+            ...prevstate,
+            ModelNumber: serialData.ModelNumber,
+            purchase_date: serialData.purchase_date
           }));
         } else {
           alert("This serial no already allocated");
@@ -1270,6 +1302,12 @@ export function CspTicketView(params) {
     }
 
 
+    if (complaintview.serial_no && String(complaintview.serial_no).length !== 9) {
+      alert("Serial number should be exactly 9 digits!");
+      return;
+    }
+    
+    
     if (complaintview.sub_call_status === 'Technician on-route') {
       if (addedEngineers.length === 0) {
         // Handle the case where no engineers are added
@@ -1310,6 +1348,16 @@ export function CspTicketView(params) {
           ticket_no: complaintview.ticket_no,
           complete_date: complaintview.closed_date,
           customer_mobile: complaintview.customer_mobile,
+          customer_id: complaintview.customer_id,
+          dealercustid: dealercustid,
+          customer_name: complaintview.customer_name,
+          address: complaintview.address,
+          region: complaintview.region,
+          state: complaintview.state,
+          city: complaintview.city,
+          area: complaintview.area,
+          pincode: complaintview.pincode,
+          customer_class: complaintview.customer_class,
           totp: complaintview.totp,
           ticket_type: complaintview.ticket_type,
           ticket_start_date: complaintview.created_date,
@@ -1334,6 +1382,7 @@ export function CspTicketView(params) {
           gas_transportation: complaintview.gas_transportation,
           transportation: complaintview.transportation,
           transportation_charge: complaintview.transportation_charge,
+          allocation: allocation,
           note,
           created_by,
         };
@@ -2231,7 +2280,13 @@ export function CspTicketView(params) {
                         value={complaintview.serial_no || ""}
                         placeholder="Enter Serial No"
                         style={{ fontSize: "14px", width: "100%" }}
-                        onChange={handleModelChange}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          // Allow only numbers and limit to 9 digits
+                          if (/^\d{0,9}$/.test(value)) {
+                            handleModelChange(e);
+                          }
+                        }}
                       />
                     )}
                   </div>
@@ -2313,6 +2368,10 @@ export function CspTicketView(params) {
                                     const selectedid = callstatus.find(item => item.Callstatus == selectedname)?.id; // Find the corresponding Callstatus value
                                     getsubcallstatus(selectedid); // Send the id to fetch sub-call statuses
                                     // Log or use the Callstatus value
+                                    setComplaintview((prev) =>({
+                                      ...prev,
+                                      sub_call_status : ""
+                                    }))
                                     setCallstatusid(selectedname)
                                     setCallid(selectedid)
                                     handleModelChange(e)
