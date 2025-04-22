@@ -156,7 +156,7 @@ const Geocity = () => {
             })
             .catch((error) => {
               if (error.response && error.response.status === 409) {
-                setDuplicateError("Duplicate entry, Geo City already exists!");
+                setDuplicateError("Duplicate entry,  City already exists!");
               }
             });
         } else {
@@ -178,7 +178,7 @@ const Geocity = () => {
             })
             .catch((error) => {
               if (error.response && error.response.status === 409) {
-                setDuplicateError("Duplicate entry, Geo City already exists!");
+                setDuplicateError("Duplicate entry,  City already exists!");
               }
             });
         }
@@ -222,7 +222,7 @@ const Geocity = () => {
   const validateForm = () => {
     const newErrors = {};
     if (!formData.title.trim()) {
-      newErrors.title = "Geo City Field is required.";
+      newErrors.title = " City Field is required.";
     }
     if (!formData.country_id) {
       newErrors.country_id = "Country selection is required.";
@@ -420,7 +420,7 @@ const Geocity = () => {
                         htmlFor="geostate_id"
                         className="form-label pb-0 dropdown-label"
                       >
-                        Geo State<span className="text-danger">*</span>
+                        State<span className="text-danger">*</span>
                       </label>
                       <select
                         className="form-select dropdown-select"
@@ -428,7 +428,7 @@ const Geocity = () => {
                         value={formData.geostate_id}
                         onChange={handleChange}
                       >
-                        <option value="">Select Geo State</option>
+                        <option value="">Select  State</option>
                         {geoStates.map((geoState) => (
                           <option key={geoState.id} value={geoState.id}>
                             {geoState.title}
@@ -472,7 +472,7 @@ const Geocity = () => {
                     {/* Region Input */}
                     <div className="form-group">
                       <label htmlFor="geoStateInput" className="input-field">
-                        Geo City<span className="text-danger">*</span>
+                         City<span className="text-danger">*</span>
                       </label>
                       <input
                         type="text"
@@ -546,9 +546,9 @@ const Geocity = () => {
                         <th scope="col" width="10%" className="text-center">#</th>
                         <th scope="col" width="11%" className="text-center">Country</th>
                         <th scope="col" width="10%" className="text-center">Region</th>
-                        <th scope="col" width="19%" className="text-center">Geo State</th>
+                        <th scope="col" width="19%" className="text-center">State</th>
                         <th scope="col" width="19%" className="text-center">District</th>
-                        <th scope="col" width="19%" className="text-center">Geo City</th>
+                        <th scope="col" width="19%" className="text-center"> City</th>
                        {roleaccess > 3 ?<th scope="col" width="25%" className='text-center'>Actions</th> : null}
                       </tr>
                     </thead>

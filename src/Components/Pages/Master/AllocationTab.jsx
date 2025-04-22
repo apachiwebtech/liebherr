@@ -32,8 +32,7 @@ function AllocationTab() {
     const data = {
       role: decryptedRole,
       allocationpage: '48',
-      shipmentfgpage: '49',
-      shipmentpartpage: '50',
+     
     }
 
 
@@ -100,30 +99,7 @@ function AllocationTab() {
                       </Link>
                     </li>
                   }
-                  {status.shipmentfgpage == 1 &&
-                    <li className="nav-item">
-                      <Link to="/shipment_fg">
-                        <button
-                          className={`nav-link ${activeTab === '/shipment_fg' ? 'active' : ''}`}
-                          onClick={() => setActiveTab('/shipment_fg')}
-                        >
-                          Shipment FG
-                        </button>
-                      </Link>
-                    </li>
-                  }
-                  {status.shipmentpartpage == 1 &&
-                    <li className="nav-item">
-                      <Link to="/shipmentparts">
-                        <button
-                          className={`nav-link ${activeTab === '/shipmentparts' ? 'active' : ''}`}
-                          onClick={() => setActiveTab('/shipmentparts')}
-                        >
-                          Shipment Parts
-                        </button>
-                      </Link>
-                    </li>
-                  }
+                 
 
                   {/* <li className="nav-item">
                     <Link to="/business_partner">

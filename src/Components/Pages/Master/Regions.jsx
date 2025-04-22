@@ -81,7 +81,7 @@ const Location = () => {
     const value = e.target.value.toLowerCase();
     setSearchTerm(value);
     const filtered = users.filter(
-      (user) => user.Lhiuser && user.Lhiuser.toLowerCase().includes(value) ||
+      (user) => user.title && user.title.toLowerCase().includes(value) ||
       user.country_title && user.country_title.toLowerCase().includes(value)
     );
     setFilteredUsers(filtered);

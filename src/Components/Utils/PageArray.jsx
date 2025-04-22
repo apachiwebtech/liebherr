@@ -11,7 +11,7 @@ export const ReportsArray = "46,47,52,53"
 
 export const locationArray = "1,2,3,4,5,6"
 
-export const PincodeAlloArray = "48,49,50"
+export const PincodeAlloArray = "48"
 
 export const ProductArray = "7,8,9,10,11,12,13"
 
@@ -41,6 +41,7 @@ export const FeedbackReport = '52'
 
 export const AnnextureReport = '53'
 
+export const ShipmentArray = "49,50"
 
 
 

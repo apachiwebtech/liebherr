@@ -408,7 +408,7 @@ const Area = () => {
                         htmlFor="geostate_id"
                         className="form-label pb-0 dropdown-label"
                       >
-                        Geo State<span className="text-danger">*</span>
+                        State<span className="text-danger">*</span>
                       </label>
                       <select
                         className="form-select dropdown-select"
@@ -533,7 +533,7 @@ const Area = () => {
                         <th scope="col" width="10%" className='text-center'>#</th>
                         <th scope="col" width="14%" className='text-center'>Country</th>
                         <th scope="col" width="14%" className='text-center'>Region</th>
-                        <th scope="col" width="14%" className='text-center'>Geo State</th>
+                        <th scope="col" width="14%" className='text-center'> State</th>
                         <th scope="col" width="14%" className='text-center'>District</th>
                         {roleaccess > 3 ?<th scope="col" width="15%" className='text-center'>Edit</th> : null}
                         {roleaccess > 4 ?<th scope="col" width="15%" className='text-center'>Delete</th> : null}

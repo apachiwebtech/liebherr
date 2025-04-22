@@ -13,7 +13,7 @@ import axios from "axios";
 import { Base_Url, secretKey } from '../../Utils/Base_Url';
 
 function ProMaster() {
-  const [activeTab, setActiveTab] = useState('/category');
+  const [activeTab, setActiveTab] = useState('/products');
   const token = localStorage.getItem("token");
   const [status, setStatus] = useState([])
 
@@ -109,7 +109,7 @@ function ProMaster() {
                 }}
               >
                 <ul className="nav nav-tabs ">
-                  {status.categorypage == 1 &&
+                  {/* {status.categorypage == 1 &&
                     <li className="nav-item">
                       <Link to={`/category`}><button
                         className={`nav-link ${activeTab === "/category" ? "active" : "onClick={() => setActiveTab('category')}"
@@ -130,7 +130,7 @@ function ProMaster() {
                         SUBCATEGORY
                       </button></Link>
                     </li>
-                  }
+                  } */}
                   {status.producttypepage == 1 &&
                     <li className="nav-item">
                       <Link to={`/producttype`}><button

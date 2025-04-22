@@ -11729,8 +11729,10 @@ app.post('/getpageroledata', authenticateToken, async (req, res) => {
     masterpageid, ticketpageid, quotationpageid, enquirypageid, reportpageid,
     locationpageid, pincodepageid, productpageid, customerpageid, bussinesspageid,
     franchpageid, callstatuspageid, lhiuserpageid, servicepageid, faultpageid,
-    ratepageid, sparearray, ticketreportid, claimreportid, feedbackreportid, annexureid
+    ratepageid, sparearray, ticketreportid, claimreportid, feedbackreportid, annexureid,shipmentpageid
   } = req.body;
+
+
 
   // Function to convert comma-separated strings into arrays
   const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
@@ -11757,7 +11759,8 @@ app.post('/getpageroledata', authenticateToken, async (req, res) => {
     ticketreport: parseIds(ticketreportid),
     claimreport: parseIds(claimreportid),
     feedbackreport: parseIds(feedbackreportid),
-    annexure: parseIds(annexureid)
+    annexure: parseIds(annexureid),
+    shipmentpage: parseIds(shipmentpageid)
   };
 
   try {
@@ -11869,6 +11872,60 @@ app.post('/getallocationroledata', authenticateToken, async (req, res) => {
   // Convert all page IDs from strings to arrays
   const pageTypes = {
     allocationpage: parseIds(allocationpage),
+    shipmentfgpage: parseIds(shipmentfgpage),
+    shipmentpartpage: parseIds(shipmentpartpage),
+
+  };
+
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+    request.input("roleid", sql.Int, role);
+
+    let queryParts = [];
+    let index = 0;
+
+    for (const [pageType, pageIds] of Object.entries(pageTypes)) {
+      if (pageIds.length > 0) {
+        let pageParams = pageIds.map((_, i) => `@pageid${index + i}`).join(",");
+        queryParts.push(`
+          SELECT '${pageType}' AS pageType, COUNT(*) AS count
+          FROM pagerole
+          WHERE roleid = @roleid AND pageid IN (${pageParams}) AND accessid > 1
+        `);
+        pageIds.forEach((id, i) => request.input(`pageid${index + i}`, sql.Int, id));
+        index += pageIds.length;
+      }
+    }
+
+    if (queryParts.length === 0) {
+      return res.json(Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])));
+    }
+
+    const query = queryParts.join(" UNION ALL ");
+    const result = await request.query(query);
+
+    // Convert results to a key-value format
+    const response = Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])); // Default all pages to 0
+
+    result.recordset.forEach(row => {
+      response[row.pageType] = row.count > 0 ? 1 : 0;
+    });
+
+    return res.json(response);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
+app.post('/getshhipmentroledata', authenticateToken, async (req, res) => {
+  const { role, shipmentfgpage, shipmentpartpage } = req.body;
+
+  // Function to convert comma-separated strings into arrays
+  const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
+
+  // Convert all page IDs from strings to arrays
+  const pageTypes = {
     shipmentfgpage: parseIds(shipmentfgpage),
     shipmentpartpage: parseIds(shipmentpartpage),
 

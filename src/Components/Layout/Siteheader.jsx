@@ -5,7 +5,7 @@ import { Avatar } from '@mui/material';
 import { App_Url, Base_Url, secretKey } from '../Utils/Base_Url';
 import CryptoJS from 'crypto-js';
 import axios from "axios";
-import { AllMasterpage, AnnextureReport, BussinessArray, CallStatusArray, ClaimReport, customerArray, EnquiryArray, FaultArray, FeedbackReport, FranchiseArray, LhiArray, locationArray, PincodeAlloArray, ProductArray, QuotationArray, RateCardArray, ReportsArray, ServiceContract, SpareArray, TicketArray, TicketReport } from '../Utils/PageArray';
+import { AllMasterpage, AnnextureReport, BussinessArray, CallStatusArray, ClaimReport, customerArray, EnquiryArray, FaultArray, FeedbackReport, FranchiseArray, LhiArray, locationArray, PincodeAlloArray, ProductArray, QuotationArray, RateCardArray, ReportsArray, ServiceContract, SpareArray, TicketArray, TicketReport,ShipmentArray } from '../Utils/PageArray';
 
 
 export function Siteheader() {
@@ -75,7 +75,8 @@ export function Siteheader() {
       ticketreportid: TicketReport,
       claimreportid: ClaimReport,
       feedbackreportid: FeedbackReport,
-      annexureid: AnnextureReport
+      annexureid: AnnextureReport,
+      shipmentpageid: ShipmentArray,
     }
 
 
@@ -147,7 +148,7 @@ export function Siteheader() {
                 }
                 {status.productpage == 1 &&
                   <li>
-                    <Link className="dropdown-item" to="/category">Product Master</Link></li>
+                    <Link className="dropdown-item" to="/products">Product Master</Link></li>
                 }
                 {status.customerpage == 1 &&
                   <li>
@@ -175,8 +176,11 @@ export function Siteheader() {
                     <Link className="dropdown-item" to="/ratecard">Rate card Matrix</Link></li>}
                 {status.sparearray == 1 &&
                   <li><Link className="dropdown-item" to="/productspare">Product & Spare mapping master</Link></li>
-
                 }
+                 {status.shipmentpage == 1 &&
+                  <li><Link className="dropdown-item" to="/shipment_fg">Shipment Filters</Link></li>
+                }
+               
 
               </ul>
             </li>}

@@ -334,9 +334,9 @@ const Pincode = () => {
     const worksheet = XLSX.utils.json_to_sheet(filteredPincodes.map(user => ({
       "Country": user.country_title,
       "Region": user.region_title,
-      "Geo State": user.geostate_title,
+      " State": user.geostate_title,
       "District": user.area_title,
-      "Geo City": user.geocity_title,
+      "City": user.geocity_title,
       "Pincode": user.pincode
       // Add fields you want to export
     })));
@@ -421,9 +421,9 @@ const Pincode = () => {
                     </div> */}
                     {renderDropdown("country_id", countries, "Country")}
                     {renderDropdown("region_id", regions, "Region")}
-                    {renderDropdown("geostate_id", geoStates, "Geo State")}
+                    {renderDropdown("geostate_id", geoStates, " State")}
                     {renderDropdown("area_id", areas, "District")}
-                    {renderDropdown("geocity_id", geoCities, "Geo City")}
+                    {renderDropdown("geocity_id", geoCities, "City")}
 
                     <div className="mb-3">
                       <label htmlFor="pincodeInput" className="input-field">
@@ -504,9 +504,9 @@ const Pincode = () => {
                         </th>
                         <th scope="col" width="12%" className='text-center'>Country</th>
                         <th scope="col" width="12%" className='text-center'>Region</th>
-                        <th scope="col" width="11%" className='text-center'>Geo State</th>
+                        <th scope="col" width="11%" className='text-center'>State</th>
                         <th scope="col" width="12%" className='text-center'>District</th>
-                        <th scope="col" width="11%" className='text-center'>Geo City</th>
+                        <th scope="col" width="11%" className='text-center'>City</th>
                         <th scope="col" width="12%" className='text-center'>Pincode</th>
                         {roleaccess > 3 ?<th scope='col' width="15%" className='text-center'>Edit</th> : null}
                         {roleaccess > 4 ?<th scope='col' width="15%" className='text-center'>Delete</th> : null}

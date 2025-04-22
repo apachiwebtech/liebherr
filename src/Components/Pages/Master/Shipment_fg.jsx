@@ -11,6 +11,7 @@ import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 import { useDispatch } from "react-redux";
 import { getRoleData } from "../../Store/Role/role-action";
 import AllocationTab from './AllocationTab';
+import ShipmentFilters from './ShipmentFilters';
 
 export function Shipment_fg(params) {
     const { loaders, axiosInstance } = useAxiosLoader();
@@ -222,7 +223,7 @@ export function Shipment_fg(params) {
 
     return (
         <div className="tab-content">
-            < AllocationTab />
+            < ShipmentFilters />
             {(loaders || loading) && (
                 <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     <SyncLoader loading={loaders || loading} color="#FFFFFF" />

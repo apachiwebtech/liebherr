@@ -237,15 +237,15 @@ const Geostate = () => {
     const worksheet = XLSX.utils.json_to_sheet(filteredUsers.map(user => ({
       "Country": user.country_title,
       "Region": user.region_title,
-      "Geostate": user.title
+      "state": user.title
       // Add fields you want to export
     })));
 
     // Append the worksheet to the workbook
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Geostate");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "state");
 
     // Export the workbook
-    XLSX.writeFile(workbook, "Geostate.xlsx");
+    XLSX.writeFile(workbook, "state.xlsx");
   };
 
   // export to excel end 
@@ -319,7 +319,7 @@ const Geostate = () => {
 
                     {/* Region Input */}
                     <div className="form-group">
-                      <label htmlFor="geoStateInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>Geo State<span className="text-danger">*</span></label>
+                      <label htmlFor="geoStateInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>State<span className="text-danger">*</span></label>
                       <input
                         type="text"
                         className="form-control"
@@ -379,7 +379,7 @@ const Geostate = () => {
                         <th scope='col' width="10%" className='text-center'>#</th>
                         <th scope='col' width="20%" className='text-left'>Country</th>
                         <th scope='col' width="20%" className='text-left'>Region</th>
-                        <th scope='col' width="20%" className='text-left'>Geo State</th>
+                        <th scope='col' width="20%" className='text-left'> State</th>
                         {roleaccess > 3 ? <th scope='col' width="15%" className='text-center'>Edit</th> : null}
                         {roleaccess > 4 ? <th scope='col' width="15%" className='text-center'>Delete</th> : null}
                       </tr>
