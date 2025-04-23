@@ -122,7 +122,7 @@ function Ratecardtabs() {
                             }`}
 
                         >
-                          Master Warrenty
+                          MASTER WARRANTY
                         </button>
                       </li
                       ></Link>
@@ -135,7 +135,7 @@ function Ratecardtabs() {
                             }`}
 
                         >
-                          Post Sale Warrenty
+                          POST SALE WARRANTY
                         </button>
                       </li
                       ></Link>

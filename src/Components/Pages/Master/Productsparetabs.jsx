@@ -99,7 +99,7 @@ function Productsparetabs() {
                     <Link to={`/productspare`}>
                       <li className="nav-item">
                       <button className={`nav-link ${activeTab === "/productspare" ? "active" : ""}`}>
-                          PRODUCT SPARE
+                          SERVICE BOM
                         </button>
                       </li>
                     </Link>

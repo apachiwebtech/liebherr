@@ -166,7 +166,8 @@ export function Servicecontractlist(params) {
                         Authorization: token, // Send token in headers
                     },
                 });
-                window.location.reload();
+                // window.location.reload();
+                fetchServicecontractlist();
             }
         } catch (error) {
             console.error('Error deleting user:', error);

@@ -19,6 +19,7 @@ import CryptoJS from 'crypto-js';
 import { useDispatch } from "react-redux";
 import { useSelector } from 'react-redux';
 import { getRoleData } from '../Store/Role/role-action';
+import Engineertabs from '../Pages/Master/Engineertabs';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -149,7 +150,7 @@ export function Engineers(params) {
   return (
     <>
       {roleaccess > 1 ?<div className="row mp0">
-        <Franchisemaster />
+        <Engineertabs />
         <div className="col-md-12 col-12">
           <table className="table">
             <thead>

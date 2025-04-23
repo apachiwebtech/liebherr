@@ -11,6 +11,7 @@ import CryptoJS from 'crypto-js';
 import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 import { useDispatch } from "react-redux";
 import { getRoleData } from "../../Store/Role/role-action";
+import Engineertabs from './Engineertabs';
 export function Engineerlist(params) {
     const { loaders, axiosInstance } = useAxiosLoader();
     const [Engineerdata, setEngineerdata] = useState([]);
@@ -257,7 +258,7 @@ export function Engineerlist(params) {
 
     return (
         <div className="tab-content">
-            <Franchisemaster />
+            <Engineertabs />
             {loaders && (
                 <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     <SyncLoader loading={loaders} color="#FFFFFF" />

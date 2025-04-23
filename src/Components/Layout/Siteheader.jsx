@@ -5,7 +5,7 @@ import { Avatar } from '@mui/material';
 import { App_Url, Base_Url, secretKey } from '../Utils/Base_Url';
 import CryptoJS from 'crypto-js';
 import axios from "axios";
-import { AllMasterpage, AnnextureReport, BussinessArray, CallStatusArray, ClaimReport, customerArray, EnquiryArray, FaultArray, FeedbackReport, FranchiseArray, LhiArray, locationArray, PincodeAlloArray, ProductArray, QuotationArray, RateCardArray, ReportsArray, ServiceContract, SpareArray, TicketArray, TicketReport,ShipmentArray } from '../Utils/PageArray';
+import { AllMasterpage, AnnextureReport, BussinessArray, CallStatusArray, ClaimReport, customerArray, EnquiryArray, FaultArray, FeedbackReport, FranchiseArray, LhiArray, locationArray, PincodeAlloArray, ProductArray, QuotationArray, RateCardArray, ReportsArray, ServiceContract, SpareArray, TicketArray, TicketReport, ShipmentArray ,EngineerArray} from '../Utils/PageArray';
 
 
 export function Siteheader() {
@@ -77,6 +77,7 @@ export function Siteheader() {
       feedbackreportid: FeedbackReport,
       annexureid: AnnextureReport,
       shipmentpageid: ShipmentArray,
+      engineermasterpageid : EngineerArray,
     }
 
 
@@ -159,7 +160,10 @@ export function Siteheader() {
                 {status.franchpage == 1 &&
                   <li>
                     <Link className="dropdown-item" to="/Franchisemasterlist">Franchise Master</Link></li>}
-                {status.callstatuspage == 1 &&
+                {status.franchpage == 1 &&
+                  <li>
+                    <Link className="dropdown-item" to="/Engineerlist">Engineer Master</Link></li>}
+                {status.engineermasterpage == 1 &&
                   <li>
                     <Link className="dropdown-item" to="/callstatus">Call Status Code Master</Link></li>}
                 {status.lhiuserpage == 1 &&
@@ -175,12 +179,12 @@ export function Siteheader() {
                   <li>
                     <Link className="dropdown-item" to="/ratecard">Rate card Matrix</Link></li>}
                 {status.sparearray == 1 &&
-                  <li><Link className="dropdown-item" to="/productspare">Product & Spare mapping master</Link></li>
+                  <li><Link className="dropdown-item" to="/productspare">Service BOM</Link></li>
                 }
-                 {status.shipmentpage == 1 &&
+                {status.shipmentpage == 1 &&
                   <li><Link className="dropdown-item" to="/shipment_fg">Shipment Filters</Link></li>
                 }
-               
+
 
               </ul>
             </li>}

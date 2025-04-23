@@ -48,9 +48,7 @@ function MasterFranchiseTabs() {
       masterfpage: '20',
       childfpage: '21',
       childlistpage: '22',
-      engineerpage: '23',
-      engineerlistpage: '24',
-      engineerapprovepage: '56',
+     
     };
 
     axios.post(`${Base_Url}/getfranchiseroledata`, data, {

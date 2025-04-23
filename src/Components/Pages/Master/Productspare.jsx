@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Base_Url, secretKey } from "../../Utils/Base_Url";
 import { Autocomplete, TextField } from "@mui/material";
@@ -15,7 +15,10 @@ import Productsparetabs from "./Productsparetabs";
 export function Productspare() {
     const [text, setText] = useState("");
     const { loaders, axiosInstance } = useAxiosLoader();
+    const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState({});
+    const [filteredData, setFilteredData] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
     const [excelData, setExcelData] = useState([]);
     const [loader, setLoader] = useState(false);
     const [spareParts, setSpareParts] = useState([]); // Store fetched spare parts
@@ -23,6 +26,21 @@ export function Productspare() {
     const [selectmodel, setSelectedModel] = useState(null);
     const [isSubmitted, setIsSubmitted] = useState(false); // Track submission
     const token = localStorage.getItem("token");
+    const [pageSize, setPageSize] = useState(10);
+    const [totalCount, setTotalCount] = useState(0);
+
+    const totalPages = Math.ceil(totalCount / pageSize);
+
+    const handlePageChange = (page) => {
+
+        setCurrentPage(page);
+        fetchSpareListing(page); // Fetch data for the new page
+    };
+    const [searchFilters, setSearchFilters] = useState({
+        ProductCode: '',
+        title: '',
+        ItemDescription: ''
+    });
 
     const fetchModelno = async () => {
         try {
@@ -43,11 +61,23 @@ export function Productspare() {
         }
     };
 
-    const fetchSpareListing = async () => {
+    const fetchSpareListing = async (page) => {
         try {
+            const params = new URLSearchParams();
+            // Add the page and pageSize parameters
+            params.append('page', page || 1); // Current page number
+            params.append('pageSize', pageSize); // Page size
+
+
+            // Add all filters to params if they have values
+            Object.entries(searchFilters).forEach(([key, value]) => {
+                if (value) { // Only add if value is not empty
+                    params.append(key, value);
+                }
+            });
             const ModelNumber = selectmodel.ModelNumber
             console.log("Fetching spare parts for model number:", ModelNumber);
-            const response = await axiosInstance.get(`${Base_Url}/getsparelisting`, {
+            const response = await axiosInstance.get(`${Base_Url}/getsparelisting?${params.toString()}`, {
                 params: { ModelNumber },
                 headers: { Authorization: token },
             });
@@ -57,10 +87,71 @@ export function Productspare() {
             const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
             console.log("Response data:", decryptedData);
             setSpareParts(decryptedData);
+            setFilteredData(decryptedData);
+            setTotalCount(response.data.totalCount);
         } catch (error) {
             console.error("API Error:", error);
             alert("Failed to fetch spare listing. Please try again.");
+            setSpareParts([]);
+            setFilteredData([]);
         }
+        finally {
+            setLoading(false);  // Stop loader after data is loaded or in case of error
+        }
+    };
+
+    const fetchFilteredData = async () => {
+        try {
+            const params = new URLSearchParams();
+
+            // Add all filters to params
+            Object.entries(searchFilters).forEach(([key, value]) => {
+                if (value) { // Only add if value is not empty
+                    params.append(key, value);
+                }
+            });
+            const ModelNumber = selectmodel.ModelNumber
+
+            console.log('Sending params:', params.toString()); // Debug log
+
+            const response = await axiosInstance.get(`${Base_Url}/getsparelisting?${params}`, {
+                params: { ModelNumber },
+                headers: {
+                    Authorization: token,
+                },
+            }
+            );
+            // Decrypt the response data
+            const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+            const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+            const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+            setSpareParts(decryptedData);
+            setFilteredData(decryptedData);
+            setTotalCount(response.data.totalCount);
+        } catch (error) {
+            console.error('Error fetching filtered data:', error);
+            setFilteredData([]);
+        }
+    };
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+
+        setSearchFilters(prev => ({
+            ...prev,
+            [name]: value
+        }));
+
+    };
+
+    const applyFilters = () => {
+        console.log('Applying filters:', searchFilters); // Debug log
+        fetchFilteredData();
+
+        setSearchFilters({
+            ProductCode: '',
+            title: '',
+            ItemDescription: ''
+        });
     };
 
 
@@ -281,9 +372,9 @@ export function Productspare() {
                 </div>
             )}
             <Productsparetabs></Productsparetabs>
-            
-            {roleaccess > 1 ?<div className="col-4">
-                
+
+            {roleaccess > 1 ? <div className="col-4">
+
                 <div className="card mt-3 mb-3">
                     <div className="card-body">
                         <form onSubmit={handleSubmit} className="row">
@@ -323,7 +414,7 @@ export function Productspare() {
 
                     </div>
                 </div>
-                {roleaccess > 2 ?<div className="card mt-3 mb-3">
+                {roleaccess > 2 ? <div className="card mt-3 mb-3">
                     <div className="card-body">
                         <div className="row" style={{ marginTop: '10px' }}>
                             <input type="file" accept=".xlsx, .xls" onChange={importexcel} style={{ width: '230px', marginTop: '5px', marginLeft: '20px' }} />
@@ -342,16 +433,100 @@ export function Productspare() {
                 {isSubmitted && spareParts.length > 0 && ( // Show table only after submission
                     <div className="card mt-3 mb-3">
                         <div className="card-body">
-                            <div className="row">
-                                <h5 style={{ width: "200px" }}>Spare Parts Listing</h5>
+                            <div className="row mb-3">
 
-                                <button
-                                    className="btn btn-primary"
-                                    onClick={exportToExcel}
-                                    style={{ width: "20%", marginLeft: '560px' }}
-                                >
-                                    Export to Excel
-                                </button>
+                                <div className="col-md-2">
+                                    <div className="form-group">
+                                        <label>Product Code</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="ProductCode"
+                                            value={searchFilters.ProductCode}
+                                            placeholder="Search by Product Code"
+                                            onChange={handleFilterChange}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="col-md-2">
+                                    <div className="form-group">
+                                        <label>Name</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="title"
+                                            value={searchFilters.title}
+                                            placeholder="Search by Name"
+                                            onChange={handleFilterChange}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="col-md-2">
+                                    <div className="form-group">
+                                        <label>Description </label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="ItemDescription"
+                                            value={searchFilters.ItemDescription}
+                                            placeholder="Search by Description"
+                                            onChange={handleFilterChange}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="row mb-3">
+                                <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
+                                    <div className="form-group">
+                                        <button
+                                            className="btn btn-primary"
+                                            onClick={exportToExcel}
+                                            style={{
+                                                marginLeft: '5px',
+                                            }}
+                                        >
+                                            Export to Excel
+                                        </button>
+                                        <button
+                                            className="btn btn-primary mr-2"
+                                            onClick={applyFilters}
+                                            style={{
+                                                marginLeft: '5px',
+                                            }}
+                                        >
+                                            Search
+                                        </button>
+                                        <button
+                                            className="btn btn-secondary"
+                                            onClick={() => {
+                                           
+                                                applyFilters()
+                                            }}
+                                            style={{
+                                                marginLeft: '5px',
+                                            }}
+                                        >
+                                            Reset
+                                        </button>
+                                        {filteredData.length === 0 && (
+                                            <div
+                                                style={{
+                                                    backgroundColor: '#f8d7da',
+                                                    color: '#721c24',
+                                                    padding: '5px 10px',
+                                                    marginLeft: '10px',
+                                                    borderRadius: '4px',
+                                                    border: '1px solid #f5c6cb',
+                                                    fontSize: '14px',
+                                                    display: 'inline-block'
+                                                }}
+                                            >
+                                                No Record Found
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
                             <table className="table table-striped">
                                 <thead>
@@ -363,16 +538,56 @@ export function Productspare() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {spareParts.map((spare, index) => (
-                                        <tr key={spare.id}>
-                                            <td>{index + 1}</td>
-                                            <td>{spare.title}</td>
-                                            <td>{spare.ItemDescription}</td>
-                                            <td>{spare.ProductCode}</td>
-                                        </tr>
-                                    ))}
+                                    {spareParts.map((spare, index) => {
+                                        const displayIndex = (currentPage - 1) * pageSize + index + 1;
+                                        return (
+                                            <tr key={spare.id}>
+                                                <td>{displayIndex}</td>
+                                                <td>{spare.title}</td>
+                                                <td>{spare.ItemDescription}</td>
+                                                <td>{spare.ProductCode}</td>
+                                            </tr>
+                                        )
+                                    })}
                                 </tbody>
                             </table>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                                <button
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    disabled={currentPage <= 1}
+                                    style={{
+                                        padding: '8px 15px',
+                                        fontSize: '16px',
+                                        cursor: currentPage <= 1 ? 'not-allowed' : 'pointer',
+                                        backgroundColor: currentPage <= 1 ? '#ccc' : '#007bff',
+                                        color: '#fff',
+                                        border: 'none',
+                                        borderRadius: '5px',
+                                        transition: 'background-color 0.3s',
+                                    }}
+                                >
+                                    Previous
+                                </button>
+                                <span style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                                    Page {currentPage} of {totalPages}
+                                </span>
+                                <button
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    disabled={currentPage >= totalPages}
+                                    style={{
+                                        padding: '8px 15px',
+                                        fontSize: '16px',
+                                        cursor: currentPage >= totalPages ? 'not-allowed' : 'pointer',
+                                        backgroundColor: currentPage >= totalPages ? '#ccc' : '#007bff',
+                                        color: '#fff',
+                                        border: 'none',
+                                        borderRadius: '5px',
+                                        transition: 'background-color 0.3s',
+                                    }}
+                                >
+                                    Next
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}

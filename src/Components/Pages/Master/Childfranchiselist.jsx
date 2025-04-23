@@ -157,6 +157,26 @@ export function ChildFranchiselist(params) {
         navigate(`/Childfranchisemaster/${encrypted}`)
     };
 
+    const deleted = async (id) => {
+
+        try {
+            // Add confirmation dialog
+            const isConfirmed = window.confirm("Are you sure you want to delete?");
+
+            // Only proceed with deletion if user clicks "OK"
+            if (isConfirmed) {
+                const response = await axiosInstance.post(`${Base_Url}/deletechildfranchise`, { id }, {
+                    headers: {
+                        Authorization: token, // Send token in headers
+                    },
+                });
+                fetchChildfranchisemasterlist();
+            }
+        } catch (error) {
+            console.error('Error deleting user:', error);
+        }
+    };
+
     useEffect(() => {
         fetchChildfranchisemasterlist();
     }, []);
@@ -431,6 +451,7 @@ export function ChildFranchiselist(params) {
                                             <th width="8%">State</th>
                                             <th width="5%">District</th>
                                             <th width="5%">{roleaccess <= 3 ? "View" : "Edit"}</th>
+                                            {roleaccess > 4 ? <th width="5%">Delete</th> : null}
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -472,6 +493,18 @@ export function ChildFranchiselist(params) {
                                                             </button>
                                                         ) : null}
                                                     </td>
+
+                                                    {roleaccess > 4 ? <td >
+                                                        <button
+                                                            className='btn'
+                                                            onClick={() => deleted(item.id)}
+                                                            title="Delete"
+                                                            style={{ backgroundColor: 'transparent', border: 'none', color: 'red', fontSize: '20px' }}
+                                                            disabled={roleaccess > 4 ? false : true}
+                                                        >
+                                                            <FaTrash />
+                                                        </button>
+                                                    </td> : null}
 
 
 

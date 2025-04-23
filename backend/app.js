@@ -5800,7 +5800,7 @@ app.post("/postengineer",
       // Use the poolPromise to get the connection pool
       const pool = await poolPromise;
 
-     //this is for csp
+      //this is for csp
       const getcount = `SELECT TOP 1 RIGHT(engineer_id, 4) AS last_four_digits FROM awt_engineermaster where employee_code = '${employee_code}'  ORDER BY RIGHT(engineer_id, 4) DESC`;
 
       const countResult = await pool.request().query(getcount);
@@ -5812,7 +5812,7 @@ app.post("/postengineer",
       const newcount = Number(latestQuotation) + 1
 
 
-     //this is for lhi
+      //this is for lhi
       const getlhicount = `SELECT TOP 1 RIGHT(engineer_id, 4) AS last_four_digits FROM awt_engineermaster where employee_code = '${employee_code}'  ORDER BY RIGHT(engineer_id, 4) DESC`;
 
       console.log(getlhicount)
@@ -6593,6 +6593,25 @@ app.get("/requestchildfranchise/:id", authenticateToken, async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "Error fetching child franchise data" });
+  }
+});
+app.post("/deletechildfranchise", authenticateToken, async (req, res) => {
+  const { id } = req.body;
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    // Directly inject `id` into the SQL query (no parameter binding)
+    const sql = `UPDATE awt_childfranchisemaster SET deleted = 1 WHERE id = '${id}'`;
+
+    // Execute the SQL query
+    await pool.request().query(sql);
+
+    return res.json({ message: "Child Franchise deleted successfully!" });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Error updating Child Franchise" });
   }
 });
 // app
@@ -7488,19 +7507,67 @@ app.post("/delmanufacturer", authenticateToken, async (req, res) => {
 // Rate Card code start
 app.get("/getratedata", authenticateToken, async (req, res) => {
   try {
+    const {
+      call_type,
+      class_city,
+      ProductType,
+      ProductLine,
+      ProductClass,
+      page = 1, // Default to page 1 if not provided
+      pageSize = 10, // Default to 10 items per page if not provided
+    } = req.query;
     const pool = await poolPromise;
 
     // SQL query to fetch rate data where deleted is 0
-    const sql = "SELECT * FROM rate_card WHERE deleted = 0";
+    let sql = "SELECT r.* FROM rate_card as r WHERE deleted = 0";
+
+
+    if (call_type) {
+      sql += ` AND r.call_type LIKE '%${call_type}%'`;
+    }
+
+    if (class_city) {
+      sql += ` AND r.class_city LIKE '%${class_city}%'`;
+    }
+
+    if (ProductType) {
+      sql += ` AND r.ProductType LIKE '%${ProductType}%'`;
+    }
+
+    if (ProductLine) {
+      sql += ` AND r.ProductLine LIKE '%${ProductLine}%'`;
+    }
+    if (ProductClass) {
+      sql += ` AND r.ProductClass LIKE '%${ProductClass}%'`;
+    }
+
+    const offset = (page - 1) * pageSize;
+    // Add pagination to the SQL query (OFFSET and FETCH NEXT)
+    sql += ` ORDER BY r.id desc OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
     const result = await pool.request().query(sql);
+    let countSql = `SELECT COUNT(*) as totalCount FROM rate_card where deleted = 0 `;
+    if (call_type) countSql += ` AND call_type LIKE '%${call_type}%'`;
+    if (class_city) countSql += ` AND class_city LIKE '%${class_city}%'`;
+    if (ProductType) countSql += ` AND ProductType LIKE '%${ProductType}%'`;
+    if (ProductLine) countSql += ` AND ProductLine LIKE '%${ProductLine}%'`;
+    if (ProductClass) countSql += ` AND ProductClass LIKE '%${ProductClass}%'`;
+
+
+
+    const countResult = await pool.request().query(countSql);
+    const totalCount = countResult.recordset[0].totalCount;
     // Convert data to JSON string and encrypt it
     const jsonData = JSON.stringify(result.recordset);
     const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
-
-    return res.json({ encryptedData });
+    return res.json({
+      encryptedData,
+      totalCount: totalCount,
+      page,
+      pageSize,
+    });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "An error occurred while fetching rate data" });
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred" });
   }
 });
 // Insert for Ratecard
@@ -11275,7 +11342,7 @@ app.get("/getmsp", authenticateToken, async (req, res) => {
 
 app.post("/finalapproveenginner", authenticateToken, async (req, res) => {
 
-  const { eng_id ,approve_by } = req.body;
+  const { eng_id, approve_by } = req.body;
 
 
 
@@ -11729,7 +11796,7 @@ app.post('/getpageroledata', authenticateToken, async (req, res) => {
     masterpageid, ticketpageid, quotationpageid, enquirypageid, reportpageid,
     locationpageid, pincodepageid, productpageid, customerpageid, bussinesspageid,
     franchpageid, callstatuspageid, lhiuserpageid, servicepageid, faultpageid,
-    ratepageid, sparearray, ticketreportid, claimreportid, feedbackreportid, annexureid,shipmentpageid
+    ratepageid, sparearray, ticketreportid, claimreportid, feedbackreportid, annexureid, shipmentpageid, engineermasterpageid
   } = req.body;
 
 
@@ -11760,7 +11827,8 @@ app.post('/getpageroledata', authenticateToken, async (req, res) => {
     claimreport: parseIds(claimreportid),
     feedbackreport: parseIds(feedbackreportid),
     annexure: parseIds(annexureid),
-    shipmentpage: parseIds(shipmentpageid)
+    shipmentpage: parseIds(shipmentpageid),
+    engineermasterpage: parseIds(engineermasterpageid)
   };
 
   try {
@@ -11874,6 +11942,61 @@ app.post('/getallocationroledata', authenticateToken, async (req, res) => {
     allocationpage: parseIds(allocationpage),
     shipmentfgpage: parseIds(shipmentfgpage),
     shipmentpartpage: parseIds(shipmentpartpage),
+
+  };
+
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+    request.input("roleid", sql.Int, role);
+
+    let queryParts = [];
+    let index = 0;
+
+    for (const [pageType, pageIds] of Object.entries(pageTypes)) {
+      if (pageIds.length > 0) {
+        let pageParams = pageIds.map((_, i) => `@pageid${index + i}`).join(",");
+        queryParts.push(`
+          SELECT '${pageType}' AS pageType, COUNT(*) AS count
+          FROM pagerole
+          WHERE roleid = @roleid AND pageid IN (${pageParams}) AND accessid > 1
+        `);
+        pageIds.forEach((id, i) => request.input(`pageid${index + i}`, sql.Int, id));
+        index += pageIds.length;
+      }
+    }
+
+    if (queryParts.length === 0) {
+      return res.json(Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])));
+    }
+
+    const query = queryParts.join(" UNION ALL ");
+    const result = await request.query(query);
+
+    // Convert results to a key-value format
+    const response = Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])); // Default all pages to 0
+
+    result.recordset.forEach(row => {
+      response[row.pageType] = row.count > 0 ? 1 : 0;
+    });
+
+    return res.json(response);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
+app.post('/getengineerroledata', authenticateToken, async (req, res) => {
+  const { role, engineerpage, engineerlistpage, engineerapprovepage } = req.body;
+
+  // Function to convert comma-separated strings into arrays
+  const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
+
+  // Convert all page IDs from strings to arrays
+  const pageTypes = {
+    engineerpage: parseIds(engineerpage),
+    engineerlistpage: parseIds(engineerlistpage),
+    engineerapprovepage: parseIds(engineerapprovepage),
 
   };
 
@@ -14703,34 +14826,77 @@ app.post("/getmodelno", authenticateToken, async (req, res) => {
 
 
 app.get("/getsparelisting", authenticateToken, async (req, res) => {
-  const { ModelNumber } = req.query; // Get ModelNumber from query parameters
-  console.log("Received request with ModelNumber:", ModelNumber);
-
   try {
+    const {
+      ModelNumber,
+      ProductCode = "",
+      ItemDescription = "",
+      title = "",
+      page = 1,
+      pageSize = 10,
+    } = req.query;
+
     if (!ModelNumber) {
       console.error("Model number is missing.");
       return res.status(400).json({ error: "Model number is required." });
     }
 
     const pool = await poolPromise;
-    const result = await pool
-      .request()
-      .input("ModelNumber", ModelNumber)
-      .query(
-        "SELECT * FROM Spare_parts WHERE ModelNumber = @modelNumber AND deleted = 0"
-      );
-    // Convert data to JSON string and encrypt it
+    const offset = (page - 1) * pageSize;
+
+    const request = pool.request();
+    request.input("modelNumber", ModelNumber);
+    request.input("productCode", `%${ProductCode}%`);
+    request.input("itemdescription", `%${ItemDescription}%`);
+    request.input("title", `%${title}%`);
+    request.input("offset", offset);
+    request.input("pageSize", parseInt(pageSize));
+
+    let sql = `
+      SELECT s.* FROM Spare_parts as s
+      WHERE s.ModelNumber = @modelNumber AND s.deleted = 0
+        ${ProductCode ? "AND s.ProductCode LIKE @productCode" : ""}
+        ${title ? "AND s.title LIKE @title" : ""}
+        ${ItemDescription ? "AND s.ItemDescription LIKE @ItemDescription" : ""}
+      ORDER BY s.id DESC
+      OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY
+    `;
+
+    const result = await request.query(sql);
+
+    // Count Query
+    const countRequest = pool.request();
+    countRequest.input("modelNumber", ModelNumber);
+    countRequest.input("productCode", `%${ProductCode}%`);
+    countRequest.input("itemdescription", `%${ItemDescription}%`);
+    countRequest.input("title", `%${title}%`);
+
+    let countSql = `
+      SELECT COUNT(*) as totalCount FROM Spare_parts
+      WHERE ModelNumber = @modelNumber AND deleted = 0
+        ${ProductCode ? "AND ProductCode LIKE @productCode" : ""}
+        ${ItemDescription ? "AND ItemDescription LIKE @itemdescription" : ""}
+        ${title ? "AND title LIKE @title" : ""}
+    `;
+
+    const countResult = await countRequest.query(countSql);
+    const totalCount = countResult.recordset[0].totalCount;
+
     const jsonData = JSON.stringify(result.recordset);
     const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
 
-
-    console.log("Query result:", encryptedData);
-    return res.json({ encryptedData });
+    return res.json({
+      encryptedData,
+      totalCount,
+      page: parseInt(page),
+      pageSize: parseInt(pageSize),
+    });
   } catch (err) {
-    console.error("Error in /getsparelisting API:", err);
-    return res.status(500).json({ error: "An error occurred while fetching data." });
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred" });
   }
 });
+
 
 
 
@@ -14810,22 +14976,104 @@ app.get("/getshipmentparts", authenticateToken, async (req, res) => {
     return res.status(500).json({ error: 'An error occurred while fetching data' });
   }
 });
+
 app.get("/getbussinesspartner", authenticateToken, async (req, res) => {
   try {
+    const {
+      Bp_code,
+      partner_name,
+      email,
+      mobile_no,
+      title,
+      contact_person,
+      address,
+      webste,
+      gstno,
+      panno,
+      bankname,
+      bankacc,
+      bankifsc,
+      bankaddress,
+      Licare_Ac_Id,
+      licare_code,
+      Vendor_Name,
+      withliebher,
+      lastworkingdate,
+      contractactive,
+      contractexpire,
+      page = 1, // Default to page 1 if not provided
+      pageSize = 10, // Default to 10 items per page if not provided
+    } = req.query;
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
-    const result = await pool
-      .request()
-      .query("SELECT  * FROM bussiness_partner WHERE deleted = 0 ORDER BY id DESC");
 
-    // Convert result to string and encrypt it
-    const jsonString = JSON.stringify(result.recordset);
-    const encryptedData = CryptoJS.AES.encrypt(jsonString, secretKey).toString();
+    const getcsp = `select * from lhi_user where Usercode = '${licare_code}'`
 
-    return res.json({ data: encryptedData });
+
+    const getcspresilt = await pool.request().query(getcsp)
+
+    const assigncsp = getcspresilt.recordset[0] && getcspresilt.recordset[0].assigncsp
+
+    // Directly use the query (no parameter binding)
+    let sql = `SELECT q.* FROM bussiness_partner as q WHERE 1=1`;
+
+
+    if (assigncsp !== 'ALL') {
+      // Convert to an array and wrap each value in single quotes
+      const formattedCspList = assigncsp.split(",").map(csp => `'${csp.trim()}'`).join(",");
+
+      // Directly inject the formatted values into the SQL query
+      sql += ` AND q.csp_code IN (${formattedCspList})`;
+    }
+
+
+    if (Bp_code) {
+      sql += ` AND q.Bp_code LIKE '%${Bp_code}%'`;
+    }
+
+    if (partner_name) {
+      sql += ` AND q.partner_name LIKE '%${partner_name}%'`;
+    }
+
+    if (email) {
+      sql += ` AND q.email LIKE '%${email}%'`;
+    }
+
+    if (mobile_no) {
+      sql += ` AND q.mobile_no LIKE '%${mobile_no}%'`;
+    }
+    // Pagination logic: Calculate offset based on the page number
+    const offset = (page - 1) * pageSize;
+    // Add pagination to the SQL query (OFFSET and FETCH NEXT)
+    sql += ` ORDER BY q.Bp_code desc OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+
+    // Execute the query
+    const result = await pool.request().query(sql);
+    // Get the total count of records for pagination
+    let countSql = `SELECT COUNT(*) as totalCount FROM bussiness_partner where deleted = 0 `;
+    if (Bp_code) countSql += ` AND Bp_code LIKE '%${Bp_code}%'`;
+    if (partner_name) countSql += ` AND partner_name LIKE '%${partner_name}%'`;
+    if (email) countSql += ` AND email LIKE '%${email}%'`;
+    if (mobile_no) countSql += ` AND mobile_no LIKE '%${mobile_no}%'`;
+
+
+
+    const countResult = await pool.request().query(countSql);
+    const totalCount = countResult.recordset[0].totalCount;
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
+    return res.json({
+      encryptedData,
+      totalCount: totalCount,
+      page,
+      pageSize,
+    });
+
+
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'An error occurred while fetching data' });
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred" });
   }
 });
 
@@ -14852,38 +15100,128 @@ app.get("/fetchfrommobile/:mobile", authenticateToken, async (req, res) => {
 // get masterWarrenty Data 
 app.get("/getmasterwarrenty", authenticateToken, async (req, res) => {
   try {
+    const {
+      Service_Type,
+      item_code,
+      Product_Type,
+      Product_Line,
+      Product_Class,
+      page = 1, // Default to page 1 if not provided
+      pageSize = 10, // Default to 10 items per page if not provided
+    } = req.query;
     const pool = await poolPromise;
 
     // SQL query to fetch rate data where deleted is 0
-    const sql = "SELECT * FROM master_warrenty WHERE deleted = 0";
+    let sql = "SELECT m.* FROM Master_warrenty as m  WHERE deleted = 0";
+
+    if (Service_Type) {
+      sql += ` AND m.Service_Type LIKE '%${Service_Type}%'`;
+    }
+
+    if (item_code) {
+      sql += ` AND m.item_code LIKE '%${item_code}%'`;
+    }
+
+    if (Product_Type) {
+      sql += ` AND m.Product_Type LIKE '%${Product_Type}%'`;
+    }
+
+    if (Product_Line) {
+      sql += ` AND m.Product_Line LIKE '%${Product_Line}%'`;
+    }
+    if (Product_Class) {
+      sql += ` AND m.Product_Class LIKE '%${Product_Class}%'`;
+    }
+
+    const offset = (page - 1) * pageSize;
+    // Add pagination to the SQL query (OFFSET and FETCH NEXT)
+    sql += ` ORDER BY m.id desc OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
     const result = await pool.request().query(sql);
+    let countSql = `SELECT COUNT(*) as totalCount FROM Master_warrenty where deleted = 0 `;
+    if (Service_Type) countSql += ` AND Service_Type LIKE '%${Service_Type}%'`;
+    if (item_code) countSql += ` AND item_code LIKE '%${item_code}%'`;
+    if (Product_Type) countSql += ` AND Product_Type LIKE '%${Product_Type}%'`;
+    if (Product_Line) countSql += ` AND Product_Line LIKE '%${Product_Line}%'`;
+    if (Product_Class) countSql += ` AND Product_Class LIKE '%${Product_Class}%'`;
+
+    const countResult = await pool.request().query(countSql);
+    const totalCount = countResult.recordset[0].totalCount;
     // Convert data to JSON string and encrypt it
     const jsonData = JSON.stringify(result.recordset);
     const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
-
-    return res.json({ encryptedData });
+    return res.json({
+      encryptedData,
+      totalCount: totalCount,
+      page,
+      pageSize,
+    });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "An error occurred while fetching masterWarrenty data" });
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred" });
   }
 });
 
 // Get PostSaleWarrenty Data
 app.get("/getpostsalewarrenty", authenticateToken, async (req, res) => {
   try {
+    const {
+      ServiceType,
+      item_code,
+      Producttype,
+      ProductLine,
+      ProductClass,
+      page = 1, // Default to page 1 if not provided
+      pageSize = 10, // Default to 10 items per page if not provided
+    } = req.query;
     const pool = await poolPromise;
 
     // SQL query to fetch rate data where deleted is 0
-    const sql = "SELECT * FROM post_sale_warrenty WHERE deleted = 0";
+    let sql = "SELECT p.* FROM post_sale_warrenty as p  WHERE deleted = 0";
+
+    if (ServiceType) {
+      sql += ` AND p.ServiceType LIKE '%${ServiceType}%'`;
+    }
+
+    if (item_code) {
+      sql += ` AND p.item_code LIKE '%${item_code}%'`;
+    }
+
+    if (Producttype) {
+      sql += ` AND p.Producttype LIKE '%${Producttype}%'`;
+    }
+
+    if (ProductLine) {
+      sql += ` AND p.ProductLine LIKE '%${ProductLine}%'`;
+    }
+    if (ProductClass) {
+      sql += ` AND p.ProductClass LIKE '%${ProductClass}%'`;
+    }
+
+    const offset = (page - 1) * pageSize;
+    // Add pagination to the SQL query (OFFSET and FETCH NEXT)
+    sql += ` ORDER BY p.id desc OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
     const result = await pool.request().query(sql);
+    let countSql = `SELECT COUNT(*) as totalCount FROM post_sale_warrenty where deleted = 0 `;
+    if (ServiceType) countSql += ` AND ServiceType LIKE '%${ServiceType}%'`;
+    if (item_code) countSql += ` AND item_code LIKE '%${item_code}%'`;
+    if (Producttype) countSql += ` AND Producttype LIKE '%${Producttype}%'`;
+    if (ProductLine) countSql += ` AND ProductLine LIKE '%${ProductLine}%'`;
+    if (ProductClass) countSql += ` AND ProductClass LIKE '%${ProductClass}%'`;
+
+    const countResult = await pool.request().query(countSql);
+    const totalCount = countResult.recordset[0].totalCount;
     // Convert data to JSON string and encrypt it
     const jsonData = JSON.stringify(result.recordset);
     const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
-
-    return res.json({ encryptedData });
+    return res.json({
+      encryptedData,
+      totalCount: totalCount,
+      page,
+      pageSize,
+    });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "An error occurred while fetching masterWarrenty data" });
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred" });
   }
 });
 
@@ -16002,7 +16340,7 @@ app.post("/updatevisitcount", authenticateToken, async (req, res) => {
 
 app.post("/getServiceCharges", authenticateToken, async (req, res) => {
 
-  let { ModelNumber ,warrenty_status} = req.body;
+  let { ModelNumber, warrenty_status } = req.body;
 
   try {
     // Use the poolPromise to get the connection pool
@@ -16182,33 +16520,33 @@ app.post("/transferproduct", authenticateToken, async (req, res) => {
     const updateResult = await pool.request()
       .input("product_id", product_id)
       .query(`UPDATE awt_uniqueproductmaster SET SerialStatus = 'Inactive' WHERE id = @product_id`);
-       
- 
-    const getaddress = `select act.* , ac.customer_fname , ac.customer_classification from awt_customerlocation as act left join awt_customer as ac on ac.customer_id = act.customer_id where act.id = '${newaddress}'`  
+
+
+    const getaddress = `select act.* , ac.customer_fname , ac.customer_classification from awt_customerlocation as act left join awt_customer as ac on ac.customer_id = act.customer_id where act.id = '${newaddress}'`
 
     const getaddressresult = await pool.request().query(getaddress)
 
-    if(getaddressresult.recordset.length > 0){
+    if (getaddressresult.recordset.length > 0) {
 
-      let { address , region_id , geostate_id,geocity_id, district_id ,pincode_id ,customer_fname ,customer_classification}  = getaddressresult.recordset[0];
+      let { address, region_id, geostate_id, geocity_id, district_id, pincode_id, customer_fname, customer_classification } = getaddressresult.recordset[0];
 
 
       const insertquery = `insert into awt_uniqueproductmaster(CustomerID , CustomerName ,ModelNumber , serial_no ,address , region , state ,district , city , pincode , SerialStatus ,customer_classification) values (@customer_id,@customer_fname,@Modelno,@serial_no,@address,@region_id,@geostate_id,@district_id,@geocity_id,@pincode_id,@status,@customer_classification)`
 
       const insertproduct = await pool.request()
-      .input('customer_id' , customer_id)
-      .input('customer_fname' ,customer_fname) 
-      .input('Modelno' ,Modelno) 
-      .input('serial_no' ,serial_no) 
-      .input('address' ,address) 
-      .input('region_id' ,region_id) 
-      .input('geostate_id' ,geostate_id) 
-      .input('district_id' ,district_id) 
-      .input('geocity_id' ,geocity_id) 
-      .input('pincode_id' ,pincode_id) 
-      .input('status' ,'Active') 
-      .input('customer_classification' ,customer_classification) 
-      .query(insertquery)
+        .input('customer_id', customer_id)
+        .input('customer_fname', customer_fname)
+        .input('Modelno', Modelno)
+        .input('serial_no', serial_no)
+        .input('address', address)
+        .input('region_id', region_id)
+        .input('geostate_id', geostate_id)
+        .input('district_id', district_id)
+        .input('geocity_id', geocity_id)
+        .input('pincode_id', pincode_id)
+        .input('status', 'Active')
+        .input('customer_classification', customer_classification)
+        .query(insertquery)
 
 
       return res.json(insertproduct)
