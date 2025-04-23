@@ -51,22 +51,30 @@ export function Productspare() {
                     headers: { Authorization: token },
                 }
             );
-        
+
             const encryptedData = response.data.encryptedData;
             const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
             const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
-        
+
             setModelData(decryptedData);
         } catch (error) {
             console.error("Error fetching models:", error);
         }
-        
+
     };
 
     const fetchSpareListing = async (page) => {
         try {
+         const params = new URLSearchParams();
+
+            // Add all filters to params
+            Object.entries(searchFilters).forEach(([key, value]) => {
+                if (value) { // Only add if value is not empty
+                    params.append(key, value);
+                }
+            });
             const item_code = selectmodel.item_code
-            const response = await axiosInstance.get(`${Base_Url}/getsparelisting`, {
+            const response = await axiosInstance.get(`${Base_Url}/getsparelisting?${params.toString()}`, {
                 params: { item_code },
                 headers: { Authorization: token },
             });
@@ -99,12 +107,12 @@ export function Productspare() {
                     params.append(key, value);
                 }
             });
-            const ModelNumber = selectmodel.ModelNumber
+            const item_code = selectmodel.item_code
 
             console.log('Sending params:', params.toString()); // Debug log
 
             const response = await axiosInstance.get(`${Base_Url}/getsparelisting?${params}`, {
-                params: { ModelNumber },
+                params: { item_code },
                 headers: {
                     Authorization: token,
                 },
@@ -491,7 +499,7 @@ export function Productspare() {
                                         <button
                                             className="btn btn-secondary"
                                             onClick={() => {
-                                           
+
                                                 applyFilters()
                                             }}
                                             style={{

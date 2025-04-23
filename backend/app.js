@@ -14853,24 +14853,96 @@ app.post("/getmodelno", authenticateToken, async (req, res) => {
 
 
 
-app.get("/getsparelisting", authenticateToken, async (req, res) => {
-  const { item_code } = req.query; // Get ModelNumber from query parameters
-  console.log("Received request with ProductCode:", item_code);
+// app.get("/getsparelisting", authenticateToken, async (req, res) => {
+//   const { item_code } = req.query; // Get ModelNumber from query parameters
+//   console.log("Received request with ProductCode:", item_code);
 
+//   try {
+//     if (!item_code) {
+//       console.error("item_code number is missing.");
+//       return res.status(400).json({ error: "item_code number is required." });
+//     }
+
+//     const pool = await poolPromise;
+//     const result = await pool
+//       .request()
+//       .input("item_code", item_code)
+//       .query(
+//         "SELECT * FROM Spare_parts WHERE ProductCode = @item_code AND deleted = 0"
+//       );
+//     // Convert data to JSON string and encrypt it
+//     const jsonData = JSON.stringify(result.recordset);
+//     const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
+
+//     return res.json({
+//       encryptedData,
+//       totalCount,
+//       page: parseInt(page),
+//       pageSize: parseInt(pageSize),
+//     });
+//   } catch (err) {
+//     console.error("Database error:", err);
+//     return res.status(500).json({ error: "Database error occurred" });
+//   }
+// });
+
+app.get("/getsparelisting", authenticateToken, async (req, res) => {
   try {
+    const {
+      item_code,
+      ProductCode = "",
+      ItemDescription = "",
+      title = "",
+      page = 1,
+      pageSize = 10,
+    } = req.query;
+
     if (!item_code) {
-      console.error("item_code number is missing.");
-      return res.status(400).json({ error: "item_code number is required." });
+      console.error("Item Code is missing.");
+      return res.status(400).json({ error: "Item Code is required." });
     }
 
     const pool = await poolPromise;
-    const result = await pool
-      .request()
-      .input("item_code", item_code)
-      .query(
-        "SELECT * FROM Spare_parts WHERE ProductCode = @item_code AND deleted = 0"
-      );
-    // Convert data to JSON string and encrypt it
+    const offset = (page - 1) * pageSize;
+
+    const request = pool.request();
+    request.input("itemCode", item_code);
+    request.input("productCode", `%${ProductCode}%`);
+    request.input("itemdescription", `%${ItemDescription}%`);
+    request.input("title", `%${title}%`);
+    request.input("offset", offset);
+    request.input("pageSize", parseInt(pageSize));
+
+    let sql = `
+      SELECT s.* FROM Spare_parts as s
+      WHERE s.ProductCode = @itemCode AND s.deleted = 0
+        ${ProductCode ? "AND s.ProductCode LIKE @productCode" : ""}
+        ${title ? "AND s.title LIKE @title" : ""}
+        ${ItemDescription ? "AND s.ItemDescription LIKE @ItemDescription" : ""}
+      ORDER BY s.id DESC
+      OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY
+    `;
+
+    const result = await request.query(sql);
+
+    // Count Query
+    const countRequest = pool.request();
+    countRequest.input("itemCode", item_code);
+    countRequest.input("productCode", `%${ProductCode}%`);
+    countRequest.input("itemdescription", `%${ItemDescription}%`);
+    countRequest.input("title", `%${title}%`);
+
+    let countSql = `
+      SELECT COUNT(*) as totalCount FROM Spare_parts
+      WHERE ProductCode = @itemCode AND deleted = 0
+        ${ProductCode ? "AND ProductCode LIKE @productCode" : ""}
+        ${ItemDescription ? "AND ItemDescription LIKE @itemdescription" : ""}
+        ${title ? "AND title LIKE @title" : ""}
+    `;
+
+    const countResult = await countRequest.query(countSql);
+    const totalCount = countResult.recordset[0].totalCount;
+
     const jsonData = JSON.stringify(result.recordset);
     const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
 
