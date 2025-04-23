@@ -584,7 +584,7 @@ const Uniqueproduct = () => {
                       </div>
 
                       <div onClick={handleClickOpen} style={{ textDecoration: "underline", cursor: "pointer" }}>
-                        Transfer to customer
+                      Serial number transfer
                       </div>
                       <Dialog
                         open={open}
@@ -593,7 +593,7 @@ const Uniqueproduct = () => {
                         aria-describedby="alert-dialog-description"
                       >
                         <DialogTitle id="alert-dialog-title">
-                          {"Transfer to customer"}
+                          {"Serial number transfer"}
                         </DialogTitle>
                         <DialogContent style={{ width: "600px" }}>
                           <div className="row">

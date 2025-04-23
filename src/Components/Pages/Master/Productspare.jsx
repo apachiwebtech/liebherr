@@ -51,34 +51,23 @@ export function Productspare() {
                     headers: { Authorization: token },
                 }
             );
-            // Decrypt the response data
-            const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+        
+            const encryptedData = response.data.encryptedData;
             const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
             const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+        
             setModelData(decryptedData);
         } catch (error) {
             console.error("Error fetching models:", error);
         }
+        
     };
 
     const fetchSpareListing = async (page) => {
         try {
-            const params = new URLSearchParams();
-            // Add the page and pageSize parameters
-            params.append('page', page || 1); // Current page number
-            params.append('pageSize', pageSize); // Page size
-
-
-            // Add all filters to params if they have values
-            Object.entries(searchFilters).forEach(([key, value]) => {
-                if (value) { // Only add if value is not empty
-                    params.append(key, value);
-                }
-            });
-            const ModelNumber = selectmodel.ModelNumber
-            console.log("Fetching spare parts for model number:", ModelNumber);
-            const response = await axiosInstance.get(`${Base_Url}/getsparelisting?${params.toString()}`, {
-                params: { ModelNumber },
+            const item_code = selectmodel.item_code
+            const response = await axiosInstance.get(`${Base_Url}/getsparelisting`, {
+                params: { item_code },
                 headers: { Authorization: token },
             });
             // Decrypt the response data
@@ -161,6 +150,8 @@ export function Productspare() {
     }, 200);
 
     const handleSearchChange = (newValue) => {
+
+
         setSelectedModel(newValue);
     };
 
@@ -387,7 +378,7 @@ export function Productspare() {
                                     disablePortal
                                     options={modeldata}
                                     value={selectmodel}
-                                    getOptionLabel={(option) => option.ModelNumber || ""}
+                                    getOptionLabel={(option) => option.item_description || ""}
                                     onChange={(e, newValue) => handleSearchChange(newValue)}
                                     onInputChange={(e, newInputValue) => handleInputChange(newInputValue)}
                                     renderInput={(params) => (

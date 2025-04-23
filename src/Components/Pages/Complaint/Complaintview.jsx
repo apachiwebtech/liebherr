@@ -101,7 +101,8 @@ export function Complaintview(params) {
     totp: '',
     closed_date: "",
     area: '',
-    region: ''
+    region: '',
+    item_code : ''
   });
 
 
@@ -1030,7 +1031,7 @@ export function Complaintview(params) {
 
       getupdatespare(response.data.ticket_no)
       getsparelist(response.data.ticket_no)
-      getSpare(response.data.ModelNumber)
+      getSpare(response.data.item_code)
 
       if (response.data.serial_no != "") {
         setsserial_no(response.data.serial_no);
@@ -1219,6 +1220,7 @@ export function Complaintview(params) {
           ...prevstate,
           ModelNumber: '',
           serial_no: '',
+          item_code : ''
         }));
         return;
       }
@@ -1236,6 +1238,7 @@ export function Complaintview(params) {
           setComplaintview((prevstate) => ({
             ...prevstate,
             ModelNumber: serialData.ModelNumber,
+            item_code: serialData.ItemNumber
           }));
 
         }
@@ -1253,7 +1256,8 @@ export function Complaintview(params) {
           setComplaintview((prevstate) => ({
             ...prevstate,
             ModelNumber: serialData.ModelNumber,
-            purchase_date: serialData.purchase_date
+            purchase_date: serialData.purchase_date,
+            item_code: serialData.ItemNumber
           }));
         }
         else if (serialData.customer_id == complaintview.customer_id) {
@@ -1268,7 +1272,8 @@ export function Complaintview(params) {
           setComplaintview((prevstate) => ({
             ...prevstate,
             ModelNumber: serialData.ModelNumber,
-            purchase_date: serialData.purchase_date
+            purchase_date: serialData.purchase_date,
+            item_code: serialData.ItemNumber
           }));
         } else {
           alert("This serial no already allocated");
@@ -1276,6 +1281,7 @@ export function Complaintview(params) {
             ...prevstate,
             ModelNumber: '',
             serial_no: '',
+            item_code : ''
           }));
         }
       }
@@ -1288,6 +1294,7 @@ export function Complaintview(params) {
           ...prevstate,
           ModelNumber: '',
           serial_no: '',
+          item_code : ''
         }));
       }
     } catch (error) {
@@ -1476,6 +1483,7 @@ export function Complaintview(params) {
           activity_code: complaintview.activity_code || '',
           serial_no: String(complaintview.serial_no),
           ModelNumber: complaintview.ModelNumber,
+          item_code: complaintview.item_code,
           purchase_date: complaintview.purchase_date,
           warrenty_status: complaintview.warranty_status || warranty_status_data,
           engineerdata: addedEngineers.map((item) => item.engineer_id),

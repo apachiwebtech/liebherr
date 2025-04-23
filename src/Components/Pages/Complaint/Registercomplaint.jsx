@@ -186,7 +186,8 @@ export function Registercomplaint(params) {
     requested_email: "",
     requested_mobile: "",
     class_city: "",
-    mother_branch: ""
+    mother_branch: "",
+    item_code: ""
   })
 
   const handleDateChange = (date) => {
@@ -898,7 +899,8 @@ export function Registercomplaint(params) {
         mwhatsapp: String(checkboxes.mwhatsapp),
         awhatsapp: String(checkboxes.awhatsaap),
         ticket_id: String(ticketid),
-        mother_branch: value.mother_branch || ''
+        mother_branch: value.mother_branch || '',
+        item_code : value.item_code || ''
       };
 
 
@@ -983,7 +985,8 @@ export function Registercomplaint(params) {
       mwhatsapp: checkboxes.mwhatsapp || 0,
       awhatsapp: checkboxes.awhatsaap || 0,
       ticket_no: Comp_id,
-      mother_branch: value.mother_branch || ''
+      mother_branch: value.mother_branch || '',
+      item_code : value.item_code || ''
     };
 
 
@@ -1197,6 +1200,8 @@ export function Registercomplaint(params) {
       }
       );
 
+      
+
       setClassification(response.data[0].customerClassification)
 
       const purchase_date = response.data[0].purchase_date
@@ -1221,6 +1226,8 @@ export function Registercomplaint(params) {
         setpurchase_data('');  // or handle it accordingly (e.g., leave it as null)
       }
 
+
+
       if (response.data && response.data[0]) {
 
 
@@ -1239,7 +1246,8 @@ export function Registercomplaint(params) {
           email: data.email || "",
           address: data.address || "",
           customer_id: data.customer_id || "",
-          pincode: data.pincode || ''
+          pincode: data.pincode || '',
+          item_code : data.ItemNumber || ''
         });
       }
 

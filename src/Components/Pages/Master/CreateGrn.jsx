@@ -319,7 +319,7 @@ const CreateGrn = () => {
 
 
         try {
-            const response = await axios.get(`${Base_Url}/getSpareParts/${newValue.item_description}`, {
+            const response = await axios.get(`${Base_Url}/getSpareParts/${newValue.item_code}`, {
                 headers: {
                     Authorization: token, // Send token in headers
                 },

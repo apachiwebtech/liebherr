@@ -413,8 +413,8 @@ const Customer = () => {
                         <label htmlFor="cclassification" className="form-label">Customer Classification<span className="text-danger">*</span></label>
                         <select id="cclassification" name="customer_classification" className="form-select" aria-label=".form-select-lg example" value={formData.customer_classification} onChange={handleChange} >
                           <option value="selected">Select Customer Classification</option>
-                          <option value="IMPORT">IMPORT</option>
-                          <option value="CONSUMER">CONSUMER</option>
+                          <option value="Import">Import</option>
+                          <option value="Consumer">Consumer</option>
                         </select>
                         {errors.customer_classification && (
                           <small className="text-danger">{errors.customer_classification}</small>

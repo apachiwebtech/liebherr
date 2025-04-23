@@ -91,7 +91,10 @@ export function Complaintviewmsp(params) {
     customer_id: '',
     gascheck: 'No',
     transportcheck: 'No',
-    closed_date: ''
+    closed_date: '',
+    area: '',
+    region: '',
+    item_code : ''
   });
 
 
@@ -924,7 +927,7 @@ export function Complaintviewmsp(params) {
 
       getupdatespare(response.data.ticket_no)
       getsparelist(response.data.ticket_no)
-      getSpare(response.data.ModelNumber)
+      getSpare(response.data.item_code)
 
       if (response.data.serial_no != "") {
         setsserial_no(response.data.serial_no);
@@ -1113,6 +1116,7 @@ export function Complaintviewmsp(params) {
           ...prevstate,
           ModelNumber: '',
           serial_no: '',
+          item_code : ''
         }));
         return;
       }
@@ -1130,6 +1134,7 @@ export function Complaintviewmsp(params) {
           setComplaintview((prevstate) => ({
             ...prevstate,
             ModelNumber: serialData.ModelNumber,
+            item_code: serialData.ItemNumber
           }));
 
         }
@@ -1147,7 +1152,8 @@ export function Complaintviewmsp(params) {
           setComplaintview((prevstate) => ({
             ...prevstate,
             ModelNumber: serialData.ModelNumber,
-            purchase_date: serialData.purchase_date
+            purchase_date: serialData.purchase_date,
+            item_code: serialData.ItemNumber
           }));
         }
         else if (serialData.customer_id == complaintview.customer_id) {
@@ -1162,7 +1168,8 @@ export function Complaintviewmsp(params) {
           setComplaintview((prevstate) => ({
             ...prevstate,
             ModelNumber: serialData.ModelNumber,
-            purchase_date: serialData.purchase_date
+            purchase_date: serialData.purchase_date,
+            item_code: serialData.ItemNumber
           }));
         } else {
           alert("This serial no already allocated");
@@ -1170,6 +1177,7 @@ export function Complaintviewmsp(params) {
             ...prevstate,
             ModelNumber: '',
             serial_no: '',
+            item_code : ''
           }));
         }
       }
@@ -1182,6 +1190,7 @@ export function Complaintviewmsp(params) {
           ...prevstate,
           ModelNumber: '',
           serial_no: '',
+          item_code : ''
         }));
       }
     } catch (error) {
