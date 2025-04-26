@@ -55,8 +55,9 @@ export function Complaintviewmsp(params) {
   const { loaders, axiosInstance } = useAxiosLoader();
   const [errors, setErrors] = useState({})
   const [dealercustid, setDealercust] = useState('')
-  const [complaintview, setComplaintview] = useState({
+ const [complaintview, setComplaintview] = useState({
     ticket_no: '',
+    ticket_date: '',
     customer_name: '',
     address: '',
     pincode: '',
@@ -91,12 +92,13 @@ export function Complaintviewmsp(params) {
     customer_id: '',
     gascheck: 'No',
     transportcheck: 'No',
-    closed_date: '',
+    totp: '',
+    closed_date: "",
     area: '',
     region: '',
-    item_code : ''
+    item_code : '',
+    customer_email:''
   });
-
 
 
 
@@ -1294,7 +1296,7 @@ export function Complaintviewmsp(params) {
     setFiles(e.target.files);
   };
 
- const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
 
     e.preventDefault();
 
@@ -1359,6 +1361,7 @@ export function Complaintviewmsp(params) {
           customer_id: complaintview.customer_id,
           dealercustid: dealercustid,
           customer_name: complaintview.customer_name,
+          customer_email: complaintview.customer_email,
           address: complaintview.address,
           region: complaintview.region,
           state: complaintview.state,
@@ -1380,6 +1383,7 @@ export function Complaintviewmsp(params) {
           activity_code: complaintview.activity_code || '',
           serial_no: String(complaintview.serial_no),
           ModelNumber: complaintview.ModelNumber,
+          item_code: complaintview.item_code,
           purchase_date: complaintview.purchase_date,
           warrenty_status: complaintview.warranty_status || warranty_status_data,
           engineerdata: addedEngineers.map((item) => item.engineer_id),
@@ -1391,6 +1395,7 @@ export function Complaintviewmsp(params) {
           transportation: complaintview.transportation,
           transportation_charge: complaintview.transportation_charge,
           allocation: allocation,
+          nps_link : `${Base_Url}`,
           note,
           created_by,
         };

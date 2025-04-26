@@ -31,6 +31,7 @@ function Details() {
   const [serial_no, setserial] = useState('');
   const [purchase_date, setPurchaseDate] = useState('');
   const [allocation, setallocation] = useState('');
+  const [item_code, setItemcode] = useState('');
   const [modelno, setModelNumber] = useState('');
   const [errors, setErrors] = useState({})
   const [files, setFiles] = useState({
@@ -85,7 +86,8 @@ function Details() {
     spare_qty: '',
     purchase_date: '',
     check_remark : '',
-    customer_mobile:''
+    customer_mobile:'',
+    item_code : ''
   })
 
 
@@ -286,7 +288,8 @@ function Details() {
           formData.append('purchase_date', Value.purchase_date && formatpurchasedate(Value.purchase_date));
           formData.append('ticket_no', data.ticket_no);
           formData.append('allocation', allocation);
-          formData.append('ModelNumber', modelno || data.ModelNumber);
+          formData.append('item_code', item_code);
+          formData.append('Model', modelno || data.ModelNumber);
           formData.append('serial_no', serial_no || data.serial_no);
           formData.append('user_id', localStorage.getItem('userid'));
           formData.append('serial_data', JSON.stringify(data));
@@ -364,7 +367,8 @@ function Details() {
         formData.append('check_remark', Value.check_remark);
         formData.append('ticket_no', data.ticket_no);
         formData.append('allocation', allocation);
-        formData.append('ModelNumber', modelno || data.ModelNumber);
+        formData.append('item_code', item_code);
+        formData.append('Model', modelno || data.ModelNumber);
         formData.append('serial_no', serial_no || data.serial_no);
         formData.append('user_id', localStorage.getItem('userid'));
         formData.append('serial_data', JSON.stringify(data));
@@ -442,7 +446,7 @@ function Details() {
           setdata(res.data.data[0])
           getremark(res.data.data[0].ticket_no)
           getuniquespare(res.data.data[0].ticket_no)
-          getspare(res.data.data[0].ModelNumber)
+          getspare(res.data.data[0].item_code)
           getprice(res.data.data[0].ModelNumber , res.data.data[0].warranty_status)
           setPurchaseDate(res.data.data[0].purchase_date)
           // console.log(Value.symptomcode);
@@ -842,16 +846,18 @@ function Details() {
 
         if (response.data[0].customer_id == 'null' || response.data[0].customer_id == null) {
           alert("New serial no")
-          getspare(response.data[0].ModelNumber)
+          getspare(response.data[0].ItemNumber)
           getprice(response.data[0].ModelNumber)
           setModelNumber(response.data[0].ModelNumber)
           setallocation(response.data[0].allocation)
+          setItemcode(response.data[0].ItemNumber)
         }
         else if (response.data[0].customer_id == data.customer_id) {
           alert("Serial no matched")
-          getspare(response.data[0].ModelNumber)
+          getspare(response.data[0].ItemNumber)
           getprice(response.data[0].ModelNumber)
           setModelNumber(response.data[0].ModelNumber)
+          setItemcode(response.data[0].ItemNumber)
         }
         else {
           setserial('')
@@ -864,14 +870,14 @@ function Details() {
 
 
       if ((response.data && response.data[0] && response.data[0].customer_classification == 'null') || (response.data && response.data[0] && response.data[0].customer_classification == null)) {
-        console.log("Matched")
+        console.log("Classification not found")
       }
       else if (response.data && response.data[0] && response.data[0].customer_classification == data.customer_class) {
 
         console.log("Matched")
 
       } else {
-        alert("classification is different")
+        alert("Classification is different")
         setserial('')
         setsparedata('')
         setModelNumber('')

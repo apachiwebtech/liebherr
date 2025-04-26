@@ -102,7 +102,8 @@ export function Complaintview(params) {
     closed_date: "",
     area: '',
     region: '',
-    item_code : ''
+    item_code : '',
+    customer_email:''
   });
 
 
@@ -177,9 +178,22 @@ export function Complaintview(params) {
     }
 
     const data = {
-      serial : complaintview.serial_no,
-      ticket_no : complaintview.ticket_no,
-      modelnumber : complaintview.ModelNumber,
+      serial : complaintview.serial_no || '',
+      ticket_no : complaintview.ticket_no || '',
+      modelnumber : complaintview.ModelNumber || '',
+      item_code : complaintview.item_code || '',
+      customer_id : complaintview.customer_id || '',
+      customer_name: complaintview.customer_name || '',
+      address : complaintview.address || '',
+      region : complaintview.region || '', 
+      state : complaintview.state || '',
+      city : complaintview.city || '',
+      area : complaintview.area || '',
+      pincode : complaintview.pincode || '',
+      customer_class : complaintview.customer_class || '',
+      purchase_date : complaintview .purchase_date || '',
+      item_code : complaintview.item_code || '',
+      created_by : created_by || ''
     }
      
     axiosInstance.post(`${Base_Url}/updateserialno` , data , {
@@ -1462,6 +1476,7 @@ export function Complaintview(params) {
           customer_id: complaintview.customer_id,
           dealercustid: dealercustid,
           customer_name: complaintview.customer_name,
+          customer_email: complaintview.customer_email,
           address: complaintview.address,
           region: complaintview.region,
           state: complaintview.state,
@@ -1495,6 +1510,7 @@ export function Complaintview(params) {
           transportation: complaintview.transportation,
           transportation_charge: complaintview.transportation_charge,
           allocation: allocation,
+          nps_link : `${Base_Url}`,
           note,
           created_by,
         };

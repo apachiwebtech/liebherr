@@ -53,7 +53,8 @@ const Uniqueproduct = () => {
     CustomerName: "",
     SerialStatus: "",
     customer_id: "",
-    newaddress: ""
+    newaddress: "",
+    ItemNumber : ""
   });
 
 
@@ -177,6 +178,7 @@ const Uniqueproduct = () => {
           setFormData((prev) => ({
             ...prev,
             product: data[0].ModelNumber, // Auto-fill product field with ModelNumber
+            ItemNumber: data[0].ItemNumber, // Auto-fill product field with ModelNumber
           }));
           setIsProductDisabled(true);
         } else {
@@ -351,6 +353,7 @@ const Uniqueproduct = () => {
         purchase_date: formattedDate,
         address: response.data.address,
         SerialStatus: response.data.SerialStatus,
+        ItemNumber: response.data.ModelName,
       };
 
       setFormData(editData);
@@ -371,7 +374,8 @@ const Uniqueproduct = () => {
         Modelno: formData.product,
         product_id: String(formData.id),
         newaddress: formData.newaddress,
-        oldcustid: formData.CustomerID
+        oldcustid: formData.CustomerID,
+        ItemNumber : formData.ItemNumber
       }
 
       axios.post(`${Base_Url}/transferproduct`, payload, {
