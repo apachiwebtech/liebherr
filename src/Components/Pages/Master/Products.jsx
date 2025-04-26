@@ -110,10 +110,10 @@ export function Products(params) {
                 },
             }
             );
-             // Decrypt the response data
-                  const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
-                  const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
-                  const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+            // Decrypt the response data
+            const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+            const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+            const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
             setProductdata(decryptedData);
             setFilteredData(decryptedData);
             setTotalCount(response.data.totalCount);
@@ -158,11 +158,15 @@ export function Products(params) {
 
     const navigate = useNavigate();
 
+
+    // console.log("Excel Export Data:", allProductData);
+
+
     // export to excel 
     const exportToExcel = async () => {
         try {
             // Fetch all customer data without pagination
-            const response = await axiosInstance.get(`${Base_Url}/getproductlist`, {
+            const response = await axiosInstance.get(`${Base_Url}/getproductexcel`, {
                 headers: {
                     Authorization: token,
                 },
@@ -171,13 +175,15 @@ export function Products(params) {
                     page: 1, // Start from the first page
                 },
             });
-            const allProductDate = response.data.data;
+            const bytes = CryptoJS.AES.decrypt(response.data.encryptedData, secretKey);
+            const decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+            console.log("Excel Export Data:", decryptedData);
 
             // Create a new workbook
             const workbook = XLSX.utils.book_new();
 
             // Convert data to a worksheet
-            const worksheet = XLSX.utils.json_to_sheet(allProductDate.map(user => ({
+            const worksheet = XLSX.utils.json_to_sheet(decryptedData.map(user => ({
                 "Item Code": user.item_code,
                 "Item Description": user.item_description,
                 "Product Name": user.product_model,
@@ -206,11 +212,12 @@ export function Products(params) {
                 // Add fields you want to export
             })));
 
+
             // Append the worksheet to the workbook
             XLSX.utils.book_append_sheet(workbook, worksheet, "Products List");
 
             // Export the workbook
-            XLSX.writeFile(workbook, "Products List.xlsx");
+            XLSX.writeFile(workbook, "Products_List.xlsx");
         } catch (error) {
             console.error("Error exporting data to Excel:", error);
         }

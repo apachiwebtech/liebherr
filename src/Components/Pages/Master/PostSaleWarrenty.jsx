@@ -93,7 +93,7 @@ const PostSaleWarrenty = () => {
 
       console.log('Sending params:', params.toString()); // Debug log
 
-      const response = await axiosInstance.get(`${Base_Url}/getmasterwarrenty?${params}`, {
+      const response = await axiosInstance.get(`${Base_Url}/getpostsalewarrenty?${params}`, {
         headers: {
           Authorization: token,
         },
@@ -187,6 +187,60 @@ const PostSaleWarrenty = () => {
         console.log(err)
       })
   }
+
+  // export to excel 
+  const exportToExcel = async () => {
+    try {
+      // Fetch all customer data without pagination
+      const response = await axiosInstance.get(`${Base_Url}/getpostsalewarrenty`, {
+        headers: {
+          Authorization: token,
+        },
+        params: {
+          pageSize: totalCount, // Fetch all data
+          page: 1, // Start from the first page
+        },
+      });
+      const bytes = CryptoJS.AES.decrypt(response.data.encryptedData, secretKey);
+      const decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+      console.log("Excel Export Data:", decryptedData);
+
+      // Create a new workbook
+      const workbook = XLSX.utils.book_new();
+
+      // Convert data to a worksheet
+      const worksheet = XLSX.utils.json_to_sheet(decryptedData.map(user => ({
+        "Item Code": user.item_code,
+        "Serial No": user.serial_no,
+        "Customer name": user.customer_name,
+        "Email": user.customer_email,
+        "Mobile_no": user.customer_mobile,
+        "Product Type": user.Producttyype,
+        "Product Line ": user.ProductLine,
+        "Product Class": user.ProductClass,
+        "Service Type": user.ServiceType,
+        "Warranty Year": user.warranty_yearr,
+        "Compressor Warranty": user.compressor_warranty,
+        "Warranty Amount": user.warranty_amount,
+        "Is Scheme": user.is_scheme,
+        "Scheme name": user.scheme_name,
+        "Start date": user.scheme_startdate,
+        "End Date": user.scheme_enddate,
+        // Add fields you want to export
+      })));
+
+
+      // Append the worksheet to the workbook
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Post Sale Warranty");
+
+      // Export the workbook
+      XLSX.writeFile(workbook, "PostSale_warranty.xlsx");
+    } catch (error) {
+      console.error("Error exporting data to Excel:", error);
+    }
+  };
+
+  // export to excel end 
 
   // Role Right 
 
@@ -312,7 +366,7 @@ const PostSaleWarrenty = () => {
                     </button> : null}
                     <button
                       className="btn btn-primary"
-                      // onClick={exportToExcel}
+                      onClick={exportToExcel}
                       style={{
                         marginLeft: '5px',
                       }}

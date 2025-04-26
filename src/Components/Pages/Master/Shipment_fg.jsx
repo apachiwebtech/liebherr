@@ -134,13 +134,16 @@ export function Shipment_fg(params) {
                     page: 1, // Start from the first page
                 },
             });
+            const bytes = CryptoJS.AES.decrypt(response.data.encryptedData, secretKey);
+            const decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+            console.log("Excel Export Data:", decryptedData);
 
-            const AllShipmentfgdata = response.data.data;
+            // const AllShipmentfgdata = response.data.data;
             // Create a new workbook
             const workbook = XLSX.utils.book_new();
 
             // Convert data to a worksheet
-            const worksheet = XLSX.utils.json_to_sheet(AllShipmentfgdata.map(user => ({
+            const worksheet = XLSX.utils.json_to_sheet(decryptedData.map(user => ({
 
                 "InvoiceNumber": user.InvoiceNumber,
                 "InvoiceDate": user.InvoiceDate,

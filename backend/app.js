@@ -16,6 +16,7 @@ const CryptoJS = require('crypto-js');
 const nodemailer = require('nodemailer');
 const axios = require("axios");
 const https = require('https');
+const ExcelJS = require('exceljs');
 
 // Secret key for JWT
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -2081,7 +2082,50 @@ app.get("/getproductlist", authenticateToken, async (req, res) => {
     return res.status(500).json({ error: "Database error occurred" });
   }
 });
+
 // Product list end
+
+app.get("/getproductexcel", authenticateToken, async (req, res) => {
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+    const {
+      page = 1, // Default to page 1 if not provided
+      pageSize = 10, // Default to 10 items per page if not provided
+    } = req.query;
+
+    // Directly use the query (no parameter binding)
+    let sql = `SELECT m.* FROM product_master as m WHERE 1= 1 `;
+
+
+    // Pagination logic: Calculate offset based on the page number
+    const offset = (page - 1) * pageSize;
+
+    // Add pagination to the SQL query (OFFSET and FETCH NEXT)
+    sql += ` ORDER BY m.id OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+
+    const result = await pool.request().query(sql);
+    // Get the total count of records for pagination
+    let countSql = `SELECT COUNT(*) as totalCount FROM product_master where 1=1 `;
+
+
+    const countResult = await pool.request().query(countSql);
+    const totalCount = countResult.recordset[0].totalCount;
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
+
+    return res.json({
+      encryptedData,
+      totalCount: totalCount,
+      page,
+      pageSize,
+    });
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred" });
+  }
+});
 //customer list start
 //customer list start
 app.get("/getcustomerlist", authenticateToken, async (req, res) => {
@@ -2160,6 +2204,51 @@ app.get("/getcustomerlist", authenticateToken, async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "An error occurred while fetching the customer list" });
+  }
+});
+
+app.get("/downloadcustomerexcel", authenticateToken, async (req, res) => {
+  try {
+    const pool = await poolPromise;
+
+    // Fetch all customers who are not deleted
+    const result = await pool.request().query(`SELECT * FROM awt_customer WHERE deleted = 0`);
+    const customers = result.recordset;
+
+    // Create a new workbook and worksheet
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Customer');
+
+    // Define columns
+    worksheet.columns = [
+      { header: 'Salutation', key: 'salutation' },
+      { header: 'CustomerName', key: 'customer_fname' },
+      { header: 'customerID', key: 'customer_id' },
+      { header: 'CustomerType', key: 'customer_type' },
+      { header: 'CustomerClassification', key: 'customer_classification' },
+      { header: 'MobileNumber', key: 'mobileno' },
+      { header: 'Email', key: 'email' },
+      { header: 'Mwhatsapp', key: 'mwhatsapp' },
+      { header: 'Alternate Mobileno', key: 'alt_mobileno' },
+      { header: 'Alternate whatsapp', key: 'a_whatsapp' },
+      { header: 'Date of Birth', key: 'dateofbirth' },
+      { header: 'Anniversary Date', key: 'anniversary_date' },
+
+    ];
+
+    // Add all customer data as rows
+    worksheet.addRows(customers);
+
+    // Set headers for file download
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename=Customer.xlsx');
+
+    // Write and download
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send('Error generating Customer Excel file');
   }
 });
 
@@ -2279,6 +2368,7 @@ app.get("/requestdatacat/:id", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
 
     // Direct SQL query without parameter binding
+    
     const sql = `
       SELECT *
       FROM awt_category
@@ -3488,7 +3578,7 @@ app.get("/getcomplaintview/:complaintid", authenticateToken, async (req, res) =>
 });
 
 app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
-  const { ticket_no, note, created_by, call_status, call_status_id, sub_call_status, group_code, site_defect, defect_type, activity_code, serial_no, ModelNumber, purchase_date, warrenty_status, engineerdata, engineername, ticket_type, call_city, ticket_start_date, mandaysprice, gas_chargs, gas_transportation, transportation_charge, visit_count, customer_mobile, totp, complete_date, allocation, dealercustid , item_code } = req.body;
+  const { ticket_no, note, created_by, call_status, call_status_id, sub_call_status, group_code, site_defect, defect_type, activity_code, serial_no, ModelNumber, purchase_date, warrenty_status, engineerdata, engineername, ticket_type, call_city, ticket_start_date, mandaysprice, gas_chargs, gas_transportation, transportation_charge, visit_count, customer_mobile, totp, complete_date, allocation, dealercustid, item_code } = req.body;
 
   const username = process.env.TATA_USER;
   const password = process.env.PASSWORD;
@@ -4345,7 +4435,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
     complaint_date, customer_name = "NA", contact_person, email, mobile, address,
     state, city, area, pincode, mode_of_contact, ticket_type, cust_type,
     warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks
-    , ticket_id, classification, priority, callType, requested_by, requested_email, requested_mobile, msp, csp, sales_partner, sales_partner2, salutation, mwhatsapp, awhatsapp, class_city, mother_branch , item_code
+    , ticket_id, classification, priority, callType, requested_by, requested_email, requested_mobile, msp, csp, sales_partner, sales_partner2, salutation, mwhatsapp, awhatsapp, class_city, mother_branch, item_code
   } = req.body;
 
   const otp = Math.floor(1000 + Math.random() * 9000);
@@ -14851,43 +14941,9 @@ app.post("/getmodelno", authenticateToken, async (req, res) => {
   }
 });
 
-
-
-// app.get("/getsparelisting", authenticateToken, async (req, res) => {
-//   const { item_code } = req.query; // Get ModelNumber from query parameters
-//   console.log("Received request with ProductCode:", item_code);
-
-//   try {
-//     if (!item_code) {
-//       console.error("item_code number is missing.");
-//       return res.status(400).json({ error: "item_code number is required." });
-//     }
-
-//     const pool = await poolPromise;
-//     const result = await pool
-//       .request()
-//       .input("item_code", item_code)
-//       .query(
-//         "SELECT * FROM Spare_parts WHERE ProductCode = @item_code AND deleted = 0"
-//       );
-//     // Convert data to JSON string and encrypt it
-//     const jsonData = JSON.stringify(result.recordset);
-//     const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
-
-//     return res.json({
-//       encryptedData,
-//       totalCount,
-//       page: parseInt(page),
-//       pageSize: parseInt(pageSize),
-//     });
-//   } catch (err) {
-//     console.error("Database error:", err);
-//     return res.status(500).json({ error: "Database error occurred" });
-//   }
-// });
-
 app.get("/getsparelisting", authenticateToken, async (req, res) => {
   try {
+    const pool = await poolPromise;
     const {
       item_code,
       ProductCode = "",
@@ -14895,68 +14951,113 @@ app.get("/getsparelisting", authenticateToken, async (req, res) => {
       title = "",
       page = 1,
       pageSize = 10,
+
     } = req.query;
 
-    if (!item_code) {
-      console.error("Item Code is missing.");
-      return res.status(400).json({ error: "Item Code is required." });
-    }
-
-    const pool = await poolPromise;
-    const offset = (page - 1) * pageSize;
-
-    const request = pool.request();
-    request.input("itemCode", item_code);
-    request.input("productCode", `%${ProductCode}%`);
-    request.input("itemdescription", `%${ItemDescription}%`);
-    request.input("title", `%${title}%`);
-    request.input("offset", offset);
-    request.input("pageSize", parseInt(pageSize));
+    // Debug log
 
     let sql = `
-      SELECT s.* FROM Spare_parts as s
-      WHERE s.ProductCode = @itemCode AND s.deleted = 0
-        ${ProductCode ? "AND s.ProductCode LIKE @productCode" : ""}
-        ${title ? "AND s.title LIKE @title" : ""}
-        ${ItemDescription ? "AND s.ItemDescription LIKE @ItemDescription" : ""}
-      ORDER BY s.id DESC
-      OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY
+       SELECT s.* FROM Spare_parts as s WHERE s.ProductCode = ${item_code} AND s.deleted = 0
     `;
 
-    const result = await request.query(sql);
+    // if (ProductCode) {
+    //   sql += ` AND s.ProductCode LIKE '%${ProductCode}%'`;
 
-    // Count Query
-    const countRequest = pool.request();
-    countRequest.input("itemCode", item_code);
-    countRequest.input("productCode", `%${ProductCode}%`);
-    countRequest.input("itemdescription", `%${ItemDescription}%`);
-    countRequest.input("title", `%${title}%`);
+    // }
 
-    let countSql = `
-      SELECT COUNT(*) as totalCount FROM Spare_parts
-      WHERE ProductCode = @itemCode AND deleted = 0
-        ${ProductCode ? "AND ProductCode LIKE @productCode" : ""}
-        ${ItemDescription ? "AND ItemDescription LIKE @itemdescription" : ""}
-        ${title ? "AND title LIKE @title" : ""}
-    `;
+    if (title) {
+      sql += ` AND s.title LIKE '%${title}%'`;
+    }
 
-    const countResult = await countRequest.query(countSql);
+    if (ItemDescription) {
+      sql += ` AND s.ItemDescription LIKE '%${ItemDescription}%'`;
+    }
+
+    // Pagination logic: Calculate offset based on the page number
+    const offset = (page - 1) * pageSize;
+
+    // Add pagination to the SQL query (OFFSET and FETCH NEXT)
+    sql += ` ORDER BY s.id OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+
+    // return res.json({sql:sql})
+    const result = await pool.request().query(sql);
+
+    // Get the total count of records for pagination
+    let countSql = `SELECT COUNT(*) as totalCount FROM Spare_parts WHERE ProductCode = ${item_code} AND deleted = 0`;
+    if (ProductCode) countSql += ` AND ProductCode LIKE '%${ProductCode}%'`;
+    if (ItemDescription) countSql += ` AND ItemDescription LIKE '%${ItemDescription}%'`;
+    if (title) countSql += ` AND title LIKE '%${title}%'`;
+
+    // return res.json({countSql:countSql})
+
+    const countResult = await pool.request().query(countSql);
     const totalCount = countResult.recordset[0].totalCount;
-
+    // Convert data to JSON string and encrypt it
     const jsonData = JSON.stringify(result.recordset);
     const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
+    return res.json({
+      encryptedData,
+      totalCount: totalCount,
+      page,
+      pageSize,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "An error occurred while fetching the complaint list" });
+  }
+});
 
+
+
+app.get("/getspareexcel", authenticateToken, async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    const {
+      page = 1,
+      pageSize = 10,
+
+    } = req.query;
+
+    // Debug log
+
+    let sql = `
+       SELECT s.* FROM Spare_parts as s WHERE s.deleted = 0
+    `;
+
+    // Pagination logic: Calculate offset based on the page number
+    const offset = (page - 1) * pageSize;
+
+    // Add pagination to the SQL query (OFFSET and FETCH NEXT)
+    sql += ` ORDER BY s.id OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+
+    // return res.json({sql:sql})
+    const result = await pool.request().query(sql);
+
+    // Get the total count of records for pagination
+    let countSql = `SELECT COUNT(*) as totalCount FROM Spare_parts WHERE deleted = 0`;
+
+    // return res.json({countSql:countSql})
+
+    const countResult = await pool.request().query(countSql);
+    const totalCount = countResult.recordset[0].totalCount;
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
     return res.json({
       encryptedData,
       totalCount,
-      page: parseInt(page),
-      pageSize: parseInt(pageSize),
+      page,
+      pageSize,
     });
   } catch (err) {
-    console.error("Database error:", err);
-    return res.status(500).json({ error: "Database error occurred" });
+    console.error(err);
+    return res.status(500).json({ message: "An error occurred while fetching the complaint list" });
   }
 });
+
+
+
+
 
 
 

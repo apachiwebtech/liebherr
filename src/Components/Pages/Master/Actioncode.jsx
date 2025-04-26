@@ -45,10 +45,10 @@ const ActionCode = () => {
             Authorization: token, // Send token in headers
           },
         });
-        // Decrypt the response data
-              const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
-              const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
-              const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+      // Decrypt the response data
+      const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+      const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+      const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
       console.log(decryptedData);
       setGroupdefect_code(decryptedData);
     } catch (error) {
@@ -64,10 +64,10 @@ const ActionCode = () => {
             Authorization: token, // Send token in headers
           },
         });
-        // Decrypt the response data
-              const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
-              const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
-              const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+      // Decrypt the response data
+      const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+      const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+      const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
       console.log(decryptedData);
       setUsers(decryptedData);
       setFilteredUsers(decryptedData);
@@ -91,7 +91,7 @@ const ActionCode = () => {
     setSearchTerm(value);
     const filtered = users.filter((user) =>
       user.dsite_code && user.dsite_code.toLowerCase().includes(value) ||
-    user.dsite_title && user.dsite_title.toLowerCase().includes(value)
+      user.dsite_title && user.dsite_title.toLowerCase().includes(value)
     );
     setFilteredUsers(filtered);
     setCurrentPage(0);
@@ -235,12 +235,21 @@ const ActionCode = () => {
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
   // export to excel 
-  const exportToExcel = () => {
+  const exportToExcel = async () => {
+    const response = await axiosInstance.get(`${Base_Url}/getsite`, {
+      headers: {
+        Authorization: token,
+      },
+    });
+    // Create a new workbook
+    const bytes = CryptoJS.AES.decrypt(response.data.encryptedData, secretKey);
+    const decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+    console.log("Excel Export Data:", decryptedData);
     // Create a new workbook
     const workbook = XLSX.utils.book_new();
 
     // Convert data to a worksheet
-    const worksheet = XLSX.utils.json_to_sheet(currentUsers.map(user => ({
+    const worksheet = XLSX.utils.json_to_sheet(decryptedData.map(user => ({
 
       "DefectGroupCode": user.defectgroupcode,
       "SiteDefectCode": user.dsite_code,
@@ -443,7 +452,7 @@ const ActionCode = () => {
                         <th style={{ padding: '12px 15px', textAlign: 'center' }}>Defect Type Title</th>
                         <th style={{ padding: '12px 15px', textAlign: 'center' }}>Description</th>
                         {roleaccess > 3 ? <th style={{ padding: '12px 15px', textAlign: 'center' }}>Edit</th> : null}
-                        {roleaccess > 4 ?<th style={{ padding: '12px 15px', textAlign: 'center' }}>Delete</th> : null}
+                        {roleaccess > 4 ? <th style={{ padding: '12px 15px', textAlign: 'center' }}>Delete</th> : null}
                       </tr>
                     </thead>
                     <tbody>

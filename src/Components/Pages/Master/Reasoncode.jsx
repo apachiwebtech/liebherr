@@ -89,7 +89,7 @@ const ReasonCode = () => {
         setSearchTerm(value);
         const filtered = users.filter((user) =>
             user.defect_code && user.defect_code.toLowerCase().includes(value) ||
-        user.defect_title && user.defect_title.toLowerCase().includes(value)
+            user.defect_title && user.defect_title.toLowerCase().includes(value)
         );
         setFilteredUsers(filtered);
         setCurrentPage(0);
@@ -229,12 +229,20 @@ const ReasonCode = () => {
     const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
     // export to excel 
-    const exportToExcel = () => {
+    const exportToExcel = async () => {
+        const response = await axiosInstance.get(`${Base_Url}/gettypeofdefect`, {
+            headers: {
+                Authorization: token,
+            },
+        });
         // Create a new workbook
+        const bytes = CryptoJS.AES.decrypt(response.data.encryptedData, secretKey);
+        const decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+        console.log("Excel Export Data:", decryptedData);
         const workbook = XLSX.utils.book_new();
 
         // Convert data to a worksheet
-        const worksheet = XLSX.utils.json_to_sheet(currentUsers.map(user => ({
+        const worksheet = XLSX.utils.json_to_sheet(decryptedData.map(user => ({
 
             "DefectCode": user.defect_code,
             "Description": user.description,

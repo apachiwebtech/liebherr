@@ -253,31 +253,31 @@ export function Customerlist(params) {
                 "CustomerType": user.customer_type,
                 "CustomerClassification": user.customer_classification,
                 "MobileNumber": user.mobileno,
-                // "Email": user.email, 
-                // "Address": user.address,
-                // "Country": user.country_name,
-                // "Region": user.region_name,
-                // "State": user.geostate_name,
-                // "City": user.geocity_name,
-                // "District": user.district_name,                
-                // "Pincode": user.pincode,
-                // "CCperson": user.cc_person,
-                // "CCNumber": user.ccnumber,
-                // "ModelNumber": user.ModelNumber,
-                // "SerialNumber": user.serial_no,
-                // "ModelName": user.Modelname,
-                // "PurchaseDate": user.purchase_date,
-                // "WarrantyStartDate": user.warranty_sdate,
-                // "WarrantyEndDate": user.warranty_edate,
-                // "Invoicedate": user.InvoiceDate,
-                // "InvoiceNumber": user.InvoiceNumber,
-                // "Short_model_no": user.Short_model_no,
-                // "SerialStatus": user.SerialStatus,
-                // "Notes": user.Notes,
-                // "BranchName": user.BranchName,
-                // "CurrentAccountStatus": user.CurrentAccountStatus,
-                // "SalesDealer": user.SalesDealer,
-                // "SubDealer": user.SubDealer,
+                "Email": user.email,
+                "Address": user.address,
+                "Country": user.country_name,
+                "Region": user.region_name,
+                "State": user.geostate_name,
+                "City": user.geocity_name,
+                "District": user.district_name,
+                "Pincode": user.pincode,
+                "CCperson": user.cc_person,
+                "CCNumber": user.ccnumber,
+                "ModelNumber": user.ModelNumber,
+                "SerialNumber": user.serial_no,
+                "ModelName": user.Modelname,
+                "PurchaseDate": user.purchase_date,
+                "WarrantyStartDate": user.warranty_sdate,
+                "WarrantyEndDate": user.warranty_edate,
+                "Invoicedate": user.InvoiceDate,
+                "InvoiceNumber": user.InvoiceNumber,
+                "Short_model_no": user.Short_model_no,
+                "SerialStatus": user.SerialStatus,
+                "Notes": user.Notes,
+                "BranchName": user.BranchName,
+                "CurrentAccountStatus": user.CurrentAccountStatus,
+                "SalesDealer": user.SalesDealer,
+                "SubDealer": user.SubDealer,
 
 
             })));
@@ -289,6 +289,24 @@ export function Customerlist(params) {
             XLSX.writeFile(workbook, "Customer.xlsx");
         } catch (error) {
             console.error("Error exporting data to Excel:", error);
+        }
+    };
+
+    const exportCustomerToExcel = async () => {
+        try {
+            const response = await axiosInstance.get(`${Base_Url}/downloadcustomerexcel`, {
+                headers: { Authorization: token },
+                responseType: 'blob', // Important to handle file
+            });
+
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'Customer.xlsx'); // File name
+            document.body.appendChild(link);
+            link.click();
+        } catch (error) {
+            console.error('Error downloading Customer Excel:', error);
         }
     };
 
@@ -448,7 +466,7 @@ export function Customerlist(params) {
                                     <div className="form-group">
                                         <button
                                             className="btn btn-primary"
-                                            onClick={exportToExcel}
+                                            onClick={exportCustomerToExcel}
                                         >
                                             Export to Excel
                                         </button>

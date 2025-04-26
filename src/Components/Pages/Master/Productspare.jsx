@@ -65,7 +65,7 @@ export function Productspare() {
 
     const fetchSpareListing = async (page) => {
         try {
-         const params = new URLSearchParams();
+            const params = new URLSearchParams();
 
             // Add all filters to params
             Object.entries(searchFilters).forEach(([key, value]) => {
@@ -74,8 +74,10 @@ export function Productspare() {
                 }
             });
             const item_code = selectmodel.item_code
+
+            console.log('Sending params:', params); // Debug log
             const response = await axiosInstance.get(`${Base_Url}/getsparelisting?${params.toString()}`, {
-                params: { item_code },
+                params: { item_code, page: page, pageSize: pageSize },
                 headers: { Authorization: token },
             });
             // Decrypt the response data
@@ -86,6 +88,7 @@ export function Productspare() {
             setSpareParts(decryptedData);
             setFilteredData(decryptedData);
             setTotalCount(response.data.totalCount);
+
         } catch (error) {
             console.error("API Error:", error);
             alert("Failed to fetch spare listing. Please try again.");
@@ -102,7 +105,7 @@ export function Productspare() {
             const params = new URLSearchParams();
 
             // Add all filters to params
-            Object.entries(searchFilters).forEach(([key, value]) => {
+            Object.entries().forEach(([key, value]) => {
                 if (value) { // Only add if value is not empty
                     params.append(key, value);
                 }
@@ -180,18 +183,31 @@ export function Productspare() {
             return; // Stop execution if there are validation errors
         }
 
-        console.log(selectmodel.ModelNumber, "selectmodel");
+        console.log(selectmodel.item_code, "selectmodel");
         setIsSubmitted(true); // Mark submission as true
         await fetchSpareListing(); // Fetch spare listing
     };
 
     // export to excel 
-    const exportToExcel = () => {
+    const exportToExcel = async () => {
+        // const item_code = selectmodel.item_code
+        const response = await axiosInstance.get(`${Base_Url}/getspareexcel`, {
+            headers: {
+                Authorization: token,
+            },
+            params: {
+                pageSize: totalCount, // Fetch all data
+                page: 1, // Start from the first page
+            },
+        });
+        // Create a new workbook
+        const decryptedData = CryptoJS.AES.decrypt(response.data.encryptedData, secretKey).toString(CryptoJS.enc.Utf8);
+        const allSpareData = JSON.parse(decryptedData);
         // Create a new workbook
         const workbook = XLSX.utils.book_new();
 
         // Convert data to a worksheet
-        const worksheet = XLSX.utils.json_to_sheet(spareParts.map(user => ({
+        const worksheet = XLSX.utils.json_to_sheet(allSpareData.map(user => ({
             "Spare": user.title, // Add fields you want to export
             "ProductCode": user.ProductCode,
             "ModelNumber": user.ModelNumber,
@@ -208,9 +224,9 @@ export function Productspare() {
             "HSN": user.HSN,
             "Packed": user.Packed,
             "Returnable": user.Returnable,
-
-
-
+            "Product Class": user.ProductClass,
+            "Product Line": user.ProductLine,
+            "Serialized": user.Serialized
         })));
 
         // Append the worksheet to the workbook
@@ -219,6 +235,9 @@ export function Productspare() {
         // Export the workbook
         XLSX.writeFile(workbook, "SpareListing.xlsx");
     };
+
+
+    
     const importexcel = (event) => {
         setLoader(true);
         const file = event?.target?.files ? event.target.files[0] : null;
@@ -552,7 +571,10 @@ export function Productspare() {
                             </table>
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
                                 <button
-                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    onClick={() => {
+                                        setCurrentPage(currentPage - 1)
+                                        fetchSpareListing(currentPage - 1)
+                                    }}
                                     disabled={currentPage <= 1}
                                     style={{
                                         padding: '8px 15px',
@@ -571,7 +593,10 @@ export function Productspare() {
                                     Page {currentPage} of {totalPages}
                                 </span>
                                 <button
-                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    onClick={() => {
+                                        setCurrentPage(currentPage + 1)
+                                        fetchSpareListing(currentPage + 1)
+                                    }}
                                     disabled={currentPage >= totalPages}
                                     style={{
                                         padding: '8px 15px',

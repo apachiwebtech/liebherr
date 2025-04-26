@@ -96,7 +96,7 @@ const Master_Warrenty = () => {
       console.log('Sending params:', params.toString()); // Debug log
 
       const response = await axiosInstance.get(`${Base_Url}/getmasterwarrenty?${params}`, {
-        
+
         headers: {
           Authorization: token,
         },
@@ -192,6 +192,55 @@ const Master_Warrenty = () => {
       });
   }
 
+  // export to excel 
+  const exportToExcel = async () => {
+    try {
+      // Fetch all customer data without pagination
+      const response = await axiosInstance.get(`${Base_Url}/getmasterwarrenty`, {
+        headers: {
+          Authorization: token,
+        },
+        params: {
+          pageSize: totalCount, // Fetch all data
+          page: 1, // Start from the first page
+        },
+      });
+      const bytes = CryptoJS.AES.decrypt(response.data.encryptedData, secretKey);
+      const decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+      console.log("Excel Export Data:", decryptedData);
+
+      // Create a new workbook
+      const workbook = XLSX.utils.book_new();
+
+      // Convert data to a worksheet
+      const worksheet = XLSX.utils.json_to_sheet(decryptedData.map(user => ({
+        "Item Code": user.Item_code,
+        "Csp Code": user.csp_code,
+        "Product Type": user.Product_Type,
+        "Product Line": user.Product_Line,
+        "Product Class": user.Product_Class,
+        "Service Type": user.Service_Type,
+        "Warranty Year ": user.Warrenty_year,
+        "Compressor Warranty": user.Compressor_Warrenty,
+        "Warranty Amount": user.Warrenty_amount,
+        "Is Scheme": user.IsScheme,
+        "Scheme name": user.Scheme_Name,
+        // Add fields you want to export
+      })));
+
+
+      // Append the worksheet to the workbook
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Master Warranty");
+
+      // Export the workbook
+      XLSX.writeFile(workbook, "Master_Warranty.xlsx");
+    } catch (error) {
+      console.error("Error exporting data to Excel:", error);
+    }
+  };
+
+  // export to excel end 
+
   // Role Right 
 
 
@@ -237,7 +286,7 @@ const Master_Warrenty = () => {
             >
               <div className="row mb-3">
 
-              <div className="col-md-2">
+                <div className="col-md-2">
                   <div className="form-group">
                     <label>Item Code</label>
                     <input
@@ -317,7 +366,7 @@ const Master_Warrenty = () => {
                     </button> : null}
                     <button
                       className="btn btn-primary"
-                      // onClick={exportToExcel}
+                      onClick={exportToExcel}
                       style={{
                         marginLeft: '5px',
                       }}
