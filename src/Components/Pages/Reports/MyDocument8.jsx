@@ -121,41 +121,45 @@ const MyDocument8 = ({ data, spare , csp}) => {
     };
 
     function numberToWords(num) {
-        if (num === 0) return "";
-
+        if (num === 0) return "Zero";
+    
         const belowTwenty = [
             "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten",
             "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen",
             "Eighteen", "Nineteen"
         ];
-        const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+        const tens = [
+            "", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"
+        ];
         const thousands = ["", "Thousand", "Million", "Billion"];
-
+    
         function helper(n) {
             if (n === 0) return "";
             else if (n < 20) return belowTwenty[n - 1] + " ";
             else if (n < 100) return tens[Math.floor(n / 10)] + " " + helper(n % 10);
-            else if (n < 1000) return belowTwenty[Math.floor(n / 100) - 1] + " hundred " + helper(n % 100);
-            else {
-                for (let i = 0, unit = 1000; unit <= Math.pow(10, 12); unit *= 1000, i++) {
-                    if (n < unit * 1000) {
-                        return helper(Math.floor(n / unit)) + thousands[i] + " " + helper(n % unit);
-                    }
-                }
-            }
+            else return belowTwenty[Math.floor(n / 100) - 1] + " Hundred " + helper(n % 100);
         }
-
-        return helper(num).trim();
+    
+        let result = "";
+        let i = 0;
+    
+        while (num > 0) {
+            if (num % 1000 !== 0) {
+                result = helper(num % 1000) + thousands[i] + " " + result;
+            }
+            num = Math.floor(num / 1000);
+            i++;
+        }
+    
+        return result.trim();
     }
-
+    
 
     const grandtotal = spare.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
 
     const qfor = spare.map((item) => item.article_description).join(', ')
 
-
-    console.log(data,csp,spare)
 
 
 

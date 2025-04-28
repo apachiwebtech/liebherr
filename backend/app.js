@@ -3776,28 +3776,28 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
 
       //Nps Msg
 
-      const encrypt = (data) => {
-        return CryptoJS.AES.encrypt(data, secretKey).toString();
-      };
+      // const encrypt = (data) => {
+      //   return CryptoJS.AES.encrypt(data, secretKey).toString();
+      // };
 
-      // Encrypt each part
-      const encryptedEmail = encrypt(customer_email);
-      const encryptedTicket = encrypt(ticket_no);
-      const encryptedCustomerId = encrypt(customer_id);
-
-
-      // Build the URL-safe message
-      const encryptedPath = `${encodeURIComponent(encryptedEmail)}/${encodeURIComponent(encryptedTicket)}/${encodeURIComponent(encryptedCustomerId)}`;
-
-      const npsmsg = `Dear Customer, Your feedback helps us grow. Please rate us in survey: ${nps_link} ${'hgjhghj'} . Thanks for choosing Liebherr.`;
-
-      const nps_msg = encodeURIComponent(npsmsg);
+      // // Encrypt each part
+      // const encryptedEmail = encrypt(customer_email);
+      // const encryptedTicket = encrypt(ticket_no);
+      // const encryptedCustomerId = encrypt(customer_id);
 
 
-      const npsapiUrl = `https://smsgw.tatatel.co.in:9095/campaignService/campaigns/qs?recipient=${customer_mobile}&dr=false&msg=${nps_msg}&user=${username}&pswd=${password}&sender=LICARE&PE_ID=1201159257274643113&Template_ID=1207173855461934489`;
+      // // Build the URL-safe message
+      // const encryptedPath = `${encodeURIComponent(encryptedEmail)}/${encodeURIComponent(encryptedTicket)}/${encodeURIComponent(encryptedCustomerId)}`;
 
-      console.log(npsapiUrl)
-      await axios.get(npsapiUrl, { httpsAgent });
+      // const npsmsg = `Dear Customer, Your feedback helps us grow. Please rate us in survey: ${nps_link} ${'hgjhghj'} . Thanks for choosing Liebherr.`;
+
+      // const nps_msg = encodeURIComponent(npsmsg);
+
+
+      // const npsapiUrl = `https://smsgw.tatatel.co.in:9095/campaignService/campaigns/qs?recipient=${customer_mobile}&dr=false&msg=${nps_msg}&user=${username}&pswd=${password}&sender=LICARE&PE_ID=1201159257274643113&Template_ID=1207173855461934489`;
+
+      // console.log(npsapiUrl)
+      // await axios.get(npsapiUrl, { httpsAgent });
 
 
 
