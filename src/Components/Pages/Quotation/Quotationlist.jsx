@@ -1,7 +1,7 @@
 import * as XLSX from "xlsx";
 import { useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
-import { FaPencilAlt, FaTrash,FaEye } from 'react-icons/fa';
+import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
 import { Base_Url, secretKey } from '../../Utils/Base_Url';
 import CryptoJS from 'crypto-js';
 import { useSelector } from 'react-redux';
@@ -41,11 +41,27 @@ export function Quotationlist(params) {
     const [searchFilters, setSearchFilters] = useState({
         ticketId: '',
         CustomerName: '',
-        spareId: '',
         ModelNumber: '',
-        ticket_no: '',
-        quantity: '',
+        ticketId: '',
         price: '',
+        fromDate: '',
+        toDate: '',
+        quotationNumber: '',
+        customer_id: '',
+        customer_class: '',
+        mobile_no: '',
+        alt_mobileno: '',
+        email: '',
+        state: '',
+        customer_type: '',
+        ticket_type: '',
+        call_status: '',
+        sub_call_status: '',
+        warranty_status: '',
+        serial_no: '',
+        sevice_partner: '',
+        child_service_partner: '',
+        mother_branch: '',
     });
 
     const fetchQuotationlist = async (page) => {
@@ -151,41 +167,65 @@ export function Quotationlist(params) {
 
     // export to excel 
     const exportToExcel = async () => {
+        // Check if From and To Dates are selected
+        if (!searchFilters.fromDate || !searchFilters.toDate) {
+            alert("Please select both From Date and To Date.");
+            return;
+        }
         try {
+            // Convert From and To Date to the desired format (if necessary)
+            const fromDate = new Date(searchFilters.fromDate).toISOString().split('T')[0];
+            const toDate = new Date(searchFilters.toDate).toISOString().split('T')[0];
             // Fetch all customer data without pagination
-            const response = await axiosInstance.get(`${Base_Url}/getchildFranchiseDetails`, {
+            const response = await axiosInstance.get(`${Base_Url}/getquotationlist`, {
                 headers: {
                     Authorization: token,
                 },
                 params: {
                     pageSize: totalCount, // Fetch all data
-                    page: 1, // Start from the first page
+                    page: 1,
+                    fromDate: fromDate,
+                    toDate: toDate,
+                    licare_code: licare_code,
                 },
             });
-            const allQuotationdata = response.data.data;
+            const bytes = CryptoJS.AES.decrypt(response.data.encryptedData, secretKey);
+            const decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+            console.log("Excel Export Data:", decryptedData);
             // Create a new workbook
             const workbook = XLSX.utils.book_new();
 
             // Convert data to a worksheet
-            const worksheet = XLSX.utils.json_to_sheet(allQuotationdata.map(user => ({
-
-                "QuotationNumber": user.quotationNumber,
-                "ticketId": user.ticketId,
-                "ticketdate": user.ticketdate,
-                "QuotationDate": user.quotationDate,
-                "EngineerName": user.assignedEngineer,
-                "CustomerName": user.CustomerName,
-                "CustomerID": user.customer_id,
-                "ModelNumber": user.ModelNumber,
-                "State": user.state,
-                "City": user.city,
-                "SpareName": user.title,
-                "Quantity": user.quantity,
-                "Price": user.price,
-                "Status": user.status,
-
-
-            })));
+            const worksheet = XLSX.utils.json_to_sheet(
+                decryptedData.map((item) => ({
+                    ticketId: item.ticketId,
+                    ticketdate: item.ticketdate ? formatDate(item.ticketdate) : '',
+                    CustomerID: item.customer_id,
+                    CustomerName: item.CustomerName,
+                    Address: item.customer_address,
+                    State: item.state,
+                    CustomerClassification: item.customer_class,
+                    CustomerMobile: item.mobile_no,
+                    AltMobileNo: item.alt_mobileno,
+                    CustomerEmail: item.email,  
+                    CustomerType: item.customer_type,
+                    TicketType: item.ticket_type,
+                    ModelNumber: item.ModelNumber,
+                    SerialNo : item.serial_no,
+                    WarrantyStatus: item.warranty_status,
+                    CallStatus: item.call_status,
+                    SubCallStatus: item.sub_call_status,
+                    LiebherrBranch: item.mother_branch,
+                    MasterServicePartner: item.sevice_partner,
+                    ChildServicePartner: item.child_service_partner,
+                    EngineerName: item.engineer_name,
+                    QuotationFor: "Spare Parts",
+                    QuotationNumber: item.quotationNumber,        
+                    QuotationDate: item.quotationDate,                    
+                    QuotationAmount: item.price,
+                    QuoteStatus: item.status,
+                }))
+            );
 
             // Append the worksheet to the workbook
             XLSX.utils.book_append_sheet(workbook, worksheet, "QuotationList");
@@ -246,141 +286,360 @@ export function Quotationlist(params) {
                     <div className="card mb-3 tab_box">
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
 
+                            <div className="searchFilter" onKeyDown={(event) => {
+                                if (event.key === "Enter") {
+                                    event.preventDefault(); // Prevent form submission if inside a form
+                                    applyFilters();
+                                }
+                            }}>
 
-                            <div className="row mb-3">
+                                <div className='m-3'>
 
-                                <div className="col-md-2">
-                                    <div className="form-group">
-                                        <label>Quotation Number</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="quotationNumber"
-                                            value={searchFilters.quotationNumber}
-                                            placeholder="Search by QuotationNumber"
-                                            onChange={handleFilterChange}
-                                        />
-                                    </div>
-                                </div>
-
-
-                                <div className="col-md-2">
-                                    <div className="form-group">
-                                        <label>Engineer</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="assignedEngineer"
-                                            value={searchFilters.assignedEngineer}
-                                            placeholder="Search by Engineer"
-                                            onChange={handleFilterChange}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="col-md-2">
-                                    <div className="form-group">
-                                        <label>Customer Name</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="CustomerName"
-                                            value={searchFilters.CustomerName}
-                                            placeholder="Search by CustomerName"
-                                            onChange={handleFilterChange}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="col-md-2">
-                                    <div className="form-group">
-                                        <label>Ticket No.</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="ticket_no"
-                                            value={searchFilters.ticket_no}
-                                            placeholder="Search by Ticket No"
-                                            onChange={handleFilterChange}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="col-md-2">
-                                    <div className="form-group">
-                                        <label>Price</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="price"
-                                            value={searchFilters.price}
-                                            placeholder="Search by Price name"
-                                            onChange={handleFilterChange}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="col-md-2">
-                                    <div className="form-group">
-                                        <label>Status</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="status"
-                                            value={searchFilters.status}
-                                            placeholder="Search by Status"
-                                            onChange={handleFilterChange}
-                                        />
-                                    </div>
-                                </div>
-
-
-
-                            </div>
-                            <div className="row mb-3">
-                                <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
-                                    <div className="form-group">
-                                        <button
-                                            className="btn btn-primary"
-                                            onClick={exportToExcel}
-                                        >
-                                            Export to Excel
-                                        </button>
-                                        <button
-                                            className="btn btn-primary mr-2"
-                                            onClick={applyFilters}
-                                            style={{
-                                                marginLeft: '5px',
-                                            }}
-                                        >
-                                            Search
-                                        </button>
-                                        <button
-                                            className="btn btn-secondary"
-                                            onClick={() => {
-                                                window.location.reload()
-                                            }}
-                                            style={{
-                                                marginLeft: '5px',
-                                            }}
-                                        >
-                                            Reset
-                                        </button>
-                                        {filteredData.length === 0 && (
-                                            <div
-                                                style={{
-                                                    backgroundColor: '#f8d7da',
-                                                    color: '#721c24',
-                                                    padding: '5px 10px',
-                                                    marginLeft: '10px',
-                                                    borderRadius: '4px',
-                                                    border: '1px solid #f5c6cb',
-                                                    fontSize: '14px',
-                                                    display: 'inline-block'
-                                                }}
-                                            >
-                                                No Record Found
+                                    <div className="row mb-2">
+                                        <div className="col-md-2">
+                                            <div className="form-group">
+                                                <label>From Date</label>
+                                                <input
+                                                    type="date"
+                                                    className="form-control"
+                                                    name="fromDate"
+                                                    value={searchFilters.fromDate}
+                                                    onChange={handleFilterChange}
+                                                />
                                             </div>
-                                        )}
+                                        </div>
+                                        <div className="col-md-2">
+                                            <div className="form-group">
+                                                <label>To Date</label>
+                                                <input
+                                                    type="date"
+                                                    className="form-control"
+                                                    name="toDate"
+                                                    value={searchFilters.toDate}
+                                                    onChange={handleFilterChange}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="col-md-2">
+                                            <div className="form-group">
+                                                <label>Quotation Number</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    name="quotationNumber"
+                                                    value={searchFilters.quotationNumber}
+                                                    placeholder="Search by QuotationNumber"
+                                                    onChange={handleFilterChange}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="col-md-2">
+                                            <div className="form-group">
+                                                <label>Ticket No.</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    name="ticketId"
+                                                    value={searchFilters.ticketId}
+                                                    placeholder="Search by Ticket No"
+                                                    onChange={handleFilterChange}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="col-md-2">
+                                            <div className="form-group">
+                                                <label>Customer ID</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    name="customer_id"
+                                                    value={searchFilters.customer_id}
+                                                    placeholder="Search by customer Id"
+                                                    onChange={handleFilterChange}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="col-md-2">
+                                            <div className="form-group">
+                                                <label>Customer Classification</label>
+                                                <select
+                                                    className="form-control"
+                                                    name="customer_class"
+                                                    value={searchFilters.customer_class}
+                                                    onChange={handleFilterChange}
+                                                >
+                                                    <option value=""> SELECT</option>
+                                                    <option value="Import">Import</option>
+                                                    <option value="Consumer">Consumer</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div className="col-md-2">
+                                            <div className="form-group">
+                                                <label>Customer Type</label>
+                                                <select
+
+                                                    className="form-select"
+                                                    name="customer_type"
+                                                    value={searchFilters.customer_type}
+                                                    placeholder="Search by customer Type"
+                                                    onChange={handleFilterChange}
+                                                >
+                                                    <option value="selected">Select Customer Type</option>
+                                                    <option value="END CUSTOMER">END CUSTOMER</option>
+                                                    <option value="DISPLAY / EVENTS">DISPLAY / EVENTS</option>
+                                                    <option value="SERVICE PARTNER">SERVICE PARTNER</option>
+                                                    <option value="WAREHOUSE">WAREHOUSE</option>
+                                                    <option value="LHI DISPLAY/WH">LHI DISPLAY/WH</option>
+                                                    <option value="SUB-DEALER">SUB-DEALER</option>
+
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div className="col-md-2">
+                                            <div className="form-group">
+                                                <label>Customer Mobile</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    name="mobile_no"
+                                                    value={searchFilters.mobile_no}
+                                                    placeholder="Search by customer mobile"
+                                                    onChange={handleFilterChange}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="col-md-2">
+                                            <div className="form-group">
+                                                <label>Alternate Mobile</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    name="alt_mobileno"
+                                                    value={searchFilters.alt_mobileno}
+                                                    placeholder="Search by customer mobile"
+                                                    onChange={handleFilterChange}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="col-md-2">
+                                            <div className="form-group">
+                                                <label>Customer Email</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    name="customerEmail"
+                                                    value={searchFilters.email}
+                                                    placeholder="Search by customer email"
+                                                    onChange={handleFilterChange}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="col-md-2">
+                                            <div className="form-group">
+                                                <label>State</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    name="state"
+                                                    value={searchFilters.state}
+                                                    placeholder="Search by State"
+                                                    onChange={handleFilterChange}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="col-md-2">
+                                            <div className="form-group">
+                                                <label>Ticket Type</label>
+                                                <select
+                                                    className="form-control"
+                                                    name="ticket_type"
+                                                    value={searchFilters.ticket_type}
+                                                    onChange={handleFilterChange}
+                                                >
+                                                    <option value=""> SELECT</option>
+                                                    <option value="INSTALLATION">INSTALLATION</option>
+                                                    <option value="BREAKDOWN">BREAKDOWN</option>
+                                                    <option value="VISIT">VISIT</option>
+                                                    <option value="DEMO">DEMO</option>
+                                                    <option value="MAINTENANCE">MAINTENANCE</option>
+                                                    <option value="HELPDESK">HELPDESK</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div className="col-md-2">
+                                            <div className="form-group">
+                                                <label>Call Status</label>
+                                                <select
+                                                    className="form-control"
+                                                    name="call_status"
+                                                    value={searchFilters.call_status}
+                                                    onChange={handleFilterChange}
+                                                >
+                                                    <option value=""> SELECT</option>
+                                                    <option value="Approval">Approval</option>
+                                                    <option value="Closed">Closed</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div className="col-md-2">
+                                            <div className="form-group">
+                                                <label>Sub Call Status</label>
+                                                <select
+                                                    className="form-control"
+                                                    name="sub_call_status"
+                                                    value={searchFilters.sub_call_status}
+                                                    onChange={handleFilterChange}
+                                                >
+                                                    <option value=""> SELECT</option>
+                                                    <option value="Fully">FULLY</option>
+                                                    <option value="Customer Approval / Quotation">CUSTOMER APPROVAL / QUOTATION</option>
+                                                    <option value="Spare Required">SPARE REQUIRED</option>
+                                                    <option value="Technician on-route">TECHNICIAN ON-ROUTE</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div className="col-md-2">
+                                            <div className="form-group">
+                                                <label>Warranty Status</label>
+                                                <select
+                                                    className="form-control"
+                                                    name="warranty_status"
+                                                    value={searchFilters.warranty_status}
+                                                    onChange={handleFilterChange}
+                                                >
+                                                    <option value=""> SELECT</option>
+                                                    <option value="WARRANTY">Warranty</option>
+                                                    <option value="OUT OF WARRANTY">Out Of Warranty</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+
+
+                                        <div className="col-md-2">
+                                            <div className="form-group">
+                                                <label>Serial No</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    name="serial_no"
+                                                    value={searchFilters.serial_no}
+                                                    placeholder="Search by Serial No"
+                                                    onChange={handleFilterChange}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="col-md-2">
+                                            <div className="form-group">
+                                                <label>Master Service Partner</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    name="sevice_partner"
+                                                    value={searchFilters.sevice_partner}
+                                                    placeholder="Search by Msp"
+                                                    onChange={handleFilterChange}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="col-md-2">
+                                            <div className="form-group">
+                                                <label>Child Service partner</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    name="child_service_partner"
+                                                    value={searchFilters.child_service_partner}
+                                                    placeholder="Search by Csp"
+                                                    onChange={handleFilterChange}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="col-md-2">
+                                            <div className="form-group">
+                                                <label>Liebherr Branch</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    name="mother_branch"
+                                                    value={searchFilters.mother_branch}
+                                                    placeholder="Search by Liebherr Branch"
+                                                    onChange={handleFilterChange}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="col-md-2">
+                                            <div className="form-group">
+                                                <label>Model Number</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    name="ModelNumber"
+                                                    value={searchFilters.ModelNumber}
+                                                    placeholder="Search by Model Number"
+                                                    onChange={handleFilterChange}
+                                                />
+                                            </div>
+                                        </div>
+
+
+
+
+
+
+
+                                    </div>
+
+                                    <div className="row mb-3">
+                                        <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
+                                            <div className="form-group">
+                                                <button
+                                                    className="btn btn-primary"
+                                                    onClick={exportToExcel}
+                                                >
+                                                    Export to Excel
+                                                </button>
+                                                <button
+                                                    className="btn btn-primary mr-2"
+                                                    onClick={applyFilters}
+                                                    style={{
+                                                        marginLeft: '5px',
+                                                    }}
+                                                >
+                                                    Search
+                                                </button>
+                                                <button
+                                                    className="btn btn-secondary"
+                                                    onClick={() => {
+                                                        window.location.reload()
+                                                    }}
+                                                    style={{
+                                                        marginLeft: '5px',
+                                                    }}
+                                                >
+                                                    Reset
+                                                </button>
+                                                {filteredData.length === 0 && (
+                                                    <div
+                                                        style={{
+                                                            backgroundColor: '#f8d7da',
+                                                            color: '#721c24',
+                                                            padding: '5px 10px',
+                                                            marginLeft: '10px',
+                                                            borderRadius: '4px',
+                                                            border: '1px solid #f5c6cb',
+                                                            fontSize: '14px',
+                                                            display: 'inline-block'
+                                                        }}
+                                                    >
+                                                        No Record Found
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -389,13 +648,17 @@ export function Quotationlist(params) {
                                     <thead>
                                         <tr>
                                             <th width="3%">#</th>
-                                            <th width="13%">Quotation Number</th>
                                             <th width="7%">Ticket No.</th>
                                             <th width="10%">Ticket Date</th>
-                                            <th width="20%">Engineer</th>
-                                            <th width="10%">Customer Name</th>
+                                            <th width="20%">State</th>
+                                            <th width="10%">Customer Classification</th>
                                             <th width="15%">ModelNumber</th>
-                                            <th width="10%">Status</th>
+                                            <th width="15%">Liebherr Branch</th>
+                                            <th width="15%">Quotation For</th>
+                                            <th width="10%"> Quotation No</th>
+                                            <th width="10%"> Quotation Date</th>
+                                            <th width="10%"> Quotation Amount</th>
+                                            <th width="10%"> Quote Status</th>
                                             <th width="5%">{roleaccess <= 3 ? "View" : "Edit"}</th>
 
                                         </tr>
@@ -406,12 +669,16 @@ export function Quotationlist(params) {
                                             return (
                                                 <tr key={item.id}>
                                                     <td >{displayIndex}</td>
-                                                    <td>{item.quotationNumber}</td>
                                                     <td>{item.ticketId}</td>
                                                     <td>{formatDate(item.ticketdate)}</td>
-                                                    <td>{item.assignedEngineer}</td>
-                                                    <td>{item.CustomerName}</td>
+                                                    <td>{item.state}</td>
+                                                    <td>{item.customer_class}</td>
                                                     <td>{item.ModelNumber}</td>
+                                                    <td>{item.mother_branch}</td>
+                                                    <td>Spare Parts</td>
+                                                    <td>{item.quotationNumber}</td>
+                                                    <td>{item.quotationDate}</td>
+                                                    <td>{item.price}</td>
                                                     <td style={{ padding: '0px', textAlign: 'center' }}>
                                                         {item.status}
                                                     </td>

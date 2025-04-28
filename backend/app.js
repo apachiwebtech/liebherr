@@ -2368,7 +2368,7 @@ app.get("/requestdatacat/:id", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
 
     // Direct SQL query without parameter binding
-    
+
     const sql = `
       SELECT *
       FROM awt_category
@@ -10958,106 +10958,182 @@ app.post("/getDefectCodewisesite", authenticateToken,
 app.get("/getquotationlist", authenticateToken, async (req, res) => {
   try {
     const {
-      ticket_no,
-      spareId,
+      ticketId,
+      CustomerName,
       ModelNumber,
-      title,
-      quantity,
       price,
       quotationNumber,
-      assignedEngineer,
       licare_code,
-      CustomerName,
-      page = 1, // Default to page 1 if not provided
-      pageSize = 10, // Default to 10 items per page if not provided
+      fromDate,
+      toDate,
+      customer_id,
+      customer_class,
+      mobile_no,
+      alt_mobileno,
+      email,
+      state,
+      customer_type,
+      ticket_type,
+      call_status,
+      sub_call_status,
+      warranty_status,
+      serial_no,
+      sevice_partner,
+      child_service_partner,
+      mother_branch,
+      status,
+      page = 1,
+      pageSize = 10,
     } = req.query;
-    // Use the poolPromise to get the connection pool
+
     const pool = await poolPromise;
 
-    const getcsp = `select * from lhi_user where Usercode = '${licare_code}'`
+    // Fetch assigncsp
+    const getcspresilt = await pool.request().query(`SELECT * FROM lhi_user WHERE Usercode = '${licare_code}'`);
+    const assigncsp = getcspresilt.recordset[0] && getcspresilt.recordset[0].assigncsp;
 
+    // Initialize SQL and Count Queries
+    let sql = `
+      SELECT q.*, 
+        c.customer_class, c.ticket_type, c.call_status, c.sub_call_status, c.warranty_status, 
+        c.serial_no, c.sevice_partner, c.child_service_partner, c.mother_branch, 
+        cs.mobileno, cs.alt_mobileno, cs.email, cs.customer_type , (select em.title from awt_engineermaster as em where q.assignedEngineer = em.engineer_id) as engineer_name ,
+		(select top 1 cl.address from awt_customerlocation as cl where cl.customer_id = q.customer_id) as customer_address
+      FROM awt_quotation AS q
+      LEFT JOIN complaint_ticket AS c ON c.ticket_no = q.ticketId
+      LEFT JOIN awt_customer AS cs ON cs.customer_id = q.customer_id
+      WHERE q.deleted=0`;
 
-    const getcspresilt = await pool.request().query(getcsp)
+    let countSql = `
+      SELECT COUNT(*) as totalCount
+      FROM awt_quotation AS q
+      LEFT JOIN complaint_ticket AS c ON c.ticket_no = q.ticketId
+      LEFT JOIN awt_customer AS cs ON cs.customer_id = q.customer_id
+      WHERE 1=1`;
 
-    const assigncsp = getcspresilt.recordset[0] && getcspresilt.recordset[0].assigncsp
-
-    // Directly use the query (no parameter binding)
-    let sql = `SELECT q.* FROM awt_quotation as q WHERE 1=1`;
-
-
+    // Apply assigncsp filter
     if (assigncsp !== 'ALL') {
-      // Convert to an array and wrap each value in single quotes
       const formattedCspList = assigncsp.split(",").map(csp => `'${csp.trim()}'`).join(",");
-
-      // Directly inject the formatted values into the SQL query
       sql += ` AND q.csp_code IN (${formattedCspList})`;
+      countSql += ` AND q.csp_code IN (${formattedCspList})`;
     }
 
-
-    if (ticket_no) {
-      sql += ` AND q.ticketId LIKE '%${ticket_no}%'`;
+    // Apply all filters
+    if (fromDate && toDate) {
+      sql += ` AND q.ticketdate  BETWEEN '${fromDate}' AND '${toDate}'`;
+      countSql += ` AND q.ticketdate  BETWEEN '${fromDate}' AND '${toDate}'`;
     }
-
+    if (ticketId) {
+      sql += ` AND q.ticketId LIKE '%${ticketId}%'`;
+      countSql += ` AND q.ticketId LIKE '%${ticketId}%'`;
+    }
     if (CustomerName) {
       sql += ` AND q.CustomerName LIKE '%${CustomerName}%'`;
+      countSql += ` AND q.CustomerName LIKE '%${CustomerName}%'`;
     }
-
-    if (quotationNumber) {
-      sql += ` AND q.quotationNumber LIKE '%${quotationNumber}%'`;
-    }
-
     if (ModelNumber) {
       sql += ` AND q.ModelNumber LIKE '%${ModelNumber}%'`;
-    }
-
-    if (title) {
-      sql += ` AND q.title LIKE '%${title}%'`;
-    }
-
-    if (quantity) {
-      sql += ` AND q.quantity LIKE '%${quantity}%'`;
+      countSql += ` AND q.ModelNumber LIKE '%${ModelNumber}%'`;
     }
     if (price) {
       sql += ` AND q.price LIKE '%${price}%'`;
+      countSql += ` AND q.price LIKE '%${price}%'`;
     }
-    // Pagination logic: Calculate offset based on the page number
+    if (quotationNumber) {
+      sql += ` AND q.quotationNumber LIKE '%${quotationNumber}%'`;
+      countSql += ` AND q.quotationNumber LIKE '%${quotationNumber}%'`;
+    }
+    if (customer_id) {
+      sql += ` AND q.customer_id LIKE '%${customer_id}%'`;
+      countSql += ` AND q.customer_id LIKE '%${customer_id}%'`;
+    }
+    if (customer_class) {
+      sql += ` AND c.customer_class LIKE '%${customer_class}%'`;
+      countSql += ` AND c.customer_class LIKE '%${customer_class}%'`;
+    }
+    if (ticket_type) {
+      sql += ` AND c.ticket_type LIKE '%${ticket_type}%'`;
+      countSql += ` AND c.ticket_type LIKE '%${ticket_type}%'`;
+    }
+    if (call_status) {
+      sql += ` AND c.call_status LIKE '%${call_status}%'`;
+      countSql += ` AND c.call_status LIKE '%${call_status}%'`;
+    }
+    if (sub_call_status) {
+      sql += ` AND c.sub_call_status LIKE '%${sub_call_status}%'`;
+      countSql += ` AND c.sub_call_status LIKE '%${sub_call_status}%'`;
+    }
+    if (warranty_status) {
+      sql += ` AND c.warranty_status LIKE '%${warranty_status}%'`;
+      countSql += ` AND c.warranty_status LIKE '%${warranty_status}%'`;
+    }
+    if (serial_no) {
+      sql += ` AND c.serial_no LIKE '%${serial_no}%'`;
+      countSql += ` AND c.serial_no LIKE '%${serial_no}%'`;
+    }
+    if (sevice_partner) {
+      sql += ` AND c.sevice_partner LIKE '%${sevice_partner}%'`;
+      countSql += ` AND c.sevice_partner LIKE '%${sevice_partner}%'`;
+    }
+    if (child_service_partner) {
+      sql += ` AND c.child_service_partner LIKE '%${child_service_partner}%'`;
+      countSql += ` AND c.child_service_partner LIKE '%${child_service_partner}%'`;
+    }
+    if (mother_branch) {
+      sql += ` AND c.mother_branch LIKE '%${mother_branch}%'`;
+      countSql += ` AND c.mother_branch LIKE '%${mother_branch}%'`;
+    }
+    if (mobile_no) {
+      sql += ` AND cs.mobileno LIKE '%${mobile_no}%'`;
+      countSql += ` AND cs.mobileno LIKE '%${mobile_no}%'`;
+    }
+    if (alt_mobileno) {
+      sql += ` AND cs.alt_mobileno LIKE '%${alt_mobileno}%'`;
+      countSql += ` AND cs.alt_mobileno LIKE '%${alt_mobileno}%'`;
+    }
+    if (email) {
+      sql += ` AND cs.email LIKE '%${email}%'`;
+      countSql += ` AND cs.email LIKE '%${email}%'`;
+    }
+    if (state) {
+      sql += ` AND c.state LIKE '%${state}%'`;
+      countSql += ` AND c.state LIKE '%${state}%'`;
+    }
+    if (customer_type) {
+      sql += ` AND cs.customer_type LIKE '%${customer_type}%'`;
+      countSql += ` AND cs.customer_type LIKE '%${customer_type}%'`;
+    }
+    if (status) {
+      sql += ` AND q.status LIKE '%${status}%'`;
+      countSql += ` AND q.status LIKE '%${status}%'`;
+    }
+
+    // Pagination
     const offset = (page - 1) * pageSize;
-    // Add pagination to the SQL query (OFFSET and FETCH NEXT)
-    sql += ` ORDER BY q.quotationNumber desc OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+    sql += ` ORDER BY q.quotationNumber DESC OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
 
-    // Execute the query
+    // Execute queries
     const result = await pool.request().query(sql);
-    // Get the total count of records for pagination
-    let countSql = `SELECT COUNT(*) as totalCount FROM awt_quotation where 1=1 `;
-    if (quotationNumber) countSql += ` AND quotationNumber LIKE '%${quotationNumber}%'`;
-    if (assignedEngineer) countSql += ` AND assignedEngineer LIKE '%${assignedEngineer}%'`;
-
-    if (CustomerName) countSql += ` AND CustomerName LIKE '%${CustomerName}%'`;
-    if (spareId) countSql += ` AND spareId LIKE '%${spareId}%'`;
-    if (ModelNumber) countSql += ` AND ModelNumber LIKE '%${ModelNumber}%'`;
-    if (title) countSql += ` AND title LIKE '%${title}%'`;
-    if (quantity) countSql += ` AND quantity LIKE '%${quantity}%'`;
-    if (price) countSql += ` AND price LIKE '%${price}%'`;
-    if (ticket_no) countSql += ` AND ticketId LIKE '%${ticket_no}%'`;
-
     const countResult = await pool.request().query(countSql);
     const totalCount = countResult.recordset[0].totalCount;
-    // Convert data to JSON string and encrypt it
+
+    // Encrypt result
     const jsonData = JSON.stringify(result.recordset);
     const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
+
     return res.json({
       encryptedData,
-      totalCount: totalCount,
+      totalCount,
       page,
       pageSize,
     });
-
 
   } catch (err) {
     console.error("Database error:", err);
     return res.status(500).json({ error: "Database error occurred" });
   }
 });
+
 
 app.get("/getquotationcsplist", authenticateToken, async (req, res) => {
   try {
@@ -16739,18 +16815,18 @@ app.get("/getsmsapi", async (req, res) => {
   //     // Build the URL-safe message
   //     const encryptedPath = `${encodeURIComponent(encryptedEmail)}/${encodeURIComponent(encryptedTicket)}/${encodeURIComponent(encryptedCustomerId)}`;
 
-      const npilink = 'https://test-licare.liebherr.com';
+  const npilink = 'https://test-licare.liebherr.com';
 
-      const npsmsg = `Dear Customer, Your feedback helps us grow. Please rate us in survey: https://licare.liebherr.com/BH0425-0028. Thanks for choosing Liebherr.`;
-
-
-      const nps_msg = encodeURIComponent(npsmsg);
+  const npsmsg = `Dear Customer, Your feedback helps us grow. Please rate us in survey: https://licare.liebherr.com/BH0425-0028. Thanks for choosing Liebherr.`;
 
 
-      const npsapiUrl = `https://smsgw.tatatel.co.in:9095/campaignService/campaigns/qs?recipient=${mobile}&dr=false&msg=${nps_msg}&user=${username}&pswd=${password}&sender=LICARE&PE_ID=1201159257274643113&Template_ID=1207173855461934489`;
+  const nps_msg = encodeURIComponent(npsmsg);
 
-      console.log(npsapiUrl)
-      await axios.get(npsapiUrl, { httpsAgent });
+
+  const npsapiUrl = `https://smsgw.tatatel.co.in:9095/campaignService/campaigns/qs?recipient=${mobile}&dr=false&msg=${nps_msg}&user=${username}&pswd=${password}&sender=LICARE&PE_ID=1201159257274643113&Template_ID=1207173855461934489`;
+
+  console.log(npsapiUrl)
+  await axios.get(npsapiUrl, { httpsAgent });
 
 
 
