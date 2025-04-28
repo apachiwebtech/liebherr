@@ -56,49 +56,49 @@ export function CspTicketView(params) {
   const [errors, setErrors] = useState({})
   const [dealercustid, setDealercust] = useState('')
   const [complaintview, setComplaintview] = useState({
-     ticket_no: '',
-     ticket_date: '',
-     customer_name: '',
-     address: '',
-     pincode: '',
-     customer_mobile: '',
-     ticket_type: '',
-     call_type: '',
-     warranty_status: '',
-     ModelNumber: '',
-     invoice_date: '',
-     purchase_date: '',
-     serial_no: '',
-     call_status: '',
-     engineer_id: '',
-     sub_call_status: '',
-     defect_type: '',
-     site_defect: "",
-     spare_part_id: "",
-     quantity: "",
-     state: "",
-     city: "",
-     activity_code: "",
-     class_city: "",
-     gas_chargs: "",
-     gas_transportation: '',
-     mandays: '',
-     mandaysprice: '',
-     transportation: "",
-     transportation_charge: "",
-     visit_count: "",
-     csp: "",
-     customer_class: "",
-     customer_id: '',
-     gascheck: 'No',
-     transportcheck: 'No',
-     totp: '',
-     closed_date: "",
-     area: '',
-     region: '',
-     item_code : '',
-     customer_email:''
-   });
+    ticket_no: '',
+    ticket_date: '',
+    customer_name: '',
+    address: '',
+    pincode: '',
+    customer_mobile: '',
+    ticket_type: '',
+    call_type: '',
+    warranty_status: '',
+    ModelNumber: '',
+    invoice_date: '',
+    purchase_date: '',
+    serial_no: '',
+    call_status: '',
+    engineer_id: '',
+    sub_call_status: '',
+    defect_type: '',
+    site_defect: "",
+    spare_part_id: "",
+    quantity: "",
+    state: "",
+    city: "",
+    activity_code: "",
+    class_city: "",
+    gas_chargs: "",
+    gas_transportation: '',
+    mandays: '',
+    mandaysprice: '',
+    transportation: "",
+    transportation_charge: "",
+    visit_count: "",
+    csp: "",
+    customer_class: "",
+    customer_id: '',
+    gascheck: 'No',
+    transportcheck: 'No',
+    totp: '',
+    closed_date: "",
+    area: '',
+    region: '',
+    item_code: '',
+    customer_email: ''
+  });
 
 
 
@@ -141,14 +141,36 @@ export function CspTicketView(params) {
   const [spare12, setSpare12] = useState([]) // for quatation pdf
   const [cspdata, setCsp] = useState({}) // for quatation pdf
   const [show, setShow] = useState(false)
-  const [show1, setShow1] = useState(false)
-  const [show2, setShow2] = useState(false)
-  const [show3, setShow3] = useState(false)
   const [TicketUpdateSuccess, setTicketUpdateSuccess] = useState({
     message: '',
     visible: false,
     type: 'success' // can be 'success' or 'error'
   });
+
+
+  //resend otp
+
+  const resendotp = () => {
+
+    const data = {
+      ticket_no: complaintview.ticket_no,
+      customer_mobile: complaintview.customer_mobile
+    }
+
+
+    axios.post(`${Base_Url}/resend_otp`, data, {
+      headers: {
+        Authorization: token,
+      },
+    })
+      .then((res) => {
+        console.log(res);
+        alert("OTP sent")
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
 
 
   const handlefeilddatechange = (date) => {
@@ -1120,7 +1142,7 @@ export function CspTicketView(params) {
           ...prevstate,
           ModelNumber: '',
           serial_no: '',
-          item_code : ''
+          item_code: ''
         }));
         return;
       }
@@ -1142,7 +1164,7 @@ export function CspTicketView(params) {
           }));
 
         }
-        else if (serialData.salutation == 'Dl' ) {
+        else if (serialData.salutation == 'Dl') {
           alert("Serial no transfer to customer")
           setallocation('Available');
           setDealercust(serialData.customer_id)
@@ -1181,7 +1203,7 @@ export function CspTicketView(params) {
             ...prevstate,
             ModelNumber: '',
             serial_no: '',
-            item_code : ''
+            item_code: ''
           }));
         }
       }
@@ -1194,7 +1216,7 @@ export function CspTicketView(params) {
           ...prevstate,
           ModelNumber: '',
           serial_no: '',
-          item_code : ''
+          item_code: ''
         }));
       }
     } catch (error) {
@@ -1318,8 +1340,8 @@ export function CspTicketView(params) {
       alert("Serial number should be exactly 9 digits!");
       return;
     }
-    
-    
+
+
     if (complaintview.sub_call_status === 'Technician on-route') {
       if (addedEngineers.length === 0) {
         // Handle the case where no engineers are added
@@ -1397,7 +1419,7 @@ export function CspTicketView(params) {
           transportation: complaintview.transportation,
           transportation_charge: complaintview.transportation_charge,
           allocation: allocation,
-          nps_link : `${Base_Url}`,
+          nps_link: `${Base_Url}`,
           note,
           created_by,
         };
@@ -2383,9 +2405,9 @@ export function CspTicketView(params) {
                                     const selectedid = callstatus.find(item => item.Callstatus == selectedname)?.id; // Find the corresponding Callstatus value
                                     getsubcallstatus(selectedid); // Send the id to fetch sub-call statuses
                                     // Log or use the Callstatus value
-                                    setComplaintview((prev) =>({
+                                    setComplaintview((prev) => ({
                                       ...prev,
-                                      sub_call_status : ""
+                                      sub_call_status: ""
                                     }))
                                     setCallstatusid(selectedname)
                                     setCallid(selectedid)
@@ -3126,6 +3148,9 @@ export function CspTicketView(params) {
                       </button> : null} */}
 
 
+                </div>
+                <div>
+                  <p>Want to resend OTP? <span className='text-primary' onClick={resendotp} style={{ cursor: "pointer" }}>Resend OTP</span></p>
                 </div>
 
                 <div className="my-3 ">

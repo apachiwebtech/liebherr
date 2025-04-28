@@ -85,9 +85,10 @@ function Details() {
     call_remark: '',
     spare_qty: '',
     purchase_date: '',
-    check_remark : '',
-    customer_mobile:'',
-    item_code : ''
+    check_remark: '',
+    customer_mobile: '',
+    item_code: '',
+    ticketno: ''
   })
 
 
@@ -111,6 +112,29 @@ function Details() {
 
 
   }
+
+  const resendotp = () => {
+
+    const data = {
+      ticket_no : Value.ticketno,
+      customer_mobile : Value.customer_mobile
+    }
+
+
+    axios.post(`${Base_Url}/resend_otp`, data, {
+      headers: {
+        Authorization: token,
+      },
+    })
+      .then((res) => {
+        console.log(res);
+        alert("OTP sent")
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+
   const handleCheckChange = (e) => {
     const { name, checked } = e.target;
     setChecklist((prevState) => ({
@@ -120,9 +144,9 @@ function Details() {
   };
 
 
-  async function getprice(modelno ,warrenty_status ) {
+  async function getprice(modelno, warrenty_status) {
 
-    axios.post(`${Base_Url}/getServiceCharges`, { ModelNumber:  modelno , warrenty_status : warrenty_status}, {
+    axios.post(`${Base_Url}/getServiceCharges`, { ModelNumber: modelno, warrenty_status: warrenty_status }, {
       headers: {
         Authorization: token
       }
@@ -307,7 +331,7 @@ function Details() {
           formData.append('gas_charges', checklist.gas_charges == 'null' ? 'No' : checklist.gas_charges);
           formData.append('transpotation', checklist.transpotation == 'null' ? 'No' : checklist.transpotation);
           formData.append('customer_mobile', Value.customer_mobile);
-          
+
 
 
           if (Value.spare_required) {
@@ -385,7 +409,7 @@ function Details() {
         formData.append('earthing', checklist.earthing == 'null' ? 'No' : checklist.earthing);
         formData.append('gas_charges', checklist.gas_charges == 'null' ? 'No' : checklist.gas_charges);
         formData.append('transpotation', checklist.transpotation == 'null' ? 'No' : checklist.transpotation);
-        
+
         if (Value.spare_required) {
           formData.append('spare_detail', Value.spare_detail);
         }
@@ -447,7 +471,7 @@ function Details() {
           getremark(res.data.data[0].ticket_no)
           getuniquespare(res.data.data[0].ticket_no)
           getspare(res.data.data[0].item_code)
-          getprice(res.data.data[0].ModelNumber , res.data.data[0].warranty_status)
+          getprice(res.data.data[0].ModelNumber, res.data.data[0].warranty_status)
           setPurchaseDate(res.data.data[0].purchase_date)
           // console.log(Value.symptomcode);
           if (res.data.data[0].group_code != "") {
@@ -464,7 +488,8 @@ function Details() {
             warranty_status: res.data.data[0].warranty_status,
             call_status: res.data.data[0].call_status,
             purchase_date: res.data.data[0].purchase_date,
-            customer_mobile : res.data.data[0].customer_mobile
+            customer_mobile: res.data.data[0].customer_mobile,
+            ticketno : res.data.data[0].ticket_no
           })
 
 
@@ -592,7 +617,7 @@ function Details() {
       title: sparedata[Value.spare].article_code,
       product_code: sparedata[Value.spare].spareId,
       spare_qty: Value.spare_qty,
-      price : sparedata[Value.spare].price
+      price: sparedata[Value.spare].price
     }
     // console.log(data);
 
@@ -1351,13 +1376,13 @@ function Details() {
                     </div>
                     <div className='row mt-2'>
                       <div class="form-group col-6">
-                        <input type="checkbox" onChange={handleCheckChange}  name="picking_damages" checked={checklist.picking_damages == 'Yes' ? true : false} disabled={data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false} /> <label>Any Picking Damages</label>
+                        <input type="checkbox" onChange={handleCheckChange} name="picking_damages" checked={checklist.picking_damages == 'Yes' ? true : false} disabled={data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false} /> <label>Any Picking Damages</label>
                       </div>
                       <div class="form-group col-6">
                         <input type="checkbox" onChange={handleCheckChange} name="product_damages" checked={checklist.product_damages == 'Yes' ? true : false} disabled={data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false} /> <label>Any Product Damages </label>
                       </div>
                       <div class="form-group col-6">
-                        <input type="checkbox" onChange={handleCheckChange}  name="missing_part" checked={checklist.missing_part == 'Yes' ? true : false} disabled={data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false} /> <label>Any Missing Parts</label>
+                        <input type="checkbox" onChange={handleCheckChange} name="missing_part" checked={checklist.missing_part == 'Yes' ? true : false} disabled={data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false} /> <label>Any Missing Parts</label>
                       </div>
                       <div class="form-group col-6">
                         <input type="checkbox" onChange={handleCheckChange} name="leg_adjustment" checked={checklist.leg_adjustment == 'Yes' ? true : false} disabled={data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false} /> <label>Leg Adjustment Done</label>
@@ -1446,7 +1471,7 @@ function Details() {
 
                       {Value.call_status == 'Completed' && <div class="mb-3">
                         <div class="form-group">
-                          <label for="val-actioncode">Enter OTP </label>
+                          <label for="val-actioncode">Enter OTP - <span className='text-primary' onClick={resendotp} style={{ cursor: "pointer" }}>Resend OTP</span> </label>
                           <input type="text" onChange={handleChange} value={Value.otps} class="form-control" name="otps" id="otps" disabled={data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false} />
                           {errors.otps && <span className='text-danger'>{errors.otps}</span>}
                         </div>

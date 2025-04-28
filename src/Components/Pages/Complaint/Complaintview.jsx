@@ -102,8 +102,8 @@ export function Complaintview(params) {
     closed_date: "",
     area: '',
     region: '',
-    item_code : '',
-    customer_email:''
+    item_code: '',
+    customer_email: ''
   });
 
 
@@ -172,65 +172,90 @@ export function Complaintview(params) {
   //update serial no
   const handleupdateserial = () => {
 
-    if(String(complaintview.serial_no).length !== 9) {
+    if (String(complaintview.serial_no).length !== 9) {
       alert("Serial no should be 9 digits!");
       return;
     }
 
     const data = {
-      serial : complaintview.serial_no || '',
-      ticket_no : complaintview.ticket_no || '',
-      modelnumber : complaintview.ModelNumber || '',
-      item_code : complaintview.item_code || '',
-      customer_id : complaintview.customer_id || '',
+      serial: complaintview.serial_no || '',
+      ticket_no: complaintview.ticket_no || '',
+      modelnumber: complaintview.ModelNumber || '',
+      item_code: complaintview.item_code || '',
+      customer_id: complaintview.customer_id || '',
       customer_name: complaintview.customer_name || '',
-      address : complaintview.address || '',
-      region : complaintview.region || '', 
-      state : complaintview.state || '',
-      city : complaintview.city || '',
-      area : complaintview.area || '',
-      pincode : complaintview.pincode || '',
-      customer_class : complaintview.customer_class || '',
-      purchase_date : complaintview .purchase_date || '',
-      item_code : complaintview.item_code || '',
-      created_by : created_by || ''
+      address: complaintview.address || '',
+      region: complaintview.region || '',
+      state: complaintview.state || '',
+      city: complaintview.city || '',
+      area: complaintview.area || '',
+      pincode: complaintview.pincode || '',
+      customer_class: complaintview.customer_class || '',
+      purchase_date: complaintview.purchase_date || '',
+      item_code: complaintview.item_code || '',
+      created_by: created_by || ''
     }
-     
-    axiosInstance.post(`${Base_Url}/updateserialno` , data , {
-      headers : {
-        Authorization : token
+
+    axiosInstance.post(`${Base_Url}/updateserialno`, data, {
+      headers: {
+        Authorization: token
       }
     })
-    .then((res) =>{
-      setOpen(false)
-      fetchComplaintview(complaintid)
-    })
-    .catch((err) =>{
-      console.log(err)
-    })
+      .then((res) => {
+        setOpen(false)
+        fetchComplaintview(complaintid)
+      })
+      .catch((err) => {
+        console.log(err)
+      })
   };
+
+
+  //resend otp
+
+  const resendotp = () => {
+
+    const data = {
+      ticket_no: complaintview.ticket_no,
+      customer_mobile: complaintview.customer_mobile
+    }
+
+
+    axios.post(`${Base_Url}/resend_otp`, data, {
+      headers: {
+        Authorization: token,
+      },
+    })
+      .then((res) => {
+        console.log(res);
+        alert("OTP sent")
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
 
   //update purchase date
   const handleupdatepurchase = () => {
 
     const data = {
-      ticket_no : complaintview.ticket_no,
-      purchase_date : complaintview.purchase_date,
-      warrenty_status : complaintview.warranty_status,
+      ticket_no: complaintview.ticket_no,
+      purchase_date: complaintview.purchase_date,
+      warrenty_status: complaintview.warranty_status,
     }
-     
-    axiosInstance.post(`${Base_Url}/updatepurchasedate` , data , {
-      headers : {
-        Authorization : token
+
+    axiosInstance.post(`${Base_Url}/updatepurchasedate`, data, {
+      headers: {
+        Authorization: token
       }
     })
-    .then((res) =>{
-      setOpen2(false)
-      fetchComplaintview(complaintid)
-    })
-    .catch((err) =>{
-      console.log(err)
-    })
+      .then((res) => {
+        setOpen2(false)
+        fetchComplaintview(complaintid)
+      })
+      .catch((err) => {
+        console.log(err)
+      })
   };
 
 
@@ -312,7 +337,7 @@ export function Complaintview(params) {
 
   const getDateAfterOneYear = (value) => {
 
-    console.log(value,"purchase")
+    console.log(value, "purchase")
     try {
       // Ensure value is in a recognized format
       const purchase_date = new Date(value);
@@ -1234,7 +1259,7 @@ export function Complaintview(params) {
           ...prevstate,
           ModelNumber: '',
           serial_no: '',
-          item_code : ''
+          item_code: ''
         }));
         return;
       }
@@ -1256,7 +1281,7 @@ export function Complaintview(params) {
           }));
 
         }
-        else if (serialData.salutation == 'Dl' ) {
+        else if (serialData.salutation == 'Dl') {
           alert("Serial no transfer to customer")
           setallocation('Available');
           setDealercust(serialData.customer_id)
@@ -1295,7 +1320,7 @@ export function Complaintview(params) {
             ...prevstate,
             ModelNumber: '',
             serial_no: '',
-            item_code : ''
+            item_code: ''
           }));
         }
       }
@@ -1308,7 +1333,7 @@ export function Complaintview(params) {
           ...prevstate,
           ModelNumber: '',
           serial_no: '',
-          item_code : ''
+          item_code: ''
         }));
       }
     } catch (error) {
@@ -1431,8 +1456,8 @@ export function Complaintview(params) {
       alert("Serial number should be exactly 9 digits!");
       return;
     }
-    
-    
+
+
     if (complaintview.sub_call_status === 'Technician on-route') {
       if (addedEngineers.length === 0) {
         // Handle the case where no engineers are added
@@ -1510,7 +1535,7 @@ export function Complaintview(params) {
           transportation: complaintview.transportation,
           transportation_charge: complaintview.transportation_charge,
           allocation: allocation,
-          nps_link : `${Base_Url}`,
+          nps_link: `${Base_Url}`,
           note,
           created_by,
         };
@@ -1873,6 +1898,8 @@ export function Complaintview(params) {
   const storedEncryptedRole = localStorage.getItem("Userrole");
   const decryptedRole = Decrypt(storedEncryptedRole);
 
+  const role_id = decryptedRole
+
   const roledata = {
     role: decryptedRole,
     pageid: String(43)
@@ -1885,6 +1912,8 @@ export function Complaintview(params) {
   useEffect(() => {
     dispatch(getRoleData(roledata))
   }, [])
+
+
 
 
   async function getEngineerRemark(ticket_no) {
@@ -2404,7 +2433,7 @@ export function Complaintview(params) {
 
                     <div className="col-md-2">
                       <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold", display: "flex", alignItems: "center" }}>
-                        Serial No {roleaccess > 4 ? <span className="mx-1"><EditIcon onClick={handleClickOpen} style={{ fontSize: "13px" }} /></span>  : null}
+                        Serial No {roleaccess > 4 ? <span className="mx-1"><EditIcon onClick={handleClickOpen} style={{ fontSize: "13px" }} /></span> : null}
                       </p>
                       {closestatus === "Closed" && subclosestatus === 'Fully' && sserial_no == 0 ? (
                         <p style={{ fontSize: "14px" }}>{complaintview.serial_no} </p>
@@ -2438,14 +2467,14 @@ export function Complaintview(params) {
                         {"Update Serial No."}
                       </DialogTitle>
                       <DialogContent>
-                      <input
+                        <input
                           type="text"
                           className="form-control"
                           name="serial_no"
                           value={complaintview.serial_no || ""}
                           placeholder="Enter Serial No"
                           style={{ fontSize: "14px", width: "100%" }}
-                              onChange={(e) => {
+                          onChange={(e) => {
                             const value = e.target.value;
                             // Allow only numbers and limit to 9 digits
                             if (/^\d{0,9}$/.test(value)) {
@@ -2456,7 +2485,7 @@ export function Complaintview(params) {
                       </DialogContent>
                       <DialogActions>
                         <Button onClick={handleupdateserial} autoFocus>
-                          Update 
+                          Update
                         </Button>
                       </DialogActions>
                     </Dialog>
@@ -2473,7 +2502,7 @@ export function Complaintview(params) {
 
 
                     <div className="col-md-4">
-                      <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Purchase Date {roleaccess > 4 ?<span className="mx-1"><EditIcon onClick={handleClickOpen2} style={{ fontSize: "13px" }} /></span> : null}</p>
+                      <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Purchase Date {roleaccess > 4 ? <span className="mx-1"><EditIcon onClick={handleClickOpen2} style={{ fontSize: "13px" }} /></span> : null}</p>
                       <p style={{ fontSize: "14px" }}>{purchase_date == null || purchase_date == '' || purchase_date == 'null' ? <DatePicker
                         selected={complaintview.purchase_date}
                         onChange={(date) => {
@@ -2498,25 +2527,25 @@ export function Complaintview(params) {
                       <DialogTitle id="alert-dialog-title">
                         {"Update Serial No."}
                       </DialogTitle>
-                      <DialogContent style={{height : "300px"}}>
-                      <DatePicker
-                        selected={complaintview.purchase_date}
-                        onChange={(date) => {
+                      <DialogContent style={{ height: "300px" }}>
+                        <DatePicker
+                          selected={complaintview.purchase_date}
+                          onChange={(date) => {
 
-                          getDateAfterOneYear(date);
-                        }}
-                        dateFormat="dd-MM-yyyy"
-                        placeholderText="DD-MM-YYYY"
-                        className='form-control'
-                        name="purchase_date"
-                        aria-describedby="Anidate"
+                            getDateAfterOneYear(date);
+                          }}
+                          dateFormat="dd-MM-yyyy"
+                          placeholderText="DD-MM-YYYY"
+                          className='form-control'
+                          name="purchase_date"
+                          aria-describedby="Anidate"
 
-                        maxDate={new Date().toISOString().split("T")[0]}
-                      />
+                          maxDate={new Date().toISOString().split("T")[0]}
+                        />
                       </DialogContent>
                       <DialogActions>
                         <Button onClick={handleupdatepurchase} autoFocus>
-                          Update 
+                          Update
                         </Button>
                       </DialogActions>
                     </Dialog>
@@ -2567,9 +2596,9 @@ export function Complaintview(params) {
                                       const selectedname = e.target.value; // Get the id
                                       const selectedid = callstatus.find(item => item.Callstatus == selectedname)?.id; // Find the corresponding Callstatus value
                                       getsubcallstatus(selectedid); // Send the id to fetch sub-call statuses
-                                      setComplaintview((prev) =>({
+                                      setComplaintview((prev) => ({
                                         ...prev,
-                                        sub_call_status : ""
+                                        sub_call_status: ""
                                       }))
                                       setCallstatusid(selectedname)
                                       setCallid(selectedid)
@@ -3317,6 +3346,17 @@ export function Complaintview(params) {
 
                   </div>
 
+                  {console.log(role_id, "roleid")}
+
+                  {(role_id == 2 || role_id == 8 || role_id == 12) && (
+                    <div>
+                      <p>
+                        Want to resend OTP? <span className="text-primary" onClick={resendotp} style={{ cursor: 'pointer' }}>Resend OTP</span>
+                      </p>
+                    </div>
+                  )}
+
+
                   <div className="my-3 ">
                     <h4 className="pname" style={{ fontSize: "14px" }}>Visit Count</h4>
                     <select
@@ -3334,6 +3374,8 @@ export function Complaintview(params) {
                       <option value='4'>4</option>
                     </select>
                   </div>
+
+
 
 
 

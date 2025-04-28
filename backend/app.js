@@ -16795,7 +16795,7 @@ app.post("/getengineerremark", authenticateToken, async (req, res) => {
 app.get("/getsmsapi", async (req, res) => {
   const ticket_no = 'SH234';
   const otp = '1234';
-  const mobile = '9579463208';
+  const mobile = '9326476448';
 
   const username = process.env.TATA_USER;
   const password = process.env.PASSWORD;
@@ -16817,7 +16817,7 @@ app.get("/getsmsapi", async (req, res) => {
 
   const npilink = 'https://test-licare.liebherr.com';
 
-  const npsmsg = `Dear Customer, Your feedback helps us grow. Please rate us in survey: https://licare.liebherr.com/BH0425-0028. Thanks for choosing Liebherr.`;
+  const npsmsg = `Dear Customer, Your feedback helps us grow. Please rate us in survey: https://licare.liebherr.com/feedbackid/id=?BH0425-0028. Thanks for choosing Liebherr.`;
 
 
   const nps_msg = encodeURIComponent(npsmsg);
@@ -17095,6 +17095,55 @@ app.post("/updatepurchasedate", authenticateToken, async (req, res) => {
     const sql = `update complaint_ticket set purchase_date = '${purchase_date}' , warranty_status = '${warrenty_status}'   where ticket_no = '${ticket_no}'`;
 
     const result = await pool.request().query(sql);
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Database Error:", err);
+    return res.status(500).json({ error: "Failed to fetch MSPs", details: err.message });
+  }
+});
+
+app.post("/resend_otp", authenticateToken, async (req, res) => {
+
+  let { ticket_no, customer_mobile } = req.body;
+
+  console.log(req.body)
+
+
+  const otp = Math.floor(1000 + Math.random() * 9000);
+
+  try {
+    const pool = await poolPromise;
+    const sql = `update complaint_ticket set totp = '${otp}'  where ticket_no = '${ticket_no}'`;
+    const result = await pool.request().query(sql);
+
+
+    if (1 == 1) {
+
+      const username = process.env.TATA_USER;
+      const password = process.env.PASSWORD;
+      const temp_id = '1207173530305447084'
+
+      try {
+
+        const msg = encodeURIComponent(
+          `Dear Customer, Greetings from Liebherr! Your Ticket Number is ${ticket_no}. Please share OTP ${otp} with the engineer once the ticket is resolved.`
+        );
+
+        const res = await axios.get(
+          `https://smsgw.tatatel.co.in:9095/campaignService/campaigns/qs?recipient=${customer_mobile}&dr=false&msg=${msg}&user=${username}&pswd=${password}&sender=LICARE&PE_ID=1201159257274643113&Template_ID=${temp_id}`
+        );
+
+
+        console.log(res)
+
+
+
+
+      } catch (error) {
+        console.error('Error hitting SMS API (token):', error.response?.data || error.message);
+      }
+
+    }
     return res.json(result.recordset);
   } catch (err) {
     console.error("Database Error:", err);
