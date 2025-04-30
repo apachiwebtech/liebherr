@@ -457,6 +457,19 @@ export function Customerlist(params) {
                                         />
                                     </div>
                                 </div>
+                                <div className="col-md-2">
+                                    <div className="form-group">
+                                        <label>Serial No</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="serial_no"
+                                            value={searchFilters.serial_no}
+                                            placeholder="Search by  serial_no"
+                                            onChange={handleFilterChange}
+                                        />
+                                    </div>
+                                </div>
 
 
                             </div>

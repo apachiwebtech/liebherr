@@ -87,6 +87,8 @@ const QuotationEdit = () => {
             const encryptedData = res.data.encryptedData; // Assuming response contains { encryptedData }
             const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
             const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+            console.log(decryptedData);
+            
             setSpare(decryptedData);
 
         } catch (error) {
@@ -107,6 +109,8 @@ const QuotationEdit = () => {
                 const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
                 const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
                 setCsp(decryptedData)
+                // console.log(decryptedData);
+                
             })
             .catch((err) => {
                 console.log(err)
@@ -136,6 +140,8 @@ const QuotationEdit = () => {
 
     async function downloadPDF(id) {
         Blob(value)
+        // console.log(value);
+        
     }
 
 
@@ -144,7 +150,11 @@ const QuotationEdit = () => {
     const Blob = async (data) => {
 
         try {
-            const blob = await pdf(<MyDocument8 data={value} spare={spare} csp={csp} />).toBlob();
+            console.log(csp,'csp');
+            console.log(spare,'spare');
+            console.log(value,'value');
+            
+            const blob = await pdf(<MyDocument8 data={value} spare={spare} csp={csp[0]} />).toBlob();
             const url = URL.createObjectURL(blob);
             window.open(url);
             URL.revokeObjectURL(url);

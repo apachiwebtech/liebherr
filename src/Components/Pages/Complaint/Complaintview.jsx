@@ -2012,6 +2012,8 @@ export function Complaintview(params) {
       const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
       const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
 
+      console.log(decryptedData);
+      
       return decryptedData[0]; // Assuming you need the first object
 
     } catch (error) {

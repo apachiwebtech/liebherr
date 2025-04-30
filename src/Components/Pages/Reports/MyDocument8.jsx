@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
     },
 });
 
-const MyDocument8 = ({ data, spare , csp}) => {
+const MyDocument8 = ({ data, spare, csp }) => {
 
     const formatDate = (dateString) => {
         if (!dateString) {
@@ -122,7 +122,7 @@ const MyDocument8 = ({ data, spare , csp}) => {
 
     function numberToWords(num) {
         if (num === 0) return "Zero";
-    
+
         const belowTwenty = [
             "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten",
             "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen",
@@ -132,17 +132,17 @@ const MyDocument8 = ({ data, spare , csp}) => {
             "", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"
         ];
         const thousands = ["", "Thousand", "Million", "Billion"];
-    
+
         function helper(n) {
             if (n === 0) return "";
             else if (n < 20) return belowTwenty[n - 1] + " ";
             else if (n < 100) return tens[Math.floor(n / 10)] + " " + helper(n % 10);
             else return belowTwenty[Math.floor(n / 100) - 1] + " Hundred " + helper(n % 100);
         }
-    
+
         let result = "";
         let i = 0;
-    
+
         while (num > 0) {
             if (num % 1000 !== 0) {
                 result = helper(num % 1000) + thousands[i] + " " + result;
@@ -150,10 +150,10 @@ const MyDocument8 = ({ data, spare , csp}) => {
             num = Math.floor(num / 1000);
             i++;
         }
-    
+
         return result.trim();
     }
-    
+
 
     const grandtotal = spare.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
@@ -169,10 +169,10 @@ const MyDocument8 = ({ data, spare , csp}) => {
     return (
         <Document>
             <Page size="A4" style={styles.page}>
-                
+
                 <View style={styles.header}>
                     <Image src={Liebherrlogo} style={styles.image} />
-                    <View style={{flex : '20'}}>
+                    <View style={{ flex: '20' }}>
                         <Text style={{ fontSize: '10px', marginTop: 15, marginLeft: 40, fontWeight: '900', color: "#000" }}>QUOTATION_SPARE PART & CONTRACT</Text>
                     </View>
                     <View style={styles.headerRight}>
@@ -312,7 +312,7 @@ const MyDocument8 = ({ data, spare , csp}) => {
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Quotation for : </Text>
                         </View>
                         <View style={[styles.tableCol, { width: '80%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{qfor}</Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}> Spare Quote</Text>
 
                         </View>
 
@@ -334,7 +334,7 @@ const MyDocument8 = ({ data, spare , csp}) => {
 
 
                         </View>
-            
+
 
 
                     </View>
@@ -361,6 +361,10 @@ const MyDocument8 = ({ data, spare , csp}) => {
                             <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 5, color: '#fff', fontWeight: 1600 }}>Total Amount</Text>
 
                         </View>
+                        <View style={[styles.tableCol14, { width: '10%' }]}>
+                            <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 5, color: '#fff', fontWeight: 1600 }}>Visit Charges</Text>
+
+                        </View>
                         <View style={[styles.tableCol14, { width: '20%' }]}>
                             <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 15, color: '#fff', fontWeight: 1600 }}>Remarks</Text>
 
@@ -370,7 +374,7 @@ const MyDocument8 = ({ data, spare , csp}) => {
 
                     {spare.map((item, index) => {
 
-             
+
                         return (
                             <View style={styles.Course} key={index}>
                                 <div style={{ height: "20px", margin: "0 0 0 0" }}>
@@ -381,10 +385,10 @@ const MyDocument8 = ({ data, spare , csp}) => {
 
                                 </View>
                                 <View style={[styles.tableCol, { width: '35%' }]}>
-                                    <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 15, color: '#000',lineHeight: 15 }}>{item.article_description}</Text>
+                                    <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 15, color: '#000', lineHeight: 15 }}>{item.article_description}</Text>
 
                                 </View>
-                                 
+
                                 <View style={[styles.tableCol, { width: '10%' }]}>
                                     <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 15, color: '#000' }}>{item.price}</Text>
                                 </View>
@@ -396,6 +400,11 @@ const MyDocument8 = ({ data, spare , csp}) => {
                                     <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 5, color: '#000' }}>{item.price * item.quantity} </Text>
 
                                 </View>
+                                <View style={[styles.tableCol, { width: '10%' }]}>
+                                    <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 15, color: '#000' }}>{item.service_charges}</Text>
+
+                                </View>
+
                                 <View style={[styles.tableCol, { width: '20%' }]}>
                                     <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 15, color: '#000' }}></Text>
 
@@ -412,11 +421,11 @@ const MyDocument8 = ({ data, spare , csp}) => {
                         <View style={[styles.tableCol, { width: '65%' }]}>
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Total Value in Words :{numberToWords(grandtotal)} {numberToWords(grandtotal) == '' ? null : "Rupees Only."}</Text>
                         </View>
-                        <View style={[styles.tableCol, { width: '15%' }]}>
+                        <View style={[styles.tableCol, { width: '17%' }]}>
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Grand Amount</Text>
 
                         </View>
-                        <View style={[styles.tableCol, { width: '20%' }]}>
+                        <View style={[styles.tableCol, { width: '18%' }]}>
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{grandtotal}</Text>
                         </View>
 
