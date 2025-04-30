@@ -17,6 +17,7 @@ const nodemailer = require('nodemailer');
 const axios = require("axios");
 const https = require('https');
 const ExcelJS = require('exceljs');
+const { RequestPageTwoTone } = require('@mui/icons-material');
 
 // Secret key for JWT
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -12397,7 +12398,7 @@ app.post('/getshhipmentroledata', authenticateToken, async (req, res) => {
 });
 
 app.post('/getproductspareroledata', authenticateToken, async (req, res) => {
-  const { role, productsparepage, stockpage } = req.body;
+  const { role, productsparepage, stockpage, mslpage } = req.body;
 
   // Function to convert comma-separated strings into arrays
   const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
@@ -12406,6 +12407,7 @@ app.post('/getproductspareroledata', authenticateToken, async (req, res) => {
   const pageTypes = {
     stockpage: parseIds(stockpage),
     productsparepage: parseIds(productsparepage),
+    mslpage: parseIds(mslpage),
   };
 
   try {
@@ -17984,6 +17986,46 @@ app.post('/uploadspareexcel', async (req, res) => {
   } catch (err) {
     console.error("Error inserting data:", err);
     return res.status(500).json({ error: 'An error occurred while processing data' });
+  }
+});
+
+app.get("/getmsl", authenticateToken, async (req, res) => {
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+    const result = await pool.request().query(`SELECT * FROM Msl WHERE deleted = 0`);
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
+
+app.get("/getmslmsp/:licare_code", authenticateToken, async (req, res) => {
+  const { licare_code } = req.params
+  try {
+    // return res.json({licare_code});
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+    const result = await pool.request().query(`SELECT * FROM Msl WHERE deleted = 0 and msp_code = '${licare_code}'`);
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
+app.get("/getmslcsp/:licare_code", authenticateToken, async (req, res) => {
+  const { licare_code } = req.params
+  try {
+    // return res.json({licare_code});
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+    const result = await pool.request().query(`SELECT * FROM Msl WHERE deleted = 0 and csp_code = '${licare_code}'`);
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
   }
 });
 

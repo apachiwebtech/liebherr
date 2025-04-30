@@ -46,70 +46,80 @@ function GrnTab() {
       <div className="container-fluid p-0">
         {/* Top Header */}
         <div className="text-left headings">
-          <span style={{paddingLeft:"20px",color:'#FFFFFF'}}>GRN</span>
+          <span style={{ paddingLeft: "20px", color: '#FFFFFF' }}>GRN</span>
         </div>
 
         {/* Nav Tabs */}
         <div class="row">
           <div className="container-fluid">
             <div className="col-sm-6 p-0" style={{ width: '100%' }}>
-            <div className="tabsMenu" style={{fontSize:"14px", marginLeft: "12px",fontWeight:"600",fontFamily:"Nunito"}}>
-              <ul className="nav nav-tabs ">
-                <li className="nav-item">
-                <Link to={`/csp/creategrn`}><button
-                    className={`nav-link ${activeTab === '/csp/creategrn' ? 'active' : ' onClick={() => setActiveTab("csp/creategrn")}'}`}
-                   
-                  >
-                   CREATE GRN
-                  </button></Link>
-                </li>
-                
-                <li className="nav-item">
-                <Link to={`/csp/grnlisting`}> <button
-                    className={`nav-link ${activeTab === '/csp/grnlisting' ? 'active' : ' onClick={() => setActiveTab("grnlisting")}'}`}
-                  
-                  >
-                    GRN INWARD LISTING
-                  </button></Link>
-                </li>
+              <div className="tabsMenu" style={{ fontSize: "14px", marginLeft: "12px", fontWeight: "600", fontFamily: "Nunito" }}>
+                <ul className="nav nav-tabs ">
+                  <li className="nav-item">
+                    <Link to={`/csp/creategrn`}><button
+                      className={`nav-link ${activeTab === '/csp/creategrn' ? 'active' : ' onClick={() => setActiveTab("csp/creategrn")}'}`}
 
-                <li className="nav-item">
-                <Link to={`/csp/spareoutward`}> <button
-                    className={`nav-link ${activeTab === '/csp/spareoutward' ? 'active' : ' onClick={() => setActiveTab("spareoutward")}'}`}
-                  
-                  >
-                    SPARE OUTWARD
-                  </button></Link>
-                </li>
-                <li className="nav-item">
-                <Link to={`/csp/grnoutward`}> <button
-                    className={`nav-link ${activeTab === '/csp/grnoutward' ? 'active' : ' onClick={() => setActiveTab("grnoutward")}'}`}
-                  
-                  >
-                    GRN OUTWARD LISTING
-                  </button></Link>
-                </li>
-                <li className="nav-item">
-                <Link to={`/csp/cspstock`}> <button
-                    className={`nav-link ${activeTab === '/csp/cspstock' ? 'active' : ' onClick={() => setActiveTab("cspstock")}'}`}
-                  
-                  >
-                    Stock
-                  </button></Link>
-                </li>
-             
-                {/* Add other tabs like GEO STATE, GEO CITY, AREA */}
-              </ul>
-            </div> 
+                    >
+                      CREATE GRN
+                    </button></Link>
+                  </li>
+
+                  <li className="nav-item">
+                    <Link to={`/csp/grnlisting`}> <button
+                      className={`nav-link ${activeTab === '/csp/grnlisting' ? 'active' : ' onClick={() => setActiveTab("grnlisting")}'}`}
+
+                    >
+                      GRN INWARD LISTING
+                    </button></Link>
+                  </li>
+
+                  <li className="nav-item">
+                    <Link to={`/csp/spareoutward`}> <button
+                      className={`nav-link ${activeTab === '/csp/spareoutward' ? 'active' : ' onClick={() => setActiveTab("spareoutward")}'}`}
+
+                    >
+                      SPARE OUTWARD
+                    </button></Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link to={`/csp/grnoutward`}> <button
+                      className={`nav-link ${activeTab === '/csp/grnoutward' ? 'active' : ' onClick={() => setActiveTab("grnoutward")}'}`}
+
+                    >
+                      GRN OUTWARD LISTING
+                    </button></Link>
+                  </li>
+                  <li
+                    className="nav-item">
+                    <Link to={`/csp/cspstock`}> <button
+                      className={`nav-link ${activeTab === '/csp/cspstock' ? 'active' : ' onClick={() => setActiveTab("cspstock")}'}`}
+
+                    >
+                      Stock
+                    </button></Link>
+                  </li>
+                  <li
+                    className="nav-item">
+                    <Link to={`/csp/mslcsp`}> <button
+                      className={`nav-link ${activeTab === '/csp/mslcsp' ? 'active' : ' onClick={() => setActiveTab("mslcsp")}'}`}
+
+                    >
+                      MSL Listing
+                    </button></Link>
+                  </li>
+
+                  {/* Add other tabs like GEO STATE, GEO CITY, AREA */}
+                </ul>
+              </div>
             </div>
 
 
-            {/* Tab Content */}       
-              <div className="col-12 col-custom" style={{paddingLeft:"12px",paddingRight:"12px"}}>
-                <div className="tab-content">
-                  {/* {renderTabContent()} */}
-                </div>
+            {/* Tab Content */}
+            <div className="col-12 col-custom" style={{ paddingLeft: "12px", paddingRight: "12px" }}>
+              <div className="tab-content">
+                {/* {renderTabContent()} */}
               </div>
+            </div>
           </div>
         </div>
       </div>

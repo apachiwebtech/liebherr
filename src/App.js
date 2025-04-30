@@ -157,6 +157,9 @@ import JsontoExcel from './Components/Utils/JsontoExcel';
 import Productsparetabs from './Components/Pages/Master/Productsparetabs';
 import { Stock } from './Components/Pages/Master/Stock';
 import ExceltoUpdateScript from './Components/Utils/ExceltoupdateScript';
+import { Msl } from './Components/Pages/Master/Msl';
+import { Mslmsp } from './Components/Pages/Master/Mslmsp';
+import { Mslcsp } from './Components/Pages/Master/Mslcsp';
 
 
 
@@ -287,6 +290,11 @@ const Router = createBrowserRouter([
         element: <ProtectedRoute><Csplisting /></ProtectedRoute>,
       },
       {
+        path: "/msp/mslmsp",
+        element: <ProtectedRoute><Mslmsp /></ProtectedRoute>,
+      },
+
+      {
         path: "/msp/complaintviewmsp/:complaintid",
         element: <ProtectedRoute><Complaintviewmsp /></ProtectedRoute>,
       },
@@ -343,6 +351,10 @@ const Router = createBrowserRouter([
         path: "/csp/ticketview/:complaintid",
         element: <ProtectedRoute><CspTicketView /></ProtectedRoute>,
 
+      },
+      {
+        path: "/csp/mslcsp",
+        element: <ProtectedRoute><Mslcsp /></ProtectedRoute>,
       },
       {
         path: "/csp/adduser",
@@ -898,6 +910,10 @@ const Router = createBrowserRouter([
       {
         path: "/stock",
         element: <Stock />,
+      },
+      {
+        path: "/msl",
+        element: <Msl />,
       },
       {
         path: "/productsparetabs",

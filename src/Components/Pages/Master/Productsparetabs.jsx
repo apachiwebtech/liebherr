@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Link,useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import CryptoJS from 'crypto-js';
 import axios from "axios";
 import { Base_Url, secretKey } from '../../Utils/Base_Url';
@@ -18,6 +18,8 @@ function Productsparetabs() {
       setActiveTab("/productspare");
     } else if (location.pathname.startsWith("/stock")) {
       setActiveTab("/stock");
+    } else if (location.pathname.startsWith("/msl")) {
+      setActiveTab("/msl");
     }
 
   }, [location.pathname]);
@@ -35,8 +37,9 @@ function Productsparetabs() {
 
     const data = {
       role: decryptedRole,
-     productsparepage: '40',
+      productsparepage: '40',
       stockpage: '57',
+      mslpage: '58'
     }
 
 
@@ -98,7 +101,7 @@ function Productsparetabs() {
                   {status.productsparepage == 1 &&
                     <Link to={`/productspare`}>
                       <li className="nav-item">
-                      <button className={`nav-link ${activeTab === "/productspare" ? "active" : ""}`}>
+                        <button className={`nav-link ${activeTab === "/productspare" ? "active" : ""}`}>
                           SERVICE BOM
                         </button>
                       </li>
@@ -108,6 +111,13 @@ function Productsparetabs() {
                     <Link to={`/stock`}><li className="nav-item">
                       <button className={`nav-link ${activeTab === "/stock" ? "active" : ""}`}>
                         STOCK
+                      </button>
+                    </li></Link>
+                  }
+                  {status.mslpage == 1 &&
+                    <Link to={`/msl`}><li className="nav-item">
+                      <button className={`nav-link ${activeTab === "/msl" ? "active" : ""}`}>
+                        MSL
                       </button>
                     </li></Link>
                   }

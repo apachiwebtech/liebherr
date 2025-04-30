@@ -34,7 +34,7 @@ const Loginheader = (params) => {
     setName(firstLetter)
   }, [])
 
-  const Custname = localStorage.getItem('Lhiuser') || ""; 
+  const Custname = localStorage.getItem('Lhiuser') || "";
 
 
   return (
@@ -136,6 +136,20 @@ const Loginheader = (params) => {
                 GRN
               </Link>
             </li>
+            <li
+              className={`nav-item dropdown ${location.pathname === "/csp/mslcsp" ? "active-class" : ""}`}
+              style={location.pathname === "/csp/mslcsp" ? { background: '#0d6efd', borderRadius: '5px' } : {}}
+            >
+              <Link
+                to={`/csp/mslcsp`}
+                className={`nav-link site ${location.pathname === "/csp/mslcsp" ? "text-light" : ""}`}
+                id="navbarDropdown"
+                role="button"
+                aria-expanded="false"
+              >
+                MSL Listing
+              </Link>
+            </li>
 
 
 
@@ -168,7 +182,7 @@ const Loginheader = (params) => {
               <li className="dropdown-item" role="button">
                 <Link className="dropdown-item" to="/csp/mspdata">MSP Data</Link></li>
               <li className="dropdown-item" role="button">
-                <Link className="dropdown-item"  tabIndex="0" onClick={clearLocal}>Sign out</Link></li>
+                <Link className="dropdown-item" tabIndex="0" onClick={clearLocal}>Sign out</Link></li>
             </ul>
           </div>
         </div>
