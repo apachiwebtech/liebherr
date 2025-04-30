@@ -132,7 +132,7 @@ const Spareoutward = () => {
         //     // Clear the error if at least one is selected
         //     newErrors.selectcsp = ""; 
         // }
-        
+
 
         setErrors(newErrors)
         return newErrors; // Return the error object
@@ -176,6 +176,7 @@ const Spareoutward = () => {
                     },
                 });
                 setHide(true)
+                alert(response.data.message)
                 fetchsparelist()
 
             } catch (error) {
@@ -201,7 +202,7 @@ const Spareoutward = () => {
                 remark: formData.remark,
                 isEng: selecteng ? 'eng' : selectcsp ? 'csp' : ''
             };
-            
+
 
             axios.post(`${Base_Url}/add_spareoutward`, data, {
                 headers: {
@@ -228,7 +229,7 @@ const Spareoutward = () => {
 
 
     }
- const navigate = useNavigate()
+    const navigate = useNavigate()
     const handleSpareSend = async () => {
         try {
             // Map the `spare` array to construct the payload with additional `spare_qty`
@@ -238,9 +239,9 @@ const Spareoutward = () => {
                 article_title: item.spare_title,
                 quantity: String(item.quantity) || String(0), // Use the updated `spare_qty`, default to 0 if empty
                 issue_no: localStorage.getItem('issue_no'),
-                licare_code : created_by,
-                issue_to : localStorage.getItem('issue_to'),
-                lhi_code : localStorage.getItem('lhi_code')
+                licare_code: created_by,
+                issue_to: localStorage.getItem('issue_to'),
+                lhi_code: localStorage.getItem('lhi_code')
             }));
 
 
@@ -259,14 +260,17 @@ const Spareoutward = () => {
 
             if (response.status === 200) {
                 alert("Data saved successfully!");
-                navigate('/csp/grnoutward')
-
+                navigate('/csp/grnoutward');
+            } else if (response.status === 400) {
+                alert(response.data.message);
             } else {
                 alert("Failed to save data.");
             }
+
         } catch (error) {
-            console.error("Error saving data:", error);
-            alert("An error occurred while saving data.");
+            console.log(error.response.data.error);
+            
+            alert(error.response.data.error);
         }
     };
 
@@ -350,7 +354,7 @@ const Spareoutward = () => {
 
         fetchCsp();
     }, 200);
-    
+
     const handleInputEngChange = _debounce((newValue) => {
         console.log(newValue);
 
@@ -513,10 +517,10 @@ const Spareoutward = () => {
 
                                 </div>
 
-                            {submithide ? null : <div className="">
+                                {submithide ? null : <div className="">
                                     <button className="btn btn-primary" type="">Submit</button>
                                 </div>
-}    
+                                }
 
                             </form>
 

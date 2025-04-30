@@ -2,13 +2,17 @@ import React from 'react';
 import Logo from '../../../images/Liebherr-logo-768x432.png'
 import Rating from '@mui/material/Rating';
 import { Base_Url, secretKey } from '../../Utils/Base_Url';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { useState,useEffect } from 'react';
 import CryptoJS from 'crypto-js';
 import axios from 'axios';
 
 const ContactForm = () => {
     const token = localStorage.getItem("token");
+    const [searchParams] = useSearchParams();
+    const ticketId = searchParams.get('ticket'); // 'BH0425-0028'
+
+    console.log(ticketId , "RRR")
     const [formState, setFormState] = useState({
         rating1: 0,
         remark: "",

@@ -199,7 +199,7 @@ const Router = createBrowserRouter([
     element: <NotAuthenticate />,
   },
   {
-    path: "/nps/:email/:ticketNo/:customerId",
+    path: "/feedbackform",
     element: <Nps />,
   },
   {

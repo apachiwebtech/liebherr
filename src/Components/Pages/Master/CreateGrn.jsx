@@ -41,6 +41,7 @@ const CreateGrn = () => {
     const token = localStorage.getItem("token"); // Get token from localStorage
     const created_by = localStorage.getItem("licare_code"); // Get token from localStorage
     const GRN_NO = localStorage.getItem("grn_no"); // Get token from localStorage
+    const [engtext, setEngText] = useState("");
     const [formData, setFormData] = useState({
         received_from: "",
         invoice_number: "",
@@ -63,9 +64,9 @@ const CreateGrn = () => {
         }
     };
 
-    const fetchengineer = async () => {
+    const fetchEng = async () => {
         try {
-            const response = await axios.post(`${Base_Url}/getsearchengineer` ,{param: text},{
+            const response = await axios.post(`${Base_Url}/getsearchengineer` ,{param: engtext},{
                 headers: {
                     Authorization: token, // Send token in headers
                     },
@@ -197,8 +198,8 @@ const CreateGrn = () => {
             const data = {
                 invoice_number: formData.invoice_number,
                 invoice_date: formData.invoice_date,
-                csp_no: selectcsp?.id || 'LIEBHERR',
-                csp_name: selectcsp?.title || 'LIEBHERR',
+                csp_no: selectcsp?.id || selectengineer?.id  ||'LIEBHERR',
+                csp_name: selectcsp?.title || selectengineer?.title  || 'LIEBHERR',
                 created_by: created_by,
                 remark: formData.remark
             }
@@ -347,13 +348,17 @@ const CreateGrn = () => {
         fetchCsp();
     }, 200);
 
-    const handleEngineerInputChange = _debounce((newValue) => {
+    const handleInputEngChange = _debounce((newValue) => {
         console.log(newValue);
 
-        setText(newValue);
+        // Update the text state
+        setEngText(newValue);
 
-        fetchengineer();
-    },200);
+        // Check if newValue is not blank and has more than 4 words
+
+        fetchEng();
+    }, 200);
+
 
 
     const handleSearchChange = (newValue) => {
@@ -467,7 +472,8 @@ const CreateGrn = () => {
                                     <label htmlFor="EmailInput" className="input-field">
                                         Received from <span className="text-danger">*</span>
                                     </label>
-                                    {selectedEngineerType === "Franchisee" ? (
+                                    
+                                    {selectedEngineerType == "Franchisee" ? (
                                         <Autocomplete
                                             size="small"
                                             disablePortal
@@ -478,7 +484,7 @@ const CreateGrn = () => {
                                             onInputChange={(e, newInputValue) => handleInputChange(newInputValue)}
                                             renderInput={(params) => <TextField {...params} label="Enter.." variant="outlined" />}
                                         />
-                                    ) : selectedEngineerType === "Engineer" ? (
+                                    ) : selectedEngineerType == "Engineer" ? (
                                         <Autocomplete
                                             size="small"
                                             disablePortal
@@ -486,7 +492,7 @@ const CreateGrn = () => {
                                             value={selectengineer}
                                             getOptionLabel={(option) => option.title}
                                             onChange={(e, newValue) => handleSearchEngineerChange(newValue)}
-                                            onInputChange={(e, newInputValue) => handleInputChange(newInputValue)}
+                                            onInputChange={(e, newInputValue) => handleInputEngChange(newInputValue)}
                                             renderInput={(params) => <TextField {...params} label="Enter.." variant="outlined" />}
                                         />
                                     ) : (

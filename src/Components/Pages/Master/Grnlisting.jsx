@@ -238,7 +238,7 @@ export function Grnlisting(params) {
                     <SyncLoader loading={loaders} color="#FFFFFF" />
                 </div>
             )}
-            {roleaccess > 1 ? <div className="row mp0">
+           <div className="row mp0">
 
                 <div className="searchFilter" >
 
@@ -439,7 +439,7 @@ export function Grnlisting(params) {
                                                                 onClick={() => sendtoedit(item.grn_no)}
                                                                 title="Edit"
                                                                 style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                                                                disabled={roleaccess > 3 ? false : true}
+                                                                
                                                             >
                                                                 <FaEye />
                                                             </button>
@@ -448,7 +448,7 @@ export function Grnlisting(params) {
                                                                 onClick={() => handledelete(item.grn_no)}
                                                                 title="Edit"
                                                                 style={{ backgroundColor: 'transparent', border: 'none', color: 'red', fontSize: '20px' }}
-                                                                disabled={roleaccess > 3 ? false : true}
+                                                                
                                                             >
                                                                 <MdOutlineDelete />
                                                             </button>
@@ -472,7 +472,7 @@ export function Grnlisting(params) {
                         </div>
                     </div>
                 </div>
-            </div> : null}
+            </div> 
         </div>
     );
 }

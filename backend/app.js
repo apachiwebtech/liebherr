@@ -14075,7 +14075,7 @@ app.post("/getsearcheng", authenticateToken, async (req, res) => {
     const sql = `
     SELECT TOP 20 engineer_id as id, title
     FROM awt_engineermaster
-    WHERE title LIKE @param AND deleted = 0
+    WHERE title LIKE @param AND deleted = 0 and status = 1
     ORDER BY title;
     `;
 
@@ -14278,19 +14278,55 @@ app.post('/updateissuespares', authenticateToken, async (req, res) => {
     return res.status(400).json({ error: 'Invalid payload format. Expected an array.' });
   }
 
+
   try {
     const pool = await sql.connect(dbConfig);
+
+
+    const insufficientStockItems = [];
+
+
+    // Phase 1: Validate all items and stock
+    for (const item of spareData) {
+
+      if (!item.issue_no || !item.article_code || !item.quantity || !item.licare_code) {
+        return res.status(400).json({ error: 'Missing required fields in spare data.' });
+      }
+
+      const quantityResult = await pool.request()
+        .input('Productcode', sql.VarChar, item.article_code)
+        .input('Cspcode', sql.VarChar, item.licare_code)
+        .query(`SELECT stock_quantity FROM csp_stock WHERE product_code = @Productcode AND csp_code = @Cspcode`);
+
+      const availableQty = quantityResult.recordset[0]?.stock_quantity ?? 0;
+
+      if (availableQty < Number(item.quantity)) {
+        insufficientStockItems.push({
+          article_code: item.article_code,
+          requested: item.quantity,
+          available: availableQty,
+        });
+      }
+
+
+      // If any stock issues, return early
+      if (insufficientStockItems.length > 0) {
+        return res.status(400).json({
+          error: "Insufficient stock for one or more items.",
+          details: insufficientStockItems,
+        });
+      }
+    }
 
     // Start a transaction
     const transaction = new sql.Transaction(pool);
     await transaction.begin();
 
     for (const item of spareData) {
-      if (!item.issue_no || !item.article_code || !item.quantity || !item.licare_code) {
-        return res.status(400).json({ error: 'Missing required fields in spare data.' });
-      }
+
 
       const request = new sql.Request(transaction);
+      request.timeout = 600000;
 
       // Update quantity in `awt_cspissuespare`
       const updateIssueQuery = `
@@ -14314,7 +14350,7 @@ app.post('/updateissuespares', authenticateToken, async (req, res) => {
       SELECT stock_quantity
       FROM engineer_stock
       WHERE product_code = @product_code and eng_code = @eng_code
-    `;
+     `;
 
 
         engStockRequest.input('product_code', sql.VarChar, item.article_code);
@@ -14358,7 +14394,7 @@ app.post('/updateissuespares', authenticateToken, async (req, res) => {
       SELECT stock_quantity
       FROM csp_stock
       WHERE product_code = @product_code and csp_code = @csp_code
-    `;
+     `;
 
 
         cspStockRequest.input('product_code', sql.VarChar, item.article_code);
@@ -14457,7 +14493,7 @@ app.post("/getselctedspare", authenticateToken, async (req, res) => {
 
     // Parameterized query with a limit
     const sql = `
-   SELECT sp.id, sp.ModelNumber, sp.title as article_code ,sp.ProductCode as spareId, sp.ItemDescription as article_description , spt.Price_group as price FROM Spare_parts as sp left join Spare_partprice as spt on sp.title = spt.Item  WHERE sp.deleted = 0 and  id = '${article_id}' 
+   SELECT sp.id, sp.ModelNumber, sp.title as article_code ,sp.ProductCode as spareId, sp.ItemDescription as article_description , spt.Price_group as price FROM Spare_parts as sp left join Spare_partprice as spt on sp.title = spt.Item  WHERE sp.deleted = 0 and  sp.id = '${article_id}' 
     `;
 
     const result = await pool.request()
@@ -14701,6 +14737,7 @@ app.post('/addissuespares', authenticateToken, async (req, res) => {
     // Connect to the database
     const pool = await sql.connect(dbConfig);
 
+
     // Fetch spare parts data
     const getspare = `
       SELECT id, ModelNumber, title as article_code, ProductCode as spareId, ItemDescription as article_description
@@ -14710,6 +14747,31 @@ app.post('/addissuespares', authenticateToken, async (req, res) => {
       .input('spare_id', sql.VarChar, spare_id)
       .query(getspare);
 
+    const articleCode = result.recordset[0]?.article_code;
+
+    if (!articleCode) {
+      return res.status(404).json({ message: "Spare part not found" });
+    }
+
+    // Use parameterized query to avoid SQL injection
+    const checkstockQuery = `
+        SELECT stock_quantity 
+        FROM csp_stock 
+        WHERE csp_code = @created_by AND product_code = @article_code
+      `;
+
+    const stockresult = await pool.request()
+      .input('created_by', sql.VarChar, created_by)
+      .input('article_code', sql.VarChar, articleCode)
+      .query(checkstockQuery);
+
+    if (
+      stockresult.recordset.length === 0 ||
+      stockresult.recordset[0].stock_quantity == 0
+    ) {
+      return res.json({ message: "No Stock Available" });
+    }
+
     const spareData = result.recordset.map(record => ({
       issue_no,
       article_code: record.article_code,
@@ -14718,6 +14780,8 @@ app.post('/addissuespares', authenticateToken, async (req, res) => {
       created_by,
       created_date: new Date()
     }));
+
+
 
 
     // Use a transaction for bulk inserts
@@ -14768,8 +14832,7 @@ app.post('/addissuespares', authenticateToken, async (req, res) => {
     await transaction.commit();
 
     res.status(200).json({
-      message: 'Data saved successfully (duplicates skipped)',
-      affectedRows, // Send the actual count of affected rows
+      message: 'Spare Added'
     });
   } catch (err) {
     console.error('Error inserting data:', err);

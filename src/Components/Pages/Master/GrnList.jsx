@@ -240,7 +240,7 @@ export function GrnList(params) {
                     <SyncLoader loading={loaders} color="#FFFFFF" />
                 </div>
             )}
-            {roleaccess > 1 ? <div className="row mp0">
+           <div className="row mp0">
 
                 <div className="searchFilter" >
 
@@ -443,7 +443,7 @@ export function GrnList(params) {
                                                                 onClick={() => sendtoedit(item.grn_no)}
                                                                 title="Edit"
                                                                 style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                                                                disabled={roleaccess > 3 ? false : true}
+                                                                d
                                                             >
                                                                 <FaEye />
                                                             </button>
@@ -452,7 +452,7 @@ export function GrnList(params) {
                                                                 onClick={() => handledelete(item.grn_no)}
                                                                 title="Edit"
                                                                 style={{ backgroundColor: 'transparent', border: 'none', color: 'red', fontSize: '20px' }}
-                                                                disabled={roleaccess > 3 ? false : true}
+                                                                
                                                             >
                                                                 <MdOutlineDelete />
                                                             </button>
@@ -476,7 +476,7 @@ export function GrnList(params) {
                         </div>
                     </div>
                 </div>
-            </div> : null}
+            </div> 
         </div>
     );
 }

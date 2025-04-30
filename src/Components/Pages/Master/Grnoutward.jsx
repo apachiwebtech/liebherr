@@ -240,7 +240,7 @@ export function Grnoutward(params) {
                     <SyncLoader loading={loaders} color="#FFFFFF" />
                 </div>
             )}
-            {roleaccess > 1 ? <div className="row mp0">
+ <div className="row mp0">
 
                 <div className="searchFilter" >
 
@@ -439,7 +439,7 @@ export function Grnoutward(params) {
                                                                 onClick={() => sendtoedit(item.issue_no)}
                                                                 title="Edit"
                                                                 style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                                                                disabled={roleaccess > 3 ? false : true}
+                                                                
                                                             >
                                                                 <FaEye />
                                                             </button>
@@ -448,7 +448,7 @@ export function Grnoutward(params) {
                                                                 onClick={() => handledelete(item.issue_no)}
                                                                 title="Edit"
                                                                 style={{ backgroundColor: 'transparent', border: 'none', color: 'red', fontSize: '20px' }}
-                                                                disabled={roleaccess > 3 ? false : true}
+                                                                
                                                             >
                                                                 <MdOutlineDelete />
                                                             </button>
@@ -472,7 +472,7 @@ export function Grnoutward(params) {
                         </div>
                     </div>
                 </div>
-            </div> : null}
+            </div> 
         </div>
     );
 }
