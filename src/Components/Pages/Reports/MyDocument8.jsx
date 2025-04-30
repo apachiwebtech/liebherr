@@ -401,7 +401,7 @@ const MyDocument8 = ({ data, spare, csp }) => {
 
                                 </View>
                                 <View style={[styles.tableCol, { width: '10%' }]}>
-                                    <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 15, color: '#000' }}>{item.service_charges}</Text>
+                                    <Text style={{ fontSize: '10px', marginTop: 10, marginLeft: 15, color: '#000' }}>{data.service_charges}</Text>
 
                                 </View>
 

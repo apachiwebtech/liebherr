@@ -11466,7 +11466,7 @@ app.post('/getquotedetails', authenticateToken, async (req, res) => {
 
   try {
     // Use parameterized query to prevent SQL Injection
-    const query = `select aq.* , ct.address,ct.customer_mobile,ct.customer_email , ct.assigned_to , ct.serial_no from  awt_quotation as aq left join complaint_ticket as ct on ct.ticket_no = aq.ticketId WHERE aq.id = @quote_id`;
+    const query = `select aq.* , ct.address,ct.customer_mobile,ct.customer_email , ct.assigned_to , ct.serial_no,ct.service_charges from  awt_quotation as aq left join complaint_ticket as ct on ct.ticket_no = aq.ticketId WHERE aq.id = @quote_id`;
 
 
 
