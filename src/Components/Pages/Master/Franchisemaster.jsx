@@ -115,7 +115,7 @@ function MasterFranchiseTabs() {
                     <li className="nav-item">
                       <Link to={`/Childfranchisemaster`}>
                         <button className={`nav-link ${activeTab === "/Childfranchisemaster" ? "active" : ""}`}>
-                          CHILD SERVICE PARTNER
+                           ADD CHILD SERVICE PARTNER
                         </button>
                       </Link>
                     </li>

@@ -417,7 +417,7 @@ export function Products(params) {
                                             <th width="10%">Product Line</th>
                                             <th width="15%">Material</th>
                                             <th width="5%">Manufacturer</th>
-                                            <th width="5%">View</th>
+                                            <th width="5%">{roleaccess <= 3 ? "View" : "Edit"}</th>
 
                                         </tr>
                                     </thead>

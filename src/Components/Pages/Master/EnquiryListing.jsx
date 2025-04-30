@@ -2,7 +2,7 @@ import axios from 'axios';
 import * as XLSX from "xlsx";
 import { Link, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
-import { FaPencilAlt, FaTrash , FaEye} from 'react-icons/fa';
+import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
 import { Base_Url, secretKey } from '../../Utils/Base_Url';
 import CryptoJS from 'crypto-js';
 import { useSelector } from 'react-redux';
@@ -48,6 +48,17 @@ const EnquiryListing = () => {
         enquiry_type: '',
         priority: '',
         modelnumber: '',
+        fromDate: '',
+        toDate: '',
+        customer_id: '',
+        interested: '',
+        alt_mobileno: '',
+        email: '',
+        state: '',
+        city: '',
+        lead_converted: '',
+        mother_branch: '',
+
     });
 
     const getenquirydata = async (page) => {
@@ -69,10 +80,15 @@ const EnquiryListing = () => {
                     Authorization: token,
                 },
             });
-            setEnquirydata(response.data.data);
-            setFilteredData(response.data.data);
+
+            const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+            const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+            const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+            setEnquirydata(decryptedData);
+            setFilteredData(decryptedData);
             // Store total count for pagination logic on the frontend
             setTotalCount(response.data.totalCount);
+
         } catch (error) {
             console.error('Error fetching Quotationdata:', error);
             setEnquirydata([]);
@@ -98,8 +114,11 @@ const EnquiryListing = () => {
                 },
             }
             );
-            setEnquirydata(response.data.data);
-            setFilteredData(response.data.data);
+            const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+            const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+            const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+            setEnquirydata(decryptedData);
+            setFilteredData(decryptedData);
             setTotalCount(response.data.totalCount);
         } catch (error) {
             console.error('Error fetching filtered data:', error);
@@ -145,63 +164,63 @@ const EnquiryListing = () => {
         navigate(`/enquiryListing/${encrypted}`)
     };
 
-     // export to excel 
-        const exportToExcel = async () => {
-            try {
-                // Fetch all customer data without pagination
-                const response = await axiosInstance.get(`${Base_Url}/getenquiry`, {
-                    headers: {
-                        Authorization: token,
-                    },
-                    params: {
-                        pageSize: totalCount, // Fetch all data
-                        page: 1, // Start from the first page
-                    },
-                });
-                const allEnquiryData = response.data.data;
-    
-                // Create a new workbook
-                const workbook = XLSX.utils.book_new();
-    
-                // Convert data to a worksheet
-                const worksheet = XLSX.utils.json_to_sheet(allEnquiryData.map(user => ({
-                    "Enquiry mo": user.enquiry_no,
-                    "Source": user.source,
-                    "Enquiry Date": user.enquiry_date,
-                    "Salutation": user.salutation,
-                    "Customer Name": user.customer_name,
-                    "Email": user.email,
-                    "Mobile Number": user.mobile,
-                    "Alt Mobile": user.alt_mobile,
-                    "Request Mobile": user.request_mobile,
-                    "Mwhatsapp": user.mwhatsapp,
-                    "Awhatsapp": user.awhatsapp,
-                    "Customer Type ": user.customer_type,
-                    "Enquiry Type": user.enquiry_type,
-                    "Address": user.address,
-                    "Pincode": user.pincode,
-                    "State": user.state,
-                    "District ": user.district,
-                    "City ": user.city,
-                    "Customer Classification": user.interested,
-                    "Model Number": user.modelnumber,
-                    "Priority": user.priority,
-                    "Notes": user.notes,
-                    "Leadstatus": user.leadstatus,
-                    // Add fields you want to export
-                })));
-    
-                // Append the worksheet to the workbook
-                XLSX.utils.book_append_sheet(workbook, worksheet, "Enquiry List");
-    
-                // Export the workbook
-                XLSX.writeFile(workbook, "Enquiry List.xlsx");
-            } catch (error) {
-                console.error("Error exporting data to Excel:", error);
-            }
-        };
-    
-        // export to excel end 
+    // export to excel 
+    const exportToExcel = async () => {
+        try {
+            // Fetch all customer data without pagination
+            const response = await axiosInstance.get(`${Base_Url}/getenquiry`, {
+                headers: {
+                    Authorization: token,
+                },
+                params: {
+                    pageSize: totalCount, // Fetch all data
+                    page: 1, // Start from the first page
+                },
+            });
+            const allEnquiryData = response.data.data;
+
+            // Create a new workbook
+            const workbook = XLSX.utils.book_new();
+
+            // Convert data to a worksheet
+            const worksheet = XLSX.utils.json_to_sheet(allEnquiryData.map(user => ({
+                "Enquiry mo": user.enquiry_no,
+                "Source": user.source,
+                "Enquiry Date": user.enquiry_date,
+                "Salutation": user.salutation,
+                "Customer Name": user.customer_name,
+                "Email": user.email,
+                "Mobile Number": user.mobile,
+                "Alt Mobile": user.alt_mobile,
+                "Request Mobile": user.request_mobile,
+                "Mwhatsapp": user.mwhatsapp,
+                "Awhatsapp": user.awhatsapp,
+                "Customer Type ": user.customer_type,
+                "Enquiry Type": user.enquiry_type,
+                "Address": user.address,
+                "Pincode": user.pincode,
+                "State": user.state,
+                "District ": user.district,
+                "City ": user.city,
+                "Customer Classification": user.interested,
+                "Model Number": user.modelnumber,
+                "Priority": user.priority,
+                "Notes": user.notes,
+                "Leadstatus": user.leadstatus,
+                // Add fields you want to export
+            })));
+
+            // Append the worksheet to the workbook
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Enquiry List");
+
+            // Export the workbook
+            XLSX.writeFile(workbook, "Enquiry List.xlsx");
+        } catch (error) {
+            console.error("Error exporting data to Excel:", error);
+        }
+    };
+
+    // export to excel end 
 
     // Role Right 
     const Decrypt = (encrypted) => {
@@ -232,193 +251,343 @@ const EnquiryListing = () => {
             )}
 
             {roleaccess > 1 ? <div className="row mp0">
-                <div className="searchFilter">
-
-                    <div className="m-3">
-                        {roleaccess > 2 ? <div className='my-2 text-end'>
-                            <button className='btn btn-primary ' onClick={() => {
-                                navigate('/addenquiry')
-                            }}>Add Enquiry</button>
-                        </div> : null}
-
-                        <div className="row mb-3">
-
-
-                            <div className="col-md-2">
-                                <div className="form-group">
-                                    <label>Enquiry No</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        name="enquiry_no"
-                                        value={searchFilters.enquiry_no}
-                                        placeholder="Search by Enquiry NO"
-                                        onChange={handleFilterChange}
-                                    />
-                                </div>
-                            </div>
-
-
-                            <div className="col-md-2">
-                                <div className="form-group">
-                                    <label>Customer Name</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        name="customer_name"
-                                        value={searchFilters.customer_name}
-                                        placeholder="Search by Customer Name"
-                                        onChange={handleFilterChange}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="col-md-2">
-                                <div className="form-group">
-                                    <label>Mobile Number</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        name="mobile"
-                                        value={searchFilters.mobile}
-                                        placeholder="Search by Mobile Number"
-                                        onChange={handleFilterChange}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="col-md-2">
-                                <div className="form-group">
-                                    <label>Customer Type</label>
-                                    <select
-                                        className="form-control"
-                                        name="customer_type"
-                                        value={searchFilters.customer_type}
-                                        onChange={handleFilterChange}
-                                    >
-                                        <option value=""> SELECT</option>
-                                        <option value="Customer">CUSTOMER</option>
-                                        <option value="Dealer">DEALER</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div className="col-md-2">
-                                <div className="form-group">
-                                    <label>Enquiry Type</label>
-                                    <select
-                                        className="form-control"
-                                        name="enquiry_type"
-                                        value={searchFilters.enquiry_type}
-                                        onChange={handleFilterChange}
-                                    >
-                                        <option value=""> SELECT</option>
-                                        <option value="Product">PRODUCT</option>
-                                        <option value="Spare Parts">SPARE PARTS</option>
-                                        <option value="Dealership">DEALERSHIP</option>
-                                        <option value="Service Partner">SERVICE PARTNER</option>
-                                        <option value="Others">OTHERS</option>
-
-                                    </select>
-                                </div>
-                            </div>
-                            <div className="col-md-2">
-                                <div className="form-group">
-                                    <label>Priority</label>
-                                    <select
-                                        className="form-control"
-                                        name="priority"
-                                        value={searchFilters.priority}
-                                        onChange={handleFilterChange}
-                                    >
-                                        <option value=""> SELECT</option>
-                                        <option value="Regular">REGULAR</option>
-                                        <option value="High">HIGH</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="row mb-3">
-
-                            <div className="col-md-2">
-                                <div className="form-group">
-                                    <label>Model Number</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        name="modelnumber"
-                                        value={searchFilters.modelnumber}
-                                        placeholder="Search by Model Number"
-                                        onChange={handleFilterChange}
-                                    />
-                                </div>
-                            </div>
-
-
-
-
-                        </div>
-                        <div className="row mb-3">
-                            <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
-
-                                <div className="form-group">
-                                    <button
-                                        className="btn btn-primary"
-                                        onClick={exportToExcel}
-                                        style={{
-                                            marginLeft: '5px',
-                                        }}
-                                    >
-                                        Export to Excel
-                                    </button>
-                                    <button
-                                        className="btn btn-primary mr-2"
-                                        onClick={applyFilters}
-                                        style={{
-                                            marginLeft: '5px',
-                                        }}
-                                    >
-                                        Search
-                                    </button>
-                                    <button
-                                        className="btn btn-secondary"
-                                        onClick={() => {
-                                            window.location.reload()
-                                        }}
-                                        style={{
-                                            marginLeft: '5px',
-                                        }}
-                                    >
-                                        Reset
-                                    </button>
-                                    {filteredData.length === 0 && (
-                                        <div
-                                            style={{
-                                                backgroundColor: '#f8d7da',
-                                                color: '#721c24',
-                                                padding: '5px 10px',
-                                                marginLeft: '10px',
-                                                borderRadius: '4px',
-                                                border: '1px solid #f5c6cb',
-                                                fontSize: '14px',
-                                                display: 'inline-block'
-                                            }}
-                                        >
-                                            No Record Found
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-
-
-
                 <div className="col-md-12 col-12">
                     <div className="card mb-3 tab_box">
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
                             <div className='table-responsive'>
+                                <div className="searchFilter" onKeyDown={(event) => {
+                                    if (event.key === "Enter") {
+                                        event.preventDefault(); // Prevent form submission if inside a form
+                                        applyFilters();
+                                    }
+                                }}>
+
+                                    <div className="m-3">
+                                        {roleaccess > 2 ? <div className='my-2 text-end'>
+                                            <button className='btn btn-primary ' onClick={() => {
+                                                navigate('/addenquiry')
+                                            }}>Add Enquiry</button>
+                                        </div> : null}
+
+                                        <div className="row mb-3">
+
+                                            <div className="col-md-2">
+                                                <div className="form-group">
+                                                    <label>From Date</label>
+                                                    <input
+                                                        type="date"
+                                                        className="form-control"
+                                                        name="fromDate"
+                                                        value={searchFilters.fromDate}
+                                                        onChange={handleFilterChange}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="col-md-2">
+                                                <div className="form-group">
+                                                    <label>To Date</label>
+                                                    <input
+                                                        type="date"
+                                                        className="form-control"
+                                                        name="toDate"
+                                                        value={searchFilters.toDate}
+                                                        onChange={handleFilterChange}
+                                                    />
+                                                </div>
+                                            </div>
+
+
+                                            <div className="col-md-2">
+                                                <div className="form-group">
+                                                    <label>Enquiry No</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        name="enquiry_no"
+                                                        value={searchFilters.enquiry_no}
+                                                        placeholder="Search by Enquiry No"
+                                                        onChange={handleFilterChange}
+                                                    />
+                                                </div>
+                                            </div>
+
+
+                                            <div className="col-md-2">
+                                                <div className="form-group">
+                                                    <label>Customer Name</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        name="customer_name"
+                                                        value={searchFilters.customer_name}
+                                                        placeholder="Search by Customer Name"
+                                                        onChange={handleFilterChange}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="col-md-2">
+                                                <div className="form-group">
+                                                    <label>Mobile Number</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        name="mobile"
+                                                        value={searchFilters.mobile}
+                                                        placeholder="Search by Mobile Number"
+                                                        onChange={handleFilterChange}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="col-md-2">
+                                                <div className="form-group">
+                                                    <label>Customer Type</label>
+                                                    <select
+                                                        className="form-control"
+                                                        name="customer_type"
+                                                        value={searchFilters.customer_type}
+                                                        onChange={handleFilterChange}
+                                                    >
+                                                        <option value=""> SELECT</option>
+                                                        <option value="Customer">CUSTOMER</option>
+                                                        <option value="Dealer">DEALER</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div className="col-md-2">
+                                                <div className="form-group">
+                                                    <label>Enquiry Type</label>
+                                                    <select
+                                                        className="form-control"
+                                                        name="enquiry_type"
+                                                        value={searchFilters.enquiry_type}
+                                                        onChange={handleFilterChange}
+                                                    >
+                                                        <option value=""> SELECT</option>
+                                                        <option value="Product">PRODUCT</option>
+                                                        <option value="Spare Parts">SPARE PARTS</option>
+                                                        <option value="Dealership">DEALERSHIP</option>
+                                                        <option value="Service Partner">SERVICE PARTNER</option>
+                                                        <option value="Others">OTHERS</option>
+
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div className="col-md-2">
+                                                <div className="form-group">
+                                                    <label>Priority</label>
+                                                    <select
+                                                        className="form-control"
+                                                        name="priority"
+                                                        value={searchFilters.priority}
+                                                        onChange={handleFilterChange}
+                                                    >
+                                                        <option value=""> SELECT</option>
+                                                        <option value="Regular">REGULAR</option>
+                                                        <option value="High">HIGH</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+
+
+                                            <div className="col-md-2">
+                                                <div className="form-group">
+                                                    <label>Model Number</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        name="modelnumber"
+                                                        value={searchFilters.modelnumber}
+                                                        placeholder="Search by Model Number"
+                                                        onChange={handleFilterChange}
+                                                    />
+                                                </div>
+                                            </div>
+                                            {/* <div className="col-md-2">
+                                                <div className="form-group">
+                                                    <label>Customer ID</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        name="customer_id"
+                                                        value={searchFilters.customer_id}
+                                                        placeholder="Search by customer Id"
+                                                        onChange={handleFilterChange}
+                                                    />
+                                                </div>
+                                            </div> */}
+                                            <div className="col-md-2">
+                                                <div className="form-group">
+                                                    <label>Customer Classification</label>
+                                                    <select
+                                                        className="form-control"
+                                                        name="interested"
+                                                        value={searchFilters.interested}
+                                                        onChange={handleFilterChange}
+                                                    >
+                                                        <option value=""> SELECT</option>
+                                                        <option value="Import">Import</option>
+                                                        <option value="Consumer">Consumer</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div className="col-md-2">
+                                                <div className="form-group">
+                                                    <label>Alternate Mobile</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        name="alt_mobile"
+                                                        value={searchFilters.alt_mobile}
+                                                        placeholder="Search by customer mobile"
+                                                        onChange={handleFilterChange}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="col-md-2">
+                                                <div className="form-group">
+                                                    <label>Customer Email</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        name="email"
+                                                        value={searchFilters.email}
+                                                        placeholder="Search by customer email"
+                                                        onChange={handleFilterChange}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="col-md-2">
+                                                <div className="form-group">
+                                                    <label>Source</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        name="source"
+                                                        value={searchFilters.source}
+                                                        placeholder="Search by Source"
+                                                        onChange={handleFilterChange}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="col-md-2">
+                                                <div className="form-group">
+                                                    <label>State</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        name="state"
+                                                        value={searchFilters.state}
+                                                        placeholder="Search by State"
+                                                        onChange={handleFilterChange}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="col-md-2">
+                                                <div className="form-group">
+                                                    <label>Lead Converted</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        name="leadstatus"
+                                                        value={searchFilters.leadstatus}
+                                                        placeholder="Search by Lead Converted"
+                                                        onChange={handleFilterChange}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="col-md-2">
+                                                <div className="form-group">
+                                                    <label>City</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        name="city"
+                                                        value={searchFilters.city}
+                                                        placeholder="Search by city"
+                                                        onChange={handleFilterChange}
+                                                    />
+                                                </div>
+                                            </div>
+                                            {/* <div className="col-md-2">
+                                                <div className="form-group">
+                                                    <label>Liebherr Branch</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        name="mother_branch"
+                                                        value={searchFilters.mother_branch}
+                                                        placeholder="Search by Liebherr Branch"
+                                                        onChange={handleFilterChange}
+                                                    />
+                                                </div>
+                                            </div> */}
+
+
+
+
+                                        </div>
+                                        <div className="row mb-3">
+                                            <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
+
+                                                <div className="form-group">
+                                                    <button
+                                                        className="btn btn-primary"
+                                                        onClick={exportToExcel}
+                                                        style={{
+                                                            marginLeft: '5px',
+                                                        }}
+                                                    >
+                                                        Export to Excel
+                                                    </button>
+                                                    <button
+                                                        className="btn btn-primary mr-2"
+                                                        onClick={applyFilters}
+                                                        style={{
+                                                            marginLeft: '5px',
+                                                        }}
+                                                    >
+                                                        Search
+                                                    </button>
+                                                    <button
+                                                        className="btn btn-secondary"
+                                                        onClick={() => {
+                                                            window.location.reload()
+                                                        }}
+                                                        style={{
+                                                            marginLeft: '5px',
+                                                        }}
+                                                    >
+                                                        Reset
+                                                    </button>
+                                                    {filteredData.length === 0 && (
+                                                        <div
+                                                            style={{
+                                                                backgroundColor: '#f8d7da',
+                                                                color: '#721c24',
+                                                                padding: '5px 10px',
+                                                                marginLeft: '10px',
+                                                                borderRadius: '4px',
+                                                                border: '1px solid #f5c6cb',
+                                                                fontSize: '14px',
+                                                                display: 'inline-block'
+                                                            }}
+                                                        >
+                                                            No Record Found
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+
+
+
                                 <table id="example" className="table table-striped">
                                     <thead>
                                         <tr>

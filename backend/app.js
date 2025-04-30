@@ -13536,78 +13536,121 @@ app.get("/getenquiry", authenticateToken, async (req, res) => {
       enquiry_type,
       priority,
       modelnumber,
-      page = 1, // Default to page 1 if not provided
-      pageSize = 10, // Default to 10 items per page if not provided
+      fromDate,
+      toDate,
+      source,
+      interested,
+      alt_mobile,
+      email,
+      state,
+      city,
+      leadstatus,
+      page = 1,
+      pageSize = 10,
     } = req.query;
-    // Access the connection pool using poolPromise
+
     const pool = await poolPromise;
 
-    // Direct SQL query
+
     let sql = `
-      SELECT p.* FROM awt_enquirymaster as p WHERE deleted = 0 `;
+      SELECT p.*
+      FROM awt_enquirymaster AS p
+      WHERE p.deleted = 0`;
+
+    let countSql = `
+      SELECT COUNT(*) as totalCount
+      FROM awt_enquirymaster AS p
+      WHERE p.deleted = 0`;
+
+
+
+    // Filter application
+    if (fromDate && toDate) {
+      sql += ` AND p.enquirydate BETWEEN '${fromDate}' AND '${toDate}'`;
+      countSql += ` AND p.enquirydate BETWEEN '${fromDate}' AND '${toDate}'`;
+    }
     if (enquiry_no) {
       sql += ` AND p.enquiry_no LIKE '%${enquiry_no}%'`;
+      countSql += ` AND p.enquiry_no LIKE '%${enquiry_no}%'`;
     }
-
     if (customer_name) {
       sql += ` AND p.customer_name LIKE '%${customer_name}%'`;
+      countSql += ` AND p.customer_name LIKE '%${customer_name}%'`;
     }
-
     if (mobile) {
       sql += ` AND p.mobile LIKE '%${mobile}%'`;
+      countSql += ` AND p.mobile LIKE '%${mobile}%'`;
     }
-
     if (customer_type) {
       sql += ` AND p.customer_type LIKE '%${customer_type}%'`;
+      countSql += ` AND p.customer_type LIKE '%${customer_type}%'`;
     }
-
     if (enquiry_type) {
       sql += ` AND p.enquiry_type LIKE '%${enquiry_type}%'`;
+      countSql += ` AND p.enquiry_type LIKE '%${enquiry_type}%'`;
     }
-
     if (priority) {
       sql += ` AND p.priority LIKE '%${priority}%'`;
+      countSql += ` AND p.priority LIKE '%${priority}%'`;
     }
     if (modelnumber) {
       sql += ` AND p.modelnumber LIKE '%${modelnumber}%'`;
+      countSql += ` AND p.modelnumber LIKE '%${modelnumber}%'`;
+    }
+    if (leadstatus) {
+      sql += ` AND p.leadstatus LIKE '%${leadstatus}%'`;
+      countSql += ` AND p.leadstatus LIKE '%${leadstatus}%'`;
+    }
+    if (interested) {
+      sql += ` AND p.interested LIKE '%${interested}%'`;
+      countSql += ` AND p.interested LIKE '%${interested}%'`;
+    }
+    if (alt_mobile) {
+      sql += ` AND p.alt_mobile LIKE '%${alt_mobile}%'`;
+      countSql += ` AND p.alt_mobile LIKE '%${alt_mobile}%'`;
+    }
+    if (email) {
+      sql += ` AND p.email LIKE '%${email}%'`;
+      countSql += ` AND p.email LIKE '%${email}%'`;
+    }
+    if (state) {
+      sql += ` AND p.state LIKE '%${state}%'`;
+      countSql += ` AND p.state LIKE '%${state}%'`;
+    }
+    if (city) {
+      sql += ` AND p.city LIKE '%${city}%'`;
+      countSql += ` AND p.city LIKE '%${city}%'`;
+    }
+    if (source) {
+      sql += ` AND p.source LIKE '%${source}%'`;
+      countSql += ` AND p.source LIKE '%${source}%'`;
     }
 
-
-    // Pagination logic: Calculate offset based on the page number
+    // Pagination
     const offset = (page - 1) * pageSize;
-    // Add pagination to the SQL query (OFFSET and FETCH NEXT)
-    sql += ` ORDER BY p.enquiry_no  OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+    sql += ` ORDER BY p.enquiry_no DESC OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
 
-
-    // Execute the query
     const result = await pool.request().query(sql);
-
-    // Get the total count of records for pagination
-    let countSql = `SELECT COUNT(*) as totalCount FROM awt_enquirymaster where 1=1 `;
-    if (enquiry_no) countSql += ` AND enquiry_no LIKE '%${enquiry_no}%'`;
-    if (customer_name) countSql += ` AND customer_name LIKE '%${customer_name}%'`;
-
-    if (mobile) countSql += ` AND mobile LIKE '%${mobile}%'`;
-    if (customer_type) countSql += ` AND customer_type LIKE '%${customer_type}%'`;
-    if (enquiry_type) countSql += ` AND enquiry_type LIKE '%${enquiry_type}%'`;
-    if (priority) countSql += ` AND priority LIKE '%${priority}%'`;
-    if (modelnumber) countSql += ` AND modelnumber LIKE '%${modelnumber}%'`;
-
     const countResult = await pool.request().query(countSql);
     const totalCount = countResult.recordset[0].totalCount;
+
+    // Encrypt data
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
+
     return res.json({
-      data: result.recordset,
-      totalCount: totalCount,
+      encryptedData,
+      totalCount,
       page,
       pageSize,
     });
-
 
   } catch (err) {
     console.error("Database error:", err);
     return res.status(500).json({ error: "Database error occurred" });
   }
 });
+
 
 
 app.post("/searchenquiry", authenticateToken, async (req, res) => {
