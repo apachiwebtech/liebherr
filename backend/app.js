@@ -2139,11 +2139,27 @@ app.get("/getcustomerlist", authenticateToken, async (req, res) => {
       customer_lname,
       mobileno,
       email,
+      serial_no,
       page = 1, // Default to page 1 if not provided
       pageSize = 10, // Default to 10 items per page if not provided
     } = req.query;
 
-    let sql = `SELECT c.* FROM awt_customer as c WHERE c.deleted = 0`;
+    let sql = `SELECT 
+    c.*, 
+    s.serial_nos
+FROM 
+    awt_customer AS c
+LEFT JOIN (
+    SELECT 
+        CustomerID, 
+        STRING_AGG(CAST(serial_no AS VARCHAR(MAX)), ',') AS serial_nos
+    FROM 
+        awt_uniqueproductmaster
+    GROUP BY 
+        CustomerID
+) AS s ON s.CustomerID = c.customer_id
+WHERE 
+    c.deleted = 0`;
 
     // Dynamically add filters based on query parameters
     if (customer_fname) {
@@ -2169,6 +2185,9 @@ app.get("/getcustomerlist", authenticateToken, async (req, res) => {
     if (customer_id) {
       sql += ` AND c.customer_id LIKE '%${customer_id}%'`;
     }
+    if (serial_no) {
+      sql += ` AND s.serial_nos LIKE '%${serial_no}%'`;
+    }
 
     // Pagination logic: Calculate offset based on the page number
     const offset = (page - 1) * pageSize;
@@ -2180,13 +2199,26 @@ app.get("/getcustomerlist", authenticateToken, async (req, res) => {
     const result = await pool.request().query(sql);
 
     // Get the total count of records for pagination
-    let countSql = `SELECT COUNT(*) as totalCount FROM awt_customer WHERE deleted = 0`;
+    let countSql = `SELECT COUNT(*) as totalCount 
+    FROM awt_customer AS c 
+    LEFT JOIN (
+      SELECT 
+          CustomerID, 
+          STRING_AGG(CAST(serial_no AS VARCHAR(MAX)), ',') AS serial_nos
+      FROM 
+          awt_uniqueproductmaster
+      GROUP BY 
+          CustomerID
+    ) AS s ON s.CustomerID = c.customer_id
+    WHERE c.deleted = 0`;
     if (customer_fname) countSql += ` AND customer_fname LIKE '%${customer_fname}%'`;
     if (customer_lname) countSql += ` AND customer_lname LIKE '%${customer_lname}%'`;
     if (mobileno) countSql += ` AND mobileno LIKE '%${mobileno}%'`;
     if (email) countSql += ` AND email LIKE '%${email}%'`;
     if (customer_type) countSql += ` AND customer_type LIKE '%${customer_type}%'`;
     if (customer_id) countSql += ` AND customer_id LIKE '%${customer_id}%'`;
+    if (serial_no) countSql += ` AND s.serial_nos LIKE '%${serial_no}%'`;
+
 
     const countResult = await pool.request().query(countSql);
     const totalCount = countResult.recordset[0].totalCount;
@@ -5690,26 +5722,23 @@ app.post("/putproductunique", authenticateToken, async (req, res) => {
 
     console.log("Received Data:", { product, id, address, purchase_date, serial_no, CustomerID, SerialStatus });
 
-    // Validate ID
     const parsedId = Number(id);
     if (!parsedId || isNaN(parsedId)) {
       return res.status(400).json({ error: "Invalid ID format" });
     }
 
-    // Get database connection
     const pool = await poolPromise;
 
-    // 🔹 Check for Duplicates (Use Parameterized Query)
-    const checkDuplicateSql = `SELECT * FROM awt_uniqueproductmaster 
-                               WHERE serial_no = @serial_no 
-                               AND id != @id 
-                               AND deleted = 0 
-                               AND CustomerID = @CustomerID`;  // Ensures duplicates only within the same customer
+    // Duplicate Check
+    const duplicateCheckQuery = `
+      SELECT * FROM awt_uniqueproductmaster
+      WHERE serial_no = @serial_no AND id != @id AND deleted = 0 AND CustomerID = @CustomerID
+    `;
     const duplicateResult = await pool.request()
       .input('serial_no', sql.NVarChar, serial_no)
       .input('id', sql.Int, parsedId)
       .input('CustomerID', sql.NVarChar, CustomerID)
-      .query(checkDuplicateSql);
+      .query(duplicateCheckQuery);
 
     if (duplicateResult.recordset.length > 0) {
       return res.status(409).json({
@@ -5717,13 +5746,18 @@ app.post("/putproductunique", authenticateToken, async (req, res) => {
       });
     }
 
-    // 🔹 Update the Product
-    const updateSql = `UPDATE awt_uniqueproductmaster 
-                       SET ModelNumber = @product, address = @address, 
-                           purchase_date = @purchase_date, serial_no = @serial_no, 
-                            CustomerID = @CustomerID,SerialStatus = @SerialStatus, deleted = 0  
-                       WHERE id = @id`;
-
+    // Update Product
+    const updateProductQuery = `
+      UPDATE awt_uniqueproductmaster
+      SET ModelNumber = @product,
+          address = @address,
+          purchase_date = @purchase_date,
+          serial_no = @serial_no,
+          CustomerID = @CustomerID,
+          SerialStatus = @SerialStatus,
+          deleted = 0
+      WHERE id = @id
+    `;
     await pool.request()
       .input('product', sql.NVarChar, product)
       .input('address', sql.NVarChar, address)
@@ -5732,15 +5766,30 @@ app.post("/putproductunique", authenticateToken, async (req, res) => {
       .input('CustomerID', sql.NVarChar, CustomerID)
       .input('SerialStatus', sql.NVarChar, SerialStatus)
       .input('id', sql.Int, parsedId)
-      .query(updateSql);
+      .query(updateProductQuery);
 
-    return res.json({ message: "Product updated successfully!" });
+    // Update Complaint Ticket
+    const updateComplaintQuery = `
+      UPDATE complaint_ticket
+      SET purchase_date = @purchase_date
+      WHERE serial_no = @serial_no AND customer_id = @CustomerID
+    `;
+    await pool.request()
+      .input('purchase_date', sql.NVarChar, purchase_date)
+      .input('serial_no', sql.NVarChar, serial_no)
+      .input('CustomerID', sql.NVarChar, CustomerID)
+      .query(updateComplaintQuery);
 
+    res.json({ message: "Product updated successfully!" });
   } catch (err) {
-    console.error("Error:", err);
-    return res.status(500).json({ error: "An error occurred while updating the product" });
+    console.error("Server Error:", err);
+    res.status(500).json({ error: err.message || "Internal Server Error" });
   }
 });
+
+
+
+
 
 
 app.post("/deleteproductunique", authenticateToken, async (req, res) => {

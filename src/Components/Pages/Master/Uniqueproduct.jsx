@@ -54,7 +54,7 @@ const Uniqueproduct = () => {
     SerialStatus: "",
     customer_id: "",
     newaddress: "",
-    ItemNumber : ""
+    ItemNumber: ""
   });
 
 
@@ -281,9 +281,10 @@ const Uniqueproduct = () => {
             })
             .catch((error) => {
               if (error.response && error.response.status === 409) {
-                setDuplicateError(
-                  "Product with same serial number already exists!"
-                ); // Show duplicate error for update
+                setDuplicateError("Product with same serial number already exists!");
+              } else {
+                console.error("Unexpected Error:", error.response?.data || error.message);
+                alert("Something went wrong while updating. Please try again.");
               }
             });
         } else {
@@ -375,7 +376,7 @@ const Uniqueproduct = () => {
         product_id: String(formData.id),
         newaddress: formData.newaddress,
         oldcustid: formData.CustomerID,
-        ItemNumber : formData.ItemNumber
+        ItemNumber: formData.ItemNumber
       }
 
       axios.post(`${Base_Url}/transferproduct`, payload, {
@@ -392,7 +393,7 @@ const Uniqueproduct = () => {
             customer_id: '',
           }))
         })
-    }else{
+    } else {
       alert("Serial status is inactive")
     }
 
@@ -588,7 +589,7 @@ const Uniqueproduct = () => {
                       </div>
 
                       <div onClick={handleClickOpen} style={{ textDecoration: "underline", cursor: "pointer" }}>
-                      Serial number transfer
+                        Serial number transfer
                       </div>
                       <Dialog
                         open={open}
