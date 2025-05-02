@@ -4168,8 +4168,6 @@ app.get("/getAttachment2Details/:ticket_no",
     `;
 
 
-      console.log(sql, "%%%")
-
       // Execute the query
       const result = await pool.request().query(sql);
 
@@ -9706,7 +9704,6 @@ LEFT JOIN (
     JOIN (
         SELECT ticket_no, MAX(id) AS max_id
         FROM awt_complaintremark
-        WHERE created_date LIKE '%2025%' AND updated_by IS NULL
         GROUP BY ticket_no
     ) latest ON acr.id = latest.max_id
 ) acr ON c.ticket_no = acr.ticket_no
@@ -9929,12 +9926,30 @@ app.get("/getcspticketexcel", authenticateToken, async (req, res) => {
     const currentDate = new Date().toISOString().split('T')[0];  // Current date to be used for filter if needed.
 
     // SQL query to fetch complaint tickets with fromDate and toDate filter only.
+    // sql = `
+    //    SELECT c.*,
+    //     DATEDIFF(day, (c.ticket_date), GETDATE()) AS ageingdays
+    //     FROM complaint_ticket AS c
+    //     WHERE c.deleted = 0 AND c.csp = '${licare_code}'
+    //   AND CAST(c.ticket_date AS DATE) BETWEEN @fromDate AND @toDate
+    // `;
     sql = `
-       SELECT c.*,
-        DATEDIFF(day, (c.ticket_date), GETDATE()) AS ageingdays
-        FROM complaint_ticket AS c
-        WHERE c.deleted = 0 AND c.csp = '${licare_code}'
-      AND CAST(c.ticket_date AS DATE) BETWEEN @fromDate AND @toDate
+      SELECT 
+    c.*, 
+    acr.remark as final_remark, 
+    DATEDIFF(DAY, c.ticket_date, GETDATE()) AS ageingdays
+FROM complaint_ticket AS c
+LEFT JOIN (
+    SELECT acr.ticket_no, acr.remark, acr.created_date
+    FROM awt_complaintremark acr
+    JOIN (
+        SELECT ticket_no, MAX(id) AS max_id
+        FROM awt_complaintremark
+        GROUP BY ticket_no
+    ) latest ON acr.id = latest.max_id
+) acr ON c.ticket_no = acr.ticket_no
+WHERE c.deleted = 0 AND c.csp = '${licare_code}'
+AND CAST(c.ticket_date AS DATE) BETWEEN @fromDate  AND @toDate
     `;
 
     // Define the parameters for the query.
@@ -9946,7 +9961,7 @@ app.get("/getcspticketexcel", authenticateToken, async (req, res) => {
 
 
 
-    sql += `order by RIGHT(ticket_no , 4) asc`
+    sql += ` order by RIGHT(c.ticket_no , 4) asc`
 
     console.log(sql)
     // Execute the SQL query
@@ -11281,37 +11296,42 @@ app.post('/add_uniqsparepart', authenticateToken, async (req, res) => {
 
 
     const pool = await poolPromise;
+    const poolRequest = pool.request();
     const newdata = finaldata.data;
     const ticket_no = finaldata.ticket_no;
-
-    // Destructure values from `newdata`
+    const engineer_id = finaldata.engineerdata;
     const { article_code, article_description, price, spareId, quantity } = newdata;
+    const engineer_ids_string = engineer_id.map(id => `'${id}'`).join(',');
 
-    const poolRequest = pool.request();
+
+
 
     // Check if the spare part already exists
     const checkDuplicateQuery = `
-      SELECT 1
-      FROM awt_uniquespare
-      WHERE ticketId = @ticket_no AND article_code = @article_code_d
-    `;
+       SELECT 1
+       FROM awt_uniquespare
+       WHERE ticketId = @ticket_no AND article_code = @article_code_d
+     `;
 
     const duplicateResult = await poolRequest
       .input('ticket_no', sql.VarChar, ticket_no)
       .input('article_code_d', sql.VarChar, article_code)
       .query(checkDuplicateQuery);
 
+
+
+
     if (duplicateResult.recordset.length > 0) {
       // Record exists, perform an update
       const updateSpareQuery = `
-        UPDATE awt_uniquespare
-        SET article_code = @article_code,
-            article_description = @article_description,
-            price = @price,
-            quantity = @quantity,
-            deleted = @deleted
-        WHERE ticketId = @ticket_no AND article_code = @article_code_d
-      `;
+         UPDATE awt_uniquespare
+         SET article_code = @article_code,
+             article_description = @article_description,
+             price = @price,
+             quantity = @quantity,
+             deleted = @deleted
+         WHERE ticketId = @ticket_no AND article_code = @article_code_d
+       `;
 
       await poolRequest
         .input('article_code', sql.VarChar, article_code)
@@ -11325,9 +11345,9 @@ app.post('/add_uniqsparepart', authenticateToken, async (req, res) => {
     } else {
       // Record does not exist, perform an insert
       const insertSpareQuery = `
-        INSERT INTO awt_uniquespare (ticketId, spareId, article_code, article_description, price, quantity)
-        VALUES (@ticket_no, @spareId, @article_code, @article_description, @price, @quantity)
-      `;
+         INSERT INTO awt_uniquespare (ticketId, spareId, article_code, article_description, price, quantity)
+         VALUES (@ticket_no, @spareId, @article_code, @article_description, @price, @quantity)
+       `;
 
       await poolRequest
         .input('article_code', sql.VarChar, article_code)
@@ -11339,6 +11359,43 @@ app.post('/add_uniqsparepart', authenticateToken, async (req, res) => {
 
       res.status(200).send({ message: 'Spare part added successfully!' });
     }
+
+
+
+
+
+
+
+    //for stock logic
+
+    //   const checkstock = `
+    //   SELECT eng_code, stock_quantity 
+    //   FROM engineer_stock 
+    //   WHERE eng_code IN (${engineer_ids_string})
+    // `;
+
+    //   const checkresult = await poolRequest.query(checkstock);
+
+    //   // Check if all engineers have enough stock
+    //   const allHaveEnough = checkresult.recordset.every(row => row.stock_quantity >= quantity);
+
+    //   if (allHaveEnough) {
+
+
+
+    //   } else {
+    //     return res.json({ message: "Engineer dont have a stock" });
+    //   }
+
+
+
+
+
+
+
+
+
+
   } catch (error) {
     console.error('Error inserting or updating spare part:', error);
     res.status(500).send({ error: 'Internal server error' });
@@ -14113,7 +14170,7 @@ app.post("/getsearchcsp", authenticateToken, async (req, res) => {
 });
 
 app.post("/getsearcheng", authenticateToken, async (req, res) => {
-  const { param } = req.body;
+  const { param, licare_code } = req.body;
 
   if (!param) {
     return res.status(400).json({ message: "Invalid parameter" });
@@ -14126,12 +14183,19 @@ app.post("/getsearcheng", authenticateToken, async (req, res) => {
     const sql = `
     SELECT TOP 20 engineer_id as id, title
     FROM awt_engineermaster
-    WHERE title LIKE @param AND deleted = 0 and status = 1
+    WHERE title LIKE @param 
+      AND status = 1 
+      AND deleted = 0
+      AND (
+        cfranchise_id = @licare_code 
+        OR employee_code = 'LHI'
+      )
     ORDER BY title;
-    `;
+  `;
 
     const result = await pool.request()
       .input('param', `%${param}%`)
+      .input('licare_code', licare_code)
       .query(sql);
 
     if (result.recordset.length === 0) {
@@ -14158,7 +14222,7 @@ app.post("/getsearchproduct", authenticateToken, async (req, res) => {
 
     // Parameterized query with a limit
     const sql = `
-    SELECT TOP 20 id, item_description ,item_code
+    SELECT TOP 20 id, item_description ,item_code 
     FROM product_master
     WHERE item_description LIKE @param 
     ORDER BY id;
@@ -14181,19 +14245,23 @@ app.post("/getsearchproduct", authenticateToken, async (req, res) => {
 
 
 app.post("/add_grn", authenticateToken, async (req, res) => {
-  const { invoice_number, invoice_date, csp_no, csp_name, created_by, remark } = req.body;
+  const { invoice_number, invoice_date, received_date, csp_no, csp_name, created_by, remark } = req.body;
 
   try {
     const pool = await poolPromise;
 
-    // Check if the invoice_number already exists
-    const checkInvoiceQuery = `SELECT COUNT(*) AS count FROM awt_grnmaster WHERE invoice_no = @invoice_no`;
-    const checkInvoiceResult = await pool.request()
-      .input('invoice_no', invoice_number)
-      .query(checkInvoiceQuery);
 
-    if (checkInvoiceResult.recordset[0].count > 0) {
-      return res.status(400).json({ message: "Invoice number already exists" });
+
+    if (invoice_number) {
+      // Check if the invoice_number already exists
+      const checkInvoiceQuery = `SELECT COUNT(*) AS count FROM awt_grnmaster WHERE invoice_no = @invoice_no`;
+      const checkInvoiceResult = await pool.request()
+        .input('invoice_no', invoice_number)
+        .query(checkInvoiceQuery);
+
+      if (checkInvoiceResult.recordset[0].count > 0 ) {
+        return res.status(400).json({ message: "Invoice number already exists" });
+      }
     }
 
     // Query to get the count of rows in awt_grnmaster
@@ -14205,13 +14273,14 @@ app.post("/add_grn", authenticateToken, async (req, res) => {
     const grn_no = `GRN-${grnCount + 1}`; // Example: GRN-1, GRN-2, etc.
 
     // Insert the data into awt_grnmaster
-    const sql = `INSERT INTO awt_grnmaster (grn_no, invoice_no, invoice_date, csp_name, csp_code,remark, created_date, created_by) 
-                 VALUES (@grn_no, @invoice_no, @invoice_date, @csp_name, @csp_code, @remark, @created_date, @created_by)`;
+    const sql = `INSERT INTO awt_grnmaster (grn_no, invoice_no, invoice_date,received_date,csp_name, csp_code,remark, created_date, created_by) 
+                 VALUES (@grn_no, @invoice_no, @invoice_date,@received_date, @csp_name, @csp_code, @remark, @created_date, @created_by)`;
 
     const result = await pool.request()
       .input('grn_no', grn_no)
       .input('invoice_no', invoice_number)
       .input('invoice_date', invoice_date)
+      .input('received_date', received_date)
       .input('csp_name', csp_name)
       .input('csp_code', csp_no)  // Assuming you want to insert csp_no as csp_code
       .input('remark', remark)  // Assuming you want to insert csp_no as csp_code
@@ -14366,6 +14435,7 @@ app.post('/updateissuespares', authenticateToken, async (req, res) => {
           error: "Insufficient stock for one or more items.",
           details: insufficientStockItems,
         });
+
       }
     }
 
@@ -14563,40 +14633,64 @@ app.post("/getselctedspare", authenticateToken, async (req, res) => {
 
 
 app.post("/getgrnlist", authenticateToken, async (req, res) => {
-
-  const { csp_code, fromDate, toDate, received_from, invoice_number, product_code, product_name } = req.body;
-
-  let sql;
-
+  const {
+    csp_code,
+    fromDate,
+    toDate,
+    received_from,
+    invoice_number,
+  } = req.body;
 
   try {
     const pool = await poolPromise;
+    const request = pool.request();
 
-    // Parameterized query with a limit
-    sql = `select * from awt_grnmaster where created_by = '${csp_code}' and  deleted = 0 
+    let sql = `
+      SELECT 
+        gn.id,
+        gn.grn_no,
+        gn.invoice_no,
+        gn.invoice_date,
+        gn.csp_code,
+        gn.csp_name,
+        gn.status,
+        gn.created_date,
+        gn.created_by,
+        gn.remark,
+        gn.received_date,
+        COUNT(acg.grn_no) AS product_count
+      FROM awt_grnmaster AS gn
+      LEFT JOIN awt_cspgrnspare AS acg ON acg.grn_no = gn.grn_no
+      WHERE gn.deleted = 0 AND gn.created_by = @csp_code
     `;
 
+    request.input("csp_code", csp_code);
+
     if (fromDate && toDate) {
-      sql += ` AND CAST(invoice_date AS DATE) BETWEEN '${fromDate}' AND '${toDate}'`;
+      sql += " AND CAST(gn.invoice_date AS DATE) BETWEEN @fromDate AND @toDate";
+      request.input("fromDate", fromDate);
+      request.input("toDate", toDate);
     }
 
     if (received_from) {
-      sql += ` AND csp_name LIKE '%${received_from}%'`;
+      sql += " AND gn.csp_name LIKE @received_from";
+      request.input("received_from", `%${received_from}%`);
     }
 
     if (invoice_number) {
-      sql += ` AND invoice_no LIKE '%${invoice_number}%'`;
-
+      sql += " AND gn.invoice_no LIKE @invoice_number";
+      request.input("invoice_number", `%${invoice_number}%`);
     }
 
+    sql += `
+      GROUP BY
+        gn.id , gn.grn_no, gn.invoice_no, gn.invoice_date, gn.csp_code,
+        gn.csp_name, gn.status, gn.created_date,
+        gn.created_by, gn.remark, gn.received_date
+      ORDER BY gn.id DESC
+    `;
 
-    sql += ' order by id desc'
-
-
-
-
-    const result = await pool.request()
-      .query(sql);
+    const result = await request.query(sql);
 
     if (result.recordset.length === 0) {
       return res.status(404).json({ message: "No results found" });
@@ -14608,6 +14702,7 @@ app.post("/getgrnlist", authenticateToken, async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error", error: err });
   }
 });
+
 
 app.post("/getoutwardlisting", authenticateToken, async (req, res) => {
 
@@ -15217,7 +15312,7 @@ app.get("/getengstock/:licare_code", authenticateToken, async (req, res) => {
 });
 
 app.post("/getsearchengineer", authenticateToken, async (req, res) => {
-  const { param } = req.body;
+  const { param, licare_code } = req.body;
 
   if (!param) {
     return res.status(400).json({ message: "Invalid parameter" });
@@ -15230,12 +15325,19 @@ app.post("/getsearchengineer", authenticateToken, async (req, res) => {
     const sql = `
     SELECT TOP 20 engineer_id as id, title
     FROM awt_engineermaster
-    WHERE title LIKE @param AND deleted = 0
+    WHERE title LIKE @param 
+      AND status = 1 
+      AND deleted = 0
+      AND (
+        cfranchise_id = @licare_code 
+        OR employee_code = 'LHI'
+      )
     ORDER BY title;
-    `;
+  `;
 
     const result = await pool.request()
       .input('param', `%${param}%`)
+      .input('licare_code', licare_code)
       .query(sql);
 
     if (result.recordset.length === 0) {
@@ -15590,6 +15692,26 @@ app.get("/fetchfrommobile/:mobile", authenticateToken, async (req, res) => {
     const result = await pool
       .request()
       .query(`SELECT TOP 1 ac.* , acl.address ,acl.pincode_id FROM awt_customer as ac left join awt_customerlocation as acl on ac.customer_id = acl.customer_id WHERE ac.deleted = 0 and ac.mobileno = '${mobile}'`);
+
+    // Convert result to string and encrypt it
+
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
+
+app.post("/getinvoicedetails", authenticateToken, async (req, res) => {
+  try {
+
+    let { invoice_no } = req.body;
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+    const result = await pool
+      .request()
+      .query(`select * from Shipment_Parts where InvoiceNumber = '${invoice_no}'`);
 
     // Convert result to string and encrypt it
 
@@ -16974,7 +17096,7 @@ app.get("/getsmsapi", async (req, res) => {
 
   const npilink = 'https://test-licare.liebherr.com';
 
-  const npsmsg = `Dear Customer, Your feedback helps us grow. Please rate us in survey: https://licare.liebherr.com/feedbackid/id=?BH0425-0028. Thanks for choosing Liebherr.`;
+  const npsmsg = `Dear Customer, Your feedback helps us grow. Please rate us in survey: https://licare.liebherr.com/feedbackform?ticket=BH0425-0028. Thanks for choosing Liebherr.`;
 
 
   const nps_msg = encodeURIComponent(npsmsg);
@@ -17250,6 +17372,109 @@ app.post("/updatepurchasedate", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
     const sql = `update complaint_ticket set purchase_date = '${purchase_date}' , warranty_status = '${warrenty_status}'   where ticket_no = '${ticket_no}'`;
+
+    const result = await pool.request().query(sql);
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Database Error:", err);
+    return res.status(500).json({ error: "Failed to fetch MSPs", details: err.message });
+  }
+});
+
+app.post("/updatelastremark", authenticateToken, async (req, res) => {
+  let { remark_id, remark } = req.body;
+
+  try {
+    const pool = await poolPromise;
+
+    // Step 1: Fetch the current remark
+    const query = `
+      SELECT remark 
+      FROM awt_complaintremark 
+      WHERE id = @remark_id
+    `;
+
+    const result = await pool
+      .request()
+      .input('remark_id', sql.VarChar, remark_id)
+      .query(query);
+
+    if (result.recordset.length > 0) {
+      const rawRemark = result.recordset[0].remark;
+
+      // Step 2: Extract the existing remark after <b>Remark:</b>
+      const match = rawRemark?.match(/(<b>\s*Remark\s*:<\/b>\s*)([^<]*)/i);
+
+      if (!match) {
+
+        const updateQuery = `
+        UPDATE awt_complaintremark
+        SET remark = @remark
+        WHERE id = @remark_id
+      `;
+
+        await pool.request()
+          .input('remark', sql.VarChar, remark)
+          .input('remark_id', sql.VarChar, remark_id)
+          .query(updateQuery);
+
+        return res.json({ message: 'Remark updated without format match.' });
+      }
+
+      const beforeText = match[1];
+      const updatedRemarkText = beforeText + ' ' + remark;
+
+      // Step 3: Replace the full matched remark section with new text
+      const updatedFullRemark = rawRemark.replace(match[0], updatedRemarkText);
+
+      // Step 4: Update the database
+      const updateQuery = `
+        UPDATE awt_complaintremark
+        SET remark = @updated_remark
+        WHERE id = @remark_id
+      `;
+
+      await pool.request()
+        .input('updated_remark', sql.VarChar, updatedFullRemark)
+        .input('remark_id', sql.VarChar, remark_id)
+        .query(updateQuery);
+
+      console.log('Remark updated successfully.');
+      return res.json({ message: 'Remark updated successfully.', updatedFullRemark });
+    } else {
+      console.log('No record found for the given remark_id.');
+      return res.status(404).json({ error: 'Remark not found.' });
+    }
+  } catch (err) {
+    console.error("Database Error:", err);
+    return res.status(500).json({ error: "Failed to update remark", details: err.message });
+  }
+});
+
+
+app.post("/updatefeilddate", authenticateToken, async (req, res) => {
+
+  let { ticket_no, complete_date } = req.body;
+
+  try {
+    const pool = await poolPromise;
+    const sql = `update complaint_ticket set closed_date = '${complete_date}' where ticket_no = '${ticket_no}'`;
+
+    const result = await pool.request().query(sql);
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Database Error:", err);
+    return res.status(500).json({ error: "Failed to fetch MSPs", details: err.message });
+  }
+});
+
+app.post("/update_defect_code", authenticateToken, async (req, res) => {
+
+  let { group_code, defect_type, site_defect, activity_code, ticket_no } = req.body;
+
+  try {
+    const pool = await poolPromise;
+    const sql = `update complaint_ticket set group_code = '${group_code}' , defect_type = '${defect_type}', site_defect = '${site_defect}' ,activity_code = '${activity_code}'  where ticket_no = '${ticket_no}'`;
 
     const result = await pool.request().query(sql);
     return res.json(result.recordset);
@@ -17848,10 +18073,11 @@ app.post('/uploadpostwarrentyexcel', authenticateToken, async (req, res) => {
   }
 });
 
-app.post('/uploadpinexcel', authenticateToken, async (req, res) => {
+app.post('/uploadpinexcel', upload.none(), authenticateToken, async (req, res) => {
 
 
   let { jsonData } = req.body;
+
   let excelData = JSON.parse(jsonData);
 
 
@@ -17861,53 +18087,96 @@ app.post('/uploadpinexcel', authenticateToken, async (req, res) => {
 
 
 
+
     for (const item of excelData) {
-      console.log(excelData)
-      const result = await pool.request()
+
+    
+      // Check for existing record
+      const checkResult = await pool.request()
         .input('pincode', sql.Int, item.pin_code)
-        .input('country', sql.VarChar, item.country)
-        .input('region', sql.VarChar, item.region)
-        .input('state', sql.VarChar, item.state)
-        .input('city', sql.VarChar, item.city)
-        .input('mother_branch', sql.VarChar, item.mother_branch)
-        .input('resident_branch', sql.VarChar, item.resident_branch)
-        .input('area_manager', sql.VarChar, item.area_manager)
-        .input('local_manager', sql.VarChar, item.local_manager)
         .input('customer_classification', sql.VarChar, item.customer_classification)
-        .input('class_city', sql.VarChar, item.class_of_city)
-        .input('csp_name', sql.VarChar, item.child_service_partner_name)
-        .input('msp_name', sql.VarChar, item.master_service_partner_name)
         .input('call_type', sql.VarChar, item.call_type)
-        .input('msp_code', sql.Int, item.master_service_partner_code)
-        .input('csp_code', item.child_service_partner_code)
-        .input('producttype', item.producttype)
-        .input('productline', item.productline)
-        .query(`INSERT INTO pincode_allocation 
-              (pincode, country, region, state, city, mother_branch, resident_branch, area_manager, local_manager, customer_classification, class_city, csp_name, msp_name, call_type, msp_code, csp_code,ProductType,ProductLine) 
-              VALUES (
-                @pincode, 
-                @country, 
-                @region, 
-                @state, 
-                @city, 
-                @mother_branch, 
-                @resident_branch, 
-                @area_manager, 
-                @local_manager, 
-                @customer_classification, 
-                @class_city, 
-                @csp_name, 
-                @msp_name, 
-                @call_type,
-                @msp_code,
-                @csp_code,
-                @producttype,
-                @productline
-              )
-
+        .query(`
+          SELECT 1 FROM pincode_allocation 
+          WHERE pincode = @pincode AND customer_classification = @customer_classification AND call_type = @call_type
+        `);
+    
+      if (checkResult.recordset.length > 0) {
+        // If exists, update the record
+        await pool.request()
+          .input('pincode', sql.Int, item.pin_code)
+          .input('country', sql.VarChar, item.country)
+          .input('region', sql.VarChar, item.region)
+          .input('state', sql.VarChar, item.state)
+          .input('city', sql.VarChar, item.city)
+          .input('mother_branch', sql.VarChar, item.mother_branch)
+          .input('resident_branch', sql.VarChar, item.resident_branch)
+          .input('area_manager', sql.VarChar, item.area_manager)
+          .input('local_manager', sql.VarChar, item.local_manager)
+          .input('customer_classification', sql.VarChar, item.customer_classification)
+          .input('class_city', sql.VarChar, item.class_of_city)
+          .input('csp_name', sql.VarChar, item.child_service_partner_name)
+          .input('msp_name', sql.VarChar, item.master_service_partner_name)
+          .input('call_type', sql.VarChar, item.call_type)
+          .input('msp_code', sql.Int, item.master_service_partner_code)
+          .input('csp_code', item.child_service_partner_code)
+          .input('producttype', item.producttype)
+          .input('productline', item.productline)
+          .query(`
+            UPDATE pincode_allocation SET 
+              country = @country,
+              region = @region,
+              state = @state,
+              city = @city,
+              mother_branch = @mother_branch,
+              resident_branch = @resident_branch,
+              area_manager = @area_manager,
+              local_manager = @local_manager,
+              class_city = @class_city,
+              csp_name = @csp_name,
+              msp_name = @msp_name,
+              msp_code = @msp_code,
+              csp_code = @csp_code,
+              ProductType = @producttype,
+              ProductLine = @productline
+            WHERE pincode = @pincode 
+              AND customer_classification = @customer_classification 
+              AND call_type = @call_type
           `);
+      } else {
+        // If not exists, insert the record
+        await pool.request()
+          .input('pincode', sql.Int, item.pin_code)
+          .input('country', sql.VarChar, item.country)
+          .input('region', sql.VarChar, item.region)
+          .input('state', sql.VarChar, item.state)
+          .input('city', sql.VarChar, item.city)
+          .input('mother_branch', sql.VarChar, item.mother_branch)
+          .input('resident_branch', sql.VarChar, item.resident_branch)
+          .input('area_manager', sql.VarChar, item.area_manager)
+          .input('local_manager', sql.VarChar, item.local_manager)
+          .input('customer_classification', sql.VarChar, item.customer_classification)
+          .input('class_city', sql.VarChar, item.class_of_city)
+          .input('csp_name', sql.VarChar, item.child_service_partner_name)
+          .input('msp_name', sql.VarChar, item.master_service_partner_name)
+          .input('call_type', sql.VarChar, item.call_type)
+          .input('msp_code', sql.Int, item.master_service_partner_code)
+          .input('csp_code', item.child_service_partner_code)
+          .input('producttype', item.producttype)
+          .input('productline', item.productline)
+          .query(`
+            INSERT INTO pincode_allocation 
+              (pincode, country, region, state, city, mother_branch, resident_branch, area_manager, local_manager, customer_classification, class_city, csp_name, msp_name, call_type, msp_code, csp_code, ProductType, ProductLine) 
+            VALUES (
+              @pincode, @country, @region, @state, @city, @mother_branch, @resident_branch, 
+              @area_manager, @local_manager, @customer_classification, @class_city, 
+              @csp_name, @msp_name, @call_type, @msp_code, @csp_code, @producttype, @productline
+            )
+          `);
+      }
     }
-
+    
+    
 
     return res.json({ message: 'Data inserted successfully' });
   } catch (err) {

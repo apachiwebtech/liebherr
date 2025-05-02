@@ -255,7 +255,7 @@ const Grndetailspage = () => {
                                                 <th className="py-2" width="15%" scope="col">Spare Code</th>
                                                 <th className="py-2" width="20%" scope="col">Spare Name</th>
                                                 <th className="py-2" width="20%" scope="col">Quantity</th>
-                                                <th className="py-2" width="20%" scope="col">Actucal Received</th>
+                                                <th className="py-2" width="20%" scope="col">Actual Received</th> 
                                                 <th className="py-2" width="20%" scope="col">Pending Quantity</th>
                                             </thead>
                                             <tbody>
@@ -272,7 +272,7 @@ const Grndetailspage = () => {
                                                                         type="number"
                                                                         className="form-control"
                                                                         placeholder="Enter Qty"
-                                                                        disabled={value.status == '1' ? true : false}
+                                                                        disabled
                                                                         value={item.quantity || ""} // Bind to `spare_qty`
                                                                         onChange={(e) => handleQuantityChange(index, e.target.value)}
                                                                     />

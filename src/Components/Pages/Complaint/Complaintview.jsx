@@ -40,6 +40,8 @@ export function Complaintview(params) {
   let { complaintid } = useParams();
   const [open, setOpen] = React.useState(false);
   const [open2, setOpen2] = React.useState(false);
+  const [open3, setOpen3] = React.useState(false);
+  const [defetedit, setisEdit] = React.useState(false);
   const [warranty_status_data, setWarranty_status_data] = useState('OUT OF WARRANTY')
   const uniqueParts = new Set();
   const [purchase_date, setpurchase_date] = useState('')
@@ -103,7 +105,8 @@ export function Complaintview(params) {
     area: '',
     region: '',
     item_code: '',
-    customer_email: ''
+    customer_email: '',
+    remarkedit: ''
   });
 
 
@@ -146,6 +149,10 @@ export function Complaintview(params) {
   const [inputValue, setInputValue] = useState("");
   const [cspdata, setCsp] = useState({}) // for quatation pdf
   const [show, setShow] = useState(false)
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedRemark, setEditedRemark] = useState("");
+
+  const maxRemarkId = Math.max(...remarks.map(r => r.id));
   const [TicketUpdateSuccess, setTicketUpdateSuccess] = useState({
     message: '',
     visible: false,
@@ -166,7 +173,16 @@ export function Complaintview(params) {
 
   const handleClose2 = () => {
     window.location.reload()
-    setOpen(false);
+    setOpen2(false);
+  };
+
+  const handleClickOpen3 = () => {
+    setOpen3(true);
+  };
+
+  const handleClose3 = () => {
+    window.location.reload()
+    setOpen3(false);
   };
 
   //update serial no
@@ -235,6 +251,36 @@ export function Complaintview(params) {
       });
   }
 
+  //for updating group codes
+
+  const updatedefectcode = () => {
+
+    const data = {
+      group_code: groupstatusid || '',
+      defect_type: complaintview.defect_type || '',
+      site_defect: complaintview.site_defect || '',
+      activity_code: complaintview.activity_code || '',
+      ticket_no: complaintview.ticket_no,
+      updated_by: created_by
+    }
+
+
+    axios.post(`${Base_Url}/update_defect_code`, data, {
+      headers: {
+        Authorization: token,
+      },
+    })
+      .then((res) => {
+        if (res) {
+          setisEdit(false)
+          alert("Updated")
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+
   //update purchase date
   const handleupdatepurchase = () => {
 
@@ -251,6 +297,54 @@ export function Complaintview(params) {
     })
       .then((res) => {
         setOpen2(false)
+        fetchComplaintview(complaintid)
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+  };
+
+
+  const saveEditedRemark = (remark_id) => {
+    // Update logic here (e.g., API call or state update)
+    const data = {
+      updated_by: created_by,
+      remark_id: String(remark_id),
+      remark: complaintview.remarkedit
+    }
+
+    axiosInstance.post(`${Base_Url}/updatelastremark`, data, {
+      headers: {
+        Authorization: token
+      }
+    })
+      .then((res) => {
+        setOpen2(false)
+        setIsEditing(false);
+        fetchComplaintDetails()
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+
+
+  };
+
+  //update purchase date
+  const handleupdatefeilddate = () => {
+
+    const data = {
+      ticket_no: complaintview.ticket_no,
+      complete_date: complaintview.closed_date
+    }
+
+    axiosInstance.post(`${Base_Url}/updatefeilddate`, data, {
+      headers: {
+        Authorization: token
+      }
+    })
+      .then((res) => {
+        setOpen3(false)
         fetchComplaintview(complaintid)
       })
       .catch((err) => {
@@ -297,24 +391,6 @@ export function Complaintview(params) {
 
 
 
-  // const handlevisitchange = (e) => {
-  //   const { value } = e.target;
-
-  //   setComplaintview((prevState) => ({
-  //     ...prevState,
-  //     visit_count: value, // Update the visit_count field
-  //   }));
-
-
-  //   axiosInstance.post(`${Base_Url}/updatevisitcount`, { count: value, ticket_no: complaintview.ticket_no }, {
-  //     headers: {
-  //       Authorization: token
-  //     }
-  //   })
-  //     .then((res) => {
-  //       alert("Visit Count Changed")
-  //     })
-  // };
 
 
   async function getProduct(params) {
@@ -898,7 +974,7 @@ export function Complaintview(params) {
 
 
 
-    let finaldata = { data: newPart, ticket_no: complaintview.ticket_no }
+    let finaldata = { data: newPart, ticket_no: complaintview.ticket_no, engineerdata: addedEngineers.map((item) => item.engineer_id) }
 
     finaldata = JSON.stringify(finaldata)
 
@@ -1080,18 +1156,6 @@ export function Complaintview(params) {
       console.error("Error fetching ticket view:", error);
     }
   };
-
-  // async function getupdateengineer(id) {
-  //   axiosInstance.post(`${Base_Url}/getupdateengineer`, { eng_id: id }, {
-  //     headers: {
-  //       Authorization: token,
-  //     },
-  //   })
-  //     .then((res) => {
-
-  //       setAddedEngineers(res.data)
-  //     })
-  // }
 
 
   async function getupdateengineer(ticket_no) {
@@ -1342,89 +1406,6 @@ export function Complaintview(params) {
   };
 
 
-
-  // const handleSubmitTicketFormData = (e) => {
-  //   e.preventDefault();
-
-
-  //   if (addedEngineers.length > 0) {
-
-  //     const data = {
-  //       serial_no: String(complaintview.serial_no) || '',
-  //       ModelNumber: complaintview.ModelNumber || '',
-  //       engineer_id: complaintview.engineer_id || '',
-  //       call_status: callstatusid || '',
-  //       sub_call_status: complaintview.sub_call_status || '',
-  //       updated_by: created_by || '',
-  //       ticket_no: complaintview.ticket_no || '',
-  //       group_code: groupstatusid || '',
-  //       site_defect: complaintview.site_defect || '',
-  //       defect_type: complaintview.defect_type || '',
-  //       engineerdata: addedEngineers.map((item) => item.engineer_id),
-  //       engineername: addedEngineers.map((item) => item.title),
-  //       activity_code: complaintview.activity_code || ''
-  //     };
-
-  //     axiosInstance.post(`${Base_Url}/ticketFormData`, data, {
-  //       headers: {
-  //         Authorization: token, // Send token in headers
-  //       },
-  //     })
-  //       .then((response) => {
-  //         // setComplaintview({
-  //         //   ...complaintview,
-  //         //   serial_no: '',
-  //         //   ModelNumber: '',
-  //         //   engineer_id: '',
-  //         //   call_status: '',
-  //         // });
-  //         // fetchComplaintview(complaintid);
-  //         fetchComplaintDetails(complaintid)
-
-  //         setTicketUpdateSuccess({
-  //           message: 'Enginerer added successfully!',
-  //           visible: true,
-  //           type: 'success',
-  //         });
-
-  //         // Hide the message after 3 seconds
-  //         setTimeout(() => {
-  //           setTicketUpdateSuccess({
-  //             message: '',
-  //             visible: false,
-  //             type: 'success',
-  //           });
-  //         }, 3000);
-  //       })
-  //       .catch((error) => {
-  //         console.error('Error updating ticket:', error);
-  //         setTicketUpdateSuccess({
-  //           message: 'Error updating ticket. Please try again.',
-  //           visible: true,
-  //           type: 'error',
-  //         });
-
-  //         setTimeout(() => {
-  //           setTicketUpdateSuccess({
-  //             message: '',
-  //             visible: false,
-  //             type: 'error',
-  //           });
-  //         }, 3000);
-  //       });
-  //   } else {
-
-
-  //     if (addedEngineers.length === 0) {
-  //       alert('Please Add the Engineer');
-  //     }
-  //   }
-
-
-
-  // };
-
-  //handkesubmitticketdata end
 
   // New handler for Attachment 2 preview
   const handleAttachment2Click = (attachment) => {
@@ -2013,7 +1994,7 @@ export function Complaintview(params) {
       const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
 
       console.log(decryptedData);
-      
+
       return decryptedData[0]; // Assuming you need the first object
 
     } catch (error) {
@@ -2164,20 +2145,7 @@ export function Complaintview(params) {
                         Previous Ticket
                       </a>
                     </li>
-                    {/* <li className="nav-item">
-                <a
-                  className="nav-link"
-                  id="profile-tab"
-                  data-bs-toggle="tab"
-                  data-bs-target="#profile"
-                  type="button"
-                  role="tab"
-                  aria-controls="profile"
-                  aria-selected="false"
-                >
-                  Products
-                </a>
-              </li> */}
+
                   </ul>
 
                   <div className="tab-content">
@@ -2249,14 +2217,7 @@ export function Complaintview(params) {
 
               </div>
               <br></br>
-              {/* <div>
-          <h5>Added Spare Parts</h5>
-          <ul>
-            {selectedSpareParts.map((part) => (
-              <li key={part.id}>{part.name}</li>
-            ))}
-          </ul>
-        </div> */}
+
 
               {/* // */}
               <div className="card" id="attachmentInfocs">
@@ -2556,12 +2517,37 @@ export function Complaintview(params) {
                       <p style={{ fontSize: "14px" }}>{complaintview.warranty_status ? complaintview.warranty_status : warranty_status_data} </p>
                     </div>
 
-                    {/* <div className="col-md-12">
-                <h3 className="mainheade" style={{ fontSize: "14px" }}>
-                  Ticket{" "}
-                  <span style={{ fontSize: "14px" }} id="compaintno1">: {complaintview.ticket_no}</span>
-                </h3>
-              </div> */}
+                    <div className="col-md-12">
+                      <span className="float-end">Want to edit field complete date? <span className="text-primary " style={{ cursor: "pointer" }} onClick={handleClickOpen3}>Click here</span></span>
+                      <Dialog
+                        open={open3}
+                        onClose={handleClose3}
+                        aria-labelledby="alert-dialog-title"
+                        aria-describedby="alert-dialog-description"
+                      >
+                        <DialogTitle id="alert-dialog-title">
+                          {"Update Feild Date."}
+                        </DialogTitle>
+                        <DialogContent style={{ height: "300px" }}>
+                          <DatePicker
+                            selected={complaintview.closed_date}
+                            onChange={handlefeilddatechange}
+                            dateFormat="dd-MM-yyyy"
+                            placeholderText="DD-MM-YYYY"
+                            className='form-control'
+                            name="closed_date"
+                            aria-describedby="Anidate"
+                            minDate={complaintview.ticket_date}
+                            maxDate={new Date().toISOString().split("T")[0]}
+                          />
+                        </DialogContent>
+                        <DialogActions>
+                          <Button onClick={handleupdatefeilddate} autoFocus>
+                            Update
+                          </Button>
+                        </DialogActions>
+                      </Dialog>
+                    </div>
                   </div>
 
                   <div className="row d-flex justify-content-center">
@@ -3012,118 +2998,157 @@ export function Complaintview(params) {
                 </div>
 
                 {/* Listing remarks */}
+
                 <div className="remarks-attachments">
                   {remarks.length > 0 ? (
-                    remarks.map((remark) => (
-                      <div key={remark.id} className="card mb-3 remark-card">
-                        <div className="card-body">
+                    remarks.map((remark, index) => {
+                      const isLastRemark = remark.id === maxRemarkId;
 
-                          <div className="d-flex justify-content-between">
-                            {/* Remarks Section - 80% */}
-                            <div style={{ flex: "0 0 80%", paddingRight: '10px' }}>
-                              <p style={{ fontSize: "14px", margin: 0 }} dangerouslySetInnerHTML={{ __html: remark.remark }}></p>
+                      return (
+                        <div key={remark.id} className="card mb-3 remark-card">
+                          <div className="card-body">
 
+                            <div className="d-flex justify-content-between">
+                              {/* Remarks Section - 80% */}
+                              <div style={{ flex: "0 0 80%", paddingRight: '10px' }}>
+                                <p style={{ fontSize: "14px", margin: 0 }} dangerouslySetInnerHTML={{ __html: remark.remark }}></p>
+
+                              </div>
+
+                              {/* By and Date Section - 20% */}
+                              <div style={{ flex: "0 0 20%", textAlign: "right" }}>
+
+                                {remark.title == '' || remark.title == null ? null : <h3 className="mainheade important-margin" style={{ fontSize: "12px", margin: 0 }}>
+                                  By: {remark.title}
+                                </h3>}
+
+                                {remark.created_date == '' || remark.created_date == null ? null : <h3 className=" date-header" >
+                                  Date:  {formatDate1(remark.created_date)}
+                                </h3>}
+                              </div>
                             </div>
 
-                            {/* By and Date Section - 20% */}
-                            <div style={{ flex: "0 0 20%", textAlign: "right" }}>
-
-                              {remark.title == '' || remark.title == null ? null : <h3 className="mainheade important-margin" style={{ fontSize: "12px", margin: 0 }}>
-                                By: {remark.title}
-                              </h3>}
-
-                              {remark.created_date == '' || remark.created_date == null ? null : <h3 className=" date-header" >
-                                Date:  {formatDate1(remark.created_date)}
-                              </h3>}
-                            </div>
-                          </div>
-
-
-
-
-                          {attachments.filter((att) => att.remark_id == remark.id).length > 0 && (
-                            <div className="attachments mt-2">
-                              <h3 className="mainheade" style={{ fontSize: "14px" }}>Attachments</h3>
-
-                              {attachments
-                                .filter((att) => att.remark_id === remark.id)
-                                .map((attachment, index) => {
-                                  const fileNames = attachment.attachment.split(','); // Split the attachment string into an array
-
-                                  return (
-                                    <div key={attachment.id} className="attachment-group d-flex">
-                                      {/* Display the Download Zip button only once for the attachment group */}
-                                      <button
-                                        onClick={() => downloadZip(fileNames)}
-                                        style={{
-                                          marginLeft: "10px",
-                                          backgroundColor: "#007bff",
-                                          color: "white",
-                                          border: "none",
-                                          padding: "5px 10px",
-                                          cursor: "pointer",
-                                          margin: "0px 5px",
-
-                                        }}
-                                        className="btn-sm"
-                                      >
-                                        Download Zip
+                            {roleaccess > 4 &&
+                              <div>
+                                {isLastRemark && (
+                                  <div className="mt-2">
+                                    {!isEditing ? (
+                                      <button onClick={() => {
+                                        setIsEditing(true);
+                                        setEditedRemark(remark.remark);
+                                      }}>
+                                        <EditIcon />
                                       </button>
+                                    ) : (
+                                      <div className="form-control">
+                                        <div>
+                                          <textarea className="w-100" value={complaintview.remarkedit} onChange={handleModelChange} name='remarkedit' />
+                                        </div>
+                                        <div className="text-right">
+                                          <button className="btn btn-sm btn-primary " onClick={() => saveEditedRemark(remark.id)}>Save</button>
+                                          <button className="btn btn-sm btn-danger mx-2" onClick={() => setIsEditing(false)}>Cancel</button>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            }
 
-                                      {fileNames.map((fileName, fileIndex) => {
-                                        const trimmedFileName = fileName.trim();
-
-                                        const result = fileName.substring(fileName.indexOf('-') + 1);
 
 
-                                        return (
-                                          <div
-                                            key={`${attachment.attachment}-${fileIndex}`} // Unique key for each file
-                                            className="attachment"
-                                            style={{
-                                              display: "block", // Display attachments in new lines
-                                              marginTop: "5px",
-                                              marginRight: "8px"
-                                            }}
-                                          >
-                                            <span
+
+
+
+                            {attachments.filter((att) => att.remark_id == remark.id).length > 0 && (
+                              <div className="attachments mt-2">
+                                <h3 className="mainheade" style={{ fontSize: "14px" }}>Attachments</h3>
+
+                                {attachments
+                                  .filter((att) => att.remark_id === remark.id)
+                                  .map((attachment, index) => {
+                                    const fileNames = attachment.attachment.split(','); // Split the attachment string into an array
+
+                                    return (
+                                      <div key={attachment.id} className="attachment-group d-flex">
+                                        {/* Display the Download Zip button only once for the attachment group */}
+                                        <button
+                                          onClick={() => downloadZip(fileNames)}
+                                          style={{
+                                            marginLeft: "10px",
+                                            backgroundColor: "#007bff",
+                                            color: "white",
+                                            border: "none",
+                                            padding: "5px 10px",
+                                            cursor: "pointer",
+                                            margin: "0px 5px",
+
+                                          }}
+                                          className="btn-sm"
+                                        >
+                                          Download Zip
+                                        </button>
+
+                                        {fileNames.map((fileName, fileIndex) => {
+                                          const trimmedFileName = fileName.trim();
+
+                                          const result = fileName.substring(fileName.indexOf('-') + 1);
+
+
+                                          return (
+                                            <div
+                                              key={`${attachment.attachment}-${fileIndex}`} // Unique key for each file
+                                              className="attachment"
                                               style={{
-                                                color: "blue",
-                                                cursor: "pointer",
-                                              }}
-                                              onClick={() => {
-                                                setCurrentAttachment(trimmedFileName); // Set current attachment for modal view
-                                                setIsModalOpen(true); // Open the modal
+                                                display: "block", // Display attachments in new lines
+                                                marginTop: "5px",
+                                                marginRight: "8px"
                                               }}
                                             >
-                                              {result} {/* Display the new file name */}
-                                            </span>
-                                            <a
-                                              href={`${Base_Url}/uploads/${fileName}`}
-                                              download
-                                              target="_blank"
-                                              style={{
-                                                marginLeft: "10px",
-                                                textDecoration: "none",
-                                              }}
-                                            >
-                                              <FaDownload className="text-dark" />
-                                            </a>
-                                            <span>,</span>
-                                          </div>
-                                        );
-                                      })}
+                                              <span
+                                                style={{
+                                                  color: "blue",
+                                                  cursor: "pointer",
+                                                }}
+                                                onClick={() => {
+                                                  setCurrentAttachment(trimmedFileName); // Set current attachment for modal view
+                                                  setIsModalOpen(true); // Open the modal
+                                                }}
+                                              >
+                                                {result} {/* Display the new file name */}
+                                              </span>
+                                              <a
+                                                href={`${Base_Url}/uploads/${fileName}`}
+                                                download
+                                                target="_blank"
+                                                style={{
+                                                  marginLeft: "10px",
+                                                  textDecoration: "none",
+                                                }}
+                                              >
+                                                <FaDownload className="text-dark" />
+                                              </a>
+                                              <span>,</span>
+                                            </div>
+                                          );
+                                        })}
 
 
-                                    </div>
-                                  );
-                                })}
-                            </div>
-                          )}
+                                      </div>
+                                    );
+                                  })}
+                              </div>
+                            )}
 
+                          </div>
                         </div>
-                      </div>
-                    ))
+
+                      )
+
+
+                    })
+
+
                   ) : (
                     <p style={{ fontSize: "14px" }}>No remarks available.</p>
                   )}
@@ -3333,22 +3358,9 @@ export function Complaintview(params) {
                   </div>
 
                   <div className="d-flex justify-content-end py-2">
-                    {/* 
-                    {roleaccess > 2 ?
-                      <button
-                        type="submit"
-                        className="btn btn-primary"
-                        style={{ fontSize: "14px", marginTop: '5px' }}
-                        onClick={handleSubmitTicketFormData}
-                        disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
-                      >
-                        Submit
-                      </button> : null} */}
-
 
                   </div>
 
-                  {console.log(role_id, "roleid")}
 
                   {(role_id == 2 || role_id == 8 || role_id == 12) && (
                     <div>
@@ -3381,19 +3393,16 @@ export function Complaintview(params) {
 
 
 
-
-
                   {(complaintview.call_status == 'Closed' || (complaintview.group_code != null && complaintview.group_code != "")) &&
                     <>
                       <div className="mt-3">
-                        <h4 className="pname" style={{ fontSize: "14px" }}>Defect Group Code:</h4>
+                        <h4 className="pname" style={{ fontSize: "14px" }}>Defect Group Code: {roleaccess > 4 ? <span><EditIcon onClick={() => setisEdit(!defetedit)} style={{ fontSize: "13px" }} /></span> : null} </h4>
                         <select
                           name="group_code"
                           className="form-control"
-                          // disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
-                          disabled
+                          disabled={defetedit ? false : true}
                           style={{ fontSize: "14px" }}
-                          value={updatedata.group_code}
+                          value={defetedit ? groupstatusid : updatedata.group_code}
                           onChange={(e) => {
                             const selectedcode = e.target.value; // Get the id
                             getdefecttype(selectedcode); // Send the id to fetch sub-call statuses
@@ -3416,9 +3425,9 @@ export function Complaintview(params) {
                           name="defect_type"
                           className="form-control"
                           // disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
-                          disabled
+                          disabled={defetedit ? false : true}
                           style={{ fontSize: "14px" }}
-                          value={updatedata.defect_type}
+                          value={defetedit ? complaintview.defect_type : updatedata.defect_type}
                           onChange={handleModelChange}
                         >
                           <option value="">Select </option>
@@ -3436,9 +3445,9 @@ export function Complaintview(params) {
                           name="site_defect"
                           className="form-control"
                           // disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled' ? true : false}
-                          disabled
+                          disabled={defetedit ? false : true}
                           style={{ fontSize: "14px" }}
-                          value={updatedata.site_defect}
+                          value={defetedit ? complaintview.site_defect : updatedata.site_defect}
                           onChange={handleModelChange}
                         >
                           <option value="">Select </option>
@@ -3457,9 +3466,9 @@ export function Complaintview(params) {
                           // disabled={
                           //   (closestatus === 'Closed' && subclosestatus === 'Fully') || closestatus === 'Cancelled'
                           // }
-                          disabled
+                          disabled={defetedit ? false : true}
                           style={{ fontSize: "14px" }}
-                          value={updatedata.activity_code}
+                          value={defetedit ? complaintview.activity_code : updatedata.activity_code}
                           onChange={handleModelChange}
                         >
                           <option value="">Select</option>
@@ -3470,6 +3479,8 @@ export function Complaintview(params) {
                           ))}
                         </select>
                       </div>
+
+                      {defetedit ? <button className="btn btn-primary btn-sm my-2 float-end" onClick={updatedefectcode}>Submit</button> : null}
 
 
                     </>
@@ -3533,19 +3544,6 @@ export function Complaintview(params) {
                       </table>
                     </div>
 
-                    {/* {addedSpareParts.length > 0 &&
-                      <div className="d-flex justify-content-end py-2">
-                        <button
-                          type="submit"
-                          className="btn btn-primary"
-                          style={{ fontSize: "14px" }}
-                          onClick={GenerateQuotation}
-                          disabled={closestatus == 'Closed' && subclosestatus == 'Fully' || closestatus == 'Cancelled'}
-                        >
-                          Generate Quotation
-                        </button>
-                      </div>
-                    } */}
 
                   </div>
                 </div>

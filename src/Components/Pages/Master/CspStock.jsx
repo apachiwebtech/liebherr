@@ -64,7 +64,8 @@ export function CspStock(params) {
                                         <tr>
                                             <th width="5%">#</th>
                                             <th width="15%">Product Name</th>
-                                            <th width="20%">Stock</th>
+                                            <th width="20%">Physical stocks</th>
+                                            <th width="20%">Total CSP stock</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -75,6 +76,7 @@ export function CspStock(params) {
                                                 <td>{index+1}</td>
                                                 <td>{item.productname}</td>
                                                 <td>{item.stock_quantity}</td>
+                                                <td>0</td>
                                             </tr>
                                             )
                                         })}

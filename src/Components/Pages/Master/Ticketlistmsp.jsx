@@ -386,11 +386,12 @@ export function Ticketlistmsp(params) {
           DefectType: item.defect_type,
           SiteDefect: item.site_defect,
           SparePartID: item.spare_part_id,
-          TOTP: item.totp,
           RequestedBY: item.requested_by,
           RequestedEmail: item.requested_email,
           RequestedMobile: item.requested_mobile,
           SalesPartner2: item.sales_partner2,
+          FinalRemark: item.final_remark?.match(/<\/b>\s*([^,]+)/)?.[1].trim() || '',
+          Remark: item.final_remark
         }))
       );
 

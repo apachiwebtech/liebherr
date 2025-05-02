@@ -47,7 +47,11 @@ const CreateGrn = () => {
         invoice_number: "",
         invoice_date: "",
         spare: "",
-        remark: ''
+        remark: '',
+        received_date: '',
+        grn_type: '',
+        item_code: '',
+        invoice_qty: ''
     });
 
     const fetchCsp = async () => {
@@ -66,17 +70,17 @@ const CreateGrn = () => {
 
     const fetchEng = async () => {
         try {
-            const response = await axios.post(`${Base_Url}/getsearchengineer` ,{param: engtext},{
+            const response = await axios.post(`${Base_Url}/getsearchengineer`, { param: engtext, licare_code: created_by }, {
                 headers: {
                     Authorization: token, // Send token in headers
-                    },
+                },
             });
             setEngineerdata(response.data)
         }
-            catch (error) {
-                console.error("Error fetching users:", error);
-            }
-        };
+        catch (error) {
+            console.error("Error fetching users:", error);
+        }
+    };
     const fetchproduct = async () => {
 
         try {
@@ -109,10 +113,50 @@ const CreateGrn = () => {
         }
     };
 
+    const getInvoicedetails = async (invoice) => {
+
+        try {
+            const response = await axios.post(`${Base_Url}/getinvoicedetails`, { invoice_no: invoice }, {
+                headers: {
+                    Authorization: token, // Send token in headers
+                },
+            });
+
+
+
+            if (response.data[0]) {
+                const rawDate = new Date(response.data[0].InvoiceDate);
+                const formattedDate = rawDate.toISOString().split('T')[0]; // 'YYYY-MM-DD'
+
+                setFormData((prev) => ({
+                    ...prev,
+                    invoice_date: formattedDate,
+                    item_code: response.data[0].Item_Code,
+                    invoice_qty: response.data[0].Invoice_qty
+                }));
+            }
+
+
+
+        } catch (error) {
+            console.error("Error fetching users:", error);
+        }
+    };
+
+
+
+
+
+
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
+
+
+        if (name === 'invoice_number' && value.length >= 10) {
+            getInvoicedetails(value);
+        }
     };
 
 
@@ -121,20 +165,28 @@ const CreateGrn = () => {
     const validateForm = () => {
         const newErrors = {}; // Initialize an empty error object
 
-        if (!formData.invoice_date) {
-            // Check if the invoice date is empty
-            newErrors.invoice_date = "This is required."; // Set error message for invoice_date
+        if (formData.grn_type == 'With' && !formData.invoice_date) {
+            newErrors.invoice_date = "This is required.";
         }
 
-        if (!formData.invoice_number) {
+        if (formData.grn_type == 'With' && !formData.invoice_number) {
             // Check if the invoice number is empty
             newErrors.invoice_number = "This is required."; // Set error message for invoice_no
         }
 
-        // if (!selectcsp || ) {
-        //     // Check if the CSP selection is empty
-        //     newErrors.selectcsp = "This is required."; // Set error message for selectcsp
-        // }
+        if (!formData.received_date) {
+            // Check if the invoice date is empty
+            newErrors.received_date = "This is required."; // Set error message for invoice_date
+        }
+
+
+
+        if (!formData.grn_type) {
+            // Check if the invoice number is empty
+            newErrors.grn_type = "This is required."; // Set error message for invoice_no
+        }
+
+
 
         setErrors(newErrors)
         return newErrors; // Return the error object
@@ -198,8 +250,9 @@ const CreateGrn = () => {
             const data = {
                 invoice_number: formData.invoice_number,
                 invoice_date: formData.invoice_date,
-                csp_no: selectcsp?.id || selectengineer?.id  ||'LIEBHERR',
-                csp_name: selectcsp?.title || selectengineer?.title  || 'LIEBHERR',
+                received_date: formData.received_date,
+                csp_no: selectcsp?.id || selectengineer?.id || 'LIEBHERR',
+                csp_name: selectcsp?.title || selectengineer?.title || 'LIEBHERR',
                 created_by: created_by,
                 remark: formData.remark
             }
@@ -221,7 +274,7 @@ const CreateGrn = () => {
 
                 })
                 .catch((err) => {
-                    alert(err.response.data.message)
+                    alert("Duplicate Invoice Number")
                 })
         }
 
@@ -233,6 +286,26 @@ const CreateGrn = () => {
 
     const handleSpareSend = async () => {
         try {
+
+            if (formData.grn_type === 'With') {
+                // Group by article_code and sum quantities
+                const articleMap = {};
+
+                selectedspare.forEach(item => {
+                    const code = item.spare_no;
+                    const qty = Number(item.quantity || 0);
+
+                    articleMap[code] = (articleMap[code] || 0) + qty;
+                });
+
+                // Sum all quantities
+                const totalQty = Object.values(articleMap).reduce((sum, qty) => sum + qty, 0);
+
+                if (totalQty != Number(formData.invoice_qty)) {
+                    alert("Total quantity of selected spares does not match the invoice quantity.");
+                    return;
+                }
+            }
             // Map the `spare` array to construct the payload with additional `spare_qty`
             const payload = selectedspare.map((item) => ({
                 id: String(item.id),
@@ -288,6 +361,20 @@ const CreateGrn = () => {
                 },
             });
 
+            if (response.data) {
+                const article_code = response.data[0].article_code;
+
+
+                if (formData.grn_type == 'With') {
+                    if (article_code == formData.item_code) {
+                        console.log("Success");
+                    } else {
+                        alert("This article stock is not available");
+                        setSpareId("");
+                    }
+                }
+            }
+
 
         } catch (error) {
             console.error("Error fetching users:", error);
@@ -310,7 +397,7 @@ const CreateGrn = () => {
         // Check if newValue is not blank and has more than 4 words
 
         fetchproduct();
-    }, 200);
+    }, 100);
 
 
     const handleProductSearchChange = async (newValue) => {
@@ -346,7 +433,7 @@ const CreateGrn = () => {
         // Check if newValue is not blank and has more than 4 words
 
         fetchCsp();
-    }, 200);
+    }, 100);
 
     const handleInputEngChange = _debounce((newValue) => {
         console.log(newValue);
@@ -357,7 +444,7 @@ const CreateGrn = () => {
         // Check if newValue is not blank and has more than 4 words
 
         fetchEng();
-    }, 200);
+    }, 100);
 
 
 
@@ -398,7 +485,6 @@ const CreateGrn = () => {
 
     const dispatch = useDispatch()
     const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
-
 
     useEffect(() => {
         dispatch(getRoleData(roledata))
@@ -467,12 +553,28 @@ const CreateGrn = () => {
 
                                 </div>
 
+                                <div className="mb-3 col-lg-3">
+                                    <label htmlFor="EmailInput" className="input-field">
+                                        Grn Type <span className="text-danger">*</span>
+                                    </label>
+                                    <select className="form-control" value={formData.grn_type} name='grn_type' onChange={handleChange} >
+                                        <option value="">Select Type</option>
+                                        <option value="With">With Invoice</option>
+                                        <option value="Without">Without Invoice</option>
+                                    </select>
+                                    {errors.grn_type && <span className="text-danger">{errors.grn_type}</span>}
+
+
+                                </div>
+
 
                                 <div className="mb-3 col-lg-3">
                                     <label htmlFor="EmailInput" className="input-field">
                                         Received from <span className="text-danger">*</span>
                                     </label>
-                                    
+
+
+
                                     {selectedEngineerType == "Franchisee" ? (
                                         <Autocomplete
                                             size="small"
@@ -482,7 +584,7 @@ const CreateGrn = () => {
                                             getOptionLabel={(option) => option.title}
                                             onChange={(e, newValue) => handleSearchChange(newValue)}
                                             onInputChange={(e, newInputValue) => handleInputChange(newInputValue)}
-                                            renderInput={(params) => <TextField {...params} label="Enter.." variant="outlined" />}
+                                            renderInput={(params) => <TextField {...params} label="Enter Partner Name.." variant="outlined" />}
                                         />
                                     ) : selectedEngineerType == "Engineer" ? (
                                         <Autocomplete
@@ -493,7 +595,7 @@ const CreateGrn = () => {
                                             getOptionLabel={(option) => option.title}
                                             onChange={(e, newValue) => handleSearchEngineerChange(newValue)}
                                             onInputChange={(e, newInputValue) => handleInputEngChange(newInputValue)}
-                                            renderInput={(params) => <TextField {...params} label="Enter.." variant="outlined" />}
+                                            renderInput={(params) => <TextField {...params} label="Enter Engineer.." variant="outlined" />}
                                         />
                                     ) : (
                                         <p>Liebherr</p>
@@ -504,14 +606,40 @@ const CreateGrn = () => {
 
                                 <div className="mb-3 col-lg-3">
                                     <label htmlFor="EmailInput" className="input-field">
-                                        Invoice Number  <span className="text-danger">*</span>
+                                        Received Date <span className="text-danger">*</span>
+                                    </label>
+                                    <input
+                                        type="date"
+                                        className="form-control"
+                                        name="received_date"
+                                        value={formData.received_date}
+                                        onChange={handleChange}
+                                        max={new Date().toISOString().split("T")[0]} // Set max to today's date
+                                        placeholder="Enter Invoice No."
+                                    />
+                                    {errors.received_date && <span className="text-danger">{errors.received_date}</span>}
+
+
+                                </div>
+
+                                <div className="mb-3 col-lg-3">
+                                    <label htmlFor="EmailInput" className="input-field">
+                                        Invoice Number  <span className="text-danger">{formData.grn_type == 'With' ? '*' : ''}</span>
                                     </label>
                                     <input
                                         type="text"
                                         className="form-control"
                                         name="invoice_number"
                                         value={formData.invoice_number}
-                                        onChange={handleChange}
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+                                            // Allow only numbers and limit to 9 digits
+                                            if (/^[a-zA-Z0-9]{0,11}$/.test(value)) {
+                                                handleChange(e);
+                                            }
+                                        }}
+
+                                        disabled={formData.grn_type == 'With' ? false : true}
                                         placeholder="Enter Invoice No."
                                     />
                                     {errors.invoice_number && <span className="text-danger">{errors.invoice_number}</span>}
@@ -519,7 +647,7 @@ const CreateGrn = () => {
                                 </div>
                                 <div className="mb-3 col-lg-3">
                                     <label htmlFor="EmailInput" className="input-field">
-                                        Invoice Date  <span className="text-danger">*</span>
+                                        Invoice Date  <span className="text-danger">{formData.grn_type == 'With' ? '*' : ''}</span>
                                     </label>
                                     <input
                                         type="date"
@@ -527,6 +655,7 @@ const CreateGrn = () => {
                                         name="invoice_date"
                                         value={formData.invoice_date}
                                         onChange={handleChange}
+                                        disabled={formData.grn_type == 'With' ? false : true}
                                         max={new Date().toISOString().split("T")[0]} // Set max to today's date
                                         placeholder="Enter Invoice No."
                                     />
@@ -550,10 +679,10 @@ const CreateGrn = () => {
 
                                 </div>
 
-                             {submithide ?  null :<div className="">
+                                {submithide ? null : <div className="">
                                     <button className="btn btn-primary" type="">Submit</button>
-                                </div> }  
-                            
+                                </div>}
+
 
 
                             </form>

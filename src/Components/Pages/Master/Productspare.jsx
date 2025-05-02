@@ -158,7 +158,7 @@ export function Productspare() {
     const handleInputChange = _debounce((newValue) => {
         setText(newValue);
         fetchModelno();
-    }, 200);
+    }, 100);
 
     const handleSearchChange = (newValue) => {
 

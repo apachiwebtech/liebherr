@@ -62,7 +62,9 @@ const Complaintreport = () => {
         const formattedData = response.data.map(item => ({
           ...item,
           ticket_date: item.ticket_date ? excelformatDate(item.ticket_date) : '',
-          purchase_date : item.purchase_date ? excelformatDate(item.purchase_date) : ''
+          purchase_date : item.purchase_date ? excelformatDate(item.purchase_date) : '',
+          FinalRemark: item.FinalRemark?.match(/<\/b>\s*([^,]+)/)?.[1].trim() || '',
+          Remark : item.FinalRemark,
         }));
   
         // Extract and set column names dynamically

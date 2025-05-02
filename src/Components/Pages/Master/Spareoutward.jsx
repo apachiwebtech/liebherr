@@ -65,7 +65,7 @@ const Spareoutward = () => {
     const fetchEng = async () => {
 
         try {
-            const response = await axios.post(`${Base_Url}/getsearcheng`, { param: engtext }, {
+            const response = await axios.post(`${Base_Url}/getsearcheng`, { param: engtext , licare_code : created_by }, {
                 headers: {
                     Authorization: token, // Send token in headers
                 },
@@ -256,21 +256,18 @@ const Spareoutward = () => {
                 }
             });
 
-            console.log("Response:", response.data);
 
             if (response.status === 200) {
                 alert("Data saved successfully!");
                 navigate('/csp/grnoutward');
             } else if (response.status === 400) {
-                alert(response.data.message);
+                alert("Insufficient stock for one or more items.");
             } else {
                 alert("Failed to save data.");
             }
 
-        } catch (error) {
-            console.log(error.response.data.error);
-            
-            alert(error.response.data.error);
+        } catch (error) {            
+            alert("Error");
         }
     };
 
@@ -317,7 +314,7 @@ const Spareoutward = () => {
         // Check if newValue is not blank and has more than 4 words
 
         fetchproduct();
-    }, 200);
+    }, 100);
 
 
     const handleProductSearchChange = async (newValue) => {
@@ -353,7 +350,7 @@ const Spareoutward = () => {
         // Check if newValue is not blank and has more than 4 words
 
         fetchCsp();
-    }, 200);
+    }, 100);
 
     const handleInputEngChange = _debounce((newValue) => {
         console.log(newValue);
@@ -364,7 +361,7 @@ const Spareoutward = () => {
         // Check if newValue is not blank and has more than 4 words
 
         fetchEng();
-    }, 200);
+    }, 100);
 
 
     const handleSearchChange = (newValue) => {
@@ -470,7 +467,7 @@ const Spareoutward = () => {
                                         getOptionLabel={(option) => option.title}
                                         onChange={(e, newValue) => handleSearchChange(newValue)}
                                         onInputChange={(e, newInputValue) => handleInputChange(newInputValue)}
-                                        renderInput={(params) => <TextField {...params} label="Enter.." variant="outlined" />}
+                                        renderInput={(params) => <TextField {...params} label="Enter Partner Name.." variant="outlined" />}
                                     /> : <Autocomplete
                                         size="small"
                                         disablePortal
@@ -479,7 +476,7 @@ const Spareoutward = () => {
                                         getOptionLabel={(option) => option.title}
                                         onChange={(e, newValue) => handleSearchEngChange(newValue)}
                                         onInputChange={(e, newInputValue) => handleInputEngChange(newInputValue)}
-                                        renderInput={(params) => <TextField {...params} label="Enter.." variant="outlined" />}
+                                        renderInput={(params) => <TextField {...params} label="Enter Engineer.." variant="outlined" />}
                                     />}
                                     {errors.selectcsp && <span className="text-danger">{errors.selectcsp}</span>}
                                 </div>
