@@ -18,6 +18,7 @@ const axios = require("axios");
 const https = require('https');
 const ExcelJS = require('exceljs');
 const { RequestPageTwoTone } = require('@mui/icons-material');
+const { log } = require('console');
 
 // Secret key for JWT
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -12455,7 +12456,7 @@ app.post('/getshhipmentroledata', authenticateToken, async (req, res) => {
 });
 
 app.post('/getproductspareroledata', authenticateToken, async (req, res) => {
-  const { role, productsparepage, stockpage, mslpage } = req.body;
+  const { role, productsparepage, stockpage, mslpage, addmslpage } = req.body;
 
   // Function to convert comma-separated strings into arrays
   const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
@@ -12465,6 +12466,7 @@ app.post('/getproductspareroledata', authenticateToken, async (req, res) => {
     stockpage: parseIds(stockpage),
     productsparepage: parseIds(productsparepage),
     mslpage: parseIds(mslpage),
+    addmslpage: parseIds(addmslpage)
   };
 
   try {
@@ -14259,7 +14261,7 @@ app.post("/add_grn", authenticateToken, async (req, res) => {
         .input('invoice_no', invoice_number)
         .query(checkInvoiceQuery);
 
-      if (checkInvoiceResult.recordset[0].count > 0 ) {
+      if (checkInvoiceResult.recordset[0].count > 0) {
         return res.status(400).json({ message: "Invoice number already exists" });
       }
     }
@@ -18090,7 +18092,7 @@ app.post('/uploadpinexcel', upload.none(), authenticateToken, async (req, res) =
 
     for (const item of excelData) {
 
-    
+
       // Check for existing record
       const checkResult = await pool.request()
         .input('pincode', sql.Int, item.pin_code)
@@ -18100,7 +18102,7 @@ app.post('/uploadpinexcel', upload.none(), authenticateToken, async (req, res) =
           SELECT 1 FROM pincode_allocation 
           WHERE pincode = @pincode AND customer_classification = @customer_classification AND call_type = @call_type
         `);
-    
+
       if (checkResult.recordset.length > 0) {
         // If exists, update the record
         await pool.request()
@@ -18175,8 +18177,8 @@ app.post('/uploadpinexcel', upload.none(), authenticateToken, async (req, res) =
           `);
       }
     }
-    
-    
+
+
 
     return res.json({ message: 'Data inserted successfully' });
   } catch (err) {
@@ -18185,6 +18187,66 @@ app.post('/uploadpinexcel', upload.none(), authenticateToken, async (req, res) =
   }
 });
 
+app.post('/uplaodmslexcel', authenticateToken, async (req, res) => {
+  let { excelData, created_by = "1" } = req.body;
+
+
+
+
+  try {
+    const pool = await poolPromise;
+    pool.config.options.requestTimeout = 600000;
+
+    for (const item of excelData) {
+
+      console.log(item['MSP Name'])
+      console.log(item['CSP_Code'])
+      console.log(item['CSPbName'])
+      console.log(item['Item'])
+      console.log(item['item_description)'])
+
+
+
+
+
+
+      const result = await pool.request()
+        .input('msp_code', sql.VarChar, item['MSP code'])
+        .input('msp_name', sql.VarChar, item['MSP Name'])
+        .input('csp_code', sql.VarChar, item['CSP Code'])
+        .input('csp_name', sql.VarChar, item['CSP Name'])
+        .input('item', sql.VarChar, item['Item'])
+        .input('item_description', sql.VarChar, item['Item Description'])
+        .input('stock', sql.VarChar, item['Stocks'])
+        .input('created_date', sql.VarChar, item.created_date)
+        .input('created_by', sql.VarChar, created_by)
+
+        .query(`
+            INSERT INTO Msl 
+            (csp_code,msp_code, msp_name, csp_name, item, item_description, stock, created_by , created_date) 
+            VALUES (
+              @csp_code, 
+              @msp_code, 
+              @msp_name, 
+              @csp_name, 
+              @item, 
+              @item_description, 
+              @stock, 
+              @created_by,
+              @created_date
+
+            )
+          `);
+
+      console.log(result, "$%%^^")
+    }
+
+    return res.json({ message: 'Data inserted successfully' });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while inserting data' });
+  }
+});
 
 
 
@@ -18295,6 +18357,140 @@ app.get("/getmslcsp/:licare_code", authenticateToken, async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
+
+app.get("/getmslpopulate/:mslid", authenticateToken, async (req, res) => {
+  const { mslid } = req.params;
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    // SQL query to fetch data from the master list, customize based on your needs
+    const sql = `
+         SELECT m.* from  Msl as m Where m.deleted = 0 AND m.id = ${mslid}
+        `;
+    // Execute the SQL query
+    const result = await pool.request().query(sql);
+
+    // Return the result as JSON
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
+
+app.post("/putmsl", authenticateToken, async (req, res) => {
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { id, msp_code, msp_name, csp_code, csp_name, item, item_description, stock, created_by } = JSON.parse(decryptedData);
+
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+
+    // Step 1: Duplicate Check Query
+    const duplicateCheckSQL = `
+      SELECT * FROM Msl
+      WHERE msp_code = @msp_code
+      AND  csp_code = @csp_code
+      AND  item = @item
+      AND deleted = 0
+      AND id != @id
+    `;
+
+    console.log("Executing Duplicate Check SQL:", duplicateCheckSQL);
+
+    const duplicateCheckResult = await pool.request()
+      .input('msp_code', msp_code)
+      .input('csp_code', csp_code)
+      .input('item', item)
+      .input('id', id)
+      .query(duplicateCheckSQL);
+
+    if (duplicateCheckResult.recordset.length > 0) {
+      return res.status(409).json({
+        message: "Duplicate entry,  Msl already exists!"
+      });
+    }
+
+    // Step 2: Update Query
+    const updateSQL = `
+     UPDATE Msl
+     SET
+       msp_code = @msp_code,
+       msp_name = @msp_name,
+       csp_code = @csp_code,
+       csp_name = @csp_name,
+       item = @item,
+       item_description = @item_description,
+       stock = @stock
+     WHERE id = @id
+   `;
+    console.log("Executing Update SQL:", updateSQL);
+
+    await pool.request()
+      .input('msp_code', msp_code)
+      .input('msp_name', msp_name)
+      .input('csp_code', csp_code)
+      .input('csp_name', csp_name)
+      .input('item', item)
+      .input('item_description', item_description)
+      .input('stock', stock)
+      .input('created_by', created_by)
+      .input('id', id)
+      .query(updateSQL);
+
+    return res.json({
+      message: "Msl updated successfully!"
+    });
+
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while updating the Msl' });
+  }
+});
+
+app.post("/postmsl", authenticateToken, async (req, res) => {
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { msp_code, msp_name, csp_code, csp_name, item, item_description, stock } = JSON.parse(decryptedData);
+
+  try {
+    const pool = await poolPromise;
+
+    // Check if Msl already exists
+    let sql = `SELECT * FROM Msl WHERE msp_code = '${msp_code}' AND csp_code = '${csp_code}' AND item = '${item}' AND deleted = 0`;
+    const result = await pool.request().query(sql);
+
+    if (result.recordset.length > 0) {
+      return res.status(409).json({ message: "Duplicate entry, Msl already exists!" });
+    } else {
+      // Check if the Msl is soft-deleted
+      sql = `SELECT * FROM Msl WHERE msp_code = '${msp_code}' AND deleted = 1`;
+      const softDeletedData = await pool.request().query(sql);
+
+      if (softDeletedData.recordset.length > 0) {
+        // Restore soft-deleted Msl
+        sql = `UPDATE Msl SET deleted = 0 WHERE msp_code = '${msp_code}'`;
+        await pool.request().query(sql);
+        return res.json({ message: "Soft-deleted data restored successfully!" });
+      } else {
+        // Insert new Msl
+        sql = `INSERT INTO Msl (msp_code,msp_name,csp_code,csp_name,item,item_description,stock,deleted) VALUES ('${msp_code}','${msp_name}','${csp_code}','${csp_name}','${item}','${item_description}','${stock}',0)`
+        await pool.request().query(sql);
+        return res.json({ message: "Msl added successfully!" });
+
+      }
+    }
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "An error occurred while processing the Msl data" });
   }
 });
 

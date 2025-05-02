@@ -160,6 +160,7 @@ import ExceltoUpdateScript from './Components/Utils/ExceltoupdateScript';
 import { Msl } from './Components/Pages/Master/Msl';
 import { Mslmsp } from './Components/Pages/Master/Mslmsp';
 import { Mslcsp } from './Components/Pages/Master/Mslcsp';
+import AddMsl from './Components/Pages/Master/AddMsl';
 
 
 
@@ -914,6 +915,14 @@ const Router = createBrowserRouter([
       {
         path: "/msl",
         element: <Msl />,
+      },
+      {
+        path: "/addmsl",
+        element: <AddMsl />,
+      },
+      {
+        path: "/addmsl/:mslid/:view",
+        element: <ProtectedRoute> <AddMsl /></ProtectedRoute>
       },
       {
         path: "/productsparetabs",

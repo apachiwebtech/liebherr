@@ -20,6 +20,8 @@ function Productsparetabs() {
       setActiveTab("/stock");
     } else if (location.pathname.startsWith("/msl")) {
       setActiveTab("/msl");
+    } else if (location.pathname.startsWith("/addmsl")) {
+      setActiveTab("/addmsl");
     }
 
   }, [location.pathname]);
@@ -39,7 +41,8 @@ function Productsparetabs() {
       role: decryptedRole,
       productsparepage: '40',
       stockpage: '57',
-      mslpage: '58'
+      mslpage: '58',
+      addmslpage: '59'
     }
 
 
@@ -115,12 +118,20 @@ function Productsparetabs() {
                     </li></Link>
                   }
                   {status.mslpage == 1 &&
+                    <Link to={`/addmsl`}><li className="nav-item">
+                      <button className={`nav-link ${activeTab === "/addmsl" ? "active" : ""}`}>
+                        ADD MSL
+                      </button>
+                    </li></Link>
+                  }
+                  {status.mslpage == 1 &&
                     <Link to={`/msl`}><li className="nav-item">
                       <button className={`nav-link ${activeTab === "/msl" ? "active" : ""}`}>
                         MSL
                       </button>
                     </li></Link>
                   }
+
 
                 </ul>
               </div>

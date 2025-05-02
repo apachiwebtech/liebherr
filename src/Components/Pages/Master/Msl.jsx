@@ -16,6 +16,7 @@ export function Msl(params) {
     const { loaders, axiosInstance } = useAxiosLoader();
     const token = localStorage.getItem("token");
     const [Msl, setMslData] = useState([]);
+    const [excelData, setExcelData] = useState([]);
     const licare_code = localStorage.getItem("licare_code");
     const [formData, setFormData] = useState({
         msp_name: '',
@@ -50,6 +51,15 @@ export function Msl(params) {
         fetchMsl();
     }, []);
 
+    const navigate = useNavigate()
+
+    const sendtoedit = async (id, view) => {
+        id = id.toString()
+        let encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
+        encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        navigate(`/addmsl/${encrypted}/${view}`)
+    };
+
     // Role Right 
 
 
@@ -77,6 +87,61 @@ export function Msl(params) {
 
     // Role Right End 
 
+    const importexcel = (event) => {
+        // If triggered by file input
+        const file = event?.target?.files ? event.target.files[0] : null;
+
+        // If triggered by button click, use the file uploaded
+        if (!file) {
+            alert("Please upload an Excel file first!");
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+            const binaryStr = e.target.result;
+            const workbook = XLSX.read(binaryStr, { type: "binary" });
+            const sheetName = workbook.SheetNames[0]; // Get the first sheet
+            const sheet = workbook.Sheets[sheetName];
+            const jsonData = XLSX.utils.sheet_to_json(sheet); // Convert to JSON
+            setExcelData(jsonData);
+            console.log("Excel Data Imported:", jsonData);
+        };
+
+        reader.readAsBinaryString(file);
+    };
+
+    const uploadexcel = () => {
+
+        const transformData = (data) => {
+            return data.map((item) => {
+                return Object.fromEntries(
+                    Object.entries(item).map(([key, value]) => [key, value !== null ? String(value) : ""])
+                );
+            });
+        };
+
+        const data = {
+            excelData: transformData(excelData), // Keeping JSON.stringify
+            created_by: localStorage.getItem("licare_code"),
+        };
+
+        axiosInstance.post(`${Base_Url}/uplaodmslexcel`, data, {
+            headers: {
+                Authorization: token, // Send token in headers
+            },
+        })
+            .then((res) => {
+                if (res.data) {
+                    alert("Uploaded")
+                }
+                console.log(res)
+            })
+            .catch((err) => {
+                console.log(err)
+            })
+    }
 
 
 
@@ -95,6 +160,18 @@ export function Msl(params) {
                 <div className=" col-12">
                     <div className="card mb-3 tab_box">
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
+                            <div className="row mb-3">
+                                <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
+                                    <div className="form-group">
+                                        {roleaccess > 2 ? <input type="file" accept=".xlsx, .xls" onChange={importexcel} /> : null}
+                                        {roleaccess > 2 ? <button className="btn btn-primary" onClick={uploadexcel}>
+                                            Import Msl
+                                        </button> : null}
+
+
+                                    </div>
+                                </div>
+                            </div>
 
                             <div className='table-responsive'>
                                 <table id="" className="table table-striped">
@@ -129,7 +206,7 @@ export function Msl(params) {
                                                         {roleaccess > 3 ? (
                                                             <button
                                                                 className='btn'
-                                                                // onClick={() => sendtoedit(item.id, 0)}
+                                                                onClick={() => sendtoedit(item.id, 0)}
                                                                 title="Edit"
                                                                 style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
                                                             >
