@@ -331,6 +331,11 @@ function Details() {
           formData.append('gas_charges', checklist.gas_charges == 'null' ? 'No' : checklist.gas_charges);
           formData.append('transpotation', checklist.transpotation == 'null' ? 'No' : checklist.transpotation);
           formData.append('customer_mobile', Value.customer_mobile);
+          sparelist.forEach((item, index) => {
+            formData.append(`sparedata[${index}]`, item.article_code);
+            formData.append(`spareqty[${index}]`, item.quantity);
+          });
+          
 
 
 
@@ -361,8 +366,12 @@ function Details() {
             },
           })
             .then((res) => {
-              console.log(res);
-              navigate('/mobapp/dash');
+              if(res.data.status == 0){
+                alert(res.data.message)
+              }else{
+                navigate('/mobapp/dash');
+                
+              }
             })
             .catch((err) => {
               console.log(err);
@@ -413,8 +422,6 @@ function Details() {
         if (Value.spare_required) {
           formData.append('spare_detail', Value.spare_detail);
         }
-        // Append the file if it exists
-
 
         if (files.spare_doc) {
           formData.append('spare_doc', files.spare_doc);
@@ -473,6 +480,7 @@ function Details() {
           getspare(res.data.data[0].item_code)
           getprice(res.data.data[0].ModelNumber, res.data.data[0].warranty_status)
           setPurchaseDate(res.data.data[0].purchase_date)
+          setItemcode(res.data.data[0].item_code)
           // console.log(Value.symptomcode);
           if (res.data.data[0].group_code != "") {
             getDefectCodewisetype_app(res.data.data[0].group_code)

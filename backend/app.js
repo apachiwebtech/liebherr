@@ -3612,7 +3612,7 @@ app.get("/getcomplaintview/:complaintid", authenticateToken, async (req, res) =>
 });
 
 app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
-  const { ticket_no, note, created_by, call_status, call_status_id, sub_call_status, group_code, site_defect, defect_type, activity_code, serial_no, ModelNumber, purchase_date, warrenty_status, engineerdata, engineername, ticket_type, call_city, ticket_start_date, mandaysprice, gas_chargs, gas_transportation, transportation_charge, visit_count, customer_mobile, totp, complete_date, allocation, dealercustid, item_code, nps_link, customer_email, customer_id } = req.body;
+  const { ticket_no, note, created_by, call_status, call_status_id, sub_call_status, group_code, site_defect, defect_type, activity_code, serial_no, ModelNumber, purchase_date, warrenty_status, engineerdata, engineername, ticket_type, call_city, ticket_start_date, mandaysprice, gas_chargs, gas_transportation, transportation_charge, visit_count, customer_mobile, totp, complete_date, allocation, dealercustid, item_code, nps_link, customer_email, customer_id, sparedata, spareqty, state_id } = req.body;
 
   const username = process.env.TATA_USER;
   const password = process.env.PASSWORD;
@@ -3670,8 +3670,149 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
   }
 
 
+  if (
+    call_status === 'Closed' &&
+    Array.isArray(sparedata) &&
+    Array.isArray(spareqty) &&
+    state_id !== '' && state_id !== 'null' && state_id !== null && state_id !== '0' &&
+    Array.isArray(engineerdata) &&
+    engineerdata.length > 0
+  ) {
+    const primaryEngineer = engineerdata[0];
+
+    const pool = await poolPromise;
+    const request = pool.request();
+
+    request.input('eng_code', primaryEngineer);
+
+    const paramNames = sparedata.map((code, i) => {
+      const paramName = `code${i}`;
+      request.input(paramName, code);
+      return `@${paramName}`;
+    });
+
+    const sql = `
+      SELECT product_code, stock_quantity 
+      FROM engineer_stock 
+      WHERE eng_code = @eng_code 
+        AND product_code IN (${paramNames.join(',')})
+    `;
+
+    const result = await request.query(sql);
+
+    const stockMap = new Map(result.recordset.map(item => [item.product_code, item.stock_quantity]));
+
+    console.log(stockMap)
+
+    const unavailableItems = sparedata
+      .map((code, i) => ({
+        code,
+        qty: parseInt(spareqty[i], 10),
+        available: stockMap.get(code) || 0,
+      }))
+      .filter(item => item.available < item.qty);
+
+
+      console.log(unavailableItems)
+
+    if (unavailableItems.length > 0) {
+      // Check other engineers (excluding the primary)
+      const fallbackRequest = pool.request();
+      fallbackRequest.input('eng_code', primaryEngineer); 
+      
+      // Input all product codes
+      sparedata.forEach((code, i) => {
+        fallbackRequest.input(`prod${i}`, code);
+      });
+
+
+      
+      const prodParams = sparedata.map((_, i) => `@prod${i}`).join(',');
+      
+      const fallbackSql = `
+        SELECT eng_code, product_code, stock_quantity 
+        FROM engineer_stock 
+        WHERE eng_code != @eng_code AND product_code IN (${prodParams})
+        ORDER BY stock_quantity DESC
+      `;
+
+
+
+
+      
+      const fallbackResult = await fallbackRequest.query(fallbackSql);
+
+      console.log(fallbackResult)
+      const stockUsed = new Map(); // key: eng_code, value: array of { product_code, qty_to_deduct }
+
+      for (const item of unavailableItems) {
+        const matching = fallbackResult.recordset.find(row =>
+          row.product_code === item.code && row.stock_quantity >= item.qty
+        );
+
+        if (matching) {
+          if (!stockUsed.has(matching.eng_code)) {
+            stockUsed.set(matching.eng_code, []);
+          }
+          stockUsed.get(matching.eng_code).push({
+            product_code: item.code,
+            qty_to_deduct: item.qty,
+          });
+        } else {
+          return res.json({ message: `No engineer has enough stock for ${item.code}`, status: 0 });
+        }
+      }
+
+      // All alternate engineers found — proceed to update
+      const updateAltRequest = pool.request();
+      const updateQueries = [];
+
+      let counter = 0;
+      for (const [eng, items] of stockUsed.entries()) {
+        updateAltRequest.input(`eng_${eng}`, eng);
+        for (const item of items) {
+          const qtyParam = `qty${counter}`;
+          const codeParam = `code${counter}`;
+          updateAltRequest.input(qtyParam, item.qty_to_deduct);
+          updateAltRequest.input(codeParam, item.product_code);
+          updateQueries.push(`
+            UPDATE engineer_stock 
+            SET stock_quantity = stock_quantity - @${qtyParam} 
+            WHERE eng_code = @eng_${eng} AND product_code = @${codeParam};
+          `);
+          counter++;
+        }
+      }
+
+      await updateAltRequest.query(updateQueries.join('\n'));
+    } else {
+      // All stock available from primary engineer
+      const updateRequest = pool.request();
+      updateRequest.input('eng_code', primaryEngineer);
+
+      const updateQueries = sparedata.map((code, i) => {
+        const qtyParam = `qty${i}`;
+        const codeParam = `code${i}`;
+        updateRequest.input(qtyParam, parseInt(spareqty[i], 10));
+        updateRequest.input(codeParam, code);
+        return `
+          UPDATE engineer_stock 
+          SET stock_quantity = stock_quantity - @${qtyParam}
+          WHERE eng_code = @eng_code AND product_code = @${codeParam};
+        `;
+      });
+
+      await updateRequest.query(updateQueries.join('\n'));
+    }
+
+  }
+
+
+
 
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+  console.log("!!")
 
   let engineer_id;
 
@@ -3783,6 +3924,9 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
 
 
     if (call_status == 'Closed' && sub_call_status == 'Fully') {
+
+
+
 
 
       const updateSql = `
@@ -3972,7 +4116,7 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
 
 
     return res.json({
-      message: "Remark added successfully!",
+      message: "Ticket remark and files submitted successfully!",
       remark_id: remark_id, // Send the generated remark ID back to the client
     });
   } catch (err) {
@@ -11366,37 +11510,6 @@ app.post('/add_uniqsparepart', authenticateToken, async (req, res) => {
 
 
 
-
-    //for stock logic
-
-    //   const checkstock = `
-    //   SELECT eng_code, stock_quantity 
-    //   FROM engineer_stock 
-    //   WHERE eng_code IN (${engineer_ids_string})
-    // `;
-
-    //   const checkresult = await poolRequest.query(checkstock);
-
-    //   // Check if all engineers have enough stock
-    //   const allHaveEnough = checkresult.recordset.every(row => row.stock_quantity >= quantity);
-
-    //   if (allHaveEnough) {
-
-
-
-    //   } else {
-    //     return res.json({ message: "Engineer dont have a stock" });
-    //   }
-
-
-
-
-
-
-
-
-
-
   } catch (error) {
     console.error('Error inserting or updating spare part:', error);
     res.status(500).send({ error: 'Internal server error' });
@@ -15300,6 +15413,7 @@ app.get("/getstock/:licare_code", authenticateToken, async (req, res) => {
     return res.status(500).json({ error: 'An error occurred while fetching data' });
   }
 });
+
 app.get("/getengstock/:licare_code", authenticateToken, async (req, res) => {
   const { licare_code } = req.params
   try {
@@ -16329,8 +16443,7 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
   { name: 'spare_doc_two', maxCount: 1 },
   { name: 'spare_doc_three', maxCount: 1 },
 ]), async (req, res) => {
-  let { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode, activitycode, com_id, warranty_status, spare_detail, ticket_no, user_id, serial_no, Model, sub_call_status, allocation, serial_data, picking_damages, product_damages, missing_part, leg_adjustment, water_connection, abnormal_noise, ventilation_top, ventilation_bottom, ventilation_back, voltage_supply, earthing, gas_charges, transpotation, purchase_date, otp, check_remark, customer_mobile, item_code } = req.body;
-
+  let { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode, activitycode, com_id, warranty_status, spare_detail, ticket_no, user_id, serial_no, Model, sub_call_status, allocation, serial_data, picking_damages, product_damages, missing_part, leg_adjustment, water_connection, abnormal_noise, ventilation_top, ventilation_bottom, ventilation_back, voltage_supply, earthing, gas_charges, transpotation, purchase_date, otp, check_remark, customer_mobile, item_code, sparedata, spareqty } = req.body;
 
 
 
@@ -16342,6 +16455,71 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
 
   let temp_id;
   let temp_msg;
+
+  if (Array.isArray(sparedata) && Array.isArray(spareqty) && sparedata.length === spareqty.length && call_status == 'Completed') {
+    // Build your SQL query
+    const pool = await poolPromise;
+    const request = pool.request();
+
+    request.input('user_id', user_id);
+
+    const paramNames = sparedata.map((code, i) => {
+      const paramName = `code${i}`;
+      request.input(paramName, code);
+      return `@${paramName}`;
+    });
+
+    const sql = `
+      SELECT product_code, stock_quantity 
+      FROM engineer_stock 
+      WHERE eng_code = @user_id 
+        AND product_code IN (${paramNames.join(',')})
+    `;
+
+    const result = await request.query(sql);
+
+    const stockMap = new Map(
+      result.recordset.map(item => [item.product_code, item.stock_quantity])
+    );
+
+    const unavailableItems = sparedata.filter((code, i) => {
+      const requiredQty = parseInt(spareqty[i], 10);
+      const availableQty = stockMap.get(code) || 0;
+      return availableQty < requiredQty;
+    });
+
+    if (unavailableItems.length > 0) {
+      return res.json({ message: 'Some items have insufficient stock', status: 0 });
+    }
+
+    // All items are available
+    console.log("Stock is available for all items.");
+
+
+    //Minus the stock 
+
+    // ✅ All items are available - proceed to update stock
+    const updatePool = await poolPromise;
+    const updateRequest = updatePool.request();
+
+    const updateQueries = sparedata.map((code, i) => {
+      const qtyParam = `qty${i}`;
+      const codeParam = `code${i}`;
+
+      updateRequest.input(qtyParam, parseInt(spareqty[i], 10));
+      updateRequest.input(codeParam, code);
+      updateRequest.input('user_id', user_id);
+
+      return `
+      UPDATE engineer_stock 
+      SET stock_quantity = stock_quantity - @${qtyParam} 
+      WHERE eng_code = @user_id AND product_code = @${codeParam};
+    `;
+    });
+
+    const finalUpdateQuery = updateQueries.join('\n');
+    await updateRequest.query(finalUpdateQuery);
+  }
 
 
 
@@ -17493,12 +17671,14 @@ app.post("/resend_otp", authenticateToken, async (req, res) => {
   console.log(req.body)
 
 
-  const otp = Math.floor(1000 + Math.random() * 9000);
+  // const otp = Math.floor(1000 + Math.random() * 9000);
 
   try {
     const pool = await poolPromise;
-    const sql = `update complaint_ticket set totp = '${otp}'  where ticket_no = '${ticket_no}'`;
+    const sql = `select totp from complaint_ticket where ticket_no = '${ticket_no}'`;
     const result = await pool.request().query(sql);
+
+    const otp = result.recordset[0]?.totp
 
 
     if (1 == 1) {

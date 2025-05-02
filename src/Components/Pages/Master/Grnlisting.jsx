@@ -402,7 +402,7 @@ export function Grnlisting(params) {
                                     <thead>
                                         <tr>
                                             <th width="5%">#</th>
-                                            <th width="15%">Grn_No</th>
+                                            <th width="15%">Grn_N</th>
                                             <th width="20%">Received From</th>
                                             <th width="15%">Invoice No</th>
                                             <th width="15%">Invoice Date</th>
@@ -430,7 +430,7 @@ export function Grnlisting(params) {
                                                             year: 'numeric',
                                                         })}
                                                     </td>
-                                                    <td>3</td>
+                                                    <td>{item.product_count}</td>
                                                     <td> {item.status == '1' ? "Approved" : <button className='btn btn-success' onClick={() => updategrnstatus(item.grn_no)}>Approve</button>}</td>
                                                     <td>
                                                         <div className='d-flex'>

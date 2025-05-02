@@ -433,6 +433,10 @@ const Router = createBrowserRouter([
     ],
   },
   {
+    path: '/mobapp/applogin',
+    element: <AppLogin />
+  },
+  {
     path: "/mobapp",
     element: <MobApp />,
     children: [
@@ -464,11 +468,8 @@ const Router = createBrowserRouter([
       {
         path: '/mobapp/stock',
         element: <ProtectedRoute><EngineerStock /></ProtectedRoute>,
-      },
-      {
-        path: '/mobapp/applogin',
-        element: <ProtectedRoute><AppLogin /></ProtectedRoute>,
-      },
+      }
+
     ],
   },
 

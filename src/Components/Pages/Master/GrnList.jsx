@@ -434,7 +434,7 @@ export function GrnList(params) {
                                                             year: 'numeric',
                                                         })}
                                                     </td>
-                                                    <td>3</td>
+                                                    <td>{item.product_count}</td>
                                                     <td> {item.status == '1' ? "Approved" : <button className='btn btn-success' onClick={() => updategrnstatus(item.grn_no)}>Approve</button>}</td>
                                                     <td>
                                                         <div className='d-flex'>

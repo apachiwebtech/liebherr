@@ -106,7 +106,8 @@ export function Complaintview(params) {
     region: '',
     item_code: '',
     customer_email: '',
-    remarkedit: ''
+    remarkedit: '',
+    state_id : ''
   });
 
 
@@ -1509,12 +1510,15 @@ export function Complaintview(params) {
           warrenty_status: complaintview.warranty_status || warranty_status_data,
           engineerdata: addedEngineers.map((item) => item.engineer_id),
           engineername: addedEngineers.map((item) => item.title),
+          sparedata: uniquesparepart.map((item) => item.article_code),
+          spareqty: uniquesparepart.map((item) => item.quantity),
           mandays: complaintview.mandays,
           mandaysprice: complaintview.mandaysprice,
           gas_chargs: complaintview.gas_chargs,
           gas_transportation: complaintview.gas_transportation,
           transportation: complaintview.transportation,
           transportation_charge: complaintview.transportation_charge,
+          state_id: String(complaintview.state_id),
           allocation: allocation,
           nps_link: `${Base_Url}`,
           note,
@@ -1574,7 +1578,7 @@ export function Complaintview(params) {
 
 
 
-        alert("Ticket remark and files submitted successfully!");
+        alert(remarkResponse.data.message);
 
         fetchComplaintDetails();
       } catch (error) {

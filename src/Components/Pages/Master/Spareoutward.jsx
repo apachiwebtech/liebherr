@@ -267,7 +267,7 @@ const Spareoutward = () => {
             }
 
         } catch (error) {            
-            alert("Error");
+            alert("Insufficient stock");
         }
     };
 
