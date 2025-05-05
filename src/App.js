@@ -161,6 +161,7 @@ import { Msl } from './Components/Pages/Master/Msl';
 import { Mslmsp } from './Components/Pages/Master/Mslmsp';
 import { Mslcsp } from './Components/Pages/Master/Mslcsp';
 import AddMsl from './Components/Pages/Master/AddMsl';
+import {CspGrn} from './Components/Pages/Master/CspGrn';
 
 
 
@@ -376,6 +377,10 @@ const Router = createBrowserRouter([
       {
         path: "/csp/creategrn",
         element: <ProtectedRoute><CreateGrn /></ProtectedRoute>,
+      },
+      {
+        path: "/csp/cspgrn",
+        element: <ProtectedRoute><CspGrn /></ProtectedRoute>,
       },
       {
         path: "/csp/grnlisting",

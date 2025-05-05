@@ -56,8 +56,8 @@ function GrnTab() {
               <div className="tabsMenu" style={{ fontSize: "14px", marginLeft: "12px", fontWeight: "600", fontFamily: "Nunito" }}>
                 <ul className="nav nav-tabs ">
                   <li className="nav-item">
-                    <Link to={`/csp/creategrn`}><button
-                      className={`nav-link ${activeTab === '/csp/creategrn' ? 'active' : ' onClick={() => setActiveTab("csp/creategrn")}'}`}
+                    <Link to={`/csp/cspgrn`}><button
+                      className={`nav-link ${activeTab === '/csp/cspgrn' ? 'active' : ' onClick={() => setActiveTab("csp/cspgrn")}'}`}
 
                     >
                       CREATE GRN

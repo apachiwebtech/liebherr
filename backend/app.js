@@ -3713,22 +3713,22 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
       .filter(item => item.available < item.qty);
 
 
-      console.log(unavailableItems)
+    console.log(unavailableItems)
 
     if (unavailableItems.length > 0) {
       // Check other engineers (excluding the primary)
       const fallbackRequest = pool.request();
-      fallbackRequest.input('eng_code', primaryEngineer); 
-      
+      fallbackRequest.input('eng_code', primaryEngineer);
+
       // Input all product codes
       sparedata.forEach((code, i) => {
         fallbackRequest.input(`prod${i}`, code);
       });
 
 
-      
+
       const prodParams = sparedata.map((_, i) => `@prod${i}`).join(',');
-      
+
       const fallbackSql = `
         SELECT eng_code, product_code, stock_quantity 
         FROM engineer_stock 
@@ -3739,7 +3739,7 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
 
 
 
-      
+
       const fallbackResult = await fallbackRequest.query(fallbackSql);
 
       console.log(fallbackResult)
@@ -18674,3 +18674,31 @@ app.post("/postmsl", authenticateToken, async (req, res) => {
   }
 });
 
+app.get("/getgrn", authenticateToken, async (req, res) => {
+  const { InvoiceNumber } = req.body;
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+    const result = await pool.request().query(`SELECT * FROM  Shipment_Parts WHERE InvoiceNumber =${InvoiceNumber} AND deleted = 0  `);
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
+
+app.post("/getgrnlisting", authenticateToken, async (req, res) => {
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+    const result = await pool.request().query(`SELECT TOP 20 s.*
+FROM Shipment_Parts AS s 
+LEFT JOIN Address_code AS a ON a.address_code = s.Address_code 
+WHERE s.deleted = 0;
+`);
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
