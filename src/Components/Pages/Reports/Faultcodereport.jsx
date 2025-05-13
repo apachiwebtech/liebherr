@@ -183,6 +183,7 @@ const Faultcodereport = () => {
         <div className="col-12">
           <div className="card mt-3 mb-3">
             <div className="card-body">
+              <h5>Fault Code Report :</h5>
               <div className="mb-3">
                 <label>Start Date</label>
                 <DatePicker

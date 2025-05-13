@@ -6123,10 +6123,22 @@ app.get("/requestengineer/:id", authenticateToken,
   });
 
 app.post("/postengineer",
+  upload.fields([
+    { name: 'passport_picture', maxCount: 1 },
+    { name: 'resume', maxCount: 1 },
+    { name: 'photo_id_proof', maxCount: 1 },
+    { name: 'gov_address_proof', maxCount: 1 }
+  ]),
   authenticateToken, async (req, res) => {
     const { encryptedData } = req.body;
     const decryptedData = decryptData(encryptedData, secretKey)
-    const { title, mfranchise_id, cfranchise_id, password, email, mobile_no, personal_email, employee_code, personal_mobile, dob, blood_group, academic_qualification, joining_date, passport_picture, resume, photo_proof, address_proof, permanent_address, current_address } = JSON.parse(decryptedData);
+    const { title, mfranchise_id, cfranchise_id, password, email, mobile_no, personal_email, employee_code, personal_mobile, dob, blood_group, academic_qualification, joining_date, permanent_address, current_address } = JSON.parse(decryptedData);
+
+    const passportpicture = req.files['passport_picture']?.[0]?.filename || '';
+    const photo_id_proof = req.files['photo_id_proof']?.[0]?.filename || '';
+    const resume = req.files['resume']?.[0]?.filename || '';
+    const gov_address_proof = req.files['gov_address_proof']?.[0]?.filename || '';
+
 
     try {
       // Use the poolPromise to get the connection pool
@@ -6194,7 +6206,7 @@ app.post("/postengineer",
         } else {
           // Insert new engineer if no duplicate or soft-deleted found
           const insertSql = `INSERT INTO awt_engineermaster (title,mfranchise_id, cfranchise_id, mobile_no, email, password,engineer_id,personal_email,personal_mobile,dob,blood_group,academic_qualification,joining_date,passport_picture,resume,photo_proof,address_proof,permanent_address,current_address,employee_code)
-                           VALUES ('${title}','${mfranchise_id}', '${cfranchise_id}', '${mobile_no}', '${email}', '${password}', '${engineercode}', '${personal_email}', '${personal_mobile}', '${dob}', '${blood_group}', '${academic_qualification}', '${joining_date}', '${passport_picture}', '${resume}', '${photo_proof}', '${address_proof}', '${permanent_address}', '${current_address}' , '${employee_code}')`;
+                           VALUES ('${title}','${mfranchise_id}', '${cfranchise_id}', '${mobile_no}', '${email}', '${password}', '${engineercode}', '${personal_email}', '${personal_mobile}', '${dob}', '${blood_group}', '${academic_qualification}', '${joining_date}', '${passportpicture}', '${resume}', '${photo_id_proof}', '${gov_address_proof}', '${permanent_address}', '${current_address}' , '${employee_code}')`;
           await pool.request().query(insertSql);
           return res.json({ message: "Engineer added successfully!" });
         }
@@ -6204,40 +6216,67 @@ app.post("/postengineer",
       return res.status(500).json({ error: "An error occurred while adding the engineer" });
     }
   });
-app.post("/putengineer", authenticateToken, async (req, res) => {
-  const { encryptedData } = req.body;
-  const decryptedData = decryptData(encryptedData, secretKey)
-  const { title, mfranchise_id, cfranchise_id, password, email, mobile_no, personal_email, personal_mobile, dob, blood_group, academic_qualification, joining_date, passport_picture, resume, photo_proof, address_proof, permanent_address, current_address, id } = JSON.parse(decryptedData);
+app.post("/putengineer",
+  upload.fields([
+    { name: 'passport_picture', maxCount: 1 },
+    { name: 'resume', maxCount: 1 },
+    { name: 'photo_id_proof', maxCount: 1 },
+    { name: 'gov_address_proof', maxCount: 1 }
+  ]), authenticateToken, async (req, res) => {
+    const { encryptedData } = req.body;
+    const decryptedData = decryptData(encryptedData, secretKey)
+    const {
+      title, mfranchise_id, cfranchise_id, password, email, mobile_no, personal_email,
+      personal_mobile, dob, blood_group, academic_qualification, joining_date,
+      permanent_address, current_address, id
+    } = JSON.parse(decryptedData);
 
-  try {
-    // Use the poolPromise to get the connection pool
-    const pool = await poolPromise;
+    const passportpicture = req.files['passport_picture']?.[0]?.filename || '';
+    const photo_id_proof = req.files['photo_id_proof']?.[0]?.filename || '';
+    const resume = req.files['resume']?.[0]?.filename || '';
+    const gov_address_proof = req.files['gov_address_proof']?.[0]?.filename || '';
 
-    // Check for duplicates using direct query injection
-    const checkDuplicateSql = `SELECT * FROM awt_engineermaster WHERE mobile_no = '${mobile_no}' AND email = '${email}' AND id != '${id}' AND deleted = 0`;
-    const duplicateResult = await pool.request().query(checkDuplicateSql);
+    try {
+      const pool = await poolPromise;
 
-    if (duplicateResult.recordset.length > 0) {
-      return res.status(409).json({
-        message: "Duplicate entry, Email and mobile_no credentials already exist!",
-      });
-    } else {
-      // Update the engineer record if no duplicates are found
-      const updateSql = `UPDATE awt_engineermaster
-                         SET title = '${title}',mfranchise_id = '${mfranchise_id}', cfranchise_id = '${cfranchise_id}', mobile_no = '${mobile_no}', email = '${email}', password = '${password}',
-                         personal_email = '${personal_email}', personal_mobile = '${personal_mobile}', dob = '${dob ? dob : ''}',
-                         blood_group = '${blood_group}', academic_qualification = '${academic_qualification}', joining_date = '${joining_date ? joining_date : ''}', passport_picture = '${passport_picture}',
-                         resume = '${resume}', photo_proof = '${photo_proof}', address_proof = '${address_proof}', permanent_address = '${permanent_address}', current_address = '${current_address}'
+      const checkDuplicateSql = `SELECT * FROM awt_engineermaster WHERE mobile_no = '${mobile_no}' AND email = '${email}' AND id != '${id}' AND deleted = 0`;
+      const duplicateResult = await pool.request().query(checkDuplicateSql);
+
+      if (duplicateResult.recordset.length > 0) {
+        return res.status(409).json({
+          message: "Duplicate entry, Email and mobile_no credentials already exist!",
+        });
+      } else {
+        // ✅ Fetch existing file names to preserve them if no new upload
+        const getExistingSql = `SELECT passport_picture, resume, photo_proof, address_proof FROM awt_engineermaster WHERE id = '${id}'`;
+        const existingResult = await pool.request().query(getExistingSql);
+        const existingData = existingResult.recordset[0];
+
+        const final_passportpicture = passportpicture || existingData.passport_picture;
+        const final_resume = resume || existingData.resume;
+        const final_photo_proof = photo_id_proof || existingData.photo_proof;
+        const final_address_proof = gov_address_proof || existingData.address_proof;
+
+        const updateSql = `UPDATE awt_engineermaster
+                         SET title = '${title}', mfranchise_id = '${mfranchise_id}', cfranchise_id = '${cfranchise_id}',
+                         mobile_no = '${mobile_no}', email = '${email}', password = '${password}',
+                         personal_email = '${personal_email}', personal_mobile = '${personal_mobile}',
+                         dob = '${dob ? dob : ''}', blood_group = '${blood_group}',
+                         academic_qualification = '${academic_qualification}', joining_date = '${joining_date ? joining_date : ''}',
+                         passport_picture = '${final_passportpicture}', resume = '${final_resume}',
+                         photo_proof = '${final_photo_proof}', address_proof = '${final_address_proof}',
+                         permanent_address = '${permanent_address}', current_address = '${current_address}'
                          WHERE id = '${id}'`;
 
-      await pool.request().query(updateSql);
-      return res.json({ message: "Engineer updated successfully!" });
+        await pool.request().query(updateSql);
+        return res.json({ message: "Engineer updated successfully!" });
+      }
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ error: "An error occurred while updating the engineer" });
     }
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: "An error occurred while updating the engineer" });
-  }
-});
+  });
+
 
 app.post("/deleteengineer", authenticateToken,
   authenticateToken, async (req, res) => {
@@ -12283,7 +12322,8 @@ app.post('/getpageroledata', authenticateToken, async (req, res) => {
     masterpageid, ticketpageid, quotationpageid, enquirypageid, reportpageid,
     locationpageid, pincodepageid, productpageid, customerpageid, bussinesspageid,
     franchpageid, callstatuspageid, lhiuserpageid, servicepageid, faultpageid,
-    ratepageid, sparearray, ticketreportid, claimreportid, feedbackreportid, annexureid, shipmentpageid, engineermasterpageid, faultreportid, faqpageid, assetreportid
+    ratepageid, sparearray, ticketreportid, claimreportid, feedbackreportid, annexureid, shipmentpageid, engineermasterpageid, faultreportid,
+    faqpageid, assetreportid, sparereportid
   } = req.body;
 
 
@@ -12318,7 +12358,8 @@ app.post('/getpageroledata', authenticateToken, async (req, res) => {
     engineermasterpage: parseIds(engineermasterpageid),
     faultreport: parseIds(faultreportid),
     faqpage: parseIds(faqpageid),
-    assetreport: parseIds(assetreportid)
+    assetreport: parseIds(assetreportid),
+    sparereport: parseIds(sparereportid)
   };
 
   try {
@@ -13332,7 +13373,7 @@ WHERE ct.deleted = 0
     return res.status(500).json({ error: 'An error occurred while fetching data' });
   }
 });
-app.post("/getspareconumption", authenticateToken, async (req, res) => {
+app.post("/getspareconsumption", authenticateToken, async (req, res) => {
 
   const { startDate, endDate, licare_code } = req.body;
   try {
@@ -13348,7 +13389,9 @@ app.post("/getspareconumption", authenticateToken, async (req, res) => {
     let sql;
 
 
-    sql = `select ct.ticket_no as TicketNumber, au.article_code as ItemCode, au.article_description as ItemDescription,au.quantity as Quantity from awt_uniquespare as au left join complaint_ticket as ct on ct.ticket_no = au.ticketId where au.deleted = 0 and ct.call_status = 'Closed' AND ct.ticket_date >= '${startDate}' AND ct.ticket_date <= '${endDate}' `
+    sql = `select ct.ticket_no as TicketNumber, au.article_code as ItemCode, au.article_description as ItemDescription,au.quantity as Quantity, sp.Returnable as PartRetunableType , sp.Warranty as PartWarrantyType, sp.PriceGroup  from awt_uniquespare as au
+left join complaint_ticket as ct on ct.ticket_no = au.ticketId
+Left Join Spare_parts as sp on sp.title = au.article_code where au.deleted = 0 and ct.call_status = 'Closed' AND ct.ticket_date >= '${startDate}' AND ct.ticket_date <= '${endDate}' `
 
 
 

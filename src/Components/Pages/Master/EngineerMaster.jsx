@@ -1,10 +1,9 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import { FaPencilAlt, FaTrash } from 'react-icons/fa';
+import { FaEye, FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { Base_Url, secretKey } from '../../Utils/Base_Url';
 import { useParams } from "react-router-dom";
 import { useSelector } from 'react-redux';
-import Franchisemaster from '../Master/Franchisemaster';
 import md5 from "js-md5";
 import { SyncLoader } from 'react-spinners';
 import CryptoJS from 'crypto-js';
@@ -32,6 +31,10 @@ const EngineerMaster = () => {
   const [selectedDate, setSelectedDate] = useState('');
   const [joining_date, setJoiningDate] = useState('');
   const [employee, setEmployee] = useState('');
+  const isEditMode = engineerid !== undefined;
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState('');
+
   const created_by = localStorage.getItem("userId"); // Get user ID from localStorage
   const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
 
@@ -77,8 +80,8 @@ const EngineerMaster = () => {
     joining_date: '',
     passport_picture: '',
     resume: '',
-    photo_proof: '',
-    address_proof: '',
+    photo_id_proof: '',
+    gov_address_proof: '',
     permanent_address: '',
     current_address: ''
   });
@@ -113,8 +116,8 @@ const EngineerMaster = () => {
         joining_date: response.data[0].joining_date,
         passport_picture: response.data[0].passport_picture,
         resume: response.data[0].resume,
-        photo_proof: response.data[0].photo_proof,
-        address_proof: response.data[0].address_proof,
+        photo_id_proof: response.data[0].photo_proof,
+        gov_address_proof: response.data[0].address_proof,
         permanent_address: response.data[0].permanent_address,
         current_address: response.data[0].current_address
       });
@@ -210,14 +213,89 @@ const EngineerMaster = () => {
         break;
     }
   };
-  const handleSearch = (e) => {
-    const value = e.target.value.toLowerCase();
-    setSearchTerm(value);
-    const filtered = users.filter((user) =>
-      user.title && user.title.toLowerCase().includes(value)
-    );
-    setFilteredUsers(filtered);
-    setCurrentPage(0);
+
+
+  const handleUploadChange = async (event) => {
+    const file = event.target.files[0];
+    setFormData((prev) => ({
+      ...prev,
+      photo_id_proof: file
+
+    }))
+
+  }
+
+  const handleUploadChange1 = async (event) => {
+    const file = event.target.files[0];
+    setFormData((prev) => ({
+      ...prev,
+      passport_picture: file
+
+    }))
+
+  }
+
+  const handleUploadChange2 = async (event) => {
+    const file = event.target.files[0];
+    setFormData((prev) => ({
+      ...prev,
+      resume: file
+
+    }))
+
+  }
+
+  const handleUploadChange3 = async (event) => {
+    const file = event.target.files[0];
+    setFormData((prev) => ({
+      ...prev,
+      gov_address_proof: file
+
+    }))
+
+  }
+
+  const handlePreviewClick = (photo_id_proof) => {
+
+    if (photo_id_proof) {
+      const fileUrl = `${Base_Url}/uploads/${photo_id_proof}`; // Make sure this URL is correct
+      setPreviewUrl(fileUrl);
+      setPreviewOpen(true);
+    } else {
+      alert('No file available for preview.');
+    }
+  };
+
+
+  const handlePreviewClick1 = (resume) => {
+
+    if (resume) {
+      const fileUrl = `${Base_Url}/uploads/${resume}`; // Make sure this URL is correct
+      setPreviewUrl(fileUrl);
+      setPreviewOpen(true);
+    } else {
+      alert('No file available for preview.');
+    }
+  };
+  const handlePreviewClick2 = (passport_picture) => {
+
+    if (passport_picture) {
+      const fileUrl = `${Base_Url}/uploads/${passport_picture}`; // Make sure this URL is correct
+      setPreviewUrl(fileUrl);
+      setPreviewOpen(true);
+    } else {
+      alert('No file available for preview.');
+    }
+  };
+  const handlePreviewClick3 = (gov_address_proof) => {
+
+    if (gov_address_proof) {
+      const fileUrl = `${Base_Url}/uploads/${gov_address_proof}`; // Make sure this URL is correct
+      setPreviewUrl(fileUrl);
+      setPreviewOpen(true);
+    } else {
+      alert('No file available for preview.');
+    }
   };
 
 
@@ -268,7 +346,7 @@ const EngineerMaster = () => {
       created_by,
     }
 
-    console.log(payload , "TTT")
+    console.log(payload, "TTT")
 
 
     const encryptedData = CryptoJS.AES.encrypt(
@@ -282,8 +360,26 @@ const EngineerMaster = () => {
       const confirmSubmission = window.confirm("Do you want to submit the data?");
       if (confirmSubmission) {
         if (isEdit) {
+
+          const formDataToSend = new FormData();
+          formDataToSend.append('encryptedData', encryptedData);
+
+          // Append files
+          if (formData.passport_picture) {
+            formDataToSend.append('passport_picture', formData.passport_picture);
+          }
+          if (formData.resume) {
+            formDataToSend.append('resume', formData.resume);
+          }
+          if (formData.photo_id_proof) {
+            formDataToSend.append('photo_id_proof', formData.photo_id_proof);
+          }
+          if (formData.gov_address_proof) {
+            formDataToSend.append('gov_address_proof', formData.gov_address_proof);
+          }
+
           // For update, include duplicate check
-          await axiosInstance.post(`${Base_Url}/putengineer`, { encryptedData }
+          await axiosInstance.post(`${Base_Url}/putengineer`, formDataToSend
             , {
               headers: {
                 Authorization: token,
@@ -307,8 +403,8 @@ const EngineerMaster = () => {
                 joining_date: '',
                 passport_picture: '',
                 resume: '',
-                photo_proof: '',
-                address_proof: '',
+                photo_id_proof: '',
+                gov_address_proof: '',
                 permanent_address: '',
                 current_address: ''
               })
@@ -320,11 +416,31 @@ const EngineerMaster = () => {
               }
             });
         } else {
+
+
+
+          const formDataToSend = new FormData();
+          formDataToSend.append('encryptedData', encryptedData);
+
+          // Append files
+          if (formData.passport_picture) {
+            formDataToSend.append('passport_picture', formData.passport_picture);
+          }
+          if (formData.resume) {
+            formDataToSend.append('resume', formData.resume);
+          }
+          if (formData.photo_id_proof) {
+            formDataToSend.append('photo_id_proof', formData.photo_id_proof);
+          }
+          if (formData.gov_address_proof) {
+            formDataToSend.append('gov_address_proof', formData.gov_address_proof);
+          }
           // For insert, include duplicate check
-          await axiosInstance.post(`${Base_Url}/postengineer`, { encryptedData }
+          await axiosInstance.post(`${Base_Url}/postengineer`, formDataToSend
             , {
               headers: {
                 Authorization: token,
+                'Content-Type': 'multipart/form-data'
               },
             }
           )
@@ -346,8 +462,8 @@ const EngineerMaster = () => {
                 joining_date: '',
                 passport_picture: '',
                 resume: '',
-                photo_proof: '',
-                address_proof: '',
+                photo_id_proof: '',
+                gov_address_proof: '',
                 permanent_address: '',
                 current_address: ''
               })
@@ -366,37 +482,6 @@ const EngineerMaster = () => {
   };
 
 
-  const deleted = async (id) => {
-    try {
-      const response = await axiosInstance.post(`${Base_Url}/deleteengineer`, { id }
-        , {
-          headers: {
-            Authorization: token,
-          },
-        }
-      );
-
-      fetchUsers();
-    } catch (error) {
-      console.error('Error deleting user:', error);
-    }
-  };
-
-  const edit = async (id) => {
-    try {
-      const response = await axiosInstance.get(`${Base_Url}/requestengineer/${id}`, {
-        headers: {
-          Authorization: token,
-        },
-      }
-      );
-      setFormData(response.data)
-      setIsEdit(true);
-      console.log(response.data);
-    } catch (error) {
-      console.error('Error editing user:', error);
-    }
-  };
 
 
   const indexOfLastUser = (currentPage + 1) * itemsPerPage;
@@ -505,8 +590,8 @@ const EngineerMaster = () => {
                           value={formData.employee_code}
                           onChange={handleChange}
                           disabled={employee ? true : false}
-                          >
-                            
+                        >
+
                           <option value="">Select</option>
                           <option value="LHI">LHI</option>
                           <option value="SRV">CSP</option>
@@ -689,60 +774,158 @@ const EngineerMaster = () => {
                       </div>
 
                       <div className="col-md-3">
-                        <label htmlFor="passportPictureInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>Passport Picture</label>
-                        <input
-                          type="file"  // Changed to "file" for uploading Passport Picture
-                          className="form-control"
-                          name="passport_picture"
-                          id="passportPictureInput"
-                          onChange={handleChange}
-                          accept="image/*"  // Accept any image format (can restrict to jpg, png, etc.)
-                        />
+                        <label htmlFor="passportPictureInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>
+                          Passport Picture
+                        </label>
+                        {/* Show eye icon button only in edit mode */}
+                        {isEditMode && (
+                          <button
+                            type="button"
+                            className="btn btn-outline-secondary"
+                            onClick={() => handlePreviewClick2(formData.passport_picture)}
+                            title="Preview"
+                            style={{
+                              border: 'none',    // Remove border
+                              background: 'transparent',  // Transparent background
+                              padding: '0', // Remove padding around the icon
+                              marginLeft: '10px'
+                            }}
+                          >
+                            <FaEye style={{ color: 'blue' }} />
+                          </button>
+                        )}
+                        <div className="d-flex align-items-center" style={{ gap: '10px' }}>
+                          <input
+                            type="file"  // Changed to "file" for uploading Passport Picture
+                            className="form-control"
+                            name="passport_picture"
+                            id="passportPictureInput"
+                            onChange={handleUploadChange1}
+                            accept="image/*"  // Accept any image format (can restrict to jpg, png, etc.)
+                            style={{ flex: 1 }}
+                          />
+                        </div>
+
                         {errors.passport_picture && <small className="text-danger">{errors.passport_picture}</small>}
                         {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
                       </div>
 
+
                       <div className="col-md-3">
-                        <label htmlFor="resumeInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>Resume</label>
-                        <input
-                          type="file"  // Changed to "file" for uploading a Resume
-                          className="form-control"
-                          name="resume"
-                          id="resumeInput"
-                          onChange={handleChange}
-                          accept=".pdf,.doc,.docx"  // Accept PDF, DOC, and DOCX formats for resumes (you can adjust as needed)
-                        />
+                        <label htmlFor="resumeInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>
+                          Resume
+                        </label>
+                        {/* Show eye icon button only in edit mode */}
+                        {isEditMode && (
+                          <button
+                            type="button"
+                            className="btn btn-outline-secondary"
+                            onClick={() => handlePreviewClick1(formData.resume)}
+                            title="Preview"
+                            style={{
+                              border: 'none',    // Remove border
+                              background: 'transparent',  // Transparent background
+                              padding: '0', // Remove padding around the icon
+                              marginLeft: '10px'
+                            }}
+                          >
+                            <FaEye style={{ color: 'blue' }} />
+                          </button>
+                        )}
+                        <div className="d-flex align-items-center" style={{ gap: '10px' }}>
+                          <input
+                            type="file"
+                            className="form-control"
+                            name="resume"
+                            id="resumeInput"
+                            onChange={handleUploadChange2}
+                            accept="image/*,application/pdf"  // Accept PDF, DOC, and DOCX formats for resumes (you can adjust as needed)
+                            style={{ flex: 1 }}
+                          />
+                        </div>
+
                         {errors.resume && <small className="text-danger">{errors.resume}</small>}
                         {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
                       </div>
 
                       <div className="col-md-3">
-                        <label htmlFor="photoIdProofInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>Photo ID Proof</label>
-                        <input
-                          type="file"  // Changed to "file" for uploading Photo ID Proof
-                          className="form-control"
-                          name="photo_proof"
-                          id="photoIdProofInput"
-                          onChange={handleChange}
-                          accept="image/*,application/pdf"  // Accept image files or PDF formats for ID proof (customize as needed)
-                        />
-                        {errors.photo_proof && <small className="text-danger">{errors.photo_proof}</small>}
+                        <label htmlFor="photoIdProofInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>
+                          Photo ID Proof
+                          {/* Show eye icon button only in edit mode */}
+                          {isEditMode && (
+                            <button
+                              type="button"
+                              className="btn btn-outline-secondary"
+                              onClick={() => handlePreviewClick(formData.photo_id_proof)}
+                              title="Preview"
+                              style={{
+                                border: 'none',    // Remove border
+                                background: 'transparent',  // Transparent background
+                                padding: '0', // Remove padding around the icon
+                                marginLeft: '10px'
+                              }}
+                            >
+                              <FaEye style={{ color: 'blue' }} />
+                            </button>
+                          )}
+                        </label>
+                        <div className="d-flex align-items-center" style={{ gap: '10px' }}>
+                          <input
+                            type="file"
+                            className="form-control"
+                            name="photo_id_proof"
+                            id="photoIdProofInput"
+                            onChange={handleUploadChange}
+                            accept="image/*,application/pdf"
+                            style={{ flex: 1 }}
+                          />
+
+
+                        </div>
+
+                        {errors.photo_id_proof && <small className="text-danger">{errors.photo_id_proof}</small>}
+                        {duplicateError && <small className="text-danger">{duplicateError}</small>}
+                      </div>
+
+
+
+                      <div className="col-md-3">
+                        <label htmlFor="govAddressProofInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>
+                          Govt. Address Proof
+                        </label>
+                        {/* Show eye icon button only in edit mode */}
+                        {isEditMode && (
+                          <button
+                            type="button"
+                            className="btn btn-outline-secondary"
+                            onClick={() => handlePreviewClick3(formData.gov_address_proof)}
+                            title="Preview"
+                            style={{
+                              border: 'none',    // Remove border
+                              background: 'transparent',  // Transparent background
+                              padding: '0', // Remove padding around the icon
+                              marginLeft: '10px'
+                            }}
+                          >
+                            <FaEye style={{ color: 'blue' }} />
+                          </button>
+                        )}
+                        <div className="d-flex align-items-center" style={{ gap: '10px' }}>
+                          <input
+                            type="file"  // Changed to "file" for uploading Govt. Address Proof
+                            className="form-control"
+                            name="gov_address_proof"
+                            id="govAddressProofInput"
+                            onChange={handleUploadChange3}
+                            accept="image/*,application/pdf"  // Accepts image files and PDFs (e.g., utility bills, bank statements)
+                            style={{ flex: 1 }}
+                          />
+                        </div>
+
+                        {errors.gov_address_proof && <small className="text-danger">{errors.gov_address_proof}</small>}
                         {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
                       </div>
 
-                      <div className="col-md-3">
-                        <label htmlFor="govAddressProofInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>Govt. Address Proof</label>
-                        <input
-                          type="file"  // Changed to "file" for uploading Govt. Address Proof
-                          className="form-control"
-                          name="address_proof"
-                          id="govAddressProofInput"
-                          onChange={handleChange}
-                          accept="image/*,application/pdf"  // Accepts image files and PDFs (e.g., utility bills, bank statements)
-                        />
-                        {errors.address_proof && <small className="text-danger">{errors.address_proof}</small>}
-                        {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
-                      </div>
 
                       <div className="col-md-4">
                         <label htmlFor="permanentAddressInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>Permanent Address</label>
@@ -779,6 +962,55 @@ const EngineerMaster = () => {
                         {isEdit ? "Update" : "Submit"}
                       </button>
                     </div> : null}
+                    {previewOpen && (
+                      <div
+                        style={{
+                          position: 'fixed',
+                          top: 0, left: 0, right: 0, bottom: 0,
+                          backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                          display: 'flex',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          zIndex: 9999
+                        }}
+                        onClick={() => setPreviewOpen(false)}
+                      >
+                        <div
+                          style={{
+                            background: 'white',
+                            padding: '1rem',
+                            borderRadius: '10px',
+                            maxWidth: '90%',
+                            maxHeight: '90%',
+                            overflow: 'auto',
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <button
+                            style={{ float: 'right', marginBottom: '10px', background: 'transparent', border: 'none', fontSize: '20px' }}
+                            onClick={() => setPreviewOpen(false)}
+                          >
+                            ✖
+                          </button>
+
+                          {previewUrl.endsWith('.pdf') ? (
+                            <iframe
+                              src={previewUrl}
+                              title="Preview PDF"
+                              width="600"
+                              height="500"
+                            />
+                          ) : (
+                            <img
+                              src={previewUrl}
+                              alt="Preview"
+                              style={{ maxWidth: '100%', maxHeight: '80vh' }}
+                            />
+                          )}
+                        </div>
+                      </div>
+                    )}
+
                   </form>
                 </div>
               </div>

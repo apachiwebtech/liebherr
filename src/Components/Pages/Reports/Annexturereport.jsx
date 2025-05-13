@@ -29,7 +29,7 @@ const AnnextureReport = () => {
     const fetchMsps = async () => {
 
         try {
-            const response = await axiosInstance.post(`${Base_Url}/getmsplist`, {data : "1"},{
+            const response = await axiosInstance.post(`${Base_Url}/getmsplist`, { data: "1" }, {
                 headers: {
                     Authorization: token
                 },
@@ -245,6 +245,7 @@ const AnnextureReport = () => {
                     <div className="col-12">
                         <div className="card mt-3 mb-3">
                             <div className="card-body">
+                                <h5>Annexture   Report :</h5>
 
                                 <div className="mb-3">
                                     <label>Select MSP</label>

@@ -5,7 +5,7 @@ import { Avatar } from '@mui/material';
 import { App_Url, Base_Url, secretKey } from '../Utils/Base_Url';
 import CryptoJS from 'crypto-js';
 import axios from "axios";
-import { AllMasterpage, AnnextureReport, BussinessArray, CallStatusArray, ClaimReport, customerArray, EnquiryArray, FaultArray, FeedbackReport, FranchiseArray, LhiArray, locationArray, PincodeAlloArray, ProductArray, QuotationArray, RateCardArray, ReportsArray, ServiceContract, SpareArray, TicketArray, TicketReport, ShipmentArray, EngineerArray, FaultReportArray, FaqArray, AssetArray } from '../Utils/PageArray';
+import { AllMasterpage, AnnextureReport, BussinessArray, CallStatusArray, ClaimReport, customerArray, EnquiryArray, FaultArray, FeedbackReport, FranchiseArray, LhiArray, locationArray, PincodeAlloArray, ProductArray, QuotationArray, RateCardArray, ReportsArray, ServiceContract, SpareArray, TicketArray, TicketReport, ShipmentArray, EngineerArray, FaultReportArray, FaqArray, AssetArray, SpareReportArray } from '../Utils/PageArray';
 
 
 export function Siteheader() {
@@ -82,6 +82,7 @@ export function Siteheader() {
       faultreportid: FaultReportArray,
       faqpageid: FaqArray,
       assetreportid: AssetArray,
+      sparereportid: SpareReportArray,
     }
 
 
@@ -263,7 +264,10 @@ export function Siteheader() {
                       <Link className="dropdown-item" to="/faultcodereport">Fault Code Report</Link></li>}
                   {status.assetreport == 1 &&
                     <li>
-                      <Link className="dropdown-item" to="/faultcodereport">All Asset Report</Link></li>}
+                      <Link className="dropdown-item" to="/assetreport">All Asset Report</Link></li>}
+                  {status.sparereport == 1 &&
+                    <li>
+                      <Link className="dropdown-item" to="/sparereport">Spare Consumption Report</Link></li>}
                 </ul>
               </li>
             }
@@ -288,9 +292,9 @@ export function Siteheader() {
 
 
 
-          <div className="dropdown text-end d-flex  justify-content-center" style={{alignItems : "center"}}>
+          <div className="dropdown text-end d-flex  justify-content-center" style={{ alignItems: "center" }}>
             <div className='mx-2'>
-              <p className='m-0'>Welcome User , <b style={{textTransform : "capitalize"}}>{Username}</b></p>
+              <p className='m-0'>Welcome User , <b style={{ textTransform: "capitalize" }}>{Username}</b></p>
             </div>
             <Link className="btn btn-primary mr-2 newcomplaint text-light" onClick={redirect}>New Ticket</Link>
 

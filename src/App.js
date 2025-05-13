@@ -166,6 +166,8 @@ import Faultcodereport from './Components/Pages/Reports/Faultcodereport';
 import { CspAccess } from './Components/Pages/Master/CspAccess';
 import { MspAccess } from './Components/Pages/Master/MspAccess';
 import { Faq } from './Components/Pages/Faq/Faq';
+import AssetReport from './Components/Pages/Reports/AssetReport';
+import SpareReport from './Components/Pages/Reports/SpareReport';
 
 
 
@@ -928,6 +930,14 @@ const Router = createBrowserRouter([
       {
         path: "/faultcodereport",
         element: <ProtectedRoute><Faultcodereport /></ProtectedRoute>
+      },
+       {
+        path: "/assetreport",
+        element: <ProtectedRoute><AssetReport /></ProtectedRoute>
+      },
+       {
+        path: "/sparereport",
+        element: <ProtectedRoute><SpareReport /></ProtectedRoute>
       },
       {
         path: "/subcallstatus",

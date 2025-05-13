@@ -51,5 +51,7 @@ export const FaqArray = "63"
 
 export const AssetArray = "64"
 
+export const SpareReportArray = "65"
+
 
 
