@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { Autocomplete, Radio, TextField } from '@mui/material';
+import { Autocomplete, Button, Radio, TextField } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { getRoleData } from '../../Store/Role/role-action';
@@ -9,6 +10,11 @@ import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 import { SyncLoader } from 'react-spinners';
 import toast, { Toaster } from 'react-hot-toast';
 import CryptoJS from 'crypto-js';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 
 
 const Roleassign = () => {
@@ -16,20 +22,23 @@ const Roleassign = () => {
     const { loaders, axiosInstance } = useAxiosLoader();
     const [selectedOption, setSelectedOption] = useState(null);
     const [role, setRoleData] = useState([])
+    const [description, setDescription] = useState('');
     const [rolePages, setRolePages] = useState([])
     const [roleId, setRoleId] = useState(false)
+    const [open2, setOpen2] = React.useState(false);
+    const [selectedPageId, setSelectedPageId] = useState(null);
     const token = localStorage.getItem("token");
     const notify = () => toast.success('Data Submitted..');
     // Function to handle changes in the enable/disable state for an ID
     const handleRadioChange = (event, indexToUpdate) => {
         const newAccessid = +event.target.value;
-        const updatedRow = { 
-            ...rolePages[indexToUpdate], 
-            accessid: newAccessid 
+        const updatedRow = {
+            ...rolePages[indexToUpdate],
+            accessid: newAccessid
         };
 
-        console.log(updatedRow.id[0] , "@#$%^")
-    
+        console.log(updatedRow.id[0], "@#$%^")
+
         // Convert all values to strings before sending
         const formattedRow = {
             id: updatedRow.id[0].toString(),
@@ -38,23 +47,23 @@ const Roleassign = () => {
             accessid: updatedRow.accessid.toString(),
             deleted: updatedRow.deleted.toString(),
         };
-    
+
         // Send only the updated row to the backend
         axiosInstance.post(`${Base_Url}/assign_role`, formattedRow, {
             headers: { Authorization: token },
         })
-        .then((res) => {
-            toast.success('Role updated successfully!');
-            
-            // Update local state to reflect the change
-            setRolePages(prevState => prevState.map((item, index) => 
-                index === indexToUpdate ? updatedRow : item
-            ));
-        })
-        .catch((err) => {
-            console.error('Error updating role:', err);
-            toast.error('Failed to update role.');
-        });
+            .then((res) => {
+                toast.success('Role updated successfully!');
+
+                // Update local state to reflect the change
+                setRolePages(prevState => prevState.map((item, index) =>
+                    index === indexToUpdate ? updatedRow : item
+                ));
+            })
+            .catch((err) => {
+                console.error('Error updating role:', err);
+                toast.error('Failed to update role.');
+            });
     };
 
 
@@ -95,6 +104,28 @@ const Roleassign = () => {
         setRolePages([])
     };
 
+    const handleupdatedescription = () => {
+        const data = {
+            id: selectedPageId, // You need to track this
+            description: description,
+        };
+
+        axiosInstance.post(`${Base_Url}/updatedescription`, data, {
+            headers: {
+                Authorization: token
+            }
+        })
+            .then((res) => {
+                toast.success('Description updated!');
+                setOpen2(false);
+                getRolePages(selectedOption.id); // Refresh data
+            })
+            .catch((err) => {
+                console.log(err)
+                toast.error("Failed to update description");
+            });
+    };
+
     async function getRolePages(rid) {
         axiosInstance.post(`${Base_Url}/role_pages`, { role_id: rid }, {
             headers: {
@@ -111,6 +142,16 @@ const Roleassign = () => {
                 console.log(err)
             })
     }
+
+    const handleClickOpen2 = (pageId, desc) => {
+        setDescription(desc);
+        setSelectedPageId(pageId);
+        setOpen2(true);
+    };
+
+    const handleClose2 = () => {
+        setOpen2(false);
+    };
 
 
 
@@ -137,7 +178,7 @@ const Roleassign = () => {
     useEffect(() => {
         dispatch(getRoleData(roledata))
     }, [])
-console.log (roleaccess, "roleaccess")
+    console.log(roleaccess, "roleaccess")
 
     return (
         <div className="tab-content">
@@ -150,7 +191,7 @@ console.log (roleaccess, "roleaccess")
                 reverseOrder={false} />
 
             <Lhiusertabs />
-            {roleaccess > 1 ?   <div className="row mp0">
+            {roleaccess > 1 ? <div className="row mp0">
                 <div className="col-12">
                     <div className="card mb-3 tab_box">
                         <div
@@ -177,7 +218,7 @@ console.log (roleaccess, "roleaccess")
                                         />
                                     </div>
 
-                   
+
                                 </div>
 
                                 {roleId === true && <div class="form-group" >
@@ -185,23 +226,27 @@ console.log (roleaccess, "roleaccess")
                                     <table class="table table-bordered">
                                         <thead>
                                             <tr>
-                                                <th>
+                                                <th style={{ width: '20%' }}>
                                                     Role Rights
                                                 </th>
-                                                <th>
+                                                <th style={{ width: '30%' }}>
+                                                    Description
+
+                                                </th>
+                                                <th style={{ width: '8%' }}>
                                                     Block
                                                 </th>
 
-                                                <th>
+                                                <th style={{ width: '8%' }}>
                                                     View
                                                 </th>
-                                                <th>
+                                                <th style={{ width: '8%' }}>
                                                     Add
                                                 </th>
-                                                <th>
+                                                <th style={{ width: '8%' }}>
                                                     Edit
                                                 </th>
-                                                <th>
+                                                <th style={{ width: '8%' }}>
                                                     Full
                                                 </th>
                                             </tr>
@@ -212,6 +257,41 @@ console.log (roleaccess, "roleaccess")
                                                     <tr key={index}>
                                                         <td>
                                                             {item.pagename}
+                                                        </td>
+                                                        <td>
+                                                            <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>{item.description}
+                                                                {roleaccess > 4 ? <span className="mx-1">
+                                                                    <EditIcon
+                                                                        onClick={() => handleClickOpen2(item.pageid, item.description)} // Changed from item.id[0]
+                                                                        style={{ fontSize: "13px", cursor: "pointer" }}
+                                                                    /></span> : null}</p>
+                                                            <Dialog
+                                                                open={open2}
+                                                                onClose={handleClose2}
+                                                                aria-labelledby="alert-dialog-title"
+                                                                aria-describedby="alert-dialog-description"
+                                                            >
+                                                                <DialogTitle id="alert-dialog-title">
+                                                                    {"Update Description"}
+                                                                </DialogTitle>
+                                                                <DialogContent sx={{ height: "300px", width: "500px" }}>
+                                                                    <TextField
+                                                                        multiline
+                                                                        fullWidth
+                                                                        value={description}
+                                                                        onChange={(e) => setDescription(e.target.value)}
+                                                                        label="Description"
+                                                                        variant="outlined"
+                                                                        rows={10}
+                                                                    />
+                                                                </DialogContent>
+                                                                <DialogActions>
+                                                                    <Button onClick={handleupdatedescription} autoFocus>
+                                                                        Update
+                                                                    </Button>
+                                                                </DialogActions>
+                                                            </Dialog>
+
                                                         </td>
                                                         <td>
                                                             <Radio
@@ -266,7 +346,7 @@ console.log (roleaccess, "roleaccess")
                     </div>
                 </div>
             </div> : null}
-            </div>
+        </div>
     );
 };
 

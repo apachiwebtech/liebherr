@@ -5,7 +5,7 @@ import { Avatar } from '@mui/material';
 import { App_Url, Base_Url, secretKey } from '../Utils/Base_Url';
 import CryptoJS from 'crypto-js';
 import axios from "axios";
-import { AllMasterpage, AnnextureReport, BussinessArray, CallStatusArray, ClaimReport, customerArray, EnquiryArray, FaultArray, FeedbackReport, FranchiseArray, LhiArray, locationArray, PincodeAlloArray, ProductArray, QuotationArray, RateCardArray, ReportsArray, ServiceContract, SpareArray, TicketArray, TicketReport, ShipmentArray ,EngineerArray} from '../Utils/PageArray';
+import { AllMasterpage, AnnextureReport, BussinessArray, CallStatusArray, ClaimReport, customerArray, EnquiryArray, FaultArray, FeedbackReport, FranchiseArray, LhiArray, locationArray, PincodeAlloArray, ProductArray, QuotationArray, RateCardArray, ReportsArray, ServiceContract, SpareArray, TicketArray, TicketReport, ShipmentArray, EngineerArray, FaultReportArray, FaqArray, AssetArray } from '../Utils/PageArray';
 
 
 export function Siteheader() {
@@ -16,6 +16,7 @@ export function Siteheader() {
   const [enquirypage, setEnquirypage] = useState([])
   const [quotationpage, setQuotationpage] = useState([])
   const [reportpage, setReportpage] = useState([])
+  const [faqpage, setFaqpage] = useState([])
   const [status, setStatus] = useState([])
 
 
@@ -77,7 +78,10 @@ export function Siteheader() {
       feedbackreportid: FeedbackReport,
       annexureid: AnnextureReport,
       shipmentpageid: ShipmentArray,
-      engineermasterpageid : EngineerArray,
+      engineermasterpageid: EngineerArray,
+      faultreportid: FaultReportArray,
+      faqpageid: FaqArray,
+      assetreportid: AssetArray,
     }
 
 
@@ -92,6 +96,7 @@ export function Siteheader() {
         setQuotationpage(res.data.quotationpage)
         setReportpage(res.data.reportpage)
         setTicketpage(res.data.ticketpage)
+        setFaqpage(res.data.faqpage)
         setStatus(res.data)
       })
       .then((err) => {
@@ -253,7 +258,27 @@ export function Siteheader() {
                   {status.annexure == 1 &&
                     <li>
                       <Link className="dropdown-item" to="/annexturelist">Annexture Report</Link></li>}
+                  {status.faultreport == 1 &&
+                    <li>
+                      <Link className="dropdown-item" to="/faultcodereport">Fault Code Report</Link></li>}
+                  {status.assetreport == 1 &&
+                    <li>
+                      <Link className="dropdown-item" to="/faultcodereport">All Asset Report</Link></li>}
                 </ul>
+              </li>
+            }
+
+            {faqpage == 1 &&
+              <li className="nav-item dropdown">
+                <Link className={`nav-link site `}
+                  to={`/faq`}
+                  id="navbarDropdown"
+                  role="button"
+                  aria-expanded="false"
+                >
+                  FAQ
+                </Link>
+
               </li>
             }
 

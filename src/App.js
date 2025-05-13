@@ -161,7 +161,11 @@ import { Msl } from './Components/Pages/Master/Msl';
 import { Mslmsp } from './Components/Pages/Master/Mslmsp';
 import { Mslcsp } from './Components/Pages/Master/Mslcsp';
 import AddMsl from './Components/Pages/Master/AddMsl';
-import {CspGrn} from './Components/Pages/Master/CspGrn';
+import { CspGrn } from './Components/Pages/Master/CspGrn';
+import Faultcodereport from './Components/Pages/Reports/Faultcodereport';
+import { CspAccess } from './Components/Pages/Master/CspAccess';
+import { MspAccess } from './Components/Pages/Master/MspAccess';
+import { Faq } from './Components/Pages/Faq/Faq';
 
 
 
@@ -320,6 +324,7 @@ const Router = createBrowserRouter([
         path: "/msp/roleright",
         element: <ProtectedRoute><MspAddtab /></ProtectedRoute>,
       },
+      
 
 
     ]
@@ -642,6 +647,16 @@ const Router = createBrowserRouter([
 
       },
       {
+        path: "/cspaccess",
+        element: <ProtectedRoute><CspAccess /></ProtectedRoute>,
+
+      },
+            {
+        path: "/mspaccess",
+        element: <ProtectedRoute><MspAccess /></ProtectedRoute>,
+
+      },
+      {
         path: "/lhiusertabs",
         element: <ProtectedRoute><Lhiusertabs /></ProtectedRoute>,
 
@@ -862,6 +877,10 @@ const Router = createBrowserRouter([
         element: <ProtectedRoute><EnquiryForm /></ProtectedRoute>
       },
       {
+        path: "/faq",
+        element: <ProtectedRoute><Faq /></ProtectedRoute>
+      },
+      {
         path: "enuiry",
         element: <ProtectedRoute><EnquiryTabs /></ProtectedRoute>
       },
@@ -905,6 +924,10 @@ const Router = createBrowserRouter([
       {
         path: "/annexturelist",
         element: <ProtectedRoute><AnnextureReport /></ProtectedRoute>
+      },
+      {
+        path: "/faultcodereport",
+        element: <ProtectedRoute><Faultcodereport /></ProtectedRoute>
       },
       {
         path: "/subcallstatus",

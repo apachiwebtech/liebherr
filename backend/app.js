@@ -2246,7 +2246,22 @@ app.get("/downloadcustomerexcel", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
 
     // Fetch all customers who are not deleted
-    const result = await pool.request().query(`SELECT * FROM awt_customer WHERE deleted = 0`);
+    const result = await pool.request().query(`SELECT 
+    c.*, 
+    s.serial_nos
+FROM 
+    awt_customer AS c
+LEFT JOIN (
+    SELECT 
+        CustomerID, 
+        STRING_AGG(CAST(serial_no AS VARCHAR(MAX)), ',') AS serial_nos
+    FROM 
+        awt_uniqueproductmaster
+    GROUP BY 
+        CustomerID
+) AS s ON s.CustomerID = c.customer_id
+WHERE 
+    c.deleted = 0`);
     const customers = result.recordset;
 
     // Create a new workbook and worksheet
@@ -11992,7 +12007,7 @@ app.get("/getrole", authenticateToken, async (req, res) => {
     const sql = `
       SELECT *
       FROM role_master
-      WHERE deleted = 0
+      WHERE  deleted = 0
     `;
 
     // Execute the query
@@ -12268,7 +12283,7 @@ app.post('/getpageroledata', authenticateToken, async (req, res) => {
     masterpageid, ticketpageid, quotationpageid, enquirypageid, reportpageid,
     locationpageid, pincodepageid, productpageid, customerpageid, bussinesspageid,
     franchpageid, callstatuspageid, lhiuserpageid, servicepageid, faultpageid,
-    ratepageid, sparearray, ticketreportid, claimreportid, feedbackreportid, annexureid, shipmentpageid, engineermasterpageid
+    ratepageid, sparearray, ticketreportid, claimreportid, feedbackreportid, annexureid, shipmentpageid, engineermasterpageid, faultreportid, faqpageid, assetreportid
   } = req.body;
 
 
@@ -12300,7 +12315,10 @@ app.post('/getpageroledata', authenticateToken, async (req, res) => {
     feedbackreport: parseIds(feedbackreportid),
     annexure: parseIds(annexureid),
     shipmentpage: parseIds(shipmentpageid),
-    engineermasterpage: parseIds(engineermasterpageid)
+    engineermasterpage: parseIds(engineermasterpageid),
+    faultreport: parseIds(faultreportid),
+    faqpage: parseIds(faqpageid),
+    assetreport: parseIds(assetreportid)
   };
 
   try {
@@ -12843,7 +12861,7 @@ app.post('/getcallstatusroledata', authenticateToken, async (req, res) => {
 });
 
 app.post('/getlhiuserroledata', authenticateToken, async (req, res) => {
-  const { role, lhiuserpage, rolepage, roleassignpage } = req.body;
+  const { role, lhiuserpage, rolepage, roleassignpage, mspaccesspage, cspaccesspage } = req.body;
 
   // Function to convert comma-separated strings into arrays
   const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
@@ -12852,7 +12870,9 @@ app.post('/getlhiuserroledata', authenticateToken, async (req, res) => {
   const pageTypes = {
     lhiuserpage: parseIds(lhiuserpage),
     rolepage: parseIds(rolepage),
-    roleassignpage: parseIds(roleassignpage)
+    roleassignpage: parseIds(roleassignpage),
+    mspaccesspage: parseIds(mspaccesspage),
+    cspaccesspage: parseIds(cspaccesspage),
   };
 
   try {
@@ -18696,6 +18716,116 @@ FROM Shipment_Parts AS s
 LEFT JOIN Address_code AS a ON a.address_code = s.Address_code 
 WHERE s.deleted = 0;
 `);
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
+app.post("/updatedescription", authenticateToken, async (req, res) => {
+  const { id, description } = req.body;
+
+  try {
+    const pool = await poolPromise;
+
+    const updateQuery = `
+      UPDATE page_master 
+      SET description = @description 
+      WHERE id = @id
+    `;
+
+    const result = await pool.request()
+      .input('id', id)
+      .input('description', description)
+      .query(updateQuery);
+
+    return res.json({ message: "Description updated successfully" });
+  } catch (err) {
+    console.error("Database Error:", err);
+    return res.status(500).json({ error: "Failed to update description", details: err.message });
+  }
+});
+
+
+app.post("/getfaultcodedump", authenticateToken, async (req, res) => {
+
+  const { startDate, endDate, licare_code } = req.body;
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    let sql;
+
+
+    // sql = `Select id,ticket_no, ticket_date,customer_id,customer_name,customer_mobile,alt_mobile,customer_email,ModelNumber,serial_no, address, region, state, city, area, pincode, mother_branch,sevice_partner,child_service_partner, msp, csp, sales_partner, assigned_to, engineer_code, engineer_id, ticket_type, call_type , sub_call_status, call_status, warranty_status, purchase_date, mode_of_contact, customer_class, call_priority, closed_date,group_code,defect_type,site_defect,activity_code,  created_date, created_by,deleted From complaint_ticket where deleted = 0  AND ticket_date >= '${startDate}' AND ticket_date <= '${endDate}' `
+
+
+    sql = `SELECT
+ct.ticket_no as TicketNumber,
+g.defectgrouptitle as FaultGroup,
+t.defect_title as FaultType,
+s.dsite_title as FaultLocation,
+a.title  as Activity 
+FROM complaint_ticket ct 
+LEFT JOIN  awt_defectgroup as g on g.defectgroupcode = ct.group_code 
+LEFT JOIN  awt_typeofdefect as t on t.defect_code = ct.defect_type
+LEFT JOIN awt_site_defect as s on s.dsite_code = ct.site_defect
+LEFT JOIN awt_activity as a on a.code = ct.activity_code
+WHERE ct.deleted = 0 
+  AND ct.ticket_date >= '${startDate}' 
+  AND ct.ticket_date <= '${endDate}'  `
+
+
+    sql += ` ORDER BY RIGHT(ct.ticket_no , 4) ASC`;
+
+
+
+
+
+    const result = await pool.request().query(sql);
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
+
+app.post("/getassetreportdump", authenticateToken, async (req, res) => {
+
+  const { startDate, endDate, licare_code } = req.body;
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    let sql;
+
+
+    // sql = `Select id,ticket_no, ticket_date,customer_id,customer_name,customer_mobile,alt_mobile,customer_email,ModelNumber,serial_no, address, region, state, city, area, pincode, mother_branch,sevice_partner,child_service_partner, msp, csp, sales_partner, assigned_to, engineer_code, engineer_id, ticket_type, call_type , sub_call_status, call_status, warranty_status, purchase_date, mode_of_contact, customer_class, call_priority, closed_date,group_code,defect_type,site_defect,activity_code,  created_date, created_by,deleted From complaint_ticket where deleted = 0  AND ticket_date >= '${startDate}' AND ticket_date <= '${endDate}' `
+
+
+    sql = `SELECT
+ct.ticket_no as TicketNumber,
+g.defectgrouptitle as FaultGroup,
+t.defect_title as FaultType,
+s.dsite_title as FaultLocation,
+a.title  as Activity 
+FROM complaint_ticket ct 
+LEFT JOIN  awt_defectgroup as g on g.defectgroupcode = ct.group_code 
+LEFT JOIN  awt_typeofdefect as t on t.defect_code = ct.defect_type
+LEFT JOIN awt_site_defect as s on s.dsite_code = ct.site_defect
+LEFT JOIN awt_activity as a on a.code = ct.activity_code
+WHERE ct.deleted = 0 
+  AND ct.ticket_date >= '${startDate}' 
+  AND ct.ticket_date <= '${endDate}'  `
+
+
+    sql += ` ORDER BY RIGHT(ct.ticket_no , 4) ASC`;
+
+
+
+
+
+    const result = await pool.request().query(sql);
     return res.json(result.recordset);
   } catch (err) {
     console.error(err);

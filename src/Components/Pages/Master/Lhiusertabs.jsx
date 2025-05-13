@@ -38,6 +38,9 @@ function Lhiusertabs() {
       lhiuserpage: '27',
       rolepage: '28',
       roleassignpage: '29',
+      mspaccesspage: '61',
+      cspaccesspage: '62',
+
     }
 
 
@@ -134,6 +137,30 @@ function Lhiusertabs() {
 
                       >
                         ROLE ASSIGN
+                      </button></Link>
+                    </li>
+                  }
+
+                  {status.mspaccesspage == 1 &&
+                    <li className="nav-item">
+                      <Link to={`/mspaccess`}><button
+                        className={`nav-link ${activeTab === "/mspaccess" ? "active" : "onClick={() => setActiveTab('mspaccess')}"
+                          }`}
+
+                      >
+                        MSP ACCESS
+                      </button></Link>
+                    </li>
+                  }
+
+                  {status.cspaccesspage == 1 &&
+                    <li className="nav-item">
+                      <Link to={`/cspaccess`}><button
+                        className={`nav-link ${activeTab === "/cspaccess" ? "active" : "onClick={() => setActiveTab('cspaccess')}"
+                          }`}
+
+                      >
+                        CSP ACCESS
                       </button></Link>
                     </li>
                   }

@@ -7,7 +7,7 @@ export const QuotationArray = "44,45"
 
 export const EnquiryArray = "54,55"
 
-export const ReportsArray = "46,47,52,53"
+export const ReportsArray = "46,47,52,53,60"
 
 export const locationArray = "1,2,3,4,5,6"
 
@@ -23,7 +23,7 @@ export const FranchiseArray = "19,20,21,22"
 
 export const CallStatusArray = "51,26"
 
-export const LhiArray = "27,28,29"
+export const LhiArray = "27,28,29,61,62"
 
 export const ServiceContract = "30,31"
 
@@ -44,6 +44,12 @@ export const AnnextureReport = '53'
 export const ShipmentArray = "49,50"
 
 export const EngineerArray = "23,24,56"
+
+export const FaultReportArray = "60"
+
+export const FaqArray = "63"
+
+export const AssetArray = "64"
 
 
 
