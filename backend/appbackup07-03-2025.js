@@ -1,31 +1,42 @@
-const sql = require("mssql");
+require('dotenv').config();
 const express = require('express');
+const sql = require("mssql");
 const app = express();
-const cors = require('cors');
-const Category = require("./Routes/ProductMaster/Category");
+const PORT = process.env.PORT;
 const multer = require("multer");
 const bodyParser = require("body-parser");
 const path = require("path");
+const cors = require('cors');
 const fs = require("fs");
 const jwt = require("jsonwebtoken");
-const MobApp = require('./Routes/MobApp')
+const MobApp = require("./Routes/MobApp");
 const fetchdata = require('./fetchdata')
-const RateCardExcel = require('./Routes/Utils/RateCardExcel')
+// const RateCardExcel = require('./Routes/Utils/RateCardExcel')
 const CryptoJS = require('crypto-js');
 const nodemailer = require('nodemailer');
 const axios = require("axios");
+const https = require('https');
+const ExcelJS = require('exceljs');
 
-
-require('dotenv').config();
+// Secret key for JWT
 const JWT_SECRET = process.env.JWT_SECRET;
 const API_KEY = process.env.API_KEY;
 const secretKey = process.env.SECRET_KEY
 
-app.use(cors({ origin: "*" }));
-app.use(express.json({ limit: '1000mb' }));
-app.use(express.urlencoded({ extended: true, limit: '1000mb' }));
-app.use(bodyParser.urlencoded({ extended: true }));
+// Create HTTPS agent with self-signed certificate
+const httpsAgent = new https.Agent({
+  ca: fs.readFileSync(process.env.CERT_PATH), // Adjust path accordingly
+  rejectUnauthorized: false // Set to true if you trust the cert (recommended for production)
+});
 
+//middleware
+app.use(cors({ origin: process.env.ORIGIN }));
+//app.use(cors({ origin: "*" }));
+
+app.use(express.json({ limit: '500mb', strict: false }));
+app.use(express.urlencoded({ extended: true, limit: '500mb' }));
+app.use(bodyParser.urlencoded({ extended: true }));
+//app.use(fileUpload());
 
 const authenticateToken = (req, res, next) => {
 
@@ -43,7 +54,6 @@ const authenticateToken = (req, res, next) => {
     req.user = user; // Attach user info to request
     next();
   });
-
 };
 
 function decryptData(encryptedData, secretKey) {
@@ -62,23 +72,14 @@ function decryptData(encryptedData, secretKey) {
   }
 }
 
-// this is for use routing
-
-
-app.use("/", Category);
 app.use("/", MobApp);
 app.use("/", fetchdata);
-app.use("/", RateCardExcel)
-
-
-
-const uploadDir = path.join(__dirname, 'uploads');
-
+// app.use("/", RateCardExcel)
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, uploadDir); // Absolute path to 'uploads' folder
+    cb(null, "./uploads"); // Folder where images will be saved
   },
   filename: (req, file, cb) => {
     cb(null, `${Date.now()}-${file.originalname}`);
@@ -86,7 +87,7 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
-//
+
 const dbConfig = {
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
@@ -104,13 +105,40 @@ const poolPromise = new sql.ConnectionPool(dbConfig).connect()
 
   .catch(err => console.error("Database Connection Pool Error:", err));
 
-
-
-
-app.listen(8081, () => {
-  console.log('Server is running on http://localhost:8081');
+// Start server
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
 });
 
+//Country Master Start
+//app.get("/", async (req, res) => {
+//  try {
+//     Use the poolPromise to get the connection pool
+//    const pool = await poolPromise;
+//   const result = await pool.request().query("SELECT * FROM awt_country WHERE deleted = 0");
+//    return res.json(result.recordset);
+//  } catch (err) {
+//    console.error(err);
+//    return res.status(500).json({ error: 'An error occurred while fetching data' });
+//  }
+//});
+
+app.get("/", async (req, res) => {
+  try {
+    // Check if the database is connected
+    await poolPromise; // This will throw an error if not connected
+    return res.json({
+      message: 'Welcome to our Liebherr API!',
+      databaseStatus: 'Database is running'
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      error: 'An error occurred',
+      databaseStatus: 'Database connection error'
+    });
+  }
+});
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -119,7 +147,6 @@ const transporter = nodemailer.createTransport({
     pass: 'zazb zhkl khsn jehv', // Replace with your email password or app password
   },
 });
-
 
 app.get('/send-otp', authenticateToken, async (req, res) => {
   // const { email, otp } = req.body;
@@ -2055,7 +2082,50 @@ app.get("/getproductlist", authenticateToken, async (req, res) => {
     return res.status(500).json({ error: "Database error occurred" });
   }
 });
+
 // Product list end
+
+app.get("/getproductexcel", authenticateToken, async (req, res) => {
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+    const {
+      page = 1, // Default to page 1 if not provided
+      pageSize = 10, // Default to 10 items per page if not provided
+    } = req.query;
+
+    // Directly use the query (no parameter binding)
+    let sql = `SELECT m.* FROM product_master as m WHERE 1= 1 `;
+
+
+    // Pagination logic: Calculate offset based on the page number
+    const offset = (page - 1) * pageSize;
+
+    // Add pagination to the SQL query (OFFSET and FETCH NEXT)
+    sql += ` ORDER BY m.id OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+
+    const result = await pool.request().query(sql);
+    // Get the total count of records for pagination
+    let countSql = `SELECT COUNT(*) as totalCount FROM product_master where 1=1 `;
+
+
+    const countResult = await pool.request().query(countSql);
+    const totalCount = countResult.recordset[0].totalCount;
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
+
+    return res.json({
+      encryptedData,
+      totalCount: totalCount,
+      page,
+      pageSize,
+    });
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred" });
+  }
+});
 //customer list start
 //customer list start
 app.get("/getcustomerlist", authenticateToken, async (req, res) => {
@@ -2069,11 +2139,27 @@ app.get("/getcustomerlist", authenticateToken, async (req, res) => {
       customer_lname,
       mobileno,
       email,
+      serial_no,
       page = 1, // Default to page 1 if not provided
       pageSize = 10, // Default to 10 items per page if not provided
     } = req.query;
 
-    let sql = `SELECT c.* FROM awt_customer as c WHERE c.deleted = 0`;
+    let sql = `SELECT 
+    c.*, 
+    s.serial_nos
+FROM 
+    awt_customer AS c
+LEFT JOIN (
+    SELECT 
+        CustomerID, 
+        STRING_AGG(CAST(serial_no AS VARCHAR(MAX)), ',') AS serial_nos
+    FROM 
+        awt_uniqueproductmaster
+    GROUP BY 
+        CustomerID
+) AS s ON s.CustomerID = c.customer_id
+WHERE 
+    c.deleted = 0`;
 
     // Dynamically add filters based on query parameters
     if (customer_fname) {
@@ -2099,6 +2185,9 @@ app.get("/getcustomerlist", authenticateToken, async (req, res) => {
     if (customer_id) {
       sql += ` AND c.customer_id LIKE '%${customer_id}%'`;
     }
+    if (serial_no) {
+      sql += ` AND s.serial_nos LIKE '%${serial_no}%'`;
+    }
 
     // Pagination logic: Calculate offset based on the page number
     const offset = (page - 1) * pageSize;
@@ -2110,13 +2199,26 @@ app.get("/getcustomerlist", authenticateToken, async (req, res) => {
     const result = await pool.request().query(sql);
 
     // Get the total count of records for pagination
-    let countSql = `SELECT COUNT(*) as totalCount FROM awt_customer WHERE deleted = 0`;
+    let countSql = `SELECT COUNT(*) as totalCount 
+    FROM awt_customer AS c 
+    LEFT JOIN (
+      SELECT 
+          CustomerID, 
+          STRING_AGG(CAST(serial_no AS VARCHAR(MAX)), ',') AS serial_nos
+      FROM 
+          awt_uniqueproductmaster
+      GROUP BY 
+          CustomerID
+    ) AS s ON s.CustomerID = c.customer_id
+    WHERE c.deleted = 0`;
     if (customer_fname) countSql += ` AND customer_fname LIKE '%${customer_fname}%'`;
     if (customer_lname) countSql += ` AND customer_lname LIKE '%${customer_lname}%'`;
     if (mobileno) countSql += ` AND mobileno LIKE '%${mobileno}%'`;
     if (email) countSql += ` AND email LIKE '%${email}%'`;
     if (customer_type) countSql += ` AND customer_type LIKE '%${customer_type}%'`;
     if (customer_id) countSql += ` AND customer_id LIKE '%${customer_id}%'`;
+    if (serial_no) countSql += ` AND s.serial_nos LIKE '%${serial_no}%'`;
+
 
     const countResult = await pool.request().query(countSql);
     const totalCount = countResult.recordset[0].totalCount;
@@ -2134,6 +2236,51 @@ app.get("/getcustomerlist", authenticateToken, async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "An error occurred while fetching the customer list" });
+  }
+});
+
+app.get("/downloadcustomerexcel", authenticateToken, async (req, res) => {
+  try {
+    const pool = await poolPromise;
+
+    // Fetch all customers who are not deleted
+    const result = await pool.request().query(`SELECT * FROM awt_customer WHERE deleted = 0`);
+    const customers = result.recordset;
+
+    // Create a new workbook and worksheet
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Customer');
+
+    // Define columns
+    worksheet.columns = [
+      { header: 'Salutation', key: 'salutation' },
+      { header: 'CustomerName', key: 'customer_fname' },
+      { header: 'customerID', key: 'customer_id' },
+      { header: 'CustomerType', key: 'customer_type' },
+      { header: 'CustomerClassification', key: 'customer_classification' },
+      { header: 'MobileNumber', key: 'mobileno' },
+      { header: 'Email', key: 'email' },
+      { header: 'Mwhatsapp', key: 'mwhatsapp' },
+      { header: 'Alternate Mobileno', key: 'alt_mobileno' },
+      { header: 'Alternate whatsapp', key: 'a_whatsapp' },
+      { header: 'Date of Birth', key: 'dateofbirth' },
+      { header: 'Anniversary Date', key: 'anniversary_date' },
+
+    ];
+
+    // Add all customer data as rows
+    worksheet.addRows(customers);
+
+    // Set headers for file download
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename=Customer.xlsx');
+
+    // Write and download
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send('Error generating Customer Excel file');
   }
 });
 
@@ -2253,6 +2400,7 @@ app.get("/requestdatacat/:id", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
 
     // Direct SQL query without parameter binding
+
     const sql = `
       SELECT *
       FROM awt_category
@@ -3462,14 +3610,208 @@ app.get("/getcomplaintview/:complaintid", authenticateToken, async (req, res) =>
 });
 
 app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
-  const { ticket_no, note, created_by, call_status, call_status_id, sub_call_status, group_code, site_defect, defect_type, activity_code, serial_no, ModelNumber, purchase_date, warrenty_status, engineerdata, engineername, ticket_type, call_city, ticket_start_date, mandaysprice, gas_chargs, gas_transportation, transportation_charge, visit_count } = req.body;
+  const { ticket_no, note, created_by, call_status, call_status_id, sub_call_status, group_code, site_defect, defect_type, activity_code, serial_no, ModelNumber, purchase_date, warrenty_status, engineerdata, engineername, ticket_type, call_city, ticket_start_date, mandaysprice, gas_chargs, gas_transportation, transportation_charge, visit_count, customer_mobile, totp, complete_date, allocation, dealercustid, item_code, nps_link, customer_email, customer_id, sparedata, spareqty, state_id, payment_collected, collected_amount } = req.body;
+
+  const username = process.env.TATA_USER;
+  const password = process.env.PASSWORD;
 
 
+
+  let temp_id;
+  let temp_msg;
+
+  if (call_status == 'Open') {
+    temp_id = '1207173530305447084';
+    temp_msg = `Dear Customer, Greetings from Liebherr! Your Ticket Number is ${ticket_no}. Please share OTP ${totp} with the engineer once the ticket is resolved.`
+  }
+  else if (call_status == 'In Process') {
+    temp_id = '1207173530751596304';
+    temp_msg = `Dear Liebherr Customer, Your Ticket Number ${ticket_no} has been assigned to ${engineername} and will be contact shortly for appointment.`
+  }
+  else if (call_status == 'Appointment') {
+    temp_id = '1207173530643890095';
+    temp_msg = `Dear Liebherr Customer, Your Ticket Number ${ticket_no} has been successfully scheduled. Our Service engineer will attend as per the appointment.`
+  }
+  else if (call_status == 'Cancelled') {
+    temp_id = '1207173530833742041';
+    temp_msg = `Dear Customer, We regret to inform that the ticket registered with Liebherr is cancelled ${ticket_no}). To reschedule, please contact 7038100400`
+  }
+  else if (call_status == 'Closed') {
+    temp_id = '1207173530271700565';
+    temp_msg = `Dear Customer, Your Ticket Number ${ticket_no} has been successfully closed. Please contact 7038100400 for future assistance. Thank you for choosing Liebherr.`
+  }
+  else if (call_status == 'Approval') {
+    temp_id = '1207173530799359858';
+    temp_msg = `Dear Liebherr Customer, Ticket Number ${ticket_no} has been raised for quotation and will be processed once approved. For any query, please contact 7038100400`
+  }
+  else if (call_status == 'Spares' && sub_call_status == 'Spare Ordered') {
+    temp_id = '1207173530641222930';
+    temp_msg = `Dear Liebherr Customer, Ticket Number ${ticket_no} has been raised for a spare request and will be processed shortly. For any query, please contact 7038100400`
+  }
+  else if (call_status == 'Spares' && sub_call_status == 'Spare Required') {
+    temp_id = '1207173530641222930';
+    temp_msg = `Dear Liebherr Customer, Ticket Number ${ticket_no} has been raised for a spare request and will be processed shortly. For any query, please contact 7038100400`
+  }
+  else if (call_status == 'Spares' && sub_call_status == 'Spare in-transit') {
+    temp_id = '1207173530201018241';
+    temp_msg = `Dear Liebherr Customer, for your Ticket Number ${ticket_no}, spare parts are in-transit. For any query, please contact 7038100400`
+  }
+
+  else if (call_status == 'Spares' && sub_call_status == 'Spare Delivery Delayed') {
+    temp_id = '1207173530566445149';
+    temp_msg = `Dear Liebherr Customer, We apologize for the delay in Ticket Number${ticket_no} due to unforeseen challenges in part transit. We are on it right away.
+`
+  }
+  else if (call_status == 'Completed') {
+    temp_id = '1207173530028299875';
+    temp_msg = `Dear Liebherr Customer, Ticket Number ${ticket_no} has been successfully completed. For future assistance, please contact 7038100400`
+  }
+
+
+  if (
+    call_status === 'Closed' &&
+    Array.isArray(sparedata) && sparedata.length > 0 &&
+    Array.isArray(spareqty) && spareqty.length > 0 &&
+    state_id != '' && state_id != 'null' && state_id != null && state_id != '0' &&
+    Array.isArray(engineerdata) &&
+    engineerdata.length > 0
+  ) {
+
+    const primaryEngineer = engineerdata[0];
+
+    const pool = await poolPromise;
+    const request = pool.request();
+
+    request.input('eng_code', primaryEngineer);
+
+    const paramNames = sparedata.map((code, i) => {
+      const paramName = `code${i}`;
+      request.input(paramName, code);
+      return `@${paramName}`;
+    });
+
+    const sql = `
+      SELECT product_code, stock_quantity 
+      FROM engineer_stock 
+      WHERE eng_code = @eng_code 
+        AND product_code IN (${paramNames.join(',')})
+    `;
+
+    const result = await request.query(sql);
+
+    const stockMap = new Map(result.recordset.map(item => [item.product_code, item.stock_quantity]));
+
+    console.log(stockMap)
+
+    const unavailableItems = sparedata
+      .map((code, i) => ({
+        code,
+        qty: parseInt(spareqty[i], 10),
+        available: stockMap.get(code) || 0,
+      }))
+      .filter(item => item.available < item.qty);
+
+
+    console.log(unavailableItems)
+
+    if (unavailableItems.length > 0) {
+      // Check other engineers (excluding the primary)
+      const fallbackRequest = pool.request();
+      fallbackRequest.input('eng_code', primaryEngineer);
+
+      // Input all product codes
+      sparedata.forEach((code, i) => {
+        fallbackRequest.input(`prod${i}`, code);
+      });
+
+
+
+      const prodParams = sparedata.map((_, i) => `@prod${i}`).join(',');
+
+      const fallbackSql = `
+        SELECT eng_code, product_code, stock_quantity 
+        FROM engineer_stock 
+        WHERE eng_code != @eng_code AND product_code IN (${prodParams})
+        ORDER BY stock_quantity DESC
+      `;
+
+
+
+
+
+      const fallbackResult = await fallbackRequest.query(fallbackSql);
+
+      console.log(fallbackResult)
+      const stockUsed = new Map(); // key: eng_code, value: array of { product_code, qty_to_deduct }
+
+      for (const item of unavailableItems) {
+        const matching = fallbackResult.recordset.find(row =>
+          row.product_code === item.code && row.stock_quantity >= item.qty
+        );
+
+        if (matching) {
+          if (!stockUsed.has(matching.eng_code)) {
+            stockUsed.set(matching.eng_code, []);
+          }
+          stockUsed.get(matching.eng_code).push({
+            product_code: item.code,
+            qty_to_deduct: item.qty,
+          });
+        } else {
+          return res.json({ message: `No engineer has enough stock for ${item.code}`, status: 0 });
+        }
+      }
+
+      // All alternate engineers found — proceed to update
+      const updateAltRequest = pool.request();
+      const updateQueries = [];
+
+      let counter = 0;
+      for (const [eng, items] of stockUsed.entries()) {
+        updateAltRequest.input(`eng_${eng}`, eng);
+        for (const item of items) {
+          const qtyParam = `qty${counter}`;
+          const codeParam = `code${counter}`;
+          updateAltRequest.input(qtyParam, item.qty_to_deduct);
+          updateAltRequest.input(codeParam, item.product_code);
+          updateQueries.push(`
+            UPDATE engineer_stock 
+            SET stock_quantity = stock_quantity - @${qtyParam} 
+            WHERE eng_code = @eng_${eng} AND product_code = @${codeParam};
+          `);
+          counter++;
+        }
+      }
+
+      await updateAltRequest.query(updateQueries.join('\n'));
+    } else {
+      // All stock available from primary engineer
+      const updateRequest = pool.request();
+      updateRequest.input('eng_code', primaryEngineer);
+
+      const updateQueries = sparedata.map((code, i) => {
+        const qtyParam = `qty${i}`;
+        const codeParam = `code${i}`;
+        updateRequest.input(qtyParam, parseInt(spareqty[i], 10));
+        updateRequest.input(codeParam, code);
+        return `
+          UPDATE engineer_stock 
+          SET stock_quantity = stock_quantity - @${qtyParam}
+          WHERE eng_code = @eng_code AND product_code = @${codeParam};
+        `;
+      });
+
+      await updateRequest.query(updateQueries.join('\n'));
+    }
+
+  }
 
 
 
 
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+  console.log("!!")
 
   let engineer_id;
 
@@ -3490,23 +3832,19 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
     serial_no ? `Serial No: ${serial_no}` : '',
     visit_count ? `Visit Count: ${visit_count}` : '',
     ModelNumber ? `Model Number: ${ModelNumber}` : '',
-    note ? `<b>Remark:</b> ${note}` : ''
+    note ? `<b>Remark:</b> ${note}` : '',
+    complete_date ? `<b>Field Complete Date:</b> ${complete_date}` : ''
 
   ].filter(Boolean).join(' , ');
 
 
-  console.log(engineer_id, "^^&&*")
+
 
 
   try {
     const pool = await poolPromise;
 
-
-
-
-    const updateSql = `
-    UPDATE complaint_ticket
-    SET call_status = '${call_status}' , updated_by = '${created_by}', updated_date = '${formattedDate}' , sub_call_status  = '${sub_call_status}' ,group_code = '${group_code}' , defect_type = '${defect_type}' , ModelNumber = '${ModelNumber}',serial_no = '${serial_no}' , site_defect = '${site_defect}' ,activity_code = '${activity_code}' , purchase_date = '${purchase_date}' , warranty_status = '${warrenty_status}' ,engineer_id = '${engineer_id}' ,mandays_charges = '${mandaysprice}',transport_charge = '${transportation_charge}', assigned_to = '${engineer_name}' , call_status_id = '${call_status_id}' , visit_count = '${visit_count}'  WHERE ticket_no = '${ticket_no}' `;
+    const updateSql = `UPDATE complaint_ticket SET call_status = '${call_status}' , updated_by = '${created_by}', updated_date = '${formattedDate}' , sub_call_status  = '${sub_call_status}' ,group_code = '${group_code}' , defect_type = '${defect_type}' , ModelNumber = '${ModelNumber}',serial_no = '${serial_no}' , site_defect = '${site_defect}' ,activity_code = '${activity_code}' , purchase_date = '${purchase_date}' , warranty_status = '${warrenty_status}' ,engineer_id = '${engineer_id}' ,mandays_charges = '${mandaysprice}',transport_charge = '${transportation_charge}', assigned_to = '${engineer_name}' , call_status_id = '${call_status_id}' , visit_count = '${visit_count}' , item_code ='${item_code}' , payment_collected = '${payment_collected}' , collected_amount = '${collected_amount}' WHERE ticket_no = '${ticket_no}' `;
 
     await pool.request().query(updateSql);
 
@@ -3528,12 +3866,69 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
 
 
 
+    if (allocation == 'Available') {
+
+      if (dealercustid) {
+
+
+        const updatestatus = `update awt_uniqueproductmaster set SerialStatus = 'Inactive' where CustomerID = '${dealercustid}'`;
+
+        await pool.request().query(updatestatus)
+
+
+
+      }
+
+      const {
+        customer_id,
+        customer_name,
+        ModelNumber,
+        address,
+        region,
+        state,
+        city,
+        area,
+        pincode,
+        customer_class,
+        purchase_date,
+        item_code
+      } = req.body;
+
+
+
+
+      const insertQuery = `INSERT INTO awt_uniqueproductmaster (CustomerID, CustomerName, ModelNumber, serial_no, address, region, state, district, city, pincode, created_by, created_date, customer_classification,SerialStatus,purchase_date,ModelName) VALUES (@CustomerID, @CustomerName, @ModelNumber, @SerialNo, @Address, @Region, @State, @District, @City, @Pincode, @CreatedBy, GETDATE(), @CustomerClassification , 'Active' , @PurchaseDate ,@item_code);`;
+
+      await pool.request()
+        .input('CustomerID', customer_id)
+        .input('CustomerName', customer_name)
+        .input('ModelNumber', ModelNumber)
+        .input('SerialNo', serial_no)
+        .input('Address', address)
+        .input('Region', region)
+        .input('State', state)
+        .input('District', area) // Assuming area is district
+        .input('City', city)
+        .input('Pincode', pincode)
+        .input('CreatedBy', created_by) // Example for created_by
+        .input('CustomerClassification', customer_class)
+        .input('PurchaseDate', purchase_date)
+        .input('item_code', item_code)
+        .query(insertQuery)
+
+
+    }
+
+
     if (call_status == 'Closed' && sub_call_status == 'Fully') {
+
+
+
 
 
       const updateSql = `
       UPDATE complaint_ticket
-      SET closed_date = GETDATE()  WHERE ticket_no = '${ticket_no}'`;
+      SET closed_date = '${complete_date}' WHERE ticket_no = '${ticket_no}'`;
 
       await pool.request().query(updateSql);
 
@@ -3551,6 +3946,65 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
       const getproductinfo = `select top 1 id, productType ,  productLine , productClass from product_master where item_description = '${ModelNumber}'`;
 
       const productresult = await pool.request().query(getproductinfo)
+
+
+
+      //Nps Msg
+
+      // const encrypt = (data) => {
+      //   return CryptoJS.AES.encrypt(data, secretKey).toString();
+      // };
+
+      // // Encrypt each part
+      // const encryptedEmail = encrypt(customer_email);
+      // const encryptedTicket = encrypt(ticket_no);
+      // const encryptedCustomerId = encrypt(customer_id);
+
+
+      // // Build the URL-safe message
+      // const encryptedPath = `${encodeURIComponent(encryptedEmail)}/${encodeURIComponent(encryptedTicket)}/${encodeURIComponent(encryptedCustomerId)}`;
+
+      // const npsmsg = `Dear Customer, Your feedback helps us grow. Please rate us in survey: ${nps_link} ${'hgjhghj'} . Thanks for choosing Liebherr.`;
+
+      // const nps_msg = encodeURIComponent(npsmsg);
+
+
+      // const npsapiUrl = `https://smsgw.tatatel.co.in:9095/campaignService/campaigns/qs?recipient=${customer_mobile}&dr=false&msg=${nps_msg}&user=${username}&pswd=${password}&sender=LICARE&PE_ID=1201159257274643113&Template_ID=1207173855461934489`;
+
+      // console.log(npsapiUrl)
+      // await axios.get(npsapiUrl, { httpsAgent });
+
+
+
+
+      const msg = encodeURIComponent(temp_msg);
+
+      const apiUrl = `https://smsgw.tatatel.co.in:9095/campaignService/campaigns/qs?recipient=${customer_mobile}&dr=false&msg=${msg}&user=${username}&pswd=${password}&sender=LICARE&PE_ID=1201159257274643113&Template_ID=${temp_id}`;
+
+      const response = await axios.get(apiUrl, { httpsAgent });
+
+
+
+      // const mailOptions = {
+      //   from: 'zeliant997@gmail.com',
+      //   to: 'monikakharb90@gmail.com',
+      //   subject: 'Feedback form',
+      //   html: `<div>This is nps form link  ${/nps/:email/:ticketNo/:customerId}</div>`,
+      // };
+
+      // try {
+      //   // Verify the transporter connection
+      //   await transporter.verify();
+      //   const info = await transporter.sendMail(mailOptions);
+
+
+      //   res.status(200).json({ message: 'OTP sent successfully', info });
+
+
+      // } catch (error) {
+      //   console.error('Error sending email:', error);
+
+      // }
 
 
 
@@ -3625,7 +4079,11 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
 
           const finalresult = await pool.request().query(updatecomplaint);
 
+
+
+
           return res.json({
+            message: "Ticket remark and files submitted successfully!",
             hoursDifference, // Include the hours difference in the response
             rateCardData: finalresult.affectedRows,
           });
@@ -3637,6 +4095,15 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
 
 
 
+
+
+    } else {
+
+      const msg = encodeURIComponent(temp_msg);
+
+      const apiUrl = `https://smsgw.tatatel.co.in:9095/campaignService/campaigns/qs?recipient=${customer_mobile}&dr=false&msg=${msg}&user=${username}&pswd=${password}&sender=LICARE&PE_ID=1201159257274643113&Template_ID=${temp_id}`;
+
+      const response = await axios.get(apiUrl, { httpsAgent });
     }
 
 
@@ -3647,7 +4114,7 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
 
 
     return res.json({
-      message: "Remark added successfully!",
+      message: "Ticket remark and files submitted successfully!",
       remark_id: remark_id, // Send the generated remark ID back to the client
     });
   } catch (err) {
@@ -3843,6 +4310,7 @@ app.get("/getAttachment2Details/:ticket_no",
       ORDER BY created_date DESC
     `;
 
+
       // Execute the query
       const result = await pool.request().query(sql);
 
@@ -3880,6 +4348,28 @@ app.get("/getcvengineer/:pincode/:msp/:csp", authenticateToken, async (req, res)
   }
 });
 
+
+
+app.get("/gethelplhi", authenticateToken, async (req, res) => {
+
+  try {
+    const pool = await poolPromise;
+
+    const sql = `select Lhiuser as title , Usercode as engineer_id from lhi_user where assigncsp like '%9999999%' and deleted = '0' and status = '1'`
+    console.log(sql)
+    // Execute the query
+    const result = await pool.request().query(sql);
+
+    // Return the entire array of data
+    return res.json(result.recordset);
+
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred" });
+  }
+});
+
+
 app.get("/getlhiengineer", authenticateToken, async (req, res) => {
 
 
@@ -3887,7 +4377,11 @@ app.get("/getlhiengineer", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
-    const sql = `select * from awt_engineermaster where  deleted = 0 and status = 1 and employee_code = 'LHI'`
+    // const sql = `select * from awt_engineermaster where  deleted = 0 and status = 1 and employee_code = 'LHI'`
+
+    const sql = `SELECT id, Lhiuser as title, Usercode as engineer_id , 'LHI' as employee_code FROM lhi_user
+UNION
+SELECT id, title, engineer_id , employee_code FROM awt_engineermaster WHERE deleted = 0 AND status = 1 AND employee_code = 'LHI'`
     console.log(sql)
     // Execute the query
     const result = await pool.request().query(sql);
@@ -4142,7 +4636,7 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
     complaint_date, customer_name = "NA", contact_person, email, mobile, address,
     state, city, area, pincode, mode_of_contact, ticket_type, cust_type,
     warrenty_status, invoice_date, call_charge, cust_id, model, alt_mobile, serial, purchase_date, created_by, child_service_partner, master_service_partner, specification, additional_remarks
-    , ticket_id, classification, priority, callType, requested_by, requested_email, requested_mobile, msp, csp, sales_partner, sales_partner2, salutation, mwhatsapp, awhatsapp, class_city, mother_branch
+    , ticket_id, classification, priority, callType, requested_by, requested_email, requested_mobile, msp, csp, sales_partner, sales_partner2, salutation, mwhatsapp, awhatsapp, class_city, mother_branch, item_code
   } = req.body;
 
   const otp = Math.floor(1000 + Math.random() * 9000);
@@ -4153,128 +4647,130 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
   // duplicate check
 
-  const duplicatecheck = `select * from complaint_ticket where customer_mobile = '${mobile}' and call_status = 'Open' `;
+  const duplicatecheck = `select * from complaint_ticket where customer_mobile = '${mobile}' and call_status = 'Open' and salutation ! = 'Dl'`;
 
 
   const dupresult = await pool.request().query(duplicatecheck);
 
 
-  if (dupresult.recordset.length == 0) {
+  // if (dupresult.recordset.length == 0) {
 
-    const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
+  const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
-    let t_type;
+  let t_type;
 
-    if (ticket_type == 'BREAKDOWN') {
-      t_type = 'B'
+  if (ticket_type == 'BREAKDOWN') {
+    t_type = 'B'
+  }
+  else if (ticket_type == 'DEMO') {
+    t_type = 'D'
+
+  } else if (ticket_type == 'INSTALLATION') {
+    t_type = 'I'
+
+  } else if (ticket_type == 'MAINTENANCE') {
+    t_type = 'M'
+
+  } else if (ticket_type == 'HELPDESK') {
+    t_type = 'H'
+  }
+  else if (ticket_type == 'VISIT') {
+    t_type = 'V'
+  }
+
+
+  //Dynamic sms 
+
+
+  try {
+    const pool = await poolPromise;
+
+
+    // Split customer_name into customer_fname and customer_lname
+
+
+    const [customer_fname, ...customer_lnameArr] = customer_name.split(' ');
+    const customer_lname = customer_lnameArr.join(' ');
+
+
+    const getcustcount = `select top 1 id from awt_customer where customer_id is not null order by id desc`
+
+    const getcustresult = await pool.request().query(getcustcount)
+
+    const custcount = getcustresult.recordset[0].id;
+
+    const newcustid = 'B' + custcount.toString().padStart(7, "0")
+
+
+
+
+
+
+    if (ticket_id == '' && (cust_id == '' || cust_id == 'undefined')) {
+
+      // Insert into awt_customer
+      const customerSQL = `INSERT INTO awt_customer ( salutation,customer_id,customer_fname, customer_lname, email, mobileno, alt_mobileno, created_date, created_by)OUTPUT INSERTED.id VALUES ( @salutation, @customer_id,@customer_fname, @customer_lname, @email, @mobile, @alt_mobile, @formattedDate, @created_by)`;
+      // Debugging log
+
+      const customerResult = await pool.request()
+        .input('customer_fname', customer_fname)
+        .input('customer_id', newcustid)
+        .input('customer_lname', customer_lname)
+        .input('email', email)
+        .input('mobile', mobile)
+        .input('alt_mobile', alt_mobile)
+        .input('salutation', salutation)
+        .input('formattedDate', formattedDate)
+        .input('created_by', created_by)
+        .query(customerSQL);
+
+      const insertedCustomerId = customerResult.recordset;
+
+
+
+
     }
-    else if (ticket_type == 'DEMO') {
-      t_type = 'D'
 
-    } else if (ticket_type == 'INSTALLATION') {
-      t_type = 'I'
 
-    } else if (ticket_type == 'MAINTENANCE') {
-      t_type = 'M'
 
-    } else if (ticket_type == 'HELPDESK') {
-      t_type = 'H'
+    // Insert into awt_uniqueproductmaster using insertedCustomerId as customer_id
+
+
+
+    if ((cust_id == '' || cust_id == 'undefined') && model != "") {
+
+
+
+      const productSQL = `INSERT INTO awt_uniqueproductmaster (
+        CustomerID, ModelNumber, serial_no,  pincode ,address,state,city,district ,purchase_date, created_date, created_by,customer_classification, ModelName
+       )
+       VALUES (
+        @customer_id, @model, @serial,  @pincode,@address,@state,@city,@area,@purchase_date,@formattedDate, @created_by,@customer_classification , @itemCode
+       )`;
+
+
+
+      await pool.request()
+        .input('customer_id', newcustid)
+        .input('model', model)
+        .input('created_by', created_by)
+        .input('serial', serial)
+        .input('purchase_date', purchase_date)
+        .input('pincode', pincode)
+        .input('formattedDate', formattedDate)
+        .input('address', address)
+        .input('area', area)
+        .input('state', state)
+        .input('city', city)
+        .input('customer_classification', classification)
+        .input('itemCode', item_code)
+        .query(productSQL);
+
     }
-    else if (ticket_type == 'VISIT') {
-      t_type = 'V'
-    }
 
-
-    //Dynamic sms 
-
-
-    try {
-      const pool = await poolPromise;
-
-
-      // Split customer_name into customer_fname and customer_lname
-
-
-      const [customer_fname, ...customer_lnameArr] = customer_name.split(' ');
-      const customer_lname = customer_lnameArr.join(' ');
-
-
-      const getcustcount = `select top 1 id from awt_customer where customer_id is not null order by id desc`
-
-      const getcustresult = await pool.request().query(getcustcount)
-
-      const custcount = getcustresult.recordset[0].id;
-
-      const newcustid = 'B' + custcount.toString().padStart(7, "0")
-
-
-
-
-
-
-      if (ticket_id == '' && (cust_id == '' || cust_id == 'undefined')) {
-
-        // Insert into awt_customer
-        const customerSQL = `INSERT INTO awt_customer ( salutation,customer_id,customer_fname, customer_lname, email, mobileno, alt_mobileno, created_date, created_by)OUTPUT INSERTED.id VALUES ( @salutation, @customer_id,@customer_fname, @customer_lname, @email, @mobile, @alt_mobile, @formattedDate, @created_by)`;
-        // Debugging log
-
-        const customerResult = await pool.request()
-          .input('customer_fname', customer_fname)
-          .input('customer_id', newcustid)
-          .input('customer_lname', customer_lname)
-          .input('email', email)
-          .input('mobile', mobile)
-          .input('alt_mobile', alt_mobile)
-          .input('salutation', salutation)
-          .input('formattedDate', formattedDate)
-          .input('created_by', created_by)
-          .query(customerSQL);
-
-        const insertedCustomerId = customerResult.recordset;
-
-
-
-
-      }
-
-
-
-      // Insert into awt_uniqueproductmaster using insertedCustomerId as customer_id
-
-
-
-      if ((cust_id == '' || cust_id == 'undefined') && model != "") {
-
-
-
-        const productSQL = `INSERT INTO awt_uniqueproductmaster (
-        CustomerID, ModelNumber, serial_no,  pincode ,address,state,city,district ,purchase_date, created_date, created_by,customer_classification
-      )
-      VALUES (
-        @customer_id, @model, @serial,  @pincode,@address,@state,@city,@area,@purchase_date,@formattedDate, @created_by,@customer_classification
-      )`;
-
-
-
-        await pool.request()
-          .input('customer_id', newcustid)
-          .input('model', model)
-          .input('created_by', created_by)
-          .input('serial', serial)
-          .input('purchase_date', purchase_date)
-          .input('pincode', pincode)
-          .input('formattedDate', formattedDate)
-          .input('address', address)
-          .input('area', area)
-          .input('state', state)
-          .input('city', city)
-          .input('customer_classification', classification)
-          .query(productSQL);
-      }
-
-      if ((cust_id == '' || cust_id == 'undefined')) {
-        // Insert into awt_customerlocation using insertedCustomerId as customer_id
-        const customerLocationSQL = `
+    if ((cust_id == '' || cust_id == 'undefined')) {
+      // Insert into awt_customerlocation using insertedCustomerId as customer_id
+      const customerLocationSQL = `
         INSERT INTO awt_customerlocation (
       customer_id, geostate_id, geocity_id, district_id, pincode_id,
       created_date, created_by, ccperson, ccnumber, address , deleted
@@ -4286,23 +4782,21 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
 
 
-        await pool.request()
-          .input('customer_id', newcustid)
-          .input('state', state)
-          .input('city', city)
-          .input('area', area)
-          .input('created_by', created_by)
-          .input('pincode', pincode)
-          .input('formattedDate', formattedDate)
-          .input('customer_name', customer_name)
-          .input('mobile', mobile)
-          .input('address', address)
-          .input('deleted', '0')
-          .query(customerLocationSQL);
+      await pool.request()
+        .input('customer_id', newcustid)
+        .input('state', state)
+        .input('city', city)
+        .input('area', area)
+        .input('created_by', created_by)
+        .input('pincode', pincode)
+        .input('formattedDate', formattedDate)
+        .input('customer_name', customer_name)
+        .input('mobile', mobile)
+        .input('address', address)
+        .input('deleted', '0')
+        .query(customerLocationSQL);
 
-      }
-
-
+    }
 
 
 
@@ -4315,58 +4809,68 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
 
 
-      // this is for generating ticket no
-      const checkResult = await pool.request()
-        .input('ticketType', sql.NVarChar, t_type)  // Define the parameter
-        .query(`
-        SELECT Top 1 ticket_no
-        FROM complaint_ticket
-        WHERE ticket_no LIKE @ticketType + 'H' + '%'
-          AND ticket_date >= CAST(DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0) AS DATE)
-          AND ticket_date < CAST(DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) + 1, 0) AS DATE)
-        ORDER BY ticket_no Desc;
-      `);
+
+
+    // this is for generating ticket no
+    // const checkResult = await pool.request()
+    //   .input('ticketType', sql.NVarChar, t_type)  // Define the parameter
+    //   .query(`
+    //   SELECT Top 1 ticket_no
+    //   FROM complaint_ticket
+    //   WHERE ticket_no LIKE @ticketType + 'H' + '%'
+    //     AND ticket_date >= CAST(DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0) AS DATE)
+    //     AND ticket_date < CAST(DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) + 1, 0) AS DATE)
+    //   ORDER BY ticket_no Desc;
+    // `);
+
+
+    const current_date = new Date().toISOString().split('T')[0]; // Formats date to YYYY-MM-DD
+
+    console.log(current_date)
+    const checkResult = await pool.request()
+      .input('complaint_date', sql.NVarChar, complaint_date)  // Pass formatted date
+      .query(`SELECT TOP 1 ticket_no
+                FROM complaint_ticket
+                WHERE ticket_date = @complaint_date
+                ORDER BY RIGHT(ticket_no, 4) Desc;`);
 
 
 
-      const count = checkResult.recordset[0] ? checkResult.recordset[0].ticket_no : 'H0000';
+
+    const count = checkResult.recordset[0] ? checkResult.recordset[0].ticket_no : 'H0000';
+
+    const lastFourDigits = count.slice(-4)
+
+    const newcount = Number(lastFourDigits) + 1
+
+    const tdate = new Date(complaint_date);
+
+    const formatDate = `${(new Date().getMonth() + 1).toString().padStart(2, '0')}${tdate.getDate().toString().padStart(2, '0')}`;
 
 
-      // Accessing the last 4 digits from the result
-      const lastFourDigits = count.slice(-4)
-
-      const newcount = Number(lastFourDigits) + 1
-
-      // i have ticket date like 2025-01-29 add this date in format date take month and date dont take current month and current date
-
-      const formatDate = `${(new Date().getMonth() + 1).toString().padStart(2, '0')}${new Date().getDate().toString().padStart(2, '0')}`;
-
-      // const formatDate = `${complaint_date.slice(5, 7)}${complaint_date.slice(8, 10)}`;
-
-
-      const ticket_no = `${t_type}H${formatDate}-${newcount.toString().padStart(4, "0")}`;
+    const ticket_no = `${t_type}H${formatDate}-${newcount.toString().padStart(4, "0")}`;
 
 
 
-      let complaintSQL
+    let complaintSQL
 
-      if (!ticket_id) {
-        complaintSQL = `
+    if (!ticket_id) {
+      complaintSQL = `
         INSERT INTO complaint_ticket (
           ticket_no, ticket_date, customer_name, customer_mobile, customer_email, address,
           state, city, area, pincode, customer_id, ModelNumber, ticket_type, call_type,
           call_status, warranty_status, invoice_date, call_charges, mode_of_contact,
-          contact_person,  created_date, created_by,  purchase_date, serial_no, child_service_partner, sevice_partner, specification ,customer_class,call_priority,requested_mobile,requested_email,requested_by,msp,csp,sales_partner,sales_partner2,call_remark,salutation,alt_mobile,mwhatsapp,awhatsapp,class_city,mother_branch,call_status_id ,totp
+          contact_person,  created_date, created_by,  purchase_date, serial_no, child_service_partner, sevice_partner, specification ,customer_class,call_priority,requested_mobile,requested_email,requested_by,msp,csp,sales_partner,sales_partner2,call_remark,salutation,alt_mobile,mwhatsapp,awhatsapp,class_city,mother_branch,call_status_id ,totp ,item_code
         )
         VALUES (
           @ticket_no, @complaint_date, @customer_name, @mobile, @email, @address,
           @state, @city, @area, @pincode, @customer_id, @model, @ticket_type, @cust_type,
           'Open', @warranty_status, @invoice_date, @call_charge, @mode_of_contact,
-          @contact_person,  @formattedDate, @created_by,  @purchase_date, @serial, @child_service_partner, @master_service_partner, @specification ,@classification , @priority ,@requested_mobile,@requested_email,@requested_by,@msp,@csp,@sales_partner,@sales_partner2,@call_remark,@salutation,@alt_mobile,@mwhatsapp,@awhatsapp,@class_city,@mother_branch,'1',@totp
+          @contact_person,  @formattedDate, @created_by,  @purchase_date, @serial, @child_service_partner, @master_service_partner, @specification ,@classification , @priority ,@requested_mobile,@requested_email,@requested_by,@msp,@csp,@sales_partner,@sales_partner2,@call_remark,@salutation,@alt_mobile,@mwhatsapp,@awhatsapp,@class_city,@mother_branch,'1',@totp ,@item_code
         )
       `;
-      } else {
-        complaintSQL = `
+    } else {
+      complaintSQL = `
         UPDATE complaint_ticket
         SET
           ticket_no = @ticket_no,
@@ -4413,80 +4917,86 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
           awhatsapp = @awhatsapp,
           class_city = @class_city,
           mother_branch = @mother_branch,
-          totp = @totp
+          totp = @totp,
+          item_code = @item_code
           WHERE
           id = @ticket_id
       `;
+    }
+
+
+
+
+    const resutlt = await pool.request()
+      .input('ticket_no', ticket_no)
+      .input('ticket_id', ticket_id)
+      .input('complaint_date', complaint_date)
+      .input('customer_name', customer_name)
+      .input('mobile', mobile)
+      .input('email', email)
+      .input('address', address)
+      .input('state', state)
+      .input('created_by', created_by)
+      .input('city', city)
+      .input('area', area)
+      .input('pincode', pincode)
+      .input('customer_id', cust_id == '' || cust_id == 'undefined' ? newcustid : cust_id)
+      .input('model', model)
+      .input('ticket_type', ticket_type)
+      .input('cust_type', cust_type)
+      .input('warranty_status', sql.NVarChar, warrenty_status)
+      .input('invoice_date', invoice_date)
+      .input('call_charge', call_charge)
+      .input('mode_of_contact', mode_of_contact)
+      .input('contact_person', contact_person)
+      .input('formattedDate', formattedDate)
+      .input('purchase_date', purchase_date)
+      .input('serial', serial)
+      .input('master_service_partner', master_service_partner)
+      .input('child_service_partner', child_service_partner)
+      .input('specification', specification)
+      .input('call_remark', additional_remarks)
+      .input('classification', classification)
+      .input('priority', priority)
+      .input('requested_by', requested_by)
+      .input('requested_email', requested_email)
+      .input('requested_mobile', requested_mobile)
+      .input('msp', msp)
+      .input('csp', csp)
+      .input('sales_partner', sales_partner)
+      .input('sales_partner2', sales_partner2)
+      .input('salutation', salutation)
+      .input('alt_mobile', alt_mobile)
+      .input('awhatsapp', awhatsapp)
+      .input('mwhatsapp', mwhatsapp)
+      .input('class_city', class_city)
+      .input('mother_branch', mother_branch)
+      .input('totp', otp)
+      .input('item_code', item_code)
+      .query(complaintSQL);
+
+
+    if (1 === 1) {
+
+      const username = process.env.TATA_USER;
+      const password = process.env.PASSWORD;
+      const temp_id = '1207173530305447084'
+
+      try {
+
+        const msg = encodeURIComponent(
+          `Dear Customer, Greetings from Liebherr! Your Ticket Number is ${ticket_no}. Please share OTP ${otp} with the engineer once the ticket is resolved.`
+        );
+
+        const tokenResponse = await axios.get(
+          `https://smsgw.tatatel.co.in:9095/campaignService/campaigns/qs?recipient=${mobile}&dr=false&msg=${msg}&user=${username}&pswd=${password}&sender=LICARE&PE_ID=1201159257274643113&Template_ID=${temp_id}`, { httpsAgent }
+        );
+
+
+      } catch (error) {
+        console.error('Error hitting SMS API (token):', error.response?.data || error.message);
       }
-
-
-
-
-      const resutlt = await pool.request()
-        .input('ticket_no', ticket_no)
-        .input('ticket_id', ticket_id)
-        .input('complaint_date', complaint_date)
-        .input('customer_name', customer_name)
-        .input('mobile', mobile)
-        .input('email', email)
-        .input('address', address)
-        .input('state', state)
-        .input('created_by', created_by)
-        .input('city', city)
-        .input('area', area)
-        .input('pincode', pincode)
-        .input('customer_id', cust_id == '' || cust_id == 'undefined' ? newcustid : cust_id)
-        .input('model', model)
-        .input('ticket_type', ticket_type)
-        .input('cust_type', cust_type)
-        .input('warranty_status', sql.NVarChar, warrenty_status)
-        .input('invoice_date', invoice_date)
-        .input('call_charge', call_charge)
-        .input('mode_of_contact', mode_of_contact)
-        .input('contact_person', contact_person)
-        .input('formattedDate', formattedDate)
-        .input('purchase_date', purchase_date)
-        .input('serial', serial)
-        .input('master_service_partner', master_service_partner)
-        .input('child_service_partner', child_service_partner)
-        .input('specification', specification)
-        .input('call_remark', additional_remarks)
-        .input('classification', classification)
-        .input('priority', priority)
-        .input('requested_by', requested_by)
-        .input('requested_email', requested_email)
-        .input('requested_mobile', requested_mobile)
-        .input('msp', msp)
-        .input('csp', csp)
-        .input('sales_partner', sales_partner)
-        .input('sales_partner2', sales_partner2)
-        .input('salutation', salutation)
-        .input('alt_mobile', alt_mobile)
-        .input('awhatsapp', awhatsapp)
-        .input('mwhatsapp', mwhatsapp)
-        .input('class_city', class_city)
-        .input('mother_branch', mother_branch)
-        .input('totp', otp)
-        .query(complaintSQL);
-
-
-      if (1 === 1) {
-
-        const username = process.env.TATA_USER;
-        const password = process.env.PASSWORD;
-        const temp_id = '1207173530305447084'
-
-        try {
-          const tokenResponse = await axios.get(
-            `https://smsgw.tatatel.co.in:9095/campaignService/campaigns/qs?recipient=${mobile}&dr=false&msg=Dear Customer, Greetings from Liebherr! Your Ticket Number is ${ticket_no}. Please share OTP ${otp} with the engineer once the ticket is resolved.&user=${username}&pswd=${password}&sender=LICARE&PE_ID=1201159257274643113&Template_ID=${temp_id}`
-          );
-
-          
-
-        } catch (error) {
-          console.error('Error hitting SMS API (token):', error.response?.data || error.message);
-        }
-      }
+    }
 
 
 
@@ -4495,15 +5005,15 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
 
 
 
-      if (additional_remarks || specification) {
-        // Combine both remarks
-        const combinedRemarks = `
+    if (additional_remarks || specification) {
+      // Combine both remarks
+      const combinedRemarks = `
             ${additional_remarks ? `Additional Remark: ${additional_remarks}` : ''} 
             ${specification ? `Fault Description: ${specification}` : ''}
           `.trim(); // Trim to avoid unnecessary whitespace if one is empty
 
-        // Insert query for combined remarks
-        const remarksQuery = `
+      // Insert query for combined remarks
+      const remarksQuery = `
             INSERT INTO awt_complaintremark (
                 ticket_no, remark, created_date, created_by
             )
@@ -4511,45 +5021,45 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
                 @ticket_no, @combinedRemarks, @formattedDate, @created_by
             )`;
 
-        // Execute the query
-        await pool.request()
-          .input('ticket_no', ticket_no) // Use existing ticket_no from earlier query
-          .input('formattedDate', formattedDate) // Use current timestamp
-          .input('created_by', created_by) // Use current user ID
-          .input('combinedRemarks', combinedRemarks) // Combined remarks
-          .query(remarksQuery);
-      }
-
-
-      //Fault Description *************
-
-
-
-
-      // const mailOptions = {
-      //   from: 'zeliant997@gmail.com',
-      //   to: email,
-      //   subject: 'Welcome to Our Platform!',
-      //   html: `<a href='http://localhost:3000/nps/${email}/${ticket_no}/${cust_id == '' ? newcustid : cust_id}'>Click here to give us feedback</a>`,
-      // };
-
-
-
-      // await transporter.verify();
-      // const info = await transporter.sendMail(mailOptions);
-
-
-
-
-      return res.json({ message: 'Complaint added successfully!', ticket_no, cust_id });
-    } catch (err) {
-      console.error("Error inserting complaint:", err.stack);
-      return res.status(500).json({ error: 'An error occurred while adding the complaint', details: err.message });
+      // Execute the query
+      await pool.request()
+        .input('ticket_no', ticket_no) // Use existing ticket_no from earlier query
+        .input('formattedDate', formattedDate) // Use current timestamp
+        .input('created_by', created_by) // Use current user ID
+        .input('combinedRemarks', combinedRemarks) // Combined remarks
+        .query(remarksQuery);
     }
 
-  } else {
-    return res.json({ message: "Ticket is already created", ticket_no: 'Ticket is already created', cust_id: 'NA' })
+
+    //Fault Description *************
+
+
+
+
+    // const mailOptions = {
+    //   from: 'zeliant997@gmail.com',
+    //   to: email,
+    //   subject: 'Welcome to Our Platform!',
+    //   html: `<a href='http://localhost:3000/nps/${email}/${ticket_no}/${cust_id == '' ? newcustid : cust_id}'>Click here to give us feedback</a>`,
+    // };
+
+
+
+    // await transporter.verify();
+    // const info = await transporter.sendMail(mailOptions);
+
+
+
+
+    return res.json({ message: 'Complaint added successfully!', ticket_no, cust_id });
+  } catch (err) {
+    console.error("Error inserting complaint:", err.stack);
+    return res.status(500).json({ error: 'An error occurred while adding the complaint', details: err.message });
   }
+
+  // } else {
+  //   return res.json({ message: "Ticket is already created", ticket_no: 'Ticket is already created', cust_id: 'NA' })
+  // }
 
 
 
@@ -4595,7 +5105,6 @@ SET
   city = @city,
   area = @area,
   pincode = @pincode,
-  customer_id = @customer_id,
   ModelNumber = @model,
   call_type = @cust_type,
   warranty_status = @warranty_status,
@@ -4644,7 +5153,6 @@ SET
       .input('city', city)
       .input('area', area)
       .input('pincode', pincode)
-      .input('customer_id', cust_id)
       .input('model', model)
       .input('cust_type', cust_type)
       .input("warranty_status", sql.NVarChar, warrenty_status)
@@ -4972,9 +5480,13 @@ app.post("/postcustomer", authenticateToken, async (req, res) => {
 // customer put
 
 app.post("/putcustomer", authenticateToken, async (req, res) => {
-  const { encryptedData, encryptedDate } = req.body;
-  const decryptedData = decryptData(encryptedData, encryptedDate, secretKey)
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+
+
   const { id, customer_fname, customer_type, customer_classification, mobileno, alt_mobileno, dateofbirth, anniversary_date, email, salutation, customer_id, created_by } = JSON.parse(decryptedData);
+
+  console.log(JSON.parse(decryptedData))
 
 
   try {
@@ -5162,9 +5674,7 @@ app.post("/deletecustomerlocation", authenticateToken, async (req, res) => {
 
 // Insert new Customer Location with duplicate check
 app.post("/postcustomerlocation", authenticateToken, async (req, res) => {
-  const { encryptedData } = req.body;
-  const decryptedData = decryptData(encryptedData, secretKey)
-  const { customer_id, country_id, region_id, geostate_id, geocity_id, area_id, pincode_id, address, ccperson, ccnumber, address_type } = JSON.parse(decryptedData);
+  const { customer_id, country_name, region_name, geostate_name, geocity_name, area_name, pincode_id, address, ccperson, ccnumber, address_type } = req.body;
 
   try {
     // Use the poolPromise to get the connection pool
@@ -5174,17 +5684,14 @@ app.post("/postcustomerlocation", authenticateToken, async (req, res) => {
     SELECT customer_id FROM awt_customer
     WHERE customer_id = '${customer_id}' AND deleted = 0
   `;
-
+    console.log(area_name, 'ty')
     const customerResult = await pool.request().query(checkCustomerSql);
 
-    // if (customerResult.recordset.length === 0) {
-    //   return res.status(404).json({
-    //     message: "Customer not found in awt_customer table!"
-    //   });
-    // }
 
     // Check for duplicates
-    const checkDuplicateSql = `SELECT * FROM awt_customerlocation WHERE ccperson = '${ccperson}' AND address = '${address}' AND deleted = 0`;
+    const checkDuplicateSql = `SELECT * FROM awt_customerlocation WHERE ccnumber = '${ccnumber}' AND ccperson = '${ccperson}'  AND customer_id = '${customer_id}' and  deleted = 0`;
+
+    console.log(checkDuplicateSql)
     const duplicateResult = await pool.request().query(checkDuplicateSql);
 
     if (duplicateResult.recordset.length > 0) {
@@ -5193,7 +5700,7 @@ app.post("/postcustomerlocation", authenticateToken, async (req, res) => {
       });
     } else {
       const insertSql = `INSERT INTO awt_customerlocation (customer_id ,country_id, region_id, geostate_id, geocity_id, district_id, pincode_id, address, ccperson, ccnumber, address_type,deleted)
-                         VALUES ('${customer_id}','${country_id}', '${region_id}', '${geostate_id}', '${geocity_id}', '${area_id}', '${pincode_id}', '${address}', '${ccperson}', '${ccnumber}', '${address_type}',0)`;
+                         VALUES ('${customer_id}','${country_name}', '${region_name}', '${geostate_name}', '${geocity_name}', '${area_name}', '${pincode_id}', '${address}', '${ccperson}', '${ccnumber}', '${address_type}',0)`;
 
       await pool.request().query(insertSql);
 
@@ -5205,12 +5712,34 @@ app.post("/postcustomerlocation", authenticateToken, async (req, res) => {
   }
 });
 
+
+
+app.post("/updatecustomerlocation", authenticateToken, async (req, res) => {
+  const { geostate_name, geocity_name, area_name, pincode_id, address, ccperson, ccnumber, address_id } = req.body;
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+
+    const insertSql = `update awt_customerlocation set  pincode_id = '${pincode_id}' , address = '${address}' , ccperson = '${ccperson}' , ccnumber = '${ccnumber}' , geostate_id = '${geostate_name}' , geocity_id = '${geocity_name}' , district_id = '${area_name}' where id = ${address_id}`
+
+    await pool.request().query(insertSql);
+
+    return res.json({ message: "Customer Location added successfully!" });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while adding the customer location' });
+  }
+});
+
 // Update existing Customer Location with duplicate check
 app.post("/putcustomerlocation", authenticateToken, async (req, res) => {
   const { encryptedData } = req.body;
   const decryptedData = decryptData(encryptedData, secretKey)
   const {
-    country_id, region_id, geostate_id, geocity_id, area_id, pincode_id, address, ccperson, ccnumber, address_type, id
+    country_name, region_name, geostate_name, geocity_name, area_name, pincode_id, address, ccperson, ccnumber, address_type, id
   } = JSON.parse(decryptedData);
 
   try {
@@ -5218,7 +5747,7 @@ app.post("/putcustomerlocation", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
 
     // Check for duplicates
-    const checkDuplicateSql = `SELECT * FROM awt_customerlocation WHERE ccperson = '${ccperson}' AND id != '${id}' AND deleted = 0`;
+    const checkDuplicateSql = `SELECT * FROM awt_customerlocation WHERE ccperson = '${ccperson}' AND ccnumber = '${ccnumber}' AND id != '${id}' AND deleted = 0`;
     const duplicateResult = await pool.request().query(checkDuplicateSql);
 
     if (duplicateResult.recordset.length > 0) {
@@ -5226,7 +5755,7 @@ app.post("/putcustomerlocation", authenticateToken, async (req, res) => {
         message: "Duplicate entry, Customer with same number already exists!",
       });
     } else {
-      const updateSql = `UPDATE awt_customerlocation SET country_id = '${country_id}', region_id = '${region_id}', geostate_id = '${geostate_id}', geocity_id = '${geocity_id}', district_id = '${area_id}', pincode_id = '${pincode_id}', address = '${address}', ccperson = '${ccperson}', ccnumber = '${ccnumber}', address_type = '${address_type}',deleted = 0 WHERE id = '${id}'`;
+      const updateSql = `UPDATE awt_customerlocation SET country_id = '${country_name}', region_id = '${region_name}', geostate_id = '${geostate_name}', geocity_id = '${geocity_name}', district_id = '${area_name}', pincode_id = '${pincode_id}', address = '${address}', ccperson = '${ccperson}', ccnumber = '${ccnumber}', address_type = '${address_type}',deleted = 0 WHERE id = '${id}'`;
 
       await pool.request().query(updateSql);
 
@@ -5302,19 +5831,22 @@ app.get("/requestproductunique/:id", authenticateToken, async (req, res) => {
 app.post("/postproductunique", authenticateToken, async (req, res) => {
   const { encryptedData } = req.body;
   const decryptedData = decryptData(encryptedData, secretKey)
-  const { product, location, date, serialnumber, CustomerID, CustomerName } = JSON.parse(decryptedData);
+  const { product, address, purchase_date, serial_no, CustomerID, CustomerName, SerialStatus, ItemNumber } = JSON.parse(decryptedData);
+
+
+  console.log(ItemNumber, "ITEM")
   try {
 
     const pool = await poolPromise;
-    const checkDuplicateSql = `SELECT * FROM awt_uniqueproductmaster WHERE CustomerID = '${CustomerID}'AND address = '${location}'AND ModelNumber = '${product}'AND deleted = 0`;
+    const checkDuplicateSql = `SELECT * FROM awt_uniqueproductmaster WHERE CustomerID = '${CustomerID}'AND address = '${address}'AND ModelNumber = '${product}'AND deleted = 0`;
     const duplicateResult = await pool.request().query(checkDuplicateSql);
     if (duplicateResult.recordset.length > 0) {
       return res.status(409).json({
         message: "Product with same customer Id and Location already exists!",
       });
     } else {
-      const insertSql = `INSERT INTO awt_uniqueproductmaster (ModelNumber, address, purchase_date, serial_no,CustomerName,CustomerID)
-                        VALUES ('${product}', '${location}', '${date}', '${serialnumber}', '${CustomerName}', '${CustomerID}')`;
+      const insertSql = `INSERT INTO awt_uniqueproductmaster (ModelNumber, address, purchase_date, serial_no,CustomerName,CustomerID,SerialStatus , ModelName)
+                        VALUES ('${product}', '${address}', '${purchase_date}', '${serial_no}', '${CustomerName}', '${CustomerID}','${SerialStatus}' , '${ItemNumber}')`;
       await pool.request().query(insertSql);
       return res.json({ message: "Product added successfully!" });
     }
@@ -5325,35 +5857,82 @@ app.post("/postproductunique", authenticateToken, async (req, res) => {
 });
 
 app.post("/putproductunique", authenticateToken, async (req, res) => {
-  const { encryptedData } = req.body;
-  const decryptedData = decryptData(encryptedData, secretKey)
-  const { product, id, location, date, serialnumber } = JSON.parse(decryptedData);
-
   try {
-    // Use the poolPromise to get the connection pool
+    const { encryptedData } = req.body;
+    const decryptedData = decryptData(encryptedData, secretKey);
+    const { product, id, address, purchase_date, serial_no, CustomerID, SerialStatus } = JSON.parse(decryptedData);
+
+    console.log("Received Data:", { product, id, address, purchase_date, serial_no, CustomerID, SerialStatus });
+
+    const parsedId = Number(id);
+    if (!parsedId || isNaN(parsedId)) {
+      return res.status(400).json({ error: "Invalid ID format" });
+    }
+
     const pool = await poolPromise;
 
-    // Check for duplicates (excluding the current product) customer_ id will be add
-    const checkDuplicateSql = `SELECT * FROM awt_uniqueproductmaster WHERE serialnumber = '${serialnumber}' AND id != '${id}' AND deleted = 0`;
-    const duplicateResult = await pool.request().query(checkDuplicateSql);
+    // Duplicate Check
+    const duplicateCheckQuery = `
+      SELECT * FROM awt_uniqueproductmaster
+      WHERE serial_no = @serial_no AND id != @id AND deleted = 0 AND CustomerID = @CustomerID
+    `;
+    const duplicateResult = await pool.request()
+      .input('serial_no', sql.NVarChar, serial_no)
+      .input('id', sql.Int, parsedId)
+      .input('CustomerID', sql.NVarChar, CustomerID)
+      .query(duplicateCheckQuery);
 
     if (duplicateResult.recordset.length > 0) {
       return res.status(409).json({
-        message: "Product with same customer Id and Location already exists!",
+        message: "Product with the same Serial Number and Customer ID already exists!",
       });
-    } else {
-      // Update the product if no duplicates are found
-      const updateSql = `UPDATE awt_uniqueproductmaster SET product = '${product}', location = '${location}', date = '${date}', serialnumber = '${serialnumber}' WHERE id = '${id}'`;
-
-      await pool.request().query(updateSql);
-
-      return res.json({ message: "Product updated successfully!" });
     }
+
+    // Update Product
+    const updateProductQuery = `
+      UPDATE awt_uniqueproductmaster
+      SET ModelNumber = @product,
+          address = @address,
+          purchase_date = @purchase_date,
+          serial_no = @serial_no,
+          CustomerID = @CustomerID,
+          SerialStatus = @SerialStatus,
+          deleted = 0
+      WHERE id = @id
+    `;
+    await pool.request()
+      .input('product', sql.NVarChar, product)
+      .input('address', sql.NVarChar, address)
+      .input('purchase_date', sql.NVarChar, purchase_date)
+      .input('serial_no', sql.NVarChar, serial_no)
+      .input('CustomerID', sql.NVarChar, CustomerID)
+      .input('SerialStatus', sql.NVarChar, SerialStatus)
+      .input('id', sql.Int, parsedId)
+      .query(updateProductQuery);
+
+    // Update Complaint Ticket
+    const updateComplaintQuery = `
+      UPDATE complaint_ticket
+      SET purchase_date = @purchase_date
+      WHERE serial_no = @serial_no AND customer_id = @CustomerID
+    `;
+    await pool.request()
+      .input('purchase_date', sql.NVarChar, purchase_date)
+      .input('serial_no', sql.NVarChar, serial_no)
+      .input('CustomerID', sql.NVarChar, CustomerID)
+      .query(updateComplaintQuery);
+
+    res.json({ message: "Product updated successfully!" });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'An error occurred while updating the product' });
+    console.error("Server Error:", err);
+    res.status(500).json({ error: err.message || "Internal Server Error" });
   }
 });
+
+
+
+
+
 
 app.post("/deleteproductunique", authenticateToken, async (req, res) => {
   const { id } = req.body;
@@ -5426,7 +6005,7 @@ app.get("/getengineer", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
     const {
       title,
-      employee_code,
+      engineer_id,
       mobile_no,
       email,
       page = 1, // Default to page 1 if not provided
@@ -5439,14 +6018,14 @@ app.get("/getengineer", authenticateToken, async (req, res) => {
         FROM awt_engineermaster r
         INNER JOIN awt_childfranchisemaster c 
         ON r.cfranchise_id = c.licare_code
-        WHERE r.deleted = 0
+        WHERE r.deleted = 0 and employee_code is not null
       `;
 
     if (title) {
       sql += ` AND r.title LIKE '%${title}%'`;
     }
-    if (employee_code) {
-      sql += ` AND r.engineer_id LIKE '%${employee_code}%'`;
+    if (engineer_id) {
+      sql += ` AND r.engineer_id LIKE '%${engineer_id}%'`;
     }
     if (mobile_no) {
       sql += ` AND r.mobile_no LIKE '%${mobile_no}%'`;
@@ -5468,13 +6047,13 @@ app.get("/getengineer", authenticateToken, async (req, res) => {
         FROM awt_engineermaster r
         INNER JOIN awt_childfranchisemaster c 
         ON r.cfranchise_id = c.licare_code
-        WHERE r.deleted = 0
+        WHERE r.deleted = 0  and employee_code is not null
       `;
     if (title) {
       countSql += ` AND r.title LIKE '%${title}%'`;
     }
-    if (employee_code) {
-      countSql += ` AND r.engineer_id LIKE '%${employee_code}%'`;
+    if (engineer_id) {
+      countSql += ` AND r.engineer_id LIKE '%${engineer_id}%'`;
     }
     if (mobile_no) {
       countSql += ` AND r.mobile_no LIKE '%${mobile_no}%'`;
@@ -5538,16 +6117,45 @@ app.post("/postengineer",
       // Use the poolPromise to get the connection pool
       const pool = await poolPromise;
 
-
-      const getcount = `SELECT TOP 1 id FROM awt_engineermaster ORDER BY id DESC`;
+      //this is for csp
+      const getcount = `SELECT TOP 1 RIGHT(engineer_id, 4) AS last_four_digits FROM awt_engineermaster where employee_code = '${employee_code}'  ORDER BY RIGHT(engineer_id, 4) DESC`;
 
       const countResult = await pool.request().query(getcount);
 
-      const latestQuotation = countResult.recordset[0]?.id || 0;
+      const latestQuotation = countResult.recordset[0]?.last_four_digits || 0;
 
-      const newcount = latestQuotation + 1
+      console.log(latestQuotation, "#$%")
 
-      const engineercode = 'E' + newcount.toString().padStart(4, "0")
+      const newcount = Number(latestQuotation) + 1
+
+
+      //this is for lhi
+      const getlhicount = `SELECT TOP 1 RIGHT(engineer_id, 4) AS last_four_digits FROM awt_engineermaster where employee_code = '${employee_code}'  ORDER BY RIGHT(engineer_id, 4) DESC`;
+
+      console.log(getlhicount)
+
+      const countlhiResult = await pool.request().query(getlhicount);
+
+      const latestlhiQuotation = countlhiResult.recordset[0]?.last_four_digits || 0;
+
+      console.log(latestlhiQuotation, "#$%")
+
+      const newlhicount = Number(latestlhiQuotation) + 1
+
+
+      let engineercode;
+
+
+      if (employee_code == 'LHI') {
+
+        engineercode = 'LHI-TEC-' + newlhicount.toString().padStart(4, "0")
+
+
+      } else {
+        engineercode = 'SPT-TEC-' + newcount.toString().padStart(4, "0")
+
+      }
+
 
       // Check for duplicates using direct query injection
       const checkDuplicateSql = `SELECT * FROM awt_engineermaster WHERE mobile_no = '${mobile_no}' AND email = '${email}' AND deleted = 0`;
@@ -5570,8 +6178,8 @@ app.post("/postengineer",
           });
         } else {
           // Insert new engineer if no duplicate or soft-deleted found
-          const insertSql = `INSERT INTO awt_engineermaster (title,mfranchise_id, cfranchise_id, mobile_no, email, password,engineer_id,personal_email,personal_mobile,dob,blood_group,academic_qualification,joining_date,passport_picture,resume,photo_proof,address_proof,permanent_address,current_address)
-                           VALUES ('${title}','${mfranchise_id}', '${cfranchise_id}', '${mobile_no}', '${email}', '${password}', '${engineercode}', '${personal_email}', '${personal_mobile}', '${dob}', '${blood_group}', '${academic_qualification}', '${joining_date}', '${passport_picture}', '${resume}', '${photo_proof}', '${address_proof}', '${permanent_address}', '${current_address}')`;
+          const insertSql = `INSERT INTO awt_engineermaster (title,mfranchise_id, cfranchise_id, mobile_no, email, password,engineer_id,personal_email,personal_mobile,dob,blood_group,academic_qualification,joining_date,passport_picture,resume,photo_proof,address_proof,permanent_address,current_address,employee_code)
+                           VALUES ('${title}','${mfranchise_id}', '${cfranchise_id}', '${mobile_no}', '${email}', '${password}', '${engineercode}', '${personal_email}', '${personal_mobile}', '${dob}', '${blood_group}', '${academic_qualification}', '${joining_date}', '${passport_picture}', '${resume}', '${photo_proof}', '${address_proof}', '${permanent_address}', '${current_address}' , '${employee_code}')`;
           await pool.request().query(insertSql);
           return res.json({ message: "Engineer added successfully!" });
         }
@@ -5602,8 +6210,8 @@ app.post("/putengineer", authenticateToken, async (req, res) => {
       // Update the engineer record if no duplicates are found
       const updateSql = `UPDATE awt_engineermaster
                          SET title = '${title}',mfranchise_id = '${mfranchise_id}', cfranchise_id = '${cfranchise_id}', mobile_no = '${mobile_no}', email = '${email}', password = '${password}',
-                         personal_email = '${personal_email}', personal_mobile = '${personal_mobile}', dob = '${dob}',
-                         blood_group = '${blood_group}', academic_qualification = '${academic_qualification}', joining_date = '${joining_date}', passport_picture = '${passport_picture}',
+                         personal_email = '${personal_email}', personal_mobile = '${personal_mobile}', dob = '${dob ? dob : ''}',
+                         blood_group = '${blood_group}', academic_qualification = '${academic_qualification}', joining_date = '${joining_date ? joining_date : ''}', passport_picture = '${passport_picture}',
                          resume = '${resume}', photo_proof = '${photo_proof}', address_proof = '${address_proof}', permanent_address = '${permanent_address}', current_address = '${current_address}'
                          WHERE id = '${id}'`;
 
@@ -5817,7 +6425,9 @@ app.get("/getfranchisedata", authenticateToken, async (req, res) => {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
     const result = await pool.request().query("SELECT * FROM awt_franchisemaster WHERE deleted = 0");
-    return res.json(result.recordset);
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
+    return res.json(encryptedData);
   } catch (err) {
     console.error(err); return res.status(500).json({ error: 'An error occurred while fetching franchise data' });
   }
@@ -6300,6 +6910,25 @@ app.get("/requestchildfranchise/:id", authenticateToken, async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "Error fetching child franchise data" });
+  }
+});
+app.post("/deletechildfranchise", authenticateToken, async (req, res) => {
+  const { id } = req.body;
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    // Directly inject `id` into the SQL query (no parameter binding)
+    const sql = `UPDATE awt_childfranchisemaster SET deleted = 1 WHERE id = '${id}'`;
+
+    // Execute the SQL query
+    await pool.request().query(sql);
+
+    return res.json({ message: "Child Franchise deleted successfully!" });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Error updating Child Franchise" });
   }
 });
 // app
@@ -7195,19 +7824,67 @@ app.post("/delmanufacturer", authenticateToken, async (req, res) => {
 // Rate Card code start
 app.get("/getratedata", authenticateToken, async (req, res) => {
   try {
+    const {
+      call_type,
+      class_city,
+      ProductType,
+      ProductLine,
+      ProductClass,
+      page = 1, // Default to page 1 if not provided
+      pageSize = 10, // Default to 10 items per page if not provided
+    } = req.query;
     const pool = await poolPromise;
 
     // SQL query to fetch rate data where deleted is 0
-    const sql = "SELECT * FROM rate_card WHERE deleted = 0";
+    let sql = "SELECT r.* FROM rate_card as r WHERE deleted = 0";
+
+
+    if (call_type) {
+      sql += ` AND r.call_type LIKE '%${call_type}%'`;
+    }
+
+    if (class_city) {
+      sql += ` AND r.class_city LIKE '%${class_city}%'`;
+    }
+
+    if (ProductType) {
+      sql += ` AND r.ProductType LIKE '%${ProductType}%'`;
+    }
+
+    if (ProductLine) {
+      sql += ` AND r.ProductLine LIKE '%${ProductLine}%'`;
+    }
+    if (ProductClass) {
+      sql += ` AND r.ProductClass LIKE '%${ProductClass}%'`;
+    }
+
+    const offset = (page - 1) * pageSize;
+    // Add pagination to the SQL query (OFFSET and FETCH NEXT)
+    sql += ` ORDER BY r.id desc OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
     const result = await pool.request().query(sql);
+    let countSql = `SELECT COUNT(*) as totalCount FROM rate_card where deleted = 0 `;
+    if (call_type) countSql += ` AND call_type LIKE '%${call_type}%'`;
+    if (class_city) countSql += ` AND class_city LIKE '%${class_city}%'`;
+    if (ProductType) countSql += ` AND ProductType LIKE '%${ProductType}%'`;
+    if (ProductLine) countSql += ` AND ProductLine LIKE '%${ProductLine}%'`;
+    if (ProductClass) countSql += ` AND ProductClass LIKE '%${ProductClass}%'`;
+
+
+
+    const countResult = await pool.request().query(countSql);
+    const totalCount = countResult.recordset[0].totalCount;
     // Convert data to JSON string and encrypt it
     const jsonData = JSON.stringify(result.recordset);
     const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
-
-    return res.json({ encryptedData });
+    return res.json({
+      encryptedData,
+      totalCount: totalCount,
+      page,
+      pageSize,
+    });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "An error occurred while fetching rate data" });
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred" });
   }
 });
 // Insert for Ratecard
@@ -7328,6 +8005,67 @@ app.get("/getprodata", authenticateToken, async (req, res) => {
     return res.status(500).json({ message: "An error occurred while fetching product data" });
   }
 });
+// service product code start
+app.post("/getlhiassigncsp", authenticateToken, async (req, res) => {
+
+  let { Usercode } = req.body;
+
+  try {
+    const pool = await poolPromise;
+
+    // SQL query to fetch service product data where deleted is 0
+    const sql = `SELECT assigncsp FROM lhi_user WHERE Usercode = '${Usercode}'`;
+    const result = await pool.request().query(sql);
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "An error occurred while fetching product data" });
+  }
+});
+
+//update csp code
+
+app.post("/updatecspcode", authenticateToken, async (req, res) => {
+  let { licare_code, Usercode, checked } = req.body;
+
+  try {
+    const pool = await poolPromise;
+
+    // Fetch existing assigncsp value
+    const fetchSql = `SELECT assigncsp FROM lhi_user WHERE Usercode = '${Usercode}'`;
+    const fetchResult = await pool.request().query(fetchSql);
+
+    let existingCspCodes = fetchResult.recordset[0]?.assigncsp || ""; // Get existing data or empty string
+
+    // Convert existing codes into an array
+    let cspCodesArray = existingCspCodes ? existingCspCodes.split(",") : [];
+
+    if (checked == 'true') {
+      // Add new licare_code if not already present
+      if (!cspCodesArray.includes(licare_code)) {
+        cspCodesArray.push(licare_code);
+      }
+    } else {
+      // Remove licare_code if exists
+      cspCodesArray = cspCodesArray.filter(code => code !== licare_code);
+    }
+
+    // Convert array back to a comma-separated string
+    const updatedCspCodes = cspCodesArray.join(",");
+
+    // Update the database with the new value
+    const updateSql = `UPDATE lhi_user SET assigncsp = '${updatedCspCodes}' WHERE Usercode = '${Usercode}'`;
+    await pool.request().query(updateSql);
+
+    return res.json({ message: "CSP code updated successfully", assigncsp: updatedCspCodes });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "An error occurred while updating CSP codes" });
+  }
+});
+
+
 // Insert for Serviceproduct
 app.post("/postprodata", authenticateToken, async (req, res) => {
   const { Serviceproduct } = req.body;
@@ -7790,7 +8528,7 @@ app.get("/getlhidata", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
 
     // SQL query to fetch lhi_user data where deleted is 0
-    const sql = "SELECT * FROM lhi_user WHERE deleted = 0 order by id desc";
+    const sql = "SELECT lh.* , rm.title as role_title FROM lhi_user as lh left join role_master as rm on lh.Role = rm.id WHERE lh.deleted = 0 order by lh.id desc";
     const result = await pool.request().query(sql);
     // Convert data to JSON string and encrypt it
     const jsonData = JSON.stringify(result.recordset);
@@ -7828,7 +8566,6 @@ app.post("/postlhidata", authenticateToken, async (req, res) => {
   const decryptedData = decryptData(encryptedData, secretKey)
   const { Lhiuser,
     mobile_no,
-    password,
     UserCode,
     email,
     remarks,
@@ -7836,51 +8573,58 @@ app.post("/postlhidata", authenticateToken, async (req, res) => {
     Role,
     Reporting_to,
     Designation,
-    assigncsp,
-
+    employee_type
 
   } = JSON.parse(decryptedData);
-
 
 
   try {
     const pool = await poolPromise;
 
     // Step 1: Check if the same Lhiuser exists and is not soft-deleted
-    let sql = `SELECT * FROM lhi_user WHERE  Lhiuser = '${Lhiuser}' AND deleted = 0`;
+    let sql = `SELECT * FROM lhi_user WHERE  email = '${email}' AND deleted = 0`;
     const result = await pool.request().query(sql);
 
     if (result.recordset.length > 0) {
       // If duplicate data exists (not soft-deleted)
-      return res.status(409).json({ message: "Duplicate entry, Lhiuser already exists!" });
+      return res.status(409).json({ message: "Duplicate entry, Email already exists!" });
     } else {
       // Step 2: Check if the same Lhiuser exists but is soft-deleted
-      sql = `SELECT * FROM lhi_user WHERE Lhiuser = '${Lhiuser}' AND deleted = 1`;
+      sql = `SELECT * FROM lhi_user WHERE email = '${email}' AND deleted = 1`;
       const softDeletedData = await pool.request().query(sql);
 
       if (softDeletedData.recordset.length > 0) {
         // If soft-deleted data exists, restore the entry
-        sql = `UPDATE lhi_user SET deleted = 0 WHERE Lhiuser = '${Lhiuser}'`;
+        sql = `UPDATE lhi_user SET deleted = 0 WHERE email = '${email}'`;
         await pool.request().query(sql);
 
         return res.json({ message: "Soft-deleted data restored successfully!" });
       } else {
 
-        const getcount = `SELECT COUNT(*) AS count FROM lhi_user`;
+
+
+        const getcount = `SELECT  max (right(REPLACE(REPLACE(REPLACE(usercode, CHAR(9), ''), CHAR(10), ''), CHAR(13), ''),4) )as  count  FROM lhi_user WHERE UserCode LIKE 'LHI-${employee_type}%' `;
+
+
+
 
         const getcountresult = await pool.request().query(getcount);
 
-        const newcount = getcountresult.recordset[0].count + 1;
+        console.log(getcountresult)
+
+        const newcount = Number(getcountresult.recordset[0]?.count || 0) + 1;
+
+        console.log(newcount)
 
         // Format the newcount as LH0001
-        const licarecode = `LH${newcount.toString().padStart(4, '0')}`;
+        const licarecode = `LHI-${employee_type}-${newcount.toString().padStart(4, '0')}`;
 
 
 
 
 
         // Step 3: Insert new entry if no duplicates found
-        sql = `INSERT INTO lhi_user (Lhiuser,password,remarks,Usercode,mobile_no,email,status,Role,Reporting_to,Designation,assigncsp) VALUES ('${Lhiuser}','${password}','${remarks}','${licarecode}','${mobile_no}','${email}','${status}','${Role}','${Reporting_to}','${Designation}','${assigncsp}')`
+        sql = `INSERT INTO lhi_user (Lhiuser,remarks,Usercode,mobile_no,email,status,Role,Reporting_to,Designation) VALUES ('${Lhiuser}','${remarks}','${licarecode}','${mobile_no}','${email}','${status}','${Role}','${Reporting_to}','${Designation}')`
         await pool.request().query(sql);
 
 
@@ -7918,8 +8662,11 @@ app.post("/putlhidata", authenticateToken, async (req, res) => {
   const { encryptedData } = req.body;
   const decryptedData = decryptData(encryptedData, secretKey)
   const {
-    Lhiuser, id, updated_by, mobile_no, Usercode, password, status, email, remarks, Role, Designation, Reporting_to, assigncsp,
+    Lhiuser, id, updated_by, mobile_no, Usercode, status, email, remarks, Role, Designation, Reporting_to,
   } = JSON.parse(decryptedData);
+
+
+
 
 
   try {
@@ -7928,7 +8675,7 @@ app.post("/putlhidata", authenticateToken, async (req, res) => {
     // Step 1: Check if the same Lhiuser exists for another record (other than the current one) and is not soft-deleted
     const checkDuplicateSql = `
       SELECT * FROM lhi_user
-      WHERE Lhiuser = '${Lhiuser}'
+      WHERE email = '${email}'
       AND id != '${id}'
       AND deleted = 0
     `;
@@ -7936,7 +8683,7 @@ app.post("/putlhidata", authenticateToken, async (req, res) => {
 
     if (duplicateResult.recordset.length > 0) {
       // If a duplicate exists (other than the current record)
-      return res.status(409).json({ message: "Duplicate entry, Lhiuser already exists!" });
+      return res.status(409).json({ message: "Duplicate entry, Email already exists!" });
     } else {
       // Step 2: Update the record if no duplicates are found
       const updateSql = `
@@ -7947,14 +8694,12 @@ app.post("/putlhidata", authenticateToken, async (req, res) => {
           updated_date = GETDATE(),
           mobile_no = '${mobile_no}',
           Usercode = '${Usercode}',
-          password = '${password}',
           status = ${status},
           email = '${email}',
           remarks = '${remarks}',
           Role = '${Role}',
           Designation = '${Designation}',
-          Reporting_to = '${Reporting_to}',
-          assigncsp = '${assigncsp}'
+          Reporting_to = '${Reporting_to}'
         WHERE id = '${id}'
       `;
       await pool.request().query(updateSql);
@@ -8639,7 +9384,7 @@ app.post("/add_new_ticket", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
-    const productdetail = `select * from awt_uniqueproductmaster where CustomerID = '${customerId}'`
+    const productdetail = `select * from awt_uniqueproductmaster where CustomerID = '${customerId}' and serial_no = '${serial_no}'`
     const productdetailquery = await pool.request()
       .query(productdetail);
 
@@ -8676,7 +9421,7 @@ app.post("/add_new_ticket", authenticateToken, async (req, res) => {
       .input("mobile", sql.NVarChar, mobile)
       .input("email", sql.NVarChar, email)
       .input("address", sql.NVarChar, address)
-      .input("customer_id", sql.Int, cust_id)
+      .input("customer_id", sql.NVarChar, cust_id)
       .input("model", sql.NVarChar, details.ModelNumber)
       .input("serial_no", details.serial_no)
       .input("state", sql.NVarChar, details.state)
@@ -8711,9 +9456,7 @@ app.post("/add_new_ticket", authenticateToken, async (req, res) => {
     });
   } catch (err) {
     console.error("Error:", err);
-    return res
-      .status(500)
-      .json({ error: "An error occurred while adding the ticket.", "Error": err });
+    return res.status(500).json({ error: "An error occurred while adding the ticket.", "Error": err });
   }
 });
 
@@ -8827,6 +9570,7 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
       Priority,
       upcoming = 'current',
       ticket_type,
+      role
     } = req.query;
 
     const offset = (page - 1) * pageSize;
@@ -8835,12 +9579,7 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
 
     const getcsp = `select * from lhi_user where Usercode = '${licare_code}'`
 
-    console.log(getcsp, "csp")
-
     const getcspresilt = await pool.request().query(getcsp)
-
-
-
 
     const assigncsp = getcspresilt.recordset[0].assigncsp
 
@@ -8868,6 +9607,11 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
 
 
     let params = [];
+
+    if (role == '10') {
+      sql += ` AND call_status IN ('Spares', 'Closed')`;
+      countSql += ` AND call_status IN ('Spares', 'Closed')`;
+    }
 
     if (assigncsp !== 'ALL') {
       // Convert to an array and wrap each value in single quotes
@@ -8953,10 +9697,10 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
       params.push({ name: "customer_class", value: `%${customer_class}%` });
     }
 
-    if(ticket_type) {
+    if (ticket_type) {
       sql += `AND c.ticket_type LIKE @ticket_type`;
       countSql += `AND c.ticket_type LIKE @ticket_type`;
-      params.push ({ name: "ticket_type", value: `%${ticket_type}%` });
+      params.push({ name: "ticket_type", value: `%${ticket_type}%` });
     }
 
     if (status) {
@@ -9030,7 +9774,6 @@ app.get("/getcomplainlist", authenticateToken, async (req, res) => {
 
 
 
-    console.log(sql)
 
 
     // Execute queries
@@ -9065,6 +9808,19 @@ app.get("/getcomplaintexcel", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
     const { fromDate, toDate, licare_code } = req.query;  // Only fromDate, toDate, and licare_code are expected.
 
+    let sql;
+
+    const getcsp = `select * from lhi_user where Usercode = '${licare_code}'`
+
+    const getcspresilt = await pool.request().query(getcsp)
+
+    const assigncsp = getcspresilt.recordset[0].assigncsp
+
+
+    console.log(assigncsp, "#%")
+
+
+
     // Check if both fromDate and toDate are provided
     if (!fromDate || !toDate) {
       return res.status(400).json({
@@ -9075,11 +9831,29 @@ app.get("/getcomplaintexcel", authenticateToken, async (req, res) => {
     const currentDate = new Date().toISOString().split('T')[0];  // Current date to be used for filter if needed.
 
     // SQL query to fetch complaint tickets with fromDate and toDate filter only.
-    let sql = `
-      SELECT c.*, DATEDIFF(DAY, c.ticket_date, GETDATE()) AS ageingdays
-      FROM complaint_ticket AS c
-      WHERE c.deleted = 0
-      AND CAST(c.ticket_date AS DATE) BETWEEN @fromDate AND @toDate
+    // sql = `
+    //   SELECT c.*, DATEDIFF(DAY, c.ticket_date, GETDATE()) AS ageingdays
+    //   FROM complaint_ticket AS c
+    //   WHERE c.deleted = 0
+    //   AND CAST(c.ticket_date AS DATE) BETWEEN @fromDate AND @toDate
+    // `;
+    sql = `
+    SELECT 
+    c.*, 
+    acr.remark as final_remark, 
+    DATEDIFF(DAY, c.ticket_date, GETDATE()) AS ageingdays
+FROM complaint_ticket AS c
+LEFT JOIN (
+    SELECT acr.ticket_no, acr.remark, acr.created_date
+    FROM awt_complaintremark acr
+    JOIN (
+        SELECT ticket_no, MAX(id) AS max_id
+        FROM awt_complaintremark
+        GROUP BY ticket_no
+    ) latest ON acr.id = latest.max_id
+) acr ON c.ticket_no = acr.ticket_no
+WHERE c.deleted = 0
+AND CAST(c.ticket_date AS DATE) BETWEEN @fromDate  AND @toDate
     `;
 
     // Define the parameters for the query.
@@ -9088,10 +9862,24 @@ app.get("/getcomplaintexcel", authenticateToken, async (req, res) => {
       { name: "toDate", value: toDate }
     ];
 
+
+    if (assigncsp !== 'ALL') {
+      // Convert to an array and wrap each value in single quotes
+      const formattedCspList = assigncsp.split(",").map(csp => `'${csp.trim()}'`).join(",");
+
+      // Directly inject the formatted values into the SQL query
+      sql += ` AND c.csp IN (${formattedCspList}) `;
+    }
+
+    sql += `order by RIGHT(c.ticket_no , 4) asc`
+
+    console.log(sql)
     // Execute the SQL query
     const request = pool.request();
     params.forEach((param) => request.input(param.name, param.value));
     const result = await request.query(sql);
+
+
 
     // If no records are found, return an appropriate message
     if (result.recordset.length === 0) {
@@ -9263,9 +10051,91 @@ app.get("/getcomplainlistcsp", authenticateToken, async (req, res) => {
     return res.status(500).json({ message: "An error occurred while fetching the complaint list" });
   }
 });
+app.get("/getcspticketexcel", authenticateToken, async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    const { fromDate, toDate, licare_code } = req.query;  // Only fromDate, toDate, and licare_code are expected.
+
+    let sql;
 
 
 
+
+    // Check if both fromDate and toDate are provided
+    if (!fromDate || !toDate) {
+      return res.status(400).json({
+        message: "Both 'fromDate' and 'toDate' are required."
+      });
+    }
+
+    const currentDate = new Date().toISOString().split('T')[0];  // Current date to be used for filter if needed.
+
+    // SQL query to fetch complaint tickets with fromDate and toDate filter only.
+    // sql = `
+    //    SELECT c.*,
+    //     DATEDIFF(day, (c.ticket_date), GETDATE()) AS ageingdays
+    //     FROM complaint_ticket AS c
+    //     WHERE c.deleted = 0 AND c.csp = '${licare_code}'
+    //   AND CAST(c.ticket_date AS DATE) BETWEEN @fromDate AND @toDate
+    // `;
+    sql = `
+      SELECT 
+    c.*, 
+    acr.remark as final_remark, 
+    DATEDIFF(DAY, c.ticket_date, GETDATE()) AS ageingdays
+FROM complaint_ticket AS c
+LEFT JOIN (
+    SELECT acr.ticket_no, acr.remark, acr.created_date
+    FROM awt_complaintremark acr
+    JOIN (
+        SELECT ticket_no, MAX(id) AS max_id
+        FROM awt_complaintremark
+        GROUP BY ticket_no
+    ) latest ON acr.id = latest.max_id
+) acr ON c.ticket_no = acr.ticket_no
+WHERE c.deleted = 0 AND c.csp = '${licare_code}'
+AND CAST(c.ticket_date AS DATE) BETWEEN @fromDate  AND @toDate
+    `;
+
+    // Define the parameters for the query.
+    let params = [
+      { name: "fromDate", value: fromDate },
+      { name: "toDate", value: toDate }
+    ];
+
+
+
+
+    sql += ` order by RIGHT(c.ticket_no , 4) asc`
+
+    console.log(sql)
+    // Execute the SQL query
+    const request = pool.request();
+    params.forEach((param) => request.input(param.name, param.value));
+    const result = await request.query(sql);
+
+
+
+    // If no records are found, return an appropriate message
+    if (result.recordset.length === 0) {
+      return res.status(404).json({
+        message: "No records found for the given date range."
+      });
+    }
+
+    // Return the data as JSON to the frontend
+    return res.json({
+      data: result.recordset
+    });
+
+  } catch (err) {
+    console.error("Error fetching complaint data for Excel export:", err.message);
+    return res.status(500).json({
+      message: "An error occurred while fetching complaint data for Excel export.",
+      err: err.message
+    });
+  }
+});
 app.get("/getcsplistmsp", authenticateToken, async (req, res) => {
   const { licare_code, page = 1, pageSize = 10 } = req.query;
 
@@ -9413,6 +10283,7 @@ app.get("/getcomplainlistmsp", authenticateToken, async (req, res) => {
       ticketno,
       status,
       customerID,
+      csp,
       msp,
       mode_of_contact,
       customer_class,
@@ -9421,16 +10292,14 @@ app.get("/getcomplainlistmsp", authenticateToken, async (req, res) => {
     const offset = (page - 1) * pageSize;
 
     let sql = `
-        SELECT c.*, e.title as assigned_name,
+        SELECT c.*, 
                DATEDIFF(day, (c.ticket_date), GETDATE()) AS ageingdays
         FROM complaint_ticket AS c
-        JOIN awt_engineermaster AS e ON c.engineer_id = e.engineer_id
         WHERE c.deleted = 0 AND c.msp = '${licare_code}'
     `;
     let countSql = `
         SELECT COUNT(*) as totalCount
         FROM complaint_ticket AS c
-        JOIN awt_engineermaster AS e ON c.engineer_id = e.engineer_id
         WHERE c.deleted = 0 AND c.msp = '${licare_code}'
     `;
 
@@ -9519,7 +10388,7 @@ app.get("/getcomplainlistmsp", authenticateToken, async (req, res) => {
 
 
 
-
+    console.log(sql, "@RD")
 
     // Execute the queries
     const dataResult = await pool.request().query(sql);
@@ -9542,6 +10411,75 @@ app.get("/getcomplainlistmsp", authenticateToken, async (req, res) => {
 
 //MSP complaint list
 
+app.get("/getmspticketexcel", authenticateToken, async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    const { fromDate, toDate, licare_code } = req.query;  // Only fromDate, toDate, and licare_code are expected.
+
+    let sql;
+
+
+
+
+    // Check if both fromDate and toDate are provided
+    if (!fromDate || !toDate) {
+      return res.status(400).json({
+        message: "Both 'fromDate' and 'toDate' are required."
+      });
+    }
+
+    const currentDate = new Date().toISOString().split('T')[0];  // Current date to be used for filter if needed.
+
+    // SQL query to fetch complaint tickets with fromDate and toDate filter only.
+    sql = `
+      SELECT c.*, e.title as assigned_name,
+               DATEDIFF(day, (c.ticket_date), GETDATE()) AS ageingdays
+        FROM complaint_ticket AS c
+        LEFT JOIN awt_engineermaster AS e ON c.engineer_id = e.engineer_id
+        WHERE c.deleted = 0 AND c.msp = '${licare_code}'
+      AND CAST(c.ticket_date AS DATE) BETWEEN @fromDate AND @toDate
+    `;
+
+    // Define the parameters for the query.
+    let params = [
+      { name: "fromDate", value: fromDate },
+      { name: "toDate", value: toDate }
+    ];
+
+
+
+
+    sql += `order by RIGHT(ticket_no , 4) asc`
+
+    console.log(sql)
+    // Execute the SQL query
+    const request = pool.request();
+    params.forEach((param) => request.input(param.name, param.value));
+    const result = await request.query(sql);
+
+
+
+    // If no records are found, return an appropriate message
+    if (result.recordset.length === 0) {
+      return res.status(404).json({
+        message: "No records found for the given date range."
+      });
+    }
+
+    // Return the data as JSON to the frontend
+    return res.json({
+      data: result.recordset
+    });
+
+  } catch (err) {
+    console.error("Error fetching complaint data for Excel export:", err.message);
+    return res.status(500).json({
+      message: "An error occurred while fetching complaint data for Excel export.",
+      err: err.message
+    });
+  }
+});
+
 // end Complaint list
 
 
@@ -9563,9 +10501,29 @@ app.get("/getmultiplelocation/:pincode/:classification/:ticket_type", authentica
     LEFT JOIN awt_district as d on p.area_id = d.id
     LEFT JOIN awt_geocity as c on p.geocity_id = c.id
     LEFT JOIN pincode_allocation as o on p.pincode = o.pincode
-    LEFT JOIN awt_franchisemaster as f on f.licarecode =  o.msp_code
-    LEFT JOIN awt_childfranchisemaster as fm on fm.licare_code =  o.csp_code
-    where p.pincode = ${pincode} and o.customer_classification = '${classification}' and o.call_type = '${ticket_type}'`
+  LEFT JOIN awt_franchisemaster as f on f.licarecode =  o.msp_code
+  LEFT JOIN awt_childfranchisemaster as fm on fm.licare_code =  o.csp_code
+  where p.pincode = ${pincode} and o.customer_classification = '${classification}' and o.call_type = '${ticket_type}' and f.title != '' and fm.title != '' order by o.id desc`
+
+    const result = await pool.request().query(sql);
+
+    return res.json(result.recordset);
+
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred", details: err.message });
+  }
+});
+
+app.get("/getmultiplepincode/:pincode", authenticateToken, async (req, res) => {
+
+  const { pincode } = req.params;
+
+  try {
+
+    const pool = await poolPromise;
+
+    const sql = ` Select * from awt_pincode  where pincode = ${pincode}`
 
     const result = await pool.request().query(sql);
 
@@ -9580,67 +10538,6 @@ app.get("/getmultiplelocation/:pincode/:classification/:ticket_type", authentica
 
 
 
-// app.get("/getserial/:serial", authenticateToken, async (req, res) => {
-//   const { serial } = req.params;
-
-//   try {
-
-//     const pool = await poolPromise;
-
-//     const sql = `	SELECT
-//     asl.*,
-//     spm.SalesPartner,
-//     spm.SalesAM,
-//     CASE
-//         WHEN asl.CountryofOrigin = 'India' THEN 'Consumer'
-//         ELSE 'Import'
-//     END AS customerClassification
-// FROM
-//     awt_serial_list AS asl
-// LEFT JOIN
-//     SalesPartnerMaster AS spm
-// ON
-//     asl.PrimarySalesDealer = spm.BPcode
-// WHERE
-//     asl.serial_no = @serial;
-// `
-
-//     const result = await pool.request()
-//       .input('serial', serial)
-//       .query(sql);
-
-
-
-//     const fallbackSql = `SELECT ac.salutation , ac.customer_fname ,ac.customer_lname , ac.customer_type , ac.customer_classification , ac.mobileno , ac.alt_mobileno,ac.email ,
-// au.CustomerID , au.ModelNumber , au.address , au.region , au.state ,au.district , au.city , au.pincode ,au.purchase_date,au.SalesDealer as SalesPartner,au.serial_no , au.SubDealer as SalesAM ,au.ModelName as ItemNumber ,au.customer_classification as customerClassification
-// FROM awt_uniqueproductmaster as au
-// left join awt_customer as ac on ac.customer_id = au.CustomerID
-// WHERE au.serial_no = @serial order by au.id desc`;
-
-//     const fallbackResult = await pool.request()
-//       .input('serial', serial)
-//       .query(fallbackSql);
-
-//     if (fallbackResult.recordset.length !== 0) {
-
-//       return res.json(fallbackResult.recordset);
-
-//     } else {
-
-//       return res.json(result.recordset);
-
-//     }
-
-
-
-
-
-//   } catch (err) {
-//     console.error("Database error:", err);
-//     return res.status(500).json({ error: "Database error occurred", details: err.message });
-//   }
-// });
-
 
 app.get("/getserial/:serial", authenticateToken, async (req, res) => {
   const { serial } = req.params;
@@ -9650,7 +10547,7 @@ app.get("/getserial/:serial", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
 
 
-    const sql = `select serial_no , DESCRIPTION as ModelNumber , ACCOUNT as customer_id , ALLOCATIONSTATUS as allocation , CUSTOMERCLASSIFICATION as customerClassification ,spm.SalesPartner ,spm.SalesAM from LHI_Licare_data as lhi LEFT JOIN SalesPartnerMaster AS spm  ON lhi.DealerCode = spm.BPcode where serial_no = @serial`
+    const sql = `select lhi.serial_no , lhi.DESCRIPTION as ModelNumber , ACCOUNT as customer_id , ALLOCATIONSTATUS as allocation , CUSTOMERCLASSIFICATION as customerClassification ,spm.SalesPartner ,spm.SalesAM , asl.ItemNumber from SERIAL_API_VW as lhi LEFT JOIN SalesPartnerMaster AS spm  ON lhi.DealerCode = spm.BPcode left join awt_serial_list as asl on asl.serial_no = lhi.serial_no where lhi.serial_no = @serial`
 
     const result = await pool.request()
       .input('serial', serial)
@@ -9659,10 +10556,70 @@ app.get("/getserial/:serial", authenticateToken, async (req, res) => {
 
 
     const fallbackSql = `SELECT ac.salutation , ac.customer_fname ,ac.customer_lname , ac.customer_type , ac.customer_classification , ac.mobileno , ac.alt_mobileno,ac.email ,allocation = 'Allocated',
-au.CustomerID as customer_id , au.ModelNumber , au.address , au.region , au.state ,au.district , au.city , au.pincode ,au.purchase_date,au.SalesDealer as SalesPartner,au.serial_no , au.SubDealer as SalesAM ,au.ModelName as ItemNumber ,au.customer_classification as customerClassification
+au.CustomerID as customer_id , au.ModelNumber , au.address , au.region , au.state ,au.district , au.city , au.pincode ,au.purchase_date,au.SalesDealer as SalesPartner,au.serial_no , au.SubDealer as SalesAM ,au.ModelName as ItemNumber ,au.customer_classification as customerClassification , au.SerialStatus
 FROM awt_uniqueproductmaster as au
 left join awt_customer as ac on ac.customer_id = au.CustomerID
-WHERE au.serial_no = @serial order by au.id desc`;
+WHERE au.serial_no = @serial and au.SerialStatus = 'Active' order by au.id asc `;
+
+    const fallbackResult = await pool.request()
+      .input('serial', serial)
+      .query(fallbackSql);
+
+
+
+    const lastfallbacksql = `select serial_no ,ModelNumber,customer_classification as customerClassification,purchase_date ,ModelName  from awt_uniqueproductmaster where serial_no = @serial`
+
+
+    const lastfallbackResult = await pool.request()
+      .input('serial', serial)
+      .query(lastfallbacksql);
+
+
+
+
+    if (fallbackResult.recordset.length !== 0) {
+
+      return res.json(fallbackResult.recordset);
+
+    } else if (lastfallbackResult.recordset.length !== 0) {
+
+      return res.json(lastfallbackResult.recordset);
+    }
+    else {
+      return res.json(result.recordset);
+
+    }
+
+
+
+
+
+
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred", details: err.message });
+  }
+});
+app.get("/getcheckserial/:serial", authenticateToken, async (req, res) => {
+  const { serial } = req.params;
+
+  try {
+
+    const pool = await poolPromise;
+
+
+    const sql = `select lhi.serial_no , lhi.DESCRIPTION as ModelNumber , ACCOUNT as customer_id , ALLOCATIONSTATUS as allocation , CUSTOMERCLASSIFICATION as customerClassification ,spm.SalesPartner ,spm.SalesAM , asl.ItemNumber from SERIAL_API_VW as lhi LEFT JOIN SalesPartnerMaster AS spm  ON lhi.DealerCode = spm.BPcode left join awt_serial_list as asl on asl.serial_no = lhi.serial_no where lhi.serial_no = @serial`
+
+    const result = await pool.request()
+      .input('serial', serial)
+      .query(sql);
+
+
+
+    const fallbackSql = `SELECT ac.salutation , ac.customer_fname ,ac.customer_lname , ac.customer_type , ac.customer_classification , ac.mobileno , ac.alt_mobileno,ac.email ,allocation = 'Allocated',
+au.CustomerID as customer_id , au.ModelNumber , au.address , au.region , au.state ,au.district , au.city , au.pincode ,au.purchase_date,au.SalesDealer as SalesPartner,au.serial_no , au.SubDealer as SalesAM ,au.ModelName as ItemNumber ,au.customer_classification as customerClassification , au.SerialStatus
+FROM awt_uniqueproductmaster as au left join awt_customer as ac on ac.customer_id = au.CustomerID
+WHERE au.serial_no = @serial and au.SerialStatus = 'Active' order by au.id desc`;
 
     const fallbackResult = await pool.request()
       .input('serial', serial)
@@ -9688,6 +10645,9 @@ WHERE au.serial_no = @serial order by au.id desc`;
 });
 
 
+
+
+
 app.get("/getmobserial/:serial", authenticateToken, async (req, res) => {
   const { serial } = req.params;
 
@@ -9695,11 +10655,11 @@ app.get("/getmobserial/:serial", authenticateToken, async (req, res) => {
 
     const pool = await poolPromise;
 
-    const sql = `select serial_no , DESCRIPTION as ModelNumber , ACCOUNT as customer_id , ALLOCATIONSTATUS as allocation , CUSTOMERCLASSIFICATION as customer_classification from LHI_Licare_data where serial_no = @serial`;
+    const sql = `select lhi.serial_no , lhi.DESCRIPTION as ModelNumber , ACCOUNT as customer_id , ALLOCATIONSTATUS as allocation , CUSTOMERCLASSIFICATION as customerClassification ,spm.SalesPartner ,spm.SalesAM , asl.ItemNumber from SERIAL_API_VW as lhi LEFT JOIN SalesPartnerMaster AS spm  ON lhi.DealerCode = spm.BPcode left join awt_serial_list as asl on asl.serial_no = lhi.serial_no where lhi.serial_no = @serial`;
 
 
     const fallbackSql = `SELECT allocation = 'Allocated', ac.customer_classification ,
-    au.CustomerID as customer_id , au.ModelNumber ,au.serial_no 
+    au.CustomerID as customer_id , au.ModelNumber ,au.serial_no,au.ModelName 
     FROM awt_uniqueproductmaster as au
     left join awt_customer as ac on ac.customer_id = au.CustomerID
     WHERE au.serial_no = @serial order by au.id desc`;
@@ -10102,8 +11062,8 @@ app.get("/getEndCustomerAddresses/:customerEndId", authenticateToken, async (req
   }
 });
 
-app.get("/getSpareParts/:model", authenticateToken, async (req, res) => {
-  const { model } = req.params;
+app.get("/getSpareParts/:item_code", authenticateToken, async (req, res) => {
+  const { item_code } = req.params;
 
 
 
@@ -10111,11 +11071,19 @@ app.get("/getSpareParts/:model", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
     // Parameterized query
     const sql = `
-      SELECT sp.id, sp.ModelNumber, sp.title as article_code ,sp.ProductCode as spareId, sp.ItemDescription as article_description , spt.MRPQuotation as price FROM Spare_parts as sp left join priceGroup as spt on sp.PriceGroup = spt.PriceGroup  WHERE sp.deleted = 0  AND ModelNumber = @model
+      SELECT sp.id, 
+       sp.ModelNumber, 
+       sp.title as article_code,
+       sp.ProductCode as spareId, 
+       sp.ItemDescription as article_description, 
+       spt.MRPQuotation as price
+FROM Spare_parts as sp 
+LEFT JOIN priceGroup as spt ON sp.PriceGroup = spt.PriceGroup
+WHERE sp.deleted = 0 and ProductCode = @item_code
     `;
 
     const result = await pool.request()
-      .input("model", model) // Specify the data type for the parameter
+      .input("item_code", item_code) // Specify the data type for the parameter
       .query(sql);
 
     return res.json(result.recordset);
@@ -10124,6 +11092,37 @@ app.get("/getSpareParts/:model", authenticateToken, async (req, res) => {
     return res.status(500).json({ error: "Database error occurred", details: err.message });
   }
 });
+// app.get("/getSpareParts/:model", authenticateToken, async (req, res) => {
+//   const { model } = req.params;
+
+
+
+//   try {
+//     const pool = await poolPromise;
+//     // Parameterized query
+//     const sql = `
+//       SELECT sp.id, 
+//        sp.ModelNumber, 
+//        sp.title as article_code,
+//        sp.ProductCode as spareId, 
+//        sp.ItemDescription as article_description, 
+//        spt.MRPQuotation as price
+// FROM Spare_parts as sp 
+// LEFT JOIN priceGroup as spt ON sp.PriceGroup = spt.PriceGroup
+// WHERE sp.deleted = 0
+//   AND TRIM(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(sp.ModelNumber, '     ', ' '), '    ', ' '), '   ', ' '), '  ', ' '), '  ', ' ')) = @model
+//     `;
+
+//     const result = await pool.request()
+//       .input("model", model) // Specify the data type for the parameter
+//       .query(sql);
+
+//     return res.json(result.recordset);
+//   } catch (err) {
+//     console.error("Database error:", err);
+//     return res.status(500).json({ error: "Database error occurred", details: err.message });
+//   }
+// });
 
 
 
@@ -10135,7 +11134,7 @@ app.post("/getDefectCodewisetype", authenticateToken,
     try {
       const pool = await poolPromise;
       // Modified SQL query using parameterized query
-      const sql = `SELECT * FROM awt_typeofdefect  where groupdefect_code = ${defect_code}`;
+      const sql = `SELECT * FROM awt_typeofdefect  where groupdefect_code = ${defect_code} and deleted = 0`;
 
       const result = await pool.request().query(sql);
 
@@ -10154,7 +11153,7 @@ app.post("/getDefectCodewisesite", authenticateToken,
     try {
       const pool = await poolPromise;
       // Modified SQL query using parameterized query
-      const sql = `SELECT * FROM awt_site_defect  where defectgroupcode = ${defect_code}`;
+      const sql = `SELECT * FROM awt_site_defect  where defectgroupcode = ${defect_code} and deleted = 0`;
 
       const result = await pool.request().query(sql);
 
@@ -10169,106 +11168,182 @@ app.post("/getDefectCodewisesite", authenticateToken,
 app.get("/getquotationlist", authenticateToken, async (req, res) => {
   try {
     const {
-      ticket_no,
-      spareId,
+      ticketId,
+      CustomerName,
       ModelNumber,
-      title,
-      quantity,
       price,
       quotationNumber,
-      assignedEngineer,
       licare_code,
-      CustomerName,
-      page = 1, // Default to page 1 if not provided
-      pageSize = 10, // Default to 10 items per page if not provided
+      fromDate,
+      toDate,
+      customer_id,
+      customer_class,
+      mobile_no,
+      alt_mobileno,
+      email,
+      state,
+      customer_type,
+      ticket_type,
+      call_status,
+      sub_call_status,
+      warranty_status,
+      serial_no,
+      sevice_partner,
+      child_service_partner,
+      mother_branch,
+      status,
+      page = 1,
+      pageSize = 10,
     } = req.query;
-    // Use the poolPromise to get the connection pool
+
     const pool = await poolPromise;
 
-    const getcsp = `select * from lhi_user where Usercode = '${licare_code}'`
+    // Fetch assigncsp
+    const getcspresilt = await pool.request().query(`SELECT * FROM lhi_user WHERE Usercode = '${licare_code}'`);
+    const assigncsp = getcspresilt.recordset[0] && getcspresilt.recordset[0].assigncsp;
 
+    // Initialize SQL and Count Queries
+    let sql = `
+      SELECT q.*, 
+        c.customer_class, c.ticket_type, c.call_status, c.sub_call_status, c.warranty_status, 
+        c.serial_no, c.sevice_partner, c.child_service_partner, c.mother_branch, 
+        cs.mobileno, cs.alt_mobileno, cs.email, cs.customer_type , (select em.title from awt_engineermaster as em where q.assignedEngineer = em.engineer_id) as engineer_name ,
+    (select top 1 cl.address from awt_customerlocation as cl where cl.customer_id = q.customer_id) as customer_address
+      FROM awt_quotation AS q
+      LEFT JOIN complaint_ticket AS c ON c.ticket_no = q.ticketId
+      LEFT JOIN awt_customer AS cs ON cs.customer_id = q.customer_id
+      WHERE q.deleted=0`;
 
-    const getcspresilt = await pool.request().query(getcsp)
+    let countSql = `
+      SELECT COUNT(*) as totalCount
+      FROM awt_quotation AS q
+      LEFT JOIN complaint_ticket AS c ON c.ticket_no = q.ticketId
+      LEFT JOIN awt_customer AS cs ON cs.customer_id = q.customer_id
+      WHERE 1=1`;
 
-    const assigncsp = getcspresilt.recordset[0].assigncsp
-
-    // Directly use the query (no parameter binding)
-    let sql = `SELECT q.* FROM awt_quotation as q WHERE 1=1`;
-
-
+    // Apply assigncsp filter
     if (assigncsp !== 'ALL') {
-      // Convert to an array and wrap each value in single quotes
       const formattedCspList = assigncsp.split(",").map(csp => `'${csp.trim()}'`).join(",");
-
-      // Directly inject the formatted values into the SQL query
       sql += ` AND q.csp_code IN (${formattedCspList})`;
+      countSql += ` AND q.csp_code IN (${formattedCspList})`;
     }
 
-
-    if (ticket_no) {
-      sql += ` AND q.ticketId LIKE '%${ticket_no}%'`;
+    // Apply all filters
+    if (fromDate && toDate) {
+      sql += ` AND q.ticketdate  BETWEEN '${fromDate}' AND '${toDate}'`;
+      countSql += ` AND q.ticketdate  BETWEEN '${fromDate}' AND '${toDate}'`;
     }
-
+    if (ticketId) {
+      sql += ` AND q.ticketId LIKE '%${ticketId}%'`;
+      countSql += ` AND q.ticketId LIKE '%${ticketId}%'`;
+    }
     if (CustomerName) {
       sql += ` AND q.CustomerName LIKE '%${CustomerName}%'`;
+      countSql += ` AND q.CustomerName LIKE '%${CustomerName}%'`;
     }
-
-    if (quotationNumber) {
-      sql += ` AND q.quotationNumber LIKE '%${quotationNumber}%'`;
-    }
-
     if (ModelNumber) {
       sql += ` AND q.ModelNumber LIKE '%${ModelNumber}%'`;
-    }
-
-    if (title) {
-      sql += ` AND q.title LIKE '%${title}%'`;
-    }
-
-    if (quantity) {
-      sql += ` AND q.quantity LIKE '%${quantity}%'`;
+      countSql += ` AND q.ModelNumber LIKE '%${ModelNumber}%'`;
     }
     if (price) {
       sql += ` AND q.price LIKE '%${price}%'`;
+      countSql += ` AND q.price LIKE '%${price}%'`;
     }
-    // Pagination logic: Calculate offset based on the page number
+    if (quotationNumber) {
+      sql += ` AND q.quotationNumber LIKE '%${quotationNumber}%'`;
+      countSql += ` AND q.quotationNumber LIKE '%${quotationNumber}%'`;
+    }
+    if (customer_id) {
+      sql += ` AND q.customer_id LIKE '%${customer_id}%'`;
+      countSql += ` AND q.customer_id LIKE '%${customer_id}%'`;
+    }
+    if (customer_class) {
+      sql += ` AND c.customer_class LIKE '%${customer_class}%'`;
+      countSql += ` AND c.customer_class LIKE '%${customer_class}%'`;
+    }
+    if (ticket_type) {
+      sql += ` AND c.ticket_type LIKE '%${ticket_type}%'`;
+      countSql += ` AND c.ticket_type LIKE '%${ticket_type}%'`;
+    }
+    if (call_status) {
+      sql += ` AND c.call_status LIKE '%${call_status}%'`;
+      countSql += ` AND c.call_status LIKE '%${call_status}%'`;
+    }
+    if (sub_call_status) {
+      sql += ` AND c.sub_call_status LIKE '%${sub_call_status}%'`;
+      countSql += ` AND c.sub_call_status LIKE '%${sub_call_status}%'`;
+    }
+    if (warranty_status) {
+      sql += ` AND c.warranty_status LIKE '%${warranty_status}%'`;
+      countSql += ` AND c.warranty_status LIKE '%${warranty_status}%'`;
+    }
+    if (serial_no) {
+      sql += ` AND c.serial_no LIKE '%${serial_no}%'`;
+      countSql += ` AND c.serial_no LIKE '%${serial_no}%'`;
+    }
+    if (sevice_partner) {
+      sql += ` AND c.sevice_partner LIKE '%${sevice_partner}%'`;
+      countSql += ` AND c.sevice_partner LIKE '%${sevice_partner}%'`;
+    }
+    if (child_service_partner) {
+      sql += ` AND c.child_service_partner LIKE '%${child_service_partner}%'`;
+      countSql += ` AND c.child_service_partner LIKE '%${child_service_partner}%'`;
+    }
+    if (mother_branch) {
+      sql += ` AND c.mother_branch LIKE '%${mother_branch}%'`;
+      countSql += ` AND c.mother_branch LIKE '%${mother_branch}%'`;
+    }
+    if (mobile_no) {
+      sql += ` AND cs.mobileno LIKE '%${mobile_no}%'`;
+      countSql += ` AND cs.mobileno LIKE '%${mobile_no}%'`;
+    }
+    if (alt_mobileno) {
+      sql += ` AND cs.alt_mobileno LIKE '%${alt_mobileno}%'`;
+      countSql += ` AND cs.alt_mobileno LIKE '%${alt_mobileno}%'`;
+    }
+    if (email) {
+      sql += ` AND cs.email LIKE '%${email}%'`;
+      countSql += ` AND cs.email LIKE '%${email}%'`;
+    }
+    if (state) {
+      sql += ` AND c.state LIKE '%${state}%'`;
+      countSql += ` AND c.state LIKE '%${state}%'`;
+    }
+    if (customer_type) {
+      sql += ` AND cs.customer_type LIKE '%${customer_type}%'`;
+      countSql += ` AND cs.customer_type LIKE '%${customer_type}%'`;
+    }
+    if (status) {
+      sql += ` AND q.status LIKE '%${status}%'`;
+      countSql += ` AND q.status LIKE '%${status}%'`;
+    }
+
+    // Pagination
     const offset = (page - 1) * pageSize;
-    // Add pagination to the SQL query (OFFSET and FETCH NEXT)
-    sql += ` ORDER BY q.quotationNumber desc OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+    sql += ` ORDER BY q.quotationNumber DESC OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
 
-    // Execute the query
+    // Execute queries
     const result = await pool.request().query(sql);
-    // Get the total count of records for pagination
-    let countSql = `SELECT COUNT(*) as totalCount FROM awt_quotation where 1=1 `;
-    if (quotationNumber) countSql += ` AND quotationNumber LIKE '%${quotationNumber}%'`;
-    if (assignedEngineer) countSql += ` AND assignedEngineer LIKE '%${assignedEngineer}%'`;
-
-    if (CustomerName) countSql += ` AND CustomerName LIKE '%${CustomerName}%'`;
-    if (spareId) countSql += ` AND spareId LIKE '%${spareId}%'`;
-    if (ModelNumber) countSql += ` AND ModelNumber LIKE '%${ModelNumber}%'`;
-    if (title) countSql += ` AND title LIKE '%${title}%'`;
-    if (quantity) countSql += ` AND quantity LIKE '%${quantity}%'`;
-    if (price) countSql += ` AND price LIKE '%${price}%'`;
-    if (ticket_no) countSql += ` AND ticketId LIKE '%${ticket_no}%'`;
-
     const countResult = await pool.request().query(countSql);
     const totalCount = countResult.recordset[0].totalCount;
-    // Convert data to JSON string and encrypt it
+
+    // Encrypt result
     const jsonData = JSON.stringify(result.recordset);
     const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
+
     return res.json({
       encryptedData,
-      totalCount: totalCount,
+      totalCount,
       page,
       pageSize,
     });
-
 
   } catch (err) {
     console.error("Database error:", err);
     return res.status(500).json({ error: "Database error occurred" });
   }
 });
+
 
 app.get("/getquotationcsplist", authenticateToken, async (req, res) => {
   try {
@@ -10366,37 +11441,42 @@ app.post('/add_uniqsparepart', authenticateToken, async (req, res) => {
 
 
     const pool = await poolPromise;
+    const poolRequest = pool.request();
     const newdata = finaldata.data;
     const ticket_no = finaldata.ticket_no;
-
-    // Destructure values from `newdata`
+    const engineer_id = finaldata.engineerdata;
     const { article_code, article_description, price, spareId, quantity } = newdata;
+    const engineer_ids_string = engineer_id.map(id => `'${id}'`).join(',');
 
-    const poolRequest = pool.request();
+
+
 
     // Check if the spare part already exists
     const checkDuplicateQuery = `
-      SELECT 1
-      FROM awt_uniquespare
-      WHERE ticketId = @ticket_no AND article_code = @article_code_d
-    `;
+       SELECT 1
+       FROM awt_uniquespare
+       WHERE ticketId = @ticket_no AND article_code = @article_code_d
+     `;
 
     const duplicateResult = await poolRequest
       .input('ticket_no', sql.VarChar, ticket_no)
       .input('article_code_d', sql.VarChar, article_code)
       .query(checkDuplicateQuery);
 
+
+
+
     if (duplicateResult.recordset.length > 0) {
       // Record exists, perform an update
       const updateSpareQuery = `
-        UPDATE awt_uniquespare
-        SET article_code = @article_code,
-            article_description = @article_description,
-            price = @price,
-            quantity = @quantity,
-            deleted = @deleted
-        WHERE ticketId = @ticket_no AND article_code = @article_code_d
-      `;
+         UPDATE awt_uniquespare
+         SET article_code = @article_code,
+             article_description = @article_description,
+             price = @price,
+             quantity = @quantity,
+             deleted = @deleted
+         WHERE ticketId = @ticket_no AND article_code = @article_code_d
+       `;
 
       await poolRequest
         .input('article_code', sql.VarChar, article_code)
@@ -10410,9 +11490,9 @@ app.post('/add_uniqsparepart', authenticateToken, async (req, res) => {
     } else {
       // Record does not exist, perform an insert
       const insertSpareQuery = `
-        INSERT INTO awt_uniquespare (ticketId, spareId, article_code, article_description, price, quantity)
-        VALUES (@ticket_no, @spareId, @article_code, @article_description, @price, @quantity)
-      `;
+         INSERT INTO awt_uniquespare (ticketId, spareId, article_code, article_description, price, quantity)
+         VALUES (@ticket_no, @spareId, @article_code, @article_description, @price, @quantity)
+       `;
 
       await poolRequest
         .input('article_code', sql.VarChar, article_code)
@@ -10424,6 +11504,12 @@ app.post('/add_uniqsparepart', authenticateToken, async (req, res) => {
 
       res.status(200).send({ message: 'Spare part added successfully!' });
     }
+
+
+
+
+
+
   } catch (error) {
     console.error('Error inserting or updating spare part:', error);
     res.status(500).send({ error: 'Internal server error' });
@@ -10528,7 +11614,24 @@ app.post(`/add_quotation`, authenticateToken, async (req, res) => {
 
   } catch (error) {
     console.error("Error inserting data:", error);
-    res.status(500).json({ message: "Error inserting data", error });
+
+    // Insert error into `error_log` table
+    const errorLogQuery = `
+      INSERT INTO error_log (api_name, error_desc, created_date)
+      VALUES (@api_name, @error_desc, @created_date)
+    `;
+
+    try {
+      await pool.request()
+        .input('api_name', sql.NVarChar, '/add_quotation')
+        .input('error_desc', sql.NVarChar, error.message)
+        .input('created_date', sql.NVarChar, new Date().toISOString())
+        .query(errorLogQuery);
+    } catch (logError) {
+      console.error("Error logging to error_log:", logError);
+    }
+
+    res.status(500).json({ message: "Error inserting data", error: error.message });
   }
 });
 
@@ -10584,7 +11687,7 @@ app.post('/getquotedetails', authenticateToken, async (req, res) => {
 
   try {
     // Use parameterized query to prevent SQL Injection
-    const query = `select aq.* , ct.address,ct.customer_mobile,ct.customer_email , ct.assigned_to from  awt_quotation as aq left join complaint_ticket as ct on ct.ticket_no = aq.ticketId WHERE aq.id = @quote_id`;
+    const query = `select aq.* , ct.address,ct.customer_mobile,ct.customer_email , ct.assigned_to , ct.serial_no,ct.service_charges from  awt_quotation as aq left join complaint_ticket as ct on ct.ticket_no = aq.ticketId WHERE aq.id = @quote_id`;
 
 
 
@@ -10657,11 +11760,11 @@ app.get("/getapproveEng", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
 
     // Directly use the query (no parameter binding)
-    const sql = `select * from awt_engineermaster where status != 1 AND deleted = 0`;
+    const sql = `select * from awt_engineermaster where status != 1 AND deleted = 0 AND employee_code = 'SRV' AND approved_by is null`;
 
     // Execute the query
     const result = await pool.request().query(sql);
-    console.log(result)
+
 
     return res.json(result.recordset);
   } catch (err) {
@@ -10680,7 +11783,7 @@ app.get("/getcsp", authenticateToken, async (req, res) => {
 
     // Execute the query
     const result = await pool.request().query(sql);
-    console.log(result)
+
 
     return res.json(result.recordset);
   } catch (err) {
@@ -10711,7 +11814,7 @@ app.get("/getmsp", authenticateToken, async (req, res) => {
 
 app.post("/finalapproveenginner", authenticateToken, async (req, res) => {
 
-  const { eng_id } = req.body;
+  const { eng_id, approve_by } = req.body;
 
 
 
@@ -10720,7 +11823,7 @@ app.post("/finalapproveenginner", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
 
     // Directly use the query (no parameter binding)
-    const sql = `update awt_engineermaster set status = 1 where id = '${eng_id}'`;
+    const sql = `update awt_engineermaster set status = 1 , approved_by = '${approve_by}' where id = '${eng_id}' `;
 
     // Execute the query
     const result = await pool.request().query(sql);
@@ -11069,72 +12172,65 @@ app.post('/role_pages', authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
-    const sqlSelect = `
+    // Fetch pages already assigned to this role
+    const existingPagesQuery = `
+      SELECT pageid FROM pagerole WHERE roleid = @role_id
+    `;
+    const existingPagesResult = await pool.request()
+      .input("role_id", sql.Int, role_id)
+      .query(existingPagesQuery);
+
+    const existingPageIds = new Set(existingPagesResult.recordset.map(row => row.pageid));
+
+    // Fetch all active pages from page_master
+    const fetchPageIdsQuery = `SELECT id AS pageid FROM page_master WHERE deleted = 0`;
+    const allPagesResult = await pool.request().query(fetchPageIdsQuery);
+    const allPageIds = allPagesResult.recordset.map(row => row.pageid);
+
+    // Identify missing pages
+    const missingPages = allPageIds.filter(pageid => !existingPageIds.has(pageid));
+
+    // Insert only missing pages
+    if (missingPages.length > 0) {
+      const transaction = new sql.Transaction(pool);
+      await transaction.begin();
+
+      try {
+        const request = transaction.request();
+        for (const page_id of missingPages) {
+          await request.query(`
+            INSERT INTO pagerole (roleid, pageid, accessid) 
+            VALUES (${role_id}, ${page_id}, 1)
+          `);
+        }
+
+        await transaction.commit();
+      } catch (err) {
+        await transaction.rollback();
+        console.error("Transaction error:", err);
+        return res.status(500).json({ error: "Failed to insert missing pages", details: err });
+      }
+    }
+
+    // Fetch updated list
+    const getDataQuery = `
       SELECT * 
       FROM pagerole AS pg 
       LEFT JOIN page_master AS pm ON pg.pageid = pm.id 
       WHERE pg.roleid = @role_id 
-      ORDER BY pg.id ASC
+      ORDER BY pm.pagename ASC
     `;
-
-    const result = await pool.request()
+    const updatedData = await pool.request()
       .input("role_id", sql.Int, role_id)
-      .query(sqlSelect);
+      .query(getDataQuery);
 
-    const data = result.recordset;
-
-    if (data.length === 0) {
-      const fetchPageIds = `
-        SELECT id AS page_id 
-        FROM page_master 
-        WHERE deleted = 0
-      `;
-
-      const pageIdsResult = await pool.request().query(fetchPageIds);
-      const pageIds = pageIdsResult.recordset;
-
-      if (pageIds.length > 0) {
-        const transaction = new sql.Transaction(pool);
-        await transaction.begin();
-
-        try {
-          const request = transaction.request();
-          for (const { page_id } of pageIds) {
-            await request.query(`
-                INSERT INTO pagerole (roleid, pageid, accessid) 
-                VALUES (${role_id}, ${page_id},1)
-              `);
-          }
-
-          await transaction.commit();
-
-          const getData = `
-            SELECT * 
-            FROM pagerole AS pg 
-            LEFT JOIN page_master AS pm ON pg.pageid = pm.id 
-            WHERE pg.roleid = @role2_id 
-            ORDER BY pg.id ASC
-          `;
-
-          const newData = await pool.request()
-            .input("role2_id", sql.Int, role_id)
-            .query(getData);
-
-          return res.json(newData.recordset);
-        } catch (err) {
-          await transaction.rollback();
-          console.error("Transaction error:", err);
-          return res.status(500).json({ error: "Failed to insert rows", details: err });
-        }
-      }
-    } else {
-      return res.json(data);
-    }
+    return res.json(updatedData.recordset);
   } catch (err) {
     console.error("Database error:", err);
     return res.status(500).json({ error: "Database query failed", details: err });
   }
 });
+
 
 
 
@@ -11165,57 +12261,885 @@ app.post('/getRoleData', authenticateToken, async (req, res) => {
   }
 });
 
+
+app.post('/getpageroledata', authenticateToken, async (req, res) => {
+  const {
+    role,
+    masterpageid, ticketpageid, quotationpageid, enquirypageid, reportpageid,
+    locationpageid, pincodepageid, productpageid, customerpageid, bussinesspageid,
+    franchpageid, callstatuspageid, lhiuserpageid, servicepageid, faultpageid,
+    ratepageid, sparearray, ticketreportid, claimreportid, feedbackreportid, annexureid, shipmentpageid, engineermasterpageid
+  } = req.body;
+
+
+
+  // Function to convert comma-separated strings into arrays
+  const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
+
+  // Convert all page IDs from strings to arrays
+  const pageTypes = {
+    masterpage: parseIds(masterpageid),
+    ticketpage: parseIds(ticketpageid),
+    quotationpage: parseIds(quotationpageid),
+    enquirypage: parseIds(enquirypageid),
+    reportpage: parseIds(reportpageid),
+    locationpage: parseIds(locationpageid),
+    pincodepage: parseIds(pincodepageid),
+    productpage: parseIds(productpageid),
+    customerpage: parseIds(customerpageid),
+    bussinesspage: parseIds(bussinesspageid),
+    franchpage: parseIds(franchpageid),
+    callstatuspage: parseIds(callstatuspageid),
+    lhiuserpage: parseIds(lhiuserpageid),
+    servicepage: parseIds(servicepageid),
+    faultpage: parseIds(faultpageid),
+    ratepage: parseIds(ratepageid),
+    sparearray: parseIds(sparearray),
+    ticketreport: parseIds(ticketreportid),
+    claimreport: parseIds(claimreportid),
+    feedbackreport: parseIds(feedbackreportid),
+    annexure: parseIds(annexureid),
+    shipmentpage: parseIds(shipmentpageid),
+    engineermasterpage: parseIds(engineermasterpageid)
+  };
+
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+    request.input("roleid", sql.Int, role);
+
+    let queryParts = [];
+    let index = 0;
+
+    for (const [pageType, pageIds] of Object.entries(pageTypes)) {
+      if (pageIds.length > 0) {
+        let pageParams = pageIds.map((_, i) => `@pageid${index + i}`).join(",");
+        queryParts.push(`
+          SELECT '${pageType}' AS pageType, COUNT(*) AS count
+          FROM pagerole
+          WHERE roleid = @roleid AND pageid IN (${pageParams}) AND accessid > 1
+        `);
+        pageIds.forEach((id, i) => request.input(`pageid${index + i}`, sql.Int, id));
+        index += pageIds.length;
+      }
+    }
+
+    if (queryParts.length === 0) {
+      return res.json(Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])));
+    }
+
+    const query = queryParts.join(" UNION ALL ");
+    const result = await request.query(query);
+
+    // Convert results to a key-value format
+    const response = Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])); // Default all pages to 0
+
+    result.recordset.forEach(row => {
+      response[row.pageType] = row.count > 0 ? 1 : 0;
+    });
+
+    return res.json(response);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
+
+app.post('/getlocationroledata', authenticateToken, async (req, res) => {
+  const { role, countrypage, regionpage, geostatepage, districtpage, geocitypage, pincodepage } = req.body;
+
+  // Function to convert comma-separated strings into arrays
+  const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
+
+  // Convert all page IDs from strings to arrays
+  const pageTypes = {
+    countrypage: parseIds(countrypage),
+    regionpage: parseIds(regionpage),
+    geostatepage: parseIds(geostatepage),
+    districtpage: parseIds(districtpage),
+    geocitypage: parseIds(geocitypage),
+    pincodepage: parseIds(pincodepage),
+  };
+
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+    request.input("roleid", sql.Int, role);
+
+    let queryParts = [];
+    let index = 0;
+
+    for (const [pageType, pageIds] of Object.entries(pageTypes)) {
+      if (pageIds.length > 0) {
+        let pageParams = pageIds.map((_, i) => `@pageid${index + i}`).join(",");
+        queryParts.push(`
+          SELECT '${pageType}' AS pageType, COUNT(*) AS count
+          FROM pagerole
+          WHERE roleid = @roleid AND pageid IN (${pageParams}) AND accessid > 1
+        `);
+        pageIds.forEach((id, i) => request.input(`pageid${index + i}`, sql.Int, id));
+        index += pageIds.length;
+      }
+    }
+
+    if (queryParts.length === 0) {
+      return res.json(Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])));
+    }
+
+    const query = queryParts.join(" UNION ALL ");
+    const result = await request.query(query);
+
+    // Convert results to a key-value format
+    const response = Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])); // Default all pages to 0
+
+    result.recordset.forEach(row => {
+      response[row.pageType] = row.count > 0 ? 1 : 0;
+    });
+
+    return res.json(response);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
+
+app.post('/getallocationroledata', authenticateToken, async (req, res) => {
+  const { role, allocationpage, shipmentfgpage, shipmentpartpage } = req.body;
+
+  // Function to convert comma-separated strings into arrays
+  const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
+
+  // Convert all page IDs from strings to arrays
+  const pageTypes = {
+    allocationpage: parseIds(allocationpage),
+    shipmentfgpage: parseIds(shipmentfgpage),
+    shipmentpartpage: parseIds(shipmentpartpage),
+
+  };
+
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+    request.input("roleid", sql.Int, role);
+
+    let queryParts = [];
+    let index = 0;
+
+    for (const [pageType, pageIds] of Object.entries(pageTypes)) {
+      if (pageIds.length > 0) {
+        let pageParams = pageIds.map((_, i) => `@pageid${index + i}`).join(",");
+        queryParts.push(`
+          SELECT '${pageType}' AS pageType, COUNT(*) AS count
+          FROM pagerole
+          WHERE roleid = @roleid AND pageid IN (${pageParams}) AND accessid > 1
+        `);
+        pageIds.forEach((id, i) => request.input(`pageid${index + i}`, sql.Int, id));
+        index += pageIds.length;
+      }
+    }
+
+    if (queryParts.length === 0) {
+      return res.json(Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])));
+    }
+
+    const query = queryParts.join(" UNION ALL ");
+    const result = await request.query(query);
+
+    // Convert results to a key-value format
+    const response = Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])); // Default all pages to 0
+
+    result.recordset.forEach(row => {
+      response[row.pageType] = row.count > 0 ? 1 : 0;
+    });
+
+    return res.json(response);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
+app.post('/getengineerroledata', authenticateToken, async (req, res) => {
+  const { role, engineerpage, engineerlistpage, engineerapprovepage } = req.body;
+
+  // Function to convert comma-separated strings into arrays
+  const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
+
+  // Convert all page IDs from strings to arrays
+  const pageTypes = {
+    engineerpage: parseIds(engineerpage),
+    engineerlistpage: parseIds(engineerlistpage),
+    engineerapprovepage: parseIds(engineerapprovepage),
+
+  };
+
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+    request.input("roleid", sql.Int, role);
+
+    let queryParts = [];
+    let index = 0;
+
+    for (const [pageType, pageIds] of Object.entries(pageTypes)) {
+      if (pageIds.length > 0) {
+        let pageParams = pageIds.map((_, i) => `@pageid${index + i}`).join(",");
+        queryParts.push(`
+          SELECT '${pageType}' AS pageType, COUNT(*) AS count
+          FROM pagerole
+          WHERE roleid = @roleid AND pageid IN (${pageParams}) AND accessid > 1
+        `);
+        pageIds.forEach((id, i) => request.input(`pageid${index + i}`, sql.Int, id));
+        index += pageIds.length;
+      }
+    }
+
+    if (queryParts.length === 0) {
+      return res.json(Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])));
+    }
+
+    const query = queryParts.join(" UNION ALL ");
+    const result = await request.query(query);
+
+    // Convert results to a key-value format
+    const response = Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])); // Default all pages to 0
+
+    result.recordset.forEach(row => {
+      response[row.pageType] = row.count > 0 ? 1 : 0;
+    });
+
+    return res.json(response);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
+app.post('/getshhipmentroledata', authenticateToken, async (req, res) => {
+  const { role, shipmentfgpage, shipmentpartpage } = req.body;
+
+  // Function to convert comma-separated strings into arrays
+  const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
+
+  // Convert all page IDs from strings to arrays
+  const pageTypes = {
+    shipmentfgpage: parseIds(shipmentfgpage),
+    shipmentpartpage: parseIds(shipmentpartpage),
+
+  };
+
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+    request.input("roleid", sql.Int, role);
+
+    let queryParts = [];
+    let index = 0;
+
+    for (const [pageType, pageIds] of Object.entries(pageTypes)) {
+      if (pageIds.length > 0) {
+        let pageParams = pageIds.map((_, i) => `@pageid${index + i}`).join(",");
+        queryParts.push(`
+          SELECT '${pageType}' AS pageType, COUNT(*) AS count
+          FROM pagerole
+          WHERE roleid = @roleid AND pageid IN (${pageParams}) AND accessid > 1
+        `);
+        pageIds.forEach((id, i) => request.input(`pageid${index + i}`, sql.Int, id));
+        index += pageIds.length;
+      }
+    }
+
+    if (queryParts.length === 0) {
+      return res.json(Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])));
+    }
+
+    const query = queryParts.join(" UNION ALL ");
+    const result = await request.query(query);
+
+    // Convert results to a key-value format
+    const response = Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])); // Default all pages to 0
+
+    result.recordset.forEach(row => {
+      response[row.pageType] = row.count > 0 ? 1 : 0;
+    });
+
+    return res.json(response);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
+
+app.post('/getproductspareroledata', authenticateToken, async (req, res) => {
+  const { role, productsparepage, stockpage, mslpage, addmslpage } = req.body;
+
+  // Function to convert comma-separated strings into arrays
+  const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
+
+  // Convert all page IDs from strings to arrays
+  const pageTypes = {
+    stockpage: parseIds(stockpage),
+    productsparepage: parseIds(productsparepage),
+    mslpage: parseIds(mslpage),
+    addmslpage: parseIds(addmslpage)
+  };
+
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+    request.input("roleid", sql.Int, role);
+
+    let queryParts = [];
+    let index = 0;
+
+    for (const [pageType, pageIds] of Object.entries(pageTypes)) {
+      if (pageIds.length > 0) {
+        let pageParams = pageIds.map((_, i) => `@pageid${index + i}`).join(",");
+        queryParts.push(`
+          SELECT '${pageType}' AS pageType, COUNT(*) AS count
+          FROM pagerole
+          WHERE roleid = @roleid AND pageid IN (${pageParams}) AND accessid > 1
+        `);
+        pageIds.forEach((id, i) => request.input(`pageid${index + i}`, sql.Int, id));
+        index += pageIds.length;
+      }
+    }
+
+    if (queryParts.length === 0) {
+      return res.json(Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])));
+    }
+
+    const query = queryParts.join(" UNION ALL ");
+    const result = await request.query(query);
+
+    // Convert results to a key-value format
+    const response = Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])); // Default all pages to 0
+
+    result.recordset.forEach(row => {
+      response[row.pageType] = row.count > 0 ? 1 : 0;
+    });
+
+    return res.json(response);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
+app.post('/getcustomerroledata', authenticateToken, async (req, res) => {
+  const { role, customerpage, customerlistpage } = req.body;
+
+  // Function to convert comma-separated strings into arrays
+  const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
+
+  // Convert all page IDs from strings to arrays
+  const pageTypes = {
+    customerlistpage: parseIds(customerlistpage),
+    customerpage: parseIds(customerpage),
+  };
+
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+    request.input("roleid", sql.Int, role);
+
+    let queryParts = [];
+    let index = 0;
+
+    for (const [pageType, pageIds] of Object.entries(pageTypes)) {
+      if (pageIds.length > 0) {
+        let pageParams = pageIds.map((_, i) => `@pageid${index + i}`).join(",");
+        queryParts.push(`
+          SELECT '${pageType}' AS pageType, COUNT(*) AS count
+          FROM pagerole
+          WHERE roleid = @roleid AND pageid IN (${pageParams}) AND accessid > 1
+        `);
+        pageIds.forEach((id, i) => request.input(`pageid${index + i}`, sql.Int, id));
+        index += pageIds.length;
+      }
+    }
+
+    if (queryParts.length === 0) {
+      return res.json(Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])));
+    }
+
+    const query = queryParts.join(" UNION ALL ");
+    const result = await request.query(query);
+
+    // Convert results to a key-value format
+    const response = Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])); // Default all pages to 0
+
+    result.recordset.forEach(row => {
+      response[row.pageType] = row.count > 0 ? 1 : 0;
+    });
+
+    return res.json(response);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
+
+app.post('/getbussinessroledata', authenticateToken, async (req, res) => {
+  const { role, bussinesspage } = req.body;
+
+  // Function to convert comma-separated strings into arrays
+  const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
+
+  // Convert all page IDs from strings to arrays
+  const pageTypes = {
+    bussinesspage: parseIds(bussinesspage),
+  };
+
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+    request.input("roleid", sql.Int, role);
+
+    let queryParts = [];
+    let index = 0;
+
+    for (const [pageType, pageIds] of Object.entries(pageTypes)) {
+      if (pageIds.length > 0) {
+        let pageParams = pageIds.map((_, i) => `@pageid${index + i}`).join(",");
+        queryParts.push(`
+          SELECT '${pageType}' AS pageType, COUNT(*) AS count
+          FROM pagerole
+          WHERE roleid = @roleid AND pageid IN (${pageParams}) AND accessid > 1
+        `);
+        pageIds.forEach((id, i) => request.input(`pageid${index + i}`, sql.Int, id));
+        index += pageIds.length;
+      }
+    }
+
+    if (queryParts.length === 0) {
+      return res.json(Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])));
+    }
+
+    const query = queryParts.join(" UNION ALL ");
+    const result = await request.query(query);
+
+    // Convert results to a key-value format
+    const response = Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])); // Default all pages to 0
+
+    result.recordset.forEach(row => {
+      response[row.pageType] = row.count > 0 ? 1 : 0;
+    });
+
+    return res.json(response);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
+
+app.post('/getfranchiseroledata', authenticateToken, async (req, res) => {
+  const { role, masterfpage, childfpage, childlistpage, engineerpage, engineerlistpage, engineerapprovepage } = req.body;
+
+  // Function to convert comma-separated strings into arrays
+  const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
+
+  // Convert all page IDs from strings to arrays
+  const pageTypes = {
+    masterfpage: parseIds(masterfpage),
+    childfpage: parseIds(childfpage),
+    childlistpage: parseIds(childlistpage),
+    engineerpage: parseIds(engineerpage),
+    engineerlistpage: parseIds(engineerlistpage),
+    engineerapprovepage: parseIds(engineerapprovepage),
+  };
+
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+    request.input("roleid", sql.Int, role);
+
+    let queryParts = [];
+    let index = 0;
+
+    for (const [pageType, pageIds] of Object.entries(pageTypes)) {
+      if (pageIds.length > 0) {
+        let pageParams = pageIds.map((_, i) => `@pageid${index + i}`).join(",");
+        queryParts.push(`
+          SELECT '${pageType}' AS pageType, COUNT(*) AS count
+          FROM pagerole
+          WHERE roleid = @roleid AND pageid IN (${pageParams}) AND accessid > 1
+        `);
+        pageIds.forEach((id, i) => request.input(`pageid${index + i}`, sql.Int, id));
+        index += pageIds.length;
+      }
+    }
+
+    if (queryParts.length === 0) {
+      return res.json(Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])));
+    }
+
+    const query = queryParts.join(" UNION ALL ");
+    const result = await request.query(query);
+
+    // Convert results to a key-value format
+    const response = Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])); // Default all pages to 0
+
+    result.recordset.forEach(row => {
+      response[row.pageType] = row.count > 0 ? 1 : 0;
+    });
+
+    return res.json(response);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
+
+app.post('/getcallstatusroledata', authenticateToken, async (req, res) => {
+  const { role, callstatuspage, subcallstatuspage } = req.body;
+
+  // Function to convert comma-separated strings into arrays
+  const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
+
+  // Convert all page IDs from strings to arrays
+  const pageTypes = {
+    callstatuspage: parseIds(callstatuspage),
+    subcallstatuspage: parseIds(subcallstatuspage),
+  };
+
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+    request.input("roleid", sql.Int, role);
+
+    let queryParts = [];
+    let index = 0;
+
+    for (const [pageType, pageIds] of Object.entries(pageTypes)) {
+      if (pageIds.length > 0) {
+        let pageParams = pageIds.map((_, i) => `@pageid${index + i}`).join(",");
+        queryParts.push(`
+          SELECT '${pageType}' AS pageType, COUNT(*) AS count
+          FROM pagerole
+          WHERE roleid = @roleid AND pageid IN (${pageParams}) AND accessid > 1
+        `);
+        pageIds.forEach((id, i) => request.input(`pageid${index + i}`, sql.Int, id));
+        index += pageIds.length;
+      }
+    }
+
+    if (queryParts.length === 0) {
+      return res.json(Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])));
+    }
+
+    const query = queryParts.join(" UNION ALL ");
+    const result = await request.query(query);
+
+    // Convert results to a key-value format
+    const response = Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])); // Default all pages to 0
+
+    result.recordset.forEach(row => {
+      response[row.pageType] = row.count > 0 ? 1 : 0;
+    });
+
+    return res.json(response);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
+
+app.post('/getlhiuserroledata', authenticateToken, async (req, res) => {
+  const { role, lhiuserpage, rolepage, roleassignpage } = req.body;
+
+  // Function to convert comma-separated strings into arrays
+  const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
+
+  // Convert all page IDs from strings to arrays
+  const pageTypes = {
+    lhiuserpage: parseIds(lhiuserpage),
+    rolepage: parseIds(rolepage),
+    roleassignpage: parseIds(roleassignpage)
+  };
+
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+    request.input("roleid", sql.Int, role);
+
+    let queryParts = [];
+    let index = 0;
+
+    for (const [pageType, pageIds] of Object.entries(pageTypes)) {
+      if (pageIds.length > 0) {
+        let pageParams = pageIds.map((_, i) => `@pageid${index + i}`).join(",");
+        queryParts.push(`
+          SELECT '${pageType}' AS pageType, COUNT(*) AS count
+          FROM pagerole
+          WHERE roleid = @roleid AND pageid IN (${pageParams}) AND accessid > 1
+        `);
+        pageIds.forEach((id, i) => request.input(`pageid${index + i}`, sql.Int, id));
+        index += pageIds.length;
+      }
+    }
+
+    if (queryParts.length === 0) {
+      return res.json(Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])));
+    }
+
+    const query = queryParts.join(" UNION ALL ");
+    const result = await request.query(query);
+
+    // Convert results to a key-value format
+    const response = Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])); // Default all pages to 0
+
+    result.recordset.forEach(row => {
+      response[row.pageType] = row.count > 0 ? 1 : 0;
+    });
+
+    return res.json(response);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
+
+app.post('/getserviceroledata', authenticateToken, async (req, res) => {
+  const { role, servicecontractpage, servicelistpage } = req.body;
+
+  // Function to convert comma-separated strings into arrays
+  const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
+
+  // Convert all page IDs from strings to arrays
+  const pageTypes = {
+    servicecontractpage: parseIds(servicecontractpage),
+    servicelistpage: parseIds(servicelistpage),
+  };
+
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+    request.input("roleid", sql.Int, role);
+
+    let queryParts = [];
+    let index = 0;
+
+    for (const [pageType, pageIds] of Object.entries(pageTypes)) {
+      if (pageIds.length > 0) {
+        let pageParams = pageIds.map((_, i) => `@pageid${index + i}`).join(",");
+        queryParts.push(`
+          SELECT '${pageType}' AS pageType, COUNT(*) AS count
+          FROM pagerole
+          WHERE roleid = @roleid AND pageid IN (${pageParams}) AND accessid > 1
+        `);
+        pageIds.forEach((id, i) => request.input(`pageid${index + i}`, sql.Int, id));
+        index += pageIds.length;
+      }
+    }
+
+    if (queryParts.length === 0) {
+      return res.json(Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])));
+    }
+
+    const query = queryParts.join(" UNION ALL ");
+    const result = await request.query(query);
+
+    // Convert results to a key-value format
+    const response = Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])); // Default all pages to 0
+
+    result.recordset.forEach(row => {
+      response[row.pageType] = row.count > 0 ? 1 : 0;
+    });
+
+    return res.json(response);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
+
+app.post('/getproductroledata', authenticateToken, async (req, res) => {
+  const { role, categorypage, subcatpage, producttypepage, productlinepage, materialpage, manufacturerpage, productspage } = req.body;
+
+  // Function to convert comma-separated strings into arrays
+  const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
+
+  // Convert all page IDs from strings to arrays
+  const pageTypes = {
+    categorypage: parseIds(categorypage),
+    subcatpage: parseIds(subcatpage),
+    producttypepage: parseIds(producttypepage),
+    productlinepage: parseIds(productlinepage),
+    materialpage: parseIds(materialpage),
+    manufacturerpage: parseIds(manufacturerpage),
+    productspage: parseIds(productspage),
+  };
+
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+    request.input("roleid", sql.Int, role);
+
+    let queryParts = [];
+    let index = 0;
+
+    for (const [pageType, pageIds] of Object.entries(pageTypes)) {
+      if (pageIds.length > 0) {
+        let pageParams = pageIds.map((_, i) => `@pageid${index + i}`).join(",");
+        queryParts.push(`
+          SELECT '${pageType}' AS pageType, COUNT(*) AS count
+          FROM pagerole
+          WHERE roleid = @roleid AND pageid IN (${pageParams}) AND accessid > 1
+        `);
+        pageIds.forEach((id, i) => request.input(`pageid${index + i}`, sql.Int, id));
+        index += pageIds.length;
+      }
+    }
+
+    if (queryParts.length === 0) {
+      return res.json(Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])));
+    }
+
+    const query = queryParts.join(" UNION ALL ");
+    const result = await request.query(query);
+
+    // Convert results to a key-value format
+    const response = Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])); // Default all pages to 0
+
+    result.recordset.forEach(row => {
+      response[row.pageType] = row.count > 0 ? 1 : 0;
+    });
+
+    return res.json(response);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
+app.post('/getfaultroledata', authenticateToken, async (req, res) => {
+  const { role, defectgrouppage, typedefectpage, sitedefectpage, activitypage } = req.body;
+
+  // Function to convert comma-separated strings into arrays
+  const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
+
+  // Convert all page IDs from strings to arrays
+  const pageTypes = {
+    defectgrouppage: parseIds(defectgrouppage),
+    typedefectpage: parseIds(typedefectpage),
+    sitedefectpage: parseIds(sitedefectpage),
+    activitypage: parseIds(activitypage),
+  };
+
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+    request.input("roleid", sql.Int, role);
+
+    let queryParts = [];
+    let index = 0;
+
+    for (const [pageType, pageIds] of Object.entries(pageTypes)) {
+      if (pageIds.length > 0) {
+        let pageParams = pageIds.map((_, i) => `@pageid${index + i}`).join(",");
+        queryParts.push(`
+          SELECT '${pageType}' AS pageType, COUNT(*) AS count
+          FROM pagerole
+          WHERE roleid = @roleid AND pageid IN (${pageParams}) AND accessid > 1
+        `);
+        pageIds.forEach((id, i) => request.input(`pageid${index + i}`, sql.Int, id));
+        index += pageIds.length;
+      }
+    }
+
+    if (queryParts.length === 0) {
+      return res.json(Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])));
+    }
+
+    const query = queryParts.join(" UNION ALL ");
+    const result = await request.query(query);
+
+    // Convert results to a key-value format
+    const response = Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])); // Default all pages to 0
+
+    result.recordset.forEach(row => {
+      response[row.pageType] = row.count > 0 ? 1 : 0;
+    });
+
+    return res.json(response);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
+app.post('/getratecardroledata', authenticateToken, async (req, res) => {
+  const { role, ratecardpage, masterpage, postsalepage } = req.body;
+
+  // Function to convert comma-separated strings into arrays
+  const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
+
+  // Convert all page IDs from strings to arrays
+  const pageTypes = {
+    ratecardpage: parseIds(ratecardpage),
+    masterpage: parseIds(masterpage),
+    postsalepage: parseIds(postsalepage),
+  };
+
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+    request.input("roleid", sql.Int, role);
+
+    let queryParts = [];
+    let index = 0;
+
+    for (const [pageType, pageIds] of Object.entries(pageTypes)) {
+      if (pageIds.length > 0) {
+        let pageParams = pageIds.map((_, i) => `@pageid${index + i}`).join(",");
+        queryParts.push(`
+          SELECT '${pageType}' AS pageType, COUNT(*) AS count
+          FROM pagerole
+          WHERE roleid = @roleid AND pageid IN (${pageParams}) AND accessid > 1
+        `);
+        pageIds.forEach((id, i) => request.input(`pageid${index + i}`, sql.Int, id));
+        index += pageIds.length;
+      }
+    }
+
+    if (queryParts.length === 0) {
+      return res.json(Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])));
+    }
+
+    const query = queryParts.join(" UNION ALL ");
+    const result = await request.query(query);
+
+    // Convert results to a key-value format
+    const response = Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])); // Default all pages to 0
+
+    result.recordset.forEach(row => {
+      response[row.pageType] = row.count > 0 ? 1 : 0;
+    });
+
+    return res.json(response);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
+
+
+
 app.post('/assign_role', authenticateToken, async (req, res) => {
-  const rolePages = req.body;
 
-  // Validate the input
-  if (!Array.isArray(rolePages) || rolePages.length === 0) {
-    return res.status(400).json({ error: "Invalid input: 'rolePages' should be a non-empty array." });
-  }
-
-  const role_id = rolePages[0]?.roleid;
-
-  if (!role_id) {
-    return res.status(400).json({ error: "Invalid input: 'roleid' is required." });
-  }
-
+  let { accessid, id, pageid, roleid } = req.body;
   try {
     // Connect to the MSSQL database
     const pool = await poolPromise;
 
-    // Delete existing roles for the given role_id
-    const deleteSql = "DELETE FROM pagerole WHERE roleid = @roleid";
-    await pool.request()
-      .input("roleid", sql.Int, role_id)
-      .query(deleteSql);
 
     // Prepare values for bulk insert
-    const insertSql = "INSERT INTO pagerole (roleid, pageid, accessid) VALUES (@roleid, @pageid, @accessid)";
-    const transaction = new sql.Transaction(pool);
+    const updatesql = `update pagerole set accessid = '${accessid}' ,pageid = '${pageid}',roleid = '${roleid}' where id = ${id}`;
 
-    try {
-      await transaction.begin();
+    console.log(updatesql, "#$%^&")
 
-      for (const rolePage of rolePages) {
-        await transaction.request()
-          .input("roleid", sql.Int, rolePage.roleid)
-          .input("pageid", sql.Int, rolePage.pageid)
-          .input("accessid", sql.Int, rolePage.accessid)
-          .query(insertSql);
-      }
+    await pool.request().query(updatesql)
 
-      await transaction.commit();
+    return res.json({
+      message: "Roles assigned successfully",
+    });
 
-      return res.json({
-        message: "Roles assigned successfully",
-        affectedRows: rolePages.length,
-      });
-
-    } catch (err) {
-      await transaction.rollback();
-      console.error("Transaction error:", err);
-      return res.status(500).json({ error: "Failed to insert roles", details: err });
-    }
 
   } catch (err) {
     console.error("Database error:", err);
@@ -11223,18 +13147,203 @@ app.post('/assign_role', authenticateToken, async (req, res) => {
   }
 });
 
+
+
+// app.post('/assign_role', authenticateToken, async (req, res) => {
+
+//   let rolePages = req.body;
+
+
+
+
+//   // Validate the input
+//   if (!Array.isArray(rolePages) || rolePages.length === 0) {
+//     return res.status(400).json({ error: "Invalid input: 'rolePages' should be a non-empty array." });
+//   }
+
+//   const role_id = rolePages[0]?.roleid;
+
+//   if (!role_id) {
+//     return res.status(400).json({ error: "Invalid input: 'roleid' is required." });
+//   }
+
+//   try {
+//     // Connect to the MSSQL database
+//     const pool = await poolPromise;
+
+//     // Delete existing roles for the given role_id
+//     const deleteSql = "DELETE FROM pagerole WHERE roleid = @roleid";
+//     await pool.request()
+//       .input("roleid", sql.Int, role_id)
+//       .query(deleteSql);
+
+//     // Prepare values for bulk insert
+//     const insertSql = "INSERT INTO pagerole (roleid, pageid, accessid) VALUES (@roleid, @pageid, @accessid)";
+//     const transaction = new sql.Transaction(pool);
+
+//     try {
+//       await transaction.begin();
+
+//       for (const rolePage of rolePages) {
+//         await transaction.request()
+//           .input("roleid", sql.Int, rolePage.roleid)
+//           .input("pageid", sql.Int, rolePage.pageid)
+//           .input("accessid", sql.Int, rolePage.accessid)
+//           .query(insertSql);
+//       }
+
+//       await transaction.commit();
+
+//       return res.json({
+//         message: "Roles assigned successfully",
+//         affectedRows: rolePages.length,
+//       });
+
+//     } catch (err) {
+//       await transaction.rollback();
+//       console.error("Transaction error:", err);
+//       return res.status(500).json({ error: "Failed to insert roles", details: err });
+//     }
+
+//   } catch (err) {
+//     console.error("Database error:", err);
+//     return res.status(500).json({ error: "Database query failed", details: err });
+//   }
+// });
+
 // complete dump of ticket data 
 
 app.post("/getcomplainticketdump", authenticateToken, async (req, res) => {
 
-  const { startDate, endDate } = req.body;
+  const { startDate, endDate, licare_code } = req.body;
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
+    const getcsp = `select * from lhi_user where Usercode = '${licare_code}'`
 
-    const sql = `Select id,ticket_no,ticket_date,customer_id,customer_name,customer_mobile,alt_mobile,customer_email,ModelNumber,serial_no, address, region, state, city, area, pincode, sevice_partner, msp, csp, sales_partner, assigned_to, engineer_code, engineer_id, ticket_type, call_type , sub_call_status, call_status, warranty_status, invoice_date, mode_of_contact, customer_class, call_priority, closed_date, created_date, created_by,deleted From complaint_ticket where deleted = 0  AND ticket_date >= '${startDate}' AND ticket_date <= '${endDate}'`
 
-    console.log(sql, "$$$")
+    const getcspresilt = await pool.request().query(getcsp)
+
+    const assigncsp = getcspresilt.recordset[0].assigncsp
+
+    let sql;
+
+
+    sql = `SELECT 
+    ct.id,
+    ct.ticket_no,
+    ct.ticket_date,
+    ct.customer_id,
+    ct.customer_name,
+    ct.customer_mobile,
+    ct.alt_mobile,
+    ct.customer_email,
+    ct.ModelNumber,
+    ct.serial_no,
+    ct.address,
+    ct.region,
+    ct.state,
+    ct.city,
+    ct.area,
+    ct.pincode,
+    ct.mother_branch,
+    ct.sevice_partner,
+    ct.child_service_partner,
+    ct.msp,
+    ct.csp,
+    ct.sales_partner,
+    ct.assigned_to,
+    ct.engineer_code,
+    ct.engineer_id,
+    ct.ticket_type,
+    ct.call_type,
+    ct.sub_call_status,
+    ct.call_status,
+    ct.warranty_status,
+    ct.purchase_date,
+    ct.mode_of_contact,
+    ct.customer_class,
+    ct.call_priority,
+    ct.closed_date,
+    ct.group_code,
+    ct.defect_type,
+    ct.site_defect,
+    ct.visit_count,
+    ct.activity_code,
+    ct.created_date,
+    ct.created_by,
+    ct.deleted,
+    acr.remark AS FinalRemark
+FROM complaint_ticket ct
+LEFT JOIN (
+    SELECT acr1.ticket_no, acr1.remark, acr1.created_date
+    FROM awt_complaintremark acr1
+    JOIN (
+        SELECT ticket_no, MAX(id) AS max_id
+        FROM awt_complaintremark
+        WHERE created_date LIKE '%2025%' AND updated_by IS NULL
+        GROUP BY ticket_no
+    ) latest ON acr1.id = latest.max_id
+) acr ON ct.ticket_no = acr.ticket_no
+WHERE ct.deleted = 0 
+  AND ct.ticket_date >= '${startDate}' 
+  AND ct.ticket_date <= '${endDate}' `
+
+
+
+    if (assigncsp !== 'ALL') {
+      // Convert to an array and wrap each value in single quotes
+      const formattedCspList = assigncsp.split(",").map(csp => `'${csp.trim()}'`).join(",");
+
+      // Directly inject the formatted values into the SQL query
+      sql += ` AND ct.csp IN (${formattedCspList})`;
+    }
+
+    sql += ` ORDER BY RIGHT(ct.ticket_no , 4) ASC`;
+
+
+
+
+
+    const result = await pool.request().query(sql);
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
+app.post("/getspareconumption", authenticateToken, async (req, res) => {
+
+  const { startDate, endDate, licare_code } = req.body;
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+    const getcsp = `select * from lhi_user where Usercode = '${licare_code}'`
+
+
+    const getcspresilt = await pool.request().query(getcsp)
+
+    const assigncsp = getcspresilt.recordset[0].assigncsp
+
+    let sql;
+
+
+    sql = `select ct.ticket_no as TicketNumber, au.article_code as ItemCode, au.article_description as ItemDescription,au.quantity as Quantity from awt_uniquespare as au left join complaint_ticket as ct on ct.ticket_no = au.ticketId where au.deleted = 0 and ct.call_status = 'Closed' AND ct.ticket_date >= '${startDate}' AND ct.ticket_date <= '${endDate}' `
+
+
+
+    if (assigncsp !== 'ALL') {
+      // Convert to an array and wrap each value in single quotes
+      const formattedCspList = assigncsp.split(",").map(csp => `'${csp.trim()}'`).join(",");
+
+      // Directly inject the formatted values into the SQL query
+      sql += ` AND ct.csp IN (${formattedCspList})`;
+    }
+
+    sql += ` ORDER BY RIGHT(ct.ticket_no , 4) ASC`;
+
+
+
 
 
     const result = await pool.request().query(sql);
@@ -11689,78 +13798,121 @@ app.get("/getenquiry", authenticateToken, async (req, res) => {
       enquiry_type,
       priority,
       modelnumber,
-      page = 1, // Default to page 1 if not provided
-      pageSize = 10, // Default to 10 items per page if not provided
+      fromDate,
+      toDate,
+      source,
+      interested,
+      alt_mobile,
+      email,
+      state,
+      city,
+      leadstatus,
+      page = 1,
+      pageSize = 10,
     } = req.query;
-    // Access the connection pool using poolPromise
+
     const pool = await poolPromise;
 
-    // Direct SQL query
+
     let sql = `
-      SELECT p.* FROM awt_enquirymaster as p WHERE deleted = 0 `;
+      SELECT p.*
+      FROM awt_enquirymaster AS p
+      WHERE p.deleted = 0`;
+
+    let countSql = `
+      SELECT COUNT(*) as totalCount
+      FROM awt_enquirymaster AS p
+      WHERE p.deleted = 0`;
+
+
+
+    // Filter application
+    if (fromDate && toDate) {
+      sql += ` AND p.enquirydate BETWEEN '${fromDate}' AND '${toDate}'`;
+      countSql += ` AND p.enquirydate BETWEEN '${fromDate}' AND '${toDate}'`;
+    }
     if (enquiry_no) {
       sql += ` AND p.enquiry_no LIKE '%${enquiry_no}%'`;
+      countSql += ` AND p.enquiry_no LIKE '%${enquiry_no}%'`;
     }
-
     if (customer_name) {
       sql += ` AND p.customer_name LIKE '%${customer_name}%'`;
+      countSql += ` AND p.customer_name LIKE '%${customer_name}%'`;
     }
-
     if (mobile) {
       sql += ` AND p.mobile LIKE '%${mobile}%'`;
+      countSql += ` AND p.mobile LIKE '%${mobile}%'`;
     }
-
     if (customer_type) {
       sql += ` AND p.customer_type LIKE '%${customer_type}%'`;
+      countSql += ` AND p.customer_type LIKE '%${customer_type}%'`;
     }
-
     if (enquiry_type) {
       sql += ` AND p.enquiry_type LIKE '%${enquiry_type}%'`;
+      countSql += ` AND p.enquiry_type LIKE '%${enquiry_type}%'`;
     }
-
     if (priority) {
       sql += ` AND p.priority LIKE '%${priority}%'`;
+      countSql += ` AND p.priority LIKE '%${priority}%'`;
     }
     if (modelnumber) {
       sql += ` AND p.modelnumber LIKE '%${modelnumber}%'`;
+      countSql += ` AND p.modelnumber LIKE '%${modelnumber}%'`;
+    }
+    if (leadstatus) {
+      sql += ` AND p.leadstatus LIKE '%${leadstatus}%'`;
+      countSql += ` AND p.leadstatus LIKE '%${leadstatus}%'`;
+    }
+    if (interested) {
+      sql += ` AND p.interested LIKE '%${interested}%'`;
+      countSql += ` AND p.interested LIKE '%${interested}%'`;
+    }
+    if (alt_mobile) {
+      sql += ` AND p.alt_mobile LIKE '%${alt_mobile}%'`;
+      countSql += ` AND p.alt_mobile LIKE '%${alt_mobile}%'`;
+    }
+    if (email) {
+      sql += ` AND p.email LIKE '%${email}%'`;
+      countSql += ` AND p.email LIKE '%${email}%'`;
+    }
+    if (state) {
+      sql += ` AND p.state LIKE '%${state}%'`;
+      countSql += ` AND p.state LIKE '%${state}%'`;
+    }
+    if (city) {
+      sql += ` AND p.city LIKE '%${city}%'`;
+      countSql += ` AND p.city LIKE '%${city}%'`;
+    }
+    if (source) {
+      sql += ` AND p.source LIKE '%${source}%'`;
+      countSql += ` AND p.source LIKE '%${source}%'`;
     }
 
-
-    // Pagination logic: Calculate offset based on the page number
+    // Pagination
     const offset = (page - 1) * pageSize;
-    // Add pagination to the SQL query (OFFSET and FETCH NEXT)
-    sql += ` ORDER BY p.enquiry_no  OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+    sql += ` ORDER BY p.enquiry_no DESC OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
 
-
-    // Execute the query
     const result = await pool.request().query(sql);
-
-    // Get the total count of records for pagination
-    let countSql = `SELECT COUNT(*) as totalCount FROM awt_enquirymaster where 1=1 `;
-    if (enquiry_no) countSql += ` AND enquiry_no LIKE '%${enquiry_no}%'`;
-    if (customer_name) countSql += ` AND customer_name LIKE '%${customer_name}%'`;
-
-    if (mobile) countSql += ` AND mobile LIKE '%${mobile}%'`;
-    if (customer_type) countSql += ` AND customer_type LIKE '%${customer_type}%'`;
-    if (enquiry_type) countSql += ` AND enquiry_type LIKE '%${enquiry_type}%'`;
-    if (priority) countSql += ` AND priority LIKE '%${priority}%'`;
-    if (modelnumber) countSql += ` AND modelnumber LIKE '%${modelnumber}%'`;
-
     const countResult = await pool.request().query(countSql);
     const totalCount = countResult.recordset[0].totalCount;
+
+    // Encrypt data
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
+
     return res.json({
-      data: result.recordset,
-      totalCount: totalCount,
+      encryptedData,
+      totalCount,
       page,
       pageSize,
     });
-
 
   } catch (err) {
     console.error("Database error:", err);
     return res.status(500).json({ error: "Database error occurred" });
   }
 });
+
 
 
 app.post("/searchenquiry", authenticateToken, async (req, res) => {
@@ -12139,7 +14291,7 @@ app.get('/getheaddata_web', authenticateToken, async (req, res) => {
 
 
 app.post("/getsearchcsp", authenticateToken, async (req, res) => {
-  const { param } = req.body;
+  const { param, licare_code } = req.body;
 
   if (!param) {
     return res.status(400).json({ message: "Invalid parameter" });
@@ -12148,16 +14300,28 @@ app.post("/getsearchcsp", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
+    const getresult = await pool.request()
+      .input('licare_code', licare_code)
+      .query('SELECT pfranchise_id FROM awt_childfranchisemaster WHERE licare_code = @licare_code');
+
+
+    const pfranchise_id = getresult.recordset[0]?.pfranchise_id
+
+    if (!pfranchise_id) {
+      return res.status(404).json({ message: "Franchise ID not found for the provided licare_code" });
+    }
+
     // Parameterized query with a limit
     const sql = `
     SELECT TOP 20 licare_code as id, title
     FROM awt_childfranchisemaster
-    WHERE title LIKE @param AND deleted = 0
+    WHERE title LIKE @param AND deleted = 0 AND pfranchise_id = @pfranchise_id
     ORDER BY title;
     `;
 
     const result = await pool.request()
       .input('param', `%${param}%`)
+      .input('pfranchise_id', pfranchise_id)
       .query(sql);
 
     if (result.recordset.length === 0) {
@@ -12172,7 +14336,7 @@ app.post("/getsearchcsp", authenticateToken, async (req, res) => {
 });
 
 app.post("/getsearcheng", authenticateToken, async (req, res) => {
-  const { param } = req.body;
+  const { param, licare_code } = req.body;
 
   if (!param) {
     return res.status(400).json({ message: "Invalid parameter" });
@@ -12185,12 +14349,19 @@ app.post("/getsearcheng", authenticateToken, async (req, res) => {
     const sql = `
     SELECT TOP 20 engineer_id as id, title
     FROM awt_engineermaster
-    WHERE title LIKE @param AND deleted = 0
+    WHERE title LIKE @param 
+      AND status = 1 
+      AND deleted = 0
+      AND (
+        cfranchise_id = @licare_code 
+        OR employee_code = 'LHI'
+      )
     ORDER BY title;
-    `;
+  `;
 
     const result = await pool.request()
       .input('param', `%${param}%`)
+      .input('licare_code', licare_code)
       .query(sql);
 
     if (result.recordset.length === 0) {
@@ -12217,7 +14388,7 @@ app.post("/getsearchproduct", authenticateToken, async (req, res) => {
 
     // Parameterized query with a limit
     const sql = `
-    SELECT TOP 20 id, item_description
+    SELECT TOP 20 id, item_description ,item_code 
     FROM product_master
     WHERE item_description LIKE @param 
     ORDER BY id;
@@ -12240,19 +14411,23 @@ app.post("/getsearchproduct", authenticateToken, async (req, res) => {
 
 
 app.post("/add_grn", authenticateToken, async (req, res) => {
-  const { invoice_number, invoice_date, csp_no, csp_name, created_by, remark } = req.body;
+  const { invoice_number, invoice_date, received_date, csp_no, csp_name, created_by, remark } = req.body;
 
   try {
     const pool = await poolPromise;
 
-    // Check if the invoice_number already exists
-    const checkInvoiceQuery = `SELECT COUNT(*) AS count FROM awt_grnmaster WHERE invoice_no = @invoice_no`;
-    const checkInvoiceResult = await pool.request()
-      .input('invoice_no', invoice_number)
-      .query(checkInvoiceQuery);
 
-    if (checkInvoiceResult.recordset[0].count > 0) {
-      return res.status(400).json({ message: "Invoice number already exists" });
+
+    if (invoice_number) {
+      // Check if the invoice_number already exists
+      const checkInvoiceQuery = `SELECT COUNT(*) AS count FROM awt_grnmaster WHERE invoice_no = @invoice_no`;
+      const checkInvoiceResult = await pool.request()
+        .input('invoice_no', invoice_number)
+        .query(checkInvoiceQuery);
+
+      if (checkInvoiceResult.recordset[0].count > 0) {
+        return res.status(400).json({ message: "Invoice number already exists" });
+      }
     }
 
     // Query to get the count of rows in awt_grnmaster
@@ -12264,13 +14439,14 @@ app.post("/add_grn", authenticateToken, async (req, res) => {
     const grn_no = `GRN-${grnCount + 1}`; // Example: GRN-1, GRN-2, etc.
 
     // Insert the data into awt_grnmaster
-    const sql = `INSERT INTO awt_grnmaster (grn_no, invoice_no, invoice_date, csp_name, csp_code,remark, created_date, created_by) 
-                 VALUES (@grn_no, @invoice_no, @invoice_date, @csp_name, @csp_code, @remark, @created_date, @created_by)`;
+    const sql = `INSERT INTO awt_grnmaster (grn_no, invoice_no, invoice_date,received_date,csp_name, csp_code,remark, created_date, created_by) 
+                 VALUES (@grn_no, @invoice_no, @invoice_date,@received_date, @csp_name, @csp_code, @remark, @created_date, @created_by)`;
 
     const result = await pool.request()
       .input('grn_no', grn_no)
       .input('invoice_no', invoice_number)
       .input('invoice_date', invoice_date)
+      .input('received_date', received_date)
       .input('csp_name', csp_name)
       .input('csp_code', csp_no)  // Assuming you want to insert csp_no as csp_code
       .input('remark', remark)  // Assuming you want to insert csp_no as csp_code
@@ -12388,19 +14564,56 @@ app.post('/updateissuespares', authenticateToken, async (req, res) => {
     return res.status(400).json({ error: 'Invalid payload format. Expected an array.' });
   }
 
+
   try {
     const pool = await sql.connect(dbConfig);
+
+
+    const insufficientStockItems = [];
+
+
+    // Phase 1: Validate all items and stock
+    for (const item of spareData) {
+
+      if (!item.issue_no || !item.article_code || !item.quantity || !item.licare_code) {
+        return res.status(400).json({ error: 'Missing required fields in spare data.' });
+      }
+
+      const quantityResult = await pool.request()
+        .input('Productcode', sql.VarChar, item.article_code)
+        .input('Cspcode', sql.VarChar, item.licare_code)
+        .query(`SELECT stock_quantity FROM csp_stock WHERE product_code = @Productcode AND csp_code = @Cspcode`);
+
+      const availableQty = quantityResult.recordset[0]?.stock_quantity ?? 0;
+
+      if (availableQty < Number(item.quantity)) {
+        insufficientStockItems.push({
+          article_code: item.article_code,
+          requested: item.quantity,
+          available: availableQty,
+        });
+      }
+
+
+      // If any stock issues, return early
+      if (insufficientStockItems.length > 0) {
+        return res.status(400).json({
+          error: "Insufficient stock for one or more items.",
+          details: insufficientStockItems,
+        });
+
+      }
+    }
 
     // Start a transaction
     const transaction = new sql.Transaction(pool);
     await transaction.begin();
 
     for (const item of spareData) {
-      if (!item.issue_no || !item.article_code || !item.quantity || !item.licare_code) {
-        return res.status(400).json({ error: 'Missing required fields in spare data.' });
-      }
+
 
       const request = new sql.Request(transaction);
+      request.timeout = 600000;
 
       // Update quantity in `awt_cspissuespare`
       const updateIssueQuery = `
@@ -12424,7 +14637,7 @@ app.post('/updateissuespares', authenticateToken, async (req, res) => {
       SELECT stock_quantity
       FROM engineer_stock
       WHERE product_code = @product_code and eng_code = @eng_code
-    `;
+     `;
 
 
         engStockRequest.input('product_code', sql.VarChar, item.article_code);
@@ -12468,7 +14681,7 @@ app.post('/updateissuespares', authenticateToken, async (req, res) => {
       SELECT stock_quantity
       FROM csp_stock
       WHERE product_code = @product_code and csp_code = @csp_code
-    `;
+     `;
 
 
         cspStockRequest.input('product_code', sql.VarChar, item.article_code);
@@ -12567,7 +14780,7 @@ app.post("/getselctedspare", authenticateToken, async (req, res) => {
 
     // Parameterized query with a limit
     const sql = `
-   SELECT sp.id, sp.ModelNumber, sp.title as article_code ,sp.ProductCode as spareId, sp.ItemDescription as article_description , spt.Price_group as price FROM Spare_parts as sp left join Spare_partprice as spt on sp.title = spt.Item  WHERE sp.deleted = 0 and  id = '${article_id}' 
+   SELECT sp.id, sp.ModelNumber, sp.title as article_code ,sp.ProductCode as spareId, sp.ItemDescription as article_description , spt.Price_group as price FROM Spare_parts as sp left join Spare_partprice as spt on sp.title = spt.Item  WHERE sp.deleted = 0 and  sp.id = '${article_id}' 
     `;
 
     const result = await pool.request()
@@ -12586,8 +14799,80 @@ app.post("/getselctedspare", authenticateToken, async (req, res) => {
 
 
 app.post("/getgrnlist", authenticateToken, async (req, res) => {
+  const {
+    csp_code,
+    fromDate,
+    toDate,
+    received_from,
+    invoice_number,
+  } = req.body;
 
-  const { csp_code, fromDate, toDate, received_from, invoice_number, product_code, product_name } = req.body;
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+
+    let sql = `
+      SELECT 
+        gn.id,
+        gn.grn_no,
+        gn.invoice_no,
+        gn.invoice_date,
+        gn.csp_code,
+        gn.csp_name,
+        gn.status,
+        gn.created_date,
+        gn.created_by,
+        gn.remark,
+        gn.received_date,
+        COUNT(acg.grn_no) AS product_count
+      FROM awt_grnmaster AS gn
+      LEFT JOIN awt_cspgrnspare AS acg ON acg.grn_no = gn.grn_no
+      WHERE gn.deleted = 0 AND gn.created_by = @csp_code
+    `;
+
+    request.input("csp_code", csp_code);
+
+    if (fromDate && toDate) {
+      sql += " AND CAST(gn.invoice_date AS DATE) BETWEEN @fromDate AND @toDate";
+      request.input("fromDate", fromDate);
+      request.input("toDate", toDate);
+    }
+
+    if (received_from) {
+      sql += " AND gn.csp_name LIKE @received_from";
+      request.input("received_from", `%${received_from}%`);
+    }
+
+    if (invoice_number) {
+      sql += " AND gn.invoice_no LIKE @invoice_number";
+      request.input("invoice_number", `%${invoice_number}%`);
+    }
+
+    sql += `
+      GROUP BY
+        gn.id , gn.grn_no, gn.invoice_no, gn.invoice_date, gn.csp_code,
+        gn.csp_name, gn.status, gn.created_date,
+        gn.created_by, gn.remark, gn.received_date
+      ORDER BY gn.id DESC
+    `;
+
+    const result = await request.query(sql);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "No results found" });
+    }
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+});
+
+
+app.post("/getoutwardlisting", authenticateToken, async (req, res) => {
+
+  const { csp_code, fromDate, toDate, received_from } = req.body;
 
   let sql;
 
@@ -12596,26 +14881,23 @@ app.post("/getgrnlist", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
 
     // Parameterized query with a limit
-    sql = `select * from awt_grnmaster where created_by = '${csp_code}' and  deleted = 0 
+    sql = `select asp.* ,acp.spare_no , acp.spare_title , acp.quantity from awt_spareoutward as asp left join awt_cspissuespare as acp on asp.issue_no = acp.issue_no where asp.created_by = '${csp_code}'  and  asp.deleted = 0 
     `;
 
     if (fromDate && toDate) {
-      sql += ` AND CAST(invoice_date AS DATE) BETWEEN '${fromDate}' AND '${toDate}'`;
+      sql += ` AND CAST(asp.issue_date AS DATE) BETWEEN '${fromDate}' AND '${toDate}'`;
+
     }
 
     if (received_from) {
-      sql += ` AND csp_name LIKE '%${received_from}%'`;
-    }
-
-    if (invoice_number) {
-      sql += ` AND invoice_no LIKE '%${invoice_number}%'`;
-
+      sql += ` AND asp.lhi_name LIKE '%${received_from}%'`;
     }
 
 
-    sql += ' order by id desc'
 
+    sql += ' order by asp.id desc'
 
+    console.log(sql)
 
 
     const result = await pool.request()
@@ -12632,9 +14914,9 @@ app.post("/getgrnlist", authenticateToken, async (req, res) => {
   }
 });
 
-app.post("/getoutwardlisting", authenticateToken, async (req, res) => {
+app.post("/getoutwardexcel", authenticateToken, async (req, res) => {
 
-  const { issue_no, csp_code, fromDate, toDate, lhi_name, product_code, product_name } = req.body;
+  const { csp_code, fromDate, toDate, received_from } = req.body;
 
   let sql;
 
@@ -12643,26 +14925,23 @@ app.post("/getoutwardlisting", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
 
     // Parameterized query with a limit
-    sql = `select * from awt_spareoutward where created_by = '${csp_code}' and  deleted = 0 
+    sql = `select asp.* ,acp.spare_no , acp.spare_title , acp.quantity from awt_spareoutward as asp left join awt_cspissuespare as acp on asp.issue_no = acp.issue_no where asp.created_by = '${csp_code}'  and  asp.deleted = 0 
     `;
 
     if (fromDate && toDate) {
-      sql += ` AND CAST(issue_date AS DATE) BETWEEN '${fromDate}' AND '${toDate}'`;
-    }
-
-    if (lhi_name) {
-      sql += ` AND lhi_name LIKE '%${lhi_name}%'`;
-    }
-
-    if (issue_no) {
-      sql += ` AND issue_no LIKE '%${issue_no}%'`;
+      sql += ` AND CAST(asp.issue_date AS DATE) BETWEEN '${fromDate}' AND '${toDate}'`;
 
     }
 
+    if (received_from) {
+      sql += ` AND asp.lhi_name LIKE '%${received_from}%'`;
+    }
 
-    sql += ' order by id desc'
 
 
+    sql += ' order by asp.id desc'
+
+    console.log(sql)
 
 
     const result = await pool.request()
@@ -12811,14 +15090,40 @@ app.post('/addissuespares', authenticateToken, async (req, res) => {
     // Connect to the database
     const pool = await sql.connect(dbConfig);
 
+
     // Fetch spare parts data
     const getspare = `
       SELECT id, ModelNumber, title as article_code, ProductCode as spareId, ItemDescription as article_description
-      FROM Spare_parts WHERE id = @spare_id
+      FROM Spare_parts WHERE title = @spare_id
     `;
     const result = await pool.request()
       .input('spare_id', sql.VarChar, spare_id)
       .query(getspare);
+
+    const articleCode = result.recordset[0]?.article_code;
+
+    if (!articleCode) {
+      return res.status(404).json({ message: "Spare part not found" });
+    }
+
+    // Use parameterized query to avoid SQL injection
+    const checkstockQuery = `
+        SELECT stock_quantity 
+        FROM csp_stock 
+        WHERE csp_code = @created_by AND product_code = @article_code
+      `;
+
+    const stockresult = await pool.request()
+      .input('created_by', sql.VarChar, created_by)
+      .input('article_code', sql.VarChar, articleCode)
+      .query(checkstockQuery);
+
+    if (
+      stockresult.recordset.length === 0 ||
+      stockresult.recordset[0].stock_quantity == 0
+    ) {
+      return res.json({ message: "No Stock Available" });
+    }
 
     const spareData = result.recordset.map(record => ({
       issue_no,
@@ -12828,6 +15133,8 @@ app.post('/addissuespares', authenticateToken, async (req, res) => {
       created_by,
       created_date: new Date()
     }));
+
+
 
 
     // Use a transaction for bulk inserts
@@ -12878,8 +15185,7 @@ app.post('/addissuespares', authenticateToken, async (req, res) => {
     await transaction.commit();
 
     res.status(200).json({
-      message: 'Data saved successfully (duplicates skipped)',
-      affectedRows, // Send the actual count of affected rows
+      message: 'Spare Added'
     });
   } catch (err) {
     console.error('Error inserting data:', err);
@@ -13062,6 +15368,7 @@ app.post('/updategrnapprovestatus', authenticateToken, async (req, res) => {
 
 
 
+
 app.post('/deletedgrn', authenticateToken, async (req, res) => {
 
   const { grn_no } = req.body;
@@ -13199,6 +15506,20 @@ app.get("/getstock/:licare_code", authenticateToken, async (req, res) => {
     return res.status(500).json({ error: 'An error occurred while fetching data' });
   }
 });
+
+app.get("/getallstock", authenticateToken, async (req, res) => {
+  const { licare_code } = req.params
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+    const result = await pool.request().query(`SELECT * FROM csp_stock WHERE deleted = 0`);
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
+
 app.get("/getengstock/:licare_code", authenticateToken, async (req, res) => {
   const { licare_code } = req.params
   try {
@@ -13213,7 +15534,7 @@ app.get("/getengstock/:licare_code", authenticateToken, async (req, res) => {
 });
 
 app.post("/getsearchengineer", authenticateToken, async (req, res) => {
-  const { param } = req.body;
+  const { param, licare_code } = req.body;
 
   if (!param) {
     return res.status(400).json({ message: "Invalid parameter" });
@@ -13226,12 +15547,19 @@ app.post("/getsearchengineer", authenticateToken, async (req, res) => {
     const sql = `
     SELECT TOP 20 engineer_id as id, title
     FROM awt_engineermaster
-    WHERE title LIKE @param AND deleted = 0
+    WHERE title LIKE @param 
+      AND status = 1 
+      AND deleted = 0
+      AND (
+        cfranchise_id = @licare_code 
+        OR employee_code = 'LHI'
+      )
     ORDER BY title;
-    `;
+  `;
 
     const result = await pool.request()
       .input('param', `%${param}%`)
+      .input('licare_code', licare_code)
       .query(sql);
 
     if (result.recordset.length === 0) {
@@ -13248,6 +15576,7 @@ app.post("/getsearchengineer", authenticateToken, async (req, res) => {
 app.post("/getmodelno", authenticateToken, async (req, res) => {
   const { param } = req.body;
 
+  console.log(param);
   if (!param) {
     return res.status(400).json({ message: "Invalid parameter" });
   }
@@ -13255,21 +15584,18 @@ app.post("/getmodelno", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
-    // Parameterized query with a limit
-    const sql = `
-    SELECT TOP 20 id, ModelNumber
-    FROM Spare_parts
-    WHERE ModelNumber LIKE @param AND deleted = 0
-    ORDER BY ModelNumber;
-    `;
+    const sql = `SELECT top 20 * FROM product_master WHERE item_description LIKE @param`;
 
     const result = await pool.request()
-      .input('param', `%${param}%`)
+      .input("param", `%${param}%`)
       .query(sql);
 
     if (result.recordset.length === 0) {
       return res.status(404).json({ message: "No results found" });
     }
+
+    console.log(result)
+
     // Convert data to JSON string and encrypt it
     const jsonData = JSON.stringify(result.recordset);
     const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
@@ -13277,40 +15603,128 @@ app.post("/getmodelno", authenticateToken, async (req, res) => {
     return res.json({ encryptedData });
   } catch (err) {
     console.error("Error fetching data:", err);
-    return res.status(500).json({ message: "Internal Server Error", error: err });
+    return res.status(500).json({ message: "Internal Server Error", error: err.message });
   }
 });
 
-
 app.get("/getsparelisting", authenticateToken, async (req, res) => {
-  const { ModelNumber } = req.query; // Get ModelNumber from query parameters
-  console.log("Received request with ModelNumber:", ModelNumber);
-
   try {
-    if (!ModelNumber) {
-      console.error("Model number is missing.");
-      return res.status(400).json({ error: "Model number is required." });
+    const pool = await poolPromise;
+    const {
+      item_code,
+      ProductCode = "",
+      ItemDescription = "",
+      title = "",
+      page = 1,
+      pageSize = 10,
+
+    } = req.query;
+
+    // Debug log
+
+    let sql = `
+       SELECT s.* FROM Spare_parts as s WHERE s.ProductCode = ${item_code} AND s.deleted = 0
+    `;
+
+    // if (ProductCode) {
+    //   sql += ` AND s.ProductCode LIKE '%${ProductCode}%'`;
+
+    // }
+
+    if (title) {
+      sql += ` AND s.title LIKE '%${title}%'`;
     }
 
-    const pool = await poolPromise;
-    const result = await pool
-      .request()
-      .input("ModelNumber", ModelNumber)
-      .query(
-        "SELECT * FROM Spare_parts WHERE ModelNumber = @modelNumber AND deleted = 0"
-      );
+    if (ItemDescription) {
+      sql += ` AND s.ItemDescription LIKE '%${ItemDescription}%'`;
+    }
+
+    // Pagination logic: Calculate offset based on the page number
+    const offset = (page - 1) * pageSize;
+
+    // Add pagination to the SQL query (OFFSET and FETCH NEXT)
+    sql += ` ORDER BY s.id OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+
+    // return res.json({sql:sql})
+    const result = await pool.request().query(sql);
+
+    // Get the total count of records for pagination
+    let countSql = `SELECT COUNT(*) as totalCount FROM Spare_parts WHERE ProductCode = ${item_code} AND deleted = 0`;
+    if (ProductCode) countSql += ` AND ProductCode LIKE '%${ProductCode}%'`;
+    if (ItemDescription) countSql += ` AND ItemDescription LIKE '%${ItemDescription}%'`;
+    if (title) countSql += ` AND title LIKE '%${title}%'`;
+
+    // return res.json({countSql:countSql})
+
+    const countResult = await pool.request().query(countSql);
+    const totalCount = countResult.recordset[0].totalCount;
     // Convert data to JSON string and encrypt it
     const jsonData = JSON.stringify(result.recordset);
     const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
-
-
-    console.log("Query result:", encryptedData);
-    return res.json({ encryptedData });
+    return res.json({
+      encryptedData,
+      totalCount: totalCount,
+      page,
+      pageSize,
+    });
   } catch (err) {
-    console.error("Error in /getsparelisting API:", err);
-    return res.status(500).json({ error: "An error occurred while fetching data." });
+    console.error(err);
+    return res.status(500).json({ message: "An error occurred while fetching the complaint list" });
   }
 });
+
+
+
+app.get("/getspareexcel", authenticateToken, async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    const {
+      page = 1,
+      pageSize = 10,
+
+    } = req.query;
+
+    // Debug log
+
+    let sql = `
+       SELECT s.* FROM Spare_parts as s WHERE s.deleted = 0
+    `;
+
+    // Pagination logic: Calculate offset based on the page number
+    const offset = (page - 1) * pageSize;
+
+    // Add pagination to the SQL query (OFFSET and FETCH NEXT)
+    sql += ` ORDER BY s.id OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+
+    // return res.json({sql:sql})
+    const result = await pool.request().query(sql);
+
+    // Get the total count of records for pagination
+    let countSql = `SELECT COUNT(*) as totalCount FROM Spare_parts WHERE deleted = 0`;
+
+    // return res.json({countSql:countSql})
+
+    const countResult = await pool.request().query(countSql);
+    const totalCount = countResult.recordset[0].totalCount;
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
+    return res.json({
+      encryptedData,
+      totalCount,
+      page,
+      pageSize,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "An error occurred while fetching the complaint list" });
+  }
+});
+
+
+
+
+
 
 
 
@@ -13390,22 +15804,104 @@ app.get("/getshipmentparts", authenticateToken, async (req, res) => {
     return res.status(500).json({ error: 'An error occurred while fetching data' });
   }
 });
+
 app.get("/getbussinesspartner", authenticateToken, async (req, res) => {
   try {
+    const {
+      Bp_code,
+      partner_name,
+      email,
+      mobile_no,
+      title,
+      contact_person,
+      address,
+      webste,
+      gstno,
+      panno,
+      bankname,
+      bankacc,
+      bankifsc,
+      bankaddress,
+      Licare_Ac_Id,
+      licare_code,
+      Vendor_Name,
+      withliebher,
+      lastworkingdate,
+      contractactive,
+      contractexpire,
+      page = 1, // Default to page 1 if not provided
+      pageSize = 10, // Default to 10 items per page if not provided
+    } = req.query;
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
-    const result = await pool
-      .request()
-      .query("SELECT  * FROM bussiness_partner WHERE deleted = 0 ORDER BY id DESC");
 
-    // Convert result to string and encrypt it
-    const jsonString = JSON.stringify(result.recordset);
-    const encryptedData = CryptoJS.AES.encrypt(jsonString, secretKey).toString();
+    const getcsp = `select * from lhi_user where Usercode = '${licare_code}'`
 
-    return res.json({ data: encryptedData });
+
+    const getcspresilt = await pool.request().query(getcsp)
+
+    const assigncsp = getcspresilt.recordset[0] && getcspresilt.recordset[0].assigncsp
+
+    // Directly use the query (no parameter binding)
+    let sql = `SELECT q.* FROM bussiness_partner as q WHERE 1=1`;
+
+
+    if (assigncsp !== 'ALL') {
+      // Convert to an array and wrap each value in single quotes
+      const formattedCspList = assigncsp.split(",").map(csp => `'${csp.trim()}'`).join(",");
+
+      // Directly inject the formatted values into the SQL query
+      sql += ` AND q.csp_code IN (${formattedCspList})`;
+    }
+
+
+    if (Bp_code) {
+      sql += ` AND q.Bp_code LIKE '%${Bp_code}%'`;
+    }
+
+    if (partner_name) {
+      sql += ` AND q.partner_name LIKE '%${partner_name}%'`;
+    }
+
+    if (email) {
+      sql += ` AND q.email LIKE '%${email}%'`;
+    }
+
+    if (mobile_no) {
+      sql += ` AND q.mobile_no LIKE '%${mobile_no}%'`;
+    }
+    // Pagination logic: Calculate offset based on the page number
+    const offset = (page - 1) * pageSize;
+    // Add pagination to the SQL query (OFFSET and FETCH NEXT)
+    sql += ` ORDER BY q.Bp_code desc OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+
+    // Execute the query
+    const result = await pool.request().query(sql);
+    // Get the total count of records for pagination
+    let countSql = `SELECT COUNT(*) as totalCount FROM bussiness_partner where deleted = 0 `;
+    if (Bp_code) countSql += ` AND Bp_code LIKE '%${Bp_code}%'`;
+    if (partner_name) countSql += ` AND partner_name LIKE '%${partner_name}%'`;
+    if (email) countSql += ` AND email LIKE '%${email}%'`;
+    if (mobile_no) countSql += ` AND mobile_no LIKE '%${mobile_no}%'`;
+
+
+
+    const countResult = await pool.request().query(countSql);
+    const totalCount = countResult.recordset[0].totalCount;
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
+    return res.json({
+      encryptedData,
+      totalCount: totalCount,
+      page,
+      pageSize,
+    });
+
+
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'An error occurred while fetching data' });
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred" });
   }
 });
 
@@ -13429,41 +15925,151 @@ app.get("/fetchfrommobile/:mobile", authenticateToken, async (req, res) => {
   }
 });
 
+app.post("/getinvoicedetails", authenticateToken, async (req, res) => {
+  try {
+
+    let { invoice_no } = req.body;
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+    const result = await pool
+      .request()
+      .query(`select * from Shipment_Parts where InvoiceNumber = '${invoice_no}'`);
+
+    // Convert result to string and encrypt it
+
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
+
 // get masterWarrenty Data 
 app.get("/getmasterwarrenty", authenticateToken, async (req, res) => {
   try {
+    const {
+      Service_Type,
+      item_code,
+      Product_Type,
+      Product_Line,
+      Product_Class,
+      page = 1, // Default to page 1 if not provided
+      pageSize = 10, // Default to 10 items per page if not provided
+    } = req.query;
     const pool = await poolPromise;
 
     // SQL query to fetch rate data where deleted is 0
-    const sql = "SELECT * FROM master_warrenty WHERE deleted = 0";
+    let sql = "SELECT m.* FROM Master_warrenty as m  WHERE deleted = 0";
+
+    if (Service_Type) {
+      sql += ` AND m.Service_Type LIKE '%${Service_Type}%'`;
+    }
+
+    if (item_code) {
+      sql += ` AND m.item_code LIKE '%${item_code}%'`;
+    }
+
+    if (Product_Type) {
+      sql += ` AND m.Product_Type LIKE '%${Product_Type}%'`;
+    }
+
+    if (Product_Line) {
+      sql += ` AND m.Product_Line LIKE '%${Product_Line}%'`;
+    }
+    if (Product_Class) {
+      sql += ` AND m.Product_Class LIKE '%${Product_Class}%'`;
+    }
+
+    const offset = (page - 1) * pageSize;
+    // Add pagination to the SQL query (OFFSET and FETCH NEXT)
+    sql += ` ORDER BY m.id desc OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
     const result = await pool.request().query(sql);
+    let countSql = `SELECT COUNT(*) as totalCount FROM Master_warrenty where deleted = 0 `;
+    if (Service_Type) countSql += ` AND Service_Type LIKE '%${Service_Type}%'`;
+    if (item_code) countSql += ` AND item_code LIKE '%${item_code}%'`;
+    if (Product_Type) countSql += ` AND Product_Type LIKE '%${Product_Type}%'`;
+    if (Product_Line) countSql += ` AND Product_Line LIKE '%${Product_Line}%'`;
+    if (Product_Class) countSql += ` AND Product_Class LIKE '%${Product_Class}%'`;
+
+    const countResult = await pool.request().query(countSql);
+    const totalCount = countResult.recordset[0].totalCount;
     // Convert data to JSON string and encrypt it
     const jsonData = JSON.stringify(result.recordset);
     const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
-
-    return res.json({ encryptedData });
+    return res.json({
+      encryptedData,
+      totalCount: totalCount,
+      page,
+      pageSize,
+    });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "An error occurred while fetching masterWarrenty data" });
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred" });
   }
 });
 
 // Get PostSaleWarrenty Data
 app.get("/getpostsalewarrenty", authenticateToken, async (req, res) => {
   try {
+    const {
+      ServiceType,
+      item_code,
+      Producttype,
+      ProductLine,
+      ProductClass,
+      page = 1, // Default to page 1 if not provided
+      pageSize = 10, // Default to 10 items per page if not provided
+    } = req.query;
     const pool = await poolPromise;
 
     // SQL query to fetch rate data where deleted is 0
-    const sql = "SELECT * FROM post_sale_warrenty WHERE deleted = 0";
+    let sql = "SELECT p.* FROM post_sale_warrenty as p  WHERE deleted = 0";
+
+    if (ServiceType) {
+      sql += ` AND p.ServiceType LIKE '%${ServiceType}%'`;
+    }
+
+    if (item_code) {
+      sql += ` AND p.item_code LIKE '%${item_code}%'`;
+    }
+
+    if (Producttype) {
+      sql += ` AND p.Producttype LIKE '%${Producttype}%'`;
+    }
+
+    if (ProductLine) {
+      sql += ` AND p.ProductLine LIKE '%${ProductLine}%'`;
+    }
+    if (ProductClass) {
+      sql += ` AND p.ProductClass LIKE '%${ProductClass}%'`;
+    }
+
+    const offset = (page - 1) * pageSize;
+    // Add pagination to the SQL query (OFFSET and FETCH NEXT)
+    sql += ` ORDER BY p.id desc OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
     const result = await pool.request().query(sql);
+    let countSql = `SELECT COUNT(*) as totalCount FROM post_sale_warrenty where deleted = 0 `;
+    if (ServiceType) countSql += ` AND ServiceType LIKE '%${ServiceType}%'`;
+    if (item_code) countSql += ` AND item_code LIKE '%${item_code}%'`;
+    if (Producttype) countSql += ` AND Producttype LIKE '%${Producttype}%'`;
+    if (ProductLine) countSql += ` AND ProductLine LIKE '%${ProductLine}%'`;
+    if (ProductClass) countSql += ` AND ProductClass LIKE '%${ProductClass}%'`;
+
+    const countResult = await pool.request().query(countSql);
+    const totalCount = countResult.recordset[0].totalCount;
     // Convert data to JSON string and encrypt it
     const jsonData = JSON.stringify(result.recordset);
     const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
-
-    return res.json({ encryptedData });
+    return res.json({
+      encryptedData,
+      totalCount: totalCount,
+      page,
+      pageSize,
+    });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "An error occurred while fetching masterWarrenty data" });
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred" });
   }
 });
 
@@ -13943,10 +16549,111 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
   { name: 'spare_doc_two', maxCount: 1 },
   { name: 'spare_doc_three', maxCount: 1 },
 ]), async (req, res) => {
-  let { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode, activitycode, com_id, warranty_status, spare_detail, ticket_no, user_id, serial_no, ModelNumber, sub_call_status, allocation, serial_data, picking_damages, product_damages, missing_part, leg_adjustment, water_connection, abnormal_noise, ventilation_top, ventilation_bottom, ventilation_back, voltage_supply, earthing, gas_charges, transpotation, purchase_date, otp, check_remark } = req.body;
+  let { actioncode, service_charges, call_remark, call_status, call_type, causecode, other_charge, symptomcode, activitycode, com_id, warranty_status, spare_detail, ticket_no, user_id, serial_no, Model, sub_call_status, allocation, serial_data, picking_damages, product_damages, missing_part, leg_adjustment, water_connection, abnormal_noise, ventilation_top, ventilation_bottom, ventilation_back, voltage_supply, earthing, gas_charges, transpotation, purchase_date, otp, check_remark, customer_mobile, item_code, sparedata, spareqty, collected_amount, payment_collected } = req.body;
+
+
+
+  const username = process.env.TATA_USER;
+  const password = process.env.PASSWORD;
 
 
   const data_serial = JSON.parse(serial_data);
+
+  let temp_id;
+  let temp_msg;
+
+  if (Array.isArray(sparedata) && Array.isArray(spareqty) && sparedata.length === spareqty.length && call_status == 'Completed') {
+    // Build your SQL query
+    const pool = await poolPromise;
+    const request = pool.request();
+
+    request.input('user_id', user_id);
+
+    const paramNames = sparedata.map((code, i) => {
+      const paramName = `code${i}`;
+      request.input(paramName, code);
+      return `@${paramName}`;
+    });
+
+    const sql = `
+      SELECT product_code, stock_quantity 
+      FROM engineer_stock 
+      WHERE eng_code = @user_id 
+        AND product_code IN (${paramNames.join(',')})
+    `;
+
+    const result = await request.query(sql);
+
+    const stockMap = new Map(
+      result.recordset.map(item => [item.product_code, item.stock_quantity])
+    );
+
+    const unavailableItems = sparedata.filter((code, i) => {
+      const requiredQty = parseInt(spareqty[i], 10);
+      const availableQty = stockMap.get(code) || 0;
+      return availableQty < requiredQty;
+    });
+
+    if (unavailableItems.length > 0) {
+      return res.json({ message: 'Some items have insufficient stock', status: 0 });
+    }
+
+    // All items are available
+    console.log("Stock is available for all items.");
+
+
+    //Minus the stock 
+
+    // ✅ All items are available - proceed to update stock
+    const updatePool = await poolPromise;
+    const updateRequest = updatePool.request();
+
+    const updateQueries = sparedata.map((code, i) => {
+      const qtyParam = `qty${i}`;
+      const codeParam = `code${i}`;
+
+      updateRequest.input(qtyParam, parseInt(spareqty[i], 10));
+      updateRequest.input(codeParam, code);
+      updateRequest.input('user_id', user_id);
+
+      return `
+      UPDATE engineer_stock 
+      SET stock_quantity = stock_quantity - @${qtyParam} 
+      WHERE eng_code = @user_id AND product_code = @${codeParam};
+    `;
+    });
+
+    const finalUpdateQuery = updateQueries.join('\n');
+    await updateRequest.query(finalUpdateQuery);
+  }
+
+
+
+
+
+  if (call_status == 'Approval') {
+    temp_id = '1207173530799359858';
+    temp_msg = `Dear Liebherr Customer, Ticket Number ${ticket_no} has been raised for quotation and will be processed once approved. For any query, please contact 7038100400`
+  }
+  if (call_status == 'Approval-Int') {
+    temp_id = '1207173530799359858';
+    temp_msg = `Dear Liebherr Customer, Ticket Number ${ticket_no} has been raised for quotation and will be processed once approved. For any query, please contact 7038100400`
+  }
+  else if (call_status == 'Spares') {
+    temp_id = '1207173530641222930';
+    temp_msg = `Dear Liebherr Customer, Ticket Number ${ticket_no} has been raised for a spare request and will be processed shortly. For any query, please contact 7038100400`
+  }
+  else if (call_status == 'Completed') {
+    temp_id = '1207173530028299875';
+    temp_msg = `Dear Liebherr Customer, Ticket Number ${ticket_no} has been successfully completed. For future assistance, please contact 7038100400`
+  }
+
+
+  const msg = encodeURIComponent(temp_msg);
+
+  const apiUrl = `https://smsgw.tatatel.co.in:9095/campaignService/campaigns/qs?recipient=${customer_mobile}&dr=false&msg=${msg}&user=${username}&pswd=${password}&sender=LICARE&PE_ID=1201159257274643113&Template_ID=${temp_id}`;
+
+  const response = await axios.get(apiUrl, { httpsAgent });
 
 
   if (call_status == 'Completed') {
@@ -13967,6 +16674,10 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
 
+  const newdate = new Date();
+  const closed_date = newdate.toISOString();
+
+
   const finalremark = [
     call_remark && call_remark !== 'undefined' ? `Remark: ${call_remark}` : '',
     check_remark && check_remark !== 'undefined' ? `Checklist Remark: ${check_remark}` : '',
@@ -13976,8 +16687,9 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
     service_charges && service_charges !== 'undefined' ? `Price: ${service_charges}` : '',
     other_charge && other_charge !== 'undefined' ? `Other Charges: ${other_charge}` : '',
     serial_no && serial_no !== 'undefined' ? `Serial No: ${serial_no}` : '',
-    ModelNumber && ModelNumber !== 'undefined' ? `Model Number: ${ModelNumber}` : '',
+    Model && Model !== 'undefined' ? `Model Number: ${Model}` : '',
     purchase_date && purchase_date !== 'undefined' ? `purchase Date: ${purchase_date}` : '',
+    call_status == 'Completed' ? `Feild Complete Date: ${closed_date}` : '',
   ].filter(Boolean).join(', ');
 
 
@@ -13997,14 +16709,13 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
       .input('service_charges', sql.VarChar, service_charges != 'undefined' ? service_charges : null)
       .input('call_status', sql.VarChar, call_status != 'undefined' ? call_status : '')
       .input('sub_call_status', sql.VarChar, sub_call_status != 'undefined' ? sub_call_status : '')
-      .input('call_type', sql.VarChar, call_type != 'undefined' ? call_type : null)
       .input('other_charge', sql.VarChar, other_charge != 'undefined' ? other_charge : null)
       .input('warranty_status', sql.VarChar, warranty_status != 'undefined' ? warranty_status : null)
       .input('com_id', sql.VarChar, com_id != 'undefined' ? com_id : null)
       .input('spare_doc_path', sql.VarChar, spareDoc)
       .input('spare_detail', sql.VarChar, spare_detail != 'undefined' ? spare_detail : null)
       .input('serial_no', sql.VarChar, serial_no != 'undefined' ? serial_no : null)
-      .input('ModelNumber', sql.VarChar, ModelNumber != 'undefined' ? ModelNumber : '')
+      .input('ModelNumber', sql.VarChar, Model != 'undefined' ? Model : '')
       .input('purchase_date', sql.VarChar, purchase_date != 'undefined' ? purchase_date : '')
       .input('picking_damages', sql.VarChar, picking_damages)
       .input('product_damages', sql.VarChar, product_damages)
@@ -14019,35 +16730,52 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
       .input('earthing', sql.VarChar, earthing)
       .input('gas_charges', sql.VarChar, gas_charges)
       .input('transpotation', sql.VarChar, transpotation)
+      .input('item_code', item_code)
+      .input('payment_collected', payment_collected)
+      .input('collected_amount', collected_amount)
       .input('otp', sql.Int, Number(otp))
-      .query('UPDATE complaint_ticket SET warranty_status = @warranty_status, group_code = @symptomcode, defect_type = @causecode, site_defect = @actioncode,activity_code = @activitycode,service_charges = @service_charges, call_status = @call_status,sub_call_status = @sub_call_status, call_type = @call_type, other_charges = @other_charge, spare_doc_path = @spare_doc_path, spare_detail = @spare_detail , ModelNumber = @ModelNumber , serial_no = @serial_no ,picking_damages = @picking_damages,product_damages = @product_damages,missing_part = @missing_part,leg_adjustment = @leg_adjustment,water_connection = @water_connection, abnormal_noise = @abnormal_noise,ventilation_top = @ventilation_top,ventilation_bottom = @ventilation_bottom,ventilation_back = @ventilation_back,voltage_supply = @voltage_supply , earthing = @earthing ,gascheck = @gas_charges , transportcheck = @transpotation ,purchase_date = @purchase_date  , state_id = @otp WHERE id = @com_id');
+      .query('UPDATE complaint_ticket SET warranty_status = @warranty_status, group_code = @symptomcode, defect_type = @causecode, site_defect = @actioncode,activity_code = @activitycode,service_charges = @service_charges, call_status = @call_status,sub_call_status = @sub_call_status, other_charges = @other_charge, spare_doc_path = @spare_doc_path, spare_detail = @spare_detail , ModelNumber = @ModelNumber , serial_no = @serial_no ,picking_damages = @picking_damages,product_damages = @product_damages,missing_part = @missing_part,leg_adjustment = @leg_adjustment,water_connection = @water_connection, abnormal_noise = @abnormal_noise,ventilation_top = @ventilation_top,ventilation_bottom = @ventilation_bottom,ventilation_back = @ventilation_back,voltage_supply = @voltage_supply , earthing = @earthing ,gascheck = @gas_charges , transportcheck = @transpotation ,purchase_date = @purchase_date  , state_id = @otp , item_code = @item_code ,collected_amount = @collected_amount ,payment_collected = @payment_collected   WHERE id = @com_id');
 
     // Check if any rows were updated
 
     const date = new Date()
+
+    if (call_status == 'Completed') {
+
+      const updatecloseddate = `update complaint_ticket set closed_date = '${closed_date}' where ticket_no ='${ticket_no}'`;
+
+      await pool.request().query(updatecloseddate);
+    }
+
+
+
+
 
 
     if (allocation == 'Available') {
       const {
         customer_id,
         customer_name,
-        ModelNumber,
         address,
         region,
         state,
         city,
         area,
         pincode,
-        customer_class
+        customer_class,
+        purchase_date,
       } = data_serial;
 
 
-      const insertQuery = `INSERT INTO awt_uniqueproductmaster (CustomerID, CustomerName, ModelNumber, serial_no, address, region, state, district, city, pincode, created_by, created_date, customer_classification) VALUES (@CustomerID, @CustomerName, @ModelNumber, @SerialNo, @Address, @Region, @State, @District, @City, @Pincode, @CreatedBy, GETDATE(), @CustomerClassification);`;
+
+
+
+      const insertQuery = `INSERT INTO awt_uniqueproductmaster (CustomerID, CustomerName, ModelNumber, serial_no, address, region, state, district, city, pincode, created_by, created_date, customer_classification , SerialStatus , purchase_date ,ModelName) VALUES (@CustomerID, @CustomerName, @ModelNumber, @SerialNo, @Address, @Region, @State, @District, @City, @Pincode, @CreatedBy, GETDATE(), @CustomerClassification , 'Active' , @PurchaseDate , @item_code);`;
 
       const result = await pool.request()
         .input('CustomerID', sql.VarChar, customer_id)
         .input('CustomerName', sql.VarChar, customer_name)
-        .input('ModelNumber', sql.VarChar, ModelNumber)
+        .input('ModelNumber', sql.VarChar, Model)
         .input('SerialNo', sql.Int, serial_no)
         .input('Address', sql.VarChar, address)
         .input('Region', sql.VarChar, region)
@@ -14055,9 +16783,10 @@ app.post('/updatecomplaint', authenticateToken, upload.fields([
         .input('District', sql.VarChar, area) // Assuming area is district
         .input('City', sql.VarChar, city)
         .input('Pincode', sql.VarChar, pincode)
+        .input('PurchaseDate', sql.VarChar, purchase_date)
         .input('CreatedBy', sql.VarChar, user_id) // Example for created_by
-        // .input('Createddate', sql.DateTime, date) // Example for created_by
-        .input('CustomerClassification', sql.VarChar, customer_class) // Example classification
+        .input('CustomerClassification', sql.VarChar, customer_class)
+        .input('item_code', item_code)
         .query(insertQuery)
 
 
@@ -14256,18 +16985,26 @@ app.post("/getsparelistapp", authenticateToken, async (req, res) => {
 });
 
 
-app.get("/getSpareParts_app/:model", authenticateToken, async (req, res) => {
-  const { model } = req.params;
+app.get("/getSpareParts_app/:item_code", authenticateToken, async (req, res) => {
+
+  const { item_code } = req.params;
 
   try {
     const pool = await poolPromise;
-    // Parameterized query
     const sql = `
-          SELECT sp.id, sp.ModelNumber, sp.title as article_code ,sp.ProductCode as spareId, sp.ItemDescription as article_description , spt.MRPQuotation as price FROM Spare_parts as sp left join priceGroup as spt on sp.PriceGroup = spt.PriceGroup  WHERE sp.deleted = 0  AND ModelNumber = @model
+        SELECT sp.id, 
+       sp.ModelNumber, 
+       sp.title as article_code,
+       sp.ProductCode as spareId, 
+       sp.ItemDescription as article_description, 
+       spt.MRPQuotation as price
+FROM Spare_parts as sp 
+LEFT JOIN priceGroup as spt ON sp.PriceGroup = spt.PriceGroup
+WHERE sp.deleted = 0 and ProductCode = @item_code
         `;
 
     const result = await pool.request()
-      .input("model", model) // Specify the data type for the parameter
+      .input("item_code", item_code) // Specify the data type for the parameter
       .query(sql);
 
     return res.json(result.recordset);
@@ -14495,22 +17232,61 @@ app.post("/updatevisitcount", authenticateToken, async (req, res) => {
 });
 
 
+// app.post("/getServiceCharges", authenticateToken, async (req, res) => {
+
+//   let { ModelNumber } = req.body;
+
+//   try {
+//     // Use the poolPromise to get the connection pool
+//     const pool = await poolPromise;
+
+//     const sql = `SELECT top 1 p.item_code, m.warrenty_year, m.compressor_warrenty, m.warrenty_amount FROM product_master as p 
+// LEFT JOIN Master_warrenty as m on m.product_line = p.productLine
+// where p.item_description = '${ModelNumber}'`;
+
+//     const result = await pool.request().query(sql);
+
+
+//     return res.json(result.recordset);
+//   } catch (err) {
+//     console.error(err);
+//     return res.status(500).json(err);
+//   }
+// });
+
 app.post("/getServiceCharges", authenticateToken, async (req, res) => {
 
-  let { ModelNumber } = req.body;
+  let { ModelNumber, warrenty_status } = req.body;
 
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
 
-    const sql = `SELECT top 1 p.item_code, m.warrenty_year, m.compressor_warrenty, m.warrenty_amount FROM product_master as p 
-LEFT JOIN Master_warrenty as m on m.product_line = p.productLine
-where p.item_description = '${ModelNumber}'`;
+    const sql = `select top 1 id, productType ,  productLine , productClass from product_master where item_description = '${ModelNumber}'`;
 
     const result = await pool.request().query(sql);
 
 
-    return res.json(result.recordset);
+    if (result.recordset.length > 0) {
+
+      const productType = result.recordset[0].productType
+      const productclass = result.recordset[0].productClass
+      const productLine = result.recordset[0].productLine
+
+
+      const getprice = `select * from post_sale_warrenty where ProductClass = '${productclass}' and ProductLine = '${productLine}' and Producttype = '${productType}' and ServiceType = '${warrenty_status}'`;
+
+      console.log(getprice)
+
+
+      const getresult = await pool.request().query(getprice);
+
+      return res.json(getresult.recordset);
+    } else {
+      return res.json('No price available')
+    }
+
+
   } catch (err) {
     console.error(err);
     return res.status(500).json(err);
@@ -14581,32 +17357,49 @@ app.post("/getengineerremark", authenticateToken, async (req, res) => {
 
 
 
+
+
 app.get("/getsmsapi", async (req, res) => {
   const ticket_no = 'SH234';
   const otp = '1234';
   const mobile = '9326476448';
 
-  // const username = process.env.TATA_USER;
-  // const password = process.env.PASSWORD;
+  const username = process.env.TATA_USER;
+  const password = process.env.PASSWORD;
+
+  const encrypt = (data) => {
+    return CryptoJS.AES.encrypt(data, secretKey).toString();
+  };
+
+  // Encrypt each part
+  // const encryptedEmail = encrypt(customer_email);
+  // const encryptedTicket = encrypt(ticket_no);
+  // const encryptedCustomerId = encrypt(customer_id);
 
 
-  const username = "LIEBHERR";
-  const password = "Liebh@01";
+
+
+  //     // Build the URL-safe message
+  //     const encryptedPath = `${encodeURIComponent(encryptedEmail)}/${encodeURIComponent(encryptedTicket)}/${encodeURIComponent(encryptedCustomerId)}`;
+
+  const npilink = 'https://test-licare.liebherr.com';
+
+  const npsmsg = `Dear Customer, Greetings from Liebherr! Your Ticket Number is ${ticket_no}. Please share OTP ${otp} with the engineer once the ticket is resolved.`;
+
+
+  const nps_msg = encodeURIComponent(npsmsg);
+
+
+  const npsapiUrl = `https://smsgw.tatatel.co.in:9095/campaignService/campaigns/qs?recipient=${mobile}&dr=false&msg=${nps_msg}&user=${username}&pswd=${password}&sender=LICARE&PE_ID=1201159257274643113&Template_ID=1207173855461934489`;
+
+  console.log(npsapiUrl)
+  await axios.get(npsapiUrl, { httpsAgent });
 
 
 
-
-
-  const temp_id = '1207173530305447084';
-
-  const msg = encodeURIComponent(
-    `Dear Customer, Greetings from Liebherr! Your Ticket Number is ${ticket_no}. Please share OTP ${otp} with the engineer once the ticket is resolved.`
-  );
-
-  const apiUrl = `https://smsgw.tatatel.co.in:9095/campaignService/campaigns/qs?recipient=${mobile}&dr=false&msg=${msg}&user=${username}&pswd=${password}&sender=LICARE&PE_ID=1201159257274643113&Template_ID=${temp_id}`;
 
   try {
-    const response = await axios.get(apiUrl); // Remove httpsAgent unless absolutely needed
+    const response = await axios.get(npsapiUrl, { httpsAgent });
     if (response.data) {
       return res.json({ message: "Success", data: response.data });
     }
@@ -14615,6 +17408,7 @@ app.get("/getsmsapi", async (req, res) => {
     return res.status(500).json({ message: 'Failed to send SMS', error: error.message });
   }
 });
+
 // FETCH ANNEXTURE DATA 
 
 app.post("/getannexturedata", authenticateToken, async (req, res) => {
@@ -14648,6 +17442,58 @@ app.post("/getannexturedata", authenticateToken, async (req, res) => {
     return res.status(500).json({ error: "An error occurred while fetching data" });
   }
 });
+
+app.post("/transferproduct", authenticateToken, async (req, res) => {
+  const { serial_no, customer_id, Modelno, product_id, newaddress, ItemNumber } = req.body;
+
+  try {
+    const pool = await poolPromise;
+
+    // First, update SerialStatus to 'Inactive'
+    const updateResult = await pool.request()
+      .input("product_id", product_id)
+      .query(`UPDATE awt_uniqueproductmaster SET SerialStatus = 'Inactive' WHERE id = @product_id`);
+
+
+    const getaddress = `select act.* , ac.customer_fname , ac.customer_classification from awt_customerlocation as act left join awt_customer as ac on ac.customer_id = act.customer_id where act.id = '${newaddress}'`
+
+    const getaddressresult = await pool.request().query(getaddress)
+
+    if (getaddressresult.recordset.length > 0) {
+
+      let { address, region_id, geostate_id, geocity_id, district_id, pincode_id, customer_fname, customer_classification } = getaddressresult.recordset[0];
+
+
+      const insertquery = `insert into awt_uniqueproductmaster(CustomerID , CustomerName ,ModelNumber , serial_no ,address , region , state ,district , city , pincode , SerialStatus ,customer_classification , ModelName) values (@customer_id,@customer_fname,@Modelno,@serial_no,@address,@region_id,@geostate_id,@district_id,@geocity_id,@pincode_id,@status,@customer_classification , @item_code)`
+
+      const insertproduct = await pool.request()
+        .input('customer_id', customer_id)
+        .input('customer_fname', customer_fname)
+        .input('Modelno', Modelno)
+        .input('serial_no', serial_no)
+        .input('address', address)
+        .input('region_id', region_id)
+        .input('geostate_id', geostate_id)
+        .input('district_id', district_id)
+        .input('geocity_id', geocity_id)
+        .input('pincode_id', pincode_id)
+        .input('status', 'Active')
+        .input('customer_classification', customer_classification)
+        .input('item_code', ItemNumber)
+        .query(insertquery)
+
+
+      return res.json(insertproduct)
+    }
+
+    return res.status(200).json({ message: "Product status updated successfully", result: updateResult.recordset });
+
+  } catch (err) {
+    console.error("Error during transfer:", err);
+    return res.status(500).json({ error: "An error occurred while updating product status" });
+  }
+});
+
 
 
 // get msp for annexture data
@@ -14693,7 +17539,7 @@ app.post("/getannexturedata", authenticateToken, async (req, res) => {
 // });
 
 // Fetch MSP list from awt_franchisemaster
-app.get("/getmsplist", authenticateToken, async (req, res) => {
+app.post("/getmsplist", authenticateToken, async (req, res) => {
 
 
   try {
@@ -14749,6 +17595,231 @@ app.post("/getannexturereport", authenticateToken, async (req, res) => {
   } catch (err) {
     console.error("Database Error:", err);
     return res.status(500).json({ error: "An error occurred while fetching data", details: err.message });
+  }
+});
+
+
+app.post("/updateserialno", authenticateToken, async (req, res) => {
+
+  let { serial,
+    ticket_no,
+    modelnumber,
+    customer_id,
+    customer_name,
+    address,
+    region,
+    state,
+    city,
+    area,
+    pincode,
+    customer_class,
+    purchase_date,
+    created_by,
+    item_code } = req.body;
+
+  try {
+    const pool = await poolPromise;
+    const sql = `update complaint_ticket set serial_no = '${serial}' , ModelNumber = '${modelnumber}' , item_code = '${item_code}'   where ticket_no = '${ticket_no}'`;
+
+    const result = await pool.request().query(sql);
+
+
+
+    const insertQuery = `INSERT INTO awt_uniqueproductmaster (CustomerID, CustomerName, ModelNumber, serial_no, address, region, state, district, city, pincode, created_by, created_date, customer_classification,SerialStatus,purchase_date,ModelName) VALUES (@CustomerID, @CustomerName, @ModelNumber, @SerialNo, @Address, @Region, @State, @District, @City, @Pincode, @CreatedBy, GETDATE(), @CustomerClassification , 'Active' , @PurchaseDate ,@item_code);`;
+
+    await pool.request()
+      .input('CustomerID', customer_id)
+      .input('CustomerName', customer_name)
+      .input('ModelNumber', modelnumber)
+      .input('SerialNo', serial)
+      .input('Address', address)
+      .input('Region', region)
+      .input('State', state)
+      .input('District', area) // Assuming area is district
+      .input('City', city)
+      .input('Pincode', pincode)
+      .input('CreatedBy', created_by)
+      .input('CustomerClassification', customer_class)
+      .input('PurchaseDate', purchase_date)
+      .input('item_code', item_code)
+      .query(insertQuery)
+
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Database Error:", err);
+    return res.status(500).json({ error: "Failed to fetch MSPs", details: err.message });
+  }
+});
+
+
+app.post("/updatepurchasedate", authenticateToken, async (req, res) => {
+
+  let { ticket_no, warrenty_status, purchase_date } = req.body;
+
+  try {
+    const pool = await poolPromise;
+    const sql = `update complaint_ticket set purchase_date = '${purchase_date}' , warranty_status = '${warrenty_status}'   where ticket_no = '${ticket_no}'`;
+
+    const result = await pool.request().query(sql);
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Database Error:", err);
+    return res.status(500).json({ error: "Failed to fetch MSPs", details: err.message });
+  }
+});
+
+app.post("/updatelastremark", authenticateToken, async (req, res) => {
+  let { remark_id, remark } = req.body;
+
+  try {
+    const pool = await poolPromise;
+
+    // Step 1: Fetch the current remark
+    const query = `
+      SELECT remark 
+      FROM awt_complaintremark 
+      WHERE id = @remark_id
+    `;
+
+    const result = await pool
+      .request()
+      .input('remark_id', sql.VarChar, remark_id)
+      .query(query);
+
+    if (result.recordset.length > 0) {
+      const rawRemark = result.recordset[0].remark;
+
+      // Step 2: Extract the existing remark after <b>Remark:</b>
+      const match = rawRemark?.match(/(<b>\s*Remark\s*:<\/b>\s*)([^<]*)/i);
+
+      if (!match) {
+
+        const updateQuery = `
+        UPDATE awt_complaintremark
+        SET remark = @remark
+        WHERE id = @remark_id
+      `;
+
+        await pool.request()
+          .input('remark', sql.VarChar, remark)
+          .input('remark_id', sql.VarChar, remark_id)
+          .query(updateQuery);
+
+        return res.json({ message: 'Remark updated without format match.' });
+      }
+
+      const beforeText = match[1];
+      const updatedRemarkText = beforeText + ' ' + remark;
+
+      // Step 3: Replace the full matched remark section with new text
+      const updatedFullRemark = rawRemark.replace(match[0], updatedRemarkText);
+
+      // Step 4: Update the database
+      const updateQuery = `
+        UPDATE awt_complaintremark
+        SET remark = @updated_remark
+        WHERE id = @remark_id
+      `;
+
+      await pool.request()
+        .input('updated_remark', sql.VarChar, updatedFullRemark)
+        .input('remark_id', sql.VarChar, remark_id)
+        .query(updateQuery);
+
+      console.log('Remark updated successfully.');
+      return res.json({ message: 'Remark updated successfully.', updatedFullRemark });
+    } else {
+      console.log('No record found for the given remark_id.');
+      return res.status(404).json({ error: 'Remark not found.' });
+    }
+  } catch (err) {
+    console.error("Database Error:", err);
+    return res.status(500).json({ error: "Failed to update remark", details: err.message });
+  }
+});
+
+
+app.post("/updatefeilddate", authenticateToken, async (req, res) => {
+
+  let { ticket_no, complete_date } = req.body;
+
+  try {
+    const pool = await poolPromise;
+    const sql = `update complaint_ticket set closed_date = '${complete_date}' where ticket_no = '${ticket_no}'`;
+
+    const result = await pool.request().query(sql);
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Database Error:", err);
+    return res.status(500).json({ error: "Failed to fetch MSPs", details: err.message });
+  }
+});
+
+app.post("/update_defect_code", authenticateToken, async (req, res) => {
+
+  let { group_code, defect_type, site_defect, activity_code, ticket_no } = req.body;
+
+  try {
+    const pool = await poolPromise;
+    const sql = `update complaint_ticket set group_code = '${group_code}' , defect_type = '${defect_type}', site_defect = '${site_defect}' ,activity_code = '${activity_code}'  where ticket_no = '${ticket_no}'`;
+
+    const result = await pool.request().query(sql);
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Database Error:", err);
+    return res.status(500).json({ error: "Failed to fetch MSPs", details: err.message });
+  }
+});
+
+app.post("/resend_otp", authenticateToken, async (req, res) => {
+
+  let { ticket_no, customer_mobile } = req.body;
+
+  console.log(req.body)
+
+
+  // const otp = Math.floor(1000 + Math.random() * 9000);
+
+  try {
+    const pool = await poolPromise;
+    const sql = `select totp from complaint_ticket where ticket_no = '${ticket_no}'`;
+    const result = await pool.request().query(sql);
+
+    const otp = result.recordset[0]?.totp
+
+
+    if (1 == 1) {
+
+      const username = process.env.TATA_USER;
+      const password = process.env.PASSWORD;
+      const temp_id = '1207173530305447084'
+
+      try {
+
+        const msg = encodeURIComponent(
+          `Dear Customer, Greetings from Liebherr! Your Ticket Number is ${ticket_no}. Please share OTP ${otp} with the engineer once the ticket is resolved.`
+        );
+
+        const res = await axios.get(
+          `https://smsgw.tatatel.co.in:9095/campaignService/campaigns/qs?recipient=${customer_mobile}&dr=false&msg=${msg}&user=${username}&pswd=${password}&sender=LICARE&PE_ID=1201159257274643113&Template_ID=${temp_id}`, { httpsAgent }
+        );
+
+
+        console.log(res)
+
+
+
+
+      } catch (error) {
+        console.error('Error hitting SMS API (token):', error.response?.data || error.message);
+      }
+
+    }
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Database Error:", err);
+    return res.status(500).json({ error: "Failed to fetch MSPs", details: err.message });
   }
 });
 
@@ -15292,10 +18363,11 @@ app.post('/uploadpostwarrentyexcel', authenticateToken, async (req, res) => {
   }
 });
 
-app.post('/uploadpinexcel', authenticateToken, async (req, res) => {
+app.post('/uploadpinexcel', upload.none(), authenticateToken, async (req, res) => {
 
 
   let { jsonData } = req.body;
+
   let excelData = JSON.parse(jsonData);
 
 
@@ -15305,52 +18377,95 @@ app.post('/uploadpinexcel', authenticateToken, async (req, res) => {
 
 
 
-    for (const item of excelData) {
-      console.log(excelData)
-      const result = await pool.request()
-        .input('pincode', sql.Int, item.pin_code)
-        .input('country', sql.VarChar, item.country)
-        .input('region', sql.VarChar, item.region)
-        .input('state', sql.VarChar, item.state)
-        .input('city', sql.VarChar, item.city)
-        .input('mother_branch', sql.VarChar, item.mother_branch)
-        .input('resident_branch', sql.VarChar, item.resident_branch)
-        .input('area_manager', sql.VarChar, item.area_manager)
-        .input('local_manager', sql.VarChar, item.local_manager)
-        .input('customer_classification', sql.VarChar, item.customer_classification)
-        .input('class_city', sql.VarChar, item.class_of_city)
-        .input('csp_name', sql.VarChar, item.child_service_partner_name)
-        .input('msp_name', sql.VarChar, item.master_service_partner_name)
-        .input('call_type', sql.VarChar, item.call_type)
-        .input('msp_code', sql.Int, item.master_service_partner_code)
-        .input('csp_code', item.child_service_partner_code)
-        .input('producttype', item.producttype)
-        .input('productline', item.productline)
-        .query(`INSERT INTO pincode_allocation 
-              (pincode, country, region, state, city, mother_branch, resident_branch, area_manager, local_manager, customer_classification, class_city, csp_name, msp_name, call_type, msp_code, csp_code,ProductType,ProductLine) 
-              VALUES (
-                @pincode, 
-                @country, 
-                @region, 
-                @state, 
-                @city, 
-                @mother_branch, 
-                @resident_branch, 
-                @area_manager, 
-                @local_manager, 
-                @customer_classification, 
-                @class_city, 
-                @csp_name, 
-                @msp_name, 
-                @call_type,
-                @msp_code,
-                @csp_code,
-                @producttype,
-                @productline
-              )
 
+    for (const item of excelData) {
+
+
+      // Check for existing record
+      const checkResult = await pool.request()
+        .input('pincode', sql.Int, item.pin_code)
+        .input('customer_classification', sql.VarChar, item.customer_classification)
+        .input('call_type', sql.VarChar, item.call_type)
+        .query(`
+          SELECT 1 FROM pincode_allocation 
+          WHERE pincode = @pincode AND customer_classification = @customer_classification AND call_type = @call_type
+        `);
+
+      if (checkResult.recordset.length > 0) {
+        // If exists, update the record
+        await pool.request()
+          .input('pincode', sql.Int, item.pin_code)
+          .input('country', sql.VarChar, item.country)
+          .input('region', sql.VarChar, item.region)
+          .input('state', sql.VarChar, item.state)
+          .input('city', sql.VarChar, item.city)
+          .input('mother_branch', sql.VarChar, item.mother_branch)
+          .input('resident_branch', sql.VarChar, item.resident_branch)
+          .input('area_manager', sql.VarChar, item.area_manager)
+          .input('local_manager', sql.VarChar, item.local_manager)
+          .input('customer_classification', sql.VarChar, item.customer_classification)
+          .input('class_city', sql.VarChar, item.class_of_city)
+          .input('csp_name', sql.VarChar, item.child_service_partner_name)
+          .input('msp_name', sql.VarChar, item.master_service_partner_name)
+          .input('call_type', sql.VarChar, item.call_type)
+          .input('msp_code', sql.Int, item.master_service_partner_code)
+          .input('csp_code', item.child_service_partner_code)
+          .input('producttype', item.producttype)
+          .input('productline', item.productline)
+          .query(`
+            UPDATE pincode_allocation SET 
+              country = @country,
+              region = @region,
+              state = @state,
+              city = @city,
+              mother_branch = @mother_branch,
+              resident_branch = @resident_branch,
+              area_manager = @area_manager,
+              local_manager = @local_manager,
+              class_city = @class_city,
+              csp_name = @csp_name,
+              msp_name = @msp_name,
+              msp_code = @msp_code,
+              csp_code = @csp_code,
+              ProductType = @producttype,
+              ProductLine = @productline
+            WHERE pincode = @pincode 
+              AND customer_classification = @customer_classification 
+              AND call_type = @call_type
           `);
+      } else {
+        // If not exists, insert the record
+        await pool.request()
+          .input('pincode', sql.Int, item.pin_code)
+          .input('country', sql.VarChar, item.country)
+          .input('region', sql.VarChar, item.region)
+          .input('state', sql.VarChar, item.state)
+          .input('city', sql.VarChar, item.city)
+          .input('mother_branch', sql.VarChar, item.mother_branch)
+          .input('resident_branch', sql.VarChar, item.resident_branch)
+          .input('area_manager', sql.VarChar, item.area_manager)
+          .input('local_manager', sql.VarChar, item.local_manager)
+          .input('customer_classification', sql.VarChar, item.customer_classification)
+          .input('class_city', sql.VarChar, item.class_of_city)
+          .input('csp_name', sql.VarChar, item.child_service_partner_name)
+          .input('msp_name', sql.VarChar, item.master_service_partner_name)
+          .input('call_type', sql.VarChar, item.call_type)
+          .input('msp_code', sql.Int, item.master_service_partner_code)
+          .input('csp_code', item.child_service_partner_code)
+          .input('producttype', item.producttype)
+          .input('productline', item.productline)
+          .query(`
+            INSERT INTO pincode_allocation 
+              (pincode, country, region, state, city, mother_branch, resident_branch, area_manager, local_manager, customer_classification, class_city, csp_name, msp_name, call_type, msp_code, csp_code, ProductType, ProductLine) 
+            VALUES (
+              @pincode, @country, @region, @state, @city, @mother_branch, @resident_branch, 
+              @area_manager, @local_manager, @customer_classification, @class_city, 
+              @csp_name, @msp_name, @call_type, @msp_code, @csp_code, @producttype, @productline
+            )
+          `);
+      }
     }
+
 
 
     return res.json({ message: 'Data inserted successfully' });
@@ -15360,6 +18475,68 @@ app.post('/uploadpinexcel', authenticateToken, async (req, res) => {
   }
 });
 
+app.post('/uplaodmslexcel', upload.none(), authenticateToken, async (req, res) => {
+  let { excelData, created_by = "1" } = req.body;
+
+
+
+
+
+
+  try {
+
+
+    // Parse if excelData is a JSON string
+    if (typeof excelData === 'string') {
+      try {
+        excelData = JSON.parse(excelData);
+      } catch (parseError) {
+        return res.status(400).json({ error: 'Invalid JSON format for excelData' });
+      }
+    }
+
+
+    const pool = await poolPromise;
+    pool.config.options.requestTimeout = 600000;
+
+    for (const item of excelData) {
+
+      console.log(item['MSP Name'])
+      console.log(item['CSP_Code'])
+      console.log(item['CSPbName'])
+      console.log(item['Item'])
+      console.log(item['item_description)'])
+
+
+
+
+
+
+      const result = await pool.request()
+        .input('msp_code', sql.VarChar, item['MSP code'])
+        .input('msp_name', sql.VarChar, item['MSP Name'])
+        .input('csp_code', sql.VarChar, item['CSP Code'])
+        .input('csp_name', sql.VarChar, item['CSP Name'])
+        .input('item', sql.VarChar, item['Item'])
+        .input('item_description', sql.VarChar, item['Item Description'])
+        .input('stock', sql.VarChar, item['Stocks'])
+        .input('created_date', sql.VarChar, item.created_date)
+        .input('created_by', sql.VarChar, created_by)
+
+        .query(`
+            INSERT INTO Msl (csp_code,msp_code, msp_name, csp_name, item, item_description, stock, created_by , created_date) 
+            VALUES (@csp_code, @msp_code, @msp_name, @csp_name, @item, @item_description, @stock, @created_by,@created_date)
+          `);
+
+      console.log(result, "$%%^^")
+    }
+
+    return res.json({ message: 'Data inserted successfully' });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while inserting data' });
+  }
+});
 
 
 
@@ -15433,10 +18610,525 @@ app.post('/uploadspareexcel', async (req, res) => {
   }
 });
 
+app.get("/getmsl", authenticateToken, async (req, res) => {
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+    const result = await pool.request().query(`SELECT * FROM Msl WHERE deleted = 0`);
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
+
+app.get("/getmslmsp/:licare_code", authenticateToken, async (req, res) => {
+  const { licare_code } = req.params
+  try {
+    // return res.json({licare_code});
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+    const result = await pool.request().query(`SELECT * FROM Msl WHERE deleted = 0 and msp_code = '${licare_code}'`);
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
+app.get("/getmslcsp/:licare_code", authenticateToken, async (req, res) => {
+  const { licare_code } = req.params
+  try {
+    // return res.json({licare_code});
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+    const result = await pool.request().query(`SELECT * FROM Msl WHERE deleted = 0 and csp_code = '${licare_code}'`);
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
+
+app.get("/getmslpopulate/:mslid", authenticateToken, async (req, res) => {
+  const { mslid } = req.params;
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    // SQL query to fetch data from the master list, customize based on your needs
+    const sql = `
+         SELECT m.* from  Msl as m Where m.deleted = 0 AND m.id = ${mslid}
+        `;
+    // Execute the SQL query
+    const result = await pool.request().query(sql);
+
+    // Return the result as JSON
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
+
+app.post("/putmsl", authenticateToken, async (req, res) => {
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { id, msp_code, msp_name, csp_code, csp_name, item, item_description, stock, created_by } = JSON.parse(decryptedData);
+
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+
+    // Step 1: Duplicate Check Query
+    const duplicateCheckSQL = `
+      SELECT * FROM Msl
+      WHERE msp_code = @msp_code
+      AND  csp_code = @csp_code
+      AND  item = @item
+      AND deleted = 0
+      AND id != @id
+    `;
+
+    console.log("Executing Duplicate Check SQL:", duplicateCheckSQL);
+
+    const duplicateCheckResult = await pool.request()
+      .input('msp_code', msp_code)
+      .input('csp_code', csp_code)
+      .input('item', item)
+      .input('id', id)
+      .query(duplicateCheckSQL);
+
+    if (duplicateCheckResult.recordset.length > 0) {
+      return res.status(409).json({
+        message: "Duplicate entry,  Msl already exists!"
+      });
+    }
+
+    // Step 2: Update Query
+    const updateSQL = `
+     UPDATE Msl
+     SET
+       msp_code = @msp_code,
+       msp_name = @msp_name,
+       csp_code = @csp_code,
+       csp_name = @csp_name,
+       item = @item,
+       item_description = @item_description,
+       stock = @stock
+     WHERE id = @id
+   `;
+    console.log("Executing Update SQL:", updateSQL);
+
+    await pool.request()
+      .input('msp_code', msp_code)
+      .input('msp_name', msp_name)
+      .input('csp_code', csp_code)
+      .input('csp_name', csp_name)
+      .input('item', item)
+      .input('item_description', item_description)
+      .input('stock', stock)
+      .input('created_by', created_by)
+      .input('id', id)
+      .query(updateSQL);
+
+    return res.json({
+      message: "Msl updated successfully!"
+    });
+
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while updating the Msl' });
+  }
+});
+
+app.post("/postmsl", authenticateToken, async (req, res) => {
+  const { encryptedData } = req.body;
+  const decryptedData = decryptData(encryptedData, secretKey)
+  const { msp_code, msp_name, csp_code, csp_name, item, item_description, stock } = JSON.parse(decryptedData);
+
+  try {
+    const pool = await poolPromise;
+
+    // Check if Msl already exists
+    let sql = `SELECT * FROM Msl WHERE msp_code = '${msp_code}' AND csp_code = '${csp_code}' AND item = '${item}' AND deleted = 0`;
+    const result = await pool.request().query(sql);
+
+    if (result.recordset.length > 0) {
+      return res.status(409).json({ message: "Duplicate entry, Msl already exists!" });
+    } else {
+      // Check if the Msl is soft-deleted
+      sql = `SELECT * FROM Msl WHERE msp_code = '${msp_code}' AND deleted = 1`;
+      const softDeletedData = await pool.request().query(sql);
+
+      if (softDeletedData.recordset.length > 0) {
+        // Restore soft-deleted Msl
+        sql = `UPDATE Msl SET deleted = 0 WHERE msp_code = '${msp_code}'`;
+        await pool.request().query(sql);
+        return res.json({ message: "Soft-deleted data restored successfully!" });
+      } else {
+        // Insert new Msl
+        sql = `INSERT INTO Msl (msp_code,msp_name,csp_code,csp_name,item,item_description,stock,deleted) VALUES ('${msp_code}','${msp_name}','${csp_code}','${csp_name}','${item}','${item_description}','${stock}',0)`
+        await pool.request().query(sql);
+        return res.json({ message: "Msl added successfully!" });
+
+      }
+    }
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "An error occurred while processing the Msl data" });
+  }
+});
+
+app.post("/getinvoicegrndetails", authenticateToken, async (req, res) => {
+  const { InvoiceNumber } = req.body;
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+    const result = await pool.request().query(`SELECT * FROM  Shipment_Parts WHERE InvoiceNumber = '${InvoiceNumber}' AND deleted = 0  `);
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
+
+app.post("/getgrnlisting", authenticateToken, async (req, res) => {
+  let { csp_code, fromDate, toDate, invoice_number, address_code, status } = req.body;
+
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+
+    if (status == 0) {
+      status = null
+    }
+
+
+    // Add parameters safely
+    request.input("csp_code", csp_code);
+    if (fromDate) request.input("fromDate", fromDate);
+    if (toDate) request.input("toDate", toDate);
+    if (invoice_number) request.input("invoice_number", invoice_number);
+    if (address_code) request.input("address_code", address_code);
+    if (status) request.input("status", status);
+
+    // Build additional filters
+    let filterConditions = "s.deleted = 0 AND a.csp_code = @csp_code";
+
+    if (fromDate && toDate) {
+      filterConditions += " AND s.InvoiceDate BETWEEN @fromDate AND @toDate";
+    } else if (fromDate) {
+      filterConditions += " AND s.InvoiceDate >= @fromDate";
+    } else if (toDate) {
+      filterConditions += " AND s.InvoiceDate <= @toDate";
+    }
+
+    if (address_code) {
+      filterConditions += " AND s.Address_code = @address_code";
+    }
+
+
+    if (status) {
+      filterConditions += " AND agn.status = @status";
+    }
+
+    if (invoice_number) {
+      filterConditions += " AND s.InvoiceNumber = @invoice_number";
+    }
+
+    const query = `
+      WITH RankedParts AS (
+        SELECT  
+          s.id, s.Address_code, s.InvoiceDate, s.InvoiceNumber, s.Invoice_bpcode, 
+          s.Invoice_bpName, s.Invoice_qty, s.Item_Code, s.Item_Description, 
+          s.Service_Type, s.Order_Line_Number, s.Order_Number, a.csp_code, agn.status,
+          ROW_NUMBER() OVER (PARTITION BY s.InvoiceNumber ORDER BY s.InvoiceDate DESC) AS rn
+        FROM Shipment_Parts AS s 
+        LEFT JOIN Address_code AS a ON a.address_code = s.Address_code 
+        LEFT JOIN awt_grnmaster AS agn ON agn.invoice_no = s.InvoiceNumber 
+        WHERE ${filterConditions} AND s.InvoiceDate >= '2025-05-01 00:00:000' 
+      )
+      SELECT * 
+      FROM RankedParts
+      WHERE rn = 1
+      ORDER BY 
+  CASE 
+    WHEN status IS NULL THEN 0
+    WHEN status = 1 THEN 1
+    WHEN status = 2 THEN 2
+    ELSE 3
+  END,
+  InvoiceDate DESC;
+    `;
+
+    const result = await request.query(query);
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
+
+app.post("/getgrnexcel", authenticateToken, async (req, res) => {
+
+  let { csp_code, fromDate, toDate, invoice_number, address_code, status } = req.body;
+
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
 
 
 
+    // Add parameters safely
+    request.input("csp_code", csp_code);
+    if (fromDate) request.input("fromDate", fromDate);
+    if (toDate) request.input("toDate", toDate);
+    if (invoice_number) request.input("invoice_number", invoice_number);
+    if (address_code) request.input("address_code", address_code);
+    if (status) request.input("status", status);
+
+    // Build additional filters
+    let filterConditions = "s.deleted = 0 AND a.csp_code = @csp_code";
+
+    if (fromDate && toDate) {
+      filterConditions += " AND s.InvoiceDate BETWEEN @fromDate AND @toDate";
+    } else if (fromDate) {
+      filterConditions += " AND s.InvoiceDate >= @fromDate";
+    } else if (toDate) {
+      filterConditions += " AND s.InvoiceDate <= @toDate";
+    }
+
+    if (address_code) {
+      filterConditions += " AND s.Address_code = @address_code";
+    }
+
+
+    if (status) {
+      filterConditions += " AND agn.status = @status";
+    }
+
+    if (invoice_number) {
+      filterConditions += " AND s.InvoiceNumber = @invoice_number";
+    }
+
+    const query = `
+      SELECT  
+    s.id,
+    s.InvoiceNumber, 
+    s.InvoiceDate,
+    'LIEBHERR' AS received_from,
+    s.Address_code,
+    s.Order_Number,
+    s.Service_Type,
+    CASE 
+        WHEN agn.status = 1 THEN 'approved'
+        WHEN agn.status = 2 THEN 'rejected'
+        ELSE 'pending'
+    END AS status,
+    s.Item_Code,
+    s.Item_Description,
+    s.Invoice_qty,
+    acp.actual_received,
+    acp.pending_quantity,
+    agn.received_date,
+    agn.remark,
+    agn.created_date
+FROM Shipment_Parts AS s 
+LEFT JOIN Address_code AS a ON a.address_code = s.Address_code 
+LEFT JOIN awt_grnmaster AS agn ON agn.invoice_no = s.InvoiceNumber 
+LEFT JOIN awt_cspgrnspare AS acp ON agn.grn_no = acp.grn_no
+WHERE ${filterConditions} order by s.InvoiceDate DESC;
+    `;
+
+    const result = await request.query(query);
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
 
 
 
+app.post("/approvegrn", upload.none(), authenticateToken, async (req, res) => {
+  let { itemdata } = req.body;
 
+  let items = JSON.parse(itemdata);
+
+
+  try {
+    const pool = await sql.connect(dbConfig);
+
+    const creategrnno = `SELECT COUNT(*) AS count FROM awt_grnmaster`;
+    const checkResult = await pool.request().query(creategrnno);
+
+    const grnCount = checkResult.recordset[0].count || 0;
+    const grn_no = `GRN-${grnCount + 1}`;
+
+    const masterItem = items[0];
+
+
+    //add spare in awt_grnmaster
+
+    const insertintogrnmaster = `
+      INSERT INTO awt_grnmaster 
+      (grn_no, invoice_no, invoice_date, received_date, csp_name, csp_code, remark,status, created_date, created_by) 
+      VALUES 
+      (@grn_no, @invoice_no, @invoice_date, @received_date, @csp_name, @csp_code, @remark,@status, @created_date, @created_by)`;
+
+    await pool.request()
+      .input('grn_no', grn_no)
+      .input('invoice_no', masterItem.invoice_number)
+      .input('invoice_date', masterItem.invoice_date)
+      .input('received_date', masterItem.received_date)
+      .input('status', 1)
+      .input('csp_name', 'LIEBHERR')
+      .input('csp_code', 'LIEBHERR')
+      .input('remark', masterItem.remark)
+      .input('created_date', new Date())
+      .input('created_by', masterItem.created_by)
+      .query(insertintogrnmaster);
+
+
+    //update status of grn_master
+
+
+
+    const transaction = new sql.Transaction(pool);
+    await transaction.begin();
+
+    for (const item of items) {
+
+      //add spare in awt_grnmaster
+
+      const request = new sql.Request(transaction);
+      const query = `
+        INSERT INTO awt_cspgrnspare 
+        (grn_no, spare_no, spare_title, quantity, actual_received, pending_quantity, created_date, created_by)
+        VALUES 
+        (@grn_no, @spare_no, @spare_title, @quantity,@actual_quantity , @pending_quantity, @created_date, @created_by)`;
+
+      request.input('grn_no', sql.VarChar, grn_no);
+      request.input('spare_no', sql.VarChar, item.article_code);
+      request.input('spare_title', sql.VarChar, item.article_desc);
+      request.input('quantity', sql.Int, item.quantity);
+      request.input('actual_quantity', sql.Int, item.actual_quantity);
+      request.input('pending_quantity', sql.Int, item.pending_quantity);
+      request.input('created_date', sql.DateTime, new Date());
+      request.input('created_by', sql.VarChar, item.created_by);
+      await request.query(query);
+
+      const stockRequest = new sql.Request(transaction);
+      const stockInsertQuery = `
+        IF EXISTS (SELECT 1 FROM csp_stock WHERE product_code = @product_code and csp_code = @csp_code )
+BEGIN
+  UPDATE csp_stock
+  SET stock_quantity = stock_quantity + @stock_quantity,
+      created_date = @created_date,
+      created_by = @created_by
+  WHERE product_code = @product_code and csp_code = @csp_code
+END
+ELSE
+BEGIN
+  INSERT INTO csp_stock 
+  (csp_code, product_code, productname, stock_quantity, created_by, created_date)
+  VALUES 
+  (@csp_code, @product_code, @productname, @stock_quantity, @created_by, @created_date)
+END
+`;
+
+      stockRequest.input('csp_code', sql.VarChar, item.created_by);
+      stockRequest.input('product_code', sql.VarChar, item.article_code);
+      stockRequest.input('productname', sql.VarChar, item.article_desc);
+      stockRequest.input('stock_quantity', sql.Int, item.actual_quantity);
+      stockRequest.input('created_by', sql.VarChar, item.created_by);
+      stockRequest.input('created_date', sql.DateTime, new Date());
+      await stockRequest.query(stockInsertQuery);
+    }
+
+    await transaction.commit();
+    return res.status(200).json({ message: "GRN approved and saved successfully", grn_no });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while saving GRN data' });
+  }
+});
+
+
+app.post('/rejectgrn', authenticateToken, async (req, res) => {
+
+  const { remark, received_date, invoice_date, invoice_number, created_by } = req.body;
+
+  const pool = await poolPromise;
+
+  try {
+
+    const creategrnno = `SELECT COUNT(*) AS count FROM awt_grnmaster`;
+    const checkResult = await pool.request().query(creategrnno);
+
+    const grnCount = checkResult.recordset[0].count || 0;
+    const grn_no = `GRN-${grnCount + 1}`;
+
+
+    const insertintogrnmaster = `
+      INSERT INTO awt_grnmaster 
+      (grn_no, invoice_no, invoice_date, received_date, csp_name, csp_code, remark,status, created_date, created_by) 
+      VALUES (@grn_no, @invoice_no, @invoice_date, @received_date, @csp_name, @csp_code, @remark,@status, @created_date, @created_by)`;
+
+    await pool.request()
+      .input('grn_no', grn_no)
+      .input('invoice_no', invoice_number)
+      .input('invoice_date', invoice_date)
+      .input('received_date', received_date)
+      .input('status', 2)
+      .input('csp_name', 'LIEBHERR')
+      .input('csp_code', 'LIEBHERR')
+      .input('remark', remark)
+      .input('created_date', new Date())
+      .input('created_by', created_by)
+      .query(insertintogrnmaster);
+    // Update GRN master status
+
+
+    return res.json("Status Updated");
+  } catch (err) {
+    console.error("Error updating GRN status:", err);
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+});
+
+app.post("/getcspspareparts", authenticateToken, async (req, res) => {
+  const { csp_code } = req.body;
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+    const result = await pool.request().query(`select * from csp_stock as ct where  ct.csp_code = '${csp_code}'
+
+`);
+
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
+app.post("/sendjobcard", authenticateToken, async (req, res) => {
+
+  const { pdfurl, ticket_no } = req.body;
+
+  try {
+
+    return res.json("Done");
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});

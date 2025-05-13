@@ -56,22 +56,22 @@ function GrnTab() {
               <div className="tabsMenu" style={{ fontSize: "14px", marginLeft: "12px", fontWeight: "600", fontFamily: "Nunito" }}>
                 <ul className="nav nav-tabs ">
                   <li className="nav-item">
-                    <Link to={`/csp/cspgrn`}><button
-                      className={`nav-link ${activeTab === '/csp/cspgrn' ? 'active' : ' onClick={() => setActiveTab("csp/cspgrn")}'}`}
+                    <Link to={`/csp/creategrn`}><button
+                      className={`nav-link ${activeTab === '/csp/creategrn' ? 'active' : ' onClick={() => setActiveTab("csp/creategrn")}'}`}
 
                     >
                       CREATE GRN
                     </button></Link>
                   </li>
 
-                  <li className="nav-item">
+                  {/* <li className="nav-item">
                     <Link to={`/csp/grnlisting`}> <button
                       className={`nav-link ${activeTab === '/csp/grnlisting' ? 'active' : ' onClick={() => setActiveTab("grnlisting")}'}`}
 
                     >
                       GRN INWARD LISTING
                     </button></Link>
-                  </li>
+                  </li> */}
 
                   <li className="nav-item">
                     <Link to={`/csp/spareoutward`}> <button

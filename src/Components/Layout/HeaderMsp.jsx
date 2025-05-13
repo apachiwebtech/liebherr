@@ -9,7 +9,7 @@ const HeaderMsp = (params) => {
   const navigate = useNavigate();
   const [Name, setName] = useState([])
   const location = useLocation(); // Get current route
-
+  const Username = localStorage.getItem('lhiuser')
 
   function clearAllCookies() {
     document.cookie.split(";").forEach(cookie => {
@@ -133,9 +133,11 @@ const HeaderMsp = (params) => {
 
 
 
-          <div className="dropdown text-end">
+          <div className="dropdown text-end d-flex  justify-content-center" style={{alignItems : "center"}}>
             {/* <Link className="btn btn-primary newcomplaint" onClick={redirect}>New Ticket</Link> */}
-
+            <div className='mx-2'>
+              <p className='m-0'>Welcome User , <b style={{textTransform : "capitalize"}}>{Username}</b></p>
+            </div>
             <a href="#" className="link-dark d-flex align-content-center justify-content-center text-decoration-none " id="dropdownUser1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
 
               <Avatar

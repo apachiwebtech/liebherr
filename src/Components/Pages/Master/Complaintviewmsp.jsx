@@ -55,7 +55,7 @@ export function Complaintviewmsp(params) {
   const { loaders, axiosInstance } = useAxiosLoader();
   const [errors, setErrors] = useState({})
   const [dealercustid, setDealercust] = useState('')
- const [complaintview, setComplaintview] = useState({
+  const [complaintview, setComplaintview] = useState({
     ticket_no: '',
     ticket_date: '',
     customer_name: '',
@@ -96,9 +96,11 @@ export function Complaintviewmsp(params) {
     closed_date: "",
     area: '',
     region: '',
-    item_code : '',
-    customer_email:'',
-    state_id:''
+    item_code: '',
+    customer_email: '',
+    state_id: '',
+    payment_collected: '',
+    collected_amount: ''
   });
 
 
@@ -832,7 +834,7 @@ export function Complaintviewmsp(params) {
     const confirm = window.confirm("Are you sure?")
 
     if (confirm) {
-      axiosInstance.post(`${Base_Url}/removesparepart`, { spare_id: id }, {
+      axiosInstance.post(`${Base_Url}/removesparepart`, { spare_id: String(id) }, {
         headers: {
           Authorization: token, // Send token in headers
         },
@@ -1119,7 +1121,7 @@ export function Complaintviewmsp(params) {
           ...prevstate,
           ModelNumber: '',
           serial_no: '',
-          item_code : ''
+          item_code: ''
         }));
         return;
       }
@@ -1141,7 +1143,7 @@ export function Complaintviewmsp(params) {
           }));
 
         }
-        else if (serialData.salutation == 'Dl' ) {
+        else if (serialData.salutation == 'Dl') {
           alert("Serial no transfer to customer")
           setallocation('Available');
           setDealercust(serialData.customer_id)
@@ -1180,7 +1182,7 @@ export function Complaintviewmsp(params) {
             ...prevstate,
             ModelNumber: '',
             serial_no: '',
-            item_code : ''
+            item_code: ''
           }));
         }
       }
@@ -1193,7 +1195,7 @@ export function Complaintviewmsp(params) {
           ...prevstate,
           ModelNumber: '',
           serial_no: '',
-          item_code : ''
+          item_code: ''
         }));
       }
     } catch (error) {
@@ -1297,7 +1299,7 @@ export function Complaintviewmsp(params) {
     setFiles(e.target.files);
   };
 
- const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
 
     e.preventDefault();
 
@@ -1329,16 +1331,19 @@ export function Complaintviewmsp(params) {
 
 
 
+    const isMaintenanceOrHelpdesk =
+      complaintview.ticket_type === 'MAINTENANCE' ||
+      complaintview.ticket_type === 'HELPDESK';
 
 
     if (
 
       complaintview.call_status === 'Closed'
-        ? (complaintview.ticket_type === 'MAINTENANCE' || isValidValue(complaintview.defect_type)) &&
-        (complaintview.ticket_type === 'MAINTENANCE' || isValidValue(complaintview.site_defect)) &&
-        (complaintview.ticket_type === 'MAINTENANCE' || isValidValue(complaintview.activity_code)) &&
-        (complaintview.ticket_type === 'MAINTENANCE' || isValidValue(complaintview.visit_count)) &&
-        (complaintview.ticket_type === 'MAINTENANCE' || groupstatusid) &&
+        ? (isMaintenanceOrHelpdesk || isValidValue(complaintview.defect_type)) &&
+        (isMaintenanceOrHelpdesk || isValidValue(complaintview.site_defect)) &&
+        (isMaintenanceOrHelpdesk || isValidValue(complaintview.activity_code)) &&
+        (isMaintenanceOrHelpdesk || isValidValue(complaintview.visit_count)) &&
+        (isMaintenanceOrHelpdesk || groupstatusid) &&
         (complaintview.ticket_type === 'VISIT' || isValidValue(complaintview.serial_no)) &&
         (complaintview.ticket_type !== "VISIT" ? isValidValue(complaintview.purchase_date) : true) &&
         addedEngineers.length > 0 &&
@@ -1398,6 +1403,8 @@ export function Complaintviewmsp(params) {
           transportation: complaintview.transportation,
           transportation_charge: complaintview.transportation_charge,
           state_id: String(complaintview.state_id),
+          collected_amount: complaintview.collected_amount ? String(complaintview.collected_amount) : '',
+          payment_collected: complaintview.payment_collected,
           allocation: allocation,
           nps_link: `${Base_Url}`,
           note,
@@ -1802,6 +1809,34 @@ export function Complaintviewmsp(params) {
       const url = URL.createObjectURL(blob);
       window.open(url);
       URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Error generating PDF:', err);
+    }
+  };
+
+  const SendjobCard = async () => {
+
+    try {
+      const blob = await pdf(<Jobcardpdf attachments={attachments} data={updatedata} duplicate={duplicate} spare={addedSpareParts} engineer={addedEngineers} engremark={engremark} />).toBlob();
+      const url = URL.createObjectURL(blob);
+
+      const data = {
+        pdfurl: url,
+        ticket_no: complaintview.ticket_no
+      }
+      axios.post(`${Base_Url}/sendjobcard`, data, {
+        headers: {
+          Authorization: token
+        }
+      })
+        .then((res) => {
+          setEngRemark(res.data)
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+
+
     } catch (err) {
       console.error('Error generating PDF:', err);
     }
@@ -2386,9 +2421,9 @@ export function Complaintviewmsp(params) {
                                     const selectedid = callstatus.find(item => item.Callstatus == selectedname)?.id; // Find the corresponding Callstatus value
                                     getsubcallstatus(selectedid); // Send the id to fetch sub-call statuses
                                     // Log or use the Callstatus value
-                                    setComplaintview((prev) =>({
+                                    setComplaintview((prev) => ({
                                       ...prev,
-                                      sub_call_status : ""
+                                      sub_call_status: ""
                                     }))
                                     setCallstatusid(selectedname)
                                     setCallid(selectedid)
@@ -2978,8 +3013,13 @@ export function Complaintviewmsp(params) {
 
           <div className="col-3">
             <div className="card mb-3" id="productInfocs">
-              <div className="m-1">
-                <button className="btn btn-primary btn-sm float-end" onClick={() => downloadPDF()}>Download Job Card</button>
+              <div className='d-flex justify-content-between'>
+                <div className="m-1">
+                  <button className="btn btn-primary btn-sm float-end" onClick={() => SendjobCard()}>Send Job Card</button>
+                </div>
+                <div className="m-1">
+                  <button className="btn btn-primary btn-sm float-end" onClick={() => downloadPDF()}>Download Job Card</button>
+                </div>
               </div>
               <div className="card-body">
                 <h4 className="pname" style={{ fontSize: "14px" }}>Call Status</h4>

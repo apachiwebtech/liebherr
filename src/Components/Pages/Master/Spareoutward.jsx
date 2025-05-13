@@ -52,7 +52,7 @@ const Spareoutward = () => {
     const fetchCsp = async () => {
 
         try {
-            const response = await axios.post(`${Base_Url}/getsearchcsp`, { param: text }, {
+            const response = await axios.post(`${Base_Url}/getsearchcsp`, { param: text , licare_code : created_by}, {
                 headers: {
                     Authorization: token, // Send token in headers
                 },
@@ -65,7 +65,7 @@ const Spareoutward = () => {
     const fetchEng = async () => {
 
         try {
-            const response = await axios.post(`${Base_Url}/getsearcheng`, { param: engtext , licare_code : created_by }, {
+            const response = await axios.post(`${Base_Url}/getsearcheng`, { param: engtext, licare_code: created_by }, {
                 headers: {
                     Authorization: token, // Send token in headers
                 },
@@ -78,7 +78,7 @@ const Spareoutward = () => {
     const fetchproduct = async () => {
 
         try {
-            const response = await axios.post(`${Base_Url}/getsearchproduct`, { param: producttext }, {
+            const response = await axios.post(`${Base_Url}/getcspspareparts`, { csp_code: created_by }, {
                 headers: {
                     Authorization: token, // Send token in headers
                 },
@@ -88,6 +88,7 @@ const Spareoutward = () => {
             console.error("Error fetching users:", error);
         }
     };
+
     const fetchsparelist = async () => {
 
         try {
@@ -162,7 +163,7 @@ const Spareoutward = () => {
 
         if (Object.keys(serrors).length === 0) {
             const data = {
-                spare_id: SpareId,
+                spare_id: String(SpareId),
                 issue_no: localStorage.getItem('issue_no'),
                 created_by: created_by
             };
@@ -266,7 +267,7 @@ const Spareoutward = () => {
                 alert("Failed to save data.");
             }
 
-        } catch (error) {            
+        } catch (error) {
             alert("Insufficient stock");
         }
     };
@@ -305,36 +306,37 @@ const Spareoutward = () => {
 
     //For product
 
-    const handleProductInputChange = _debounce((newValue) => {
-        console.log(newValue);
-
-        // Update the text state
-        setProductText(newValue);
-
-        // Check if newValue is not blank and has more than 4 words
-
-        fetchproduct();
-    }, 100);
+    useEffect(() => {
+        fetchproduct()
+    }, [])
 
 
+
+
+    // const handleProductSearchChange = async (newValue) => {
+    //     setselectedproduct(newValue);
+    //     console.log("Selected:", newValue);
+
+
+
+    //     try {
+    //         const response = await axios.get(`${Base_Url}/getSpareParts/${newValue.item_code}`, {
+    //             headers: {
+    //                 Authorization: token, // Send token in headers
+    //             },
+    //         });
+
+
+    //         setSpare(response.data); // Update the state
+    //     } catch (error) {
+    //         console.error("Error fetching users:", error);
+    //     }
+    // };
     const handleProductSearchChange = async (newValue) => {
         setselectedproduct(newValue);
         console.log("Selected:", newValue);
 
-
-
-        try {
-            const response = await axios.get(`${Base_Url}/getSpareParts/${newValue.item_code}`, {
-                headers: {
-                    Authorization: token, // Send token in headers
-                },
-            });
-
-
-            setSpare(response.data); // Update the state
-        } catch (error) {
-            console.error("Error fetching users:", error);
-        }
+        setSpareId(newValue.product_code)
     };
 
 
@@ -538,21 +540,31 @@ const Spareoutward = () => {
                             <div className="row align-items-center">
                                 <div className="mb-3 col-lg-3">
                                     <label htmlFor="EmailInput" className="input-field">
-                                        Product <span className="text-danger">*</span>
+                                        Spare <span className="text-danger">*</span>
                                     </label>
                                     <Autocomplete
                                         size="small"
                                         disablePortal
                                         options={productdata}
                                         value={selectproduct}
-                                        getOptionLabel={(option) => option.item_description}
+                                        getOptionLabel={(option) =>
+                                            option ? `${option.product_code} - ${option.productname}` : ""
+                                        }
                                         onChange={(e, newValue) => handleProductSearchChange(newValue)}
-                                        onInputChange={(e, newInputValue) => handleProductInputChange(newInputValue)}
-                                        renderInput={(params) => <TextField {...params} label="Enter.." variant="outlined" />}
+                                        renderInput={(params) => (
+                                            <TextField {...params} label="Enter.." variant="outlined" />
+                                        )}
+                                        renderOption={(props, option) => (
+                                            <li {...props} key={option.id}>
+                                                {option.product_code} - {option.productname}
+                                            </li>
+                                        )}
                                     />
+
+
                                     {spareerrors.selectproduct && <span className="text-danger">{spareerrors.selectproduct}</span>}
                                 </div>
-                                <div className="mb-3 col-lg-3">
+                                {/* <div className="mb-3 col-lg-3">
                                     <label htmlFor="EmailInput" className="input-field">
                                         Spare <span className="text-danger">*</span>
                                     </label>
@@ -567,7 +579,7 @@ const Spareoutward = () => {
 
                                     </select>
                                     {spareerrors.spare && <span className="text-danger">{spareerrors.spare}</span>}
-                                </div>
+                                </div> */}
                                 <div className="mb-3 col-lg-3">
                                     <p></p>
                                     <button type="button" onClick={() => handleAddSpare()} className="btn btn-primary">Add Spare</button>

@@ -32,8 +32,6 @@ const Grndetailspage = () => {
     }
 
 
-
-
     const [value, setValue] = useState({
         grn_no: '',
         invoice_date: '',
@@ -166,6 +164,7 @@ const Grndetailspage = () => {
 
             if (response.status === 200) {
                 alert("Data saved successfully!");
+                navigate('/csp/grnlisting')
             } else {
                 alert("Failed to save data.");
             }
@@ -174,6 +173,37 @@ const Grndetailspage = () => {
             alert("An error occurred while saving data.");
         }
     };
+
+    const handleReject = async () => {
+
+        try {
+
+            const data = {
+                grn_no: value.grn_no
+
+            }
+
+
+            // Send stringified payload to the server
+            const response = await axios.post(`${Base_Url}/rejectgrn`, data, {
+                headers: {
+                    Authorization: token, // Send token in headers
+                }
+            });
+
+
+            if (response.data) {
+                alert("Rejected successfully!");
+                navigate('/csp/grnlisting')
+            } else {
+                alert("Failed to save data.");
+            }
+        } catch (error) {
+            console.error("Error saving data:", error);
+            alert("An error occurred while saving data.");
+        }
+
+    }
 
 
     return (
@@ -255,7 +285,7 @@ const Grndetailspage = () => {
                                                 <th className="py-2" width="15%" scope="col">Spare Code</th>
                                                 <th className="py-2" width="20%" scope="col">Spare Name</th>
                                                 <th className="py-2" width="20%" scope="col">Quantity</th>
-                                                <th className="py-2" width="20%" scope="col">Actual Received</th> 
+                                                <th className="py-2" width="20%" scope="col">Actual Received</th>
                                                 <th className="py-2" width="20%" scope="col">Pending Quantity</th>
                                             </thead>
                                             <tbody>
@@ -287,7 +317,7 @@ const Grndetailspage = () => {
                                                                         type="number"
                                                                         className="form-control"
                                                                         placeholder="Enter Qty"
-                                                                        disabled={value.status == '1' ? true : false}
+                                                                        disabled={value.status == '1' || value.status == '2'}
                                                                         value={item.actual_received || ""} // Bind to `spare_qty`
                                                                         onChange={(e) => {
                                                                             const newValue = e.target.value;
@@ -298,7 +328,7 @@ const Grndetailspage = () => {
                                                                             handleActualQtyChange(index, newValue);
                                                                         }}
                                                                     />
-                                                               
+
 
 
                                                                     {/* Show duplicate error */}
@@ -327,7 +357,8 @@ const Grndetailspage = () => {
                                             </tbody>
                                         </table>
                                         <div className="float-end">
-                                            <button className="btn btn-primary" disabled={value.status == '1' ? true : false} onClick={() => handleSpareSend()} type="">Save</button>
+                                            <button className="btn btn-primary mx-2" disabled={value.status == '1' || value.status == '2'} onClick={() => handleSpareSend()} type="">Save</button>
+                                            <button className="btn btn-danger" disabled={value.status == '1' || value.status == '2'} onClick={() => handleReject()} type="">Reject</button>
                                         </div>
 
                                     </div>

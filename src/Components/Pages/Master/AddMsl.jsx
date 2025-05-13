@@ -215,11 +215,13 @@ const AddMsl = () => {
             return;
         }
 
-        const payload = {
-            ...formData,
 
-
-        }
+        const payload = Object.fromEntries(
+            Object.entries({
+              ...formData,
+            }).map(([key, value]) => [key, String(value)])
+          );
+          
         console.log(payload, 'item_description,')
         const encryptedData = CryptoJS.AES.encrypt(
             JSON.stringify(payload),

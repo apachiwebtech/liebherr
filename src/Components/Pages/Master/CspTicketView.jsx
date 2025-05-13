@@ -98,7 +98,9 @@ export function CspTicketView(params) {
     region: '',
     item_code: '',
     customer_email: '',
-    state_id : ''
+    state_id: '',
+    payment_collected: 'No',
+    collected_amount: ''
   });
 
 
@@ -856,7 +858,7 @@ export function CspTicketView(params) {
     const confirm = window.confirm("Are you sure?")
 
     if (confirm) {
-      axiosInstance.post(`${Base_Url}/removesparepart`, { spare_id: id }, {
+      axiosInstance.post(`${Base_Url}/removesparepart`, { spare_id: String(id) }, {
         headers: {
           Authorization: token, // Send token in headers
         },
@@ -1107,6 +1109,18 @@ export function CspTicketView(params) {
     }
   };
 
+
+  const handlecheckChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    const newValue = type === 'checkbox' ? (checked ? 'Yes' : 'No') : value;
+
+    setComplaintview((prev) => ({
+      ...prev,
+      [name]: newValue,
+    }));
+  };
+
+
   const handleModelChange = (e) => {
     const { name, value } = e.target;
 
@@ -1241,7 +1255,7 @@ export function CspTicketView(params) {
     setFiles(e.target.files);
   };
 
- const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
 
     e.preventDefault();
 
@@ -1272,17 +1286,19 @@ export function CspTicketView(params) {
     }
 
 
-
+    const isMaintenanceOrHelpdesk =
+      complaintview.ticket_type === 'MAINTENANCE' ||
+      complaintview.ticket_type === 'HELPDESK';
 
 
     if (
 
       complaintview.call_status === 'Closed'
-        ? (complaintview.ticket_type === 'MAINTENANCE' || isValidValue(complaintview.defect_type)) &&
-        (complaintview.ticket_type === 'MAINTENANCE' || isValidValue(complaintview.site_defect)) &&
-        (complaintview.ticket_type === 'MAINTENANCE' || isValidValue(complaintview.activity_code)) &&
-        (complaintview.ticket_type === 'MAINTENANCE' || isValidValue(complaintview.visit_count)) &&
-        (complaintview.ticket_type === 'MAINTENANCE' || groupstatusid) &&
+        ? (isMaintenanceOrHelpdesk || isValidValue(complaintview.defect_type)) &&
+        (isMaintenanceOrHelpdesk || isValidValue(complaintview.site_defect)) &&
+        (isMaintenanceOrHelpdesk || isValidValue(complaintview.activity_code)) &&
+        (isMaintenanceOrHelpdesk || isValidValue(complaintview.visit_count)) &&
+        (isMaintenanceOrHelpdesk || groupstatusid) &&
         (complaintview.ticket_type === 'VISIT' || isValidValue(complaintview.serial_no)) &&
         (complaintview.ticket_type !== "VISIT" ? isValidValue(complaintview.purchase_date) : true) &&
         addedEngineers.length > 0 &&
@@ -1342,6 +1358,8 @@ export function CspTicketView(params) {
           transportation: complaintview.transportation,
           transportation_charge: complaintview.transportation_charge,
           state_id: String(complaintview.state_id),
+          collected_amount: complaintview.collected_amount ? String(complaintview.collected_amount) : '',
+          payment_collected: complaintview.payment_collected,
           allocation: allocation,
           nps_link: `${Base_Url}`,
           note,
@@ -1749,6 +1767,35 @@ export function CspTicketView(params) {
       console.error('Error generating PDF:', err);
     }
   };
+
+  const SendjobCard = async () => {
+
+    try {
+      const blob = await pdf(<Jobcardpdf attachments={attachments} data={updatedata} duplicate={duplicate} spare={addedSpareParts} engineer={addedEngineers} engremark={engremark} />).toBlob();
+      const url = URL.createObjectURL(blob);
+
+      const data = {
+        pdfurl: url,
+        ticket_no: complaintview.ticket_no
+      }
+      axios.post(`${Base_Url}/sendjobcard`, data, {
+        headers: {
+          Authorization: token
+        }
+      })
+        .then((res) => {
+          setEngRemark(res.data)
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+
+
+    } catch (err) {
+      console.error('Error generating PDF:', err);
+    }
+  };
+
 
 
   async function getquotedetails123(oid) {
@@ -2640,6 +2687,14 @@ export function CspTicketView(params) {
                                       <option value='4'>4</option>
                                     </select>
                                   </div>
+                                  <div className="my-3 col-lg-6">
+                                    <label for="val-spare_remark mx-2"><strong>Payment Collected</strong></label>
+                                    <input type="checkbox" className='mx-2' onChange={handlecheckChange} name="payment_collected" checked={complaintview.payment_collected == 'Yes' ? true : false} />
+
+                                    {complaintview.payment_collected == 'Yes' && <div>
+                                      <input type="text" onChange={handleModelChange} class="form-control" value={complaintview.collected_amount} name="collected_amount" id="collected_amount" />
+                                    </div>}
+                                  </div>
                                 </>
                               }
 
@@ -2920,8 +2975,13 @@ export function CspTicketView(params) {
 
           <div className="col-3">
             <div className="card mb-3" id="productInfocs">
-              <div className="m-1">
-                <button className="btn btn-primary btn-sm float-end" onClick={() => downloadPDF()}>Download Job Card</button>
+              <div className='d-flex justify-content-between'>
+                <div className="m-1">
+                  <button className="btn btn-primary btn-sm float-end" onClick={() => SendjobCard()}>Send Job Card</button>
+                </div>
+                <div className="m-1">
+                  <button className="btn btn-primary btn-sm float-end" onClick={() => downloadPDF()}>Download Job Card</button>
+                </div>
               </div>
               <div className="card-body">
                 <h4 className="pname" style={{ fontSize: "14px" }}>Call Status</h4>

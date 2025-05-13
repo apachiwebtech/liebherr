@@ -6,3 +6,7 @@ a{
     width: 30px;
     color: black;
 }
+
+div.dt-container .dt-paging .dt-paging-button{
+    padding: 10px 3px !important;
+}

@@ -47,9 +47,6 @@ export function Grnoutward(params) {
         fromDate: "",
         toDate: "",
         received_from: "",
-        invoice_number: "",
-        product_code: "",
-        product_name: ""
     })
 
 
@@ -93,8 +90,7 @@ export function Grnoutward(params) {
                     Authorization: token,
                 },
             });
-             setGrn([])
-            setnewgrn(response.data);
+            setGrn(response.data)
         } catch (error) {
             console.error('Error fetching GRN data:', error.response?.data || error.message);
         }
@@ -104,6 +100,65 @@ export function Grnoutward(params) {
     useEffect(() => {
         fetchgrnListing();
     }, []); // Memoize fetchgrnListing
+
+    const formatDate = (dateString) => {
+        const date = new Date(dateString); // Parse the date string
+        const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+        return date.toLocaleDateString('en-GB', options).replace(/\//g, '-'); // Convert to 'DD-MM-YYYY' format
+    };
+
+
+    const exportToExcel = async () => {
+
+        if (!searchFilters.fromDate || !searchFilters.toDate) {
+            alert("Please select both From Date and To Date.");
+            return;
+        }
+
+        try {
+            const data = {
+                csp_code: licare_code,
+                fromDate: searchFilters.fromDate || '',
+                toDate: searchFilters.toDate || '',
+                received_from: searchFilters.received_from || '',
+            };
+
+
+            // Fetch all customer data without pagination
+            const response = await axiosInstance.post(`${Base_Url}/getoutwardexcel`, data, {
+                headers: {
+                    Authorization: token,
+                }
+            });
+
+            const decryptedData = response.data;
+            console.log("Excel Export Data:", decryptedData);
+            // Create a new workbook
+            const workbook = XLSX.utils.book_new();
+
+            // Convert data to a worksheet
+            const worksheet = XLSX.utils.json_to_sheet(
+                decryptedData.map((item) => ({
+                    IssueNo: item.issue_no,
+                    IssueTo: item.lhi_name,
+                    IssueDate: item.issue_date ? formatDate(item.issue_date) : '',
+                    ArticleCode: item.spare_no,
+                    ArticleDescription: item.spare_title,
+                    Quantity: item.quantity
+
+                }))
+            );
+
+            // Append the worksheet to the workbook
+            XLSX.utils.book_append_sheet(workbook, worksheet, "OutwardList");
+
+            // Export the workbook
+            XLSX.writeFile(workbook, "OutwardList.xlsx");
+        } catch (error) {
+            console.error('Error fetching GRN data:', error.response?.data || error.message);
+            setGrn([]);
+        }
+    };
 
 
 
@@ -219,16 +274,14 @@ export function Grnoutward(params) {
                 Authorization: token
             }
         })
-        .then((res) =>{
-            alert(res.data)
-            fetchgrnListing()
-        })
+            .then((res) => {
+                alert(res.data)
+                fetchgrnListing()
+            })
     }
 
 
-    const exportToExcel = () => {
 
-    }
 
 
 
@@ -240,7 +293,7 @@ export function Grnoutward(params) {
                     <SyncLoader loading={loaders} color="#FFFFFF" />
                 </div>
             )}
- <div className="row mp0">
+            <div className="row mp0">
 
                 <div className="searchFilter" >
 
@@ -249,7 +302,7 @@ export function Grnoutward(params) {
                         <div className="row mb-3">
                             <div className="col-md-2">
                                 <div className="form-group">
-                                    <label>From Date</label>
+                                    <label>From Issued Date </label>
                                     <input
                                         type="date"
                                         className="form-control"
@@ -261,7 +314,7 @@ export function Grnoutward(params) {
                             </div>
                             <div className="col-md-2">
                                 <div className="form-group">
-                                    <label>To Date</label>
+                                    <label>To Issued Date</label>
                                     <input
                                         type="date"
                                         className="form-control"
@@ -275,53 +328,13 @@ export function Grnoutward(params) {
 
                             <div className="col-md-2">
                                 <div className="form-group">
-                                    <label>Received From</label>
+                                    <label>Issue To</label>
                                     <input
                                         type="text"
                                         className="form-control"
                                         name="received_from"
                                         value={searchFilters.received_from}
                                         placeholder="Search by Received From"
-                                        onChange={handleFilterChange}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="col-md-2">
-                                <div className="form-group">
-                                    <label>Invoice Number</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        name="invoice_number"
-                                        value={searchFilters.invoice_number}
-                                        placeholder="Search by Invoice Number"
-                                        onChange={handleFilterChange}
-                                    />
-                                </div>
-                            </div>
-                            <div className="col-md-2">
-                                <div className="form-group">
-                                    <label>Product Code</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        name="product_code"
-                                        value={searchFilters.product_code}
-                                        placeholder="Search by Product Code"
-                                        onChange={handleFilterChange}
-                                    />
-                                </div>
-                            </div>
-                            <div className="col-md-2 ">
-                                <div className="form-group">
-                                    <label>Product Name</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        name="product_name"
-                                        value={searchFilters.product_name}
-                                        placeholder="Search by Product Name"
                                         onChange={handleFilterChange}
                                     />
                                 </div>
@@ -400,21 +413,22 @@ export function Grnoutward(params) {
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
 
                             <div className='table-responsive'>
-                                <table  className="table">
+                                <table className="table">
                                     <thead>
                                         <tr>
                                             <th width="5%">#</th>
-                                            <th width="20%">Issue No</th>
-                                            <th width="30%">Issue To</th>
-                                            <th width="15%">Issue Date</th>
-                                            <th width="20%">Product Count</th>
-                                            <th width="20%">Action</th>
+                                            <th width="10%">Issue No</th>
+                                            <th width="15%">Issue To</th>
+                                            <th width="10%">Issue Date</th>
+                                            <th width="15%">Article Code</th>
+                                            <th width="35%">Article Description</th>
+                                            <th width="10%">Quantity</th>
 
                                         </tr>
                                     </thead>
                                     <tbody>
 
-                             
+
                                         {Grn.map((item, index) => {
 
 
@@ -431,31 +445,10 @@ export function Grnoutward(params) {
                                                             year: 'numeric',
                                                         })}
                                                     </td>
-                                                    <td>3</td>
+                                                    <td>{item.spare_no}</td>
+                                                    <td>{item.spare_title}</td>
                                                     <td>
-                                                        <div className='d-flex'>
-                                                            <button
-                                                                className='btn'
-                                                                onClick={() => sendtoedit(item.issue_no)}
-                                                                title="Edit"
-                                                                style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                                                                
-                                                            >
-                                                                <FaEye />
-                                                            </button>
-                                                            <button
-                                                                className='btn'
-                                                                onClick={() => handledelete(item.issue_no)}
-                                                                title="Edit"
-                                                                style={{ backgroundColor: 'transparent', border: 'none', color: 'red', fontSize: '20px' }}
-                                                                
-                                                            >
-                                                                <MdOutlineDelete />
-                                                            </button>
-                                                        </div>
-
-
-
+                                                        {item.quantity}
                                                     </td>
 
 
@@ -472,7 +465,7 @@ export function Grnoutward(params) {
                         </div>
                     </div>
                 </div>
-            </div> 
+            </div>
         </div>
     );
 }

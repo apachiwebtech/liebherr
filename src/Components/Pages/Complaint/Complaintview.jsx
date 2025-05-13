@@ -107,7 +107,9 @@ export function Complaintview(params) {
     item_code: '',
     customer_email: '',
     remarkedit: '',
-    state_id : ''
+    state_id: '',
+    payment_collected: '',
+    collected_amount: ''
   });
 
 
@@ -1049,7 +1051,7 @@ export function Complaintview(params) {
     const confirm = window.confirm("Are you sure?")
 
     if (confirm) {
-      axiosInstance.post(`${Base_Url}/removesparepart`, { spare_id: id }, {
+      axiosInstance.post(`${Base_Url}/removesparepart`, { spare_id: String(id) }, {
         headers: {
           Authorization: token, // Send token in headers
         },
@@ -1449,17 +1451,19 @@ export function Complaintview(params) {
     }
 
 
-
+    const isMaintenanceOrHelpdesk =
+      complaintview.ticket_type === 'MAINTENANCE' ||
+      complaintview.ticket_type === 'HELPDESK';
 
 
     if (
 
       complaintview.call_status === 'Closed'
-        ? (complaintview.ticket_type === 'MAINTENANCE' || isValidValue(complaintview.defect_type)) &&
-        (complaintview.ticket_type === 'MAINTENANCE' || isValidValue(complaintview.site_defect)) &&
-        (complaintview.ticket_type === 'MAINTENANCE' || isValidValue(complaintview.activity_code)) &&
-        (complaintview.ticket_type === 'MAINTENANCE' || isValidValue(complaintview.visit_count)) &&
-        (complaintview.ticket_type === 'MAINTENANCE' || groupstatusid) &&
+        ? (isMaintenanceOrHelpdesk || isValidValue(complaintview.defect_type)) &&
+        (isMaintenanceOrHelpdesk || isValidValue(complaintview.site_defect)) &&
+        (isMaintenanceOrHelpdesk || isValidValue(complaintview.activity_code)) &&
+        (isMaintenanceOrHelpdesk || isValidValue(complaintview.visit_count)) &&
+        (isMaintenanceOrHelpdesk || groupstatusid) &&
         (complaintview.ticket_type === 'VISIT' || isValidValue(complaintview.serial_no)) &&
         (complaintview.ticket_type !== "VISIT" ? isValidValue(complaintview.purchase_date) : true) &&
         addedEngineers.length > 0 &&
@@ -1519,6 +1523,8 @@ export function Complaintview(params) {
           transportation: complaintview.transportation,
           transportation_charge: complaintview.transportation_charge,
           state_id: String(complaintview.state_id),
+          collected_amount: complaintview.collected_amount ? String(complaintview.collected_amount) : '',
+          payment_collected: complaintview.payment_collected,
           allocation: allocation,
           nps_link: `${Base_Url}`,
           note,
@@ -1578,7 +1584,12 @@ export function Complaintview(params) {
 
 
 
-        alert(remarkResponse.data.message);
+        if (remarkResponse.data.message) {
+          alert(remarkResponse.data.message);
+        }else{
+          alert("Success")
+        }
+
 
         fetchComplaintDetails();
       } catch (error) {
@@ -1911,7 +1922,7 @@ export function Complaintview(params) {
       .then((res) => {
         setEngRemark(res.data)
       })
-      .then((err) => {
+      .catch((err) => {
         console.log(err)
       })
   }
@@ -1925,6 +1936,8 @@ export function Complaintview(params) {
   }
 
 
+
+
   const Blob = async () => {
 
     try {
@@ -1936,6 +1949,36 @@ export function Complaintview(params) {
       console.error('Error generating PDF:', err);
     }
   };
+
+  const SendjobCard = async () => {
+
+    try {
+      const blob = await pdf(<Jobcardpdf attachments={attachments} data={updatedata} duplicate={duplicate} spare={addedSpareParts} engineer={addedEngineers} engremark={engremark} />).toBlob();
+      const url = URL.createObjectURL(blob);
+
+      const data = {
+        pdfurl: url,
+        ticket_no: complaintview.ticket_no
+      }
+      axios.post(`${Base_Url}/sendjobcard`, data, {
+        headers: {
+          Authorization: token
+        }
+      })
+        .then((res) => {
+          setEngRemark(res.data)
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+
+
+    } catch (err) {
+      console.error('Error generating PDF:', err);
+    }
+  };
+
+
 
 
   async function getquotedetails123(oid) {
@@ -2521,7 +2564,7 @@ export function Complaintview(params) {
                       <p style={{ fontSize: "14px" }}>{complaintview.warranty_status ? complaintview.warranty_status : warranty_status_data} </p>
                     </div>
 
-                    <div className="col-md-12">
+                    {roleaccess > 4 && <div className="col-md-12">
                       <span className="float-end">Want to edit field complete date? <span className="text-primary " style={{ cursor: "pointer" }} onClick={handleClickOpen3}>Click here</span></span>
                       <Dialog
                         open={open3}
@@ -2551,7 +2594,8 @@ export function Complaintview(params) {
                           </Button>
                         </DialogActions>
                       </Dialog>
-                    </div>
+                    </div>}
+
                   </div>
 
                   <div className="row d-flex justify-content-center">
@@ -2901,6 +2945,14 @@ export function Complaintview(params) {
                                         <option value='4'>4</option>
                                       </select>
                                     </div>
+                                    <div className="my-3 col-lg-6">
+                                      <label for="val-spare_remark mx-2"><strong>Payment Collected</strong></label>
+                                      <input type="checkbox" className='mx-2' name="payment_collected" checked={complaintview.payment_collected == 'Yes' ? true : false} disabled />
+
+                                      {complaintview.payment_collected == 'Yes' && <div>
+                                        <input type="text" class="form-control" value={complaintview.collected_amount} name="collected_amount" id="collected_amount" disabled />
+                                      </div>}
+                                    </div>
                                   </>
                                 }
 
@@ -3223,9 +3275,15 @@ export function Complaintview(params) {
 
             <div className="col-3">
               <div className="card mb-3" id="productInfocs">
-                <div className="m-1">
-                  <button className="btn btn-primary btn-sm float-end" onClick={() => downloadPDF()}>Download Job Card</button>
+                <div className='d-flex justify-content-between'>
+                  <div className="m-1">
+                    <button className="btn btn-primary btn-sm float-end" onClick={() => SendjobCard()}>Send Job Card</button>
+                  </div>
+                  <div className="m-1">
+                    <button className="btn btn-primary btn-sm float-end" onClick={() => downloadPDF()}>Download Job Card</button>
+                  </div>
                 </div>
+
                 <div className="card-body">
                   <h4 className="pname" style={{ fontSize: "14px" }}>Call Status</h4>
                   <div className="mb-3">

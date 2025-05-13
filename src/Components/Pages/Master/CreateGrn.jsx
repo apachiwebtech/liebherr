@@ -57,7 +57,7 @@ const CreateGrn = () => {
     const fetchCsp = async () => {
 
         try {
-            const response = await axios.post(`${Base_Url}/getsearchcsp`, { param: text }, {
+            const response = await axios.post(`${Base_Url}/getsearchcsp`, { param: text , licare_code : created_by}, {
                 headers: {
                     Authorization: token, // Send token in headers
                 },

@@ -93,7 +93,7 @@ export function GrnList(params) {
                     Authorization: token,
                 },
             });
-             setGrn(response.data)
+            setGrn(response.data)
 
         } catch (error) {
             console.error('Error fetching GRN data:', error.response?.data || error.message);
@@ -114,7 +114,7 @@ export function GrnList(params) {
 
         if (confirm) {
             try {
-                const response = await axiosInstance.post(`${Base_Url}/updategrnapprovestatus`, { grn_no: grn_no , licare_code : licare_code }, {
+                const response = await axiosInstance.post(`${Base_Url}/updategrnapprovestatus`, { grn_no: grn_no, licare_code: licare_code }, {
                     headers: {
                         Authorization: token,
                     },
@@ -219,10 +219,10 @@ export function GrnList(params) {
                 Authorization: token
             }
         })
-        .then((res) =>{
-            alert(res.data)
-            fetchgrnListing()
-        })
+            .then((res) => {
+                alert(res.data)
+                fetchgrnListing()
+            })
     }
 
 
@@ -240,7 +240,7 @@ export function GrnList(params) {
                     <SyncLoader loading={loaders} color="#FFFFFF" />
                 </div>
             )}
-           <div className="row mp0">
+            <div className="row mp0">
 
                 <div className="searchFilter" >
 
@@ -416,7 +416,7 @@ export function GrnList(params) {
                                     </thead>
                                     <tbody>
 
-                                    
+
                                         {Grn.map((item, index) => {
 
 
@@ -435,7 +435,18 @@ export function GrnList(params) {
                                                         })}
                                                     </td>
                                                     <td>{item.product_count}</td>
-                                                    <td> {item.status == '1' ? "Approved" : <button className='btn btn-success' onClick={() => updategrnstatus(item.grn_no)}>Approve</button>}</td>
+                                                    <td>
+                                                        {item.status == '1' ? (
+                                                            "Approved"
+                                                        ) : item.status == '2' ? (
+                                                            "Rejected"
+                                                        ) : (
+                                                            <button className='btn btn-success' onClick={() => updategrnstatus(item.grn_no)}>
+                                                                Approve
+                                                            </button>
+                                                        )}
+                                                    </td>
+
                                                     <td>
                                                         <div className='d-flex'>
                                                             <button
@@ -447,15 +458,15 @@ export function GrnList(params) {
                                                             >
                                                                 <FaEye />
                                                             </button>
-                                                            <button
+                                                            {/* <button
                                                                 className='btn'
                                                                 onClick={() => handledelete(item.grn_no)}
                                                                 title="Edit"
                                                                 style={{ backgroundColor: 'transparent', border: 'none', color: 'red', fontSize: '20px' }}
-                                                                
+
                                                             >
                                                                 <MdOutlineDelete />
-                                                            </button>
+                                                            </button> */}
                                                         </div>
 
 
@@ -476,7 +487,7 @@ export function GrnList(params) {
                         </div>
                     </div>
                 </div>
-            </div> 
+            </div>
         </div>
     );
 }

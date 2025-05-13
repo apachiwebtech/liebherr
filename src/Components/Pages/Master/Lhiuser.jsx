@@ -339,7 +339,7 @@ const Lhiuser = () => {
                   Role: "",
                   Designation: "",
                   Reporting_to: "",
-
+                  employee_type :""
 
                 });
                 fetchUsers();
@@ -377,6 +377,7 @@ const Lhiuser = () => {
                   Role: "",
                   Designation: "",
                   Reporting_to: "",
+                  employee_type :""
                 });
                 fetchUsers();
                 fetchCsp();
@@ -773,6 +774,7 @@ const Lhiuser = () => {
                           <option value="">Select</option>
                           <option value='EMP'>Employee</option>
                           <option value='FSD'>Employee-SD</option>
+                          <option value='CCA'>Employee-CCA</option>
                         </select>
                         {errors.employee_type && (
                           <small className="text-danger">{errors.employee_type}</small>

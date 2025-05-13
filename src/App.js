@@ -212,7 +212,7 @@ const Router = createBrowserRouter([
     element: <Nps />,
   },
   {
-    path: "/query",
+    path: "/privatepage",
     element: <QueryPage />
   },
   {
@@ -381,12 +381,12 @@ const Router = createBrowserRouter([
       },
       {
         path: "/csp/creategrn",
-        element: <ProtectedRoute><CreateGrn /></ProtectedRoute>,
-      },
-      {
-        path: "/csp/cspgrn",
         element: <ProtectedRoute><CspGrn /></ProtectedRoute>,
       },
+      // {
+      //   path: "/csp/cspgrn",
+      //   element: <ProtectedRoute><CreateGrn /></ProtectedRoute>,
+      // },
       {
         path: "/csp/grnlisting",
         element: <ProtectedRoute><GrnList /></ProtectedRoute>

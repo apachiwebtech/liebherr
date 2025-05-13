@@ -50,6 +50,50 @@ export function Mslmsp(params) {
         fetchMsl();
     }, []);
 
+
+        const exportToExcel = async () => {
+    
+    
+    
+            try {
+    
+                // Fetch all customer data without pagination
+            const response = await axiosInstance.get(`${Base_Url}/getmslmsp/${licare_code}`, {
+                headers: {
+                    Authorization: token,
+                },
+            }
+            );
+    
+                const decryptedData = response.data;
+                console.log("Excel Export Data:", decryptedData);
+                // Create a new workbook
+                const workbook = XLSX.utils.book_new();
+    
+                // Convert data to a worksheet
+                const worksheet = XLSX.utils.json_to_sheet(
+                    decryptedData.map((item) => ({
+                        MspCode: item.msp_code,
+                        MspName: item.msp_name,
+                        CspName: item.csp_name,
+                        CspCode: item.csp_code,
+                        ArticleCode: item.item,
+                        ArticleDescription: item.item_description,
+                        MSLStock: item.stock,
+                        TotalCSPStock: 0,
+                    }))
+                );
+    
+                // Append the worksheet to the workbook
+                XLSX.utils.book_append_sheet(workbook, worksheet, "CspMsl");
+    
+                // Export the workbook
+                XLSX.writeFile(workbook, "CspMsl.xlsx");
+            } catch (error) {
+                console.error('Error fetching GRN data:', error.response?.data || error.message);
+            }
+        };
+
     // Role Right 
 
 
@@ -95,7 +139,9 @@ export function Mslmsp(params) {
                 <div className=" col-12">
                     <div className="card mb-3 tab_box">
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
-
+                            <div className='text-right'>
+                                <button className='btn btn-primary' onClick={exportToExcel}>Export To Excel</button>
+                            </div>
                             <div className='table-responsive'>
                                 <table id="" className="table table-striped">
                                     <thead>
@@ -105,10 +151,10 @@ export function Mslmsp(params) {
                                             <th width="15%">Msp Name</th>
                                             <th width="10%">Csp Code</th>
                                             <th width="15%">Csp Name</th>
-                                            <th width="10%">Item</th>
-                                            <th width="20%">Item Description</th>
-                                            <th width="10%">Stock</th>
-                                            <th widht="10%">Edit</th>
+                                            <th width="10%">Article Code</th>
+                                            <th width="20%">Article Description</th>
+                                            <th width="10%">Total Csp Stock</th>
+                                            <th widht="10%">Image</th>
 
                                         </tr>
                                     </thead>
@@ -125,18 +171,7 @@ export function Mslmsp(params) {
                                                     <td>{item.item}</td>
                                                     <td>{item.item_description}</td>
                                                     <td>{item.stock}</td>
-                                                    <td>
-
-                                                        <button
-                                                            className='btn'
-                                                            // onClick={() => sendtoedit(item.id, 0)}
-                                                            title="Edit"
-                                                            style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                                                        >
-                                                            <FaPencilAlt />
-                                                        </button>
-
-                                                    </td>
+                                                    <td><FaEye/></td>
                                                 </tr>
                                             )
                                         })}

@@ -25,51 +25,51 @@ export function Stock(params) {
     });
 
 
-    // const fetchStock = async (page) => {
-    //     try {
+    const fetchStock = async (page) => {
+        try {
 
-    //         const response = await axiosInstance.get(`${Base_Url}/getstock/${licare_code}`, {
-    //             headers: {
-    //                 Authorization: token,
-    //             },
-    //         }
-    //         );
-    //         setStockdata(response.data);
-    //     } catch (error) {
-    //         console.error('Error fetching Stockdata:', error);
-    //         setStockdata([]);
-    //     }
-    // };
-    // useEffect(() => {
-    //     fetchStock();
-    // }, []);
-
-        // Role Right 
-    
-    
-        const Decrypt = (encrypted) => {
-            encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
-            const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
-            return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
-        };
-    
-        const storedEncryptedRole = localStorage.getItem("Userrole");
-        const decryptedRole = Decrypt(storedEncryptedRole);
-    
-        const roledata = {
-            role: decryptedRole,
-            pageid: String(57)
+            const response = await axiosInstance.get(`${Base_Url}/getstock/${licare_code}`, {
+                headers: {
+                    Authorization: token,
+                },
+            }
+            );
+            setStockdata(response.data);
+        } catch (error) {
+            console.error('Error fetching Stockdata:', error);
+            setStockdata([]);
         }
-    
-        const dispatch = useDispatch()
-        const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
-    
-    
-        useEffect(() => {
-            dispatch(getRoleData(roledata))
-        }, [])
-    
-        // Role Right End 
+    };
+    useEffect(() => {
+        fetchStock();
+    }, []);
+
+    // Role Right 
+
+
+    const Decrypt = (encrypted) => {
+        encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
+        const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+        return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
+    };
+
+    const storedEncryptedRole = localStorage.getItem("Userrole");
+    const decryptedRole = Decrypt(storedEncryptedRole);
+
+    const roledata = {
+        role: decryptedRole,
+        pageid: String(57)
+    }
+
+    const dispatch = useDispatch()
+    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
+
+
+    useEffect(() => {
+        dispatch(getRoleData(roledata))
+    }, [])
+
+    // Role Right End 
 
 
 
@@ -84,9 +84,9 @@ export function Stock(params) {
             )}
             <Productsparetabs />
 
-       {roleaccess > 1 ?<div className="row mp0">
+            {roleaccess > 1 ? <div className="row mp0">
 
-                <div className="col-md-6 col-12">
+                <div className="col-md-12 col-12">
                     <div className="card mb-3 tab_box">
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
 
@@ -95,6 +95,7 @@ export function Stock(params) {
                                     <thead>
                                         <tr>
                                             <th width="5%">#</th>
+                                            <th width="15%">CSP Code</th>
                                             <th width="15%">Product Name</th>
                                             <th width="20%">Stock</th>
                                         </tr>
@@ -105,6 +106,7 @@ export function Stock(params) {
                                             return (
                                                 <tr key={item.id}>
                                                     <td>{index + 1}</td>
+                                                    <td>{item.csp_code}</td>
                                                     <td>{item.productname}</td>
                                                     <td>{item.stock_quantity}</td>
                                                 </tr>

@@ -4,14 +4,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { FaEye, FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { Base_Url, secretKey } from '../../Utils/Base_Url';
-import CryptoJS from 'crypto-js';
-import { useSelector } from 'react-redux';
 import $ from 'jquery';
-import { MdOutlineDelete } from "react-icons/md";
 import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
-import { useDispatch } from "react-redux";
-import { getRoleData } from "../../Store/Role/role-action";
 import { styled } from '@mui/material/styles';
 import Dialog from '@mui/material/Dialog';
 import Button from '@mui/material/Button';
@@ -20,8 +15,6 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
-import TextField from '@mui/material/TextField';
-import Autocomplete from '@mui/material/Autocomplete';
 import GrnTab from './GrnTab';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -35,80 +28,95 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 
 export function CspGrn(params) {
 
-
+    const [selectedspare, setselectedSpare] = useState([]);
     const { loaders, axiosInstance } = useAxiosLoader();
     const [open, setOpen] = React.useState(false);
     const [engineer, setEngineer] = useState([])
     const [Grn, setGrn] = useState([]);
+    const [article, setarticle] = useState([]);
     const [fullWidth, setFullWidth] = React.useState(true);
     const [maxWidth, setMaxWidth] = React.useState('lg');
+    const [errors, setErrors] = useState({});
     const token = localStorage.getItem("token");
     const licare_code = localStorage.getItem('licare_code')
-    const [msp, setMsp] = useState([])
-    const [csp, setCsp] = useState([])
-    const [value, setValue] = useState({
-        id: "",
-        title: "",
-        msp: "",
-        csp: ""
-    })
-
-
-    const handleClickOpen = (id, title, msp, csp) => {
-        setValue({
-            id: id,
-            title: title,
-            msp: msp,
-            csp: csp
-        })
-        setOpen(true);
-    };
-    const handleClose = () => {
-        setOpen(false);
-        setValue({})
-    };
+    const created_by = localStorage.getItem("licare_code");
+    const [items, setItems] = useState(article); // `initialData` is your item list
+    const navigate = useNavigate()
+    const [formData, setFormData] = useState({
+        received_from: "Liebherr",
+        invoice_number: "",
+        invoice_date: "",
+        invoice_qty: '',
+        received_date: '',
+        remark: '',
+        grn_type: '',
+        item_code: '',
+        status: ''
+    });
 
     const [searchFilters, setSearchFilters] = useState({
         fromDate: "",
         toDate: "",
-        received_from: "",
         invoice_number: "",
-        product_code: "",
-        product_name: ""
+        address_code: "",
+        status: ""
     })
 
-    async function ApproveEng(params) {
-        axios.get(`${Base_Url}/getapproveEng`, {
-            headers: {
-                Authorization: token, // Send token in headers
-            }
-        })
-            .then((res) => {
-                console.log(res.data)
-                setEngineer(res.data)
-            })
-    }
-    const created_by = localStorage.getItem("licare_code");
-    const handleApprove = (id) => {
 
-        const data = {
-            eng_id: id,
-            approve_by: created_by
+
+
+
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
+
+    };
+
+    const handleClickOpen = async (Invoice_Number, invoice_date, status) => {
+
+        setFormData((prev) => ({
+            ...prev,
+            invoice_number: Invoice_Number,
+            invoice_date: invoice_date,
+            status: status
+        }))
+
+        try {
+            const data = {
+                InvoiceNumber: Invoice_Number,
+            };
+
+            const response = await axiosInstance.post(`${Base_Url}/getinvoicegrndetails`, data, {
+                headers: {
+                    Authorization: token,
+                },
+            });
+            if (response.data) {
+                const withquantity = response.data.map(item => {
+                    const actual_quantity = 0;
+                    const pending_quantity = Number(item.Invoice_qty) - actual_quantity;
+
+                    return {
+                        ...item,
+                        actual_quantity,
+                        pending_quantity
+                    };
+                });
+                setarticle(withquantity);
+                setOpen(true);
+            }
+
+        } catch (error) {
+            console.error('Error fetching GRN data:', error.response?.data || error.message);
+            setGrn([]);
         }
-        axios.post(`${Base_Url}/finalapproveenginner`, data, {
-            headers: {
-                Authorization: token
-            }
-        })
-            .then((res) => {
-                alert("Engineer Approved")
-                ApproveEng()
-                setOpen(false)
-            })
-    }
+    };
 
+    const handleClose = () => {
+        setOpen(false);
 
-
+    };
 
 
 
@@ -133,6 +141,69 @@ export function CspGrn(params) {
         }
     };
 
+
+    const exportToExcel = async () => {
+
+        if (!searchFilters.fromDate || !searchFilters.toDate) {
+            alert("Please select both From Date and To Date.");
+            return;
+        }
+        
+        try {
+            const data = {
+                csp_code: licare_code,
+                fromDate: searchFilters.fromDate || '',
+                toDate: searchFilters.toDate || '',
+                invoice_number: searchFilters.invoice_number || '',
+                address_code: searchFilters.address_code || '',
+                status: searchFilters.status || ''
+            };
+
+
+            // Fetch all customer data without pagination
+            const response = await axiosInstance.post(`${Base_Url}/getgrnexcel`,data, {
+                headers: {
+                    Authorization: token,
+                }
+            });
+
+            const decryptedData = response.data;
+            console.log("Excel Export Data:", decryptedData);
+            // Create a new workbook
+            const workbook = XLSX.utils.book_new();
+
+            // Convert data to a worksheet
+            const worksheet = XLSX.utils.json_to_sheet(
+                decryptedData.map((item) => ({
+                    InvoiceNumber: item.InvoiceNumber,
+                    InvoiceDate: item.InvoiceDate ? formatDate(item.InvoiceDate) : '',
+                    ReceivedFrom: item.received_from,
+                    AddressCode: item.Address_code,
+                    OrderNumber: item.Order_Number,
+                    ServiceType: item.Service_Type,
+                    Status: item.approved,
+                    ArticleCode: item.Item_Code,
+                    ArticleDescription: item.Item_Description,
+                    InvoiceQty: item.Invoice_qty,
+                    ReceivedQty: item.actual_received,
+                    PendingQty: item.pending_quantity,
+                    ReceivedDate: item.received_date ? formatDate(item.received_date) : '',
+                    Remark: item.remark,
+                    ActionDate: item.created_date ? formatDate(item.created_date) : ''
+                }))
+            );
+
+            // Append the worksheet to the workbook
+            XLSX.utils.book_append_sheet(workbook, worksheet, "GrnList");
+
+            // Export the workbook
+            XLSX.writeFile(workbook, "GrnList.xlsx");
+        } catch (error) {
+            console.error('Error fetching GRN data:', error.response?.data || error.message);
+            setGrn([]);
+        }
+    };
+
     const fetchfiltergrnListing = async () => {
 
         try {
@@ -141,6 +212,8 @@ export function CspGrn(params) {
                 fromDate: searchFilters.fromDate || '',
                 toDate: searchFilters.toDate || '',
                 invoice_number: searchFilters.invoice_number || '',
+                status: searchFilters.status || '',
+                address_code: searchFilters.address_code || ''
             };
 
             const response = await axiosInstance.post(`${Base_Url}/getgrnlisting `, data, {
@@ -158,73 +231,10 @@ export function CspGrn(params) {
 
     useEffect(() => {
         fetchgrnListing();
-    }, []); // Memoize fetchgrnListing
+    }, []);
 
 
 
-
-
-    const updategrnstatus = async (grn_no) => {
-        const confirm = window.confirm("Are you sure?")
-
-        if (confirm) {
-            try {
-                const response = await axiosInstance.post(`${Base_Url}/updategrnapprovestatus`, { grn_no: grn_no }, {
-                    headers: {
-                        Authorization: token,
-                    },
-                });
-                alert(response.data)
-                fetchgrnListing()
-            } catch (error) {
-                console.error('Error fetching Quotationdata:', error);
-                setGrn([]);
-            }
-        }
-
-    };
-
-
-
-    const sendtoedit = async (id) => {
-        id = id.toString()
-        let encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
-        encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-        navigate(`/csp/grnview/${encrypted}`)
-    };
-
-
-
-
-
-    const navigate = useNavigate();
-
-    // Role Right 
-
-
-    const Decrypt = (encrypted) => {
-        encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
-        const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
-        return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
-    };
-
-    const storedEncryptedRole = localStorage.getItem("Userrole");
-    const decryptedRole = Decrypt(storedEncryptedRole);
-
-    const roledata = {
-        role: decryptedRole,
-        pageid: String(44)
-    }
-
-    const dispatch = useDispatch()
-    const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
-
-
-    useEffect(() => {
-        dispatch(getRoleData(roledata))
-    }, [])
-
-    // Role Right End 
 
 
     const handleFilterChange = (e) => {
@@ -235,29 +245,138 @@ export function CspGrn(params) {
         }));
     };
 
-    const handledelete = (grn_no) => {
+    const handleActualQtyChange = (index, value) => {
+        const updatedSpare = [...article];
+        const enteredQty = Number(value);
+        const invoiceQty = Number(updatedSpare[index].Invoice_qty);
+
+        if (enteredQty > invoiceQty) {
+            return;
+        }
+
+        updatedSpare[index].actual_quantity = enteredQty;
+        updatedSpare[index].pending_quantity = invoiceQty - enteredQty;
+
+        setarticle(updatedSpare);
+    };
 
 
-        axios.post(`${Base_Url}/deletedgrn`, { grn_no: grn_no }, {
-            headers: {
-                Authorization: token
+
+
+    const handleReject = async () => {
+        if (formData.received_date) {
+            try {
+
+                const data = {
+                    remark: formData.remark,
+                    received_date: formData.received_date,
+                    received_from: formData.received_from,
+                    invoice_date: formData.invoice_date,
+                    invoice_number: formData.invoice_number,
+                    created_by: created_by
+                }
+
+
+                // Send stringified payload to the server
+                const response = await axios.post(`${Base_Url}/rejectgrn`, data, {
+                    headers: {
+                        Authorization: token, // Send token in headers
+                    }
+                });
+
+                if (response.data) {
+                    alert("Rejected successfully!");
+                    setFormData({
+                        received_date: '',
+                        remark: ''
+                    })
+                    setOpen(false)
+                    fetchgrnListing()
+                } else {
+                    alert("Failed to save data.");
+                }
+            } catch (error) {
+                console.error("Error saving data:", error);
+                alert("An error occurred while saving data.");
             }
-        })
-        // alert(res.data)
-        fetchgrnListing()
+        } else {
+            alert("Received Date Require")
+        }
 
     }
 
 
-    const exportToExcel = () => {
+    const handleSubmit = async () => {
+
+
+        if (formData.received_date) {
+
+            const formInput = new FormData();
+
+            const payload = article.map((item) => ({
+                id: String(item.id),
+                article_code: item.Item_Code,
+                article_desc: item.Item_Description,
+                quantity: String(item.Invoice_qty) || String(0),
+                remark: formData.remark,
+                received_date: formData.received_date,
+                received_from: formData.received_from,
+                invoice_date: formData.invoice_date,
+                invoice_number: formData.invoice_number,
+                actual_quantity: item.actual_quantity,
+                pending_quantity: item.pending_quantity,
+                created_by: created_by
+            }));
+
+            formInput.append('itemdata', JSON.stringify(payload));
+            try {
+
+
+                const response = await axiosInstance.post(`${Base_Url}/approvegrn `, formInput, {
+                    headers: {
+                        Authorization: token,
+                        'Content-Type': 'multipart/form-data',
+                    },
+                });
+                if (response.data.grn_no) {
+                    alert(`GRN Created Successfully . Grn No.${response.data.grn_no}`)
+                    setFormData({
+                        received_date: '',
+                        remark: ''
+                    })
+                    setOpen(false)
+                    fetchgrnListing()
+                }
+
+            } catch (error) {
+                console.error('Error fetching GRN data:', error.response?.data || error.message);
+            }
+        } else {
+            alert("Received Date Require")
+        }
+
 
     }
+
+
+
+
+
     const formatDate = (dateString) => {
         const date = new Date(dateString); // Parse the date string
         const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
         return date.toLocaleDateString('en-GB', options).replace(/\//g, '-'); // Convert to 'DD-MM-YYYY' format
     };
 
+    const formatDate2 = (dateString) => {
+        const date = new Date(dateString);
+
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const year = date.getFullYear();
+
+        return `${year}-${month}-${day}`;
+    };
 
 
     return (
@@ -274,7 +393,7 @@ export function CspGrn(params) {
                         <div className="row mb-3">
                             <div className="col-md-2">
                                 <div className="form-group">
-                                    <label>From Date</label>
+                                    <label>From Invoice Date</label>
                                     <input
                                         type="date"
                                         className="form-control"
@@ -286,7 +405,7 @@ export function CspGrn(params) {
                             </div>
                             <div className="col-md-2">
                                 <div className="form-group">
-                                    <label>To Date</label>
+                                    <label>To Invoice Date</label>
                                     <input
                                         type="date"
                                         className="form-control"
@@ -296,7 +415,7 @@ export function CspGrn(params) {
                                     />
                                 </div>
                             </div>
-                            <div className="col-md-2">
+                            {/* <div className="col-md-2">
                                 <div className="form-group">
                                     <label>Received From</label>
                                     <input
@@ -308,7 +427,7 @@ export function CspGrn(params) {
                                         onChange={handleFilterChange}
                                     />
                                 </div>
-                            </div>
+                            </div> */}
                             <div className="col-md-2">
                                 <div className="form-group">
                                     <label>Invoice Number</label>
@@ -324,28 +443,25 @@ export function CspGrn(params) {
                             </div>
                             <div className="col-md-2">
                                 <div className="form-group">
-                                    <label>Product Code</label>
+                                    <label>Address Code</label>
                                     <input
                                         type="text"
                                         className="form-control"
-                                        name="product_code"
-                                        value={searchFilters.product_code}
-                                        placeholder="Search by Product Code"
+                                        name="address_code"
+                                        value={searchFilters.address_code}
+                                        placeholder="Search by Address Code"
                                         onChange={handleFilterChange}
                                     />
                                 </div>
                             </div>
                             <div className="col-md-2 ">
                                 <div className="form-group">
-                                    <label>Product Name</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        name="product_name"
-                                        value={searchFilters.product_name}
-                                        placeholder="Search by Product Name"
-                                        onChange={handleFilterChange}
-                                    />
+                                    <label>Status</label>
+                                    <select className='form-control' name='status' value={searchFilters.status} onChange={handleFilterChange}>
+                                        <option value={''}>Select</option>
+                                        <option value={'1'}>Approve</option>
+                                        <option value={'2'}>Reject</option>
+                                    </select>
                                 </div>
                             </div>
                             <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
@@ -391,8 +507,8 @@ export function CspGrn(params) {
                                             <th width="20%">Received From</th>
                                             <th width="15%">Address Code</th>
                                             <th width="10%">Order Number</th>
-                                            <th width="10%">Order Line Number</th>
                                             <th width="10%">Service Type</th>
+                                            <th width="10%">Status</th>
                                             <th width="20%">Action</th>
                                         </tr>
                                     </thead>
@@ -406,13 +522,21 @@ export function CspGrn(params) {
                                                     <td>Liebherr</td>
                                                     <td>{item.Address_code}</td>
                                                     <td>{item.Order_Number}</td>
-                                                    <td>{item.Order_Line_Number}</td>
                                                     <td>{item.Service_Type}</td>
+                                                    <td>  {item.status == '1' ? (
+                                                        <p className='text-success' >Approved</p>
+                                                    ) : item.status == '2' ? (
+                                                        <p className='text-danger' >Rejected</p>
+
+                                                    ) : <p className='text-warning' >Pending</p>}
+                                                    </td>
                                                     <td>
                                                         <div className='d-flex'>
                                                             <button
                                                                 className='btn'
-                                                                onClick={() => handleClickOpen(item.id, item.title, item.mfranchise_id, item.cfranchise_id)}
+                                                                onClick={() => {
+                                                                    handleClickOpen(item.InvoiceNumber, formatDate2(item.InvoiceDate), item.status)
+                                                                }}
                                                                 title="Edit"
                                                                 style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
                                                             >
@@ -423,6 +547,7 @@ export function CspGrn(params) {
                                                 </tr>
                                             )
                                         })}
+
                                         {/* Dialog Box */}
                                         <BootstrapDialog
                                             fullWidth={fullWidth}
@@ -431,7 +556,7 @@ export function CspGrn(params) {
                                             onClose={handleClose}
                                         >
                                             <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
-                                                <p>{value.title}</p>
+                                                <p>INVOICE NO. {formData.invoice_number}</p>
                                             </DialogTitle>
                                             <IconButton
                                                 aria-label="close"
@@ -446,44 +571,151 @@ export function CspGrn(params) {
                                                 <CloseIcon />
                                             </IconButton>
                                             <DialogContent >
-                                                <div className="row mb-3">
-                                                    <table className="table">
-                                                        <thead>
-                                                            <tr>
-                                                                <th>#</th>
-                                                                <th>Article Code</th>
-                                                                <th>Article Description</th>
-                                                                <th>Invoice Number</th>
-                                                                <th>Invoice Date</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-
-                                                            {engineer.map((item, index) => {
-                                                                return (
-                                                                    <tr key={item.id}>
-                                                                        <td>{index + 1}</td>
-                                                                        <td>{item.item_code}</td>
-                                                                        <td>{item.item_description}</td>
-                                                                        <td>{item.InvoiceNumber}</td>
-                                                                        <td>{item.InvoiceDate}</td>
-                                                                    </tr>
-                                                                )
-                                                            })}
+                                                <div className='row p-3'>
 
 
+                                                    <div className="mb-3 col-lg-3">
+                                                        <label htmlFor="EmailInput" className="input-field">
+                                                            Invoice Number  <span className="text-danger">{formData.grn_type == 'With' ? '*' : ''}</span>
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            className="form-control"
+                                                            name="invoice_number"
+                                                            value={formData.invoice_number}
+                                                            onChange={(e) => {
+                                                                const value = e.target.value;
+                                                                // Allow only numbers and limit to 9 digits
+                                                                if (/^[a-zA-Z0-9]{0,11}$/.test(value)) {
+                                                                    handleChange(e);
+                                                                }
+                                                            }}
 
-                                                        </tbody>
-                                                    </table>
+                                                            disabled={formData.grn_type == 'With' ? false : true}
+                                                            placeholder="Enter Invoice No."
+                                                        />
+                                                        {errors.invoice_number && <span className="text-danger">{errors.invoice_number}</span>}
+                                                        {/* Show duplicate error */}
+                                                    </div>
+                                                    <div className="mb-3 col-lg-3">
+                                                        <label htmlFor="EmailInput" className="input-field">
+                                                            Invoice Date  <span className="text-danger">{formData.grn_type == 'With' ? '*' : ''}</span>
+                                                        </label>
+                                                        <input
+                                                            type="date"
+                                                            className="form-control"
+                                                            name="invoice_date"
+                                                            value={formData.invoice_date}
+                                                            onChange={handleChange}
+                                                            disabled={formData.grn_type == 'With' ? false : true}
+                                                            max={new Date().toISOString().split("T")[0]} // Set max to today's date
+                                                            placeholder="Enter Invoice No."
+                                                        />
+                                                        {errors.invoice_date && <span className="text-danger">{errors.invoice_date}</span>}
+
+
+                                                    </div>
+                                                    <div className="mb-3 col-lg-3">
+                                                        <label htmlFor="EmailInput" className="input-field">
+                                                            Received Date <span className="text-danger">*</span>
+                                                        </label>
+                                                        <input
+                                                            type="date"
+                                                            className="form-control"
+                                                            name="received_date"
+                                                            value={formData.received_date}
+                                                            onChange={handleChange}
+                                                            max={new Date().toISOString().split("T")[0]} // Set max to today's date
+                                                            placeholder="Enter Invoice No."
+                                                        />
+                                                        {errors.received_date && <span className="text-danger">{errors.received_date}</span>}
+
+
+                                                    </div>
+
+                                                    <div className="mb-3 col-lg-3">
+                                                        <label htmlFor="EmailInput" className="input-field">
+                                                            Remark
+                                                        </label>
+
+                                                        <textarea className="form-control"
+                                                            name="remark"
+                                                            value={formData.remark}
+                                                            onChange={handleChange}>
+
+                                                        </textarea>
 
 
 
+                                                    </div>
+
+                                                    <div className="row mb-3">
+                                                        <table className="table">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>#</th>
+                                                                    <th>Article Code</th>
+                                                                    <th>Article Description</th>
+                                                                    <th>Invoice Qty</th>
+                                                                    <th>Received Qty</th>
+                                                                    <th>Pending Qty</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+
+                                                                {article.map((item, index) => {
+                                                                    return (
+                                                                        <tr key={item.id}>
+                                                                            <td>{index + 1}</td>
+                                                                            <td>{item.Item_Code}</td>
+                                                                            <td>{item.Item_Description}</td>
+                                                                            <td>{item.Invoice_qty}</td>
+                                                                            <td>
+                                                                                <input
+                                                                                    type="number"
+                                                                                    className="form-control"
+                                                                                    placeholder="Enter Qty"
+                                                                                    value={item.actual_quantity || ''}
+                                                                                    onChange={(e) => handleActualQtyChange(index, e.target.value)}
+                                                                                />
+                                                                            </td>
+                                                                            <td>
+                                                                                <input
+                                                                                    type="number"
+                                                                                    className="form-control"
+                                                                                    placeholder="Enter Qty"
+                                                                                    disabled
+                                                                                    value={item.pending_quantity || 0}
+                                                                                />
+                                                                            </td>
+                                                                        </tr>
+
+                                                                    )
+                                                                })}
+
+
+
+                                                            </tbody>
+                                                        </table>
+
+
+
+                                                    </div>
                                                 </div>
                                             </DialogContent>
                                             <DialogActions>
-                                                <Button onClick={() => handleApprove(value.id)}>
-                                                    Approve
-                                                </Button>
+                                                {formData.status != 1 && formData.status != 2 && (
+                                                    <>
+                                                        <Button onClick={(e) => handleSubmit(e)}>
+                                                            Approve
+                                                        </Button>
+                                                        <Button onClick={() => handleReject()}>
+                                                            Reject
+                                                        </Button>
+                                                    </>
+                                                )}
+
+
                                             </DialogActions>
                                         </BootstrapDialog>
 

@@ -268,6 +268,8 @@ const EngineerMaster = () => {
       created_by,
     }
 
+    console.log(payload , "TTT")
+
 
     const encryptedData = CryptoJS.AES.encrypt(
       JSON.stringify(payload),

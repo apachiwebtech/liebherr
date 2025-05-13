@@ -11,6 +11,21 @@ import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 import { useDispatch } from "react-redux";
 import { getRoleData } from "../../Store/Role/role-action";
 import Productsparetabs from './Productsparetabs';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'datatables.net-bs4/css/dataTables.bootstrap4.min.css';
+import $ from 'jquery';
+import 'datatables.net';
+import 'datatables.net-bs4';
+import 'datatables.net-responsive';
+import 'datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css';
+import 'datatables.net-fixedcolumns';
+import 'datatables.net-fixedcolumns-bs4/css/fixedColumns.bootstrap4.min.css';
+import 'datatables.net-fixedheader';
+import 'datatables.net-buttons';
+import 'datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css';
+import 'datatables.net-buttons/js/buttons.html5.min.js';
+import 'datatables.net-keytable';
+import 'datatables.net-select';
 
 export function Msl(params) {
     const { loaders, axiosInstance } = useAxiosLoader();
@@ -59,6 +74,40 @@ export function Msl(params) {
         encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
         navigate(`/addmsl/${encrypted}/${view}`)
     };
+
+
+    useEffect(() => {
+        if (Msl.length > 0) {
+            // Initialize DataTable after data is fetched
+            const table = $('#example').DataTable({
+                destroy: true, // Destroy any existing DataTable instance before reinitializing
+                paging: true,
+                searching: true,
+                ordering: true,
+                info: true,
+                lengthChange: false,
+                autoWidth: false,
+                responsive: true,
+                fixedHeader: true,
+                fixedColumns: {
+                    left: 5,
+                },
+                keys: true,
+                select: true,
+                dom: '<"d-flex justify-content-between"<"table-title"><"search-box"f>>t<"d-flex justify-content-between"ip>',
+                language: {
+                    search: '', // Remove the "Search:" label
+                    searchPlaceholder: 'Search...', // Add placeholder text
+                },
+
+            });
+
+            // Cleanup: Destroy DataTable instance before reinitializing when Productdata changes
+            return () => {
+                table.destroy();
+            };
+        }
+    }, [Msl]);
 
     // Role Right 
 
@@ -113,7 +162,6 @@ export function Msl(params) {
     };
 
     const uploadexcel = () => {
-
         const transformData = (data) => {
             return data.map((item) => {
                 return Object.fromEntries(
@@ -122,26 +170,73 @@ export function Msl(params) {
             });
         };
 
-        const data = {
-            excelData: transformData(excelData), // Keeping JSON.stringify
-            created_by: localStorage.getItem("licare_code"),
-        };
+        const jsonData = transformData(excelData);
 
-        axiosInstance.post(`${Base_Url}/uplaodmslexcel`, data, {
+        const formData = new FormData();
+        formData.append("excelData", JSON.stringify(jsonData));  // Assuming backend accepts JSON string
+        formData.append("created_by", localStorage.getItem("licare_code"));
+
+        axiosInstance.post(`${Base_Url}/uplaodmslexcel`, formData, {
             headers: {
-                Authorization: token, // Send token in headers
+                Authorization: token,
+                // DO NOT manually set 'Content-Type' when using FormData.
             },
         })
             .then((res) => {
                 if (res.data) {
-                    alert("Uploaded")
+                    alert("Uploaded");
                 }
-                console.log(res)
+                console.log(res);
             })
             .catch((err) => {
-                console.log(err)
-            })
-    }
+                console.log(err);
+            });
+    };
+
+
+    const exportToExcel = async () => {
+
+
+
+        try {
+
+            // Fetch all customer data without pagination
+            const response = await axiosInstance.get(`${Base_Url}/getmsl`, {
+                headers: {
+                    Authorization: token,
+                },
+            }
+            );
+
+            const decryptedData = response.data;
+            console.log("Excel Export Data:", decryptedData);
+            // Create a new workbook
+            const workbook = XLSX.utils.book_new();
+
+            // Convert data to a worksheet
+            const worksheet = XLSX.utils.json_to_sheet(
+                decryptedData.map((item) => ({
+                    MspCode: item.msp_code,
+                    MspName: item.msp_name,
+                    CspName: item.csp_name,
+                    CspCode: item.csp_code,
+                    ArticleCode: item.item,
+                    ArticleDescription: item.item_description,
+                    MSLStock: item.stock,
+                    TotalCSPStock: 0,
+                }))
+            );
+
+            // Append the worksheet to the workbook
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Msl");
+
+            // Export the workbook
+            XLSX.writeFile(workbook, "Msl.xlsx");
+        } catch (error) {
+            console.error('Error fetching GRN data:', error.response?.data || error.message);
+        }
+    };
+
 
 
 
@@ -160,8 +255,8 @@ export function Msl(params) {
                 <div className=" col-12">
                     <div className="card mb-3 tab_box">
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
-                            <div className="row mb-3">
-                                <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
+                            <div className="row  mb-3">
+                                <div className="col-md-6 d-flex justify-content-start align-items-center mt-3">
                                     <div className="form-group">
                                         {roleaccess > 2 ? <input type="file" accept=".xlsx, .xls" onChange={importexcel} /> : null}
                                         {roleaccess > 2 ? <button className="btn btn-primary" onClick={uploadexcel}>
@@ -171,20 +266,27 @@ export function Msl(params) {
 
                                     </div>
                                 </div>
+                                <div className="col-md-6 d-flex justify-content-end align-items-center mt-3">
+                                    <div className="form-group">
+                                        {roleaccess > 2 ? <button className="btn btn-primary" onClick={exportToExcel}>
+                                            Export Msl
+                                        </button> : null}
+                                    </div>
+                                </div>
                             </div>
 
-                            <div className='table-responsive'>
-                                <table id="" className="table table-striped">
+                            <div className='gridbox'>
+                                <table id="example" className="table">
                                     <thead>
                                         <tr>
-                                            <th width="5%">#</th>
+                                            {/* <th width="5%">#</th> */}
                                             <th width="10%">Msp Code</th>
                                             <th width="15%">Msp Name</th>
                                             <th width="10%">Csp Code</th>
                                             <th width="15%">Csp Name</th>
-                                            <th width="10%">Item</th>
-                                            <th width="20%">Item Description</th>
-                                            <th width="10%">Stock</th>
+                                            <th width="10%">Article Code</th>
+                                            <th width="20%">Article Description</th>
+                                            <th width="10%">Total Csp Stock</th>
                                             <th widht="10%">Edit</th>
 
                                         </tr>
@@ -194,7 +296,7 @@ export function Msl(params) {
                                         {Msl.map((item, index) => {
                                             return (
                                                 <tr key={item.id}>
-                                                    <td>{index + 1}</td>
+                                                    {/* <td>{index + 1}</td> */}
                                                     <td>{item.msp_code}</td>
                                                     <td>{item.msp_name}</td>
                                                     <td>{item.csp_code}</td>

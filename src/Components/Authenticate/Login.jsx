@@ -48,7 +48,7 @@ export function Login() {
         
         
         localStorage.setItem("userId", response.data.user.id);
-        localStorage.setItem("Lhiuser", response.data.user.Lhiuser);
+        localStorage.setItem("lhiuser", response.data.user.Lhiuser);
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("Userrole", Encrypt(Userrole));
         

@@ -31,7 +31,7 @@ export function MSP_Login() {
 
             if (response.data) {
                 localStorage.setItem("userId", response.data.user.id);
-                localStorage.setItem("Lhiuser", response.data.user.Lhiuser);
+                localStorage.setItem("lhiuser", response.data.user.Lhiuser);
                 localStorage.setItem("licare_code", response.data.user.licare_code);
                 localStorage.setItem("token", response.data.token);
 

@@ -34,7 +34,7 @@ export function Mslcsp(params) {
 
     const fetchMsl = async (page) => {
         try {
-          
+
             const response = await axiosInstance.get(`${Base_Url}/getmslcsp/${licare_code}`, {
                 headers: {
                     Authorization: token,
@@ -50,6 +50,50 @@ export function Mslcsp(params) {
     useEffect(() => {
         fetchMsl();
     }, []);
+
+
+    const exportToExcel = async () => {
+
+
+
+        try {
+
+            // Fetch all customer data without pagination
+            const response = await axiosInstance.get(`${Base_Url}/getmslcsp/${licare_code}`, {
+                headers: {
+                    Authorization: token,
+                },
+            }
+            );
+
+            const decryptedData = response.data;
+            console.log("Excel Export Data:", decryptedData);
+            // Create a new workbook
+            const workbook = XLSX.utils.book_new();
+
+            // Convert data to a worksheet
+            const worksheet = XLSX.utils.json_to_sheet(
+                decryptedData.map((item) => ({
+                    MspCode: item.msp_code,
+                    MspName: item.msp_name,
+                    CspName: item.csp_name,
+                    CspCode: item.csp_code,
+                    ArticleCode: item.item,
+                    ArticleDescription: item.item_description,
+                    MSLStock: item.stock,
+                    TotalCSPStock: 0,
+                }))
+            );
+
+            // Append the worksheet to the workbook
+            XLSX.utils.book_append_sheet(workbook, worksheet, "CspMsl");
+
+            // Export the workbook
+            XLSX.writeFile(workbook, "CspMsl.xlsx");
+        } catch (error) {
+            console.error('Error fetching GRN data:', error.response?.data || error.message);
+        }
+    };
 
     // Role Right 
 
@@ -96,20 +140,23 @@ export function Mslcsp(params) {
                 <div className=" col-12">
                     <div className="card mb-3 tab_box">
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
-
+                            <div className='text-right'>
+                                <button className='btn btn-primary' onClick={exportToExcel}>Export To Excel</button>
+                            </div>
                             <div className='table-responsive'>
                                 <table id="" className="table table-striped">
                                     <thead>
                                         <tr>
                                             <th width="5%">#</th>
                                             <th width="10%">Msp Code</th>
-                                            <th width="15%">Msp Name</th>
+                                            <th width="10%">Msp Name</th>
                                             <th width="10%">Csp Code</th>
-                                            <th width="15%">Csp Name</th>
-                                            <th width="10%">Item</th>
-                                            <th width="20%">Item Description</th>
-                                            <th width="10%">Stock</th>
-                                            <th widht="10%">Edit</th>
+                                            <th width="10%">Csp Name</th>
+                                            <th width="10%">Article Code</th>
+                                            <th width="20%">Article Description</th>
+                                            <th width="10%">MSL Stock</th>
+                                            <th width="10%">Total CSP Stock</th>
+                                            <th widht="5%">Image</th>
 
                                         </tr>
                                     </thead>
@@ -126,18 +173,8 @@ export function Mslcsp(params) {
                                                     <td>{item.item}</td>
                                                     <td>{item.item_description}</td>
                                                     <td>{item.stock}</td>
-                                                    <td>
-
-                                                        <button
-                                                            className='btn'
-                                                            // onClick={() => sendtoedit(item.id, 0)}
-                                                            title="Edit"
-                                                            style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                                                        >
-                                                            <FaPencilAlt />
-                                                        </button>
-
-                                                    </td>
+                                                    <td>0</td>
+                                                    <td><FaEye /></td>
                                                 </tr>
                                             )
                                         })}

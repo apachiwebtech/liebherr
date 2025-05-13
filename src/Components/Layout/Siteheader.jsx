@@ -18,7 +18,7 @@ export function Siteheader() {
   const [reportpage, setReportpage] = useState([])
   const [faqpage, setFaqpage] = useState([])
   const [status, setStatus] = useState([])
-
+  const Username = localStorage.getItem('lhiuser')
 
   const redirect = () => {
     window.location.pathname = '/registercomaplaint'
@@ -288,7 +288,10 @@ export function Siteheader() {
 
 
 
-          <div className="dropdown text-end d-flex align-content-center justify-content-center">
+          <div className="dropdown text-end d-flex  justify-content-center" style={{alignItems : "center"}}>
+            <div className='mx-2'>
+              <p className='m-0'>Welcome User , <b style={{textTransform : "capitalize"}}>{Username}</b></p>
+            </div>
             <Link className="btn btn-primary mr-2 newcomplaint text-light" onClick={redirect}>New Ticket</Link>
 
 

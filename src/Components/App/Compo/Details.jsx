@@ -54,7 +54,8 @@ function Details() {
     voltage_supply: "No",
     earthing: "No",
     gas_charges: 'No',
-    transpotation: "No"
+    transpotation: "No",
+    payment_collected: "No"
   });
 
   const handleFileChange = (e) => {
@@ -88,7 +89,8 @@ function Details() {
     check_remark: '',
     customer_mobile: '',
     item_code: '',
-    ticketno: ''
+    ticketno: '',
+    collected_amount: ''
   })
 
 
@@ -116,8 +118,8 @@ function Details() {
   const resendotp = () => {
 
     const data = {
-      ticket_no : Value.ticketno,
-      customer_mobile : Value.customer_mobile
+      ticket_no: Value.ticketno,
+      customer_mobile: Value.customer_mobile
     }
 
 
@@ -291,6 +293,12 @@ function Details() {
 
     if (validateForm()) {
 
+      if (checklist.payment_collected === 'Yes' && !Value.collected_amount) {
+        alert('Collected amount is required when payment is collected')
+        return;
+      }
+
+
       if (Value.call_status == 'Completed') {
         if (Value.otps == data.totp) {
 
@@ -313,6 +321,8 @@ function Details() {
           formData.append('ticket_no', data.ticket_no);
           formData.append('allocation', allocation);
           formData.append('item_code', item_code);
+          formData.append('collected_amount', Value.collected_amount || 0);
+          formData.append('payment_collected', checklist.payment_collected || 'No');
           formData.append('Model', modelno || data.ModelNumber);
           formData.append('serial_no', serial_no || data.serial_no);
           formData.append('user_id', localStorage.getItem('userid'));
@@ -335,7 +345,7 @@ function Details() {
             formData.append(`sparedata[${index}]`, item.article_code);
             formData.append(`spareqty[${index}]`, item.quantity);
           });
-          
+
 
 
 
@@ -366,11 +376,11 @@ function Details() {
             },
           })
             .then((res) => {
-              if(res.data.status == 0){
+              if (res.data.status == 0) {
                 alert(res.data.message)
-              }else{
+              } else {
                 navigate('/mobapp/dash');
-                
+
               }
             })
             .catch((err) => {
@@ -401,6 +411,8 @@ function Details() {
         formData.append('ticket_no', data.ticket_no);
         formData.append('allocation', allocation);
         formData.append('item_code', item_code);
+        formData.append('collected_amount', Value.collected_amount || 0);
+        formData.append('payment_collected', checklist.payment_collected || 'No');
         formData.append('Model', modelno || data.ModelNumber);
         formData.append('serial_no', serial_no || data.serial_no);
         formData.append('user_id', localStorage.getItem('userid'));
@@ -418,7 +430,7 @@ function Details() {
         formData.append('earthing', checklist.earthing == 'null' ? 'No' : checklist.earthing);
         formData.append('gas_charges', checklist.gas_charges == 'null' ? 'No' : checklist.gas_charges);
         formData.append('transpotation', checklist.transpotation == 'null' ? 'No' : checklist.transpotation);
-
+        formData.append('customer_mobile', Value.customer_mobile);
         if (Value.spare_required) {
           formData.append('spare_detail', Value.spare_detail);
         }
@@ -497,7 +509,7 @@ function Details() {
             call_status: res.data.data[0].call_status,
             purchase_date: res.data.data[0].purchase_date,
             customer_mobile: res.data.data[0].customer_mobile,
-            ticketno : res.data.data[0].ticket_no
+            ticketno: res.data.data[0].ticket_no
           })
 
 
@@ -1433,6 +1445,16 @@ function Details() {
             <div class="col-12 mt-2">
               <div class="col-12">
                 <div class="bg-light mb-3 p-2 rounded">
+                  <div class="mb-3">
+                    <div class="form-group">
+                      <label for="val-spare_remark mx-2"><strong>Payment Collected</strong></label>
+                      <input type="checkbox" className='mx-2' onChange={handleCheckChange} name="payment_collected" checked={checklist.payment_collected == 'Yes' ? true : false} disabled={data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false} />
+
+                      {checklist.payment_collected == 'Yes' && <div>
+                        <input type="text" onChange={handleChange} class="form-control" value={Value.collected_amount} name="collected_amount" id="collected_amount" disabled={data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false} />
+                      </div>}
+                    </div>
+                  </div>
                   <div class="mb-3">
                     <div class="form-group">
                       <label for="val-spare_remark"><strong>Additional Remarks</strong></label>
