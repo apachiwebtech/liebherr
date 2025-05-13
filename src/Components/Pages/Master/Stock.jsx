@@ -11,24 +11,37 @@ import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 import { useDispatch } from "react-redux";
 import { getRoleData } from "../../Store/Role/role-action";
 import Productsparetabs from './Productsparetabs';
+import EditIcon from '@mui/icons-material/Edit';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import Button from '@mui/material/Button';
 
 export function Stock(params) {
     const { loaders, axiosInstance } = useAxiosLoader();
     const token = localStorage.getItem("token");
     const [Stockdata, setStockdata] = useState([]);
+    const [open, setOpen] = React.useState(false);
+    const [Stock, setStock] = React.useState('');
     const licare_code = localStorage.getItem("licare_code");
 
     const [formData, setFormData] = useState({
-        productname: '',
-        stock_quantity: '',
-
+        article_code: '',
+        created_by: '',
+        csp_code: ''
     });
 
+
+    const handleClose = () => {
+        setOpen(false);
+    };
 
     const fetchStock = async (page) => {
         try {
 
-            const response = await axiosInstance.get(`${Base_Url}/getstock/${licare_code}`, {
+            const response = await axiosInstance.get(`${Base_Url}/getallstock`, {
                 headers: {
                     Authorization: token,
                 },
@@ -71,7 +84,44 @@ export function Stock(params) {
 
     // Role Right End 
 
+    const stockEdit = async (csp_code, product_code) => {
+        setOpen(true)
+        setFormData({
+            article_code: product_code,
+            created_by: licare_code,
+            csp_code: csp_code
+        })
 
+    }
+
+    const updateStock = async () => {
+
+        const data = {
+            article_code: formData.article_code,
+            created_by: formData.created_by,
+            csp_code: formData.csp_code,
+            stock : Stock
+        }
+
+        try {
+
+            const response = await axiosInstance.post(`${Base_Url}/updateadminstock`,data,{
+                headers: {
+                    Authorization: token,
+                },
+            });
+
+            if(response){
+                alert("Stock Updated")
+                setOpen(false)
+                fetchStock()
+            }
+
+        } catch (error) {
+            console.error('Error fetching Stockdata:', error);
+        }
+
+    }
 
 
 
@@ -96,8 +146,11 @@ export function Stock(params) {
                                         <tr>
                                             <th width="5%">#</th>
                                             <th width="15%">CSP Code</th>
-                                            <th width="15%">Product Name</th>
-                                            <th width="20%">Stock</th>
+                                            <th width="20%">Article Code</th>
+                                            <th width="20%">Article Description</th>
+                                            <th width="20%">Physical Stock</th>
+                                            <th width="20%">Total CSP stock</th>
+                                            <th width="10%">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -107,8 +160,11 @@ export function Stock(params) {
                                                 <tr key={item.id}>
                                                     <td>{index + 1}</td>
                                                     <td>{item.csp_code}</td>
+                                                    <td>{item.product_code}</td>
                                                     <td>{item.productname}</td>
                                                     <td>{item.stock_quantity}</td>
+                                                    <td>{'0'}</td>
+                                                    <td><EditIcon onClick={() => stockEdit(item.csp_code, item.product_code, item.stock_quantity)} /></td>
                                                 </tr>
                                             )
                                         })}
@@ -116,6 +172,32 @@ export function Stock(params) {
                                     </tbody>
                                 </table>
                             </div>
+                            <Dialog
+                                open={open}
+                                onClose={handleClose}
+                                aria-labelledby="alert-dialog-title"
+                                aria-describedby="alert-dialog-description"
+                            >
+                                <DialogTitle id="alert-dialog-title">
+                                    {"Update Stock"}
+                                </DialogTitle>
+                                <DialogContent style={{ height: "100px", width: "400px" }}>
+                                    <input
+                                        type="number"
+                                        min={'0'}
+                                        className="form-control"
+                                        onChange={(e) => setStock(e.target.value)}
+                                    />
+                                </DialogContent>
+                                <DialogActions>
+                                    <Button onClick={updateStock} autoFocus>
+                                        Update
+                                    </Button>
+                                    <Button onClick={handleClose} autoFocus>
+                                        Cancel
+                                    </Button>
+                                </DialogActions>
+                            </Dialog>
 
                         </div>
                     </div>

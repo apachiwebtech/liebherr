@@ -162,30 +162,6 @@ export function Grnoutward(params) {
 
 
 
-
-
-    const updategrnstatus = async (grn_no) => {
-        const confirm = window.confirm("Are you sure?")
-
-        if (confirm) {
-            try {
-                const response = await axiosInstance.post(`${Base_Url}/updategrnapprovestatus`, { grn_no: grn_no }, {
-                    headers: {
-                        Authorization: token,
-                    },
-                });
-                alert(response.data)
-                fetchgrnListing()
-            } catch (error) {
-                console.error('Error fetching Quotationdata:', error);
-                setGrn([]);
-            }
-        }
-
-    };
-
-
-
     const sendtoedit = async (id) => {
         id = id.toString()
         let encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();

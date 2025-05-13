@@ -64,14 +64,22 @@ function GrnTab() {
                     </button></Link>
                   </li>
 
-                  {/* <li className="nav-item">
+                  <li className="nav-item">
+                    <Link to={`/csp/cspgrn`}> <button
+                      className={`nav-link ${activeTab === '/csp/cspgrn' ? 'active' : ' onClick={() => setActiveTab("cspgrn")}'}`}
+
+                    >
+                      Engineer GRN
+                    </button></Link>
+                  </li>
+                  <li className="nav-item">
                     <Link to={`/csp/grnlisting`}> <button
                       className={`nav-link ${activeTab === '/csp/grnlisting' ? 'active' : ' onClick={() => setActiveTab("grnlisting")}'}`}
 
                     >
                       GRN INWARD LISTING
                     </button></Link>
-                  </li> */}
+                  </li>
 
                   <li className="nav-item">
                     <Link to={`/csp/spareoutward`}> <button

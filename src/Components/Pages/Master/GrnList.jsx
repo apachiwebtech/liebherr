@@ -109,12 +109,12 @@ export function GrnList(params) {
 
 
 
-    const updategrnstatus = async (grn_no) => {
+    const updategrnstatus = async (grn_no , eng_code) => {
         const confirm = window.confirm("Are you sure?")
 
         if (confirm) {
             try {
-                const response = await axiosInstance.post(`${Base_Url}/updategrnapprovestatus`, { grn_no: grn_no, licare_code: licare_code }, {
+                const response = await axiosInstance.post(`${Base_Url}/updategrnapprovestatus`, { grn_no: grn_no, licare_code: licare_code ,eng_code  :eng_code }, {
                     headers: {
                         Authorization: token,
                     },
@@ -441,7 +441,7 @@ export function GrnList(params) {
                                                         ) : item.status == '2' ? (
                                                             "Rejected"
                                                         ) : (
-                                                            <button className='btn btn-success' onClick={() => updategrnstatus(item.grn_no)}>
+                                                            <button className='btn btn-success' onClick={() => updategrnstatus(item.grn_no , item.csp_code)}>
                                                                 Approve
                                                             </button>
                                                         )}

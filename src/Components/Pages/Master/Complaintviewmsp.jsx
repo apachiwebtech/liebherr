@@ -207,6 +207,27 @@ export function Complaintviewmsp(params) {
   //     })
   // };
 
+  const resendotp = () => {
+
+    const data = {
+      ticket_no: complaintview.ticket_no,
+      customer_mobile: complaintview.customer_mobile
+    }
+
+
+    axios.post(`${Base_Url}/resend_otp`, data, {
+      headers: {
+        Authorization: token,
+      },
+    })
+      .then((res) => {
+        console.log(res);
+        alert("OTP sent")
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
 
   async function getProduct(params) {
 
@@ -1390,7 +1411,7 @@ export function Complaintviewmsp(params) {
           serial_no: String(complaintview.serial_no),
           ModelNumber: complaintview.ModelNumber,
           item_code: complaintview.item_code,
-          purchase_date: complaintview.purchase_date,
+          purchase_date: complaintview.purchase_date || '',
           warrenty_status: complaintview.warranty_status || warranty_status_data,
           engineerdata: addedEngineers.map((item) => item.engineer_id),
           engineername: addedEngineers.map((item) => item.title),
@@ -3171,6 +3192,10 @@ export function Complaintviewmsp(params) {
 
 
                 </div>
+
+                {(closestatus == 'Open' || closestatus == 'In Process' || closestatus == 'Completed') && <div>
+                  <p>Want to resend OTP? <span className='text-primary' onClick={resendotp} style={{ cursor: "pointer" }}>Resend OTP</span></p>
+                </div>}
 
                 <div className="my-3 ">
                   <h4 className="pname" style={{ fontSize: "14px" }}>Visit Count</h4>

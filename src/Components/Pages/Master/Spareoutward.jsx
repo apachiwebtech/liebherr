@@ -52,7 +52,7 @@ const Spareoutward = () => {
     const fetchCsp = async () => {
 
         try {
-            const response = await axios.post(`${Base_Url}/getsearchcsp`, { param: text , licare_code : created_by}, {
+            const response = await axios.post(`${Base_Url}/getsearchcsp`, { param: text, licare_code: created_by }, {
                 headers: {
                     Authorization: token, // Send token in headers
                 },
@@ -176,9 +176,17 @@ const Spareoutward = () => {
                         Authorization: token, // Send token in headers
                     },
                 });
-                setHide(true)
-                alert(response.data.message)
-                fetchsparelist()
+                if (response.data.message == 'Spare Added') {
+                    setHide(true)
+                    alert(response.data.message)
+                    fetchsparelist()
+                } else {
+
+                    alert(response.data.message)
+
+                }
+
+
 
             } catch (error) {
                 console.error("Error fetching users:", error);

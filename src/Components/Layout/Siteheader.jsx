@@ -272,7 +272,7 @@ export function Siteheader() {
               </li>
             }
 
-            {faqpage == 1 &&
+            {/* {faqpage == 1 &&
               <li className="nav-item dropdown">
                 <Link className={`nav-link site `}
                   to={`/faq`}
@@ -284,7 +284,7 @@ export function Siteheader() {
                 </Link>
 
               </li>
-            }
+            } */}
 
           </ul>
 

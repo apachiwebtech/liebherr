@@ -14481,17 +14481,17 @@ app.post("/add_grn", authenticateToken, async (req, res) => {
 
 
 
-    if (invoice_number) {
-      // Check if the invoice_number already exists
-      const checkInvoiceQuery = `SELECT COUNT(*) AS count FROM awt_grnmaster WHERE invoice_no = @invoice_no`;
-      const checkInvoiceResult = await pool.request()
-        .input('invoice_no', invoice_number)
-        .query(checkInvoiceQuery);
+    // if (invoice_number) {
+    //   // Check if the invoice_number already exists
+    //   const checkInvoiceQuery = `SELECT COUNT(*) AS count FROM awt_grnmaster WHERE invoice_no = @invoice_no`;
+    //   const checkInvoiceResult = await pool.request()
+    //     .input('invoice_no', invoice_number)
+    //     .query(checkInvoiceQuery);
 
-      if (checkInvoiceResult.recordset[0].count > 0) {
-        return res.status(400).json({ message: "Invoice number already exists" });
-      }
-    }
+    //   if (checkInvoiceResult.recordset[0].count > 0) {
+    //     return res.status(400).json({ message: "Invoice number already exists" });
+    //   }
+    // }
 
     // Query to get the count of rows in awt_grnmaster
     const creategrnno = `SELECT COUNT(*) AS count FROM awt_grnmaster`;
@@ -15032,11 +15032,19 @@ app.post('/addgrnspares', authenticateToken, async (req, res) => {
     // Fetch spare parts data
     const getspare = `
       SELECT id, ModelNumber, title as article_code, ProductCode as spareId, ItemDescription as article_description
-      FROM Spare_parts WHERE id = @spare_id
+      FROM Spare_parts WHERE title = @spare_id
     `;
     const result = await pool.request()
       .input('spare_id', sql.VarChar, spare_id)
       .query(getspare);
+
+
+    if (result.recordset.length === 0) {
+      return res.json({
+        message: `Spare BOM not found for spare_id: ${spare_id}. Please add it first.`
+      });
+    }
+
 
     const spareData = result.recordset.map(record => ({
       grn_no,
@@ -15046,6 +15054,7 @@ app.post('/addgrnspares', authenticateToken, async (req, res) => {
       created_by,
       created_date: new Date()
     }));
+
 
 
     // Use a transaction for bulk inserts
@@ -15146,6 +15155,7 @@ app.post('/addgrnspares', authenticateToken, async (req, res) => {
     sql.close();
   }
 });
+
 app.post('/addissuespares', authenticateToken, async (req, res) => {
   const { spare_id, issue_no, created_by } = req.body; // Expecting required fields in the request body
 
@@ -15166,8 +15176,12 @@ app.post('/addissuespares', authenticateToken, async (req, res) => {
     const articleCode = result.recordset[0]?.article_code;
 
     if (!articleCode) {
-      return res.status(404).json({ message: "Spare part not found" });
+            return res.json({
+        message: `Spare BOM not found for spare_id: ${spare_id}. Please add it first.`
+      });
     }
+
+
 
     // Use parameterized query to avoid SQL injection
     const checkstockQuery = `
@@ -19182,6 +19196,25 @@ app.post("/getcspspareparts", authenticateToken, async (req, res) => {
     return res.status(500).json({ error: 'An error occurred while fetching data' });
   }
 });
+app.post("/getengspareparts", authenticateToken, async (req, res) => {
+
+  const { eng_code } = req.body;
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+    const result = await pool.request().query(`select * from engineer_stock as ct where  ct.eng_code = '${eng_code}'
+
+`);
+
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
+
 app.post("/updatedescription", authenticateToken, async (req, res) => {
   const { id, description } = req.body;
 
@@ -19282,9 +19315,6 @@ WHERE ct.deleted = 0
     sql += ` ORDER BY RIGHT(ct.ticket_no , 4) ASC`;
 
 
-
-
-
     const result = await pool.request().query(sql);
     return res.json(result.recordset);
   } catch (err) {
@@ -19292,6 +19322,7 @@ WHERE ct.deleted = 0
     return res.status(500).json({ error: 'An error occurred while fetching data' });
   }
 });
+
 app.post("/sendjobcard", authenticateToken, async (req, res) => {
 
   const { pdfurl, ticket_no } = req.body;
@@ -19303,5 +19334,37 @@ app.post("/sendjobcard", authenticateToken, async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
+
+app.post("/updateadminstock", authenticateToken, async (req, res) => {
+  const { article_code, created_by, csp_code, stock } = req.body;
+
+  const date = new Date();
+
+  const pool = await poolPromise;
+
+  try {
+    const request = pool.request();
+    request.input("stock", stock);
+    request.input("created_by", created_by);
+    request.input("date", date);
+    request.input("article_code", article_code);
+    request.input("csp_code", csp_code);
+
+    const updatestock = `
+      UPDATE csp_stock
+      SET stock_quantity = @stock,
+          updated_by = @created_by,
+          updated_date = @date
+      WHERE product_code = @article_code AND csp_code = @csp_code
+    `;
+
+    const result = await request.query(updatestock);
+
+    return res.json(result);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while updating stock' });
   }
 });

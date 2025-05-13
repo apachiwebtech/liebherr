@@ -36,7 +36,8 @@ const Grndetailspage = () => {
         grn_no: '',
         invoice_date: '',
         invoice_no: '',
-        status: ''
+        status: '',
+        csp_code :''
     })
 
 

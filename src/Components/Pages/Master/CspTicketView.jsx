@@ -1345,7 +1345,7 @@ export function CspTicketView(params) {
           serial_no: String(complaintview.serial_no),
           ModelNumber: complaintview.ModelNumber,
           item_code: complaintview.item_code,
-          purchase_date: complaintview.purchase_date,
+          purchase_date: complaintview.purchase_date || '',
           warrenty_status: complaintview.warranty_status || warranty_status_data,
           engineerdata: addedEngineers.map((item) => item.engineer_id),
           engineername: addedEngineers.map((item) => item.title),
@@ -3133,9 +3133,10 @@ export function CspTicketView(params) {
 
 
                 </div>
-                <div>
+                {(closestatus == 'Open' || closestatus == 'In Process' || closestatus == 'Completed') && <div>
                   <p>Want to resend OTP? <span className='text-primary' onClick={resendotp} style={{ cursor: "pointer" }}>Resend OTP</span></p>
-                </div>
+                </div>}
+
 
                 <div className="my-3 ">
                   <h4 className="pname" style={{ fontSize: "14px" }}>Visit Count</h4>
