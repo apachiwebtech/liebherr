@@ -62,7 +62,7 @@ export function GrnMspList(params) {
             };
 
 
-            const response = await axiosInstance.post(`${Base_Url}/getgrnlist`, data, {
+            const response = await axiosInstance.post(`${Base_Url}/getgrnmsplist`, data, {
                 headers: {
                     Authorization: token,
                 },
@@ -89,7 +89,7 @@ export function GrnMspList(params) {
                 product_name: searchFilters.product_name || ''
             };
 
-            const response = await axiosInstance.post(`${Base_Url}/getgrnlist`, data, {
+            const response = await axiosInstance.post(`${Base_Url}/getgrnmsplist`, data, {
                 headers: {
                     Authorization: token,
                 },
@@ -211,25 +211,6 @@ export function GrnMspList(params) {
             [name]: value
         }));
     };
-
-    const handledelete = (grn_no) => {
-
-
-        axios.post(`${Base_Url}/deletedgrn`, { grn_no: grn_no }, {
-            headers: {
-                Authorization: token
-            }
-        })
-            .then((res) => {
-                alert(res.data)
-                fetchgrnListing()
-            })
-    }
-
-
-
-
-
     return (
         <div className="tab-content">
             <GrnMspTab />
@@ -298,32 +279,8 @@ export function GrnMspList(params) {
                                     />
                                 </div>
                             </div>
-                            <div className="col-md-2">
-                                <div className="form-group">
-                                    <label>Product Code</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        name="product_code"
-                                        value={searchFilters.product_code}
-                                        placeholder="Search by Product Code"
-                                        onChange={handleFilterChange}
-                                    />
-                                </div>
-                            </div>
-                            <div className="col-md-2 ">
-                                <div className="form-group">
-                                    <label>Product Name</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        name="product_name"
-                                        value={searchFilters.product_name}
-                                        placeholder="Search by Product Name"
-                                        onChange={handleFilterChange}
-                                    />
-                                </div>
-                            </div>
+
+
 
                             <div className="col-md-12 d-flex justify-content-end align-items-center mt-3 "  >
                                 <div className=' form-group'>
@@ -379,10 +336,12 @@ export function GrnMspList(params) {
                                         <tr>
                                             <th width="5%">#</th>
                                             <th width="15%">Grn_No</th>
-                                            <th width="20%">Received From</th>
+                                            <th width="10%">Received From</th>
                                             <th width="15%">Invoice No</th>
                                             <th width="15%">Invoice Date</th>
-                                            <th width="10%">Product Count</th>
+                                            <th width="10%">Spare No</th>
+                                            <th width="10%">Spare Title</th>
+                                             <th width="10%">Spare Quantity</th>
                                             <th width="20%">Status</th>
 
                                         </tr>
@@ -407,7 +366,9 @@ export function GrnMspList(params) {
                                                             year: 'numeric',
                                                         })}
                                                     </td>
-                                                    <td>{item.product_count}</td>
+                                                    <td>{item.spare_no}</td>
+                                                    <td>{item.spare_title}</td>
+                                                    <td>{item.quantity}</td>
                                                     <td>
                                                         {item.status == '1' ? (
                                                             "Approved"

@@ -58,7 +58,7 @@ export function SpareMspOutward(params) {
             };
 
 
-            const response = await axiosInstance.post(`${Base_Url}/getoutwardlisting`, data, {
+            const response = await axiosInstance.post(`${Base_Url}/getmspoutwardlisting`, data, {
                 headers: {
                     Authorization: token,
                 },
@@ -85,7 +85,7 @@ export function SpareMspOutward(params) {
                 product_name: searchFilters.product_name || ''
             };
 
-            const response = await axiosInstance.post(`${Base_Url}/getoutwardlisting`, data, {
+            const response = await axiosInstance.post(`${Base_Url}/getmspoutwardlisting`, data, {
                 headers: {
                     Authorization: token,
                 },

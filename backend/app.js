@@ -15002,7 +15002,46 @@ app.post("/getgrnmsplist", authenticateToken, async (req, res) => {
 
   try {
     const pool = await poolPromise;
+
+    // Step 1: Get pfranchise_id of given csp_code
+    const franchiseResult = await pool.request()
+      .input("csp_code", csp_code)
+      .query(`
+        SELECT pfranchise_id 
+        FROM awt_childfranchisemaster 
+        WHERE deleted = 0 AND licare_code = @csp_code
+      `);
+
+    if (franchiseResult.recordset.length === 0) {
+      return res.status(404).json({ message: "Parent franchise not found for given csp_code" });
+    }
+
+    const pfranchise_id = franchiseResult.recordset[0].pfranchise_id;
+
+    // Step 2: Get all licare_code under this pfranchise_id
+    const childCodesResult = await pool.request()
+      .input("pfranchise_id", pfranchise_id)
+      .query(`
+        SELECT licare_code 
+        FROM awt_childfranchisemaster 
+        WHERE deleted = 0 AND pfranchise_id = @pfranchise_id
+      `);
+
+    const licareCodes = childCodesResult.recordset.map(row => row.licare_code);
+
+    if (licareCodes.length === 0) {
+      return res.status(404).json({ message: "No child franchises found under this parent" });
+    }
+
+    // Step 3: Build dynamic SQL query
     const request = pool.request();
+
+    // Dynamically bind licare_codes array to SQL query
+    const licarePlaceholders = licareCodes.map((code, index) => {
+      const param = `code${index}`;
+      request.input(param, code);
+      return `@${param}`;
+    }).join(", ");
 
     let sql = `
       SELECT 
@@ -15017,14 +15056,15 @@ app.post("/getgrnmsplist", authenticateToken, async (req, res) => {
         gn.created_by,
         gn.remark,
         gn.received_date,
-        COUNT(acg.grn_no) AS product_count
+        acg.quantity,
+        acg.spare_title,
+        acg.spare_no
       FROM awt_grnmaster AS gn
       LEFT JOIN awt_cspgrnspare AS acg ON acg.grn_no = gn.grn_no
-      WHERE gn.deleted = 0 AND gn.created_by = @csp_code
+      WHERE gn.deleted = 0 AND gn.created_by IN (${licarePlaceholders})
     `;
 
-    request.input("csp_code", csp_code);
-
+    // Add optional filters
     if (fromDate && toDate) {
       sql += " AND CAST(gn.invoice_date AS DATE) BETWEEN @fromDate AND @toDate";
       request.input("fromDate", fromDate);
@@ -15041,14 +15081,6 @@ app.post("/getgrnmsplist", authenticateToken, async (req, res) => {
       request.input("invoice_number", `%${invoice_number}%`);
     }
 
-    sql += `
-      GROUP BY
-        gn.id , gn.grn_no, gn.invoice_no, gn.invoice_date, gn.csp_code,
-        gn.csp_name, gn.status, gn.created_date,
-        gn.created_by, gn.remark, gn.received_date
-      ORDER BY gn.id DESC
-    `;
-
     const result = await request.query(sql);
 
     if (result.recordset.length === 0) {
@@ -15057,10 +15089,13 @@ app.post("/getgrnmsplist", authenticateToken, async (req, res) => {
 
     return res.json(result.recordset);
   } catch (err) {
-    console.error("Error fetching data:", err);
+    console.error("Error fetching GRN data:", err);
     return res.status(500).json({ message: "Internal Server Error", error: err });
   }
 });
+
+
+
 
 
 app.post("/getoutwardlisting", authenticateToken, async (req, res) => {
@@ -15106,6 +15141,86 @@ app.post("/getoutwardlisting", authenticateToken, async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error", error: err });
   }
 });
+app.post("/getmspoutwardlisting", authenticateToken, async (req, res) => {
+  const { csp_code, fromDate, toDate, received_from } = req.body;
+
+  try {
+    const pool = await poolPromise;
+
+    // Step 1: Get pfranchise_id using given csp_code
+    const franchiseResult = await pool.request()
+      .input("csp_code", csp_code)
+      .query(`
+        SELECT pfranchise_id 
+        FROM awt_childfranchisemaster 
+        WHERE deleted = 0 AND licare_code = @csp_code
+      `);
+
+    if (franchiseResult.recordset.length === 0) {
+      return res.status(404).json({ message: "Parent franchise not found for given csp_code" });
+    }
+
+    const pfranchise_id = franchiseResult.recordset[0].pfranchise_id;
+
+    // Step 2: Get all licare_codes (child csp_codes) under this pfranchise_id
+    const childCodesResult = await pool.request()
+      .input("pfranchise_id", pfranchise_id)
+      .query(`
+        SELECT licare_code 
+        FROM awt_childfranchisemaster 
+        WHERE deleted = 0 AND pfranchise_id = @pfranchise_id
+      `);
+
+    const licareCodes = childCodesResult.recordset.map(row => row.licare_code);
+
+    if (licareCodes.length === 0) {
+      return res.status(404).json({ message: "No child franchises found under this parent" });
+    }
+
+    // Step 3: Build query dynamically
+    const request = pool.request();
+
+    const licarePlaceholders = licareCodes.map((code, index) => {
+      const param = `code${index}`;
+      request.input(param, code);
+      return `@${param}`;
+    }).join(", ");
+
+    let sql = `
+      SELECT asp.*, acp.spare_no, acp.spare_title, acp.quantity 
+      FROM awt_spareoutward AS asp 
+      LEFT JOIN awt_cspissuespare AS acp ON asp.issue_no = acp.issue_no 
+      WHERE asp.created_by IN (${licarePlaceholders}) AND asp.deleted = 0
+    `;
+
+    if (fromDate && toDate) {
+      sql += " AND CAST(asp.issue_date AS DATE) BETWEEN @fromDate AND @toDate";
+      request.input("fromDate", fromDate);
+      request.input("toDate", toDate);
+    }
+
+    if (received_from) {
+      sql += " AND asp.lhi_name LIKE @received_from";
+      request.input("received_from", `%${received_from}%`);
+    }
+
+    sql += " ORDER BY asp.id DESC";
+
+    console.log(sql);
+
+    const result = await request.query(sql);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "No results found" });
+    }
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+});
+
 
 app.post("/getoutwardexcel", authenticateToken, async (req, res) => {
 
