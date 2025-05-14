@@ -168,6 +168,9 @@ import { MspAccess } from './Components/Pages/Master/MspAccess';
 import { Faq } from './Components/Pages/Faq/Faq';
 import AssetReport from './Components/Pages/Reports/AssetReport';
 import SpareReport from './Components/Pages/Reports/SpareReport';
+import AddRatecard from './Components/Pages/Master/AddRatecard';
+import { GrnMspList } from './Components/Pages/Master/GrnMspList';
+import {SpareMspOutward} from './Components/Pages/Master/SpareMspOutward';
 
 
 
@@ -300,6 +303,14 @@ const Router = createBrowserRouter([
       {
         path: "/msp/mslmsp",
         element: <ProtectedRoute><Mslmsp /></ProtectedRoute>,
+      },
+      {
+        path: "/msp/grnmsplist",
+        element: <ProtectedRoute><GrnMspList /></ProtectedRoute>,
+      },
+      {
+        path: "/msp/sparemspoutward",
+        element: <ProtectedRoute><SpareMspOutward /></ProtectedRoute>,
       },
 
       {
@@ -942,6 +953,10 @@ const Router = createBrowserRouter([
       {
         path: "/subcallstatus",
         element: <ProtectedRoute><Subcallstatus /></ProtectedRoute>
+      },
+      {
+        path: "/addrate",
+        element: <ProtectedRoute><AddRatecard /></ProtectedRoute>
       },
       {
         path: "/engineerapprove",

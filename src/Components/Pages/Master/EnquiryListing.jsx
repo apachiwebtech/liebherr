@@ -165,58 +165,22 @@ const EnquiryListing = () => {
     };
 
     // export to excel 
-    const exportToExcel = async () => {
+
+    const exportEnquiryToExcel = async () => {
         try {
-            // Fetch all customer data without pagination
-            const response = await axiosInstance.get(`${Base_Url}/getenquiry`, {
-                headers: {
-                    Authorization: token,
-                },
-                params: {
-                    pageSize: totalCount, // Fetch all data
-                    page: 1, // Start from the first page
-                },
+            const response = await axiosInstance.get(`${Base_Url}/downloadenquiryexcel`, {
+                headers: { Authorization: token },
+                responseType: 'blob', // Important to handle file
             });
-            const allEnquiryData = response.data.data;
 
-            // Create a new workbook
-            const workbook = XLSX.utils.book_new();
-
-            // Convert data to a worksheet
-            const worksheet = XLSX.utils.json_to_sheet(allEnquiryData.map(user => ({
-                "Enquiry mo": user.enquiry_no,
-                "Source": user.source,
-                "Enquiry Date": user.enquiry_date,
-                "Salutation": user.salutation,
-                "Customer Name": user.customer_name,
-                "Email": user.email,
-                "Mobile Number": user.mobile,
-                "Alt Mobile": user.alt_mobile,
-                "Request Mobile": user.request_mobile,
-                "Mwhatsapp": user.mwhatsapp,
-                "Awhatsapp": user.awhatsapp,
-                "Customer Type ": user.customer_type,
-                "Enquiry Type": user.enquiry_type,
-                "Address": user.address,
-                "Pincode": user.pincode,
-                "State": user.state,
-                "District ": user.district,
-                "City ": user.city,
-                "Customer Classification": user.interested,
-                "Model Number": user.modelnumber,
-                "Priority": user.priority,
-                "Notes": user.notes,
-                "Leadstatus": user.leadstatus,
-                // Add fields you want to export
-            })));
-
-            // Append the worksheet to the workbook
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Enquiry List");
-
-            // Export the workbook
-            XLSX.writeFile(workbook, "Enquiry List.xlsx");
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'Enquiry.xlsx'); // File name
+            document.body.appendChild(link);
+            link.click();
         } catch (error) {
-            console.error("Error exporting data to Excel:", error);
+            console.error('Error downloading Enquiry Excel:', error);
         }
     };
 
@@ -535,7 +499,7 @@ const EnquiryListing = () => {
                                                 <div className="form-group">
                                                     <button
                                                         className="btn btn-primary"
-                                                        onClick={exportToExcel}
+                                                        onClick={exportEnquiryToExcel}
                                                         style={{
                                                             marginLeft: '5px',
                                                         }}

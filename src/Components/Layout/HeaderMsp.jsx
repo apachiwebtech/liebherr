@@ -109,6 +109,20 @@ const HeaderMsp = (params) => {
                 MSL Listing
               </Link>
             </li>
+            <li
+              className={`nav-item dropdown ${location.pathname === "/msp/mslmsp" ? "active-class" : ""}`}
+              style={location.pathname === "/msp/mslmsp" ? { background: '#0d6efd', borderRadius: '5px' } : {}}
+            >
+              <Link
+                to={`/msp/grnmsplist`}
+                className={`nav-link site ${location.pathname === "/msp/grnmsplist" ? "text-light" : ""}`}
+                id="navbarDropdown"
+                role="button"
+                aria-expanded="false"
+              >
+               GRN
+              </Link>
+            </li>
             {/* <li
               className={`nav-item dropdown ${location.pathname === "/msp/addusers" ? "active-class" : ""}`}
               style={location.pathname === "/msp/addusers" ? { background: '#0d6efd', borderRadius: '5px' } : {}}
@@ -133,10 +147,10 @@ const HeaderMsp = (params) => {
 
 
 
-          <div className="dropdown text-end d-flex  justify-content-center" style={{alignItems : "center"}}>
+          <div className="dropdown text-end d-flex  justify-content-center" style={{ alignItems: "center" }}>
             {/* <Link className="btn btn-primary newcomplaint" onClick={redirect}>New Ticket</Link> */}
             <div className='mx-2'>
-              <p className='m-0'>Welcome User , <b style={{textTransform : "capitalize"}}>{Username}</b></p>
+              <p className='m-0'>Welcome User , <b style={{ textTransform: "capitalize" }}>{Username}</b></p>
             </div>
             <a href="#" className="link-dark d-flex align-content-center justify-content-center text-decoration-none " id="dropdownUser1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
 
