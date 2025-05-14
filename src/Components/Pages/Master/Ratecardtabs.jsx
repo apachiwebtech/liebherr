@@ -37,6 +37,7 @@ function Ratecardtabs() {
       ratecardpage: '37',
       masterpage: '38',
       postsalepage: '39',
+      addratepage: '66',
     }
 
 
@@ -110,6 +111,19 @@ function Ratecardtabs() {
 
                         >
                           RATE CARD MATRIX
+                        </button>
+                      </li
+                      ></Link>
+                  }
+                  {status.addratepage == 1 &&
+                    <Link to={`/addrate`}>
+                      <li className="nav-item">
+                        <button
+                          className={`nav-link ${activeTab === "/addrate" ? "active" : "onClick={() => setActiveTab('Ratecard')}"
+                            }`}
+
+                        >
+                          ADD RATE CARD 
                         </button>
                       </li
                       ></Link>

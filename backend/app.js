@@ -2299,6 +2299,64 @@ WHERE
   }
 });
 
+app.get("/downloadenquiryexcel", authenticateToken, async (req, res) => {
+  try {
+    const pool = await poolPromise;
+
+    // Fetch all customers who are not deleted
+    const result = await pool.request().query(`SELECT p.*
+      FROM awt_enquirymaster AS p
+      WHERE p.deleted = 0`);
+    const enquiry = result.recordset;
+
+    // Create a new workbook and worksheet
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Enquiry');
+
+    // Define columns
+    worksheet.columns = [
+      { header: 'Enquiry no', key: 'enquiry_no' },
+      { header: 'Source', key: 'source' },
+      { header: 'Enquiry Date', key: 'enquiry_date' },
+      { header: 'Salutation', key: 'salutation' },
+      { header: 'Customer Name', key: 'customer_name' },
+      { header: 'Email', key: 'email' },
+      { header: 'Mobile Number', key: 'mobile' },
+      { header: 'Alternate Mobileno', key: 'alt_mobile' },
+      { header: 'Request Mobile', key: 'request_mobile' },
+      { header: 'Mwhatsapp', key: 'mwhatsapp' },
+      { header: 'Awhatsapp', key: 'awhatsapp' },
+      { header: 'Customer Type', key: 'customer_type' },
+      { header: 'Enquiry Type', key: 'enquiry_type' },
+      { header: 'Address', key: 'address' },
+      { header: 'Pincode', key: 'pincode' },
+      { header: 'State', key: 'state' },
+      { header: 'District', key: 'district' },
+      { header: 'City', key: 'city' },
+      { header: 'Customer Classification', key: 'interested' },
+      { header: 'Model Number', key: 'modelnumber' },
+      { header: 'Priority', key: 'priority' },
+      { header: 'Notes', key: 'notes' },
+      { header: 'Leadstatus', key: 'leadstatus' },
+
+    ];
+
+    // Add all customer data as rows
+    worksheet.addRows(enquiry);
+
+    // Set headers for file download
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename=Enquiry.xlsx');
+
+    // Write and download
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send('Error generating Enquiry Excel file');
+  }
+});
+
 // app.get("/requestcustomerlist/:id", async (req, res) => {
 //   try {
 
@@ -13126,7 +13184,7 @@ app.post('/getfaultroledata', authenticateToken, async (req, res) => {
   }
 });
 app.post('/getratecardroledata', authenticateToken, async (req, res) => {
-  const { role, ratecardpage, masterpage, postsalepage } = req.body;
+  const { role, ratecardpage, masterpage, postsalepage, addratepage } = req.body;
 
   // Function to convert comma-separated strings into arrays
   const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
@@ -13136,6 +13194,7 @@ app.post('/getratecardroledata', authenticateToken, async (req, res) => {
     ratecardpage: parseIds(ratecardpage),
     masterpage: parseIds(masterpage),
     postsalepage: parseIds(postsalepage),
+    addratepage: parseIds(addratepage),
   };
 
   try {
@@ -14932,6 +14991,77 @@ app.post("/getgrnlist", authenticateToken, async (req, res) => {
   }
 });
 
+app.post("/getgrnmsplist", authenticateToken, async (req, res) => {
+  const {
+    csp_code,
+    fromDate,
+    toDate,
+    received_from,
+    invoice_number,
+  } = req.body;
+
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+
+    let sql = `
+      SELECT 
+        gn.id,
+        gn.grn_no,
+        gn.invoice_no,
+        gn.invoice_date,
+        gn.csp_code,
+        gn.csp_name,
+        gn.status,
+        gn.created_date,
+        gn.created_by,
+        gn.remark,
+        gn.received_date,
+        COUNT(acg.grn_no) AS product_count
+      FROM awt_grnmaster AS gn
+      LEFT JOIN awt_cspgrnspare AS acg ON acg.grn_no = gn.grn_no
+      WHERE gn.deleted = 0 AND gn.created_by = @csp_code
+    `;
+
+    request.input("csp_code", csp_code);
+
+    if (fromDate && toDate) {
+      sql += " AND CAST(gn.invoice_date AS DATE) BETWEEN @fromDate AND @toDate";
+      request.input("fromDate", fromDate);
+      request.input("toDate", toDate);
+    }
+
+    if (received_from) {
+      sql += " AND gn.csp_name LIKE @received_from";
+      request.input("received_from", `%${received_from}%`);
+    }
+
+    if (invoice_number) {
+      sql += " AND gn.invoice_no LIKE @invoice_number";
+      request.input("invoice_number", `%${invoice_number}%`);
+    }
+
+    sql += `
+      GROUP BY
+        gn.id , gn.grn_no, gn.invoice_no, gn.invoice_date, gn.csp_code,
+        gn.csp_name, gn.status, gn.created_date,
+        gn.created_by, gn.remark, gn.received_date
+      ORDER BY gn.id DESC
+    `;
+
+    const result = await request.query(sql);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "No results found" });
+    }
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+});
+
 
 app.post("/getoutwardlisting", authenticateToken, async (req, res) => {
 
@@ -15176,7 +15306,7 @@ app.post('/addissuespares', authenticateToken, async (req, res) => {
     const articleCode = result.recordset[0]?.article_code;
 
     if (!articleCode) {
-            return res.json({
+      return res.json({
         message: `Spare BOM not found for spare_id: ${spare_id}. Please add it first.`
       });
     }
