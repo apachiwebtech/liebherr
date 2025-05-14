@@ -110,8 +110,8 @@ const HeaderMsp = (params) => {
               </Link>
             </li>
             <li
-              className={`nav-item dropdown ${location.pathname === "/msp/mslmsp" ? "active-class" : ""}`}
-              style={location.pathname === "/msp/mslmsp" ? { background: '#0d6efd', borderRadius: '5px' } : {}}
+              className={`nav-item dropdown ${location.pathname === "/msp/grnmsplist" ? "active-class" : ""}`}
+              style={location.pathname === "/msp/grnmsplist" ? { background: '#0d6efd', borderRadius: '5px' } : {}}
             >
               <Link
                 to={`/msp/grnmsplist`}
