@@ -1485,7 +1485,11 @@ export function Complaintviewmsp(params) {
 
 
 
-        alert(remarkResponse.data.message);
+        if (remarkResponse.data.message) {
+          alert(remarkResponse.data.message);
+        } else {
+          alert("Success")
+        }
 
         fetchComplaintDetails();
       } catch (error) {

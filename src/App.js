@@ -171,6 +171,7 @@ import SpareReport from './Components/Pages/Reports/SpareReport';
 import AddRatecard from './Components/Pages/Master/AddRatecard';
 import { GrnMspList } from './Components/Pages/Master/GrnMspList';
 import {SpareMspOutward} from './Components/Pages/Master/SpareMspOutward';
+import { MspStock } from './Components/Pages/Master/MspStock';
 
 
 
@@ -336,6 +337,10 @@ const Router = createBrowserRouter([
       {
         path: "/msp/roleright",
         element: <ProtectedRoute><MspAddtab /></ProtectedRoute>,
+      },
+      {
+        path: "/msp/mspstock",
+        element: <ProtectedRoute><MspStock /></ProtectedRoute>,
       },
       
 

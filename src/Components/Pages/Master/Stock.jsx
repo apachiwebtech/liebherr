@@ -163,7 +163,7 @@ export function Stock(params) {
                                                     <td>{item.product_code}</td>
                                                     <td>{item.productname}</td>
                                                     <td>{item.stock_quantity}</td>
-                                                    <td>{'0'}</td>
+                                                    <td>{item.total_stock}</td>
                                                     <td><EditIcon onClick={() => stockEdit(item.csp_code, item.product_code, item.stock_quantity)} /></td>
                                                 </tr>
                                             )

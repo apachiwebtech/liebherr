@@ -212,7 +212,8 @@ const CreateGrn = () => {
             const data = {
                 spare_id: SpareId,
                 grn_no: localStorage.getItem('grn_no'),
-                created_by: created_by
+                created_by: created_by,
+                eng_code: selectengineer.id
             };
 
             try {
@@ -223,10 +224,10 @@ const CreateGrn = () => {
                         Authorization: token, // Send token in headers
                     },
                 });
-                if(response.data.affectedRows > 0){
+                if (response.data.affectedRows > 0) {
                     setHide(true)
                     fetchsparelist()
-                }else if(response.data.message){
+                } else if (response.data.message) {
                     alert(response.data.message)
                 }
 
@@ -293,7 +294,8 @@ const CreateGrn = () => {
                 article_code: item.spare_no,
                 article_title: item.spare_title,
                 quantity: String(item.quantity) || String(0), // Use the updated `spare_qty`, default to 0 if empty
-                grn_no: localStorage.getItem('grn_no')
+                grn_no: localStorage.getItem('grn_no'),
+                eng_code: selectengineer.id
             }));
 
 
@@ -301,7 +303,7 @@ const CreateGrn = () => {
             const stringifiedPayload = JSON.stringify(payload);
 
             // Send stringified payload to the server
-            const response = await axios.post(`${Base_Url}/updategrnspares`, stringifiedPayload, {
+            const response = await axios.post(`${Base_Url}/updatecreategrnspares`, stringifiedPayload, {
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: token, // Send token in headers
@@ -313,11 +315,11 @@ const CreateGrn = () => {
                 alert("Data saved successfully!");
                 navigate('/csp/grnlisting')
             } else {
-                alert("Failed to save data.");
+                alert("Insufficient Stock");
             }
         } catch (error) {
             console.error("Error saving data:", error);
-            alert("An error occurred while saving data.");
+            alert("Insufficient Stock.");
         }
     };
 
@@ -437,6 +439,8 @@ const CreateGrn = () => {
 
         setSpareId(newValue.product_code)
     };
+
+
 
 
 

@@ -146,7 +146,8 @@ const Grndetailspage = () => {
                 quantity: String(item.quantity) || String(0),
                 actual_received: String(item.actual_received) || String(0),
                 pending_quantity: String(item.pending_quantity) || String(0),
-                grn_no: value.grn_no
+                grn_no: value.grn_no,
+                eng_code : value.csp_code
             }));
 
 
@@ -358,7 +359,7 @@ const Grndetailspage = () => {
                                             </tbody>
                                         </table>
                                         <div className="float-end">
-                                            <button className="btn btn-primary mx-2" disabled={value.status == '1' || value.status == '2'} onClick={() => handleSpareSend()} type="">Save</button>
+                                            <button className="btn btn-success mx-2" disabled={value.status == '1' || value.status == '2'} onClick={() => handleSpareSend()} type="">Approve</button>
                                             <button className="btn btn-danger" disabled={value.status == '1' || value.status == '2'} onClick={() => handleReject()} type="">Reject</button>
                                         </div>
 

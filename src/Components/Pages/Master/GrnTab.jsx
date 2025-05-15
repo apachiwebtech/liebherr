@@ -69,7 +69,7 @@ function GrnTab() {
                       className={`nav-link ${activeTab === '/csp/cspgrn' ? 'active' : ' onClick={() => setActiveTab("cspgrn")}'}`}
 
                     >
-                      Engineer GRN
+                      ENGINEER GRN
                     </button></Link>
                   </li>
                   <li className="nav-item">
@@ -103,7 +103,7 @@ function GrnTab() {
                       className={`nav-link ${activeTab === '/csp/cspstock' ? 'active' : ' onClick={() => setActiveTab("cspstock")}'}`}
 
                     >
-                      Stock
+                      STOCK
                     </button></Link>
                   </li>
                   <li

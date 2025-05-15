@@ -12,7 +12,7 @@ import { useDispatch } from "react-redux";
 import { getRoleData } from "../../Store/Role/role-action";
 import GrnTab from './GrnTab';
 
-export function CspStock(params) {
+export function MspStock(params) {
     const { loaders, axiosInstance } = useAxiosLoader();
     const token = localStorage.getItem("token");
     const [Stockdata, setStockdata] = useState([]);
@@ -28,7 +28,7 @@ export function CspStock(params) {
     const fetchStock = async (page) => {
         try {
 
-            const response = await axiosInstance.get(`${Base_Url}/getstock/${licare_code}`, {
+            const response = await axiosInstance.get(`${Base_Url}/getmspstock/${licare_code}`, {
                 headers: {
                     Authorization: token,
                 },
@@ -52,7 +52,7 @@ export function CspStock(params) {
         try {
 
             // Fetch all customer data without pagination
-            const response = await axiosInstance.get(`${Base_Url}/getstock/${licare_code}`, {
+            const response = await axiosInstance.get(`${Base_Url}/getmspstock/${licare_code}`, {
                 headers: {
                     Authorization: token,
                 },
@@ -67,6 +67,7 @@ export function CspStock(params) {
             // Convert data to a worksheet
             const worksheet = XLSX.utils.json_to_sheet(
                 decryptedData.map((item) => ({
+                    CSPCode: item.csp_code,
                     ArticleCode: item.product_code,
                     ArticleDescription: item.productname,
                     PhysicalStock: item.stock_quantity,
@@ -89,8 +90,6 @@ export function CspStock(params) {
 
     return (
         <div className="tab-content">
-            <GrnTab />
-
             <div className="row mp0">
 
                 <div className="col-md-12 col-12">
@@ -104,6 +103,7 @@ export function CspStock(params) {
                                     <thead>
                                         <tr>
                                             <th width="5%">#</th>
+                                            <th width="15%">CSP Code</th>
                                             <th width="15%">Article Code</th>
                                             <th width="20%">Article Description</th>
                                             <th width="20%">Physical Stock</th>
@@ -117,6 +117,7 @@ export function CspStock(params) {
                                             return (
                                                 <tr key={item.id}>
                                                     <td>{index + 1}</td>
+                                                    <td>{item.csp_code}</td>
                                                     <td>{item.product_code}</td>
                                                     <td>{item.productname}</td>
                                                     <td>{item.stock_quantity}</td>

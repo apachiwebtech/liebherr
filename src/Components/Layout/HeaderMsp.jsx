@@ -123,6 +123,20 @@ const HeaderMsp = (params) => {
                GRN
               </Link>
             </li>
+            <li
+              className={`nav-item dropdown ${location.pathname === "/msp/mspstock" ? "active-class" : ""}`}
+              style={location.pathname === "/msp/mspstock" ? { background: '#0d6efd', borderRadius: '5px' } : {}}
+            >
+              <Link
+                to={`/msp/mspstock`}
+                className={`nav-link site ${location.pathname === "/msp/mspstock" ? "text-light" : ""}`}
+                id="navbarDropdown"
+                role="button"
+                aria-expanded="false"
+              >
+               Stock
+              </Link>
+            </li>
             {/* <li
               className={`nav-item dropdown ${location.pathname === "/msp/addusers" ? "active-class" : ""}`}
               style={location.pathname === "/msp/addusers" ? { background: '#0d6efd', borderRadius: '5px' } : {}}

@@ -109,25 +109,25 @@ export function GrnList(params) {
 
 
 
-    const updategrnstatus = async (grn_no , eng_code) => {
-        const confirm = window.confirm("Are you sure?")
+    // const updategrnstatus = async (grn_no, eng_code) => {
+    //     const confirm = window.confirm("Are you sure?")
 
-        if (confirm) {
-            try {
-                const response = await axiosInstance.post(`${Base_Url}/updategrnapprovestatus`, { grn_no: grn_no, licare_code: licare_code ,eng_code  :eng_code }, {
-                    headers: {
-                        Authorization: token,
-                    },
-                });
-                alert(response.data)
-                fetchgrnListing()
-            } catch (error) {
-                console.error('Error fetching Quotationdata:', error);
-                setGrn([]);
-            }
-        }
+    //     if (confirm) {
+    //         try {
+    //             const response = await axiosInstance.post(`${Base_Url}/updategrnapprovestatus`, { grn_no: grn_no, licare_code: licare_code, eng_code: eng_code }, {
+    //                 headers: {
+    //                     Authorization: token,
+    //                 },
+    //             });
+    //             alert(response.data)
+    //             fetchgrnListing()
+    //         } catch (error) {
+    //             console.error('Error fetching Quotationdata:', error);
+    //             setGrn([]);
+    //         }
+    //     }
 
-    };
+    // };
 
 
 
@@ -211,24 +211,78 @@ export function GrnList(params) {
         }));
     };
 
-    const handledelete = (grn_no) => {
+    // const handledelete = (grn_no) => {
 
 
-        axios.post(`${Base_Url}/deletedgrn`, { grn_no: grn_no }, {
-            headers: {
-                Authorization: token
-            }
-        })
-            .then((res) => {
-                alert(res.data)
-                fetchgrnListing()
-            })
-    }
+    //     axios.post(`${Base_Url}/deletedgrn`, { grn_no: grn_no }, {
+    //         headers: {
+    //             Authorization: token
+    //         }
+    //     })
+    //         .then((res) => {
+    //             alert(res.data)
+    //             fetchgrnListing()
+    //         })
+    // }
+
+    const formatDate = (dateString) => {
+        const date = new Date(dateString); // Parse the date string
+        const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+        return date.toLocaleDateString('en-GB', options).replace(/\//g, '-'); // Convert to 'DD-MM-YYYY' format
+    };
 
 
-    const exportToExcel = () => {
+    const exportToExcel = async () => {
 
-    }
+        if (!searchFilters.fromDate || !searchFilters.toDate) {
+            alert("Please select both From Date and To Date.");
+            return;
+        }
+
+        try {
+            const data = {
+                csp_code: licare_code,
+                fromDate: searchFilters.fromDate || '',
+                toDate: searchFilters.toDate || '',
+                received_from: searchFilters.received_from || '',
+            };
+
+
+            // Fetch all customer data without pagination
+            const response = await axiosInstance.post(`${Base_Url}/getoutwardexcel`, data, {
+                headers: {
+                    Authorization: token,
+                }
+            });
+
+            const decryptedData = response.data;
+            console.log("Excel Export Data:", decryptedData);
+            // Create a new workbook
+            const workbook = XLSX.utils.book_new();
+
+            // Convert data to a worksheet
+            const worksheet = XLSX.utils.json_to_sheet(
+                decryptedData.map((item) => ({
+                    GrnNo: item.grn_no,
+                    ReceivedFrom: item.csp_name,
+                    ReceivedDate: item.received_date ? formatDate(item.received_date) : '',
+                    ArticleCode: item.spare_no,
+                    ArticleDescription: item.spare_title,
+                    Quantity: item.quantity
+
+                }))
+            );
+
+            // Append the worksheet to the workbook
+            XLSX.utils.book_append_sheet(workbook, worksheet, "GrnList");
+
+            // Export the workbook
+            XLSX.writeFile(workbook, "GrnList.xlsx");
+        } catch (error) {
+            console.error('Error fetching GRN data:', error.response?.data || error.message);
+            setGrn([]);
+        }
+    };
 
 
 
@@ -428,7 +482,7 @@ export function GrnList(params) {
                                                     <td>{item.csp_name}</td>
                                                     <td>{item.invoice_no}</td>
                                                     <td>
-                                                        {new Date(item.invoice_date).toLocaleDateString('en-GB', {
+                                                        {item.invoice_date && new Date(item.invoice_date).toLocaleDateString('en-GB', {
                                                             day: '2-digit',
                                                             month: '2-digit',
                                                             year: 'numeric',
@@ -441,9 +495,7 @@ export function GrnList(params) {
                                                         ) : item.status == '2' ? (
                                                             "Rejected"
                                                         ) : (
-                                                            <button className='btn btn-success' onClick={() => updategrnstatus(item.grn_no , item.csp_code)}>
-                                                                Approve
-                                                            </button>
+                                                           "Pending"
                                                         )}
                                                     </td>
 
