@@ -11545,12 +11545,16 @@ app.get("/getquotationcsplist", authenticateToken, async (req, res) => {
 });
 
 
-app.post('/add_uniqsparepart', authenticateToken, async (req, res) => {
+app.post('/add_uniqsparepart', authenticateToken,upload.none(), async (req, res) => {
   try {
-    let { finaldata } = req.body;
+    let finaldata;
 
-    finaldata = JSON.parse(finaldata)
-
+    // If you're using FormData and appending JSON as a string, parse it manually
+    try {
+      finaldata = JSON.parse(req.body.finaldata);
+    } catch (error) {
+      return res.status(400).json({ message: "Invalid JSON in finaldata", error: error.message });
+    }
 
     const pool = await poolPromise;
     const poolRequest = pool.request();
@@ -11630,9 +11634,18 @@ app.post('/add_uniqsparepart', authenticateToken, async (req, res) => {
 
 
 
-app.post(`/add_quotation`, authenticateToken, async (req, res) => {
+app.post(`/add_quotation`, authenticateToken, upload.none(), async (req, res) => {
 
-  let { finaldata } = req.body;
+
+  let finaldata;
+
+  // If you're using FormData and appending JSON as a string, parse it manually
+  try {
+    finaldata = JSON.parse(req.body.finaldata);
+  } catch (error) {
+    return res.status(400).json({ message: "Invalid JSON in finaldata", error: error.message });
+  }
+
 
   const ModelNumber = finaldata.ModelNumber;
   const customer_id = finaldata.customer_id;
@@ -16170,6 +16183,7 @@ app.get("/getmspstock/:licare_code", authenticateToken, async (req, res) => {
     const getresult = await pool.request().query(getmsprelatedstock);
 
     return res.json(getresult.recordset);
+
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'An error occurred while fetching data' });
@@ -18216,7 +18230,7 @@ app.post("/getmsplist", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
     const sql = `
       SELECT DISTINCT ct.msp, mf.title 
-      FROM complaint_ticket ct
+      FROM complaint_ticket ct 
       JOIN awt_franchisemaster mf ON ct.msp = mf.licarecode
       WHERE ct.msp IS NOT NULL
       ORDER BY mf.title`;
@@ -19521,7 +19535,7 @@ app.post("/getgrnlisting", authenticateToken, async (req, res) => {
         FROM Shipment_Parts AS s 
         LEFT JOIN Address_code AS a ON a.address_code = s.Address_code 
         LEFT JOIN awt_grnmaster AS agn ON agn.invoice_no = s.InvoiceNumber 
-        WHERE ${filterConditions} 
+        WHERE ${filterConditions} AND s.InvoiceDate >= '2025-05-01 00:00:000' 
       )
       SELECT * 
       FROM RankedParts

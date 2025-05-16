@@ -781,19 +781,24 @@ export function Complaintviewmsp(params) {
 
 
 
-    let finaldata = { data: newPart, ticket_no: complaintview.ticket_no }
+    let finaldata = { data: newPart, ticket_no: complaintview.ticket_no, engineerdata: addedEngineers.map((item) => item.engineer_id) }
 
-    finaldata = JSON.stringify(finaldata)
+    // finaldata = JSON.stringify(finaldata)
 
 
 
-    const data = {
-      finaldata: finaldata,
-    };
+    // const data = {
+    //   finaldata: finaldata,
+    // };
 
-    axiosInstance.post(`${Base_Url}/add_uniqsparepart`, data, {
+
+    const formData = new FormData();
+    formData.append("finaldata", JSON.stringify(finaldata)); // Append as string
+
+    axiosInstance.post(`${Base_Url}/add_uniqsparepart`, formData, {
       headers: {
         Authorization: token, // Send token in headers
+        "Content-Type": "multipart/form-data",
       },
     })
       .then((res) => {
@@ -828,10 +833,15 @@ export function Complaintviewmsp(params) {
       finaldata: finaldata,
     };
 
+    // Create FormData
+    const formData = new FormData();
+    formData.append("finaldata", JSON.stringify(finaldata)); // Append as string
+
     // Send the POST request
-    axiosInstance.post(`${Base_Url}/add_quotation`, data, {
+    axiosInstance.post(`${Base_Url}/add_quotation`, formData, {
       headers: {
         Authorization: token, // Send token in headers
+        "Content-Type": "multipart/form-data", // Important for FormData
       },
     })
       .then((response) => {

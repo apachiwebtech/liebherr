@@ -588,9 +588,10 @@ const Uniqueproduct = () => {
                         )}
                       </div>
 
-                      <div onClick={handleClickOpen} style={{ textDecoration: "underline", cursor: "pointer" }}>
+                      {roleaccess > 4 && <div onClick={handleClickOpen} style={{ textDecoration: "underline", cursor: "pointer" }}>
                         Serial number transfer
-                      </div>
+                      </div> }
+
                       <Dialog
                         open={open}
                         onClose={handleClose}

@@ -592,9 +592,9 @@ export function EnquiryForm(params) {
                                                 <option value="">Select</option>
                                                 <option value="Call">Call</option>
                                                 <option value="Website">Website</option>
-                                                <option value="Call">Social Media</option>
-                                                <option value="Call">E-mail</option>
-                                                <option value="Call">SMS</option>
+                                                <option value="SocialMedia">Social Media</option>
+                                                <option value="Email">E-mail</option>
+                                                <option value="SMS">SMS</option>
                                             </select>
                                             {errors.source && <span className="text-danger">{errors.source}</span>}
 
