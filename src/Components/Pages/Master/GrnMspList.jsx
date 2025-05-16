@@ -110,12 +110,12 @@ export function GrnMspList(params) {
 
 
 
-    const updategrnstatus = async (grn_no , eng_code) => {
+    const updategrnstatus = async (grn_no, eng_code) => {
         const confirm = window.confirm("Are you sure?")
 
         if (confirm) {
             try {
-                const response = await axiosInstance.post(`${Base_Url}/updategrnapprovestatus`, { grn_no: grn_no, licare_code: licare_code ,eng_code  :eng_code }, {
+                const response = await axiosInstance.post(`${Base_Url}/updategrnapprovestatus`, { grn_no: grn_no, licare_code: licare_code, eng_code: eng_code }, {
                     headers: {
                         Authorization: token,
                     },
@@ -128,6 +128,70 @@ export function GrnMspList(params) {
             }
         }
 
+    };
+
+    const formatDate = (dateString) => {
+        const date = new Date(dateString); // Parse the date string
+        const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+        return date.toLocaleDateString('en-GB', options).replace(/\//g, '-'); // Convert to 'DD-MM-YYYY' format
+    };
+
+
+    const exportToExcel = async () => {
+
+        if (!searchFilters.fromDate || !searchFilters.toDate) {
+            alert("Please select both From Date and To Date.");
+            return;
+        }
+
+        try {
+            const data = {
+                csp_code: licare_code,
+                fromDate: searchFilters.fromDate || '',
+                toDate: searchFilters.toDate || '',
+                received_from: searchFilters.received_from || '',
+            };
+
+
+            // Fetch all customer data without pagination
+            const response = await axiosInstance.post(`${Base_Url}/getgrnmspexcel`, data, {
+                headers: {
+                    Authorization: token,
+                }
+            });
+
+            const decryptedData = response.data;
+            console.log("Excel Export Data:", decryptedData);
+            // Create a new workbook
+            const workbook = XLSX.utils.book_new();
+
+            // Convert data to a worksheet
+            const worksheet = XLSX.utils.json_to_sheet(
+                decryptedData.map((item) => ({
+                    GrnNo: item.grn_no,
+                    ReceivedFrom: item.csp_name,
+                    ReceivedDate: item.received_date ? formatDate(item.received_date) : '',
+                    ArticleCode: item.spare_no,
+                    ArticleDescription: item.spare_title,
+                    SpareQuantity: item.quantity,
+                    SpareNumber: item.spare_no,
+                    Spare: item.spare_title,
+                    Status: item.status,
+                    InvoiceNumber: item.invoice_no,
+                    InvoiceDate: item.invoice_date ? formatDate(item.invoice_date) : '',
+
+                }))
+            );
+
+            // Append the worksheet to the workbook
+            XLSX.utils.book_append_sheet(workbook, worksheet, "GrnList");
+
+            // Export the workbook
+            XLSX.writeFile(workbook, "GrnList.xlsx");
+        } catch (error) {
+            console.error('Error fetching GRN data:', error.response?.data || error.message);
+            setGrn([]);
+        }
     };
 
 
@@ -289,7 +353,7 @@ export function GrnMspList(params) {
                                 <div className="form-group ">
                                     <button
                                         className="btn btn-primary mx-1"
-                                        // onClick={exportToExcel}
+                                    onClick={exportToExcel}
                                     >
                                         Export to Excel
                                     </button>
@@ -312,7 +376,7 @@ export function GrnMspList(params) {
                                     >
                                         Reset
                                     </button>
-                                 
+
                                 </div>
                             </div>
 
@@ -341,7 +405,7 @@ export function GrnMspList(params) {
                                             <th width="15%">Invoice Date</th>
                                             <th width="10%">Spare No</th>
                                             <th width="10%">Spare Title</th>
-                                             <th width="10%">Spare Quantity</th>
+                                            <th width="10%">Spare Quantity</th>
                                             <th width="20%">Status</th>
 
                                         </tr>
@@ -375,9 +439,7 @@ export function GrnMspList(params) {
                                                         ) : item.status == '2' ? (
                                                             "Rejected"
                                                         ) : (
-                                                            <button className='btn btn-success' onClick={() => updategrnstatus(item.grn_no , item.csp_code)}>
-                                                                Approve
-                                                            </button>
+                                                            "Pending"
                                                         )}
                                                     </td>
 

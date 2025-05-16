@@ -125,7 +125,7 @@ export function SpareMspOutward(params) {
 
 
             // Fetch all customer data without pagination
-            const response = await axiosInstance.post(`${Base_Url}/getoutwardexcel`, data, {
+            const response = await axiosInstance.post(`${Base_Url}/getmspoutwardexcel`, data, {
                 headers: {
                     Authorization: token,
                 }
@@ -144,7 +144,8 @@ export function SpareMspOutward(params) {
                     IssueDate: item.issue_date ? formatDate(item.issue_date) : '',
                     ArticleCode: item.spare_no,
                     ArticleDescription: item.spare_title,
-                    Quantity: item.quantity
+                    Quantity: item.quantity,
+                    
 
                 }))
             );
