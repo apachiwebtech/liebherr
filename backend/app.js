@@ -14779,13 +14779,13 @@ app.post('/updatecreategrnspares', authenticateToken, async (req, res) => {
       stockRequest.input('eng_code', sql.VarChar, item.eng_code);
       stockRequest.input('csp_code', sql.VarChar, item.csp_code);
 
-      console.log(item.csp_code , item.article_code)
+      console.log(item.csp_code, item.article_code)
 
       const stockResult = await stockRequest.query(checkStockQuery);
 
       const stock_quantity = stockResult.recordset[0]?.stock_quantity || 0;
 
-      console.log(typeof(stock_quantity) , 'stock' , typeof(item.quantity))
+      console.log(typeof (stock_quantity), 'stock', typeof (item.quantity))
 
       // Step 2: Compare and update only if stock is sufficient
       if (Number(stock_quantity) >= Number(item.quantity)) {
@@ -17336,10 +17336,12 @@ app.get("/getpincodelist", authenticateToken, async (req, res) => {
       pageSize = 10, // Default to 10 items per page if not provided
     } = req.query;
     // Use the poolPromise to get the connection pool
+
     const pool = await poolPromise;
 
     // Directly use the query (no parameter binding)
     let sql = `SELECT p.* FROM pincode_allocation as p WHERE 1=1`;
+
 
     if (pincode) {
       sql += ` AND p.pincode LIKE '%${pincode}%'`;
@@ -17376,7 +17378,8 @@ app.get("/getpincodelist", authenticateToken, async (req, res) => {
     // Pagination logic: Calculate offset based on the page number
     const offset = (page - 1) * pageSize;
     // Add pagination to the SQL query (OFFSET and FETCH NEXT)
-    sql += ` ORDER BY p.pincode  OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+    sql += ` ORDER BY p.id  OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+
 
     // Execute the query
     const result = await pool.request().query(sql);
@@ -17411,6 +17414,139 @@ app.get("/getpincodelist", authenticateToken, async (req, res) => {
     return res.status(500).json({ error: "Database error occurred" });
   }
 });
+
+app.get("/getpincodeexcel", authenticateToken, async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    const {
+      pincode,
+      country,
+      region,
+      state,
+      city,
+      msp_name,
+      csp_name,
+      customer_classification,
+      call_type,
+      page = 1,
+      pageSize = 10,
+    } = req.query;
+
+
+    const request = pool.request();
+
+    let sql = `SELECT * FROM pincode_allocation WHERE 1=1`;
+
+    if (pincode) {
+      sql += ` AND pincode LIKE @pincode`;
+      request.input('pincode', `%${pincode}%`);
+    }
+    if (country) {
+      sql += ` AND country LIKE @country`;
+      request.input('country', `%${country}%`);
+    }
+    if (region) {
+      sql += ` AND region LIKE @region`;
+      request.input('region', `%${region}%`);
+    }
+    if (state) {
+      sql += ` AND state LIKE @state`;
+      request.input('state', `%${state}%`);
+    }
+    if (city) {
+      sql += ` AND city LIKE @city`;
+      request.input('city', `%${city}%`);
+    }
+    if (msp_name) {
+      sql += ` AND msp_name LIKE @msp_name`;
+      request.input('msp_name', `%${msp_name}%`);
+    }
+    if (csp_name) {
+      sql += ` AND csp_name LIKE @csp_name`;
+      request.input('csp_name', `%${csp_name}%`);
+    }
+    if (customer_classification) {
+      sql += ` AND customer_classification LIKE @customer_classification`;
+      request.input('customer_classification', `%${customer_classification}%`);
+    }
+    if (call_type) {
+      sql += ` AND call_type LIKE @call_type`;
+      request.input('call_type', `%${call_type}%`);
+    }
+
+    const offset = (page - 1) * pageSize;
+    sql += ` ORDER BY id OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY`;
+    request.input('offset', offset);
+    request.input('pageSize', parseInt(pageSize));
+
+    // Execute the query
+    const result = await request.query(sql);
+
+    // Count query (use a separate request for safety)
+    const countRequest = pool.request();
+    let countSql = `SELECT COUNT(*) as totalCount FROM pincode_allocation WHERE 1=1`;
+
+    if (pincode) {
+      countSql += ` AND pincode LIKE @pincode`;
+      countRequest.input('pincode', `%${pincode}%`);
+    }
+    if (country) {
+      countSql += ` AND country LIKE @country`;
+      countRequest.input('country', `%${country}%`);
+    }
+    if (region) {
+      countSql += ` AND region LIKE @region`;
+      countRequest.input('region', `%${region}%`);
+    }
+    if (state) {
+      countSql += ` AND state LIKE @state`;
+      countRequest.input('state', `%${state}%`);
+    }
+    if (city) {
+      countSql += ` AND city LIKE @city`;
+      countRequest.input('city', `%${city}%`);
+    }
+    if (msp_name) {
+      countSql += ` AND msp_name LIKE @msp_name`;
+      countRequest.input('msp_name', `%${msp_name}%`);
+    }
+    if (csp_name) {
+      countSql += ` AND csp_name LIKE @csp_name`;
+      countRequest.input('csp_name', `%${csp_name}%`);
+    }
+    if (customer_classification) {
+      countSql += ` AND customer_classification LIKE @customer_classification`;
+      countRequest.input('customer_classification', `%${customer_classification}%`);
+    }
+    if (call_type) {
+      countSql += ` AND call_type LIKE @call_type`;
+      countRequest.input('call_type', `%${call_type}%`);
+    }
+
+    const countResult = await countRequest.query(countSql);
+    const totalCount = countResult.recordset[0].totalCount;
+
+    // Encrypt the data
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
+
+    return res.json({
+      encryptedData,
+      totalCount,
+      page: parseInt(page),
+      pageSize: parseInt(pageSize),
+    });
+
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred" });
+  }
+});
+
+
+
+
+
 
 
 //MobApp  Start
@@ -20260,7 +20396,7 @@ app.post("/getmspinwardliebherrexcel", authenticateToken, async (req, res) => {
     // Build IN clause for created_by
     const childCodes = childResult.recordset.map(row => `'${row.licare_code}'`).join(",");
 
-    console.log(childCodes , "chii")
+    console.log(childCodes, "chii")
 
     const request = pool.request();
 

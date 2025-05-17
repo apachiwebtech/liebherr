@@ -134,56 +134,57 @@ const PincodeAllocation = () => {
     fetchPincodelist();
   }, []);
   //export to excel
-  const exportToExcel = async () => {
-    try {
-      // Fetch all customer data without pagination
-      const response = await axiosInstance.get(`${Base_Url}/getpincodelist`, {
-        headers: {
-          Authorization: token,
-        },
-        params: {
-          pageSize: totalCount, // Fetch all data
-          page: 1, // Start from the first page
-        },
-      });
-      const decryptedData = CryptoJS.AES.decrypt(response.data.encryptedData, secretKey).toString(CryptoJS.enc.Utf8);
-      const allPincodedata = JSON.parse(decryptedData);
-      // Create a new workbook
-      const workbook = XLSX.utils.book_new();
+const exportToExcel = async () => {
+  try {
+    const params = new URLSearchParams();
 
-      // Convert data to a worksheet
-      const worksheet = XLSX.utils.json_to_sheet(allPincodedata.map(user => ({
+    // Add filters
+    Object.entries(searchFilters).forEach(([key, value]) => {
+      if (value) {
+        params.append(key, value);
+      }
+    });
 
-        "PIncode": user.pincode,
-        "Region": user.region,
-        "Country": user.country,
-        "State": user.state,
-        "City": user.city,
-        "MotherBranch": user.mother_branch,
-        "ResidentBranch": user.resident_branch,
-        "AreaManager": user.area_manager,
-        "LocalManager": user.local_manager,
-        "CustomerClassification": user.customer_classification,
-        "ClassCity": user.class_city,
-        "CspName": user.csp_name,
-        "MspName": user.msp_name,
-        "CallType": user.call_type,
-        "MspCode": user.msp_code,
-        "CspCode": user.csp_code,
+    // Add pagination for full export
+    params.append("pageSize", totalCount);
+    params.append("page", 1);
 
+    const response = await axiosInstance.get(`${Base_Url}/getpincodeexcel?${params.toString()}`, {
+      headers: {
+        Authorization: token,
+      },
+    });
 
+    const decryptedData = CryptoJS.AES.decrypt(response.data.encryptedData, secretKey).toString(CryptoJS.enc.Utf8);
+    const allPincodedata = JSON.parse(decryptedData);
 
-      })));
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(allPincodedata.map(user => ({
+      "Pincode": user.pincode,
+      "Region": user.region,
+      "Country": user.country,
+      "State": user.state,
+      "City": user.city,
+      "MotherBranch": user.mother_branch,
+      "ResidentBranch": user.resident_branch,
+      "AreaManager": user.area_manager,
+      "LocalManager": user.local_manager,
+      "CustomerClassification": user.customer_classification,
+      "ClassCity": user.class_city,
+      "CspName": user.csp_name,
+      "MspName": user.msp_name,
+      "CallType": user.call_type,
+      "MspCode": user.msp_code,
+      "CspCode": user.csp_code,
+    })));
 
-      // Append the worksheet to the workbook
-      XLSX.utils.book_append_sheet(workbook, worksheet, "PincodeAllocation");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "PincodeAllocation");
+    XLSX.writeFile(workbook, "PincodeAllocation.xlsx");
 
-      // Export the workbook
-      XLSX.writeFile(workbook, "PincodeAllocation.xlsx");
-    } catch (error) {
-      console.error("Error exporting data to Excel:", error);
-    }
-  };
+  } catch (error) {
+    console.error("Error exporting data to Excel:", error);
+  }
+};
 
 
 
