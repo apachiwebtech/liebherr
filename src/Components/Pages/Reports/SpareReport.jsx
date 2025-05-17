@@ -61,7 +61,6 @@ const SpareReport = () => {
                 // Format date fields
                 const formattedData = response.data.map(item => ({
                     ...item,
-                    PartChargable :  ''
 
                 }));
 

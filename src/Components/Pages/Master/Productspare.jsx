@@ -208,25 +208,21 @@ export function Productspare() {
 
         // Convert data to a worksheet
         const worksheet = XLSX.utils.json_to_sheet(allSpareData.map(user => ({
-            "Spare": user.title, // Add fields you want to export
             "ProductCode": user.ProductCode,
-            "ModelNumber": user.ModelNumber,
+            "Product Description": user.ModelNumber,
+            "ItemCode": user.title,
             "ItemDescription": user.ItemDescription,
-            "Manufactured": user.Manufactured,
             "BOM Qty": user.BOMQty,
             "PriceGroup": user.PriceGroup,
-            "Status": user.Status,
             "ProductType": user.ProductType,
-            "Model": user.Model,
-            "Index1": user.Index1,
-            "PartNature": user.PartNature,
-            "Warranty": user.Warranty,
-            "HSN": user.HSN,
-            "Packed": user.Packed,
-            "Returnable": user.Returnable,
             "Product Class": user.ProductClass,
             "Product Line": user.ProductLine,
-            "Serialized": user.Serialized
+            "Product Nature": user.PartNature,
+            "Product Warranty Type": user.Warranty,
+            "Product Returnable Type": user.Returnable,
+            "Manufacturer": user.Manufactured,
+            "Serialized": user.Serialized,
+            "Status": user.Status
         })));
 
         // Append the worksheet to the workbook

@@ -11545,7 +11545,7 @@ app.get("/getquotationcsplist", authenticateToken, async (req, res) => {
 });
 
 
-app.post('/add_uniqsparepart', authenticateToken,upload.none(), async (req, res) => {
+app.post('/add_uniqsparepart', authenticateToken, upload.none(), async (req, res) => {
   try {
     let finaldata;
 
@@ -13349,94 +13349,107 @@ app.post('/assign_role', authenticateToken, async (req, res) => {
 app.post("/getcomplainticketdump", authenticateToken, async (req, res) => {
 
   const { startDate, endDate, licare_code } = req.body;
+
+  // Helper function to format dates
+  function excelformatDate(dateStr) {
+    if (!dateStr) return ""; // Guard clause for null/undefined
+    const date = new Date(dateStr);
+    if (isNaN(date)) return dateStr; // Return original if invalid date
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  }
+
   try {
-    // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
-    const getcsp = `select * from lhi_user where Usercode = '${licare_code}'`
-
-
+    const getcsp = `SELECT * FROM lhi_user WHERE Usercode = '${licare_code}'`
     const getcspresilt = await pool.request().query(getcsp)
+    const assigncsp = getcspresilt.recordset[0]?.assigncsp
 
-    const assigncsp = getcspresilt.recordset[0].assigncsp
-
-    let sql;
-
-
-    sql = `SELECT 
-    ct.id,
-    ct.ticket_no,
-    ct.ticket_date,
-    ct.customer_id,
-    ct.customer_name,
-    ct.address,
-    ct.state,
-    ct.city,
-    ct.area as District,
-    ct.pincode,
-    ct.customer_class as CustomerClassification,
-    ct.customer_mobile,
-    ct.customer_email,
-    ct.alt_mobile,
-    ct.call_type,
-    ct.mode_of_contact as CallCategory
-    ct.ModelNumber,
-    ct.serial_no,
-    ct.purchase_date,
-    ct.warranty_status as WarrantyType,
-    ct.call_status,
-    ct.sub_call_status,
-    ct.specification as FaultDescription,
-    acr.remark AS FinalRemark,
-    ct.closed_date as FieldCompletedDate,
-    ct.call_remark as AdditionalInfo,
-    ct.mother_branch,
-    ct.msp,
-    ct.sevice_partner as MasterServicePartnerName,
-    ct.csp,
-    ct.child_service_partner,
-    ct.assigned_to as EngineerName,
-    ct.visit_count as CountOfVisit,
-    ct.call_charges as CallChargeable,
-    ct.call_priority as Priority,
-    ct.totp as TOTP+,
-FROM complaint_ticket ct
-LEFT JOIN (
-    SELECT acr1.ticket_no, acr1.remark, acr1.created_date
-    FROM awt_complaintremark acr1
-    JOIN (
-        SELECT ticket_no, MAX(id) AS max_id
-        FROM awt_complaintremark
-        WHERE created_date LIKE '%2025%' AND updated_by IS NULL
-        GROUP BY ticket_no
-    ) latest ON acr1.id = latest.max_id
-) acr ON ct.ticket_no = acr.ticket_no
-WHERE ct.deleted = 0 
-  AND ct.ticket_date >= '${startDate}' 
-  AND ct.ticket_date <= '${endDate}' `
-
-
+    let sql = `
+      SELECT 
+        ct.id,
+        ct.ticket_no as TicketNumber,
+        ct.ticket_date as CreateDate,
+        ct.customer_id as CustomerID,
+        ct.salutation as Salutation,
+        ct.customer_name as CustomerName,
+        ct.address as Address,
+        ct.city as City,
+        ct.area AS District,
+        ct.state as State,
+        ct.pincode as PINCODE,
+        ct.customer_class AS CustomerClassification,
+        ct.customer_mobile as MobileNumber,
+        ct.alt_mobile as AlternateMobileNumber,
+        ct.customer_email as CustomerEmailID,
+        ct.call_type as CustomerType,
+        ct.mode_of_contact AS CallCategory,
+        ct.ModelNumber,
+        ct.serial_no as SerialNumber,
+        ct.purchase_date as PurchaseDate,
+        ct.warranty_status AS WarrantyType,
+        ct.call_status as CallStatus,
+        ct.sub_call_status as CallSubStatus,
+        ct.specification AS FaultDescription,
+        scf.remark AS FeedbackStatus,
+        acr.remark AS FinalRemark,
+        ct.closed_date AS FieldCompletedDate,
+        ct.call_remark AS AdditionalInfo,
+        ct.mother_branch as LiebherrBranch,
+        ct.msp as MasterServicePartnerCode,
+        ct.sevice_partner AS MasterServicePartnerName,
+        ct.csp as ChildServicePartnerCode,
+        ct.child_service_partner as ChildServicePartnerName,
+        ct.assigned_to AS EngineerName,
+        ct.visit_count AS CountOfVisit,
+        ct.call_charges AS CallChargeable,
+        ct.payment_collected as FieldChargeable,
+        ct.call_priority AS Priority,
+        ct.totp AS TOTP
+      FROM complaint_ticket ct
+      LEFT JOIN (
+          SELECT acr1.ticket_no, acr1.remark, acr1.created_date
+          FROM awt_complaintremark acr1
+          JOIN (
+              SELECT ticket_no, MAX(id) AS max_id
+              FROM awt_complaintremark
+              WHERE created_date LIKE '%2025%' AND updated_by IS NULL
+              GROUP BY ticket_no
+          ) latest ON acr1.id = latest.max_id
+      ) acr ON ct.ticket_no = acr.ticket_no
+      LEFT JOIN awt_service_contact_form as scf ON ct.ticket_no = scf.ticket_no
+      WHERE ct.deleted = 0  
+        AND ct.ticket_date >= '${startDate}' 
+        AND ct.ticket_date <= '${endDate}'
+    `;
 
     if (assigncsp !== 'ALL') {
-      // Convert to an array and wrap each value in single quotes
       const formattedCspList = assigncsp.split(",").map(csp => `'${csp.trim()}'`).join(",");
-
-      // Directly inject the formatted values into the SQL query
       sql += ` AND ct.csp IN (${formattedCspList})`;
     }
 
     sql += ` ORDER BY RIGHT(ct.ticket_no , 4) ASC`;
 
-
-
-
-
     const result = await pool.request().query(sql);
-    return res.json(result.recordset);
+
+    // Format date fields in the result
+    const formattedData = result.recordset.map(record => ({
+      ...record,
+      CreateDate: excelformatDate(record.CreateDate),
+      PurchaseDate: excelformatDate(record.PurchaseDate),
+      FieldCompletedDate: excelformatDate(record.FieldCompletedDate)
+    }));
+
+    return res.json(formattedData);
+
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'An error occurred while fetching data' });
   }
 });
+
 app.post("/getspareconsumption", authenticateToken, async (req, res) => {
 
   const { startDate, endDate, licare_code } = req.body;
@@ -13453,9 +13466,9 @@ app.post("/getspareconsumption", authenticateToken, async (req, res) => {
     let sql;
 
 
-    sql = `select ct.ticket_no as TicketNumber, au.article_code as ItemCode, au.article_description as ItemDescription,au.quantity as Quantity, sp.Returnable as PartRetunableType , sp.Warranty as PartWarrantyType, sp.PriceGroup  from awt_uniquespare as au
+    sql = `select ct.ticket_no as TicketNumber, au.article_code as ItemCode, au.article_description as ItemDescription,au.quantity as Quantity, sp.PriceGroup,ct.call_charges as PartChargeable, sp.Warranty as PartWarrantyType, sp.Returnable as PartRetunableType  from awt_uniquespare as au
 left join complaint_ticket as ct on ct.ticket_no = au.ticketId
-Left Join Spare_parts as sp on sp.title = au.article_code where au.deleted = 0 and ct.call_status = 'Closed' AND ct.ticket_date >= '${startDate}' AND ct.ticket_date <= '${endDate}' `
+Left Join Spare_parts as sp on sp.title = au.article_code where au.deleted = 0 and ct.call_status = 'Closed'   AND ct.ticket_date >= '${startDate}' AND ct.ticket_date <= '${endDate}' `
 
 
 
@@ -16192,15 +16205,59 @@ app.get("/getmspstock/:licare_code", authenticateToken, async (req, res) => {
 
 
 app.get("/getallstock", authenticateToken, async (req, res) => {
-  const { licare_code } = req.params
   try {
-    // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
-    const result = await pool.request().query(`SELECT * FROM csp_stock WHERE deleted = 0`);
-    return res.json(result.recordset);
+    const {
+      csp_code,
+      product_code,
+      productname,
+      page = 1,
+      pageSize = 10,
+    } = req.query;
+    let sql = `
+       SELECT c.* FROM csp_stock as c WHERE c.deleted = 0
+    `;
+
+    if (csp_code) {
+      sql += ` AND c.csp_code LIKE '%${csp_code}%'`;
+
+    }
+
+    if (product_code) {
+      sql += ` AND c.product_code LIKE '%${product_code}%'`;
+    }
+
+    if (productname) {
+      sql += ` AND c.productname LIKE '%${productname}%'`;
+    }
+
+    // Pagination logic: Calculate offset based on the page number
+    const offset = (page - 1) * pageSize;
+    // Add pagination to the SQL query (OFFSET and FETCH NEXT)
+    sql += ` ORDER BY c.id OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+
+    const result = await pool.request().query(sql);
+
+    // Get the total count of records for pagination
+    let countSql = `SELECT COUNT(*) as totalCount FROM csp_stock WHERE deleted = 0`;
+    if (csp_code) countSql += ` AND csp_code LIKE '%${csp_code}%'`;
+    if (product_code) countSql += ` AND product_code LIKE '%${product_code}%'`;
+    if (productname) countSql += ` AND productname LIKE '%${productname}%'`;
+
+    const countResult = await pool.request().query(countSql);
+    const totalCount = countResult.recordset[0].totalCount;
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
+    return res.json({
+      encryptedData,
+      totalCount: totalCount,
+      page,
+      pageSize,
+    });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: 'An error occurred while fetching data' });
+    return res.status(500).json({ message: "An error occurred while fetching the complaint list" });
   }
 });
 
@@ -18101,18 +18158,58 @@ app.post("/getannexturedata", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
-    let sql = `SELECT id, ticket_no, created_date, ticket_type, customer_id, customer_name, state, 
-                      pincode,call_status,mother_branch, msp, sevice_partner, csp, child_service_partner,customer_class,
-                      ModelNumber, serial_no, invoice_date, warranty_status,closed_date,sales_partner, assigned_to, 
-                      class_city,visit_count,gas_charges,transport_charge,service_charges
-               FROM complaint_ticket 
-               WHERE deleted = 0 
-               AND ticket_date >= @startDate 
-               AND ticket_date <= @endDate`;
+    let sql = `SELECT
+ct.ticket_no as TicketNumber,
+ct.ticket_date as CreateDate,
+ct.customer_id as CustomerID,
+ct.customer_name as CustomerName,
+ct.ticket_type as TicketType,
+ct.mode_of_contact as CallCategory,
+ct.call_status as CallStatus,
+ct.address as Address,
+ct.area as District,
+ct.city as City,
+ct.state as State,
+ct.pincode as Pincode,
+ct.csp as ChildServicePartnerCode,
+ct.mother_branch as LiebherrBranch,
+ct.customer_class as CustomerClassification,
+DATEDIFF(DAY, ct.ticket_date, GETDATE()) AS AgeingDays,
+ct.serial_no as SerialNumber,
+ct.ModelNumber,
+ct.purchase_date as PurchaseDate,
+ct.assigned_to as EngineerName,
+ct.updated_date as LastUpdated,
+ct.closed_date as FieldCompleteDate,
+ct.created_by as CreateUser,
+ct.mode_of_contact as ModeOfContact,
+ct.updated_by as LastModifyUser,
+ct.visit_count as CountOfVisit,
+ct.child_service_partner as ChildServicePartnerName,
+ct.gas_charges as GasCharging,
+ct.msp as MasterServicePartnerCode,
+ct.sevice_partner as MasterServicePartnerName,
+ct.sub_call_status as CallSubStatus,
+ct.class_city as ClassOfCity,
+ct.sales_partner as PrimaryDealer,
+ct.call_charges as TicketCharges,
+ISNULL(TRY_CAST(ct.collected_amount AS FLOAT), 0) +
+ISNULL(TRY_CAST(ct.transport_charge AS FLOAT), 0) +
+ISNULL(TRY_CAST(ct.mandays_charges AS FLOAT), 0) +
+ISNULL(TRY_CAST(ct.gas_charges AS FLOAT), 0) +
+ISNULL(TRY_CAST(ct.service_charges AS FLOAT), 0) AS TotalTicketCharges,
+ct.salutation as Salutation,
+ct.warranty_status as WarrantyStatus
+FROM complaint_ticket as ct
+WHERE deleted = 0 
+AND ct.ticket_date >= @startDate 
+AND ct.ticket_date <= @endDate`;
 
     if (msp) {
       sql += " AND msp = @msp"; // Add MSP filter if selected
     }
+
+    sql += ` ORDER BY RIGHT(ct.ticket_no , 4) ASC`;
 
     const request = pool.request();
     request.input("startDate", startDate);
@@ -19894,42 +19991,66 @@ WHERE ct.deleted = 0
 app.post("/getassetreportdump", authenticateToken, async (req, res) => {
 
   const { startDate, endDate, licare_code } = req.body;
+
+  // Date formatting function
+  function excelformatDate(dateStr) {
+    if (!dateStr) return ""; // If empty/null
+    const date = new Date(dateStr);
+    if (isNaN(date)) return dateStr; // Return original if not a valid date
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  }
+
   try {
-    // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
 
-    let sql;
-
-
-    // sql = `Select id,ticket_no, ticket_date,customer_id,customer_name,customer_mobile,alt_mobile,customer_email,ModelNumber,serial_no, address, region, state, city, area, pincode, mother_branch,sevice_partner,child_service_partner, msp, csp, sales_partner, assigned_to, engineer_code, engineer_id, ticket_type, call_type , sub_call_status, call_status, warranty_status, purchase_date, mode_of_contact, customer_class, call_priority, closed_date,group_code,defect_type,site_defect,activity_code,  created_date, created_by,deleted From complaint_ticket where deleted = 0  AND ticket_date >= '${startDate}' AND ticket_date <= '${endDate}' `
-
-
-    sql = `SELECT
-ct.ticket_no as TicketNumber,
-g.defectgrouptitle as FaultGroup,
-t.defect_title as FaultType,
-s.dsite_title as FaultLocation,
-a.title  as Activity 
-FROM complaint_ticket ct 
-LEFT JOIN  awt_defectgroup as g on g.defectgroupcode = ct.group_code 
-LEFT JOIN  awt_typeofdefect as t on t.defect_code = ct.defect_type
-LEFT JOIN awt_site_defect as s on s.dsite_code = ct.site_defect
-LEFT JOIN awt_activity as a on a.code = ct.activity_code
-WHERE ct.deleted = 0 
-  AND ct.ticket_date >= '${startDate}' 
-  AND ct.ticket_date <= '${endDate}'  `
-
-
-    sql += ` ORDER BY RIGHT(ct.ticket_no , 4) ASC`;
-
+    let sql = `
+      SELECT
+        u.serial_no as SerialNumber,
+        u.CustomerID,
+        u.CustomerName,
+        u.BranchName as LiebherrBranch,
+        u.SerialStatus as Status,
+        sl.ItemNumber as ItemCode,
+        sl.ModelNumber as ItemDescription,
+        u.InvoiceDate,
+        u.InvoiceNumber,
+        u.warranty_sdate as WarrantyStartDate,
+        u.warranty_edate as WarrantyEndDate,
+        u.SalesDealer as PrimaryDealerName,
+        u.SubDealer as SecondaryDealerName,
+        u.Notes,
+        u.updated_by as LastModifiedBy,
+        u.updated_date as LastModifiedDate
+      FROM awt_uniqueproductmaster as u 
+      LEFT JOIN awt_serial_list as sl on sl.serial_no = u.serial_no 
+      WHERE u.deleted = 0 
+        AND u.InvoiceDate >= '${startDate}' 
+        AND u.InvoiceDate <= '${endDate}'  
+      ORDER BY RIGHT(u.serial_no , 4) ASC
+    `;
 
     const result = await pool.request().query(sql);
-    return res.json(result.recordset);
+
+    // Format date fields
+    const formattedData = result.recordset.map(record => ({
+      ...record,
+      InvoiceDate: excelformatDate(record.InvoiceDate),
+      WarrantyStartDate: excelformatDate(record.WarrantyStartDate),
+      WarrantyEndDate: excelformatDate(record.WarrantyEndDate),
+      LastModifiedDate: excelformatDate(record.LastModifiedDate)
+    }));
+
+    return res.json(formattedData);
+
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'An error occurred while fetching data' });
   }
 });
+
 
 app.post("/sendjobcard", authenticateToken, async (req, res) => {
 
@@ -19976,3 +20097,79 @@ app.post("/updateadminstock", authenticateToken, async (req, res) => {
     return res.status(500).json({ error: 'An error occurred while updating stock' });
   }
 });
+
+app.get("/downloadstockexcel", authenticateToken, async (req, res) => {
+  try {
+    const pool = await poolPromise;
+
+    // Fetch all customers who are not deleted
+    const result = await pool.request().query(`
+      SELECT 
+        f.licarecode AS licare_code,
+        f.title AS msp,
+        c.csp_code,
+        cf.title AS csp,
+        s.Manufactured,
+        c.product_code,
+        c.productname,
+        c.stock_quantity,
+        c.total_stock
+      FROM csp_stock AS c 
+      LEFT JOIN awt_childfranchisemaster AS cf ON cf.licare_code = c.csp_code 
+      LEFT JOIN awt_franchisemaster AS f ON f.licarecode = cf.pfranchise_id 
+      LEFT JOIN Spare_parts AS s ON s.title = c.product_code 
+      WHERE c.deleted = 0
+      GROUP BY 
+        f.licarecode,
+        f.title,
+        c.csp_code,
+        cf.title,
+        s.Manufactured,
+        c.product_code,
+        c.productname,
+        c.stock_quantity,
+        c.total_stock;
+    `);
+
+    const stocks = result.recordset;
+
+    // Add TotalConsumed to each row
+    const updatedStocks = stocks.map(row => ({
+      ...row,
+      TotalConsumed: (row.total_stock || 0) - (row.stock_quantity || 0)
+    }));
+
+    // Create a new workbook and worksheet
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Stock');
+
+    // Define columns
+    worksheet.columns = [
+      { header: 'MasterServicePartnerCode', key: 'licare_code' },
+      { header: 'MasterServicePartnerName', key: 'msp' },
+      { header: 'ChildServicePartnerCode', key: 'csp_code' },
+      { header: 'ChildServicePartnerName', key: 'csp' },
+      { header: 'Manufacturer', key: 'Manufactured' },
+      { header: 'ItemCode', key: 'product_code' },
+      { header: 'ItemDescription', key: 'productname' },
+      { header: 'TotalBilled', key: '' },
+      { header: 'TotalConsumed', key: 'TotalConsumed' },
+      { header: 'CurrentStocks', key: 'stock_quantity' },
+    ];
+
+    // Add data to worksheet
+    worksheet.addRows(updatedStocks);
+
+    // Set headers for file download
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename=Stock.xlsx');
+
+    // Write and download
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send('Error generating Stock Excel file');
+  }
+});
+

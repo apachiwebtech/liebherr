@@ -13,8 +13,6 @@ import { getRoleData } from "../../Store/Role/role-action"
 const Complaintreport = () => {
   const { loaders, axiosInstance } = useAxiosLoader();
   const [startDate, setStartdate] = useState('')
-  const [startDate2, setStartdate2] = useState('')
-  const [endDate2, setEnddate2] = useState('')
   const [endDate, setEnddate] = useState('')
   const [loading, setLoading] = useState([]);
   const [data, setL] = useState([]);
@@ -63,10 +61,6 @@ const Complaintreport = () => {
         // Format date fields
         const formattedData = response.data.map(item => ({
           ...item,
-          ticket_date: item.ticket_date ? excelformatDate(item.ticket_date) : '',
-          purchase_date: item.purchase_date ? excelformatDate(item.purchase_date) : '',
-          FinalRemark: item.FinalRemark?.match(/<\/b>\s*([^,]+)/)?.[1].trim() || '',
-          Remark: item.FinalRemark,
         }));
 
         // Extract and set column names dynamically
@@ -85,53 +79,6 @@ const Complaintreport = () => {
     }
   };
 
-  const spareconsumptiondata = async () => {
-    setError(''); // Clear any previous errors
-
-    if (!startDate2 || !endDate2) {
-      setError2('Both start and end dates are required.');
-      return;
-    }
-
-    if (startDate2 > endDate2) {
-      setError2('Start date cannot be later than end date.');
-      return;
-    }
-
-    const data = {
-      startDate: startDate2,
-      endDate: endDate2,
-      licare_code: licare_code
-    };
-
-    try {
-      setLoading(true);  // Show loading indicator before making API call
-      const response = await axiosInstance.post(`${Base_Url}/getspareconumption`, data, {
-        headers: { Authorization: token },
-      });
-
-
-      if (response.data && response.data.length > 0) {
-        // Format date fields
-        const formattedData = response.data.map(item => ({
-          ...item,
-        }));
-
-        // Extract and set column names dynamically
-        setColumns(Object.keys(formattedData[0]));
-
-        // Ensure all data is loaded before exporting
-        await exportToExcelspare(formattedData);
-      } else {
-        setError("No data available for the selected date range.");
-      }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      setError("Failed to fetch data. Please try again.");
-    } finally {
-      setLoading(false);  // Hide loading indicator after operation completes
-    }
-  };
 
 
 
@@ -151,24 +98,7 @@ const Complaintreport = () => {
     const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
     const dataBlob = new Blob([excelBuffer], { type: "application/octet-stream" });
 
-    saveAs(dataBlob, "ExportedData.xlsx");
-  };
-  
-  const exportToExcelspare = (exceldata) => {
-    if (!exceldata || exceldata.length === 0) {
-      alert("No data available to export."); // Alert if no data
-      return;
-    }
-
-    const workbook = XLSX.utils.book_new();
-    const worksheet = XLSX.utils.json_to_sheet(exceldata); // Directly use data
-
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-
-    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-    const dataBlob = new Blob([excelBuffer], { type: "application/octet-stream" });
-
-    saveAs(dataBlob, "ConsumptionReport.xlsx");
+    saveAs(dataBlob, "TicketDump.xlsx");
   };
 
 
@@ -191,14 +121,6 @@ const Complaintreport = () => {
       setStartdate('');
     }
   };
-  const handleStartDateChange2 = (date) => {
-    if (date) {
-      const formattedDate = formatDate(date);
-      setStartdate2(formattedDate);
-    } else {
-      setStartdate2('');
-    }
-  };
 
   const handleEndDateChange = (date) => {
     if (date) {
@@ -206,14 +128,6 @@ const Complaintreport = () => {
       setEnddate(formattedDate);
     } else {
       setEnddate('');
-    }
-  };
-  const handleEndDateChange2 = (date) => {
-    if (date) {
-      const formattedDate = formatDate(date);
-      setEnddate2(formattedDate);
-    } else {
-      setEnddate2('');
     }
   };
 
@@ -299,39 +213,6 @@ const Complaintreport = () => {
         </div>
       </div> : null}
       <div>
-        {roleaccess > 1 ? <div className="row mp0">
-          <div className="col-12">
-            <div className="card mt-3 mb-3">
-              <div className="card-body">
-                <h5>Spare Consumption Report :</h5>
-                <div className="mb-3">
-                  <label>Start Date</label>
-                  <DatePicker
-                    selected={startDate2 ? new Date(startDate2) : null}
-                    onChange={handleStartDateChange2}
-                    dateFormat="dd-MM-yyyy"
-                    placeholderText="DD-MM-YYYY"
-                    className="form-control"
-                  />
-                </div>
-                <div className="mb-3">
-                  <label>End Date</label>
-                  <DatePicker
-                    selected={endDate2 ? new Date(endDate2) : null}
-                    onChange={handleEndDateChange2}
-                    dateFormat="dd-MM-yyyy"
-                    placeholderText="DD-MM-YYYY"
-                    className="form-control"
-                  />
-                </div>
-                {error2 && <p className="text-danger">{error2}</p>}
-                <button className="btn btn-primary" onClick={spareconsumptiondata}>
-                  Export to Excel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div> : null}
       </div>
 
 
