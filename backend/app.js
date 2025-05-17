@@ -14779,12 +14779,16 @@ app.post('/updatecreategrnspares', authenticateToken, async (req, res) => {
       stockRequest.input('eng_code', sql.VarChar, item.eng_code);
       stockRequest.input('csp_code', sql.VarChar, item.csp_code);
 
+      console.log(item.csp_code , item.article_code)
+
       const stockResult = await stockRequest.query(checkStockQuery);
 
       const stock_quantity = stockResult.recordset[0]?.stock_quantity || 0;
 
+      console.log(typeof(stock_quantity) , 'stock' , typeof(item.quantity))
+
       // Step 2: Compare and update only if stock is sufficient
-      if (stock_quantity >= item.quantity) {
+      if (Number(stock_quantity) >= Number(item.quantity)) {
         const updateRequest = new sql.Request(transaction);
         updateRequest.input('grn_no', sql.VarChar, item.grn_no);
         updateRequest.input('spare_no', sql.VarChar, item.article_code);
@@ -15134,6 +15138,8 @@ app.post("/getgrnlist", authenticateToken, async (req, res) => {
     toDate,
     received_from,
     invoice_number,
+    product_code,
+    product_name
   } = req.body;
 
   try {
@@ -15153,7 +15159,8 @@ app.post("/getgrnlist", authenticateToken, async (req, res) => {
         gn.created_by,
         gn.remark,
         gn.received_date,
-        COUNT(acg.grn_no) AS product_count
+		    acg.spare_no,
+        acg.spare_title
       FROM awt_grnmaster AS gn
       LEFT JOIN awt_cspgrnspare AS acg ON acg.grn_no = gn.grn_no
       WHERE gn.deleted = 0 AND gn.created_by = @csp_code
@@ -15177,11 +15184,16 @@ app.post("/getgrnlist", authenticateToken, async (req, res) => {
       request.input("invoice_number", `%${invoice_number}%`);
     }
 
+    if (product_code) {
+      sql += " AND acg.spare_no LIKE @spare_no";
+      request.input("spare_no", `%${product_code}%`);
+    }
+    if (product_name) {
+      sql += " AND acg.spare_title LIKE @product_name";
+      request.input("product_name", `%${product_name}%`);
+    }
+
     sql += `
-      GROUP BY
-        gn.id , gn.grn_no, gn.invoice_no, gn.invoice_date, gn.csp_code,
-        gn.csp_name, gn.status, gn.created_date,
-        gn.created_by, gn.remark, gn.received_date
       ORDER BY gn.id DESC
     `;
 
@@ -15748,7 +15760,7 @@ app.post("/getadminoutwardexcel", authenticateToken, async (req, res) => {
   }
 });
 
-app.post("/getoutwardexcel", authenticateToken, async (req, res) => {
+app.post("/getinwardexcel", authenticateToken, async (req, res) => {
 
   const { csp_code, fromDate, toDate, received_from } = req.body;
 
@@ -15782,6 +15794,50 @@ app.post("/getoutwardexcel", authenticateToken, async (req, res) => {
 
     if (result.recordset.length === 0) {
       gr
+    }
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+});
+
+
+app.post("/getoutwardexcel", authenticateToken, async (req, res) => {
+
+  const { csp_code, fromDate, toDate, received_from } = req.body;
+
+  let sql;
+
+
+  try {
+    const pool = await poolPromise;
+
+    // Parameterized query with a limit
+    sql = `select asp.* ,acp.spare_no , acp.spare_title , acp.quantity from awt_spareoutward as asp left join awt_cspissuespare as acp on asp.issue_no = acp.issue_no where asp.created_by = '${csp_code}'  and  asp.deleted = 0 `;
+
+    if (fromDate && toDate) {
+      sql += ` AND CAST(asp.issue_date AS DATE) BETWEEN '${fromDate}' AND '${toDate}'`;
+
+    }
+
+    if (received_from) {
+      sql += ` AND asp.lhi_name LIKE '%${received_from}%'`;
+    }
+
+
+
+    sql += ' order by asp.id desc'
+
+    console.log(sql)
+
+
+    const result = await pool.request()
+      .query(sql);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "No results found" });
     }
 
     return res.json(result.recordset);
@@ -19928,7 +19984,7 @@ app.post("/getgrnlisting", authenticateToken, async (req, res) => {
         FROM Shipment_Parts AS s 
         LEFT JOIN Address_code AS a ON a.address_code = s.Address_code 
         LEFT JOIN awt_grnmaster AS agn ON agn.invoice_no = s.InvoiceNumber 
-        WHERE ${filterConditions} AND s.InvoiceDate >= '2025-05-01 00:00:000' 
+        WHERE ${filterConditions} 
       )
       SELECT * 
       FROM RankedParts

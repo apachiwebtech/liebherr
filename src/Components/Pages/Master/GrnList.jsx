@@ -97,6 +97,7 @@ export function GrnList(params) {
 
         } catch (error) {
             console.error('Error fetching GRN data:', error.response?.data || error.message);
+            setGrn([]);
         }
 
     };
@@ -249,7 +250,7 @@ export function GrnList(params) {
 
 
             // Fetch all customer data without pagination
-            const response = await axiosInstance.post(`${Base_Url}/getoutwardexcel`, data, {
+            const response = await axiosInstance.post(`${Base_Url}/getinwardexcel`, data, {
                 headers: {
                     Authorization: token,
                 }
@@ -264,6 +265,8 @@ export function GrnList(params) {
             const worksheet = XLSX.utils.json_to_sheet(
                 decryptedData.map((item) => ({
                     GrnNo: item.grn_no,
+                    InvoiceNo: item.invoice_no,
+                    InvoiceDate: item.invoice_date ? formatDate(item.invoice_date) : '',
                     ReceivedFrom: item.csp_name,
                     ReceivedDate: item.received_date ? formatDate(item.received_date) : '',
                     ArticleCode: item.spare_no,
@@ -459,12 +462,12 @@ export function GrnList(params) {
                                         <tr>
                                             <th width="5%">#</th>
                                             <th width="15%">Grn_No</th>
-                                            <th width="20%">Received From</th>
-                                            <th width="15%">Invoice No</th>
-                                            <th width="15%">Invoice Date</th>
-                                            <th width="10%">Product Count</th>
+                                            <th width="15%">Received From</th>
+                                            <th width="10%">Invoice No</th>
+                                            <th width="10%">Invoice Date</th>
+                                            <th width="15%">Article Code</th>
+                                            <th width="30%">Article Description</th>
                                             <th width="20%">Status</th>
-                                            <th width="20%">Action</th>
 
                                         </tr>
                                     </thead>
@@ -488,18 +491,19 @@ export function GrnList(params) {
                                                             year: 'numeric',
                                                         })}
                                                     </td>
-                                                    <td>{item.product_count}</td>
+                                                    <td>{item.spare_no}</td>
+                                                    <td>{item.spare_title}</td>
                                                     <td>
                                                         {item.status == '1' ? (
-                                                            "Approved"
+                                                            <p className='text-success'>Approved</p>
                                                         ) : item.status == '2' ? (
-                                                            "Rejected"
+                                                            <p className='text-danger'>Rejected</p>
                                                         ) : (
-                                                           "Pending"
+                                                            <p className='text-warning'>Pending</p>
                                                         )}
                                                     </td>
 
-                                                    <td>
+                                                    {/* <td>
                                                         <div className='d-flex'>
                                                             <button
                                                                 className='btn'
@@ -510,7 +514,7 @@ export function GrnList(params) {
                                                             >
                                                                 <FaEye />
                                                             </button>
-                                                            {/* <button
+                                                            <button
                                                                 className='btn'
                                                                 onClick={() => handledelete(item.grn_no)}
                                                                 title="Edit"
@@ -518,12 +522,12 @@ export function GrnList(params) {
 
                                                             >
                                                                 <MdOutlineDelete />
-                                                            </button> */}
+                                                            </button>
                                                         </div>
 
 
 
-                                                    </td>
+                                                    </td> */}
 
 
                                                 </tr>

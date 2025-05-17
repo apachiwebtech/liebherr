@@ -60,7 +60,7 @@ function GrnTab() {
                       className={`nav-link ${activeTab === '/csp/creategrn' ? 'active' : ' onClick={() => setActiveTab("csp/creategrn")}'}`}
 
                     >
-                      CREATE GRN
+                      Inward Liebherr
                     </button></Link>
                   </li>
 
@@ -69,7 +69,7 @@ function GrnTab() {
                       className={`nav-link ${activeTab === '/csp/cspgrn' ? 'active' : ' onClick={() => setActiveTab("cspgrn")}'}`}
 
                     >
-                      ENGINEER GRN
+                      Inward Others
                     </button></Link>
                   </li>
                   <li className="nav-item">
@@ -77,7 +77,7 @@ function GrnTab() {
                       className={`nav-link ${activeTab === '/csp/grnlisting' ? 'active' : ' onClick={() => setActiveTab("grnlisting")}'}`}
 
                     >
-                      GRN INWARD LISTING
+                      Inward Listing
                     </button></Link>
                   </li>
 
@@ -86,7 +86,8 @@ function GrnTab() {
                       className={`nav-link ${activeTab === '/csp/spareoutward' ? 'active' : ' onClick={() => setActiveTab("spareoutward")}'}`}
 
                     >
-                      SPARE OUTWARD
+                      Outward
+
                     </button></Link>
                   </li>
                   <li className="nav-item">
@@ -94,7 +95,8 @@ function GrnTab() {
                       className={`nav-link ${activeTab === '/csp/grnoutward' ? 'active' : ' onClick={() => setActiveTab("grnoutward")}'}`}
 
                     >
-                      GRN OUTWARD LISTING
+                      Outward Listing
+
                     </button></Link>
                   </li>
                   <li
@@ -103,7 +105,7 @@ function GrnTab() {
                       className={`nav-link ${activeTab === '/csp/cspstock' ? 'active' : ' onClick={() => setActiveTab("cspstock")}'}`}
 
                     >
-                      STOCK
+                      Stocks
                     </button></Link>
                   </li>
                   <li

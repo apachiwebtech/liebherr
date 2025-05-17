@@ -367,7 +367,7 @@ export function Stock(params) {
                                                     <td>{item.productname}</td>
                                                     <td>{item.stock_quantity}</td>
                                                     <td>{item.total_stock}</td>
-                                                    <td><EditIcon onClick={() => stockEdit(item.csp_code, item.product_code, item.stock_quantity)} /></td>
+                                                    <td>{ roleaccess > 3 && <EditIcon onClick={() => stockEdit(item.csp_code, item.product_code, item.stock_quantity)} />}</td>
                                                 </tr>
                                             )
                                         })}

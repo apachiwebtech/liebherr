@@ -389,7 +389,7 @@ export function Grnoutward(params) {
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
 
                             <div className='table-responsive'>
-                                <table className="table">
+                                <table id="" className="table table-striped">
                                     <thead>
                                         <tr>
                                             <th width="5%">#</th>

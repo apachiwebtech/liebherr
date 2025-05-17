@@ -59,9 +59,15 @@ const Complaintreport = () => {
 
       if (response.data && response.data.length > 0) {
         // Format date fields
-        const formattedData = response.data.map(item => ({
-          ...item,
-        }));
+        const formattedData = response.data.map(item => {
+          const formattedItem = { ...item };
+          if (roleaccess <= 4) {
+            delete formattedItem.TOTP;
+          }
+          return formattedItem;
+        });
+
+
 
         // Extract and set column names dynamically
         setColumns(Object.keys(formattedData[0]));
@@ -183,7 +189,7 @@ const Complaintreport = () => {
         <div className="col-12">
           <div className="card mt-3 mb-3">
             <div className="card-body">
-            <h5>Ticket Report :</h5>
+              <h5>Ticket Report :</h5>
               <div className="mb-3">
                 <label>Start Date</label>
                 <DatePicker
