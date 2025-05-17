@@ -174,6 +174,7 @@ import {SpareMspOutward} from './Components/Pages/Master/SpareMspOutward';
 import { MspStock } from './Components/Pages/Master/MspStock';
 import { GrnAdminInward } from './Components/Pages/Grn/GrnAdminInward';
 import { GrnAdminOutward } from './Components/Pages/Grn/GrnAdminOutward';
+import MspGrn from './Components/Pages/Master/MspGrn';
 
 
 
@@ -310,6 +311,10 @@ const Router = createBrowserRouter([
       {
         path: "/msp/grnmsplist",
         element: <ProtectedRoute><GrnMspList /></ProtectedRoute>,
+      },
+        {
+        path: "/msp/mspgrn",
+        element: <ProtectedRoute><MspGrn /></ProtectedRoute>,
       },
       {
         path: "/msp/sparemspoutward",

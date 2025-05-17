@@ -18513,6 +18513,7 @@ ct.customer_class as CustomerClassification,
 DATEDIFF(DAY, ct.ticket_date, GETDATE()) AS AgeingDays,
 ct.serial_no as SerialNumber,
 ct.ModelNumber,
+ct.sales_partner as PrimaryDealer,
 ct.purchase_date as PurchaseDate,
 ct.assigned_to as EngineerName,
 ct.updated_date as LastUpdated,
@@ -18527,7 +18528,6 @@ ct.msp as MasterServicePartnerCode,
 ct.sevice_partner as MasterServicePartnerName,
 ct.sub_call_status as CallSubStatus,
 ct.class_city as ClassOfCity,
-ct.sales_partner as PrimaryDealer,
 ct.call_charges as TicketCharges,
 ISNULL(TRY_CAST(ct.collected_amount AS FLOAT), 0) +
 ISNULL(TRY_CAST(ct.transport_charge AS FLOAT), 0) +
@@ -20007,6 +20007,7 @@ app.post("/getgrnlisting", authenticateToken, async (req, res) => {
   }
 });
 
+
 app.post("/getgrnexcel", authenticateToken, async (req, res) => {
 
   let { csp_code, fromDate, toDate, invoice_number, address_code, status } = req.body;
@@ -20085,6 +20086,254 @@ WHERE ${filterConditions} order by s.InvoiceDate DESC;
     return res.status(500).json({ error: 'An error occurred while fetching data' });
   }
 });
+
+app.post("/getmspinwardliebherr", authenticateToken, async (req, res) => {
+  let { csp_code, fromDate, toDate, invoice_number, address_code, status, page = 1, pageSize = 10 } = req.body;
+
+  try {
+    const pool = await poolPromise;
+
+    // Step 1: Get pfranchise_id from csp_code
+    const pfranchiseResult = await pool.request()
+      .input("csp_code", csp_code)
+      .query(`
+        SELECT pfranchise_id
+        FROM awt_childfranchisemaster
+        WHERE licare_code = @csp_code AND deleted = 0
+      `);
+
+    if (pfranchiseResult.recordset.length === 0) {
+      return res.status(404).json({ message: "Parent franchise not found for given csp_code" });
+    }
+
+    const pfranchise_id = pfranchiseResult.recordset[0].pfranchise_id;
+
+    // Step 2: Get all licare_code (CSPs) under the parent
+    const childResult = await pool.request()
+      .input("pfranchise_id", pfranchise_id)
+      .query(`
+        SELECT licare_code 
+        FROM awt_childfranchisemaster 
+        WHERE pfranchise_id = @pfranchise_id AND deleted = 0
+      `);
+
+    if (childResult.recordset.length === 0) {
+      return res.status(404).json({ message: "No child CSPs found under this parent franchise" });
+    }
+
+    const childCodes = childResult.recordset.map(row => `'${row.licare_code}'`).join(",");
+
+    if (status == 0) {
+      status = null;
+    }
+
+    const request = pool.request();
+
+    request.input("csp_code", csp_code);
+    if (fromDate) request.input("fromDate", fromDate);
+    if (toDate) request.input("toDate", toDate);
+    if (invoice_number) request.input("invoice_number", invoice_number);
+    if (address_code) request.input("address_code", address_code);
+    if (status) request.input("status", status);
+
+    let filterConditions = `s.deleted = 0 AND a.csp_code IN (${childCodes})`;
+
+    if (fromDate && toDate) {
+      filterConditions += " AND s.InvoiceDate BETWEEN @fromDate AND @toDate";
+    } else if (fromDate) {
+      filterConditions += " AND s.InvoiceDate >= @fromDate";
+    } else if (toDate) {
+      filterConditions += " AND s.InvoiceDate <= @toDate";
+    }
+
+    if (address_code) {
+      filterConditions += " AND s.Address_code = @address_code";
+    }
+
+    if (status) {
+      filterConditions += " AND agn.status = @status";
+    }
+
+    if (invoice_number) {
+      filterConditions += " AND s.InvoiceNumber = @invoice_number";
+    }
+
+    // Pagination calculation
+    const offset = (page - 1) * pageSize;
+
+    // Main query with pagination
+    const query = `
+      WITH RankedParts AS (
+        SELECT  
+          s.id, s.Address_code, s.InvoiceDate, s.InvoiceNumber, s.Invoice_bpcode, 
+          s.Invoice_bpName, s.Invoice_qty, s.Item_Code, s.Item_Description, 
+          s.Service_Type, s.Order_Line_Number, s.Order_Number, a.csp_code, agn.status,
+          ROW_NUMBER() OVER (PARTITION BY s.InvoiceNumber ORDER BY s.InvoiceDate DESC) AS rn
+        FROM Shipment_Parts AS s 
+        LEFT JOIN Address_code AS a ON a.address_code = s.Address_code 
+        LEFT JOIN awt_grnmaster AS agn ON agn.invoice_no = s.InvoiceNumber 
+        WHERE ${filterConditions}
+      )
+      SELECT * 
+      FROM RankedParts
+      WHERE rn = 1
+      ORDER BY 
+        CASE 
+          WHEN status IS NULL THEN 0
+          WHEN status = 1 THEN 1
+          WHEN status = 2 THEN 2
+          ELSE 3
+        END,
+        InvoiceDate DESC
+      OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY;
+    `;
+
+    const result = await request.query(query);
+
+    // Count query for pagination
+    const countQuery = `
+      WITH RankedParts AS (
+        SELECT  
+          s.InvoiceNumber,
+          ROW_NUMBER() OVER (PARTITION BY s.InvoiceNumber ORDER BY s.InvoiceDate DESC) AS rn
+        FROM Shipment_Parts AS s 
+        LEFT JOIN Address_code AS a ON a.address_code = s.Address_code 
+        LEFT JOIN awt_grnmaster AS agn ON agn.invoice_no = s.InvoiceNumber 
+        WHERE ${filterConditions}
+      )
+      SELECT COUNT(*) as totalCount
+      FROM RankedParts
+      WHERE rn = 1;
+    `;
+
+    const countResult = await request.query(countQuery);
+    const totalCount = countResult.recordset[0].totalCount;
+
+    return res.json({
+      data: result.recordset,
+      totalCount,
+      page,
+      pageSize
+    });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
+
+
+app.post("/getmspinwardliebherrexcel", authenticateToken, async (req, res) => {
+  let { csp_code, fromDate, toDate, invoice_number, address_code, status } = req.body;
+
+  try {
+    const pool = await poolPromise;
+
+    // Step 1: Get the pfranchise_id for the given csp_code
+    const pfranchiseResult = await pool.request()
+      .input("csp_code", csp_code)
+      .query(`
+        SELECT pfranchise_id
+        FROM awt_childfranchisemaster
+        WHERE licare_code = @csp_code AND deleted = 0
+      `);
+
+    if (pfranchiseResult.recordset.length === 0) {
+      return res.status(404).json({ message: "Parent franchise not found for given csp_code" });
+    }
+
+    const pfranchise_id = pfranchiseResult.recordset[0].pfranchise_id;
+
+    // Step 2: Get all licare_code (child CSPs) under this pfranchise_id
+    const childResult = await pool.request()
+      .input("pfranchise_id", pfranchise_id)
+      .query(`
+        SELECT licare_code 
+        FROM awt_childfranchisemaster 
+        WHERE pfranchise_id = @pfranchise_id AND deleted = 0
+      `);
+
+    if (childResult.recordset.length === 0) {
+      return res.status(404).json({ message: "No child CSPs found under this parent franchise" });
+    }
+
+    // Build IN clause for created_by
+    const childCodes = childResult.recordset.map(row => `'${row.licare_code}'`).join(",");
+
+    console.log(childCodes , "chii")
+
+    const request = pool.request();
+
+    if (status == 0) {
+      status = null;
+    }
+
+    // Add parameters safely
+    request.input("csp_code", csp_code);
+    if (fromDate) request.input("fromDate", fromDate);
+    if (toDate) request.input("toDate", toDate);
+    if (invoice_number) request.input("invoice_number", invoice_number);
+    if (address_code) request.input("address_code", address_code);
+    if (status) request.input("status", status);
+
+    // Build filter conditions
+    let filterConditions = `s.deleted = 0  AND a.csp_code IN (${childCodes})`;
+
+    if (fromDate && toDate) {
+      filterConditions += " AND s.InvoiceDate BETWEEN @fromDate AND @toDate";
+    } else if (fromDate) {
+      filterConditions += " AND s.InvoiceDate >= @fromDate";
+    } else if (toDate) {
+      filterConditions += " AND s.InvoiceDate <= @toDate";
+    }
+
+    if (address_code) {
+      filterConditions += " AND s.Address_code = @address_code";
+    }
+
+    if (status) {
+      filterConditions += " AND agn.status = @status";
+    }
+
+    if (invoice_number) {
+      filterConditions += " AND s.InvoiceNumber = @invoice_number";
+    }
+
+    const query = `
+      WITH RankedParts AS (
+        SELECT  
+          s.id, s.Address_code, s.InvoiceDate, s.InvoiceNumber, s.Invoice_bpcode, 
+          s.Invoice_bpName, s.Invoice_qty, s.Item_Code, s.Item_Description, 
+          s.Service_Type, s.Order_Line_Number, s.Order_Number, a.csp_code, agn.status,
+          ROW_NUMBER() OVER (PARTITION BY s.InvoiceNumber ORDER BY s.InvoiceDate DESC) AS rn
+        FROM Shipment_Parts AS s 
+        LEFT JOIN Address_code AS a ON a.address_code = s.Address_code 
+        LEFT JOIN awt_grnmaster AS agn ON agn.invoice_no = s.InvoiceNumber 
+        WHERE ${filterConditions}
+      )
+      SELECT * 
+      FROM RankedParts
+      WHERE rn = 1
+      ORDER BY 
+        CASE 
+          WHEN status IS NULL THEN 0
+          WHEN status = 1 THEN 1
+          WHEN status = 2 THEN 2
+          ELSE 3
+        END,
+        InvoiceDate DESC;
+    `;
+
+    const result = await request.query(query);
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
+
+
+
 
 
 

@@ -110,11 +110,11 @@ const HeaderMsp = (params) => {
               </Link>
             </li>
             <li
-              className={`nav-item dropdown ${location.pathname === "/msp/grnmsplist" ? "active-class" : ""}`}
-              style={location.pathname === "/msp/grnmsplist" ? { background: '#0d6efd', borderRadius: '5px' } : {}}
+              className={`nav-item dropdown ${location.pathname === "/msp/mspgrn  " ? "active-class" : ""}`}
+              style={location.pathname === "/msp/mspgrn" ? { background: '#0d6efd', borderRadius: '5px' } : {}}
             >
               <Link
-                to={`/msp/grnmsplist`}
+                to={`/msp/mspgrn`}
                 className={`nav-link site ${location.pathname === "/msp/grnmsplist" ? "text-light" : ""}`}
                 id="navbarDropdown"
                 role="button"

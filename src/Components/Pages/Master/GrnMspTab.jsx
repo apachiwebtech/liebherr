@@ -56,6 +56,14 @@ function GrnMspTab() {
               <div className="tabsMenu" style={{ fontSize: "14px", marginLeft: "12px", fontWeight: "600", fontFamily: "Nunito" }}>
                 <ul className="nav nav-tabs ">
                   <li className="nav-item">
+                    <Link to={`/msp/mspgrn`}> <button
+                      className={`nav-link ${activeTab === '/msp/mspgrn' ? 'active' : ' onClick={() => setActiveTab("mspgrn")}'}`}
+
+                    >
+                      INWARD LIEBHERR
+                    </button></Link>
+                  </li>
+                  <li className="nav-item">
                     <Link to={`/msp/grnmsplist`}> <button
                       className={`nav-link ${activeTab === '/msp/grnmsplist' ? 'active' : ' onClick={() => setActiveTab("grnmsplist")}'}`}
 
@@ -63,6 +71,7 @@ function GrnMspTab() {
                       GRN INWARD LISTING
                     </button></Link>
                   </li>
+
                   <li className="nav-item">
                     <Link to={`/msp/sparemspoutward`}> <button
                       className={`nav-link ${activeTab === '/msp/sparemspoutward' ? 'active' : ' onClick={() => setActiveTab("sparemspoutward")}'}`}
