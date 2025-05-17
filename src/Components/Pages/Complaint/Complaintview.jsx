@@ -154,6 +154,7 @@ export function Complaintview(params) {
   const [show, setShow] = useState(false)
   const [isEditing, setIsEditing] = useState(false);
   const [editedRemark, setEditedRemark] = useState("");
+  const [editvisit, setEditVisit] = useState(false);
 
   const maxRemarkId = Math.max(...remarks.map(r => r.id));
   const [TicketUpdateSuccess, setTicketUpdateSuccess] = useState({
@@ -276,6 +277,34 @@ export function Complaintview(params) {
       .then((res) => {
         if (res) {
           setisEdit(false)
+          alert("Updated")
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+
+  //for updating group codes
+
+  const handleVisitEdit = () => {
+
+    const data = {
+      visit_count : complaintview.visit_count,
+      ticket_no: complaintview.ticket_no,
+      updated_by: created_by
+    }
+
+
+    axios.post(`${Base_Url}/update_visit_count`, data, {
+      headers: {
+        Authorization: token,
+      },
+    })
+      .then((res) => {
+        if (res) {
+          setEditVisit(false)
+          fetchComplaintview(complaintid)
           alert("Updated")
         }
       })
@@ -3444,13 +3473,13 @@ export function Complaintview(params) {
 
 
                   <div className="my-3 ">
-                    <h4 className="pname" style={{ fontSize: "14px" }}>Visit Count</h4>
+                    <h4 className="pname" style={{ fontSize: "14px" }}>Visit Count {roleaccess > 4 ? <span className="mx-1"><EditIcon onClick={() =>setEditVisit(true)} style={{ fontSize: "13px" }} /></span> : null}</h4> 
                     <select
                       name="visit_count"
                       className="form-control"
-                      disabled
+                      disabled = {editvisit == true ? false : true}
                       style={{ fontSize: "14px" }}
-                      value={updatedata.visit_count}
+                      value={editvisit == true ?  complaintview.visit_count : updatedata.visit_count}
                       onChange={handleModelChange}
                     >
                       <option value='0'>0</option>
@@ -3459,6 +3488,8 @@ export function Complaintview(params) {
                       <option value='3'>3</option>
                       <option value='4'>4</option>
                     </select>
+
+                   {editvisit == true && <button className="btn btn-sm btn-primary my-2 float-end" onClick={handleVisitEdit}>Submit</button>}
                   </div>
 
 

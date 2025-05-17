@@ -37,7 +37,6 @@ const CreateGrn = () => {
     const [csp_no, setcsp_no] = useState(null);
     const [selectproduct, setselectedproduct] = useState(null);
     const [text, setText] = useState("");
-
     const [producttext, setProductText] = useState("");
     const token = localStorage.getItem("token"); // Get token from localStorage
     const created_by = localStorage.getItem("licare_code"); // Get token from localStorage
@@ -213,8 +212,10 @@ const CreateGrn = () => {
                 spare_id: SpareId,
                 grn_no: localStorage.getItem('grn_no'),
                 created_by: created_by,
-                eng_code: selectengineer.id
+                eng_code: selectengineer?.id || null,
+                csp_code: selectcsp?.id || null
             };
+
 
             try {
                 const response = await axios.post(`${Base_Url}/addgrnspares`, JSON.stringify(data), {
@@ -270,7 +271,16 @@ const CreateGrn = () => {
                         setHidelist(true)
                         setsubmithide(true)
 
-                        fetchSpare(selectengineer?.id)
+
+
+
+                        if (selectcsp?.id) {
+                            fetchCspSpare(selectcsp?.id)
+                        }
+                        if (selectengineer?.id) {
+                            fetchSpare(selectengineer?.id)
+                        }
+
                     }
 
                 })
@@ -295,7 +305,9 @@ const CreateGrn = () => {
                 article_title: item.spare_title,
                 quantity: String(item.quantity) || String(0), // Use the updated `spare_qty`, default to 0 if empty
                 grn_no: localStorage.getItem('grn_no'),
-                eng_code: selectengineer.id
+                eng_code: selectengineer?.id || null,
+                csp_code : selectcsp?.id || null,
+                created_by : created_by
             }));
 
 
@@ -376,10 +388,11 @@ const CreateGrn = () => {
 
 
 
-    const fetchSpare = async () => {
+    const fetchCspSpare = async (id) => {
+
 
         try {
-            const response = await axios.post(`${Base_Url}/getengspareparts`, { eng_code: selectengineer.id }, {
+            const response = await axios.post(`${Base_Url}/getcspspareparts`, { csp_code: id || selectcsp?.id }, {
                 headers: {
                     Authorization: token, // Send token in headers
                 },
@@ -388,6 +401,25 @@ const CreateGrn = () => {
         } catch (error) {
             console.error("Error fetching users:", error);
         }
+
+
+    };
+
+    const fetchSpare = async (id) => {
+
+
+        try {
+            const response = await axios.post(`${Base_Url}/getengspareparts`, { eng_code: id || selectengineer?.id }, {
+                headers: {
+                    Authorization: token, // Send token in headers
+                },
+            });
+            setProduct(response.data)
+        } catch (error) {
+            console.error("Error fetching users:", error);
+        }
+
+
     };
 
 
@@ -500,23 +532,7 @@ const CreateGrn = () => {
                                             LHI
                                         </label>
                                     </div> */}
-
-                                    {/* <div className="form-check me-3">
-                                        <input
-                                            type="radio"
-                                            className="form-check-input"
-                                            id="franchisee"
-                                            name="engineer_type"
-                                            value="Franchisee"
-                                            onChange={handleEngineerTypeChange}
-                                            checked={selectedEngineerType === "Franchisee"}
-                                        />
-                                        <label className="form-check-label" htmlFor="franchisee" style={{ fontSize: "14px" }}>
-                                            Service Partner
-                                        </label>
-                                    </div> */}
-
-                                    <div className="form-check col-lg-3">
+                                    <div className="form-check me-3">
                                         <input
                                             type="radio"
                                             className="form-check-input"
@@ -530,6 +546,22 @@ const CreateGrn = () => {
                                             ENGINEER
                                         </label>
                                     </div>
+                                    <div className="form-check me-3">
+                                        <input
+                                            type="radio"
+                                            className="form-check-input"
+                                            id="franchisee"
+                                            name="engineer_type"
+                                            value="Franchisee"
+                                            onChange={handleEngineerTypeChange}
+                                            checked={selectedEngineerType === "Franchisee"}
+                                        />
+                                        <label className="form-check-label" htmlFor="franchisee" style={{ fontSize: "14px" }}>
+                                            Service Partner
+                                        </label>
+                                    </div>
+
+
 
                                 </div>
 

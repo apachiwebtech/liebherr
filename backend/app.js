@@ -3814,7 +3814,6 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
 
       const fallbackResult = await fallbackRequest.query(fallbackSql);
 
-      console.log(fallbackResult)
       const stockUsed = new Map(); // key: eng_code, value: array of { product_code, qty_to_deduct }
 
       for (const item of unavailableItems) {
@@ -14758,15 +14757,24 @@ app.post('/updatecreategrnspares', authenticateToken, async (req, res) => {
     // Loop through spareData and update each row
     for (const item of spareData) {
       // Step 1: Check stock quantity
-      const checkStockQuery = `
-    SELECT stock_quantity
-    FROM engineer_stock
-    WHERE product_code = @product_code AND eng_code = @eng_code
-  `;
+
+      let csp_code = item.csp_code;
+      let eng_code = item.eng_code;
+      let checkStockQuery
+
+      if (csp_code) {
+        checkStockQuery = `SELECT stock_quantity FROM csp_stock WHERE product_code = @product_code AND csp_code = @csp_code`;
+        console.log('csp')
+      } else {
+        checkStockQuery = `SELECT stock_quantity FROM engineer_stock WHERE product_code = @product_code AND eng_code = @eng_code`;
+        console.log('eng')
+      }
+
 
       const stockRequest = new sql.Request(transaction);
       stockRequest.input('product_code', sql.VarChar, item.article_code);
       stockRequest.input('eng_code', sql.VarChar, item.eng_code);
+      stockRequest.input('csp_code', sql.VarChar, item.csp_code);
 
       const stockResult = await stockRequest.query(checkStockQuery);
 
@@ -14775,23 +14783,87 @@ app.post('/updatecreategrnspares', authenticateToken, async (req, res) => {
       // Step 2: Compare and update only if stock is sufficient
       if (stock_quantity >= item.quantity) {
         const updateRequest = new sql.Request(transaction);
+        updateRequest.input('grn_no', sql.VarChar, item.grn_no);
+        updateRequest.input('spare_no', sql.VarChar, item.article_code);
+        updateRequest.input('quantity', sql.Int, item.quantity);
+        updateRequest.input('actual_received', sql.Int, item.quantity);
+        updateRequest.input('pending_quantity', sql.Int, 0);
+
         const updateQuery = `
       UPDATE awt_cspgrnspare
       SET quantity = @quantity, actual_received = @actual_received, pending_quantity = @pending_quantity
       WHERE grn_no = @grn_no AND spare_no = @spare_no
     `;
-
-        updateRequest.input('grn_no', sql.VarChar, item.grn_no);
-        updateRequest.input('spare_no', sql.VarChar, item.article_code);
-        updateRequest.input('quantity', sql.Int, item.quantity);
-        updateRequest.input('actual_received', sql.Int, item.actual_received);
-        updateRequest.input('pending_quantity', sql.Int, item.pending_quantity);
-
         await updateRequest.query(updateQuery);
+
+        // Update stock table
+        const stockUpdateRequest = new sql.Request(transaction);
+        stockUpdateRequest.input('product_code', sql.VarChar, item.article_code);
+        stockUpdateRequest.input('actual_received', sql.Int, item.quantity);
+
+        if (csp_code) {
+          stockUpdateRequest.input('csp_code', sql.VarChar, csp_code);
+          await stockUpdateRequest.query(`
+        UPDATE csp_stock
+        SET stock_quantity = CAST(stock_quantity AS INT) - @actual_received
+        WHERE product_code = @product_code AND csp_code = @csp_code
+      `);
+          console.log('csp1');
+        } else {
+          stockUpdateRequest.input('eng_code', sql.VarChar, eng_code);
+          await stockUpdateRequest.query(`
+        UPDATE engineer_stock
+        SET stock_quantity = CAST(stock_quantity AS INT) - @actual_received
+        WHERE product_code = @product_code AND eng_code = @eng_code
+      `);
+          console.log('eng1');
+        }
+
+const stockupdateRequest = new sql.Request(transaction);
+        const stockInsertQuery = `
+        IF EXISTS (SELECT 1 FROM csp_stock WHERE product_code = @product_code and csp_code = @csp_code )
+BEGIN
+  UPDATE csp_stock
+  SET stock_quantity = CAST(stock_quantity AS INT) + @stock_quantity,
+      created_date = @created_date,
+      total_stock = CAST(total_stock AS INT) + @stock_quantity,
+      created_by = @created_by
+  WHERE product_code = @product_code and csp_code = @csp_code
+END
+ELSE
+BEGIN
+  INSERT INTO csp_stock 
+  (csp_code, product_code, productname, stock_quantity, created_by, created_date)
+  VALUES 
+  (@csp_code, @product_code, @productname, @stock_quantity, @created_by, @created_date)
+END
+`;
+
+        stockupdateRequest.input('csp_code', sql.VarChar, item.created_by);
+        stockupdateRequest.input('product_code', sql.VarChar, item.article_code);
+        stockupdateRequest.input('productname', sql.VarChar, item.article_desc);
+        stockupdateRequest.input('stock_quantity', sql.Int, Number(item.quantity));
+        stockupdateRequest.input('created_by', sql.VarChar, item.created_by);
+        stockupdateRequest.input('created_date', sql.DateTime, new Date());
+        await stockupdateRequest.query(stockInsertQuery);
+
+
       } else {
         return res.status(400).json(`Stock insufficient for product_code ${item.article_code}`)
       }
     }
+
+    const grn_no = spareData[0].grn_no;
+
+    // Update awt_grnmaster
+    const masterRequest = new sql.Request(transaction);
+    await masterRequest
+      .input('grn_no', sql.VarChar, grn_no)
+      .query(`
+        UPDATE awt_grnmaster
+        SET status = 1
+        WHERE grn_no = @grn_no
+      `);
 
 
     // Commit the transaction
@@ -15583,7 +15655,7 @@ app.post("/getmspoutwardexcel", authenticateToken, async (req, res) => {
 
 
 app.post('/addgrnspares', authenticateToken, async (req, res) => {
-  const { spare_id, grn_no, created_by, eng_code } = req.body; // Expecting required fields in the request body
+  let { spare_id, grn_no, created_by, eng_code, csp_code } = req.body; // Expecting required fields in the request body
 
   try {
     // Connect to the database
@@ -15607,9 +15679,18 @@ app.post('/addgrnspares', authenticateToken, async (req, res) => {
 
     //Engineer stock Validation 
 
-    const checkstock = `select stock_quantity from engineer_stock where product_code = '${spare_id}'`
+    let checkstock
+
+    if (eng_code) {
+      checkstock = `select stock_quantity from engineer_stock where product_code = '${spare_id}' and eng_code = '${eng_code}'`;
+
+    } else {
+
+      checkstock = `select stock_quantity from csp_stock where product_code = '${spare_id}' and csp_code = '${csp_code}'`;
+    }
 
     const checkresult = await pool.request().query(checkstock)
+
 
     if (checkresult.recordset[0]?.stock_quantity == 0) {
       return res.json({
@@ -17951,26 +18032,7 @@ app.post("/getcspdetails", authenticateToken, async (req, res) => {
   }
 });
 
-app.post("/updatevisitcount", authenticateToken, async (req, res) => {
 
-  let { count, ticket_no } = req.body;
-
-  try {
-    // Use the poolPromise to get the connection pool
-    const pool = await poolPromise;
-
-    const sql = `update complaint_ticket set visit_count = '${count}' where ticket_no = '${ticket_no}'`;
-
-    const result = await pool.request().query(sql);
-
-
-
-    return res.json(result.recordset);
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json(err);
-  }
-});
 
 
 // app.post("/getServiceCharges", authenticateToken, async (req, res) => {
@@ -18544,6 +18606,22 @@ app.post("/update_defect_code", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
     const sql = `update complaint_ticket set group_code = '${group_code}' , defect_type = '${defect_type}', site_defect = '${site_defect}' ,activity_code = '${activity_code}'  where ticket_no = '${ticket_no}'`;
+
+    const result = await pool.request().query(sql);
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Database Error:", err);
+    return res.status(500).json({ error: "Failed to fetch MSPs", details: err.message });
+  }
+});
+
+app.post("/update_visit_count", authenticateToken, async (req, res) => {
+
+  let { visit_count, ticket_no, updated_by } = req.body;
+
+  try {
+    const pool = await poolPromise;
+    const sql = `update complaint_ticket set visit_count = '${visit_count}' , updated_by = '${updated_by}' where ticket_no = '${ticket_no}'`;
 
     const result = await pool.request().query(sql);
     return res.json(result.recordset);

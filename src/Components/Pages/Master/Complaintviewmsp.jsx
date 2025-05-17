@@ -188,24 +188,7 @@ export function Complaintviewmsp(params) {
 
 
 
-  // const handlevisitchange = (e) => {
-  //   const { value } = e.target;
 
-  //   setComplaintview((prevState) => ({
-  //     ...prevState,
-  //     visit_count: value, // Update the visit_count field
-  //   }));
-
-
-  //   axiosInstance.post(`${Base_Url}/updatevisitcount`, { count: value, ticket_no: complaintview.ticket_no }, {
-  //     headers: {
-  //       Authorization: token
-  //     }
-  //   })
-  //     .then((res) => {
-  //       alert("Visit Count Changed")
-  //     })
-  // };
 
   const resendotp = () => {
 
