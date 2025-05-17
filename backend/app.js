@@ -12393,7 +12393,7 @@ app.post('/getpageroledata', authenticateToken, async (req, res) => {
     locationpageid, pincodepageid, productpageid, customerpageid, bussinesspageid,
     franchpageid, callstatuspageid, lhiuserpageid, servicepageid, faultpageid,
     ratepageid, sparearray, ticketreportid, claimreportid, feedbackreportid, annexureid, shipmentpageid, engineermasterpageid, faultreportid,
-    faqpageid, assetreportid, sparereportid
+    faqpageid, assetreportid, sparereportid, grnpageid
   } = req.body;
 
 
@@ -12429,7 +12429,8 @@ app.post('/getpageroledata', authenticateToken, async (req, res) => {
     faultreport: parseIds(faultreportid),
     faqpage: parseIds(faqpageid),
     assetreport: parseIds(assetreportid),
-    sparereport: parseIds(sparereportid)
+    sparereport: parseIds(sparereportid),
+    grnpage: parseIds(grnpageid)
   };
 
   try {
@@ -12698,7 +12699,7 @@ app.post('/getshhipmentroledata', authenticateToken, async (req, res) => {
 });
 
 app.post('/getproductspareroledata', authenticateToken, async (req, res) => {
-  const { role, productsparepage, stockpage, mslpage, addmslpage } = req.body;
+  const { role, productsparepage, stockpage, mslpage, addmslpage, grnadminlist, grnadminoutlist } = req.body;
 
   // Function to convert comma-separated strings into arrays
   const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
@@ -12708,7 +12709,9 @@ app.post('/getproductspareroledata', authenticateToken, async (req, res) => {
     stockpage: parseIds(stockpage),
     productsparepage: parseIds(productsparepage),
     mslpage: parseIds(mslpage),
-    addmslpage: parseIds(addmslpage)
+    addmslpage: parseIds(addmslpage),
+    grnadminlist: parseIds(grnadminlist),
+    grnadminoutlist: parseIds(grnadminoutlist)
   };
 
   try {
@@ -14819,7 +14822,7 @@ app.post('/updatecreategrnspares', authenticateToken, async (req, res) => {
           console.log('eng1');
         }
 
-const stockupdateRequest = new sql.Request(transaction);
+        const stockupdateRequest = new sql.Request(transaction);
         const stockInsertQuery = `
         IF EXISTS (SELECT 1 FROM csp_stock WHERE product_code = @product_code and csp_code = @csp_code )
 BEGIN
@@ -15297,6 +15300,136 @@ app.post("/getgrnmsplist", authenticateToken, async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error", error: err });
   }
 });
+app.post("/getinwardlist", authenticateToken, async (req, res) => {
+  const {
+    csp_code,
+    fromDate,
+    toDate,
+    received_from,
+    invoice_number,
+  } = req.body;
+
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+
+    let sql = `
+      SELECT 
+        gn.id,
+        gn.grn_no,
+        gn.invoice_no,
+        gn.invoice_date,
+        gn.csp_code,
+        gn.csp_name,
+        gn.status,
+        gn.created_date,
+        gn.created_by,
+        gn.remark,
+        gn.received_date,
+        acg.quantity,
+        acg.spare_title,
+        acg.spare_no
+      FROM awt_grnmaster AS gn
+      LEFT JOIN awt_cspgrnspare AS acg ON acg.grn_no = gn.grn_no
+      WHERE gn.deleted = 0 
+    `;
+
+    request.input("csp_code", csp_code);
+
+    if (fromDate && toDate) {
+      sql += " AND CAST(gn.invoice_date AS DATE) BETWEEN @fromDate AND @toDate";
+      request.input("fromDate", fromDate);
+      request.input("toDate", toDate);
+    }
+
+    if (received_from) {
+      sql += " AND gn.csp_name LIKE @received_from";
+      request.input("received_from", `%${received_from}%`);
+    }
+
+    if (invoice_number) {
+      sql += " AND gn.invoice_no LIKE @invoice_number";
+      request.input("invoice_number", `%${invoice_number}%`);
+    }
+
+
+    const result = await request.query(sql);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "No results found" });
+    }
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+});
+app.post("/getinwardlistexcel", authenticateToken, async (req, res) => {
+  const {
+    csp_code,
+    fromDate,
+    toDate,
+    received_from,
+    invoice_number,
+  } = req.body;
+
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+
+    let sql = `
+      SELECT 
+        gn.id,
+        gn.grn_no,
+        gn.invoice_no,
+        gn.invoice_date,
+        gn.csp_code,
+        gn.csp_name,
+        gn.status,
+        gn.created_date,
+        gn.created_by,
+        gn.remark,
+        gn.received_date,
+        acg.quantity,
+        acg.spare_title,
+        acg.spare_no
+      FROM awt_grnmaster AS gn
+      LEFT JOIN awt_cspgrnspare AS acg ON acg.grn_no = gn.grn_no
+      WHERE gn.deleted = 0 
+    `;
+
+    request.input("csp_code", csp_code);
+
+    if (fromDate && toDate) {
+      sql += " AND CAST(gn.invoice_date AS DATE) BETWEEN @fromDate AND @toDate";
+      request.input("fromDate", fromDate);
+      request.input("toDate", toDate);
+    }
+
+    if (received_from) {
+      sql += " AND gn.csp_name LIKE @received_from";
+      request.input("received_from", `%${received_from}%`);
+    }
+
+    if (invoice_number) {
+      sql += " AND gn.invoice_no LIKE @invoice_number";
+      request.input("invoice_number", `%${invoice_number}%`);
+    }
+
+
+    const result = await request.query(sql);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "No results found" });
+    }
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+});
 
 
 app.post("/getgrnmspexcel", authenticateToken, async (req, res) => {
@@ -15528,7 +15661,92 @@ app.post("/getmspoutwardlisting", authenticateToken, async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error", error: err });
   }
 });
+app.post("/getadminoutwardlisting", authenticateToken, async (req, res) => {
 
+  const { csp_code, fromDate, toDate, received_from } = req.body;
+
+  let sql;
+
+
+  try {
+    const pool = await poolPromise;
+
+    // Parameterized query with a limit
+    sql = `select asp.* ,acp.spare_no , acp.spare_title , acp.quantity from awt_spareoutward as asp left join awt_cspissuespare as acp on asp.issue_no = acp.issue_no where asp.deleted = 0 
+    `;
+
+    if (fromDate && toDate) {
+      sql += ` AND CAST(asp.issue_date AS DATE) BETWEEN '${fromDate}' AND '${toDate}'`;
+
+    }
+
+    if (received_from) {
+      sql += ` AND asp.lhi_name LIKE '%${received_from}%'`;
+    }
+
+
+
+    sql += ' order by asp.id desc'
+
+    console.log(sql)
+
+
+    const result = await pool.request()
+      .query(sql);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "No results found" });
+    }
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+});
+app.post("/getadminoutwardexcel", authenticateToken, async (req, res) => {
+
+  const { csp_code, fromDate, toDate, received_from } = req.body;
+
+  let sql;
+
+
+  try {
+    const pool = await poolPromise;
+
+    // Parameterized query with a limit
+    sql = `select asp.* ,acp.spare_no , acp.spare_title , acp.quantity from awt_spareoutward as asp left join awt_cspissuespare as acp on asp.issue_no = acp.issue_no where asp.deleted = 0 
+    `;
+
+    if (fromDate && toDate) {
+      sql += ` AND CAST(asp.issue_date AS DATE) BETWEEN '${fromDate}' AND '${toDate}'`;
+
+    }
+
+    if (received_from) {
+      sql += ` AND asp.lhi_name LIKE '%${received_from}%'`;
+    }
+
+
+
+    sql += ' order by asp.id desc'
+
+    console.log(sql)
+
+
+    const result = await pool.request()
+      .query(sql);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "No results found" });
+    }
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+});
 
 app.post("/getoutwardexcel", authenticateToken, async (req, res) => {
 
@@ -15563,7 +15781,7 @@ app.post("/getoutwardexcel", authenticateToken, async (req, res) => {
       .query(sql);
 
     if (result.recordset.length === 0) {
-      return res.status(404).json({ message: "No results found" });
+      gr
     }
 
     return res.json(result.recordset);

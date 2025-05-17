@@ -172,6 +172,8 @@ import AddRatecard from './Components/Pages/Master/AddRatecard';
 import { GrnMspList } from './Components/Pages/Master/GrnMspList';
 import {SpareMspOutward} from './Components/Pages/Master/SpareMspOutward';
 import { MspStock } from './Components/Pages/Master/MspStock';
+import { GrnAdminInward } from './Components/Pages/Grn/GrnAdminInward';
+import { GrnAdminOutward } from './Components/Pages/Grn/GrnAdminOutward';
 
 
 
@@ -897,6 +899,14 @@ const Router = createBrowserRouter([
       {
         path: "/faq",
         element: <ProtectedRoute><Faq /></ProtectedRoute>
+      },
+       {
+        path: "/grnadminlist",
+        element: <ProtectedRoute><GrnAdminInward /></ProtectedRoute>
+      },
+       {
+        path: "/grnadminoutlist",
+        element: <ProtectedRoute><GrnAdminOutward /></ProtectedRoute>
       },
       {
         path: "enuiry",

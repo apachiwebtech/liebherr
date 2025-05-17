@@ -22,6 +22,10 @@ function Productsparetabs() {
       setActiveTab("/msl");
     } else if (location.pathname.startsWith("/addmsl")) {
       setActiveTab("/addmsl");
+    } else if (location.pathname.startsWith("/grnadminlist")) {
+      setActiveTab("/grnadminlist");
+    } else if (location.pathname.startsWith("/grnadminoutlist")) {
+      setActiveTab("/grnadminoutlist");
     }
 
   }, [location.pathname]);
@@ -42,7 +46,9 @@ function Productsparetabs() {
       productsparepage: '40',
       stockpage: '57',
       mslpage: '58',
-      addmslpage: '59'
+      addmslpage: '59',
+      grnadminlist: '67',
+      grnadminoutlist: '68',
     }
 
 
@@ -113,7 +119,7 @@ function Productsparetabs() {
                   {status.stockpage == 1 &&
                     <Link to={`/stock`}><li className="nav-item">
                       <button className={`nav-link ${activeTab === "/stock" ? "active" : ""}`}>
-                        STOCK
+                        STOCKS
                       </button>
                     </li></Link>
                   }
@@ -128,6 +134,20 @@ function Productsparetabs() {
                     <Link to={`/msl`}><li className="nav-item">
                       <button className={`nav-link ${activeTab === "/msl" ? "active" : ""}`}>
                         MSL
+                      </button>
+                    </li></Link>
+                  }
+                  {status.grnadminlist == 1 &&
+                    <Link to={`/grnadminlist`}><li className="nav-item">
+                      <button className={`nav-link ${activeTab === "/grnadminlist" ? "active" : ""}`}>
+                        GRN INWARD LIST
+                      </button>
+                    </li></Link>
+                  }
+                  {status.grnadminoutlist == 1 &&
+                    <Link to={`/grnadminoutlist`}><li className="nav-item">
+                      <button className={`nav-link ${activeTab === "/grnadminoutlist" ? "active" : ""}`}>
+                        GRN OUTWARD LIST
                       </button>
                     </li></Link>
                   }

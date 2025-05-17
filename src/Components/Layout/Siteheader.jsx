@@ -5,7 +5,7 @@ import { Avatar } from '@mui/material';
 import { App_Url, Base_Url, secretKey } from '../Utils/Base_Url';
 import CryptoJS from 'crypto-js';
 import axios from "axios";
-import { AllMasterpage, AnnextureReport, BussinessArray, CallStatusArray, ClaimReport, customerArray, EnquiryArray, FaultArray, FeedbackReport, FranchiseArray, LhiArray, locationArray, PincodeAlloArray, ProductArray, QuotationArray, RateCardArray, ReportsArray, ServiceContract, SpareArray, TicketArray, TicketReport, ShipmentArray, EngineerArray, FaultReportArray, FaqArray, AssetArray, SpareReportArray } from '../Utils/PageArray';
+import { AllMasterpage, AnnextureReport, BussinessArray, CallStatusArray, ClaimReport, customerArray, EnquiryArray, FaultArray, FeedbackReport, FranchiseArray, LhiArray, locationArray, PincodeAlloArray, ProductArray, QuotationArray, RateCardArray, ReportsArray, ServiceContract, SpareArray, TicketArray, TicketReport, ShipmentArray, EngineerArray, FaultReportArray, FaqArray, AssetArray, SpareReportArray, GrnArray } from '../Utils/PageArray';
 
 
 export function Siteheader() {
@@ -16,6 +16,7 @@ export function Siteheader() {
   const [enquirypage, setEnquirypage] = useState([])
   const [quotationpage, setQuotationpage] = useState([])
   const [reportpage, setReportpage] = useState([])
+  const [grnpage, setGrnpage] = useState([])
   const [faqpage, setFaqpage] = useState([])
   const [status, setStatus] = useState([])
   const Username = localStorage.getItem('lhiuser')
@@ -271,6 +272,7 @@ export function Siteheader() {
                 </ul>
               </li>
             }
+            
 
             {/* {faqpage == 1 &&
               <li className="nav-item dropdown">
