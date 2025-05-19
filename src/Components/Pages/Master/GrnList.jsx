@@ -467,6 +467,7 @@ export function GrnList(params) {
                                             <th width="10%">Invoice Date</th>
                                             <th width="15%">Article Code</th>
                                             <th width="30%">Article Description</th>
+                                            <th width="30%">Quantity</th>
                                             <th width="20%">Status</th>
 
                                         </tr>
@@ -493,6 +494,7 @@ export function GrnList(params) {
                                                     </td>
                                                     <td>{item.spare_no}</td>
                                                     <td>{item.spare_title}</td>
+                                                    <td>{item.actual_received}</td>
                                                     <td>
                                                         {item.status == '1' ? (
                                                             <p className='text-success'>Approved</p>

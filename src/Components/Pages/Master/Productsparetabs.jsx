@@ -123,7 +123,7 @@ function Productsparetabs() {
                       </button>
                     </li></Link>
                   }
-                  {status.mslpage == 1 &&
+                  {status.addmslpage == 1 &&
                     <Link to={`/addmsl`}><li className="nav-item">
                       <button className={`nav-link ${activeTab === "/addmsl" ? "active" : ""}`}>
                         ADD MSL
@@ -140,14 +140,14 @@ function Productsparetabs() {
                   {status.grnadminlist == 1 &&
                     <Link to={`/grnadminlist`}><li className="nav-item">
                       <button className={`nav-link ${activeTab === "/grnadminlist" ? "active" : ""}`}>
-                        GRN INWARD LIST
+                        Inward Listing
                       </button>
                     </li></Link>
                   }
                   {status.grnadminoutlist == 1 &&
                     <Link to={`/grnadminoutlist`}><li className="nav-item">
                       <button className={`nav-link ${activeTab === "/grnadminoutlist" ? "active" : ""}`}>
-                        GRN OUTWARD LIST
+                        Outward Listing
                       </button>
                     </li></Link>
                   }

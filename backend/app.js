@@ -3745,63 +3745,65 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
     call_status === 'Closed' &&
     Array.isArray(sparedata) && sparedata.length > 0 &&
     Array.isArray(spareqty) && spareqty.length > 0 &&
-    state_id != '' && state_id != 'null' && state_id != null && state_id != '0' &&
-    Array.isArray(engineerdata) &&
-    engineerdata.length > 0
+    (['', 'null', null, '0'].includes(state_id)) &&
+    Array.isArray(engineerdata) && engineerdata.length > 0
+
   ) {
 
-    const primaryEngineer = engineerdata[0];
+    try {
 
-    const pool = await poolPromise;
-    const request = pool.request();
+      const primaryEngineer = engineerdata[0];
 
-    request.input('eng_code', primaryEngineer);
+      const pool = await poolPromise;
+      const request = pool.request();
 
-    const paramNames = sparedata.map((code, i) => {
-      const paramName = `code${i}`;
-      request.input(paramName, code);
-      return `@${paramName}`;
-    });
+      request.input('eng_code', primaryEngineer);
 
-    const sql = `
+      const paramNames = sparedata.map((code, i) => {
+        const paramName = `code${i}`;
+        request.input(paramName, code);
+        return `@${paramName}`;
+      });
+
+      const sql = `
       SELECT product_code, stock_quantity 
       FROM engineer_stock 
       WHERE eng_code = @eng_code 
         AND product_code IN (${paramNames.join(',')})
     `;
 
-    const result = await request.query(sql);
+      const result = await request.query(sql);
 
-    const stockMap = new Map(result.recordset.map(item => [item.product_code, item.stock_quantity]));
+      const stockMap = new Map(result.recordset.map(item => [item.product_code, item.stock_quantity]));
 
-    console.log(stockMap)
+      console.log(stockMap)
 
-    const unavailableItems = sparedata
-      .map((code, i) => ({
-        code,
-        qty: parseInt(spareqty[i], 10),
-        available: stockMap.get(code) || 0,
-      }))
-      .filter(item => item.available < item.qty);
-
-
-    console.log(unavailableItems)
-
-    if (unavailableItems.length > 0) {
-      // Check other engineers (excluding the primary)
-      const fallbackRequest = pool.request();
-      fallbackRequest.input('eng_code', primaryEngineer);
-
-      // Input all product codes
-      sparedata.forEach((code, i) => {
-        fallbackRequest.input(`prod${i}`, code);
-      });
+      const unavailableItems = sparedata
+        .map((code, i) => ({
+          code,
+          qty: parseInt(spareqty[i], 10),
+          available: stockMap.get(code) || 0,
+        }))
+        .filter(item => item.available < item.qty);
 
 
+      console.log(unavailableItems)
 
-      const prodParams = sparedata.map((_, i) => `@prod${i}`).join(',');
+      if (unavailableItems.length > 0) {
+        // Check other engineers (excluding the primary)
+        const fallbackRequest = pool.request();
+        fallbackRequest.input('eng_code', primaryEngineer);
 
-      const fallbackSql = `
+        // Input all product codes
+        sparedata.forEach((code, i) => {
+          fallbackRequest.input(`prod${i}`, code);
+        });
+
+
+
+        const prodParams = sparedata.map((_, i) => `@prod${i}`).join(',');
+
+        const fallbackSql = `
         SELECT eng_code, product_code, stock_quantity 
         FROM engineer_stock 
         WHERE eng_code != @eng_code AND product_code IN (${prodParams})
@@ -3812,69 +3814,75 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
 
 
 
-      const fallbackResult = await fallbackRequest.query(fallbackSql);
+        const fallbackResult = await fallbackRequest.query(fallbackSql);
 
-      const stockUsed = new Map(); // key: eng_code, value: array of { product_code, qty_to_deduct }
+        const stockUsed = new Map(); // key: eng_code, value: array of { product_code, qty_to_deduct }
 
-      for (const item of unavailableItems) {
-        const matching = fallbackResult.recordset.find(row =>
-          row.product_code === item.code && row.stock_quantity >= item.qty
-        );
+        for (const item of unavailableItems) {
+          const matching = fallbackResult.recordset.find(row =>
+            row.product_code === item.code && row.stock_quantity >= item.qty
+          );
 
-        if (matching) {
-          if (!stockUsed.has(matching.eng_code)) {
-            stockUsed.set(matching.eng_code, []);
+          if (matching) {
+            if (!stockUsed.has(matching.eng_code)) {
+              stockUsed.set(matching.eng_code, []);
+            }
+            stockUsed.get(matching.eng_code).push({
+              product_code: item.code,
+              qty_to_deduct: item.qty,
+            });
+          } else {
+            return res.json({ message: `No engineer has enough stock for ${item.code}`, status: 0 });
           }
-          stockUsed.get(matching.eng_code).push({
-            product_code: item.code,
-            qty_to_deduct: item.qty,
-          });
-        } else {
-          return res.json({ message: `No engineer has enough stock for ${item.code}`, status: 0 });
         }
-      }
 
-      // All alternate engineers found — proceed to update
-      const updateAltRequest = pool.request();
-      const updateQueries = [];
+        // All alternate engineers found — proceed to update
+        const updateAltRequest = pool.request();
+        const updateQueries = [];
 
-      let counter = 0;
-      for (const [eng, items] of stockUsed.entries()) {
-        updateAltRequest.input(`eng_${eng}`, eng);
-        for (const item of items) {
-          const qtyParam = `qty${counter}`;
-          const codeParam = `code${counter}`;
-          updateAltRequest.input(qtyParam, item.qty_to_deduct);
-          updateAltRequest.input(codeParam, item.product_code);
-          updateQueries.push(`
+        let counter = 0;
+        for (const [eng, items] of stockUsed.entries()) {
+          updateAltRequest.input(`eng_${eng}`, eng);
+          for (const item of items) {
+            const qtyParam = `qty${counter}`;
+            const codeParam = `code${counter}`;
+            updateAltRequest.input(qtyParam, item.qty_to_deduct);
+            updateAltRequest.input(codeParam, item.product_code);
+            updateQueries.push(`
             UPDATE engineer_stock 
             SET stock_quantity = stock_quantity - @${qtyParam} 
             WHERE eng_code = @eng_${eng} AND product_code = @${codeParam};
           `);
-          counter++;
+            counter++;
+          }
         }
-      }
 
-      await updateAltRequest.query(updateQueries.join('\n'));
-    } else {
-      // All stock available from primary engineer
-      const updateRequest = pool.request();
-      updateRequest.input('eng_code', primaryEngineer);
+        await updateAltRequest.query(updateQueries.join('\n'));
+      } else {
+        // All stock available from primary engineer
+        const updateRequest = pool.request();
+        updateRequest.input('eng_code', primaryEngineer);
 
-      const updateQueries = sparedata.map((code, i) => {
-        const qtyParam = `qty${i}`;
-        const codeParam = `code${i}`;
-        updateRequest.input(qtyParam, parseInt(spareqty[i], 10));
-        updateRequest.input(codeParam, code);
-        return `
+        const updateQueries = sparedata.map((code, i) => {
+          const qtyParam = `qty${i}`;
+          const codeParam = `code${i}`;
+          updateRequest.input(qtyParam, parseInt(spareqty[i], 10));
+          updateRequest.input(codeParam, code);
+          return `
           UPDATE engineer_stock 
           SET stock_quantity = stock_quantity - @${qtyParam}
           WHERE eng_code = @eng_code AND product_code = @${codeParam};
         `;
-      });
+        });
 
-      await updateRequest.query(updateQueries.join('\n'));
+        await updateRequest.query(updateQueries.join('\n'));
+      }
+
+    } catch (err) {
+      console.error('Error in stock logic:', err);
+      return res.status(500).json({ message: 'Internal server error', error: err.message });
     }
+
 
   }
 
@@ -15160,7 +15168,8 @@ app.post("/getgrnlist", authenticateToken, async (req, res) => {
         gn.remark,
         gn.received_date,
 		    acg.spare_no,
-        acg.spare_title
+        acg.spare_title,
+        acg.actual_received
       FROM awt_grnmaster AS gn
       LEFT JOIN awt_cspgrnspare AS acg ON acg.grn_no = gn.grn_no
       WHERE gn.deleted = 0 AND gn.created_by = @csp_code
@@ -20120,7 +20129,7 @@ app.post("/getgrnlisting", authenticateToken, async (req, res) => {
         FROM Shipment_Parts AS s 
         LEFT JOIN Address_code AS a ON a.address_code = s.Address_code 
         LEFT JOIN awt_grnmaster AS agn ON agn.invoice_no = s.InvoiceNumber 
-        WHERE ${filterConditions} 
+        WHERE ${filterConditions} AND s.InvoiceDate >= '2025-05-01 00:00:000' 
       )
       SELECT * 
       FROM RankedParts
@@ -20308,7 +20317,7 @@ app.post("/getmspinwardliebherr", authenticateToken, async (req, res) => {
         FROM Shipment_Parts AS s 
         LEFT JOIN Address_code AS a ON a.address_code = s.Address_code 
         LEFT JOIN awt_grnmaster AS agn ON agn.invoice_no = s.InvoiceNumber 
-        WHERE ${filterConditions}
+        WHERE ${filterConditions} AND s.InvoiceDate >= '2025-05-01 00:00:000' 
       )
       SELECT * 
       FROM RankedParts
@@ -20335,7 +20344,7 @@ app.post("/getmspinwardliebherr", authenticateToken, async (req, res) => {
         FROM Shipment_Parts AS s 
         LEFT JOIN Address_code AS a ON a.address_code = s.Address_code 
         LEFT JOIN awt_grnmaster AS agn ON agn.invoice_no = s.InvoiceNumber 
-        WHERE ${filterConditions}
+        WHERE ${filterConditions} AND s.InvoiceDate >= '2025-05-01 00:00:000' 
       )
       SELECT COUNT(*) as totalCount
       FROM RankedParts
@@ -20445,7 +20454,7 @@ app.post("/getmspinwardliebherrexcel", authenticateToken, async (req, res) => {
         FROM Shipment_Parts AS s 
         LEFT JOIN Address_code AS a ON a.address_code = s.Address_code 
         LEFT JOIN awt_grnmaster AS agn ON agn.invoice_no = s.InvoiceNumber 
-        WHERE ${filterConditions}
+        WHERE ${filterConditions} AND s.InvoiceDate >= '2025-05-01 00:00:000'
       )
       SELECT * 
       FROM RankedParts

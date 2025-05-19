@@ -60,7 +60,7 @@ function GrnMspTab() {
                       className={`nav-link ${activeTab === '/msp/mspgrn' ? 'active' : ' onClick={() => setActiveTab("mspgrn")}'}`}
 
                     >
-                      INWARD LIEBHERR
+                      Inward Liebherr
                     </button></Link>
                   </li>
                   <li className="nav-item">
@@ -68,7 +68,7 @@ function GrnMspTab() {
                       className={`nav-link ${activeTab === '/msp/grnmsplist' ? 'active' : ' onClick={() => setActiveTab("grnmsplist")}'}`}
 
                     >
-                      GRN INWARD LISTING
+                      Inward Listing
                     </button></Link>
                   </li>
 
@@ -77,7 +77,7 @@ function GrnMspTab() {
                       className={`nav-link ${activeTab === '/msp/sparemspoutward' ? 'active' : ' onClick={() => setActiveTab("sparemspoutward")}'}`}
 
                     >
-                      GRN OUTWARD LISTING
+                      Outward Listing
                     </button></Link>
                   </li>
 
