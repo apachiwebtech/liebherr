@@ -323,6 +323,31 @@ const Servicecontract = () => {
   };
 
   // Role Right 
+const handleSerialNumberBlur = async () => {
+  if (!formData.serial_no) return;
+
+  try {
+    const response = await axios.get('/getProductDetailsBySerial', {
+      params: {
+        serialNumber: formData.serial_no,
+      },
+    });
+
+    const data = response.data;
+
+    setFormData((prev) => ({
+      ...prev,
+      productcode: data.productCode || '',
+      productName: data.productDescription || '',
+      customerName: data.customerName || '',
+      customerID: data.customerID || '',
+    }));
+  } catch (error) {
+    console.error("Error fetching product details:", error);
+    // Optionally show a toast or error message here
+  }
+};
+
 
 
   const Decrypt = (encrypted) => {
@@ -361,7 +386,7 @@ const Servicecontract = () => {
           <SyncLoader loading={loaders} color="#FFFFFF" />
         </div>
       )}
-      { roleaccess > 1 ?<div className="row mp0">
+      {roleaccess > 1 ? <div className="row mp0">
         <div className="col-12">
           <div className="card mb-3 tab_box">
             <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
@@ -401,6 +426,58 @@ const Servicecontract = () => {
                     </div>
                     <div className="col-3 mb-3">
                       <label
+                        htmlFor="ProductcodeInput"
+                        className="input-field"
+                      >
+                        Product Code <span className="text-danger">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="productcode"
+                        id="ProductcodeInput"
+                        value={formData.productcode}
+                        onChange={handleChange}
+                        placeholder="Enter Product Code  "
+                      />
+                      {errors.productcode && (
+                        <small className="text-danger">
+                          {errors.productcode}
+                        </small>
+                      )}
+                      {duplicateError && (
+                        <small className="text-danger">{duplicateError}</small>
+                      )}{" "}
+                      {/* Show duplicate error */}
+                    </div>
+                    <div className="col-3 mb-3">
+                      <label
+                        htmlFor="CustomernameInput"
+                        className="input-field"
+                      >
+                        Product Description<span className="text-danger">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="productName"
+                        id="ServiceproductInput"
+                        value={formData.productName}
+                        onChange={handleChange}
+                        placeholder="Enter Product Name "
+                      />
+                      {errors.productName && (
+                        <small className="text-danger">
+                          {errors.productName}
+                        </small>
+                      )}
+                      {duplicateError && (
+                        <small className="text-danger">{duplicateError}</small>
+                      )}{" "}
+                      {/* Show duplicate error */}
+                    </div>
+                    <div className="col-3 mb-3">
+                      <label
                         htmlFor="CustomernameInput"
                         className="input-field"
                       >
@@ -426,7 +503,7 @@ const Servicecontract = () => {
                         htmlFor="CustomerMobileInput"
                         className="input-field"
                       >
-                        Customer Mobile No<span className="text-danger">*</span> <input type="checkbox" />Whatsapp
+                        Customer Mobile No
                       </label>
                       <input
                         type="tel"
@@ -451,7 +528,7 @@ const Servicecontract = () => {
                         htmlFor="CustomernameInput"
                         className="input-field"
                       >
-                        Contract Number<span className="text-danger">*</span>
+                        Contract Code<span className="text-danger">*</span>
                       </label>
                       <input
                         type="text"
@@ -460,7 +537,7 @@ const Servicecontract = () => {
                         id="ServiceproductInput"
                         value={formData.contractNumber}
                         onChange={handleChange}
-                        placeholder="Enter Contract Number "
+                        placeholder="Enter Contract Code "
                       />
                       {errors.contractNumber && (
                         <small className="text-danger">
@@ -473,8 +550,6 @@ const Servicecontract = () => {
                       {/* Show duplicate error */}
                     </div>
 
-                  </div>
-                  <div className="row">
                     <div className="col-3 mb-3">
                       <label htmlFor="contracttypeInput" className="input-field">
                         Contract Type<span className="text-danger">*</span>
@@ -498,23 +573,94 @@ const Servicecontract = () => {
 
                     <div className="col-3 mb-3">
                       <label
-                        htmlFor="CustomernameInput"
+                        htmlFor="ContractAmtInput"
                         className="input-field"
                       >
-                        Product Name<span className="text-danger">*</span>
+                        Contract Amount <span className="text-danger">*</span>
                       </label>
                       <input
                         type="text"
                         className="form-control"
-                        name="productName"
-                        id="ServiceproductInput"
-                        value={formData.productName}
+                        name="contractamt"
+                        id="ContractAmtInput"
+                        value={formData.contractamt}
                         onChange={handleChange}
-                        placeholder="Enter Product Name "
+                        placeholder="Enter Contract Amount"
                       />
-                      {errors.productName && (
+                      {errors.contractamt && (
                         <small className="text-danger">
-                          {errors.productName}
+                          {errors.contractamt}
+                        </small>
+                      )}
+                      {duplicateError && (
+                        <small className="text-danger">{duplicateError}</small>
+                      )}{" "}
+                      {/* Show duplicate error */}
+                    </div>
+                    <div className="col-3 mb-3">
+                      <label htmlFor="GoodwillMonthInput" className="input-field">
+                        Goodwill Month
+                      </label>
+                      <input
+                        type="text" // or use type="number" if it's numeric
+                        className="form-control"
+                        name="goodwillmonth"
+                        id="GoodwillMonthInput"
+                        value={formData.goodwillmonth}
+                        onChange={handleChange}
+                        placeholder="Enter Goodwill Month"
+                      />
+                      {errors.goodwillmonth && (
+                        <small className="text-danger">{errors.goodwillmonth}</small>
+                      )}
+                    </div>
+
+                    <div className="col-3 mb-3">
+                      <label
+                        htmlFor="DurationInput"
+                        className="input-field"
+                      >
+                        Duration<span className="text-danger">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="duration"
+                        id="DurationInput"
+                        value={formData.duration}
+                        onChange={handleChange}
+                        placeholder="Enter Duration "
+                      />
+                      {errors.duration && (
+                        <small className="text-danger">
+                          {errors.duration}
+                        </small>
+                      )}
+                      {duplicateError && (
+                        <small className="text-danger">{duplicateError}</small>
+                      )}{" "}
+                      {/* Show duplicate error */}
+                    </div>
+
+                    <div className="col-3 mb-3">
+                      <label
+                        htmlFor="SchemenameInput"
+                        className="input-field"
+                      >
+                        Scheme Name <span className="text-danger">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="schemename"
+                        id="SchemenameInput"
+                        value={formData.schemename}
+                        onChange={handleChange}
+                        placeholder="Enter Scheme Name"
+                      />
+                      {errors.schemename && (
+                        <small className="text-danger">
+                          {errors.schemename}
                         </small>
                       )}
                       {duplicateError && (
@@ -525,7 +671,7 @@ const Servicecontract = () => {
 
                     <div className="col -3 mb-3">
                       <label htmlFor="StartDateInput" className="input-field">
-                        Start Date
+                        Contract Start Date
                       </label>
                       <DatePicker
                         selected={startDate}
@@ -536,22 +682,14 @@ const Servicecontract = () => {
                         name="startDate"
                         aria-describedby="StartDateInput"
                       />
-                      {/* <input
-                        type="date"
-                        className="form-control"
-                        name="startDate"
-                        id="StartDateInput"
-                        value={formData.startDate}
-                        onChange={handleChange}
-                        placeholder="Select Start Date"
-                      /> */}
                       {errors.startDate && (
                         <small className="text-danger">{errors.startDate}</small>
                       )}
                     </div>
+
                     <div className="col-3 mb-3">
                       <label htmlFor="EndDateInput" className="input-field">
-                        End Date
+                        Contract End Date
                       </label>
                       <DatePicker
                         selected={enddate}
@@ -562,22 +700,31 @@ const Servicecontract = () => {
                         name="endDate"
                         aria-describedby="EndDateInput"
                       />
-                      {/* <input
-                        type="date"
-                        className="form-control"
-                        name="endDate"
-                        id="EndDateInput"
-                        value={formData.endDate}
-                        onChange={handleChange}
-                        placeholder="Select End Date"
-                      /> */}
                       {errors.endDate && (
                         <small className="text-danger">{errors.endDate}</small>
                       )}
                     </div>
+
+                    <div className="col-3 mb-3">
+                      <label htmlFor="PurchaseDateInput" className="input-field">
+                        Purchase Date
+                      </label>
+                      <DatePicker
+                        selected={enddate}
+                        onChange={handleDateChange2}
+                        dateFormat="dd-MM-yyyy"
+                        placeholderText="DD-MM-YYYY"
+                        className='form-control'
+                        name="purchasedate"
+                        aria-describedby="PurchaseDateInput"
+                      />
+                      {errors.purchasedate && (
+                        <small className="text-danger">{errors.purchasedate}</small>
+                      )}
+                    </div>
                   </div>
 
-                 {roleaccess > 2 ? <div className="text-right">
+                  {roleaccess > 2 ? <div className="text-right">
                     <button className="btn btn-liebherr" type="submit">
                       {isEdit ? "Update" : "Submit"}
                     </button>
@@ -590,7 +737,7 @@ const Servicecontract = () => {
           </div>
         </div>
       </div> : null}
-      </div>
+    </div>
   );
 };
 

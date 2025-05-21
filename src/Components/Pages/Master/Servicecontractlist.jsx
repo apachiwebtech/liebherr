@@ -55,6 +55,7 @@ export function Servicecontractlist(params) {
         return date.toLocaleDateString('en-GB', options).replace(/\//g, '-'); // Convert to 'DD-MM-YYYY' format
     };
 
+     
     const fetchServicecontractlist = async (page) => {
         try {
             const params = new URLSearchParams();
