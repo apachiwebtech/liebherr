@@ -222,9 +222,9 @@ const Master_Warrenty = () => {
         "Service Type": user.Service_Type,
         "Warranty Year ": user.Warrenty_year,
         "Compressor Warranty": user.Compressor_Warrenty,
-        "Warranty Amount": user.Warrenty_amount,
-        "Is Scheme": user.IsScheme,
-        "Scheme name": user.Scheme_Name,
+        // "Warranty Amount": user.Warrenty_amount,
+        // "Is Scheme": user.IsScheme,
+        // "Scheme name": user.Scheme_Name,
         // Add fields you want to export
       })));
 
@@ -427,9 +427,9 @@ const Master_Warrenty = () => {
                       <th width="10%">Service_Type</th>
                       <th width="10%">Warrenty_year</th>
                       <th width="10%">Compressor_Warrenty</th>
-                      <th width="10%">Warrenty_amount</th>
+                      {/* <th width="10%">Warrenty_amount</th>
                       <th width="10%">Is_Scheme</th>
-                      <th width="10%">Scheme_Name</th>
+                      <th width="10%">Scheme_Name</th> */}
 
 
 
@@ -450,9 +450,9 @@ const Master_Warrenty = () => {
                           <td>{item.Service_Type}</td>
                           <td>{item.warrenty_year}</td>
                           <td>{item.compressor_warrenty}</td>
-                          <td>{item.warrenty_amount}</td>
+                          {/* <td>{item.warrenty_amount}</td>
                           <td>{item.is_scheme}</td>
-                          <td>{item.scheme_name}</td>
+                          <td>{item.scheme_name}</td> */}
 
 
                         </tr>

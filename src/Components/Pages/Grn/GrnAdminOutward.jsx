@@ -33,6 +33,7 @@ import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 import { useDispatch } from "react-redux";
 import { getRoleData } from "../../Store/Role/role-action";
 import Productsparetabs from '../Master/Productsparetabs';
+import Grntab from './Grntab';
 
 export function GrnAdminOutward(params) {
 
@@ -275,7 +276,7 @@ export function GrnAdminOutward(params) {
 
     return (
         <div className="tab-content">
-            <Productsparetabs />
+            <Grntab />
             {loaders && (
                 <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     <SyncLoader loading={loaders} color="#FFFFFF" />

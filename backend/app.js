@@ -12707,7 +12707,61 @@ app.post('/getshhipmentroledata', authenticateToken, async (req, res) => {
 });
 
 app.post('/getproductspareroledata', authenticateToken, async (req, res) => {
-  const { role, productsparepage, stockpage, mslpage, addmslpage, grnadminlist, grnadminoutlist } = req.body;
+  const { role, productsparepage } = req.body;
+
+  // Function to convert comma-separated strings into arrays
+  const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
+
+  // Convert all page IDs from strings to arrays
+  const pageTypes = {
+    productsparepage: parseIds(productsparepage),
+
+  };
+
+  try {
+    const pool = await poolPromise;
+    const request = pool.request();
+    request.input("roleid", sql.Int, role);
+
+    let queryParts = [];
+    let index = 0;
+
+    for (const [pageType, pageIds] of Object.entries(pageTypes)) {
+      if (pageIds.length > 0) {
+        let pageParams = pageIds.map((_, i) => `@pageid${index + i}`).join(",");
+        queryParts.push(`
+          SELECT '${pageType}' AS pageType, COUNT(*) AS count
+          FROM pagerole
+          WHERE roleid = @roleid AND pageid IN (${pageParams}) AND accessid > 1
+        `);
+        pageIds.forEach((id, i) => request.input(`pageid${index + i}`, sql.Int, id));
+        index += pageIds.length;
+      }
+    }
+
+    if (queryParts.length === 0) {
+      return res.json(Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])));
+    }
+
+    const query = queryParts.join(" UNION ALL ");
+    const result = await request.query(query);
+
+    // Convert results to a key-value format
+    const response = Object.fromEntries(Object.keys(pageTypes).map(key => [key, 0])); // Default all pages to 0
+
+    result.recordset.forEach(row => {
+      response[row.pageType] = row.count > 0 ? 1 : 0;
+    });
+
+    return res.json(response);
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database query failed", details: err });
+  }
+});
+
+app.post('/getgrnroledata', authenticateToken, async (req, res) => {
+  const { role, stockpage, mslpage, addmslpage, grnadminlist, grnadminoutlist, inwardLiebherr, outward, inwardOthers } = req.body;
 
   // Function to convert comma-separated strings into arrays
   const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
@@ -12715,11 +12769,13 @@ app.post('/getproductspareroledata', authenticateToken, async (req, res) => {
   // Convert all page IDs from strings to arrays
   const pageTypes = {
     stockpage: parseIds(stockpage),
-    productsparepage: parseIds(productsparepage),
     mslpage: parseIds(mslpage),
     addmslpage: parseIds(addmslpage),
     grnadminlist: parseIds(grnadminlist),
-    grnadminoutlist: parseIds(grnadminoutlist)
+    grnadminoutlist: parseIds(grnadminoutlist),
+    inwardLiebherr: parseIds(inwardLiebherr),
+    outward: parseIds(outward),
+    inwardOthers: parseIds(inwardOthers)
   };
 
   try {
@@ -16621,7 +16677,7 @@ app.get("/getallstock", authenticateToken, async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: "An error occurred while fetching the complaint list" });
+    return res.status(500).json({ message: "An error occurred while fetching the stock list" });
   }
 });
 
@@ -18828,20 +18884,36 @@ app.post("/getannexturereport", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
 
     let sql = `
-        SELECT ct.id, ct.ticket_no, ct.created_date, ct.ticket_type, ct.customer_id, ct.customer_name, ct.state, 
-              ct.pincode, ct.call_status, ct.mother_branch, ct.msp, ct.sevice_partner, ct.csp, 
-              ct.child_service_partner, ct.customer_class, ct.ModelNumber, ct.serial_no, ct.invoice_date, 
-              ct.warranty_status, ct.closed_date, ct.sales_partner, ct.assigned_to, ct.class_city, 
-              ct.visit_count, ct.gas_charges, ct.transport_charge, ct.service_charges,
-              aus.ticketId, aus.quantity, aus.article_description,aus.price, 
-              pm.PriceGroup,
-              (COALESCE(TRY_CAST(aus.price AS INT), 0) * COALESCE(TRY_CAST(aus.quantity AS INT), 0)) AS total_cost
-        FROM complaint_ticket ct    
-        LEFT JOIN awt_uniquespare aus ON ct.ticket_no = aus.ticketId
-        LEFT JOIN Spare_parts pm ON ct.ModelNumber = pm.ModelNumber
-        WHERE ct.deleted = 0 
-        AND ct.ticket_date >= @startDate 
-        AND ct.ticket_date <= @endDate`;
+        SELECT 
+		ct.ticket_no as TicketNumber,
+		ct.ticket_date as CreateDate,
+		ct.customer_id as CustomerID,
+		ct.customer_name as CustomerName,
+		ct.state as State,
+		ct.customer_class as CustomerClassification,
+		ct.call_status as CallStatus,
+		ct.closed_date as FieldCompleteDate,
+		ct.ModelNumber,
+		ct.serial_no as SerialNumber,
+		ct.warranty_status as WarrantyType,
+		ct.csp as ChildServicePartnerCode,
+		ct.child_service_partner as ChildServicePartnerName,
+		ct.msp as MasterServicePartnerCode,
+		ct.sevice_partner as MasterServicePartnerName,
+		ct.item_code as ItemCode,
+		pm.ItemDescription,
+		ut.quantity as Quantity,
+		pm.Returnable as PartReturnableType,
+    pm.PriceGroup,
+		pg.MRPQuotation as BasicSpareCost,
+		pg.MRPQuotation as TotalBasicSpareCost
+    FROM complaint_ticket ct
+    INNER JOIN awt_uniquespare ut ON ct.ticket_no = ut.ticketId
+		LEFT JOIN Spare_parts pm ON pm.title = ut.article_code
+		LEFT JOIN priceGroup pg ON pm.PriceGroup = pg.PriceGroup
+    WHERE ct.deleted = 0 
+    AND ct.ticket_date >= @startDate 
+    AND ct.ticket_date <= @endDate`;
 
     if (msp) {
       sql += " AND ct.msp = @msp"; // Add MSP filter if selected
@@ -19752,6 +19824,106 @@ app.post('/uploadpinexcel', upload.none(), authenticateToken, async (req, res) =
     return res.status(500).json({ error: 'An error occurred while inserting data' });
   }
 });
+app.post('/uploadserviceexcel', upload.none(), authenticateToken, async (req, res) => {
+  let { jsonData } = req.body;
+
+  let excelData = JSON.parse(jsonData);
+
+  try {
+    const pool = await poolPromise;
+    pool.config.options.requestTimeout = 600000;
+
+    for (const item of excelData) {
+      console.log(item.customerName,'name')
+      return;
+
+      // Check for existing record
+      const checkResult = await pool.request()
+        .input('serialNumber', sql.VarChar, item.serialNumber)
+        .input('contractType', sql.VarChar, item.contractType)
+        .input('startDate', sql.DateTime, item.startDate)
+        .input('endDate', sql.DateTime, item.endDate)
+        .query(`
+          SELECT 1 FROM awt_servicecontract 
+          WHERE serialNumber = @serialNumber AND contractType = @contractType 
+          AND startDate = @startDate AND endDate = @endDate
+        `);
+
+      if (checkResult.recordset.length > 0) {
+        // Update existing record
+        await pool.request()
+          .input('serialNumber', sql.VarChar, item.serialNumber)
+          .input('product_code', sql.VarChar, item.product_code)
+          .input('productName', sql.VarChar, item.productName)
+          .input('customerName', sql.VarChar, item.customerName)
+          .input('customerID', sql.VarChar, item.customerID)
+          .input('contractNumber', sql.VarChar, item.contractNumber)
+          .input('contractType', sql.VarChar, item.contractType)
+          .input('contract_amt', sql.Float, item.contarct_amt)
+          .input('goodwill_month', sql.VarChar, item.goodwill_month)
+          .input('scheme_name', sql.VarChar, item.scheme_name)
+          .input('duration', sql.VarChar, item.duration)
+          .input('status', sql.VarChar, item.status)
+          .input('startDate', sql.DateTime, item.startDate)
+          .input('endDate', sql.DateTime, item.endDate)
+          .input('purchaseDate', sql.DateTime, item.purchaseDate)
+          .query(`
+            UPDATE awt_servicecontract SET 
+              product_code = @product_code,
+              productName = @productName,
+              customerName = @customerName,
+              customerID = @customerID,
+              contractNumber = @contractNumber,
+              contractType = @contractType,
+              contarct_amt = @contract_amt, 
+              goodwill_month = @goodwill_month,
+              scheme_name = @scheme_name,
+              duration = @duration,
+              status = @status,
+              purchaseDate = @purchaseDate
+            WHERE serialNumber = @serialNumber 
+              AND startDate = @startDate 
+              AND endDate = @endDate 
+              AND contractType = @contractType
+          `);
+      } else {
+        // Insert new record
+        await pool.request()
+          .input('serialNumber', sql.VarChar, item.serialNumber)
+          .input('product_code', sql.VarChar, item.product_code)
+          .input('productName', sql.VarChar, item.productName)
+          .input('customerName', sql.VarChar, item.customerName)
+          .input('customerID', sql.VarChar, item.customerID)
+          .input('contractNumber', sql.VarChar, item.contractNumber)
+          .input('contractType', sql.VarChar, item.contractType)
+          .input('contract_amt', sql.Float, item.contarct_amt)
+          .input('goodwill_month', sql.VarChar, item.goodwill_month)
+          .input('scheme_name', sql.VarChar, item.scheme_name)
+          .input('duration', sql.VarChar, item.duration)
+          .input('status', sql.VarChar, item.status)
+          .input('startDate', sql.DateTime, item.startDate)   
+          .input('endDate', sql.DateTime, item.endDate)       
+          .input('purchaseDate', sql.DateTime, item.purchaseDate)
+          .query(`
+            INSERT INTO awt_servicecontract 
+              (serialNumber, product_code, productName, customerName, customerID, contractNumber, contractType, contarct_amt, goodwill_month, scheme_name, duration, status, startDate, endDate, purchaseDate,deleted) 
+            VALUES (
+              @serialNumber, @product_code, @productName, @customerName, @customerID, @contractNumber, @contractType, 
+              @contract_amt, @goodwill_month, @scheme_name, @duration, @status, @startDate, @endDate, @purchaseDate,'0'
+            )
+          `);
+      }
+    }
+
+    return res.json({ message: 'Data inserted or updated successfully' });
+  } catch (err) {
+    console.error("DB Error:", err.message, err.stack);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+
+
 
 app.post('/uplaodmslexcel', upload.none(), authenticateToken, async (req, res) => {
   let { excelData, created_by = "1" } = req.body;
@@ -19850,7 +20022,7 @@ app.post('/uploadspareexcel', async (req, res) => {
         .input('HSN', sql.VarChar, item.HSN)
         .input('Packed', sql.VarChar, item.Packed)
         .input('Returnable', sql.VarChar, item.Returnable)
-        .input('ProductLine', sql.VarChar, item.ProductLine)
+        .input('purchaseDate', sql.VarChar, item.ProductLine)
         .input('ProductClass', sql.VarChar, item.ProductClass)
         .input('Serialized', sql.VarChar, item.Serialized)
         .query(`
@@ -20477,10 +20649,268 @@ app.post("/getmspinwardliebherrexcel", authenticateToken, async (req, res) => {
   }
 });
 
+app.get("/getinwardLiebherr", authenticateToken, async (req, res) => {
+  try {
+    const pool = await poolPromise;
 
+    const {
+      fromDate,
+      toDate,
+      invoice_number,
+      address_code,
+      status,
+      page = 1,
+      pageSize = 10,
+    } = req.query;
 
+    const offset = (page - 1) * pageSize;
 
+    let sqlQuery = `
+      WITH RankedParts AS (
+        SELECT  
+          s.id, s.Address_code, s.InvoiceDate, s.InvoiceNumber, s.Invoice_bpcode, 
+          s.Invoice_bpName, s.Invoice_qty, s.Item_Code, s.Item_Description, 
+          s.Service_Type, s.Order_Line_Number, s.Order_Number, a.csp_code, agn.status,
+          ROW_NUMBER() OVER (PARTITION BY s.InvoiceNumber ORDER BY s.InvoiceDate DESC) AS rn
+        FROM Shipment_Parts AS s 
+        LEFT JOIN Address_code AS a ON a.address_code = s.Address_code 
+        LEFT JOIN awt_grnmaster AS agn ON agn.invoice_no = s.InvoiceNumber 
+        WHERE s.deleted = 0
+    `;
 
+    if (fromDate && toDate) {
+      sqlQuery += ` AND s.InvoiceDate BETWEEN @fromDate AND @toDate`;
+    }
+    if (invoice_number) {
+      sqlQuery += ` AND s.InvoiceNumber LIKE @invoice_number`;
+    }
+    if (address_code) {
+      sqlQuery += ` AND s.Address_code LIKE @address_code`;
+    }
+    if (status) {
+      sqlQuery += ` AND agn.status LIKE @status`;
+    }
+
+    sqlQuery += `
+      )
+      SELECT * 
+      FROM RankedParts
+      WHERE rn = 1
+      ORDER BY InvoiceDate DESC
+      OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY
+    `;
+
+    const request = pool.request();
+
+    if (fromDate && toDate) {
+      request.input("fromDate", sql.DateTime, new Date(fromDate));
+      request.input("toDate", sql.DateTime, new Date(toDate));
+    }
+    if (invoice_number) {
+      request.input("invoice_number", sql.VarChar, `%${invoice_number}%`);
+    }
+    if (address_code) {
+      request.input("address_code", sql.VarChar, `%${address_code}%`);
+    }
+    if (status) {
+      request.input("status", sql.VarChar, `%${status}%`);
+    }
+
+    request.input("offset", sql.Int, offset);
+    request.input("pageSize", sql.Int, parseInt(pageSize));
+
+    const result = await request.query(sqlQuery);
+
+    // Count query
+    let countSql = `
+      SELECT COUNT(*) AS totalCount
+      FROM (
+        SELECT s.InvoiceNumber
+        FROM Shipment_Parts AS s
+        LEFT JOIN Address_code AS a ON a.address_code = s.Address_code
+        LEFT JOIN awt_grnmaster AS agn ON agn.invoice_no = s.InvoiceNumber
+        WHERE s.deleted = 0
+    `;
+
+    if (fromDate && toDate) {
+      countSql += ` AND s.InvoiceDate BETWEEN @fromDate AND @toDate`;
+    }
+    if (invoice_number) {
+      countSql += ` AND s.InvoiceNumber LIKE @invoice_number`;
+    }
+    if (address_code) {
+      countSql += ` AND s.Address_code LIKE @address_code`;
+    }
+    if (status) {
+      countSql += ` AND agn.status LIKE @status`;
+    }
+
+    countSql += ` GROUP BY s.InvoiceNumber ) AS CountTable`;
+
+    const countRequest = pool.request();
+
+    if (fromDate && toDate) {
+      countRequest.input("fromDate", sql.DateTime, new Date(fromDate));
+      countRequest.input("toDate", sql.DateTime, new Date(toDate));
+    }
+    if (invoice_number) {
+      countRequest.input("invoice_number", sql.VarChar, `%${invoice_number}%`);
+    }
+    if (address_code) {
+      countRequest.input("address_code", sql.VarChar, `%${address_code}%`);
+    }
+    if (status) {
+      countRequest.input("status", sql.VarChar, `%${status}%`);
+    }
+
+    const countResult = await countRequest.query(countSql);
+    const totalCount = countResult.recordset[0]?.totalCount || 0;
+
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
+
+    return res.json({
+      encryptedData,
+      totalCount,
+      page: parseInt(page),
+      pageSize: parseInt(pageSize),
+    });
+  } catch (err) {
+    console.error("Error in /getinwardLiebherr (GET):", err);
+    return res.status(500).json({ error: "An error occurred while fetching data" });
+  }
+});
+app.get("/getinwardLiebherrexcel", authenticateToken, async (req, res) => {
+  try {
+    const pool = await poolPromise;
+
+    const {
+      fromDate,
+      toDate,
+      invoice_number,
+      address_code,
+      status,
+      page = 1,
+      pageSize = 10,
+    } = req.query;
+
+    const offset = (page - 1) * pageSize;
+
+    let sqlQuery = `
+      WITH RankedParts AS (
+        SELECT  
+          s.id, s.Address_code, s.InvoiceDate, s.InvoiceNumber, s.Invoice_bpcode, 
+          s.Invoice_bpName, s.Invoice_qty, s.Item_Code, s.Item_Description, 
+          s.Service_Type, s.Order_Line_Number, s.Order_Number, a.csp_code, agn.status,
+          ROW_NUMBER() OVER (PARTITION BY s.InvoiceNumber ORDER BY s.InvoiceDate DESC) AS rn
+        FROM Shipment_Parts AS s 
+        LEFT JOIN Address_code AS a ON a.address_code = s.Address_code 
+        LEFT JOIN awt_grnmaster AS agn ON agn.invoice_no = s.InvoiceNumber 
+        WHERE s.deleted = 0
+    `;
+
+    if (fromDate && toDate) {
+      sqlQuery += ` AND s.InvoiceDate BETWEEN @fromDate AND @toDate`;
+    }
+    if (invoice_number) {
+      sqlQuery += ` AND s.InvoiceNumber LIKE @invoice_number`;
+    }
+    if (address_code) {
+      sqlQuery += ` AND s.Address_code LIKE @address_code`;
+    }
+    if (status) {
+      sqlQuery += ` AND agn.status LIKE @status`;
+    }
+
+    sqlQuery += `
+      )
+      SELECT * 
+      FROM RankedParts
+      WHERE rn = 1
+      ORDER BY InvoiceDate DESC
+      OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY
+    `;
+
+    const request = pool.request();
+
+    if (fromDate && toDate) {
+      request.input("fromDate", sql.DateTime, new Date(fromDate));
+      request.input("toDate", sql.DateTime, new Date(toDate));
+    }
+    if (invoice_number) {
+      request.input("invoice_number", sql.VarChar, `%${invoice_number}%`);
+    }
+    if (address_code) {
+      request.input("address_code", sql.VarChar, `%${address_code}%`);
+    }
+    if (status) {
+      request.input("status", sql.VarChar, `%${status}%`);
+    }
+
+    request.input("offset", sql.Int, offset);
+    request.input("pageSize", sql.Int, parseInt(pageSize));
+
+    const result = await request.query(sqlQuery);
+
+    // Count query
+    let countSql = `
+      SELECT COUNT(*) AS totalCount
+      FROM (
+        SELECT s.InvoiceNumber
+        FROM Shipment_Parts AS s
+        LEFT JOIN Address_code AS a ON a.address_code = s.Address_code
+        LEFT JOIN awt_grnmaster AS agn ON agn.invoice_no = s.InvoiceNumber
+        WHERE s.deleted = 0
+    `;
+
+    if (fromDate && toDate) {
+      countSql += ` AND s.InvoiceDate BETWEEN @fromDate AND @toDate`;
+    }
+    if (invoice_number) {
+      countSql += ` AND s.InvoiceNumber LIKE @invoice_number`;
+    }
+    if (address_code) {
+      countSql += ` AND s.Address_code LIKE @address_code`;
+    }
+    if (status) {
+      countSql += ` AND agn.status LIKE @status`;
+    }
+
+    countSql += ` GROUP BY s.InvoiceNumber ) AS CountTable`;
+
+    const countRequest = pool.request();
+
+    if (fromDate && toDate) {
+      countRequest.input("fromDate", sql.DateTime, new Date(fromDate));
+      countRequest.input("toDate", sql.DateTime, new Date(toDate));
+    }
+    if (invoice_number) {
+      countRequest.input("invoice_number", sql.VarChar, `%${invoice_number}%`);
+    }
+    if (address_code) {
+      countRequest.input("address_code", sql.VarChar, `%${address_code}%`);
+    }
+    if (status) {
+      countRequest.input("status", sql.VarChar, `%${status}%`);
+    }
+
+    const countResult = await countRequest.query(countSql);
+    const totalCount = countResult.recordset[0]?.totalCount || 0;
+
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
+
+    return res.json({
+      encryptedData,
+      totalCount,
+      page: parseInt(page),
+      pageSize: parseInt(pageSize),
+    });
+  } catch (err) {
+    console.error("Error in /getinwardLiebherr (GET):", err);
+    return res.status(500).json({ error: "An error occurred while fetching data" });
+  }
+});
 
 app.post("/approvegrn", upload.none(), authenticateToken, async (req, res) => {
   let { itemdata } = req.body;
@@ -20918,4 +21348,7 @@ app.get("/downloadstockexcel", authenticateToken, async (req, res) => {
     return res.status(500).send('Error generating Stock Excel file');
   }
 });
+
+
+
 

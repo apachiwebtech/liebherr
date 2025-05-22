@@ -170,11 +170,14 @@ import AssetReport from './Components/Pages/Reports/AssetReport';
 import SpareReport from './Components/Pages/Reports/SpareReport';
 import AddRatecard from './Components/Pages/Master/AddRatecard';
 import { GrnMspList } from './Components/Pages/Master/GrnMspList';
-import {SpareMspOutward} from './Components/Pages/Master/SpareMspOutward';
+import { SpareMspOutward } from './Components/Pages/Master/SpareMspOutward';
 import { MspStock } from './Components/Pages/Master/MspStock';
 import { GrnAdminInward } from './Components/Pages/Grn/GrnAdminInward';
 import { GrnAdminOutward } from './Components/Pages/Grn/GrnAdminOutward';
 import MspGrn from './Components/Pages/Master/MspGrn';
+import InwardLiebherr from './Components/Pages/Grn/InwardLiebherr';
+import InwardOthers from './Components/Pages/Grn/InwardOthers';
+import Outward from './Components/Pages/Grn/Outward';
 
 
 
@@ -312,7 +315,7 @@ const Router = createBrowserRouter([
         path: "/msp/grnmsplist",
         element: <ProtectedRoute><GrnMspList /></ProtectedRoute>,
       },
-        {
+      {
         path: "/msp/mspgrn",
         element: <ProtectedRoute><MspGrn /></ProtectedRoute>,
       },
@@ -349,7 +352,7 @@ const Router = createBrowserRouter([
         path: "/msp/mspstock",
         element: <ProtectedRoute><MspStock /></ProtectedRoute>,
       },
-      
+
 
 
     ]
@@ -676,7 +679,7 @@ const Router = createBrowserRouter([
         element: <ProtectedRoute><CspAccess /></ProtectedRoute>,
 
       },
-            {
+      {
         path: "/mspaccess",
         element: <ProtectedRoute><MspAccess /></ProtectedRoute>,
 
@@ -905,11 +908,11 @@ const Router = createBrowserRouter([
         path: "/faq",
         element: <ProtectedRoute><Faq /></ProtectedRoute>
       },
-       {
+      {
         path: "/grnadminlist",
         element: <ProtectedRoute><GrnAdminInward /></ProtectedRoute>
       },
-       {
+      {
         path: "/grnadminoutlist",
         element: <ProtectedRoute><GrnAdminOutward /></ProtectedRoute>
       },
@@ -962,11 +965,11 @@ const Router = createBrowserRouter([
         path: "/faultcodereport",
         element: <ProtectedRoute><Faultcodereport /></ProtectedRoute>
       },
-       {
+      {
         path: "/assetreport",
         element: <ProtectedRoute><AssetReport /></ProtectedRoute>
       },
-       {
+      {
         path: "/sparereport",
         element: <ProtectedRoute><SpareReport /></ProtectedRoute>
       },
@@ -989,6 +992,18 @@ const Router = createBrowserRouter([
       {
         path: "/msl",
         element: <Msl />,
+      },
+      {
+        path: "/inwardLiebherr",
+        element: <InwardLiebherr />,
+      },
+            {
+        path: "/outward",
+        element: <Outward />,
+      },
+            {
+        path: "/inwardOthers",
+        element: <InwardOthers />,
       },
       {
         path: "/addmsl",

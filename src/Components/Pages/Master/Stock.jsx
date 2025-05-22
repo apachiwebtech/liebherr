@@ -18,6 +18,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Button from '@mui/material/Button';
+import Grntab from '../Grn/Grntab';
 
 export function Stock(params) {
     const { loaders, axiosInstance } = useAxiosLoader();
@@ -240,7 +241,7 @@ export function Stock(params) {
                     <SyncLoader loading={loaders} color="#FFFFFF" />
                 </div>
             )}
-            <Productsparetabs />
+            <Grntab />
 
             {roleaccess > 1 ? <div className="row mp0">
 

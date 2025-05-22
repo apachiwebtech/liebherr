@@ -84,6 +84,7 @@ export function Siteheader() {
       faqpageid: FaqArray,
       assetreportid: AssetArray,
       sparereportid: SpareReportArray,
+      grnpageid: GrnArray,
     }
 
 
@@ -191,6 +192,9 @@ export function Siteheader() {
                 {status.shipmentpage == 1 &&
                   <li><Link className="dropdown-item" to="/shipment_fg">Shipment Filters</Link></li>
                 }
+                {status.grnpage == 1 &&
+                  <li><Link className="dropdown-item" to="/inwardLiebherr">GRN</Link></li>
+                }
 
 
               </ul>
@@ -272,7 +276,8 @@ export function Siteheader() {
                 </ul>
               </li>
             }
-            
+
+
 
             {/* {faqpage == 1 &&
               <li className="nav-item dropdown">

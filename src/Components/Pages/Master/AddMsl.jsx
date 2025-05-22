@@ -14,6 +14,7 @@ import { getRoleData } from "../../Store/Role/role-action";
 import { useSelector } from 'react-redux';
 import Productsparetabs from "./Productsparetabs";
 import * as XLSX from "xlsx";
+import Grntab from "../Grn/Grntab";
 const AddMsl = () => {
     // Step 1: Add this state to track errors
     const { loaders, axiosInstance } = useAxiosLoader();
@@ -348,7 +349,7 @@ const AddMsl = () => {
 
     return (
         <div className="tab-content">
-            <Productsparetabs />
+            <Grntab />
             {loaders && (
                 <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     <SyncLoader loading={loaders} color="#FFFFFF" />

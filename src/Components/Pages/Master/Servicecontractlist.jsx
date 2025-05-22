@@ -15,7 +15,9 @@ import { useSelector } from 'react-redux';
 
 export function Servicecontractlist(params) {
     const { loaders, axiosInstance } = useAxiosLoader();
+    const [excelData, setExcelData] = useState([]);
     const [Servicecontractdata, setServicecontractdata] = useState([]);
+    const [loader, setLoader] = useState(false);
     const [isEdit, setIsEdit] = useState(false);
     const [filteredData, setFilteredData] = useState([]);
     const token = localStorage.getItem("token"); // Get token from localStorage
@@ -55,7 +57,7 @@ export function Servicecontractlist(params) {
         return date.toLocaleDateString('en-GB', options).replace(/\//g, '-'); // Convert to 'DD-MM-YYYY' format
     };
 
-     
+
     const fetchServicecontractlist = async (page) => {
         try {
             const params = new URLSearchParams();
@@ -231,6 +233,123 @@ export function Servicecontractlist(params) {
 
     // export to excel end 
 
+
+    // import excel start
+    const importexcel = (event) => {
+        setLoader(true);
+        const file = event?.target?.files ? event.target.files[0] : null;
+
+        if (!file) {
+            alert("Please upload an Excel file first!");
+            setLoader(false);
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = async (e) => {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: "array" });
+
+                const sheetName = workbook.SheetNames[0];
+                const sheet = workbook.Sheets[sheetName];
+
+                console.log("Sheet Loaded:", sheet);
+
+                const chunkSize = 70000;
+                const jsonData = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+                const mapKeys = (obj) => {
+                    const keyMapping = {
+                        "serial_no": "serialNumber",
+                        "product_code": "product_code",
+                        "productName": "productName",
+                        "customerName": "customerName",
+                        "customerID": "customerID",
+                        "contractNumber": "contractNumber",
+                        "contractType": "contractType",
+                        "contract_amt": "contract_amt",
+                        "goodwill_month": "goodwill_month",
+                        "scheme_name": "scheme_name",
+                        "duration": "duration",
+                        "status": "status",
+                        "startDate": "startDate",
+                        "endDate": "endDate",
+                        "purchaseDate": "purchaseDate"
+                    };
+
+                    return Object.fromEntries(
+                        Object.entries(obj).map(([key, value]) => [
+                            keyMapping[key] || key.toLowerCase().replace(/\s+/g, "_"),
+                            String(value),
+                        ])
+                    );
+                };
+
+                let processedData = [];
+                for (let i = 0; i < jsonData.length; i += chunkSize) {
+                    const chunk = jsonData.slice(i, i + chunkSize).map(mapKeys);
+                    console.log(`Processing chunk ${i / chunkSize + 1}`);
+                    processedData.push(...chunk);
+
+                    await new Promise((resolve) => setTimeout(resolve, 10));
+                }
+
+                setExcelData(processedData);
+                console.log("Processed Data:", processedData);
+            } catch (error) {
+                console.error("Error processing Excel file:", error);
+                alert("An error occurred while processing the file.");
+            } finally {
+                setLoader(false);
+            }
+        };
+
+        reader.onerror = () => {
+            alert("Failed to read file!");
+            setLoader(false);
+        };
+
+        reader.readAsArrayBuffer(file);
+    };
+
+    const uploadexcel = () => {
+        setLoader(true);
+
+        try {
+            const jsonData = JSON.stringify(excelData);
+
+            axios.post(`${Base_Url}/uploadserviceexcel`, { jsonData: jsonData }, {
+                headers: {
+                    Authorization: token,
+                    'Content-Type': 'multipart/form-data', 
+                },
+            })
+                .then((res) => {
+                    if (res.data) {
+                        alert("Uploaded successfully!");
+                    }
+                    console.log(res);
+                })
+                .catch((err) => {
+                    console.error("Upload error:", err);
+                    alert("Error uploading file. Please try again.");
+                })
+                .finally(() => {
+                    setLoader(false);
+                });
+
+        } catch (error) {
+            console.error("Encryption error:", error);
+            alert("Error during encryption.");
+            setLoader(false);
+        }
+    };
+
+
+    //import excel end 
+
     // Role Right 
 
 
@@ -340,12 +459,24 @@ export function Servicecontractlist(params) {
 
                             </div>
                             <div className="row mb-3">
-                                {/* Buttons and message at the far-right corner */}
                                 <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
+                                    {roleaccess > 2 ? <div className="form-group">
+                                        <input type="file" accept=".xlsx, .xls" onChange={importexcel} />
+                                        <button className="btn btn-primary" onClick={uploadexcel}
+                                            style={{
+                                                marginLeft: '-100px',
+                                            }}>
+                                            Import Service Contract
+                                        </button>
+
+                                    </div> : null}
                                     <div className="form-group">
                                         <button
                                             className="btn btn-primary"
                                             onClick={exportToExcel}
+                                            style={{
+                                                marginLeft: '5px',
+                                            }}
                                         >
                                             Export to Excel
                                         </button>

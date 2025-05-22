@@ -26,6 +26,7 @@ import 'datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css';
 import 'datatables.net-buttons/js/buttons.html5.min.js';
 import 'datatables.net-keytable';
 import 'datatables.net-select';
+import Grntab from '../Grn/Grntab';
 
 export function Msl(params) {
     const { loaders, axiosInstance } = useAxiosLoader();
@@ -248,7 +249,7 @@ export function Msl(params) {
                     <SyncLoader loading={loaders} color="#FFFFFF" />
                 </div>
             )}
-            <Productsparetabs />
+            <Grntab />
 
             {roleaccess > 1 ? <div className="row mp0">
 

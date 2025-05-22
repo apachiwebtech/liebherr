@@ -44,11 +44,7 @@ function Productsparetabs() {
     const data = {
       role: decryptedRole,
       productsparepage: '40',
-      stockpage: '57',
-      mslpage: '58',
-      addmslpage: '59',
-      grnadminlist: '67',
-      grnadminoutlist: '68',
+
     }
 
 
@@ -116,43 +112,6 @@ function Productsparetabs() {
                       </li>
                     </Link>
                   }
-                  {status.stockpage == 1 &&
-                    <Link to={`/stock`}><li className="nav-item">
-                      <button className={`nav-link ${activeTab === "/stock" ? "active" : ""}`}>
-                        STOCKS
-                      </button>
-                    </li></Link>
-                  }
-                  {status.addmslpage == 1 &&
-                    <Link to={`/addmsl`}><li className="nav-item">
-                      <button className={`nav-link ${activeTab === "/addmsl" ? "active" : ""}`}>
-                        ADD MSL
-                      </button>
-                    </li></Link>
-                  }
-                  {status.mslpage == 1 &&
-                    <Link to={`/msl`}><li className="nav-item">
-                      <button className={`nav-link ${activeTab === "/msl" ? "active" : ""}`}>
-                        MSL
-                      </button>
-                    </li></Link>
-                  }
-                  {status.grnadminlist == 1 &&
-                    <Link to={`/grnadminlist`}><li className="nav-item">
-                      <button className={`nav-link ${activeTab === "/grnadminlist" ? "active" : ""}`}>
-                        Inward Listing
-                      </button>
-                    </li></Link>
-                  }
-                  {status.grnadminoutlist == 1 &&
-                    <Link to={`/grnadminoutlist`}><li className="nav-item">
-                      <button className={`nav-link ${activeTab === "/grnadminoutlist" ? "active" : ""}`}>
-                        Outward Listing
-                      </button>
-                    </li></Link>
-                  }
-
-
                 </ul>
               </div>
             </div>
