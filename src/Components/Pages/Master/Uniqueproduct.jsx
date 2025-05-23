@@ -32,6 +32,7 @@ const Uniqueproduct = () => {
   const [duplicateError, setDuplicateError] = useState("");
   const token = localStorage.getItem("token"); // Get token from localStorage
   const [open, setOpen] = React.useState(false);
+  const [open2, setOpen2] = React.useState(false);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -39,6 +40,14 @@ const Uniqueproduct = () => {
 
   const handleClose = () => {
     setOpen(false);
+  };
+
+  const handleClickOpen2 = () => {
+    setOpen2(true);
+  };
+
+  const handleClose2 = () => {
+    setOpen2(false);
   };
 
   const navigate = useNavigate()
@@ -590,7 +599,7 @@ const Uniqueproduct = () => {
 
                       {roleaccess > 4 && <div onClick={handleClickOpen} style={{ textDecoration: "underline", cursor: "pointer" }}>
                         Serial number transfer
-                      </div> }
+                      </div>}
 
                       <Dialog
                         open={open}
@@ -681,6 +690,88 @@ const Uniqueproduct = () => {
                           <Button onClick={handletransfer}>Submit</Button>
                         </DialogActions>
                       </Dialog>
+                      <Dialog
+                        open={open2}
+                        onClose={handleClose2}
+                        aria-labelledby="alert-dialog-title"
+                        aria-describedby="alert-dialog-description"
+                      >
+                        <DialogTitle id="alert-dialog-title">
+                          {"AMC"}
+                        </DialogTitle>
+                        <DialogContent style={{ width: "600px" }}>
+                          <div className="row">
+                            <div className="col-md-6 mb-3">
+                              <label htmlFor="snumber" className="form-label">
+                                Period<span className="text-danger">*</span>
+                              </label>
+                              <select
+                                className="form-select"
+                                id="StatusInput"
+                                name="SerialStatus"
+                                value={formData.SerialStatus}
+                                onChange={handleChange}
+                              >
+                                <option value=''>Select </option>
+                                <option value="1">1 Year</option>
+                                <option value="2">2 Year</option>
+                              </select>
+                              {errors.customer_id && (
+                                <small className="text-danger">{errors.customer_id}</small>
+                              )}
+
+                            </div>
+                            <div className="row">
+                              <div className="col-md-6 mb-3">
+                                <label htmlFor="snumber" className="form-label">
+                                  Warrenty Start Date<span className="text-danger">*</span>
+                                </label>
+
+                                <input
+                                  type="date"
+                                  className="form-control"
+                                  id="snumber"
+                                  name="customer_id"
+                                  value={formData.customer_id}
+                                  onChange={handleChange}
+                                  aria-describedby="snumber"
+                                />
+                                {errors.customer_id && (
+                                  <small className="text-danger">{errors.customer_id}</small>
+                                )}
+
+                              </div>
+                              <div className="col-md-6 mb-3">
+                                <label htmlFor="snumber" className="form-label">
+                                  Warrenty End Date<span className="text-danger">*</span>
+                                </label>
+
+                                <input
+                                  type="date"
+                                  className="form-control"
+                                  id="snumber"
+                                  name="customer_id"
+                                  value={formData.customer_id}
+                                  onChange={handleChange}
+                                  aria-describedby="snumber"
+                                />
+                                {errors.customer_id && (
+                                  <small className="text-danger">{errors.customer_id}</small>
+                                )}
+
+                              </div>
+                            </div>
+
+
+                          </div>
+                        </DialogContent>
+                        <DialogActions>
+                          <Button onClick={handleClose2} autoFocus>
+                            Close
+                          </Button>
+                          <Button onClick={''}>Submit</Button>
+                        </DialogActions>
+                      </Dialog>
 
                       {roleaccess > 2 ? <div className="col-md-12 text-right">
                         <button
@@ -715,6 +806,13 @@ const Uniqueproduct = () => {
                         >
                           Edit
                         </th> : null}
+                        {roleaccess > 3 ? <th
+                          scope="col"
+                          width="15%"
+                          style={{ textAlign: "center" }}
+                        >
+                          AMC
+                        </th> : null}
                         {roleaccess > 4 ? <th
                           scope="col"
                           width="15%"
@@ -736,6 +834,16 @@ const Uniqueproduct = () => {
                             <button
                               className="btn btn-link text-primary"
                               onClick={() => edit(item.id)}
+                              title="Edit"
+
+                            >
+                              <FaPencilAlt />
+                            </button>
+                          </td> : null}
+                          {roleaccess > 3 ? <td className="text-center">
+                            <button
+                              className="btn btn-link text-primary"
+                              onClick={handleClickOpen2}
                               title="Edit"
 
                             >

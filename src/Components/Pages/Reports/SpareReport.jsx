@@ -145,7 +145,7 @@ const SpareReport = () => {
 
     const roledata = {
         role: decryptedRole,
-        pageid: String(63)
+        pageid: String(65)
     }
 
     const dispatch = useDispatch()

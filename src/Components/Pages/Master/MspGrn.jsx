@@ -138,7 +138,7 @@ export function MspGrn(params) {
         try {
             const params = new URLSearchParams();
             // Add the page and pageSize parameters
-            params.append('page', page ); // Current page number
+            params.append('page', page); // Current page number
             params.append('pageSize', pageSize); // Page size
             // Add all filters to params if they have values
             Object.entries(searchFilters).forEach(([key, value]) => {
@@ -148,7 +148,7 @@ export function MspGrn(params) {
             });
             const data = {
                 csp_code: licare_code,
-                page : page
+                page: page
             };
 
 
@@ -167,6 +167,30 @@ export function MspGrn(params) {
         }
     };
 
+    const fetchfiltergrnListing = async () => {
+
+        try {
+            const data = {
+                csp_code: licare_code,
+                fromDate: searchFilters.fromDate || '',
+                toDate: searchFilters.toDate || '',
+                invoice_number: searchFilters.invoice_number || '',
+                status: searchFilters.status || '',
+                address_code: searchFilters.address_code || ''
+            };
+
+            const response = await axiosInstance.post(`${Base_Url}/getmspinwardliebherr `, data, {
+                headers: {
+                    Authorization: token,
+                },
+            });
+
+            setGrn(response.data.data);
+        } catch (error) {
+            console.error('Error fetching GRN data:', error.response?.data || error.message);
+        }
+
+    };
 
     const exportToExcel = async () => {
 
@@ -201,6 +225,8 @@ export function MspGrn(params) {
             // Convert data to a worksheet
             const worksheet = XLSX.utils.json_to_sheet(
                 decryptedData.map((item) => ({
+                    CspCode: item.csp_code,
+                    CspName: item.title,
                     InvoiceNumber: item.InvoiceNumber,
                     InvoiceDate: item.InvoiceDate ? formatDate(item.InvoiceDate) : '',
                     ReceivedFrom: item.received_from,
@@ -230,30 +256,7 @@ export function MspGrn(params) {
         }
     };
 
-    const fetchfiltergrnListing = async () => {
 
-        try {
-            const data = {
-                csp_code: licare_code,
-                fromDate: searchFilters.fromDate || '',
-                toDate: searchFilters.toDate || '',
-                invoice_number: searchFilters.invoice_number || '',
-                status: searchFilters.status || '',
-                address_code: searchFilters.address_code || ''
-            };
-
-            const response = await axiosInstance.post(`${Base_Url}/getgrnlisting `, data, {
-                headers: {
-                    Authorization: token,
-                },
-            });
-
-            setGrn(response.data);
-        } catch (error) {
-            console.error('Error fetching GRN data:', error.response?.data || error.message);
-        }
-
-    };
 
     useEffect(() => {
         fetchgrnListing();
@@ -528,10 +531,12 @@ export function MspGrn(params) {
                                     <thead>
                                         <tr>
                                             <th width="5%">#</th>
-                                            <th width="15%">Invoice No</th>
-                                            <th width="15%">Invoice Date</th>
+                                            <th width="15%">Csp Code</th>
+                                            <th width="15%">Csp Name</th>
+                                            <th width="10%">Invoice No</th>
+                                            <th width="10%">Invoice Date</th>
                                             <th width="20%">Received From</th>
-                                            <th width="15%">Address Code</th>
+                                            <th width="10%">Address Code</th>
                                             <th width="10%">Order Number</th>
                                             <th width="10%">Service Type</th>
                                             <th width="10%">Status</th>
@@ -543,6 +548,8 @@ export function MspGrn(params) {
                                             return (
                                                 <tr key={index}>
                                                     <td>{displayIndex}</td>
+                                                    <td>{item.csp_code}</td>
+                                                    <td>{item.title}</td>
                                                     <td>{item.InvoiceNumber}</td>
                                                     <td>{formatDate(item.InvoiceDate)}</td>
                                                     <td>Liebherr</td>

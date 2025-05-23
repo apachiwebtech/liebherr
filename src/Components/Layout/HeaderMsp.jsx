@@ -115,7 +115,7 @@ const HeaderMsp = (params) => {
             >
               <Link
                 to={`/msp/mspgrn`}
-                className={`nav-link site ${location.pathname === "/msp/grnmsplist" ? "text-light" : ""}`}
+                className={`nav-link site ${location.pathname === "/msp/mspgrn" ? "text-light" : ""}`}
                 id="navbarDropdown"
                 role="button"
                 aria-expanded="false"

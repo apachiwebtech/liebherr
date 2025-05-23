@@ -24,6 +24,7 @@ const InwardOthers = () => {
     const [hide, setHide] = useState(false);
     const [hidelist, setHidelist] = useState(false);
     const [cspdata, setData] = useState([]);
+    const [cspalldata, setAllData] = useState([]);
     const [engineerdata, setEngineerdata] = useState([]);
     const [spare, setSpare] = useState([]);
     const [SpareId, setSpareId] = useState([]);
@@ -31,11 +32,13 @@ const InwardOthers = () => {
     const [productdata, setProduct] = useState([]);
     const [submithide, setsubmithide] = useState(false);
     const [selectcsp, setselectedCsp] = useState(null);
+    const [receivecsp, setreciveCsp] = useState(null);
     const [selectedcsp, setselectCsp] = useState(null);
     const [selectengineer, setselectedEngineer] = useState(null);
     const [csp_no, setcsp_no] = useState(null);
     const [selectproduct, setselectedproduct] = useState(null);
     const [text, setText] = useState("");
+    const [csptext, setcspText] = useState("");
     const [producttext, setProductText] = useState("");
     const token = localStorage.getItem("token"); // Get token from localStorage
     const created_by = localStorage.getItem("licare_code"); // Get token from localStorage
@@ -56,7 +59,7 @@ const InwardOthers = () => {
     const fetchCsp = async () => {
 
         try {
-            const response = await axios.post(`${Base_Url}/getsearchcsp`, { param: text, licare_code: created_by }, {
+            const response = await axios.post(`${Base_Url}/getsearchcsp`, { param: text, licare_code: receivecsp?.id }, {
                 headers: {
                     Authorization: token, // Send token in headers
                 },
@@ -67,9 +70,23 @@ const InwardOthers = () => {
         }
     };
 
+    const fetchCspAll = async () => {
+
+        try {
+            const response = await axios.post(`${Base_Url}/getsearchallcsp`, { param: csptext }, {
+                headers: {
+                    Authorization: token, // Send token in headers
+                },
+            });
+            setAllData(response.data)
+        } catch (error) {
+            console.error("Error fetching users:", error);
+        }
+    };
+
     const fetchEng = async () => {
         try {
-            const response = await axios.post(`${Base_Url}/getsearcheng`, { param: engtext, licare_code: created_by }, {
+            const response = await axios.post(`${Base_Url}/getsearcheng`, { param: engtext, licare_code: receivecsp?.id }, {
                 headers: {
                     Authorization: token, // Send token in headers
                 },
@@ -154,14 +171,17 @@ const InwardOthers = () => {
     const validateForm = () => {
         const newErrors = {}; // Initialize an empty error object
 
-        // if (!formData.invoice_date) {
-        //     newErrors.invoice_date = "This is required.";
-        // }
+        if (selectedEngineerType == 'Engineer' && !selectengineer) {
+            newErrors.selectengineer = "This is required.";
+        }
+        if (selectedEngineerType == 'Franchisee' && !selectcsp) {
+            newErrors.selectcsp = "This is required.";
+        }
 
-        // if (!formData.invoice_number) {
-        //     // Check if the invoice number is empty
-        //     newErrors.invoice_number = "This is required."; // Set error message for invoice_no
-        // }
+        if (!receivecsp) {
+            // Check if the invoice number is empty
+            newErrors.receivecsp = "This is required."; // Set error message for invoice_no
+        }
 
         if (!formData.received_date) {
             // Check if the invoice date is empty
@@ -197,7 +217,7 @@ const InwardOthers = () => {
             const data = {
                 spare_id: SpareId,
                 grn_no: localStorage.getItem('grn_no'),
-                created_by: created_by,
+                created_by: receivecsp?.id,
                 eng_code: selectengineer?.id || null,
                 csp_code: selectcsp?.id || null
             };
@@ -236,7 +256,7 @@ const InwardOthers = () => {
                 received_date: formData.received_date,
                 csp_no: selectcsp?.id || selectengineer?.id || 'LIEBHERR',
                 csp_name: selectcsp?.title || selectengineer?.title || 'LIEBHERR',
-                created_by: created_by,
+                created_by: receivecsp?.id,
                 remark: formData.remark
             }
 
@@ -288,7 +308,7 @@ const InwardOthers = () => {
                 grn_no: localStorage.getItem('grn_no'),
                 eng_code: selectengineer?.id || null,
                 csp_code: selectcsp?.id || null,
-                created_by: created_by
+                created_by: receivecsp?.id || null
             }));
 
 
@@ -306,7 +326,7 @@ const InwardOthers = () => {
 
             if (response.status === 200) {
                 alert("Data saved successfully!");
-                navigate('/csp/grnlisting')
+                navigate('/grnadminlist')
             } else {
                 alert("Insufficient Stock");
             }
@@ -356,6 +376,7 @@ const InwardOthers = () => {
 
         fetchproduct();
     }, 100);
+
     const fetchCspSpare = async (id) => {
 
 
@@ -401,6 +422,17 @@ const InwardOthers = () => {
         fetchCsp();
     }, 100);
 
+    const handleInputCsp = _debounce((newValue) => {
+        console.log(newValue);
+
+        // Update the text state
+        setcspText(newValue);
+
+        // Check if newValue is not blank and has more than 4 words
+
+        fetchCspAll();
+    }, 100);
+
     const handleInputEngChange = _debounce((newValue) => {
         console.log(newValue);
 
@@ -418,9 +450,8 @@ const InwardOthers = () => {
         setselectedCsp(newValue);
         console.log("Selected:", newValue);
     };
-    const handleSearchCspChange = (newValue) => {
-        setselectCsp(newValue);
-        console.log("Selected:", newValue);
+    const handleSearchAllChange = (newValue) => {
+        setreciveCsp(newValue);
     };
     const handleSearchEngineerChange = (newValue) => {
         setselectedEngineer(newValue);
@@ -453,7 +484,7 @@ const InwardOthers = () => {
 
     const roledata = {
         role: decryptedRole,
-        pageid: String(70)
+        pageid: String(71)
     }
 
     const dispatch = useDispatch()
@@ -467,7 +498,7 @@ const InwardOthers = () => {
         <div className="tab-content">
             <Grntab />
 
-            <div className="row mp0">
+            {roleaccess > 1 && <div className="row mp0">
                 <div className="col-lg-12">
                     <div className="card mb-3 tab_box">
                         <div
@@ -523,13 +554,15 @@ const InwardOthers = () => {
                                     <Autocomplete
                                         size="small"
                                         disablePortal
-                                        options={cspdata}
-                                        value={selectcsp}
+                                        options={cspalldata}
+                                        value={receivecsp}
                                         getOptionLabel={(option) => option.title}
+                                        onChange={(e, newValue) => handleSearchAllChange(newValue)}
+                                        onInputChange={(e, newInputValue) => handleInputCsp(newInputValue)}
                                         renderInput={(params) => <TextField {...params} label="Select CSP" variant="outlined" />}
                                     />
 
-                                    {errors.selectcsp && <span className="text-danger">{errors.selectcsp}</span>}
+                                    {errors.receivecsp && <span className="text-danger">{errors.receivecsp}</span>}
 
                                 </div>
                                 <div className="mb-3 col-lg-3">
@@ -563,6 +596,7 @@ const InwardOthers = () => {
                                         <p>Liebherr</p>
                                     )}
                                     {errors.selectcsp && <span className="text-danger">{errors.selectcsp}</span>}
+                                    {errors.selectengineer && <span className="text-danger">{errors.selectengineer}</span>}
 
                                 </div>
 
@@ -642,7 +676,7 @@ const InwardOthers = () => {
                                 </div>
 
                                 {submithide ? null : <div className="">
-                                    <button className="btn btn-primary" type="">Submit</button>
+                                    {roleaccess > 2 && <button className="btn btn-primary" type="">Submit</button> }
                                 </div>}
 
 
@@ -761,7 +795,8 @@ const InwardOthers = () => {
 
 
 
-            </div>
+            </div>}
+
         </div>
     );
 };

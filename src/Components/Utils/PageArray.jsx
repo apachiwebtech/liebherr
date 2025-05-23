@@ -53,7 +53,7 @@ export const AssetArray = "64"
 
 export const SpareReportArray = "65"
 
-export const GrnArray = "57,58,59,67,68"
+export const GrnArray = "57,58,59,67,68,70,71"
 
 
 

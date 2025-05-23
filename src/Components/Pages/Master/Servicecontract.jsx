@@ -71,16 +71,21 @@ const Servicecontract = () => {
     console.log("Error".error)
   }
 
-  const [formData, setFormData] = useState({
+  const [Value, SetValue] = useState({
+    serialNumber: "",
+    itemNumber: "",
+    productName: "",
     customerName: "",
-    customerMobile: "",
+    customerId: "",
     contractNumber: "",
     contractType: "",
-    productName: "",
-    serialNumber: "",
+    schemename: "",
+    goodwillmonth: "",
+    duration: "",
+    purchasedate: "",
     startDate: "",
-    endDate: ""
-
+    endDate: "",
+    contractamt: "",
   });
 
   const fetchUsers = async () => {
@@ -111,9 +116,9 @@ const Servicecontract = () => {
       });
       setStartDate(response.data[0].startDate)
       setEndDate(response.data[0].endDate)
-      setFormData({
+      SetValue({
         ...response.data[0],
-        // Rename keys to match your formData structure
+        // Rename keys to match your Value structure
         customerName: response.data[0].customerName,
         customerMobile: response.data[0].customerMobile,
         contractNumber: response.data[0].contractNumber,
@@ -133,7 +138,7 @@ const Servicecontract = () => {
 
     } catch (error) {
       console.error('Error fetching Servicecontractdata:', error);
-      setFormData([]);
+      SetValue([]);
     }
   };
 
@@ -148,8 +153,43 @@ const Servicecontract = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    SetValue({ ...Value, [name]: value });
+
+
+    if (name == 'serialNumber') {
+      getserial(value)
+    }
   };
+
+  const getserial = (value) => {
+
+    const serial = Value?.serialNumber || value;
+    axios.get(`${Base_Url}/getfromserial/${serial}`, {
+      headers: {
+        Authorization: token, // Send token in headers
+      },
+    })
+      .then((res) => {
+        console.log(res)
+
+        if (res.data) {
+          const serial = res.data.data[0]
+
+          SetValue((prev) => ({
+            ...prev,
+            customerName: serial.customer_fname,
+            productName: serial.ModelNumber,
+            ItemNumber: serial.ItemNumber,
+            customerId: serial.customer_id
+          }))
+        }
+
+
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+  }
 
   const handleSearch = (e) => {
     const value = e.target.value.toLowerCase();
@@ -171,14 +211,14 @@ const Servicecontract = () => {
     };
 
     // Text/Email/Number inputs validation
-    if (isEmpty(formData.contractNumber)) newErrors.contractNumber = "Contract Number Field is required.";
-    if (isEmpty(formData.customerName)) newErrors.customerName = "Customer Name is required.";
-    if (isEmpty(formData.customerMobile)) newErrors.customerMobile = "Customer Mobile Number is required.";
-    if (isEmpty(formData.productName)) newErrors.productName = "Product Name is required.";
-    if (isEmpty(formData.serialNumber)) newErrors.serialNumber = "Serial Number is required.";
+    if (isEmpty(Value.contractNumber)) newErrors.contractNumber = "Contract Number Field is required.";
+    if (isEmpty(Value.customerName)) newErrors.customerName = "Customer Name is required.";
+    if (isEmpty(Value.customerMobile)) newErrors.customerMobile = "Customer Mobile Number is required.";
+    if (isEmpty(Value.productName)) newErrors.productName = "Product Name is required.";
+    if (isEmpty(Value.serialNumber)) newErrors.serialNumber = "Serial Number is required.";
 
     // Dropdown validations
-    if (!formData.contractType) newErrors.contractType = "Contract Type is required.";
+    if (!Value.contractType) newErrors.contractType = "Contract Type is required.";
     return newErrors; // Return the error object
   };
 
@@ -193,7 +233,7 @@ const Servicecontract = () => {
     }
 
     const payload = {
-      ...formData,
+      ...Value,
 
       startDate: startDate,
       endDate: enddate,
@@ -226,7 +266,7 @@ const Servicecontract = () => {
               setSuccessMessage('Customer Updated Successfully!');
               setTimeout(() => setSuccessMessage(''), 3000);
 
-              setFormData({
+              SetValue({
                 customerName: "",
                 customerMobile: "",
                 contractNumber: "",
@@ -259,7 +299,7 @@ const Servicecontract = () => {
             })
             .then((response) => {
               // window.location.reload();
-              setFormData({
+              SetValue({
                 customerName: "",
                 customerMobile: "",
                 contractNumber: "",
@@ -314,7 +354,7 @@ const Servicecontract = () => {
           Authorization: token, // Send token in headers
         },
       });
-      setFormData(response.data);
+      SetValue(response.data);
       setIsEdit(true);
       console.log(response.data);
     } catch (error) {
@@ -323,30 +363,30 @@ const Servicecontract = () => {
   };
 
   // Role Right 
-const handleSerialNumberBlur = async () => {
-  if (!formData.serial_no) return;
+  const handleSerialNumberBlur = async () => {
+    if (!Value.serial_no) return;
 
-  try {
-    const response = await axios.get('/getProductDetailsBySerial', {
-      params: {
-        serialNumber: formData.serial_no,
-      },
-    });
+    try {
+      const response = await axios.get('/getProductDetailsBySerial', {
+        params: {
+          serialNumber: Value.serial_no,
+        },
+      });
 
-    const data = response.data;
+      const data = response.data;
 
-    setFormData((prev) => ({
-      ...prev,
-      productcode: data.productCode || '',
-      productName: data.productDescription || '',
-      customerName: data.customerName || '',
-      customerID: data.customerID || '',
-    }));
-  } catch (error) {
-    console.error("Error fetching product details:", error);
-    // Optionally show a toast or error message here
-  }
-};
+      SetValue((prev) => ({
+        ...prev,
+        productcode: data.productCode || '',
+        productName: data.productDescription || '',
+        customerName: data.customerName || '',
+        customerID: data.customerID || '',
+      }));
+    } catch (error) {
+      console.error("Error fetching product details:", error);
+      // Optionally show a toast or error message here
+    }
+  };
 
 
 
@@ -414,7 +454,7 @@ const handleSerialNumberBlur = async () => {
                         className="form-control"
                         name="serialNumber"
                         id="ServiceproductInput"
-                        value={formData.serialNumber}
+                        value={Value.serialNumber}
                         onChange={handleChange}
                         placeholder="Enter Serial Number "
                       />
@@ -434,15 +474,15 @@ const handleSerialNumberBlur = async () => {
                       <input
                         type="text"
                         className="form-control"
-                        name="productcode"
+                        name="itemNumber"
                         id="ProductcodeInput"
-                        value={formData.productcode}
+                        value={Value.itemNumber}
                         onChange={handleChange}
                         placeholder="Enter Product Code  "
                       />
-                      {errors.productcode && (
+                      {errors.itemNumber && (
                         <small className="text-danger">
-                          {errors.productcode}
+                          {errors.itemNumber}
                         </small>
                       )}
                       {duplicateError && (
@@ -462,7 +502,7 @@ const handleSerialNumberBlur = async () => {
                         className="form-control"
                         name="productName"
                         id="ServiceproductInput"
-                        value={formData.productName}
+                        value={Value.productName}
                         onChange={handleChange}
                         placeholder="Enter Product Name "
                       />
@@ -488,7 +528,7 @@ const handleSerialNumberBlur = async () => {
                         className="form-control"
                         name="customerName"
                         id="ServiceproductInput"
-                        value={formData.customerName}
+                        value={Value.customerName}
                         onChange={handleChange}
                         placeholder="Enter Customer Name "
                       />
@@ -503,23 +543,20 @@ const handleSerialNumberBlur = async () => {
                         htmlFor="CustomerMobileInput"
                         className="input-field"
                       >
-                        Customer Mobile No
+                        Customer Id<span className="text-danger">*</span>
                       </label>
                       <input
                         type="tel"
                         className="form-control"
-                        name="customerMobile"
+                        name="customerId"
                         id="CustomerMobileInput"
-                        value={formData.customerMobile}
+                        value={Value.customerId}
                         onChange={handleChange}
-                        placeholder="Enter Customer Mobile Number "
-                        pattern="[0-9]*"
-                        maxLength="10"
-                        minLength="10"
+                        placeholder="Enter Customer Id"
                       />
-                      {errors.customerMobile && (
+                      {errors.customerId && (
                         <small className="text-danger">
-                          {errors.customerMobile}
+                          {errors.customerId}
                         </small>
                       )}
                     </div>
@@ -528,14 +565,14 @@ const handleSerialNumberBlur = async () => {
                         htmlFor="CustomernameInput"
                         className="input-field"
                       >
-                        Contract Code<span className="text-danger">*</span>
+                        Contract Code
                       </label>
                       <input
                         type="text"
                         className="form-control"
                         name="contractNumber"
                         id="ServiceproductInput"
-                        value={formData.contractNumber}
+                        value={Value.contractNumber}
                         onChange={handleChange}
                         placeholder="Enter Contract Code "
                       />
@@ -544,10 +581,6 @@ const handleSerialNumberBlur = async () => {
                           {errors.contractNumber}
                         </small>
                       )}
-                      {duplicateError && (
-                        <small className="text-danger">{duplicateError}</small>
-                      )}{" "}
-                      {/* Show duplicate error */}
                     </div>
 
                     <div className="col-3 mb-3">
@@ -558,7 +591,7 @@ const handleSerialNumberBlur = async () => {
                         className="form-select"
                         name="contractType"
                         id="contracttypeInput"
-                        value={formData.contractType}
+                        value={Value.contractType}
                         onChange={handleChange}
                         placeholder="Select End Date"
                       >
@@ -571,31 +604,29 @@ const handleSerialNumberBlur = async () => {
                       )}
                     </div>
 
+
+                    <hr />
                     <div className="col-3 mb-3">
                       <label
-                        htmlFor="ContractAmtInput"
+                        htmlFor="SchemenameInput"
                         className="input-field"
                       >
-                        Contract Amount <span className="text-danger">*</span>
+                        Scheme Name <span className="text-danger">*</span>
                       </label>
                       <input
                         type="text"
                         className="form-control"
-                        name="contractamt"
-                        id="ContractAmtInput"
-                        value={formData.contractamt}
+                        name="schemename"
+                        id="SchemenameInput"
+                        value={Value.schemename}
                         onChange={handleChange}
-                        placeholder="Enter Contract Amount"
+                        placeholder="Enter Scheme Name"
                       />
-                      {errors.contractamt && (
+                      {errors.schemename && (
                         <small className="text-danger">
-                          {errors.contractamt}
+                          {errors.schemename}
                         </small>
                       )}
-                      {duplicateError && (
-                        <small className="text-danger">{duplicateError}</small>
-                      )}{" "}
-                      {/* Show duplicate error */}
                     </div>
                     <div className="col-3 mb-3">
                       <label htmlFor="GoodwillMonthInput" className="input-field">
@@ -606,7 +637,7 @@ const handleSerialNumberBlur = async () => {
                         className="form-control"
                         name="goodwillmonth"
                         id="GoodwillMonthInput"
-                        value={formData.goodwillmonth}
+                        value={Value.goodwillmonth}
                         onChange={handleChange}
                         placeholder="Enter Goodwill Month"
                       />
@@ -622,15 +653,20 @@ const handleSerialNumberBlur = async () => {
                       >
                         Duration<span className="text-danger">*</span>
                       </label>
-                      <input
-                        type="text"
-                        className="form-control"
+                      <select
+                        className="form-select"
                         name="duration"
-                        id="DurationInput"
-                        value={formData.duration}
+                        id="contracttypeInput"
+                        value={Value.duration}
                         onChange={handleChange}
-                        placeholder="Enter Duration "
-                      />
+                      >
+                        <option value="">Select Duration</option>
+                        <option value="1">1 Year</option>
+                        <option value="2">2 Year</option>
+                        <option value="3">3 Year</option>
+                        <option value="4">4 Year</option>
+                        <option value="5">5 Year</option>
+                      </select>
                       {errors.duration && (
                         <small className="text-danger">
                           {errors.duration}
@@ -642,46 +678,41 @@ const handleSerialNumberBlur = async () => {
                       {/* Show duplicate error */}
                     </div>
 
-                    <div className="col-3 mb-3">
-                      <label
-                        htmlFor="SchemenameInput"
-                        className="input-field"
-                      >
-                        Scheme Name <span className="text-danger">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        name="schemename"
-                        id="SchemenameInput"
-                        value={formData.schemename}
-                        onChange={handleChange}
-                        placeholder="Enter Scheme Name"
-                      />
-                      {errors.schemename && (
-                        <small className="text-danger">
-                          {errors.schemename}
-                        </small>
-                      )}
-                      {duplicateError && (
-                        <small className="text-danger">{duplicateError}</small>
-                      )}{" "}
-                      {/* Show duplicate error */}
-                    </div>
 
-                    <div className="col -3 mb-3">
+                    <div className="col-3 mb-3">
+                      <label htmlFor="PurchaseDateInput" className="input-field">
+                        Purchase Date
+                      </label>
+                      <div>
+                        <DatePicker
+                          selected={enddate}
+                          onChange={handleDateChange2}
+                          dateFormat="dd-MM-yyyy"
+                          placeholderText="DD-MM-YYYY"
+                          className='form-control'
+                          name="purchasedate"
+                          aria-describedby="PurchaseDateInput"
+                        />
+                      </div>
+                      {errors.purchasedate && (
+                        <small className="text-danger">{errors.purchasedate}</small>
+                      )}
+                    </div>
+                    <div className="col-3 mb-3">
                       <label htmlFor="StartDateInput" className="input-field">
                         Contract Start Date
                       </label>
-                      <DatePicker
-                        selected={startDate}
-                        onChange={handleDateChange}
-                        dateFormat="dd-MM-yyyy"
-                        placeholderText="DD-MM-YYYY"
-                        className='form-control'
-                        name="startDate"
-                        aria-describedby="StartDateInput"
-                      />
+                      <div>
+                        <DatePicker
+                          selected={startDate}
+                          onChange={handleDateChange}
+                          dateFormat="dd-MM-yyyy"
+                          placeholderText="DD-MM-YYYY"
+                          className='form-control'
+                          name="startDate"
+                          aria-describedby="StartDateInput"
+                        />
+                      </div>
                       {errors.startDate && (
                         <small className="text-danger">{errors.startDate}</small>
                       )}
@@ -691,37 +722,48 @@ const handleSerialNumberBlur = async () => {
                       <label htmlFor="EndDateInput" className="input-field">
                         Contract End Date
                       </label>
-                      <DatePicker
-                        selected={enddate}
-                        onChange={handleDateChange2}
-                        dateFormat="dd-MM-yyyy"
-                        placeholderText="DD-MM-YYYY"
-                        className='form-control'
-                        name="endDate"
-                        aria-describedby="EndDateInput"
-                      />
+                      <div>
+                        <DatePicker
+                          selected={enddate}
+                          onChange={handleDateChange2}
+                          dateFormat="dd-MM-yyyy"
+                          placeholderText="DD-MM-YYYY"
+                          className='form-control'
+                          name="endDate"
+                          aria-describedby="EndDateInput"
+                        />
+                      </div>
                       {errors.endDate && (
                         <small className="text-danger">{errors.endDate}</small>
                       )}
                     </div>
-
                     <div className="col-3 mb-3">
-                      <label htmlFor="PurchaseDateInput" className="input-field">
-                        Purchase Date
+                      <label
+                        htmlFor="ContractAmtInput"
+                        className="input-field"
+                      >
+                        Contract Amount <span className="text-danger">*</span>
                       </label>
-                      <DatePicker
-                        selected={enddate}
-                        onChange={handleDateChange2}
-                        dateFormat="dd-MM-yyyy"
-                        placeholderText="DD-MM-YYYY"
-                        className='form-control'
-                        name="purchasedate"
-                        aria-describedby="PurchaseDateInput"
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="contractamt"
+                        id="ContractAmtInput"
+                        value={Value.contractamt}
+                        onChange={handleChange}
+                        placeholder="Enter Contract Amount"
                       />
-                      {errors.purchasedate && (
-                        <small className="text-danger">{errors.purchasedate}</small>
+                      {errors.contractamt && (
+                        <small className="text-danger">
+                          {errors.contractamt}
+                        </small>
                       )}
+                      {duplicateError && (
+                        <small className="text-danger">{duplicateError}</small>
+                      )}{" "}
+                      {/* Show duplicate error */}
                     </div>
+
                   </div>
 
                   {roleaccess > 2 ? <div className="text-right">
@@ -733,6 +775,42 @@ const handleSerialNumberBlur = async () => {
 
 
               </div>
+            </div>
+          </div>
+          <div className="card mb-3 tab_box">
+            <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
+
+              <div className="row">
+                <p><span className="text-success" style={{ fontSize: "20px" }}>●</span>Active Contact</p>
+              </div>
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th width="3%">#</th>
+                    <th width="10%">	Contract Number</th>
+                    <th width="15%"> Customer Name</th>
+                    <th width="15%">Product Name</th>
+                    <th width="15%">Serial Number</th>
+                    <th width="15%">Start Date</th>
+                    <th width="15%">End Date</th>
+
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="bg-success" >
+                    <td className="bg-success">1</td>
+                    <td className="bg-success">Cr123</td>
+                    <td className="bg-success">Satyam</td>
+                    <td className="bg-success">DFPrmC 2221 I01 20</td>
+                    <td className="bg-success">903608631</td>
+                    <td className="bg-success">20-10-2013</td>
+                    <td className="bg-success">20-10-2013</td>
+
+                  </tr>
+
+
+                </tbody>
+              </table>
             </div>
           </div>
         </div>

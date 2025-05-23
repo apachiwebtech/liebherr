@@ -419,14 +419,14 @@ const MyDocument8 = ({ data, spare, csp }) => {
 
                         </div>
                         <View style={[styles.tableCol, { width: '65%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Total Value in Words :{numberToWords(grandtotal)} {numberToWords(grandtotal) == '' ? null : "Rupees Only."}</Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Total Value in Words :{numberToWords(grandtotal + Number(data.service_charges))} {numberToWords(grandtotal  + Number(data.service_charges)) == '' ? null : "Rupees Only."}</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '17%' }]}>
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Grand Amount</Text>
 
                         </View>
                         <View style={[styles.tableCol, { width: '18%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{grandtotal}</Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{grandtotal + Number(data.service_charges)}</Text>
                         </View>
 
 

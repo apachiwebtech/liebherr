@@ -18,7 +18,7 @@ import Grntab from "./Grntab";
 const Outward = () => {
 
 
-    const [selectedEngineerType, setSelectedEngineerType] = useState("LHI");;
+    const [selectedEngineerType, setSelectedEngineerType] = useState("ENGINEER");;
     const [errors, setErrors] = useState({});
     const [spareerrors, setSpareErrors] = useState({});
     const [hide, setHide] = useState(false);
@@ -30,8 +30,11 @@ const Outward = () => {
     const [cspdata, setData] = useState([]);
     const [selectcsp, setselectedCsp] = useState(null);
     const [engdata, setEngData] = useState([]);
+    const [csptext, setcspText] = useState("");
     const [selecteng, setselectedEng] = useState(null);
     const [csp_no, setcsp_no] = useState(null);
+    const [cspalldata, setAllData] = useState([]);
+    const [receivecsp, setreciveCsp] = useState(null);
     const [selectproduct, setselectedproduct] = useState(null);
     const [text, setText] = useState("");
     const [submithide, setsubmithide] = useState(false);
@@ -47,10 +50,25 @@ const Outward = () => {
         remark: ''
     });
 
+
+    const fetchCspAll = async () => {
+
+        try {
+            const response = await axios.post(`${Base_Url}/getsearchallcsp`, { param: csptext }, {
+                headers: {
+                    Authorization: token, // Send token in headers
+                },
+            });
+            setAllData(response.data)
+        } catch (error) {
+            console.error("Error fetching users:", error);
+        }
+    };
+
     const fetchCsp = async () => {
 
         try {
-            const response = await axios.post(`${Base_Url}/getsearchcsp`, { param: text, licare_code: created_by }, {
+            const response = await axios.post(`${Base_Url}/getsearchcsp`, { param: text, licare_code: receivecsp?.id }, {
                 headers: {
                     Authorization: token, // Send token in headers
                 },
@@ -63,7 +81,7 @@ const Outward = () => {
     const fetchEng = async () => {
 
         try {
-            const response = await axios.post(`${Base_Url}/getsearcheng`, { param: engtext, licare_code: created_by }, {
+            const response = await axios.post(`${Base_Url}/getsearcheng`, { param: engtext, licare_code: receivecsp?.id }, {
                 headers: {
                     Authorization: token, // Send token in headers
                 },
@@ -73,10 +91,11 @@ const Outward = () => {
             console.error("Error fetching users:", error);
         }
     };
+
     const fetchproduct = async () => {
 
         try {
-            const response = await axios.post(`${Base_Url}/getcspspareparts`, { csp_code: created_by }, {
+            const response = await axios.post(`${Base_Url}/getcspspareparts`, { csp_code: receivecsp?.id }, {
                 headers: {
                     Authorization: token, // Send token in headers
                 },
@@ -123,14 +142,18 @@ const Outward = () => {
             newErrors.issue_date = "This is required."; // Set error message for invoice_date
         }
 
+        if (selectedEngineerType == 'ENGINEER' && !selecteng) {
+            newErrors.selecteng = "This is required.";
+        }
 
-        // if (!selectcsp && !selecteng) {
-        //     // Check if both selections are empty
-        //     newErrors.selectcsp = "This is required."; // Set error message for selectcsp
-        // } else {
-        //     // Clear the error if at least one is selected
-        //     newErrors.selectcsp = ""; 
-        // }
+        if (selectedEngineerType == 'Franchisee' && !selectcsp) {
+            newErrors.selectcsp = "This is required.";
+        }
+
+        if (!receivecsp) {
+            // Check if the invoice number is empty
+            newErrors.receivecsp = "This is required."; // Set error message for invoice_no
+        }
 
 
         setErrors(newErrors)
@@ -163,7 +186,7 @@ const Outward = () => {
             const data = {
                 spare_id: String(SpareId),
                 issue_no: localStorage.getItem('issue_no'),
-                created_by: created_by
+                created_by: receivecsp?.id
             };
 
             try {
@@ -205,7 +228,7 @@ const Outward = () => {
                 issue_date: formData.issue_date,
                 lhi_code: selectcsp?.id || selecteng?.id, // Safely access id
                 lhi_name: selectcsp?.title || selecteng?.title, // Safely access title
-                created_by: created_by,
+                created_by: receivecsp?.id,
                 remark: formData.remark,
                 isEng: selecteng ? 'eng' : selectcsp ? 'csp' : ''
             };
@@ -224,6 +247,7 @@ const Outward = () => {
                         localStorage.setItem('issue_to', res.data.issue_to)
                         localStorage.setItem('lhi_code', res.data.lhi_code)
                         setsubmithide(true)
+                        fetchproduct()
                         setHidelist(true)
                     }
 
@@ -246,7 +270,7 @@ const Outward = () => {
                 article_title: item.spare_title,
                 quantity: String(item.quantity) || String(0), // Use the updated `spare_qty`, default to 0 if empty
                 issue_no: localStorage.getItem('issue_no'),
-                licare_code: created_by,
+                licare_code: receivecsp?.id,
                 issue_to: localStorage.getItem('issue_to'),
                 lhi_code: localStorage.getItem('lhi_code')
             }));
@@ -266,7 +290,7 @@ const Outward = () => {
 
             if (response.status === 200) {
                 alert("Data saved successfully!");
-                navigate('/csp/grnoutward');
+                navigate('/grnadminoutlist');
             } else if (response.status === 400) {
                 alert("Insufficient stock for one or more items.");
             } else {
@@ -347,7 +371,16 @@ const Outward = () => {
 
 
 
+    const handleInputCsp = _debounce((newValue) => {
+        console.log(newValue);
 
+        // Update the text state
+        setcspText(newValue);
+
+        // Check if newValue is not blank and has more than 4 words
+
+        fetchCspAll();
+    }, 100);
     //For csp 
     const handleInputChange = _debounce((newValue) => {
         console.log(newValue);
@@ -371,7 +404,9 @@ const Outward = () => {
         fetchEng();
     }, 100);
 
-
+    const handleSearchAllChange = (newValue) => {
+        setreciveCsp(newValue);
+    };
     const handleSearchChange = (newValue) => {
         setselectedCsp(newValue);
         console.log("Selected:", newValue);
@@ -404,7 +439,7 @@ const Outward = () => {
 
     const roledata = {
         role: decryptedRole,
-        pageid: String(1)
+        pageid: String(70)
     }
 
     const dispatch = useDispatch()
@@ -419,7 +454,7 @@ const Outward = () => {
         <div className="tab-content">
             <Grntab />
 
-            <div className="row mp0">
+           {roleaccess > 1 &&             <div className="row mp0">
                 <div className="col-lg-12">
                     <div className="card mb-3 tab_box">
                         <div
@@ -465,6 +500,24 @@ const Outward = () => {
 
                                 <div className="mb-3 col-lg-3">
                                     <label htmlFor="EmailInput" className="input-field">
+                                        Issue From  <span className="text-danger">*</span>
+                                    </label>
+                                    <Autocomplete
+                                        size="small"
+                                        disablePortal
+                                        options={cspalldata}
+                                        value={receivecsp}
+                                        getOptionLabel={(option) => option.title}
+                                        onChange={(e, newValue) => handleSearchAllChange(newValue)}
+                                        onInputChange={(e, newInputValue) => handleInputCsp(newInputValue)}
+                                        renderInput={(params) => <TextField {...params} label="Select CSP" variant="outlined" />}
+                                    />
+
+                                    {errors.receivecsp && <span className="text-danger">{errors.receivecsp}</span>}
+                                </div>
+
+                                <div className="mb-3 col-lg-3">
+                                    <label htmlFor="EmailInput" className="input-field">
                                         Issue to <span className="text-danger">*</span>
                                     </label>
                                     {selectedEngineerType === "Franchisee" ? <Autocomplete
@@ -487,6 +540,7 @@ const Outward = () => {
                                         renderInput={(params) => <TextField {...params} label="Enter Engineer.." variant="outlined" />}
                                     />}
                                     {errors.selectcsp && <span className="text-danger">{errors.selectcsp}</span>}
+                                    {errors.selecteng && <span className="text-danger">{errors.selecteng}</span>}
                                 </div>
 
                                 <div className="mb-3 col-lg-3">
@@ -642,7 +696,8 @@ const Outward = () => {
 
 
 
-            </div>
+            </div>}
+
         </div>
     );
 };

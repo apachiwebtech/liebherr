@@ -10762,6 +10762,56 @@ WHERE au.serial_no = @serial and au.SerialStatus = 'Active' order by au.id desc`
     return res.status(500).json({ error: "Database error occurred", details: err.message });
   }
 });
+app.get("/getfromserial/:serial", authenticateToken, async (req, res) => {
+  const { serial } = req.params;
+
+  try {
+
+    const pool = await poolPromise;
+
+
+    const sql = `select lhi.serial_no , lhi.DESCRIPTION as ModelNumber , ACCOUNT as customer_id , ALLOCATIONSTATUS as allocation , CUSTOMERCLASSIFICATION as customerClassification ,spm.SalesPartner ,spm.SalesAM , asl.ItemNumber from SERIAL_API_VW as lhi LEFT JOIN SalesPartnerMaster AS spm  ON lhi.DealerCode = spm.BPcode left join awt_serial_list as asl on asl.serial_no = lhi.serial_no where lhi.serial_no = @serial`
+
+    const result = await pool.request()
+      .input('serial', serial)
+      .query(sql);
+
+
+
+    const fallbackSql = `SELECT ac.salutation , ac.customer_fname ,ac.customer_lname , ac.customer_type , ac.customer_classification , ac.mobileno , ac.alt_mobileno,ac.email ,allocation = 'Allocated',
+au.CustomerID as customer_id , au.ModelNumber , au.address , au.region , au.state ,au.district , au.city , au.pincode ,au.purchase_date,au.SalesDealer as SalesPartner,au.serial_no , au.SubDealer as SalesAM ,au.ModelName as ItemNumber ,au.customer_classification as customerClassification , au.SerialStatus
+FROM awt_uniqueproductmaster as au left join awt_customer as ac on ac.customer_id = au.CustomerID
+WHERE au.serial_no = @serial and au.SerialStatus = 'Active' order by au.id desc`;
+
+    const fallbackResult = await pool.request()
+      .input('serial', serial)
+      .query(fallbackSql);
+
+
+    const getpreviouscontract = 'select * from awt_servicecontract where serialNumber = @serial'
+
+    const getpreviouscontractresult = await pool.request()
+      .input('serial', serial)
+      .query(getpreviouscontract);
+
+    if (fallbackResult.recordset.length !== 0) {
+
+      return res.json({ data: fallbackResult.recordset, previoscontarct: getpreviouscontractresult.recordset });
+
+    } else {
+
+      return res.json({ data: result.recordset, previoscontarct: getpreviouscontractresult.recordset });
+
+    }
+
+
+
+
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred", details: err.message });
+  }
+});
 
 
 
@@ -13417,15 +13467,21 @@ app.post("/getcomplainticketdump", authenticateToken, async (req, res) => {
   const { startDate, endDate, licare_code } = req.body;
 
   // Helper function to format dates
-  function excelformatDate(dateStr) {
-    if (!dateStr) return ""; // Guard clause for null/undefined
-    const date = new Date(dateStr);
-    if (isNaN(date)) return dateStr; // Return original if invalid date
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
-  }
+  // function excelformatDate(dateStr) {
+  //   if (!dateStr) return ""; // Guard clause for null/undefined
+  //   const date = new Date(dateStr);
+  //   if (isNaN(date)) return dateStr; // Return original if invalid date
+  //   const day = String(date.getDate()).padStart(2, '0');
+  //   const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+  //   const year = date.getFullYear();
+  //   return `${day}-${month}-${year}`;
+  // }
+
+  const excelformatDate = (dateString) => {
+    const date = new Date(dateString);
+    const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+    return date.toLocaleDateString('en-GB', options).replace(/\//g, '-');
+  };
 
   try {
     const pool = await poolPromise;
@@ -13516,6 +13572,57 @@ app.post("/getcomplainticketdump", authenticateToken, async (req, res) => {
   }
 });
 
+// app.post("/getspareconsumption", authenticateToken, async (req, res) => {
+
+//   const { startDate, endDate, licare_code } = req.body;
+//   try {
+//     // Use the poolPromise to get the connection pool
+//     const pool = await poolPromise;
+//     const getcsp = `select * from lhi_user where Usercode = '${licare_code}'`
+
+
+//     const getcspresilt = await pool.request().query(getcsp)
+
+//     const assigncsp = getcspresilt.recordset[0].assigncsp
+
+//     let sql;
+
+
+//     sql = `select ct.ticket_no as TicketNumber, au.article_code as ItemCode, au.article_description as ItemDescription,au.quantity as Quantity, sp.PriceGroup,ct.call_charges as PartChargeable, sp.Warranty as PartWarrantyType, sp.Returnable as PartRetunableType  from awt_uniquespare as au left join complaint_ticket as ct on ct.ticket_no = au.ticketId Left Join Spare_parts as sp on sp.title = au.article_code where au.deleted = 0 and ct.call_status = 'Closed'   AND ct.ticket_date >= '${startDate}' AND ct.ticket_date <= '${endDate}' `
+
+
+
+//     if (assigncsp !== 'ALL') {
+//       // Convert to an array and wrap each value in single quotes
+//       const formattedCspList = assigncsp.split(",").map(csp => `'${csp.trim()}'`).join(",");
+
+//       // Directly inject the formatted values into the SQL query
+//       sql += ` AND ct.csp IN (${formattedCspList})`;
+//     }
+
+//     sql += ` GROUP BY 
+//     ct.ticket_no, 
+//     ct.call_charges,
+//   au.article_code, 
+//   au.article_description, 
+//   au.quantity,
+//   sp.PriceGroup, 
+//   sp.Warranty, 
+//   sp.Returnable  ORDER BY RIGHT(ct.ticket_no , 4) ASC`;
+
+
+//   console.log(sql)
+
+
+
+
+//     const result = await pool.request().query(sql);
+//     return res.json(result.recordset);
+//   } catch (err) {
+//     console.error(err);
+//     return res.status(500).json({ error: 'An error occurred while fetching data' });
+//   }
+// });
 app.post("/getspareconsumption", authenticateToken, async (req, res) => {
 
   const { startDate, endDate, licare_code } = req.body;
@@ -13532,9 +13639,7 @@ app.post("/getspareconsumption", authenticateToken, async (req, res) => {
     let sql;
 
 
-    sql = `select ct.ticket_no as TicketNumber, au.article_code as ItemCode, au.article_description as ItemDescription,au.quantity as Quantity, sp.PriceGroup,ct.call_charges as PartChargeable, sp.Warranty as PartWarrantyType, sp.Returnable as PartRetunableType  from awt_uniquespare as au
-left join complaint_ticket as ct on ct.ticket_no = au.ticketId
-Left Join Spare_parts as sp on sp.title = au.article_code where au.deleted = 0 and ct.call_status = 'Closed'   AND ct.ticket_date >= '${startDate}' AND ct.ticket_date <= '${endDate}' `
+    sql = `select ct.ticket_no as TicketNumber, au.article_code as ItemCode, au.article_description as ItemDescription,au.quantity as Quantity  from awt_uniquespare as au left join complaint_ticket as ct on ct.ticket_no = au.ticketId where au.deleted = 0 and ct.deleted = 0  and ct.call_status = 'Closed' AND ct.ticket_date >= '${startDate}' AND ct.ticket_date <= '${endDate}' `
 
 
 
@@ -13546,7 +13651,9 @@ Left Join Spare_parts as sp on sp.title = au.article_code where au.deleted = 0 a
       sql += ` AND ct.csp IN (${formattedCspList})`;
     }
 
-    sql += ` ORDER BY RIGHT(ct.ticket_no , 4) ASC`;
+    sql += `  ORDER BY RIGHT(ct.ticket_no , 4) ASC`;
+
+
 
 
 
@@ -14541,6 +14648,38 @@ app.post("/getsearchcsp", authenticateToken, async (req, res) => {
   }
 });
 
+app.post("/getsearchallcsp", authenticateToken, async (req, res) => {
+  const { param } = req.body;
+
+  if (!param) {
+    return res.status(400).json({ message: "Invalid parameter" });
+  }
+
+  try {
+    const pool = await poolPromise;
+
+
+    // Parameterized query with a limit
+    const sql = `SELECT TOP 20 licare_code as id, title
+    FROM awt_childfranchisemaster
+    WHERE title LIKE @param AND deleted = 0 ORDER BY title;
+    `;
+
+    const result = await pool.request()
+      .input('param', `%${param}%`)
+      .query(sql);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "No results found" });
+    }
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+});
+
 app.post("/getsearcheng", authenticateToken, async (req, res) => {
   const { param, licare_code } = req.body;
 
@@ -15342,9 +15481,11 @@ app.post("/getgrnmsplist", authenticateToken, async (req, res) => {
         gn.received_date,
         acg.quantity,
         acg.spare_title,
-        acg.spare_no
+        acg.spare_no,
+        acf.title
       FROM awt_grnmaster AS gn
       LEFT JOIN awt_cspgrnspare AS acg ON acg.grn_no = gn.grn_no
+      LEFT JOIN awt_childfranchisemaster AS acf ON acf.licare_code = gn.created_by
       WHERE gn.deleted = 0 AND gn.created_by IN (${licarePlaceholders})
     `;
 
@@ -15377,9 +15518,9 @@ app.post("/getgrnmsplist", authenticateToken, async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error", error: err });
   }
 });
+
 app.post("/getinwardlist", authenticateToken, async (req, res) => {
   const {
-    csp_code,
     fromDate,
     toDate,
     received_from,
@@ -15411,7 +15552,7 @@ app.post("/getinwardlist", authenticateToken, async (req, res) => {
       WHERE gn.deleted = 0 
     `;
 
-    request.input("csp_code", csp_code);
+
 
     if (fromDate && toDate) {
       sql += " AND CAST(gn.invoice_date AS DATE) BETWEEN @fromDate AND @toDate";
@@ -15429,6 +15570,8 @@ app.post("/getinwardlist", authenticateToken, async (req, res) => {
       request.input("invoice_number", `%${invoice_number}%`);
     }
 
+    sql += ' order by gn.id desc'
+
 
     const result = await request.query(sql);
 
@@ -15444,7 +15587,6 @@ app.post("/getinwardlist", authenticateToken, async (req, res) => {
 });
 app.post("/getinwardlistexcel", authenticateToken, async (req, res) => {
   const {
-    csp_code,
     fromDate,
     toDate,
     received_from,
@@ -15476,7 +15618,6 @@ app.post("/getinwardlistexcel", authenticateToken, async (req, res) => {
       WHERE gn.deleted = 0 
     `;
 
-    request.input("csp_code", csp_code);
 
     if (fromDate && toDate) {
       sql += " AND CAST(gn.invoice_date AS DATE) BETWEEN @fromDate AND @toDate";
@@ -15576,9 +15717,11 @@ app.post("/getgrnmspexcel", authenticateToken, async (req, res) => {
         gn.received_date,
         acg.quantity,
         acg.spare_title,
-        acg.spare_no
+        acg.spare_no,
+        acf.title
       FROM awt_grnmaster AS gn
       LEFT JOIN awt_cspgrnspare AS acg ON acg.grn_no = gn.grn_no
+      LEFT JOIN awt_childfranchisemaster AS acf ON acf.licare_code = gn.created_by
       WHERE gn.deleted = 0 AND gn.created_by IN (${licarePlaceholders})
     `;
 
@@ -15705,9 +15848,10 @@ app.post("/getmspoutwardlisting", authenticateToken, async (req, res) => {
     }).join(", ");
 
     let sql = `
-      SELECT asp.*, acp.spare_no, acp.spare_title, acp.quantity 
+      SELECT asp.*, acp.spare_no, acp.spare_title, acp.quantity  , acf.title
       FROM awt_spareoutward AS asp 
-      LEFT JOIN awt_cspissuespare AS acp ON asp.issue_no = acp.issue_no 
+      LEFT JOIN awt_cspissuespare AS acp ON asp.issue_no = acp.issue_no
+      LEFT JOIN awt_childfranchisemaster as acf on acf.licare_code = asp.created_by 
       WHERE asp.created_by IN (${licarePlaceholders}) AND asp.deleted = 0
     `;
 
@@ -15740,7 +15884,7 @@ app.post("/getmspoutwardlisting", authenticateToken, async (req, res) => {
 });
 app.post("/getadminoutwardlisting", authenticateToken, async (req, res) => {
 
-  const { csp_code, fromDate, toDate, received_from } = req.body;
+  const { fromDate, toDate, received_from } = req.body;
 
   let sql;
 
@@ -15958,9 +16102,10 @@ app.post("/getmspoutwardexcel", authenticateToken, async (req, res) => {
     }).join(", ");
 
     let sql = `
-      SELECT asp.*, acp.spare_no, acp.spare_title, acp.quantity 
+      SELECT asp.*, acp.spare_no, acp.spare_title, acp.quantity ,acf.title
       FROM awt_spareoutward AS asp 
       LEFT JOIN awt_cspissuespare AS acp ON asp.issue_no = acp.issue_no 
+      LEFT JOIN awt_childfranchisemaster as acf on acf.licare_code = asp.created_by 
       WHERE asp.created_by IN (${licarePlaceholders}) AND asp.deleted = 0
     `;
 
@@ -15977,7 +16122,6 @@ app.post("/getmspoutwardexcel", authenticateToken, async (req, res) => {
 
     sql += " ORDER BY asp.id DESC";
 
-    console.log(sql);
 
     const result = await request.query(sql);
 
@@ -19834,7 +19978,7 @@ app.post('/uploadserviceexcel', upload.none(), authenticateToken, async (req, re
     pool.config.options.requestTimeout = 600000;
 
     for (const item of excelData) {
-      console.log(item.customerName,'name')
+      console.log(item.customerName, 'name')
       return;
 
       // Check for existing record
@@ -19901,8 +20045,8 @@ app.post('/uploadserviceexcel', upload.none(), authenticateToken, async (req, re
           .input('scheme_name', sql.VarChar, item.scheme_name)
           .input('duration', sql.VarChar, item.duration)
           .input('status', sql.VarChar, item.status)
-          .input('startDate', sql.DateTime, item.startDate)   
-          .input('endDate', sql.DateTime, item.endDate)       
+          .input('startDate', sql.DateTime, item.startDate)
+          .input('endDate', sql.DateTime, item.endDate)
           .input('purchaseDate', sql.DateTime, item.purchaseDate)
           .query(`
             INSERT INTO awt_servicecontract 
@@ -20393,7 +20537,7 @@ FROM Shipment_Parts AS s
 LEFT JOIN Address_code AS a ON a.address_code = s.Address_code 
 LEFT JOIN awt_grnmaster AS agn ON agn.invoice_no = s.InvoiceNumber 
 LEFT JOIN awt_cspgrnspare AS acp ON agn.grn_no = acp.grn_no
-WHERE ${filterConditions} order by s.InvoiceDate DESC;
+WHERE ${filterConditions} AND s.InvoiceDate >= '2025-05-01 00:00:000'  order by s.InvoiceDate DESC;
     `;
 
     const result = await request.query(query);
@@ -20484,11 +20628,12 @@ app.post("/getmspinwardliebherr", authenticateToken, async (req, res) => {
         SELECT  
           s.id, s.Address_code, s.InvoiceDate, s.InvoiceNumber, s.Invoice_bpcode, 
           s.Invoice_bpName, s.Invoice_qty, s.Item_Code, s.Item_Description, 
-          s.Service_Type, s.Order_Line_Number, s.Order_Number, a.csp_code, agn.status,
+          s.Service_Type, s.Order_Line_Number, s.Order_Number, a.csp_code, agn.status,acf.title,
           ROW_NUMBER() OVER (PARTITION BY s.InvoiceNumber ORDER BY s.InvoiceDate DESC) AS rn
         FROM Shipment_Parts AS s 
         LEFT JOIN Address_code AS a ON a.address_code = s.Address_code 
         LEFT JOIN awt_grnmaster AS agn ON agn.invoice_no = s.InvoiceNumber 
+        left join awt_childfranchisemaster as acf on acf.licare_code = a.csp_code
         WHERE ${filterConditions} AND s.InvoiceDate >= '2025-05-01 00:00:000' 
       )
       SELECT * 
@@ -20504,6 +20649,7 @@ app.post("/getmspinwardliebherr", authenticateToken, async (req, res) => {
         InvoiceDate DESC
       OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY;
     `;
+
 
     const result = await request.query(query);
 
@@ -20621,11 +20767,12 @@ app.post("/getmspinwardliebherrexcel", authenticateToken, async (req, res) => {
         SELECT  
           s.id, s.Address_code, s.InvoiceDate, s.InvoiceNumber, s.Invoice_bpcode, 
           s.Invoice_bpName, s.Invoice_qty, s.Item_Code, s.Item_Description, 
-          s.Service_Type, s.Order_Line_Number, s.Order_Number, a.csp_code, agn.status,
+          s.Service_Type, s.Order_Line_Number, s.Order_Number, a.csp_code, agn.status,acf.title,
           ROW_NUMBER() OVER (PARTITION BY s.InvoiceNumber ORDER BY s.InvoiceDate DESC) AS rn
         FROM Shipment_Parts AS s 
         LEFT JOIN Address_code AS a ON a.address_code = s.Address_code 
         LEFT JOIN awt_grnmaster AS agn ON agn.invoice_no = s.InvoiceNumber 
+        left join awt_childfranchisemaster as acf on acf.licare_code = a.csp_code
         WHERE ${filterConditions} AND s.InvoiceDate >= '2025-05-01 00:00:000'
       )
       SELECT * 
@@ -20675,7 +20822,7 @@ app.get("/getinwardLiebherr", authenticateToken, async (req, res) => {
         FROM Shipment_Parts AS s 
         LEFT JOIN Address_code AS a ON a.address_code = s.Address_code 
         LEFT JOIN awt_grnmaster AS agn ON agn.invoice_no = s.InvoiceNumber 
-        WHERE s.deleted = 0
+        WHERE s.deleted = 0  AND s.InvoiceDate >= '2025-05-01 00:00:000' 
     `;
 
     if (fromDate && toDate) {
@@ -20719,6 +20866,7 @@ app.get("/getinwardLiebherr", authenticateToken, async (req, res) => {
     request.input("offset", sql.Int, offset);
     request.input("pageSize", sql.Int, parseInt(pageSize));
 
+
     const result = await request.query(sqlQuery);
 
     // Count query
@@ -20729,7 +20877,7 @@ app.get("/getinwardLiebherr", authenticateToken, async (req, res) => {
         FROM Shipment_Parts AS s
         LEFT JOIN Address_code AS a ON a.address_code = s.Address_code
         LEFT JOIN awt_grnmaster AS agn ON agn.invoice_no = s.InvoiceNumber
-        WHERE s.deleted = 0
+        WHERE s.deleted = 0 AND s.InvoiceDate >= '2025-05-01 00:00:000' 
     `;
 
     if (fromDate && toDate) {
@@ -20780,6 +20928,7 @@ app.get("/getinwardLiebherr", authenticateToken, async (req, res) => {
     return res.status(500).json({ error: "An error occurred while fetching data" });
   }
 });
+
 app.get("/getinwardLiebherrexcel", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
@@ -20806,7 +20955,7 @@ app.get("/getinwardLiebherrexcel", authenticateToken, async (req, res) => {
         FROM Shipment_Parts AS s 
         LEFT JOIN Address_code AS a ON a.address_code = s.Address_code 
         LEFT JOIN awt_grnmaster AS agn ON agn.invoice_no = s.InvoiceNumber 
-        WHERE s.deleted = 0
+        WHERE s.deleted = 0 AND s.InvoiceDate >= '2025-05-01 00:00:000' 
     `;
 
     if (fromDate && toDate) {
@@ -20860,7 +21009,7 @@ app.get("/getinwardLiebherrexcel", authenticateToken, async (req, res) => {
         FROM Shipment_Parts AS s
         LEFT JOIN Address_code AS a ON a.address_code = s.Address_code
         LEFT JOIN awt_grnmaster AS agn ON agn.invoice_no = s.InvoiceNumber
-        WHERE s.deleted = 0
+        WHERE s.deleted = 0 AND s.InvoiceDate >= '2025-05-01 00:00:000' 
     `;
 
     if (fromDate && toDate) {

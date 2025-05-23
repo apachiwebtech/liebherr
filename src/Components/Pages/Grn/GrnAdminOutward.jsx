@@ -222,7 +222,7 @@ export function GrnAdminOutward(params) {
 
     const roledata = {
         role: decryptedRole,
-        pageid: String(44)
+        pageid: String(68)
     }
 
     const dispatch = useDispatch()
@@ -282,7 +282,7 @@ export function GrnAdminOutward(params) {
                     <SyncLoader loading={loaders} color="#FFFFFF" />
                 </div>
             )}
-            <div className="row mp0">
+          {roleaccess > 1 &&        <div className="row mp0">
 
                 <div className="searchFilter" >
 
@@ -454,7 +454,8 @@ export function GrnAdminOutward(params) {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div>} 
+    
         </div>
     );
 }

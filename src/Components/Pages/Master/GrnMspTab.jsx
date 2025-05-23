@@ -65,7 +65,7 @@ function GrnMspTab() {
                   </li>
                   <li className="nav-item">
                     <Link to={`/msp/grnmsplist`}> <button
-                      className={`nav-link ${activeTab === '/msp/grnmsplist' ? 'active' : ' onClick={() => setActiveTab("grnmsplist")}'}`}
+                      className={`nav-link ${activeTab === '/msp/grnmsplist' ? 'active' : ' onClick={() => setActiveTab("mspgrn")}'}`}
 
                     >
                       Inward Listing
@@ -74,7 +74,7 @@ function GrnMspTab() {
 
                   <li className="nav-item">
                     <Link to={`/msp/sparemspoutward`}> <button
-                      className={`nav-link ${activeTab === '/msp/sparemspoutward' ? 'active' : ' onClick={() => setActiveTab("sparemspoutward")}'}`}
+                      className={`nav-link ${activeTab === '/msp/sparemspoutward' ? 'active' : ' onClick={() => setActiveTab("mspgrn")}'}`}
 
                     >
                       Outward Listing

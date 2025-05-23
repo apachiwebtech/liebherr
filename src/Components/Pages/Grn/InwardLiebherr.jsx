@@ -20,6 +20,8 @@ import DialogActions from '@mui/material/DialogActions';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import Grntab from './Grntab';
+import { Autocomplete, TextField } from "@mui/material";
+import _debounce from 'lodash.debounce';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     '& .MuiDialogContent-root': {
@@ -41,7 +43,9 @@ export function InwardLiebherr(params) {
     const [fullWidth, setFullWidth] = React.useState(true);
     const [maxWidth, setMaxWidth] = React.useState('lg');
     const [errors, setErrors] = useState({});
+    const [csptext, setcspText] = useState("");
     const [filteredData, setFilteredData] = useState([]);
+    const [cspalldata, setAllData] = useState([]);
     const token = localStorage.getItem("token");
     const licare_code = localStorage.getItem('licare_code')
     const created_by = localStorage.getItem("licare_code");
@@ -50,7 +54,7 @@ export function InwardLiebherr(params) {
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const [totalCount, setTotalCount] = useState(0);
-
+    const [receivecsp, setreciveCsp] = useState(null);
     const totalPages = Math.ceil(totalCount / pageSize);
 
     const handlePageChange = (page) => {
@@ -132,6 +136,21 @@ export function InwardLiebherr(params) {
     const handleClose = () => {
         setOpen(false);
 
+    };
+
+
+    const fetchCspAll = async () => {
+
+        try {
+            const response = await axios.post(`${Base_Url}/getsearchallcsp`, { param: csptext }, {
+                headers: {
+                    Authorization: token, // Send token in headers
+                },
+            });
+            setAllData(response.data)
+        } catch (error) {
+            console.error("Error fetching users:", error);
+        }
     };
 
 
@@ -218,62 +237,62 @@ export function InwardLiebherr(params) {
         fetchgrnListing();
     }, []);
 
-const exportToExcel = async () => {
-    if (!searchFilters.fromDate || !searchFilters.toDate) {
-        alert("Please select both From Date and To Date.");
-        return;
-    }
+    const exportToExcel = async () => {
+        if (!searchFilters.fromDate || !searchFilters.toDate) {
+            alert("Please select both From Date and To Date.");
+            return;
+        }
 
-    try {
-        const response = await axiosInstance.get(`${Base_Url}/getinwardLiebherrexcel`, {
-            headers: {
-                Authorization: token,
-            },
-            params: {
-                fromDate: searchFilters.fromDate,
-                toDate: searchFilters.toDate,
-                invoice_number : searchFilters.invoice_number,
-                address_code: searchFilters.address_code,
-                status:searchFilters.status,
-                page: 1,
-                pageSize: 100000, // Get all data if needed
-            }
-        });
+        try {
+            const response = await axiosInstance.get(`${Base_Url}/getinwardLiebherrexcel`, {
+                headers: {
+                    Authorization: token,
+                },
+                params: {
+                    fromDate: searchFilters.fromDate,
+                    toDate: searchFilters.toDate,
+                    invoice_number: searchFilters.invoice_number,
+                    address_code: searchFilters.address_code,
+                    status: searchFilters.status,
+                    page: 1,
+                    pageSize: 100000, // Get all data if needed
+                }
+            });
 
-        const encryptedData = response.data.encryptedData;
-        const bytes = CryptoJS.AES.decrypt(encryptedData, secretKey); // Ensure secretKey is defined
-        const decryptedText = bytes.toString(CryptoJS.enc.Utf8);
-        const decryptedData = JSON.parse(decryptedText);
+            const encryptedData = response.data.encryptedData;
+            const bytes = CryptoJS.AES.decrypt(encryptedData, secretKey); // Ensure secretKey is defined
+            const decryptedText = bytes.toString(CryptoJS.enc.Utf8);
+            const decryptedData = JSON.parse(decryptedText);
 
-        const workbook = XLSX.utils.book_new();
+            const workbook = XLSX.utils.book_new();
 
-        const worksheet = XLSX.utils.json_to_sheet(
-            decryptedData.map((item) => ({
-                InvoiceNumber: item.InvoiceNumber,
-                InvoiceDate: item.InvoiceDate ? formatDate(item.InvoiceDate) : '',
-                ReceivedFrom: item.received_from,
-                AddressCode: item.Address_code,
-                OrderNumber: item.Order_Number,
-                ServiceType: item.Service_Type,
-                Status: item.approved,
-                ArticleCode: item.Item_Code,
-                ArticleDescription: item.Item_Description,
-                InvoiceQty: item.Invoice_qty,
-                ReceivedQty: item.actual_received,
-                PendingQty: item.pending_quantity,
-                ReceivedDate: item.received_date ? formatDate(item.received_date) : '',
-                Remark: item.remark,
-                ActionDate: item.created_date ? formatDate(item.created_date) : ''
-            }))
-        );
+            const worksheet = XLSX.utils.json_to_sheet(
+                decryptedData.map((item) => ({
+                    InvoiceNumber: item.InvoiceNumber,
+                    InvoiceDate: item.InvoiceDate ? formatDate(item.InvoiceDate) : '',
+                    ReceivedFrom: item.received_from,
+                    AddressCode: item.Address_code,
+                    OrderNumber: item.Order_Number,
+                    ServiceType: item.Service_Type,
+                    Status: item.approved,
+                    ArticleCode: item.Item_Code,
+                    ArticleDescription: item.Item_Description,
+                    InvoiceQty: item.Invoice_qty,
+                    ReceivedQty: item.actual_received,
+                    PendingQty: item.pending_quantity,
+                    ReceivedDate: item.received_date ? formatDate(item.received_date) : '',
+                    Remark: item.remark,
+                    ActionDate: item.created_date ? formatDate(item.created_date) : ''
+                }))
+            );
 
-        XLSX.utils.book_append_sheet(workbook, worksheet, "InwardLiebherr");
-        XLSX.writeFile(workbook, "InwardLiebherr.xlsx");
-    } catch (error) {
-        console.error('Error fetching InwardLiebherr data:', error.response?.data || error.message);
-        setGrn([]);
-    }
-};
+            XLSX.utils.book_append_sheet(workbook, worksheet, "InwardLiebherr");
+            XLSX.writeFile(workbook, "InwardLiebherr.xlsx");
+        } catch (error) {
+            console.error('Error fetching InwardLiebherr data:', error.response?.data || error.message);
+            setGrn([]);
+        }
+    };
 
 
     const handleActualQtyChange = (index, value) => {
@@ -340,7 +359,7 @@ const exportToExcel = async () => {
     const handleSubmit = async () => {
 
 
-        if (formData.received_date) {
+        if (formData.received_date && receivecsp) {
 
             const formInput = new FormData();
 
@@ -356,7 +375,7 @@ const exportToExcel = async () => {
                 invoice_number: formData.invoice_number,
                 actual_quantity: item.actual_quantity,
                 pending_quantity: item.pending_quantity,
-                created_by: created_by
+                created_by: receivecsp?.id
             }));
 
             formInput.append('itemdata', JSON.stringify(payload));
@@ -424,6 +443,21 @@ const exportToExcel = async () => {
         dispatch(getRoleData(roledata))
     }, [])
 
+    const handleInputCsp = _debounce((newValue) => {
+        console.log(newValue);
+
+        // Update the text state
+        setcspText(newValue);
+
+        // Check if newValue is not blank and has more than 4 words
+
+        fetchCspAll();
+    }, 100);
+
+
+    const handleSearchAllChange = (newValue) => {
+        setreciveCsp(newValue);
+    };
 
     return (
         <div className="tab-content">
@@ -433,7 +467,7 @@ const exportToExcel = async () => {
                     <SyncLoader loading={loaders} color="#FFFFFF" />
                 </div>
             )}
-            <div className="row mp0">
+          {roleaccess > 1 &&    <div className="row mp0">
                 <div className="searchFilter">
                     <div className='m-3'>
                         <div className="row mb-3">
@@ -623,7 +657,25 @@ const exportToExcel = async () => {
 
                                                     <div className="mb-3 col-lg-3">
                                                         <label htmlFor="EmailInput" className="input-field">
-                                                            Invoice Number  <span className="text-danger">{formData.grn_type == 'With' ? '*' : ''}</span>
+                                                            Received To  <span className="text-danger">*</span>
+                                                        </label>
+                                                        <Autocomplete
+                                                            size="small"
+                                                            disablePortal
+                                                            options={cspalldata}
+                                                            value={receivecsp}
+                                                            getOptionLabel={(option) => option.title}
+                                                            onChange={(e, newValue) => handleSearchAllChange(newValue)}
+                                                            onInputChange={(e, newInputValue) => handleInputCsp(newInputValue)}
+                                                            renderInput={(params) => <TextField {...params} label="Select CSP" variant="outlined" />}
+                                                        />
+
+                                                        {errors.receivecsp && <span className="text-danger">{errors.receivecsp}</span>}
+                                                        {/* Show duplicate error */}
+                                                    </div>
+                                                    <div className="mb-3 col-lg-3">
+                                                        <label htmlFor="EmailInput" className="input-field">
+                                                            Invoice Number  
                                                         </label>
                                                         <input
                                                             type="text"
@@ -646,7 +698,7 @@ const exportToExcel = async () => {
                                                     </div>
                                                     <div className="mb-3 col-lg-3">
                                                         <label htmlFor="EmailInput" className="input-field">
-                                                            Invoice Date  <span className="text-danger">{formData.grn_type == 'With' ? '*' : ''}</span>
+                                                            Invoice Date 
                                                         </label>
                                                         <input
                                                             type="date"
@@ -753,12 +805,12 @@ const exportToExcel = async () => {
                                             <DialogActions>
                                                 {formData.status != 1 && formData.status != 2 && (
                                                     <>
-                                                        <Button onClick={(e) => handleSubmit(e)}>
+                                                      {roleaccess > 2 &&  <Button onClick={(e) => handleSubmit(e)}>
                                                             Approve
-                                                        </Button>
-                                                        <Button onClick={() => handleReject()}>
+                                                        </Button>}  
+                                                       {roleaccess > 2 && <Button onClick={() => handleReject()}>
                                                             Reject
-                                                        </Button>
+                                                        </Button>} 
                                                     </>
                                                 )}
 
@@ -809,7 +861,8 @@ const exportToExcel = async () => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div>} 
+        
         </div>
 
 

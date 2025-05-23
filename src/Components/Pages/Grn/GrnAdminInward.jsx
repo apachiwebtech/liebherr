@@ -236,7 +236,7 @@ export function GrnAdminInward(params) {
 
     const roledata = {
         role: decryptedRole,
-        pageid: String(44)
+        pageid: String(67)
     }
 
     const dispatch = useDispatch()
@@ -279,7 +279,7 @@ export function GrnAdminInward(params) {
                     <SyncLoader loading={loaders} color="#FFFFFF" />
                 </div>
             )}
-            <div className="row mp0">
+        {roleaccess > 1 &&       <div className="row mp0">
 
                 <div className="searchFilter" >
 
@@ -432,11 +432,11 @@ export function GrnAdminInward(params) {
                                                     <td>{item.quantity}</td>
                                                     <td>
                                                         {item.status == '1' ? (
-                                                            "Approved"
+                                                          <p className='text-success'>Approved</p> 
                                                         ) : item.status == '2' ? (
-                                                            "Rejected"
+                                                           <p className='text-danger'>Rejected</p> 
                                                         ) : (
-                                                            "Pending"
+                                                            <p className='text-warning'>Pending</p>
                                                         )}
                                                     </td>
 
@@ -456,7 +456,8 @@ export function GrnAdminInward(params) {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div>}  
+    
         </div>
     );
 }

@@ -169,6 +169,8 @@ export function GrnMspList(params) {
             const worksheet = XLSX.utils.json_to_sheet(
                 decryptedData.map((item) => ({
                     GrnNo: item.grn_no,
+                    CspCode : item.created_by,
+                    CspName : item.title,
                     ReceivedFrom: item.csp_name,
                     ReceivedDate: item.received_date ? formatDate(item.received_date) : '',
                     ArticleCode: item.spare_no,
@@ -353,7 +355,7 @@ export function GrnMspList(params) {
                                 <div className="form-group ">
                                     <button
                                         className="btn btn-primary mx-1"
-                                    onClick={exportToExcel}
+                                        onClick={exportToExcel}
                                     >
                                         Export to Excel
                                     </button>
@@ -399,10 +401,12 @@ export function GrnMspList(params) {
                                     <thead>
                                         <tr>
                                             <th width="5%">#</th>
-                                            <th width="15%">Grn_No</th>
+                                            <th width="5%">Grn_No</th>
+                                            <th width="15%">Csp Code</th>
+                                            <th width="15%">Csp Name</th>
+                                            <th width="10%">Invoice No</th>
+                                            <th width="10%">Invoice Date</th>
                                             <th width="10%">Received From</th>
-                                            <th width="15%">Invoice No</th>
-                                            <th width="15%">Invoice Date</th>
                                             <th width="10%">Spare No</th>
                                             <th width="10%">Spare Title</th>
                                             <th width="10%">Spare Quantity</th>
@@ -421,7 +425,8 @@ export function GrnMspList(params) {
                                                 <tr key={index}>
                                                     <td>{index + 1}</td>
                                                     <td>{item.grn_no}</td>
-                                                    <td>{item.csp_name}</td>
+                                                    <td>{item.created_by}</td>
+                                                    <td>{item.title}</td>
                                                     <td>{item.invoice_no}</td>
                                                     <td>
                                                         {new Date(item.invoice_date).toLocaleDateString('en-GB', {
@@ -430,6 +435,7 @@ export function GrnMspList(params) {
                                                             year: 'numeric',
                                                         })}
                                                     </td>
+                                                    <td>{item.csp_name}</td>
                                                     <td>{item.spare_no}</td>
                                                     <td>{item.spare_title}</td>
                                                     <td>{item.quantity}</td>
