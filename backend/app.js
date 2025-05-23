@@ -2245,19 +2245,39 @@ app.get("/downloadcustomerexcel", authenticateToken, async (req, res) => {
 
     // Fetch all customers who are not deleted
     const result = await pool.request().query(`SELECT 
-    c.*, 
-    s.serial_nos
+    c.customer_id as CustomerID,
+	c.customer_fname as CustomerName,
+	s.Address,
+	s.geocity_id as City,
+	s.district_id as District,
+	s.geostate_id as State,
+	s.pincode_id as Pincode,
+	c.customer_classification as CustomerClassification,
+	c.mobileno as MobileNumber,
+	c.alt_mobileno as AlternateMobileNumber,
+	c.email as CustomerEmailID,
+	c.customer_type as CustomerType,
+	c.updated_by as LastModifiedBy,
+	c.updated_date as LastModifiedDate
 FROM 
     awt_customer AS c
 LEFT JOIN (
     SELECT 
-        CustomerID, 
-        STRING_AGG(CAST(serial_no AS VARCHAR(MAX)), ',') AS serial_nos
+        customer_id, 
+		geostate_id,
+		geocity_id,
+		pincode_id,
+		district_id,
+        STRING_AGG(CAST(address AS VARCHAR(MAX)), ',') AS Address
     FROM 
-        awt_uniqueproductmaster
+        awt_customerlocation
     GROUP BY 
-        CustomerID
-) AS s ON s.CustomerID = c.customer_id
+        customer_id,
+		geostate_id,
+		geocity_id,
+		pincode_id,
+		district_id
+) AS s ON s.customer_id = c.customer_id
 WHERE 
     c.deleted = 0`);
     const customers = result.recordset;
@@ -2268,18 +2288,23 @@ WHERE
 
     // Define columns
     worksheet.columns = [
-      { header: 'Salutation', key: 'salutation' },
-      { header: 'CustomerName', key: 'customer_fname' },
-      { header: 'customerID', key: 'customer_id' },
-      { header: 'CustomerType', key: 'customer_type' },
-      { header: 'CustomerClassification', key: 'customer_classification' },
-      { header: 'MobileNumber', key: 'mobileno' },
-      { header: 'Email', key: 'email' },
-      { header: 'Mwhatsapp', key: 'mwhatsapp' },
-      { header: 'Alternate Mobileno', key: 'alt_mobileno' },
-      { header: 'Alternate whatsapp', key: 'a_whatsapp' },
-      { header: 'Date of Birth', key: 'dateofbirth' },
-      { header: 'Anniversary Date', key: 'anniversary_date' },
+
+      { header: 'CustomerID', key: 'CustomerID' },
+      { header: 'CustomerName', key: 'CustomerName' },
+      { header: 'Address', key: 'Address' },
+      { header: 'City', key: 'City' },
+      { header: 'District', key: 'District' },
+      { header: 'State', key: 'State' },
+      { header: 'Pincode', key: 'Pincode' },
+      { header: 'CustomerClassification', key: 'CustomerClassification' },
+      { header: 'MobileNumber', key: 'MobileNumber' },
+      { header: 'Alternate Mobileno', key: 'AlternateMobileNumber' },
+      { header: 'CustomerEmailID', key: 'CustomerEmailID' },
+      { header: 'CustomerType', key: 'CustomerType' },
+      { header: 'Status', key: 'CustomerEmailID' },
+      { header: 'CustomerType', key: 'CustomerType' },
+      { header: 'LastModifiedBy', key: 'LastModifiedBy' },
+      { header: 'LastModifiedDate', key: 'LastModifiedDate' },
 
     ];
 
@@ -16931,10 +16956,10 @@ app.get("/getsparelisting", authenticateToken, async (req, res) => {
        SELECT s.* FROM Spare_parts as s WHERE s.ProductCode = ${item_code} AND s.deleted = 0
     `;
 
-    // if (ProductCode) {
-    //   sql += ` AND s.ProductCode LIKE '%${ProductCode}%'`;
+    if (ProductCode) {
+      sql += ` AND s.ProductCode LIKE '%${ProductCode}%'`;
 
-    // }
+    }
 
     if (title) {
       sql += ` AND s.title LIKE '%${title}%'`;
@@ -20207,16 +20232,126 @@ app.post('/uploadspareexcel', async (req, res) => {
 app.get("/getmsl", authenticateToken, async (req, res) => {
 
   try {
-    // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
-    const result = await pool.request().query(`SELECT * FROM Msl WHERE deleted = 0`);
-    return res.json(result.recordset);
+    const {
+      msp_code,
+      csp_code,
+      item,
+      page = 1,
+      pageSize = 10,
+
+    } = req.query;
+
+    let sql = `
+       SELECT m.* FROM Msl as m  WHERE m.deleted = 0
+    `;
+
+
+    if (msp_code) {
+      sql += ` AND m.msp_code LIKE '%${msp_code}%'`;
+
+    }
+
+    if (csp_code) {
+      sql += ` AND m.csp_code LIKE '%${csp_code}%'`;
+    }
+
+    if (item) {
+      sql += ` AND m.item LIKE '%${item}%'`;
+    }
+
+
+    // Pagination logic: Calculate offset based on the page number
+    const offset = (page - 1) * pageSize;
+
+    // Add pagination to the SQL query (OFFSET and FETCH NEXT)
+    sql += ` ORDER BY m.id OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+
+    const result = await pool.request().query(sql);
+
+    let countSql = `SELECT COUNT(*) as totalCount FROM Msl WHERE deleted = 0`;
+    if (msp_code) countSql += ` AND msp_code LIKE '%${msp_code}%'`;
+    if (csp_code) countSql += ` AND csp_code LIKE '%${csp_code}%'`;
+    if (item) countSql += ` AND item LIKE '%${item}%'`;
+
+    const countResult = await pool.request().query(countSql);
+    const totalCount = countResult.recordset[0].totalCount;
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
+    return res.json({
+      encryptedData,
+      totalCount: totalCount,
+      page,
+      pageSize,
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'An error occurred while fetching data' });
   }
 });
 
+app.get("/getmslexcel", authenticateToken, async (req, res) => {
+
+  try {
+    const pool = await poolPromise;
+    const {
+      msp_code,
+      csp_code,
+      item,
+      page = 1,
+      pageSize = 10,
+
+    } = req.query;
+
+    let sql = `
+       SELECT m.* FROM Msl as m  WHERE m.deleted = 0
+    `;
+
+
+    if (msp_code) {
+      sql += ` AND m.msp_code LIKE '%${msp_code}%'`;
+
+    }
+
+    if (csp_code) {
+      sql += ` AND m.csp_code LIKE '%${csp_code}%'`;
+    }
+
+    if (item) {
+      sql += ` AND m.item LIKE '%${item}%'`;
+    }
+
+
+    // Pagination logic: Calculate offset based on the page number
+    const offset = (page - 1) * pageSize;
+
+    // Add pagination to the SQL query (OFFSET and FETCH NEXT)
+    sql += ` ORDER BY m.id OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+
+    const result = await pool.request().query(sql);
+
+    let countSql = `SELECT COUNT(*) as totalCount FROM Msl WHERE deleted = 0`;
+    if (msp_code) countSql += ` AND msp_code LIKE '%${msp_code}%'`;
+    if (csp_code) countSql += ` AND csp_code LIKE '%${csp_code}%'`;
+    if (item) countSql += ` AND item LIKE '%${item}%'`;
+
+    const countResult = await pool.request().query(countSql);
+    const totalCount = countResult.recordset[0].totalCount;
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
+    return res.json({
+      encryptedData,
+      totalCount: totalCount,
+      page,
+      pageSize,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
 app.get("/getmslmsp/:licare_code", authenticateToken, async (req, res) => {
   const { licare_code } = req.params
   try {

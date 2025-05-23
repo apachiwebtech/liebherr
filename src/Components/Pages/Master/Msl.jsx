@@ -11,21 +11,7 @@ import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 import { useDispatch } from "react-redux";
 import { getRoleData } from "../../Store/Role/role-action";
 import Productsparetabs from './Productsparetabs';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'datatables.net-bs4/css/dataTables.bootstrap4.min.css';
 import $ from 'jquery';
-import 'datatables.net';
-import 'datatables.net-bs4';
-import 'datatables.net-responsive';
-import 'datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css';
-import 'datatables.net-fixedcolumns';
-import 'datatables.net-fixedcolumns-bs4/css/fixedColumns.bootstrap4.min.css';
-import 'datatables.net-fixedheader';
-import 'datatables.net-buttons';
-import 'datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css';
-import 'datatables.net-buttons/js/buttons.html5.min.js';
-import 'datatables.net-keytable';
-import 'datatables.net-select';
 import Grntab from '../Grn/Grntab';
 
 export function Msl(params) {
@@ -34,6 +20,18 @@ export function Msl(params) {
     const [Msl, setMslData] = useState([]);
     const [excelData, setExcelData] = useState([]);
     const licare_code = localStorage.getItem("licare_code");
+    const [currentPage, setCurrentPage] = useState(1);
+    const [filteredData, setFilteredData] = useState([]);
+    const [pageSize, setPageSize] = useState(10);
+    const [totalCount, setTotalCount] = useState(0);
+
+    const totalPages = Math.ceil(totalCount / pageSize);
+
+    const handlePageChange = (page) => {
+
+        setCurrentPage(page);
+        fetchMsl(page); // Fetch data for the new page
+    };
     const [formData, setFormData] = useState({
         msp_name: '',
         msp_code: '',
@@ -47,22 +45,94 @@ export function Msl(params) {
 
     });
 
+    const [searchFilters, setSearchFilters] = useState({
+        msp_code: '',
+        item: '',
+        csp_code: ''
+
+
+    });
 
     const fetchMsl = async (page) => {
         try {
+            const params = new URLSearchParams();
+            // Add the page and pageSize parameters
+            params.append('page', page || 1); // Current page number
+            params.append('pageSize', pageSize); // Page size
+            // Add all filters to params if they have values
+            Object.entries(searchFilters).forEach(([key, value]) => {
+                if (value) { // Only add if value is not empty
+                    params.append(key, value);
+                }
+            });
 
-            const response = await axiosInstance.get(`${Base_Url}/getmsl`, {
+            const response = await axiosInstance.get(`${Base_Url}/getmsl?${params.toString()}`, {
                 headers: {
                     Authorization: token,
                 },
             }
             );
-            setMslData(response.data);
+            const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+            const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+            const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+            setMslData(decryptedData);
+            setFilteredData(decryptedData);
+            // Store total count for pagination logic on the frontend
+            setTotalCount(response.data.totalCount);
         } catch (error) {
             console.error('Error fetching Msl:', error);
             setMslData([]);
+            setFilteredData([]);
         }
     };
+
+    const fetchFilteredData = async () => {
+        try {
+            const params = new URLSearchParams();
+
+            // Add all filters to params
+            Object.entries(searchFilters).forEach(([key, value]) => {
+                if (value) { // Only add if value is not empty
+                    params.append(key, value);
+                }
+            });
+
+            console.log('Sending params:', params.toString()); // Debug log
+
+            const response = await axiosInstance.get(`${Base_Url}/getmsl?${params}`, {
+                headers: {
+                    Authorization: token, // Send token in headers
+                },
+            });
+            // Decrypt the response data
+            const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+            const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+            const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+            setMslData(decryptedData);
+            setFilteredData(decryptedData);
+            setTotalCount(response.data.totalCount);
+
+        } catch (error) {
+            console.error('Error fetching filtered data:', error);
+            setFilteredData([]);
+        }
+    };
+
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+
+        setSearchFilters(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+    const applyFilters = () => {
+        console.log('Applying filters:', searchFilters); // Debug log
+        fetchFilteredData();
+
+
+    };
+
     useEffect(() => {
         fetchMsl();
     }, []);
@@ -75,40 +145,6 @@ export function Msl(params) {
         encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
         navigate(`/addmsl/${encrypted}/${view}`)
     };
-
-
-    useEffect(() => {
-        if (Msl.length > 0) {
-            // Initialize DataTable after data is fetched
-            const table = $('#example').DataTable({
-                destroy: true, // Destroy any existing DataTable instance before reinitializing
-                paging: true,
-                searching: true,
-                ordering: true,
-                info: true,
-                lengthChange: false,
-                autoWidth: false,
-                responsive: true,
-                fixedHeader: true,
-                fixedColumns: {
-                    left: 5,
-                },
-                keys: true,
-                select: true,
-                dom: '<"d-flex justify-content-between"<"table-title"><"search-box"f>>t<"d-flex justify-content-between"ip>',
-                language: {
-                    search: '', // Remove the "Search:" label
-                    searchPlaceholder: 'Search...', // Add placeholder text
-                },
-
-            });
-
-            // Cleanup: Destroy DataTable instance before reinitializing when Productdata changes
-            return () => {
-                table.destroy();
-            };
-        }
-    }, [Msl]);
 
     // Role Right 
 
@@ -196,35 +232,41 @@ export function Msl(params) {
 
 
     const exportToExcel = async () => {
-
-
-
         try {
 
-            // Fetch all customer data without pagination
-            const response = await axiosInstance.get(`${Base_Url}/getmsl`, {
+            const params = new URLSearchParams();
+
+            // Add filters
+            Object.entries(searchFilters).forEach(([key, value]) => {
+                if (value) {
+                    params.append(key, value);
+                }
+            });
+
+            // Add pagination for full export
+            params.append("pageSize", totalCount);
+            params.append("page", 1);
+
+            const response = await axiosInstance.get(`${Base_Url}/getmslexcel?${params.toString()}`, {
                 headers: {
                     Authorization: token,
                 },
-            }
-            );
-
-            const decryptedData = response.data;
-            console.log("Excel Export Data:", decryptedData);
+            });
+            const decryptedData = CryptoJS.AES.decrypt(response.data.encryptedData, secretKey).toString(CryptoJS.enc.Utf8);
+            const allMslData = JSON.parse(decryptedData);
             // Create a new workbook
             const workbook = XLSX.utils.book_new();
 
             // Convert data to a worksheet
             const worksheet = XLSX.utils.json_to_sheet(
-                decryptedData.map((item) => ({
+                allMslData.map((item) => ({
                     MspCode: item.msp_code,
                     MspName: item.msp_name,
                     CspName: item.csp_name,
                     CspCode: item.csp_code,
                     ArticleCode: item.item,
                     ArticleDescription: item.item_description,
-                    MSLStock: item.stock,
-                    TotalCSPStock: 0,
+                    TotalCSPStock: item.stock,
                 }))
             );
 
@@ -234,7 +276,7 @@ export function Msl(params) {
             // Export the workbook
             XLSX.writeFile(workbook, "Msl.xlsx");
         } catch (error) {
-            console.error('Error fetching GRN data:', error.response?.data || error.message);
+            console.error('Error fetching Msl data:', error.response?.data || error.message);
         }
     };
 
@@ -256,22 +298,111 @@ export function Msl(params) {
                 <div className=" col-12">
                     <div className="card mb-3 tab_box">
                         <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
-                            <div className="row  mb-3">
-                                <div className="col-md-6 d-flex justify-content-start align-items-center mt-3">
+                            <div className="row mb-3">
+
+                                <div className="col-md-3">
                                     <div className="form-group">
-                                        {roleaccess > 2 ? <input type="file" accept=".xlsx, .xls" onChange={importexcel} /> : null}
-                                        {roleaccess > 2 ? <button className="btn btn-primary" onClick={uploadexcel}>
-                                            Import Msl
-                                        </button> : null}
-
-
+                                        <label>Msp code</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="msp_code"
+                                            value={searchFilters.msp_code}
+                                            placeholder="Search by Msp Code"
+                                            onChange={handleFilterChange}
+                                        />
                                     </div>
                                 </div>
-                                <div className="col-md-6 d-flex justify-content-end align-items-center mt-3">
+
+                                <div className="col-md-3">
                                     <div className="form-group">
-                                        {roleaccess > 2 ? <button className="btn btn-primary" onClick={exportToExcel}>
-                                            Export Msl
-                                        </button> : null}
+                                        <label>Csp Code</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="csp_code"
+                                            value={searchFilters.csp_code}
+                                            placeholder="Search by Csp Code"
+                                            onChange={handleFilterChange}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="col-md-3">
+                                    <div className="form-group">
+                                        <label>Article Code</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="item"
+                                            value={searchFilters.item}
+                                            placeholder="Search by Article Code"
+                                            onChange={handleFilterChange}
+                                        />
+                                    </div>
+                                </div>
+
+
+
+                            </div>
+                            <div className="row  mb-3">
+                                <div className="col-md-12 d-flex justify-content-end align-items-center mt-3">
+                                    {roleaccess > 2 ? <div className="form-group">
+                                        <input type="file" accept=".xlsx, .xls" onChange={importexcel} />
+                                        <button className="btn btn-primary" onClick={uploadexcel}
+                                            style={{
+                                                marginLeft: '-100px',
+                                            }}>
+                                            Import Service Contract
+                                        </button>
+
+                                    </div> : null}
+                                    <div className="form-group">
+                                        <button
+                                            className="btn btn-primary"
+                                            onClick={exportToExcel}
+                                            style={{
+                                                marginLeft: '5px',
+                                            }}
+                                        >
+                                            Export to Excel
+                                        </button>
+                                        <button
+                                            className="btn btn-primary mr-2"
+                                            onClick={applyFilters}
+                                            style={{
+                                                marginLeft: '5px',
+                                            }}
+                                        >
+                                            Search
+                                        </button>
+                                        <button
+                                            className="btn btn-secondary"
+                                            onClick={() => {
+                                                window.location.reload()
+                                            }}
+                                            style={{
+                                                marginLeft: '5px',
+                                            }}
+                                        >
+                                            Reset
+                                        </button>
+                                        {filteredData.length === 0 && (
+                                            <div
+                                                style={{
+                                                    backgroundColor: '#f8d7da',
+                                                    color: '#721c24',
+                                                    padding: '5px 10px',
+                                                    marginLeft: '10px',
+                                                    borderRadius: '4px',
+                                                    border: '1px solid #f5c6cb',
+                                                    fontSize: '14px',
+                                                    display: 'inline-block'
+                                                }}
+                                            >
+                                                No Record Found
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -280,7 +411,7 @@ export function Msl(params) {
                                 <table id="example" className="table">
                                     <thead>
                                         <tr>
-                                            {/* <th width="5%">#</th> */}
+                                            <th width="5%">#</th>
                                             <th width="10%">Msp Code</th>
                                             <th width="15%">Msp Name</th>
                                             <th width="10%">Csp Code</th>
@@ -288,16 +419,17 @@ export function Msl(params) {
                                             <th width="10%">Article Code</th>
                                             <th width="20%">Article Description</th>
                                             <th width="10%">Total Csp Stock</th>
-                                            <th widht="10%">Edit</th>
+                                           {roleaccess > 3 ? <th widht="10%">Edit</th> :null}
 
                                         </tr>
                                     </thead>
                                     <tbody>
 
                                         {Msl.map((item, index) => {
+                                            const displayIndex = (currentPage - 1) * pageSize + index + 1;
                                             return (
                                                 <tr key={item.id}>
-                                                    {/* <td>{index + 1}</td> */}
+                                                    <td>{displayIndex}</td>
                                                     <td>{item.msp_code}</td>
                                                     <td>{item.msp_name}</td>
                                                     <td>{item.csp_code}</td>
@@ -322,6 +454,43 @@ export function Msl(params) {
 
                                     </tbody>
                                 </table>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                                <button
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    disabled={currentPage <= 1}
+                                    style={{
+                                        padding: '8px 15px',
+                                        fontSize: '16px',
+                                        cursor: currentPage <= 1 ? 'not-allowed' : 'pointer',
+                                        backgroundColor: currentPage <= 1 ? '#ccc' : '#007bff',
+                                        color: '#fff',
+                                        border: 'none',
+                                        borderRadius: '5px',
+                                        transition: 'background-color 0.3s',
+                                    }}
+                                >
+                                    Previous
+                                </button>
+                                <span style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                                    Page {currentPage} of {totalPages}
+                                </span>
+                                <button
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    disabled={currentPage >= totalPages}
+                                    style={{
+                                        padding: '8px 15px',
+                                        fontSize: '16px',
+                                        cursor: currentPage >= totalPages ? 'not-allowed' : 'pointer',
+                                        backgroundColor: currentPage >= totalPages ? '#ccc' : '#007bff',
+                                        color: '#fff',
+                                        border: 'none',
+                                        borderRadius: '5px',
+                                        transition: 'background-color 0.3s',
+                                    }}
+                                >
+                                    Next
+                                </button>
                             </div>
 
                         </div>

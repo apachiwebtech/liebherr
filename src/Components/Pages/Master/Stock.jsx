@@ -136,11 +136,7 @@ export function Stock(params) {
         console.log('Applying filters:', searchFilters); // Debug log
         fetchFilteredData();
 
-        setSearchFilters({
-            product_code: '',
-            productname: '',
-            csp_code: ''
-        });
+    
     };
 
     useEffect(() => {
@@ -316,7 +312,7 @@ export function Stock(params) {
                                             className="btn btn-secondary"
                                             onClick={() => {
 
-                                                applyFilters()
+                                                window.location.reload();
                                             }}
                                             style={{
                                                 marginLeft: '5px',
