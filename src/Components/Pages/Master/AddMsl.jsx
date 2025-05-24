@@ -4,7 +4,9 @@ import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url, secretKey } from "../../Utils/Base_Url";
 import { Navigate, useParams } from "react-router-dom";
 import Servicecontracttabs from "./Servicecontracttabs";
+import { Autocomplete, TextField } from "@mui/material";
 import { SyncLoader } from 'react-spinners';
+import _debounce from "lodash.debounce";
 import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 import CryptoJS from 'crypto-js';
 import DatePicker from "react-datepicker";
@@ -20,12 +22,17 @@ const AddMsl = () => {
     const { loaders, axiosInstance } = useAxiosLoader();
 
     let { mslid } = useParams();
+    const [text, setText] = useState("");
     const [errors, setErrors] = useState({});
     const [users, setUsers] = useState([]);
     const [filteredUsers, setFilteredUsers] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
     const [currentPage, setCurrentPage] = useState(0);
     const [excelData, setExcelData] = useState([]);
+    const [mspdata, setMspData] = useState([]);
+    const [selectmsp, setSelectedMsp] = useState(null);
+    const [cspdata, setCspData] = useState([]);
+    const [selectcsp, setSelectedCsp] = useState(null);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [duplicateError, setDuplicateError] = useState(""); // State to track duplicate error
     const token = localStorage.getItem("token"); // Get token from localStorage
@@ -81,37 +88,38 @@ const AddMsl = () => {
         }
     };
     const fetchmslpopulate = async (mslid) => {
-
         try {
             const response = await axiosInstance.get(`${Base_Url}/getmslpopulate/${mslid}`, {
                 headers: {
                     Authorization: token, // Send token in headers
                 },
             });
+
             setFormData({
                 ...response.data[0],
-                // Rename keys to match your formData structure
                 msp_code: response.data[0].msp_code,
                 msp_name: response.data[0].msp_name,
                 csp_code: response.data[0].csp_code,
                 csp_name: response.data[0].csp_name,
                 item: response.data[0].item,
                 item_description: response.data[0].item_description,
-                stock: response.data[0].stock
-
+                stock: response.data[0].stock,
             });
 
+            // ✅ Fixed this part: use response data, not mslid
+            const selectedCsp = cspdata.find(csp => csp.licare_code == response.data[0].csp_code);
+
+            const selectedMsp = mspdata.find(msp => msp.licarecode === response.data[0].msp_code);
+            setSelectedMsp(selectedMsp || null);
+            setSelectedCsp(response.data[0].csp_code);
 
             setIsEdit(true);
-
-
-
-
         } catch (error) {
             console.error('Error fetching Servicecontractdata:', error);
             setFormData([]);
         }
     };
+
 
     useEffect(() => {
         fetchUsers();
@@ -206,6 +214,98 @@ const AddMsl = () => {
             })
     }
 
+    const fetchMsp = async () => {
+        try {
+            const response = await axiosInstance.post(
+                `${Base_Url}/getmspdata`,
+                { param: text },
+                {
+                    headers: { Authorization: token },
+                }
+            );
+
+            const encryptedData = response.data.encryptedData;
+            const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+            const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+
+            setMspData(decryptedData);
+        } catch (error) {
+            console.error("Error fetching models:", error);
+        }
+
+    };
+
+    const fetchCsp = async () => {
+        try {
+            const response = await axiosInstance.post(
+                `${Base_Url}/getcspdata`,
+                { param: text },
+                {
+                    headers: { Authorization: token },
+                }
+            );
+
+            const encryptedData = response.data.encryptedData;
+            const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+            const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+
+            setCspData(decryptedData);
+        } catch (error) {
+            console.error("Error fetching models:", error);
+        }
+
+    };
+
+
+
+
+    const handleInputChange = _debounce((newValue) => {
+        setText(newValue);
+        fetchMsp();
+    }, 100);
+
+    const handleSearchChangeCsp = (newValue) => {
+        setSelectedCsp(newValue);
+        // If an option is selected, update msp_code and msp_name
+        if (newValue) {
+            setFormData(prevState => ({
+                ...prevState,
+                csp_code: newValue.licare_code || "",
+                csp_name: newValue.title || ""  // <-- Adjust property name if different
+            }));
+        } else {
+            setFormData(prevState => ({
+                ...prevState,
+                csp_code: "",
+                csp_name: ""
+            }));
+        }
+    };
+
+    const handleInputChangeCsp = _debounce((newValue) => {
+        setText(newValue);
+        fetchCsp();
+    }, 100);
+
+    const handleSearchChange = (newValue) => {
+        setSelectedMsp(newValue);
+
+        // If an option is selected, update msp_code and msp_name
+        if (newValue) {
+            setFormData(prevState => ({
+                ...prevState,
+                msp_code: newValue.licarecode || "",
+                msp_name: newValue.title || ""  // <-- Adjust property name if different
+            }));
+        } else {
+            setFormData(prevState => ({
+                ...prevState,
+                msp_code: "",
+                msp_name: ""
+            }));
+        }
+    };
+
     //handlesubmit form
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -219,10 +319,9 @@ const AddMsl = () => {
 
         const payload = Object.fromEntries(
             Object.entries({
-              ...formData,
+                ...formData,
             }).map(([key, value]) => [key, String(value)])
-          );
-          
+        );
         console.log(payload, 'item_description,')
         const encryptedData = CryptoJS.AES.encrypt(
             JSON.stringify(payload),
@@ -262,7 +361,8 @@ const AddMsl = () => {
                                 stock: "",
                             });
 
-
+                            setSelectedMsp(null);
+                            setSelectedCsp(null);
                             fetchUsers();
                         })
                         .catch((error) => {
@@ -294,6 +394,8 @@ const AddMsl = () => {
                                 stock: "",
                             });
                             setSuccessMessage('Msl Updated Successfully!');
+                            setSelectedMsp(null);
+                            setSelectedCsp(null);
                             setTimeout(() => setSuccessMessage(''), 3000);
                             fetchUsers();
 
@@ -378,7 +480,25 @@ const AddMsl = () => {
                                             >
                                                 Msp Code<span className="text-danger">*</span>
                                             </label>
-                                            <input
+                                            <Autocomplete
+                                                size="small"
+                                                disablePortal
+                                                options={mspdata}
+                                                value={selectmsp}
+                                                getOptionLabel={(option) => option?.licarecode || ""}
+                                                onChange={(e, newValue) => setSelectedMsp(newValue)}
+                                                renderInput={(params) => (
+                                                    <TextField
+                                                        {...params}
+                                                        label="Enter Msp Code"
+                                                        variant="outlined"
+                                                        error={!!errors.msp_code}
+                                                        helperText={errors.msp_code}
+                                                    />
+                                                )}
+                                            />
+
+                                            {/* <input
                                                 type="text"
                                                 className="form-control"
                                                 name="msp_code"
@@ -386,7 +506,7 @@ const AddMsl = () => {
                                                 value={formData.msp_code}
                                                 onChange={handleChange}
                                                 placeholder="EnterMsp Code "
-                                            />
+                                            /> */}
                                             {errors.msp_code && (
                                                 <small className="text-danger">
                                                     {errors.msp_code}
@@ -425,7 +545,25 @@ const AddMsl = () => {
                                                 className="input-field"
                                             >
                                                 Csp Code<span className="text-danger">*</span> </label>
-                                            <input
+                                            <Autocomplete
+                                                size="small"
+                                                disablePortal
+                                                options={cspdata}
+                                                value={selectcsp}
+                                                getOptionLabel={(option) => option.licare_code || ""}
+                                                onChange={(e, newValue) => handleSearchChangeCsp(newValue)}
+                                                onInputChange={(e, newInputValue) => handleInputChangeCsp(newInputValue)}
+                                                renderInput={(params) => (
+                                                    <TextField
+                                                        {...params}
+                                                        label="Enter Csp Code"
+                                                        variant="outlined"
+                                                        error={!!errors.csp_code}
+                                                        helperText={errors.csp_code}
+                                                    />
+                                                )}
+                                            />
+                                            {/* <input
                                                 type="tel"
                                                 className="form-control"
                                                 name="csp_code"
@@ -434,7 +572,7 @@ const AddMsl = () => {
                                                 onChange={handleChange}
                                                 placeholder="Enter Csp Code "
 
-                                            />
+                                            /> */}
                                             {errors.csp_code && (
                                                 <small className="text-danger">
                                                     {errors.csp_code}

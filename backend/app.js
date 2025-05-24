@@ -16937,6 +16937,75 @@ app.post("/getmodelno", authenticateToken, async (req, res) => {
   }
 });
 
+app.post("/getmspdata", authenticateToken, async (req, res) => {
+  const { param } = req.body;
+
+  console.log(param);
+  if (!param) {
+    return res.status(400).json({ message: "Invalid parameter" });
+  }
+
+  try {
+    const pool = await poolPromise;
+
+    const sql = `SELECT top 20 licarecode,title FROM awt_franchisemaster WHERE licarecode LIKE @param`;
+
+    const result = await pool.request()
+      .input("param", `%${param}%`)
+      .query(sql);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "No results found" });
+    }
+
+    // console.log(result)
+
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
+
+    return res.json({ encryptedData });
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    return res.status(500).json({ message: "Internal Server Error", error: err.message });
+  }
+});
+
+app.post("/getcspdata", authenticateToken, async (req, res) => {
+  const { param } = req.body;
+
+  console.log(param);
+  if (!param) {
+    return res.status(400).json({ message: "Invalid parameter" });
+  }
+
+  try {
+    const pool = await poolPromise;
+
+    const sql = `SELECT top 20 licare_code,title FROM awt_childfranchisemaster WHERE licare_code LIKE @param`;
+
+    const result = await pool.request()
+      .input("param", `%${param}%`)
+      .query(sql);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "No results found" });
+    }
+
+    // console.log(result)
+
+    // Convert data to JSON string and encrypt it
+    const jsonData = JSON.stringify(result.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
+
+    return res.json({ encryptedData });
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    return res.status(500).json({ message: "Internal Server Error", error: err.message });
+  }
+});
+
+
 app.get("/getsparelisting", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
