@@ -415,7 +415,7 @@ export function Grnoutward(params) {
                                                     <td>{item.issue_no}</td>
                                                     <td>{item.lhi_name}</td>
                                                     <td>
-                                                        {new Date(item.issue_date).toLocaleDateString('en-GB', {
+                                                        {item.issue_date && new Date(item.issue_date).toLocaleDateString('en-GB', {
                                                             day: '2-digit',
                                                             month: '2-digit',
                                                             year: 'numeric',

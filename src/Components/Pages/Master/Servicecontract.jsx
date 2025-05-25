@@ -20,6 +20,7 @@ const Servicecontract = () => {
   const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
+  const [contarctlist, setContarctlist] = useState([]);
   const [isEdit, setIsEdit] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -29,6 +30,7 @@ const Servicecontract = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [startDate, setStartDate] = useState(null);
   const [enddate, setEndDate] = useState(null);
+  const [purchase_date, setPurchase] = useState(null);
   const createdBy = 1; // Static value for created_by
   const updatedBy = 2; // Static value for updated_by
 
@@ -57,6 +59,17 @@ const Servicecontract = () => {
     if (date) {
       const formattedDate = formatDate(date);
       setEndDate(formattedDate)
+    }
+
+
+  };
+  const handleDateChange3 = (date) => {
+
+
+    if (date) {
+      const formattedDate = formatDate(date);
+      setPurchase(formattedDate)
+
     }
 
 
@@ -153,18 +166,16 @@ const Servicecontract = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    SetValue({ ...Value, [name]: value });
+    SetValue((prev) => ({ ...prev, [name]: value }));
 
-
-    if (name == 'serialNumber') {
-      getserial(value)
+    if (name === 'serialNumber') {
+      getserial(value); // Pass the latest value directly
     }
   };
 
-  const getserial = (value) => {
-
-    const serial = Value?.serialNumber || value;
-    axios.get(`${Base_Url}/getfromserial/${serial}`, {
+  const getserial = (serialValue) => {
+    if (!serialValue) return;
+    axios.get(`${Base_Url}/getfromserial/${serialValue}`, {
       headers: {
         Authorization: token, // Send token in headers
       },
@@ -172,7 +183,11 @@ const Servicecontract = () => {
       .then((res) => {
         console.log(res)
 
-        if (res.data) {
+        if (res.data.previoscontarct && res.data.previoscontarct.length > 0) {
+          setContarctlist(res.data.previoscontarct);
+        }
+
+        if (res.data.data && res.data.data.length > 0) {
           const serial = res.data.data[0]
 
           SetValue((prev) => ({
@@ -180,8 +195,10 @@ const Servicecontract = () => {
             customerName: serial.customer_fname,
             productName: serial.ModelNumber,
             ItemNumber: serial.ItemNumber,
-            customerId: serial.customer_id
+            customerId: serial.customer_id,
           }))
+
+          setPurchase(serial.purchase_date ? formatDate(new Date(serial.purchase_date)) : null);
         }
 
 
@@ -191,16 +208,6 @@ const Servicecontract = () => {
       })
   }
 
-  const handleSearch = (e) => {
-    const value = e.target.value.toLowerCase();
-    setSearchTerm(value);
-    const filtered = users.filter(
-      (user) =>
-        user.Serviceproduct && user.Serviceproduct.toLowerCase().includes(value)
-    );
-    setFilteredUsers(filtered);
-    setCurrentPage(0);
-  };
 
   // Step 2: Add form validation function
   const validateForm = () => {
@@ -211,11 +218,15 @@ const Servicecontract = () => {
     };
 
     // Text/Email/Number inputs validation
-    if (isEmpty(Value.contractNumber)) newErrors.contractNumber = "Contract Number Field is required.";
-    if (isEmpty(Value.customerName)) newErrors.customerName = "Customer Name is required.";
-    if (isEmpty(Value.customerMobile)) newErrors.customerMobile = "Customer Mobile Number is required.";
-    if (isEmpty(Value.productName)) newErrors.productName = "Product Name is required.";
     if (isEmpty(Value.serialNumber)) newErrors.serialNumber = "Serial Number is required.";
+    if (isEmpty(Value.itemNumber)) newErrors.itemNumber = "Product Code is required.";
+    if (isEmpty(Value.productName)) newErrors.productName = "Product Name is required.";
+    if (isEmpty(Value.customerName)) newErrors.customerName = "Customer Name is required.";
+    if (isEmpty(Value.customerId)) newErrors.customerId = "Customer Id is required.";
+    if (isEmpty(Value.schemename)) newErrors.schemename = "Sceme Name Field is required.";
+    if (isEmpty(Value.duration)) newErrors.duration = "Duration is required.";
+    if (isEmpty(purchase_date)) newErrors.purchasedate = "Date is required.";
+    if (isEmpty(Value.contractamt)) newErrors.contractamt = "Amount is required.";
 
     // Dropdown validations
     if (!Value.contractType) newErrors.contractType = "Contract Type is required.";
@@ -234,11 +245,11 @@ const Servicecontract = () => {
 
     const payload = {
       ...Value,
-
+      purchasedate: purchase_date,
       startDate: startDate,
       endDate: enddate,
-
     }
+
     const encryptedData = CryptoJS.AES.encrypt(
       JSON.stringify(payload),
       secretKey
@@ -267,14 +278,20 @@ const Servicecontract = () => {
               setTimeout(() => setSuccessMessage(''), 3000);
 
               SetValue({
+                serialNumber: "",
+                itemNumber: "",
+                productName: "",
                 customerName: "",
-                customerMobile: "",
+                customerId: "",
                 contractNumber: "",
                 contractType: "",
-                productName: "",
-                serialNumber: "",
+                schemename: "",
+                goodwillmonth: "",
+                duration: "",
+                purchasedate: "",
                 startDate: "",
                 endDate: "",
+                contractamt: "",
               });
 
 
@@ -300,14 +317,20 @@ const Servicecontract = () => {
             .then((response) => {
               // window.location.reload();
               SetValue({
+                serialNumber: "",
+                itemNumber: "",
+                productName: "",
                 customerName: "",
-                customerMobile: "",
+                customerId: "",
                 contractNumber: "",
                 contractType: "",
-                productName: "",
-                serialNumber: "",
+                schemename: "",
+                goodwillmonth: "",
+                duration: "",
+                purchasedate: "",
                 startDate: "",
                 endDate: "",
+                contractamt: "",
               });
               setSuccessMessage('Customer Updated Successfully!');
               setTimeout(() => setSuccessMessage(''), 3000);
@@ -328,65 +351,10 @@ const Servicecontract = () => {
   };
 
 
-  const deleted = async (id) => {
-    try {
-      // Add confirmation dialog
-      const isConfirmed = window.confirm("Are you sure you want to delete?");
 
-      // Only proceed with deletion if user clicks "OK"
-      if (isConfirmed) {
-        const response = await axiosInstance.post(`${Base_Url}/deleteservicecontract`, { id }, {
-          headers: {
-            Authorization: token, // Send token in headers
-          },
-        });
-        window.location.reload();
-      }
-    } catch (error) {
-      console.error('Error deleting user:', error);
-    }
-  };
 
-  const edit = async (id) => {
-    try {
-      const response = await axiosInstance.get(`${Base_Url}/requestservicecontract/${id}`, {
-        headers: {
-          Authorization: token, // Send token in headers
-        },
-      });
-      SetValue(response.data);
-      setIsEdit(true);
-      console.log(response.data);
-    } catch (error) {
-      console.error("Error editing user:", error);
-    }
-  };
 
-  // Role Right 
-  const handleSerialNumberBlur = async () => {
-    if (!Value.serial_no) return;
 
-    try {
-      const response = await axios.get('/getProductDetailsBySerial', {
-        params: {
-          serialNumber: Value.serial_no,
-        },
-      });
-
-      const data = response.data;
-
-      SetValue((prev) => ({
-        ...prev,
-        productcode: data.productCode || '',
-        productName: data.productDescription || '',
-        customerName: data.customerName || '',
-        customerID: data.customerID || '',
-      }));
-    } catch (error) {
-      console.error("Error fetching product details:", error);
-      // Optionally show a toast or error message here
-    }
-  };
 
 
 
@@ -417,6 +385,51 @@ const Servicecontract = () => {
   const indexOfLastUser = (currentPage + 1) * itemsPerPage;
   const indexOfFirstUser = indexOfLastUser - itemsPerPage;
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+
+
+  const handlestartenddatecalculation = (e) => {
+    // e.preventDefault();
+    const duration = parseInt(Value.duration, 10);
+    const goodwillMonths = Value.goodwillmonth ? parseInt(Value.goodwillmonth, 10) : 0;
+
+    if (isNaN(duration) || duration <= 0) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        duration: "Please select a valid duration.",
+      }));
+      return;
+    }
+
+
+    if (!purchase_date) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        purchasedate: "Please select a purchase date.",
+      }));
+      return;
+    }
+
+    // Calculate warranty expiry date after one year from purchase_date
+    const start = new Date(purchase_date);
+    const warrantyExpiry = new Date(start);
+    warrantyExpiry.setFullYear(warrantyExpiry.getFullYear() + 1);
+
+    // Add goodwill months to warranty expiry if available
+    if (goodwillMonths > 0) {
+      warrantyExpiry.setMonth(warrantyExpiry.getMonth() + goodwillMonths);
+    }
+
+    // Contract start date should be +1 day after warranty expiry
+    const contractStartDate = new Date(warrantyExpiry);
+    contractStartDate.setDate(contractStartDate.getDate() + 1);
+
+    // Contract end date is duration years after contract start date
+    const contractEndDate = new Date(contractStartDate);
+    contractEndDate.setFullYear(contractEndDate.getFullYear() + duration);
+
+    setStartDate(formatDate(contractStartDate));
+    setEndDate(formatDate(contractEndDate));
+  }
 
   return (
     <div className="tab-content">
@@ -457,6 +470,7 @@ const Servicecontract = () => {
                         value={Value.serialNumber}
                         onChange={handleChange}
                         placeholder="Enter Serial Number "
+                        maxLength={9}
                       />
                       {errors.serialNumber && (
                         <small className="text-danger">
@@ -575,12 +589,13 @@ const Servicecontract = () => {
                         value={Value.contractNumber}
                         onChange={handleChange}
                         placeholder="Enter Contract Code "
+                        disabled
                       />
-                      {errors.contractNumber && (
+                      {/* {errors.contractNumber && (
                         <small className="text-danger">
                           {errors.contractNumber}
                         </small>
-                      )}
+                      )} */}
                     </div>
 
                     <div className="col-3 mb-3">
@@ -638,7 +653,10 @@ const Servicecontract = () => {
                         name="goodwillmonth"
                         id="GoodwillMonthInput"
                         value={Value.goodwillmonth}
-                        onChange={handleChange}
+                        onChange={(e) => {
+                          handleChange(e);
+                          handlestartenddatecalculation(e);
+                        }}
                         placeholder="Enter Goodwill Month"
                       />
                       {errors.goodwillmonth && (
@@ -658,7 +676,10 @@ const Servicecontract = () => {
                         name="duration"
                         id="contracttypeInput"
                         value={Value.duration}
-                        onChange={handleChange}
+                        onChange={(e) => {
+                          handleChange(e);
+                          handlestartenddatecalculation(e);
+                        }}
                       >
                         <option value="">Select Duration</option>
                         <option value="1">1 Year</option>
@@ -681,12 +702,15 @@ const Servicecontract = () => {
 
                     <div className="col-3 mb-3">
                       <label htmlFor="PurchaseDateInput" className="input-field">
-                        Purchase Date
+                        Purchase Date <span className="text-danger">*</span>
                       </label>
                       <div>
                         <DatePicker
-                          selected={enddate}
-                          onChange={handleDateChange2}
+                          selected={purchase_date}
+                          onChange={(date) => {
+                            handleDateChange3(date);
+                            handlestartenddatecalculation(date);
+                          }}
                           dateFormat="dd-MM-yyyy"
                           placeholderText="DD-MM-YYYY"
                           className='form-control'
@@ -711,6 +735,7 @@ const Servicecontract = () => {
                           className='form-control'
                           name="startDate"
                           aria-describedby="StartDateInput"
+                          disabled
                         />
                       </div>
                       {errors.startDate && (
@@ -731,6 +756,7 @@ const Servicecontract = () => {
                           className='form-control'
                           name="endDate"
                           aria-describedby="EndDateInput"
+                          disabled
                         />
                       </div>
                       {errors.endDate && (
@@ -797,17 +823,20 @@ const Servicecontract = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className="bg-success" >
-                    <td className="bg-success">1</td>
-                    <td className="bg-success">Cr123</td>
-                    <td className="bg-success">Satyam</td>
-                    <td className="bg-success">DFPrmC 2221 I01 20</td>
-                    <td className="bg-success">903608631</td>
-                    <td className="bg-success">20-10-2013</td>
-                    <td className="bg-success">20-10-2013</td>
-
-                  </tr>
-
+                  {contarctlist.map((contract, index) => {
+                    return (
+                      <tr key={index}>
+                        <td className={`${contract.status == 'Active' ? 'bg-success' : ''}`}>{index + 1}</td>
+                        <td className={`${contract.status == 'Active' ? 'bg-success' : ''}`}>{contract.contractNumber}</td>
+                        <td className={`${contract.status == 'Active' ? 'bg-success' : ''}`}>{contract.customerName}</td>
+                        <td className={`${contract.status == 'Active' ? 'bg-success' : ''}`}>{contract.productName}</td>
+                        <td className={`${contract.status == 'Active' ? 'bg-success' : ''}`}>{contract.serialNumber}</td>
+                        <td className={`${contract.status == 'Active' ? 'bg-success' : ''}`}>{new Date(contract.startDate).toLocaleDateString('en-GB')}</td>
+                        <td className={`${contract.status == 'Active' ? 'bg-success' : ''}`}>{new Date(contract.endDate).toLocaleDateString('en-GB')}</td>
+                      </tr>
+                    )
+                  }
+                  )}
 
                 </tbody>
               </table>

@@ -138,7 +138,7 @@ function Grntab() {
                                             </button>
                                         </li></Link>
                                     }
-                                    {status.mslpage == 1 &&
+                                    {status.addmslpage == 1 &&
                                         <Link to={`/addmsl`}><li className="nav-item">
                                             <button className={`nav-link ${activeTab === "/addmsl" ? "active" : ""}`}>
                                                 ADD MSL

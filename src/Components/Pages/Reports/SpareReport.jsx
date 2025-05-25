@@ -15,7 +15,7 @@ const SpareReport = () => {
     const [startDate, setStartdate] = useState('')
     const [endDate, setEnddate] = useState('')
     const [loading, setLoading] = useState([]);
-    const [data, setL] = useState([]);
+    const [type, settype] = useState('');
     const [columns, setColumns] = useState([]);
     const [error, setError] = useState('');
     const token = localStorage.getItem("token");
@@ -46,7 +46,8 @@ const SpareReport = () => {
         const data = {
             startDate: startDate,
             endDate: endDate,
-            licare_code: licare_code
+            licare_code: licare_code,
+            type : type
         };
 
         try {
@@ -131,6 +132,7 @@ const SpareReport = () => {
         }
     };
 
+
     // Role Right 
 
 
@@ -184,25 +186,45 @@ const SpareReport = () => {
                     <div className="card mt-3 mb-3">
                         <div className="card-body">
                             <h5>Spare Consumption Report :</h5>
+                            <div className="mb-3 col-lg-2">
+                                <div className="form-group">
+                                    <label>Select Type</label>
+                                    <select
+                                        className="form-control"
+                                        name="status"
+                                        value={type}
+                                        onChange={(e) => settype(e.target.value)}
+                                    >
+                                        <option value="">Select Type</option>
+                                        <option value="Pending">Pending</option>
+                                        <option value="Closed">Closed</option>
+                                    </select>
+                                </div>
+                            </div>
                             <div className="mb-3">
                                 <label>Start Date</label>
-                                <DatePicker
-                                    selected={startDate ? new Date(startDate) : null}
-                                    onChange={handleStartDateChange}
-                                    dateFormat="dd-MM-yyyy"
-                                    placeholderText="DD-MM-YYYY"
-                                    className="form-control"
-                                />
+                                <div>
+                                    <DatePicker
+                                        selected={startDate ? new Date(startDate) : null}
+                                        onChange={handleStartDateChange}
+                                        dateFormat="dd-MM-yyyy"
+                                        placeholderText="DD-MM-YYYY"
+                                        className="form-control"
+                                        
+                                    />
+                                </div>
                             </div>
                             <div className="mb-3">
                                 <label>End Date</label>
-                                <DatePicker
-                                    selected={endDate ? new Date(endDate) : null}
-                                    onChange={handleEndDateChange}
-                                    dateFormat="dd-MM-yyyy"
-                                    placeholderText="DD-MM-YYYY"
-                                    className="form-control"
-                                />
+                                <div>
+                                    <DatePicker
+                                        selected={endDate ? new Date(endDate) : null}
+                                        onChange={handleEndDateChange}
+                                        dateFormat="dd-MM-yyyy"
+                                        placeholderText="DD-MM-YYYY"
+                                        className="form-control"
+                                    />
+                                </div>
                             </div>
                             {error && <p className="text-danger">{error}</p>}
                             <button className="btn btn-primary" onClick={fetchData}>

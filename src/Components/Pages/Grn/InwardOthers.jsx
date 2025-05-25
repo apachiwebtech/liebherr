@@ -556,11 +556,23 @@ const InwardOthers = () => {
                                         disablePortal
                                         options={cspalldata}
                                         value={receivecsp}
-                                        getOptionLabel={(option) => option.title}
+                                        getOptionLabel={(option) =>
+                                            option && typeof option === "object"
+                                                ? `${option.title} - ${option.id}`
+                                                : ""
+                                        }
                                         onChange={(e, newValue) => handleSearchAllChange(newValue)}
                                         onInputChange={(e, newInputValue) => handleInputCsp(newInputValue)}
-                                        renderInput={(params) => <TextField {...params} label="Select CSP" variant="outlined" />}
+                                        renderOption={(props, option) => (
+                                            <li {...props}>
+                                                {option.title} — {option.id}
+                                            </li>
+                                        )}
+                                        renderInput={(params) => (
+                                            <TextField {...params} label="Select CSP" variant="outlined" />
+                                        )}
                                     />
+
 
                                     {errors.receivecsp && <span className="text-danger">{errors.receivecsp}</span>}
 
@@ -676,7 +688,7 @@ const InwardOthers = () => {
                                 </div>
 
                                 {submithide ? null : <div className="">
-                                    {roleaccess > 2 && <button className="btn btn-primary" type="">Submit</button> }
+                                    {roleaccess > 2 && <button className="btn btn-primary" type="">Submit</button>}
                                 </div>}
 
 

@@ -467,7 +467,7 @@ export function InwardLiebherr(params) {
                     <SyncLoader loading={loaders} color="#FFFFFF" />
                 </div>
             )}
-          {roleaccess > 1 &&    <div className="row mp0">
+            {roleaccess > 1 && <div className="row mp0">
                 <div className="searchFilter">
                     <div className='m-3'>
                         <div className="row mb-3">
@@ -664,10 +664,22 @@ export function InwardLiebherr(params) {
                                                             disablePortal
                                                             options={cspalldata}
                                                             value={receivecsp}
-                                                            getOptionLabel={(option) => option.title}
+                                                            getOptionLabel={(option) =>
+                                                                option && typeof option === "object"
+                                                                    ? `${option.title} - ${option.id}`
+                                                                    : ""
+                                                            }
+
                                                             onChange={(e, newValue) => handleSearchAllChange(newValue)}
                                                             onInputChange={(e, newInputValue) => handleInputCsp(newInputValue)}
-                                                            renderInput={(params) => <TextField {...params} label="Select CSP" variant="outlined" />}
+                                                            renderOption={(props, option) => (
+                                                                <li {...props}>
+                                                                    {option.title} — {option.id}
+                                                                </li>
+                                                            )}
+                                                            renderInput={(params) => (
+                                                                <TextField {...params} label="Select CSP" variant="outlined" />
+                                                            )}
                                                         />
 
                                                         {errors.receivecsp && <span className="text-danger">{errors.receivecsp}</span>}
@@ -675,7 +687,7 @@ export function InwardLiebherr(params) {
                                                     </div>
                                                     <div className="mb-3 col-lg-3">
                                                         <label htmlFor="EmailInput" className="input-field">
-                                                            Invoice Number  
+                                                            Invoice Number
                                                         </label>
                                                         <input
                                                             type="text"
@@ -698,7 +710,7 @@ export function InwardLiebherr(params) {
                                                     </div>
                                                     <div className="mb-3 col-lg-3">
                                                         <label htmlFor="EmailInput" className="input-field">
-                                                            Invoice Date 
+                                                            Invoice Date
                                                         </label>
                                                         <input
                                                             type="date"
@@ -805,12 +817,12 @@ export function InwardLiebherr(params) {
                                             <DialogActions>
                                                 {formData.status != 1 && formData.status != 2 && (
                                                     <>
-                                                      {roleaccess > 2 &&  <Button onClick={(e) => handleSubmit(e)}>
+                                                        {roleaccess > 2 && <Button onClick={(e) => handleSubmit(e)}>
                                                             Approve
-                                                        </Button>}  
-                                                       {roleaccess > 2 && <Button onClick={() => handleReject()}>
+                                                        </Button>}
+                                                        {roleaccess > 2 && <Button onClick={() => handleReject()}>
                                                             Reject
-                                                        </Button>} 
+                                                        </Button>}
                                                     </>
                                                 )}
 
@@ -861,8 +873,8 @@ export function InwardLiebherr(params) {
                         </div>
                     </div>
                 </div>
-            </div>} 
-        
+            </div>}
+
         </div>
 
 

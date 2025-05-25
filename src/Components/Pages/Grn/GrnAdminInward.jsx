@@ -151,13 +151,14 @@ export function GrnAdminInward(params) {
             const worksheet = XLSX.utils.json_to_sheet(
                 decryptedData.map((item) => ({
                     GrnNo: item.grn_no,
+                    MspCode: item.msp_code,
+                    CspCode: item.created_by,
+                    CspTitle: item.csp_title,
                     ReceivedFrom: item.csp_name,
                     ReceivedDate: item.received_date ? formatDate(item.received_date) : '',
                     ArticleCode: item.spare_no,
                     ArticleDescription: item.spare_title,
                     SpareQuantity: item.quantity,
-                    SpareNumber: item.spare_no,
-                    Spare: item.spare_title,
                     Status: item.status,
                     InvoiceNumber: item.invoice_no,
                     InvoiceDate: item.invoice_date ? formatDate(item.invoice_date) : '',
@@ -279,7 +280,7 @@ export function GrnAdminInward(params) {
                     <SyncLoader loading={loaders} color="#FFFFFF" />
                 </div>
             )}
-        {roleaccess > 1 &&       <div className="row mp0">
+            {roleaccess > 1 && <div className="row mp0">
 
                 <div className="searchFilter" >
 
@@ -397,9 +398,11 @@ export function GrnAdminInward(params) {
                                         <tr>
                                             <th width="5%">#</th>
                                             <th width="15%">Grn_No</th>
-                                            <th width="10%">Received From</th>
+                                            <th width="15%">Csp Code</th>
+                                            <th width="15%">Csp Title</th>
                                             <th width="15%">Invoice No</th>
                                             <th width="15%">Invoice Date</th>
+                                            <th width="10%">Received From</th>
                                             <th width="10%">Spare No</th>
                                             <th width="10%">Spare Title</th>
                                             <th width="10%">Spare Quantity</th>
@@ -418,23 +421,25 @@ export function GrnAdminInward(params) {
                                                 <tr key={index}>
                                                     <td>{index + 1}</td>
                                                     <td>{item.grn_no}</td>
-                                                    <td>{item.csp_name}</td>
+                                                    <td>{item.created_by}</td>
+                                                    <td>{item.csp_title}</td>
                                                     <td>{item.invoice_no}</td>
                                                     <td>
-                                                        {new Date(item.invoice_date).toLocaleDateString('en-GB', {
+                                                        {item.invoice_date && new Date(item.invoice_date).toLocaleDateString('en-GB', {
                                                             day: '2-digit',
                                                             month: '2-digit',
                                                             year: 'numeric',
                                                         })}
                                                     </td>
+                                                    <td>{item.csp_name}</td>
                                                     <td>{item.spare_no}</td>
                                                     <td>{item.spare_title}</td>
                                                     <td>{item.quantity}</td>
                                                     <td>
                                                         {item.status == '1' ? (
-                                                          <p className='text-success'>Approved</p> 
+                                                            <p className='text-success'>Approved</p>
                                                         ) : item.status == '2' ? (
-                                                           <p className='text-danger'>Rejected</p> 
+                                                            <p className='text-danger'>Rejected</p>
                                                         ) : (
                                                             <p className='text-warning'>Pending</p>
                                                         )}
@@ -456,8 +461,8 @@ export function GrnAdminInward(params) {
                         </div>
                     </div>
                 </div>
-            </div>}  
-    
+            </div>}
+
         </div>
     );
 }

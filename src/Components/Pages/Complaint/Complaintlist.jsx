@@ -873,7 +873,7 @@ export function Complaintlist(params) {
                           <td style={rowStyle}>{item.serial_no}</td>
                           <td style={rowStyle}>{item.ageingdays}</td>
                           <td style={rowStyle}>{item.assigned_to}</td>
-                          <td style={rowStyle}>{item.call_status}</td>
+                          <td style={rowStyle}>{item.call_status} {item.sub_call_status && '/'} {item.sub_call_status}</td>
                           <td style={rowStyle}>{item.call_priority}</td>
                           {roleaccess > 3 ? <td style={rowStyle}>
                             <button

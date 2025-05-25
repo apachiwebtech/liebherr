@@ -141,8 +141,11 @@ export function GrnAdminOutward(params) {
             const worksheet = XLSX.utils.json_to_sheet(
                 decryptedData.map((item) => ({
                     IssueNo: item.issue_no,
-                    IssueTo: item.lhi_name,
+                    MspCode: item.msp_code,
+                    CspCode: item.created_by,
+                    CspTitle: item.csp_title,
                     IssueDate: item.issue_date ? formatDate(item.issue_date) : '',
+                    IssueTo: item.lhi_name,
                     ArticleCode: item.spare_no,
                     ArticleDescription: item.spare_title,
                     Quantity: item.quantity,
@@ -282,7 +285,7 @@ export function GrnAdminOutward(params) {
                     <SyncLoader loading={loaders} color="#FFFFFF" />
                 </div>
             )}
-          {roleaccess > 1 &&        <div className="row mp0">
+            {roleaccess > 1 && <div className="row mp0">
 
                 <div className="searchFilter" >
 
@@ -351,7 +354,7 @@ export function GrnAdminOutward(params) {
                                     <button
                                         className="btn btn-secondary"
                                         onClick={() => {
-                                           applyFilters()
+                                            applyFilters()
                                         }}
                                         style={{
                                             marginLeft: '5px',
@@ -407,8 +410,10 @@ export function GrnAdminOutward(params) {
                                         <tr>
                                             <th width="5%">#</th>
                                             <th width="10%">Issue No</th>
-                                            <th width="15%">Issue To</th>
+                                            <th width="10%">Csp Code</th>
+                                            <th width="20%">Csp Name</th>
                                             <th width="10%">Issue Date</th>
+                                            <th width="15%">Issue To</th>
                                             <th width="15%">Article Code</th>
                                             <th width="35%">Article Description</th>
                                             <th width="10%">Quantity</th>
@@ -426,7 +431,8 @@ export function GrnAdminOutward(params) {
                                                 <tr key={index}>
                                                     <td>{index + 1}</td>
                                                     <td>{item.issue_no}</td>
-                                                    <td>{item.lhi_name}</td>
+                                                    <td>{item.created_by}</td>
+                                                    <td>{item.csp_title}</td>
                                                     <td>
                                                         {new Date(item.issue_date).toLocaleDateString('en-GB', {
                                                             day: '2-digit',
@@ -434,6 +440,7 @@ export function GrnAdminOutward(params) {
                                                             year: 'numeric',
                                                         })}
                                                     </td>
+                                                    <td>{item.lhi_name}</td>
                                                     <td>{item.spare_no}</td>
                                                     <td>{item.spare_title}</td>
                                                     <td>
@@ -454,8 +461,8 @@ export function GrnAdminOutward(params) {
                         </div>
                     </div>
                 </div>
-            </div>} 
-    
+            </div>}
+
         </div>
     );
 }
