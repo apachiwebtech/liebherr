@@ -8456,76 +8456,94 @@ app.get("/requestservicecontract/:id", authenticateToken, async (req, res) => {
 
 app.post("/putservicecontract", authenticateToken, async (req, res) => {
   const { encryptedData } = req.body;
-  const decryptedData = decryptData(encryptedData, secretKey)
-  const { id, customerName, customerMobile, contractNumber, contractType, productName, serialNumber, startDate, endDate, created_by } = JSON.parse(decryptedData);
+  const decryptedData = decryptData(encryptedData, secretKey);
 
+  const {
+    id,
+    schemename,
+    customerName,
+    customerId,
+    contractType,
+    itemNumber,
+    productName,
+    serialNumber,
+    duration,
+    contractamt,
+    goodwillmonth,
+    startDate,
+    endDate,
+    purchasedate
+  } = JSON.parse(decryptedData);
 
   try {
-    // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
 
+    // // Step 1: Duplicate Check
+    // const duplicateCheckSQL = `
+    //   SELECT * FROM awt_servicecontract
+    //   WHERE customerID = @customerId
+    //     AND deleted = 0
+    //     AND id != @id
+    // `;
 
-    // Step 1: Duplicate Check Query
-    const duplicateCheckSQL = `
-      SELECT * FROM awt_servicecontract
-      WHERE customerMobile = @customerMobile
-      AND deleted = 0
-      AND id != @id
+    // const duplicateCheckResult = await pool.request()
+    //   .input('customerId', customerId)
+    //   .input('id', id)
+    //   .query(duplicateCheckSQL);
+
+    // if (duplicateCheckResult.recordset.length > 0) {
+    //   return res.status(409).json({
+    //     message: "Duplicate entry, Service Contract already exists!"
+    //   });
+    // }
+
+    // Step 2: Safe Parameterized Update
+    const updateSQL = `
+      UPDATE awt_servicecontract
+      SET
+        scheme_name = @schemename,
+        customerName = @customerName,
+        customerID = @customerId,
+        contractType = @contractType,
+        product_code = @itemNumber,
+        productName = @productName,
+        serialNumber = @serialNumber,
+        duration = @duration,
+        contarct_amt = @contractamt,
+        goodwill_month = @goodwillmonth,
+        startDate = @startDate,
+        endDate = @endDate,
+        purchaseDate = @purchasedate,
+        status = 'Active',
+        deleted = 0
+      WHERE id = @id
     `;
 
-    console.log("Executing Duplicate Check SQL:", duplicateCheckSQL);
-
-    const duplicateCheckResult = await pool.request()
-      .input('customerMobile', customerMobile)
-      .input('id', id)
-      .query(duplicateCheckSQL);
-
-    if (duplicateCheckResult.recordset.length > 0) {
-      return res.status(409).json({
-        message: "Duplicate entry,  Service Contract already exists!"
-      });
-    }
-
-    // Step 2: Update Query
-    const updateSQL = `
-     UPDATE awt_servicecontract
-     SET
-       customerName = @customerName,
-       customerMobile = @customerMobile,
-       contractNumber = @contractNumber,
-       contractType = @contractType,
-       productName = @productName,
-       serialNumber = @serialNumber,
-       startDate = @startDate,
-       endDate = @endDate,
-       updated_by = @created_by
-     WHERE id = @id
-   `;
-    console.log("Executing Update SQL:", updateSQL);
-
     await pool.request()
+      .input('schemename', schemename)
       .input('customerName', customerName)
-      .input('customerMobile', customerMobile)
-      .input('contractNumber', contractNumber)
+      .input('customerId', customerId)
       .input('contractType', contractType)
+      .input('itemNumber', itemNumber)
       .input('productName', productName)
       .input('serialNumber', serialNumber)
+      .input('duration', duration)
+      .input('contractamt', contractamt)
+      .input('goodwillmonth', goodwillmonth)
       .input('startDate', startDate)
       .input('endDate', endDate)
-      .input('created_by', created_by)
+      .input('purchasedate', purchasedate)
       .input('id', id)
       .query(updateSQL);
 
-    return res.json({
-      message: "Service contract updated successfully!"
-    });
-
+    return res.json({ message: "Service contract updated successfully!" });
 
   } catch (err) {
-    console.error(err);
+    console.error("Error in updating service contract:", err);
     return res.status(500).json({ error: 'An error occurred while updating the Service Contract' });
   }
 });
+
 
 app.post("/deleteservicecontract", authenticateToken, async (req, res) => {
   const { id } = req.body;
@@ -10879,7 +10897,7 @@ WHERE au.serial_no = @serial and au.SerialStatus = 'Active' order by au.id desc`
       .input('serial', serial)
       .query(getpreviouscontract);
 
-      console.log(getpreviouscontractresult, "getpreviouscontractresult")
+    console.log(getpreviouscontractresult, "getpreviouscontractresult")
 
     if (fallbackResult.recordset.length !== 0) {
 
@@ -15620,14 +15638,20 @@ app.post("/getinwardlist", authenticateToken, async (req, res) => {
     toDate,
     received_from,
     invoice_number,
+    licare_code,
   } = req.body;
 
   try {
     const pool = await poolPromise;
     const request = pool.request();
 
+    // Fetch assigncsp using licare_code
+    const getcspQuery = `SELECT * FROM lhi_user WHERE Usercode = '${licare_code}'`;
+    const getcspresilt = await pool.request().query(getcspQuery);
+    const assigncsp = getcspresilt.recordset[0] && getcspresilt.recordset[0].assigncsp;
+
     let sql = `
-  SELECT 
+      SELECT 
         gn.id,
         gn.grn_no,
         gn.invoice_no,
@@ -15642,16 +15666,24 @@ app.post("/getinwardlist", authenticateToken, async (req, res) => {
         acg.quantity,
         acg.spare_title,
         acg.spare_no,
-		acf.pfranchise_id as msp_code,
-		acf.title as csp_title
+        acf.pfranchise_id as msp_code,
+        acf.title as csp_title
       FROM awt_grnmaster AS gn
       LEFT JOIN awt_cspgrnspare AS acg ON acg.grn_no = gn.grn_no
-	  left join awt_childfranchisemaster as acf  on acf.licare_code = gn.created_by
-      WHERE gn.deleted = 0 
+      LEFT JOIN awt_childfranchisemaster AS acf ON acf.licare_code = gn.created_by
+      WHERE gn.deleted = 0
     `;
 
+    // Apply assigncsp filtering if not ALL
+    if (assigncsp && assigncsp !== 'ALL') {
+      const formattedCspList = assigncsp
+        .split(',')
+        .map(csp => `'${csp.trim()}'`)
+        .join(',');
+      sql += ` AND gn.created_by IN (${formattedCspList})`;
+    }
 
-
+    // Apply filters
     if (fromDate && toDate) {
       sql += " AND CAST(gn.received_date AS DATE) BETWEEN @fromDate AND @toDate";
       request.input("fromDate", fromDate);
@@ -15668,8 +15700,7 @@ app.post("/getinwardlist", authenticateToken, async (req, res) => {
       request.input("invoice_number", `%${invoice_number}%`);
     }
 
-    sql += ' order by gn.id desc'
-
+    sql += " ORDER BY gn.id DESC";
 
     const result = await request.query(sql);
 
@@ -15683,20 +15714,27 @@ app.post("/getinwardlist", authenticateToken, async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error", error: err });
   }
 });
+
 app.post("/getinwardlistexcel", authenticateToken, async (req, res) => {
   const {
     fromDate,
     toDate,
     received_from,
     invoice_number,
+    licare_code,
   } = req.body;
 
   try {
     const pool = await poolPromise;
     const request = pool.request();
 
+    // Fetch assigncsp using licare_code
+    const getcspQuery = `SELECT * FROM lhi_user WHERE Usercode = '${licare_code}'`;
+    const getcspresilt = await pool.request().query(getcspQuery);
+    const assigncsp = getcspresilt.recordset[0] && getcspresilt.recordset[0].assigncsp;
+
     let sql = `
-  SELECT 
+      SELECT 
         gn.id,
         gn.grn_no,
         gn.invoice_no,
@@ -15711,15 +15749,24 @@ app.post("/getinwardlistexcel", authenticateToken, async (req, res) => {
         acg.quantity,
         acg.spare_title,
         acg.spare_no,
-		acf.pfranchise_id as msp_code,
-		acf.title as csp_title
+        acf.pfranchise_id as msp_code,
+        acf.title as csp_title
       FROM awt_grnmaster AS gn
       LEFT JOIN awt_cspgrnspare AS acg ON acg.grn_no = gn.grn_no
-	  left join awt_childfranchisemaster as acf  on acf.licare_code = gn.created_by
-      WHERE gn.deleted = 0 
+      LEFT JOIN awt_childfranchisemaster AS acf ON acf.licare_code = gn.created_by
+      WHERE gn.deleted = 0
     `;
 
+    // Apply assigncsp filtering if not ALL
+    if (assigncsp && assigncsp !== 'ALL') {
+      const formattedCspList = assigncsp
+        .split(',')
+        .map(csp => `'${csp.trim()}'`)
+        .join(',');
+      sql += ` AND gn.created_by IN (${formattedCspList})`;
+    }
 
+    // Apply filters
     if (fromDate && toDate) {
       sql += " AND CAST(gn.received_date AS DATE) BETWEEN @fromDate AND @toDate";
       request.input("fromDate", fromDate);
@@ -15736,6 +15783,7 @@ app.post("/getinwardlistexcel", authenticateToken, async (req, res) => {
       request.input("invoice_number", `%${invoice_number}%`);
     }
 
+    sql += " ORDER BY gn.id DESC";
 
     const result = await request.query(sql);
 
@@ -15749,6 +15797,7 @@ app.post("/getinwardlistexcel", authenticateToken, async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error", error: err });
   }
 });
+
 
 
 app.post("/getgrnmspexcel", authenticateToken, async (req, res) => {
@@ -15984,36 +16033,48 @@ app.post("/getmspoutwardlisting", authenticateToken, async (req, res) => {
   }
 });
 app.post("/getadminoutwardlisting", authenticateToken, async (req, res) => {
-
-  const { fromDate, toDate, received_from } = req.body;
+  const { fromDate, toDate, received_from, licare_code } = req.body;
 
   let sql;
-
 
   try {
     const pool = await poolPromise;
 
-    // Parameterized query with a limit
-    sql = `select asp.* ,acp.spare_no , acp.spare_title , acp.quantity , acf.pfranchise_id as msp_code , acf.title as csp_title from awt_spareoutward as asp left join awt_cspissuespare as acp on asp.issue_no = acp.issue_no left join awt_childfranchisemaster as acf on acf.licare_code = asp.created_by where asp.deleted = 0 
-    `;
+    // Get assigncsp list for the given licare_code
+    const getcsp = `SELECT * FROM lhi_user WHERE Usercode = '${licare_code}'`;
 
+
+    const getcspresilt = await pool.request().query(getcsp);
+    const assigncsp = getcspresilt.recordset[0] && getcspresilt.recordset[0].assigncsp;
+
+    // Base SQL query
+    sql = `SELECT asp.*, acp.spare_no, acp.spare_title, acp.quantity, acf.pfranchise_id AS msp_code, acf.title AS csp_title 
+           FROM awt_spareoutward AS asp 
+           LEFT JOIN awt_cspissuespare AS acp ON asp.issue_no = acp.issue_no 
+           LEFT JOIN awt_childfranchisemaster AS acf ON acf.licare_code = asp.created_by 
+           WHERE asp.deleted = 0`;
+
+    // Apply CSP filter if not 'ALL'
+    if (assigncsp && assigncsp !== 'ALL') {
+      const formattedCspList = assigncsp.split(",").map(csp => `'${csp.trim()}'`).join(",");
+      sql += ` AND asp.created_by IN (${formattedCspList})`;
+    }
+
+    // Date filter
     if (fromDate && toDate) {
       sql += ` AND CAST(asp.issue_date AS DATE) BETWEEN '${fromDate}' AND '${toDate}'`;
     }
 
+    // received_from filter
     if (received_from) {
       sql += ` AND asp.lhi_name LIKE '%${received_from}%'`;
     }
 
+    // Ordering
+    sql += ' ORDER BY asp.id DESC';
 
 
-    sql += ' order by asp.id desc'
-
-    console.log(sql)
-
-
-    const result = await pool.request()
-      .query(sql);
+    const result = await pool.request().query(sql);
 
     if (result.recordset.length === 0) {
       return res.status(404).json({ message: "No results found" });
@@ -16025,38 +16086,49 @@ app.post("/getadminoutwardlisting", authenticateToken, async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error", error: err });
   }
 });
-app.post("/getadminoutwardexcel", authenticateToken, async (req, res) => {
 
-  const { csp_code, fromDate, toDate, received_from } = req.body;
+app.post("/getadminoutwardexcel", authenticateToken, async (req, res) => {
+  const { fromDate, toDate, received_from, licare_code } = req.body;
 
   let sql;
-
 
   try {
     const pool = await poolPromise;
 
-    // Parameterized query with a limit
-    sql = `select asp.* ,acp.spare_no , acp.spare_title , acp.quantity , acf.pfranchise_id as msp_code , acf.title as csp_title from awt_spareoutward as asp left join awt_cspissuespare as acp on asp.issue_no = acp.issue_no left join awt_childfranchisemaster as acf on acf.licare_code = asp.created_by where asp.deleted = 0
-    `;
+    // Get assigncsp list for the given licare_code
+    const getcsp = `SELECT * FROM lhi_user WHERE Usercode = '${licare_code}'`;
+    const getcspresilt = await pool.request().query(getcsp);
+    const assigncsp = getcspresilt.recordset[0] && getcspresilt.recordset[0].assigncsp;
 
-    if (fromDate && toDate) {
-      sql += ` AND CAST(asp.issue_date AS DATE) BETWEEN '${fromDate}' AND '${toDate}'`;
+    // Base SQL query
+    sql = `SELECT asp.*, acp.spare_no, acp.spare_title, acp.quantity, acf.pfranchise_id AS msp_code, acf.title AS csp_title 
+           FROM awt_spareoutward AS asp 
+           LEFT JOIN awt_cspissuespare AS acp ON asp.issue_no = acp.issue_no 
+           LEFT JOIN awt_childfranchisemaster AS acf ON acf.licare_code = asp.created_by 
+           WHERE asp.deleted = 0`;
 
+    // Apply CSP filter if not 'ALL'
+    if (assigncsp && assigncsp !== 'ALL') {
+      const formattedCspList = assigncsp.split(",").map(csp => `'${csp.trim()}'`).join(",");
+      sql += ` AND asp.created_by IN (${formattedCspList})`;
     }
 
+    // Date filter
+    if (fromDate && toDate) {
+      sql += ` AND CAST(asp.issue_date AS DATE) BETWEEN '${fromDate}' AND '${toDate}'`;
+    }
+
+    // received_from filter
     if (received_from) {
       sql += ` AND asp.lhi_name LIKE '%${received_from}%'`;
     }
 
+    // Ordering
+    sql += ' ORDER BY asp.id DESC';
 
+    console.log(sql);
 
-    sql += ' order by asp.id desc'
-
-    console.log(sql)
-
-
-    const result = await pool.request()
-      .query(sql);
+    const result = await pool.request().query(sql);
 
     if (result.recordset.length === 0) {
       return res.status(404).json({ message: "No results found" });
@@ -21085,11 +21157,20 @@ app.get("/getinwardLiebherr", authenticateToken, async (req, res) => {
       invoice_number,
       address_code,
       status,
+      licare_code, // NEW
       page = 1,
       pageSize = 10,
     } = req.query;
 
     const offset = (page - 1) * pageSize;
+
+    // Fetch assigncsp
+    let assigncsp = "ALL";
+    if (licare_code) {
+      const cspQuery = `SELECT assigncsp FROM lhi_user WHERE Usercode = '${licare_code}'`;
+      const cspResult = await pool.request().query(cspQuery);
+      assigncsp = cspResult.recordset[0]?.assigncsp || "ALL";
+    }
 
     let sqlQuery = `
       WITH RankedParts AS (
@@ -21101,8 +21182,13 @@ app.get("/getinwardLiebherr", authenticateToken, async (req, res) => {
         FROM Shipment_Parts AS s 
         LEFT JOIN Address_code AS a ON a.address_code = s.Address_code 
         LEFT JOIN awt_grnmaster AS agn ON agn.invoice_no = s.InvoiceNumber 
-        WHERE s.deleted = 0  AND s.InvoiceDate >= '2025-05-01 00:00:000' 
+        WHERE s.deleted = 0 AND s.InvoiceDate >= '2025-05-01 00:00:000' 
     `;
+
+    if (assigncsp !== "ALL") {
+      const formattedCSPs = assigncsp.split(",").map(csp => `'${csp.trim()}'`).join(",");
+      sqlQuery += ` AND s.Address_code IN (${formattedCSPs})`;
+    }
 
     if (fromDate && toDate) {
       sqlQuery += ` AND s.InvoiceDate BETWEEN @fromDate AND @toDate`;
@@ -21145,7 +21231,6 @@ app.get("/getinwardLiebherr", authenticateToken, async (req, res) => {
     request.input("offset", sql.Int, offset);
     request.input("pageSize", sql.Int, parseInt(pageSize));
 
-
     const result = await request.query(sqlQuery);
 
     // Count query
@@ -21156,8 +21241,13 @@ app.get("/getinwardLiebherr", authenticateToken, async (req, res) => {
         FROM Shipment_Parts AS s
         LEFT JOIN Address_code AS a ON a.address_code = s.Address_code
         LEFT JOIN awt_grnmaster AS agn ON agn.invoice_no = s.InvoiceNumber
-        WHERE s.deleted = 0 AND s.InvoiceDate >= '2025-05-01 00:00:000' 
+        WHERE s.deleted = 0 AND s.InvoiceDate >= '2025-05-01 00:00:000'
     `;
+
+    if (assigncsp !== "ALL") {
+      const formattedCSPs = assigncsp.split(",").map(csp => `'${csp.trim()}'`).join(",");
+      countSql += ` AND s.Address_code IN (${formattedCSPs})`;
+    }
 
     if (fromDate && toDate) {
       countSql += ` AND s.InvoiceDate BETWEEN @fromDate AND @toDate`;
@@ -21207,6 +21297,7 @@ app.get("/getinwardLiebherr", authenticateToken, async (req, res) => {
     return res.status(500).json({ error: "An error occurred while fetching data" });
   }
 });
+
 
 app.get("/getinwardLiebherrexcel", authenticateToken, async (req, res) => {
   try {
@@ -21218,11 +21309,20 @@ app.get("/getinwardLiebherrexcel", authenticateToken, async (req, res) => {
       invoice_number,
       address_code,
       status,
+      licare_code, // NEW
       page = 1,
       pageSize = 10,
     } = req.query;
 
     const offset = (page - 1) * pageSize;
+
+    // Fetch assigncsp
+    let assigncsp = "ALL";
+    if (licare_code) {
+      const cspQuery = `SELECT assigncsp FROM lhi_user WHERE Usercode = '${licare_code}'`;
+      const cspResult = await pool.request().query(cspQuery);
+      assigncsp = cspResult.recordset[0]?.assigncsp || "ALL";
+    }
 
     let sqlQuery = `
       WITH RankedParts AS (
@@ -21236,6 +21336,11 @@ app.get("/getinwardLiebherrexcel", authenticateToken, async (req, res) => {
         LEFT JOIN awt_grnmaster AS agn ON agn.invoice_no = s.InvoiceNumber 
         WHERE s.deleted = 0 AND s.InvoiceDate >= '2025-05-01 00:00:000' 
     `;
+
+    if (assigncsp !== "ALL") {
+      const formattedCSPs = assigncsp.split(",").map(csp => `'${csp.trim()}'`).join(",");
+      sqlQuery += ` AND s.Address_code IN (${formattedCSPs})`;
+    }
 
     if (fromDate && toDate) {
       sqlQuery += ` AND s.InvoiceDate BETWEEN @fromDate AND @toDate`;
@@ -21288,8 +21393,13 @@ app.get("/getinwardLiebherrexcel", authenticateToken, async (req, res) => {
         FROM Shipment_Parts AS s
         LEFT JOIN Address_code AS a ON a.address_code = s.Address_code
         LEFT JOIN awt_grnmaster AS agn ON agn.invoice_no = s.InvoiceNumber
-        WHERE s.deleted = 0 AND s.InvoiceDate >= '2025-05-01 00:00:000' 
+        WHERE s.deleted = 0 AND s.InvoiceDate >= '2025-05-01 00:00:000'
     `;
+
+    if (assigncsp !== "ALL") {
+      const formattedCSPs = assigncsp.split(",").map(csp => `'${csp.trim()}'`).join(",");
+      countSql += ` AND s.Address_code IN (${formattedCSPs})`;
+    }
 
     if (fromDate && toDate) {
       countSql += ` AND s.InvoiceDate BETWEEN @fromDate AND @toDate`;
@@ -21339,6 +21449,7 @@ app.get("/getinwardLiebherrexcel", authenticateToken, async (req, res) => {
     return res.status(500).json({ error: "An error occurred while fetching data" });
   }
 });
+
 
 app.post("/approvegrn", upload.none(), authenticateToken, async (req, res) => {
   let { itemdata } = req.body;

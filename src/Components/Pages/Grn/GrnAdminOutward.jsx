@@ -55,7 +55,7 @@ export function GrnAdminOutward(params) {
     const fetchgrnListing = async () => {
         try {
             const data = {
-                csp_code: licare_code,
+                licare_code: licare_code,
             };
 
 

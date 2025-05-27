@@ -129,17 +129,26 @@ const Servicecontract = () => {
       });
       setStartDate(response.data[0].startDate)
       setEndDate(response.data[0].endDate)
+      setPurchase(response.data[0].purchaseDate)
       SetValue({
         ...response.data[0],
         // Rename keys to match your Value structure
+        schemename:response.data[0].scheme_name,
         customerName: response.data[0].customerName,
-        customerMobile: response.data[0].customerMobile,
+        customerId: response.data[0].customerID,
         contractNumber: response.data[0].contractNumber,
         contractType: response.data[0].contractType,
+        itemNumber: response.data[0].product_code,
+        duration: response.data[0].duration,
+        goodwillmonth: response.data[0].goodwill_month,
         productName: response.data[0].productName,
         serialNumber: response.data[0].serialNumber,
         startDate: response.data[0].startDate,
-        endDate: response.data[0].endDate
+        endDate: response.data[0].endDate,
+        purchasedate:response.data.purchaseDate,
+        contractamt: response.data[0].contarct_amt,
+
+
 
       });
 
