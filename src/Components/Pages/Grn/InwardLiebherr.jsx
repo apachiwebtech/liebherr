@@ -161,6 +161,7 @@ export function InwardLiebherr(params) {
             // Add the page and pageSize parameters
             params.append('page', page || 1); // Current page number
             params.append('pageSize', pageSize); // Page size
+            params.append('licare_code',licare_code);
             // Add all filters to params if they have values
             Object.entries(searchFilters).forEach(([key, value]) => {
                 if (value) { // Only add if value is not empty
@@ -249,6 +250,7 @@ export function InwardLiebherr(params) {
                     Authorization: token,
                 },
                 params: {
+                    licare_code: licare_code,
                     fromDate: searchFilters.fromDate,
                     toDate: searchFilters.toDate,
                     invoice_number: searchFilters.invoice_number,

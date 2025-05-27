@@ -58,7 +58,7 @@ export function GrnAdminInward(params) {
     const fetchgrnListing = async () => {
         try {
             const data = {
-                csp_code: licare_code,
+                licare_code: licare_code,
             };
 
 
@@ -80,7 +80,7 @@ export function GrnAdminInward(params) {
 
         try {
             const data = {
-                csp_code: licare_code,
+                licare_code: licare_code,
                 fromDate: searchFilters.fromDate || '',
                 toDate: searchFilters.toDate || '',
                 received_from: searchFilters.received_from || '',
@@ -128,7 +128,7 @@ export function GrnAdminInward(params) {
 
         try {
             const data = {
-                csp_code: licare_code,
+                licare_code: licare_code,
                 fromDate: searchFilters.fromDate || '',
                 toDate: searchFilters.toDate || '',
                 received_from: searchFilters.received_from || '',

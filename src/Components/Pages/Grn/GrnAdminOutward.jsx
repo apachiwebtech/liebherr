@@ -77,7 +77,7 @@ export function GrnAdminOutward(params) {
 
         try {
             const data = {
-                csp_code: licare_code,
+                licare_code: licare_code,
                 fromDate: searchFilters.fromDate || '',
                 toDate: searchFilters.toDate || '',
                 received_from: searchFilters.received_from || '',
@@ -118,7 +118,7 @@ export function GrnAdminOutward(params) {
 
         try {
             const data = {
-                csp_code: licare_code,
+                licare_code: licare_code,
                 fromDate: searchFilters.fromDate || '',
                 toDate: searchFilters.toDate || '',
                 received_from: searchFilters.received_from || '',
