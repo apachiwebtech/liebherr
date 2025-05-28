@@ -523,8 +523,9 @@ export function Servicecontractlist(params) {
                                 <thead>
                                     <tr>
                                         <th width="3%">#</th>
-                                        <th width="15%"> Customer Name</th>
+                                        <th width="15%">Customer Name</th>
                                         <th width="8%">Contract Number</th>
+                                        <th width="8%">Contract Type</th>
                                         <th width="8%">Product Name</th>
                                         <th width="10%">Serial Number</th>
                                         <th width="10%">Start Date</th>
@@ -545,10 +546,11 @@ export function Servicecontractlist(params) {
                                                 <td >{displayIndex}</td>
                                                 <td >{item.customerName}</td>
                                                 <td>{item.contractNumber}</td>
+                                                <td>{item.contractType}</td>
                                                 <td >{item.productName}</td>
                                                 <td >{item.serialNumber}</td>
-                                                <td >{formatDate(item.startDate)}</td>
-                                                <td >{formatDate(item.endDate)}</td>
+                                                <td >{item.startDate &&  formatDate(item.startDate)}</td>
+                                                <td >{item.endDate && formatDate(item.endDate)}</td>
 
 
                                                 {roleaccess > 3 ? <td >
@@ -557,7 +559,7 @@ export function Servicecontractlist(params) {
                                                             type="checkbox"
                                                             onChange={handleChangestatus}
                                                             data-id={item.id}
-                                                            checked={item.status == 1 ? 'checked' : ''}
+                                                            checked={item.status == 'Active' ? 'checked' : ''}
                                                             className="status"
                                                             disabled={roleaccess > 3 ? false : true}
                                                         />

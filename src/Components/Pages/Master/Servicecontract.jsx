@@ -34,10 +34,18 @@ const Servicecontract = () => {
   const createdBy = 1; // Static value for created_by
   const updatedBy = 2; // Static value for updated_by
 
+  // const formatDate = (date) => {
+  //   const year = date.getFullYear();
+  //   const month = String(date.getMonth() + 1).padStart(2, "0"); // Ensure two digits
+  //   const day = String(date.getDate()).padStart(2, "0"); // Ensure two digits
+  //   return `${year}-${month}-${day}`;
+  // };
+
   const formatDate = (date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0"); // Ensure two digits
-    const day = String(date.getDate()).padStart(2, "0"); // Ensure two digits
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   };
 
@@ -99,6 +107,8 @@ const Servicecontract = () => {
     startDate: "",
     endDate: "",
     contractamt: "",
+    ContrctRemark : "",
+    file : ''
   });
 
   const fetchUsers = async () => {
@@ -133,7 +143,7 @@ const Servicecontract = () => {
       SetValue({
         ...response.data[0],
         // Rename keys to match your Value structure
-        schemename:response.data[0].scheme_name,
+        schemename: response.data[0].scheme_name,
         customerName: response.data[0].customerName,
         customerId: response.data[0].customerID,
         contractNumber: response.data[0].contractNumber,
@@ -145,11 +155,8 @@ const Servicecontract = () => {
         serialNumber: response.data[0].serialNumber,
         startDate: response.data[0].startDate,
         endDate: response.data[0].endDate,
-        purchasedate:response.data.purchaseDate,
         contractamt: response.data[0].contarct_amt,
-
-
-
+        ContrctRemark : response.data
       });
 
 
@@ -180,42 +187,79 @@ const Servicecontract = () => {
     if (name === 'serialNumber') {
       getserial(value); // Pass the latest value directly
     }
+
+    // if (name === 'duration' || name === 'goodwillmonth' || name === 'purchasedate') {
+    //   handlestartenddatecalculation(e); // Call the function to calculate start and end dates
+
+    // }
   };
 
   const getserial = (serialValue) => {
-    if (!serialValue) return;
+    // If serialValue is empty, unset the relevant fields
+    if (!serialValue) {
+      SetValue((prev) => ({
+        ...prev,
+        customerName: "",
+        productName: "",
+        itemNumber: "",
+        customerId: "",
+      }));
+      setPurchase(null);
+      setContarctlist([]);
+      return;
+    }
     axios.get(`${Base_Url}/getfromserial/${serialValue}`, {
       headers: {
         Authorization: token, // Send token in headers
       },
     })
       .then((res) => {
-        console.log(res)
+        console.log(res);
 
         if (res.data.previoscontarct && res.data.previoscontarct.length > 0) {
           setContarctlist(res.data.previoscontarct);
+        } else {
+          setContarctlist([]);
         }
 
-        if (res.data.data && res.data.data.length > 0) {
-          const serial = res.data.data[0]
+        if (res.data.data && res.data.data.length > 0 && res.data.data[0]) {
+          const serial = res.data.data[0];
 
           SetValue((prev) => ({
             ...prev,
             customerName: serial.customer_fname,
             productName: serial.ModelNumber,
-            ItemNumber: serial.ItemNumber,
+            itemNumber: serial.ItemNumber,
             customerId: serial.customer_id,
-          }))
+          }));
 
           setPurchase(serial.purchase_date ? formatDate(new Date(serial.purchase_date)) : null);
+        } else {
+          // If no data found, unset the fields
+          SetValue((prev) => ({
+            ...prev,
+            customerName: "",
+            productName: "",
+            itemNumber: "",
+            customerId: "",
+          }));
+          setPurchase(null);
         }
-
-
       })
       .catch((err) => {
-        console.log(err)
-      })
-  }
+        console.log(err);
+        // On error, unset the fields
+        SetValue((prev) => ({
+          ...prev,
+          customerName: "",
+          productName: "",
+          itemNumber: "",
+          customerId: "",
+        }));
+        setPurchase(null);
+        setContarctlist([]);
+      });
+  };
 
 
   // Step 2: Add form validation function
@@ -233,7 +277,6 @@ const Servicecontract = () => {
     if (isEmpty(Value.customerName)) newErrors.customerName = "Customer Name is required.";
     if (isEmpty(Value.customerId)) newErrors.customerId = "Customer Id is required.";
     if (isEmpty(Value.schemename)) newErrors.schemename = "Sceme Name Field is required.";
-    if (isEmpty(Value.duration)) newErrors.duration = "Duration is required.";
     if (isEmpty(purchase_date)) newErrors.purchasedate = "Date is required.";
     if (isEmpty(Value.contractamt)) newErrors.contractamt = "Amount is required.";
 
@@ -396,20 +439,11 @@ const Servicecontract = () => {
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
 
-  const handlestartenddatecalculation = (e) => {
-    // e.preventDefault();
-    const duration = parseInt(Value.duration, 10);
+  const handlestartenddatecalculation = () => {
+    const duration = Value.duration ? parseInt(Value.duration, 10) : 0;
     const goodwillMonths = Value.goodwillmonth ? parseInt(Value.goodwillmonth, 10) : 0;
 
-    if (isNaN(duration) || duration <= 0) {
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        duration: "Please select a valid duration.",
-      }));
-      return;
-    }
-
-
+    // Validation: Purchase date
     if (!purchase_date) {
       setErrors((prevErrors) => ({
         ...prevErrors,
@@ -418,27 +452,57 @@ const Servicecontract = () => {
       return;
     }
 
-    // Calculate warranty expiry date after one year from purchase_date
     const start = new Date(purchase_date);
+
+    // Step 1: Warranty Expiry = 1 year from purchase date
     const warrantyExpiry = new Date(start);
     warrantyExpiry.setFullYear(warrantyExpiry.getFullYear() + 1);
 
-    // Add goodwill months to warranty expiry if available
-    if (goodwillMonths > 0) {
-      warrantyExpiry.setMonth(warrantyExpiry.getMonth() + goodwillMonths);
+    // Step 2: Contract starts 1 day after warranty
+    const contractStartDate = new Date(warrantyExpiry);
+
+    // If duration or goodwillMonths is present, calculate accordingly
+    let contractEndDate = new Date(contractStartDate);
+
+    if (duration > 0) {
+      contractEndDate.setFullYear(contractEndDate.getFullYear() + duration);
     }
 
-    // Contract start date should be +1 day after warranty expiry
-    const contractStartDate = new Date(warrantyExpiry);
-    contractStartDate.setDate(contractStartDate.getDate() + 1);
+    if (goodwillMonths > 0) {
+      // Save day of month to prevent rollover issues (like Feb 30 → Mar 2)
+      const day = contractEndDate.getDate();
+      contractEndDate.setMonth(contractEndDate.getMonth() + goodwillMonths);
+      // Fix if month rollover caused date overflow (e.g., Feb 31 → Mar 3)
+      if (contractEndDate.getDate() !== day) {
+        contractEndDate.setDate(0); // go to last day of previous month
+      }
+    }
 
-    // Contract end date is duration years after contract start date
-    const contractEndDate = new Date(contractStartDate);
-    contractEndDate.setFullYear(contractEndDate.getFullYear() + duration);
+    // If only goodwillMonths is entered (duration is 0), set end date based on goodwill only
+    if (!duration && goodwillMonths > 0) {
+      // contractStartDate is after warranty, contractEndDate is contractStartDate + goodwillMonths
+      // Already handled above
+    }
 
-    setStartDate(formatDate(contractStartDate));
-    setEndDate(formatDate(contractEndDate));
-  }
+    // Subtract 1 day from contract end date if any duration or goodwill is present
+    if (duration > 0 || goodwillMonths > 0) {
+      contractEndDate.setDate(contractEndDate.getDate() - 1);
+      setStartDate(formatDate(contractStartDate));
+      setEndDate(formatDate(contractEndDate));
+    } else {
+      setStartDate("");
+      setEndDate("");
+    }
+  };
+
+  useEffect(() => {
+    if (purchase_date && (Value.duration || Value.goodwillmonth)) {
+      handlestartenddatecalculation();
+    }
+  }, [Value.duration, Value.goodwillmonth, purchase_date]);
+
+
+
 
   return (
     <div className="tab-content">
@@ -492,14 +556,15 @@ const Servicecontract = () => {
                         htmlFor="ProductcodeInput"
                         className="input-field"
                       >
-                        Product Code <span className="text-danger">*</span>
+                        Item Code <span className="text-danger">*</span>
                       </label>
                       <input
-                        type="text"
+                        type="number"
                         className="form-control"
                         name="itemNumber"
                         id="ProductcodeInput"
                         value={Value.itemNumber}
+                        min={0}
                         onChange={handleChange}
                         placeholder="Enter Product Code  "
                       />
@@ -518,7 +583,7 @@ const Servicecontract = () => {
                         htmlFor="CustomernameInput"
                         className="input-field"
                       >
-                        Product Description<span className="text-danger">*</span>
+                        Item Description<span className="text-danger">*</span>
                       </label>
                       <input
                         type="text"
@@ -628,6 +693,33 @@ const Servicecontract = () => {
                       )}
                     </div>
 
+                    <div className="col-3 mb-3">
+                      <label
+                        htmlFor="ContractAmtInput"
+                        className="input-field"
+                      >
+                        Contract Amount <span className="text-danger">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="contractamt"
+                        id="ContractAmtInput"
+                        value={Value.contractamt}
+                        onChange={handleChange}
+                        placeholder="Enter Contract Amount"
+                      />
+                      {errors.contractamt && (
+                        <small className="text-danger">
+                          {errors.contractamt}
+                        </small>
+                      )}
+                      {duplicateError && (
+                        <small className="text-danger">{duplicateError}</small>
+                      )}{" "}
+                      {/* Show duplicate error */}
+                    </div>
+
 
                     <hr />
                     <div className="col-3 mb-3">
@@ -664,7 +756,7 @@ const Servicecontract = () => {
                         value={Value.goodwillmonth}
                         onChange={(e) => {
                           handleChange(e);
-                          handlestartenddatecalculation(e);
+                          // handlestartenddatecalculation(e);
                         }}
                         placeholder="Enter Goodwill Month"
                       />
@@ -678,7 +770,7 @@ const Servicecontract = () => {
                         htmlFor="DurationInput"
                         className="input-field"
                       >
-                        Duration<span className="text-danger">*</span>
+                        Duration
                       </label>
                       <select
                         className="form-select"
@@ -687,7 +779,7 @@ const Servicecontract = () => {
                         value={Value.duration}
                         onChange={(e) => {
                           handleChange(e);
-                          handlestartenddatecalculation(e);
+
                         }}
                       >
                         <option value="">Select Duration</option>
@@ -718,7 +810,6 @@ const Servicecontract = () => {
                           selected={purchase_date}
                           onChange={(date) => {
                             handleDateChange3(date);
-                            handlestartenddatecalculation(date);
                           }}
                           dateFormat="dd-MM-yyyy"
                           placeholderText="DD-MM-YYYY"
@@ -773,31 +864,14 @@ const Servicecontract = () => {
                       )}
                     </div>
                     <div className="col-3 mb-3">
-                      <label
-                        htmlFor="ContractAmtInput"
-                        className="input-field"
-                      >
-                        Contract Amount <span className="text-danger">*</span>
+                      <label htmlFor="ContrctRemark" className="input-field">
+                        Remark
                       </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        name="contractamt"
-                        id="ContractAmtInput"
-                        value={Value.contractamt}
-                        onChange={handleChange}
-                        placeholder="Enter Contract Amount"
-                      />
-                      {errors.contractamt && (
-                        <small className="text-danger">
-                          {errors.contractamt}
-                        </small>
-                      )}
-                      {duplicateError && (
-                        <small className="text-danger">{duplicateError}</small>
-                      )}{" "}
-                      {/* Show duplicate error */}
+                      <div>
+                        <textarea value={Value.ContrctRemark} className="form-control" name="ContrctRemark" id="ContrctRemark" ></textarea>
+                      </div>
                     </div>
+
 
                   </div>
 
@@ -812,7 +886,8 @@ const Servicecontract = () => {
               </div>
             </div>
           </div>
-          <div className="card mb-3 tab_box">
+
+          {contarctlist.length > 0 && <div className="card mb-3 tab_box">
             <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>
 
               <div className="row">
@@ -835,13 +910,13 @@ const Servicecontract = () => {
                   {contarctlist.map((contract, index) => {
                     return (
                       <tr key={index}>
-                        <td className={`${contract.status == 'Active' ? 'bg-success' : ''}`}>{index + 1}</td>
-                        <td className={`${contract.status == 'Active' ? 'bg-success' : ''}`}>{contract.contractNumber}</td>
-                        <td className={`${contract.status == 'Active' ? 'bg-success' : ''}`}>{contract.customerName}</td>
-                        <td className={`${contract.status == 'Active' ? 'bg-success' : ''}`}>{contract.productName}</td>
-                        <td className={`${contract.status == 'Active' ? 'bg-success' : ''}`}>{contract.serialNumber}</td>
-                        <td className={`${contract.status == 'Active' ? 'bg-success' : ''}`}>{new Date(contract.startDate).toLocaleDateString('en-GB')}</td>
-                        <td className={`${contract.status == 'Active' ? 'bg-success' : ''}`}>{new Date(contract.endDate).toLocaleDateString('en-GB')}</td>
+                        <td className={`${contract.status == 'Active' ? 'bg-success text-light' : ''}`}>{index + 1}</td>
+                        <td className={`${contract.status == 'Active' ? 'bg-success text-light' : ''}`}>{contract.contractNumber}</td>
+                        <td className={`${contract.status == 'Active' ? 'bg-success text-light' : ''}`}>{contract.customerName}</td>
+                        <td className={`${contract.status == 'Active' ? 'bg-success text-light' : ''}`}>{contract.productName}</td>
+                        <td className={`${contract.status == 'Active' ? 'bg-success text-light' : ''}`}>{contract.serialNumber}</td>
+                        <td className={`${contract.status == 'Active' ? 'bg-success text-light' : ''}`}>{new Date(contract.startDate).toLocaleDateString('en-GB')}</td>
+                        <td className={`${contract.status == 'Active' ? 'bg-success text-light' : ''}`}>{new Date(contract.endDate).toLocaleDateString('en-GB')}</td>
                       </tr>
                     )
                   }
@@ -850,7 +925,7 @@ const Servicecontract = () => {
                 </tbody>
               </table>
             </div>
-          </div>
+          </div>}
         </div>
       </div> : null}
     </div>

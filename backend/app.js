@@ -7182,11 +7182,13 @@ app.post("/postchildfranchise", authenticateToken, async (req, res) => {
     }
 
 
-    const getfrinchisecount = `select Count(*) as count from awt_childfranchisemaster where pfranchise_id = '${pfranchise_id}'`
+    const getfrinchisecount = `select Right(licare_code, 4) as count from awt_childfranchisemaster where pfranchise_id = '${pfranchise_id}' order by Right(licare_code , 4) desc`
 
     const countResult = await pool.request().query(getfrinchisecount);
 
-    const latestLicare = countResult.recordset[0].count || 0;
+    let latestLicare = countResult.recordset[0].count || 0;
+
+    latestLicare = Number(latestLicare) || 0; 
 
     const newcount = latestLicare + 1;
 
@@ -7198,7 +7200,7 @@ app.post("/postchildfranchise", authenticateToken, async (req, res) => {
 
 
     // Insert the new child franchise if no duplicates or soft-deleted records found
-    const insert = await pool.request()
+     await pool.request()
       .input('title', sql.VarChar, title)
       .input('pfranchise_id', sql.Int, pfranchise_id)
       .input('licare_code', sql.VarChar, licarecode)
@@ -7226,16 +7228,17 @@ app.post("/postchildfranchise", authenticateToken, async (req, res) => {
       .input('contract_expiration_date', sql.DateTime, contract_expiration_date || null)
       .input('with_liebherr', sql.DateTime, with_liebherr || null)
       .input('created_by', sql.VarChar, created_by)
+      .input('role', '2')
       .query(`
         INSERT INTO awt_childfranchisemaster
         (title, pfranchise_id, licare_code, partner_name, contact_person, email, mobile_no, password, address,
          country_id, region_id, geostate_id, area_id, geocity_id, pincode_id, webste, gstno, panno, bankname,
-         bankacc, bankifsc, bankaddress, withliebher, lastworkinddate, contractacti, contractexpir, created_by)
+         bankacc, bankifsc, bankaddress, withliebher, lastworkinddate, contractacti, contractexpir, created_by , Role)
         VALUES
         (@title, @pfranchise_id, @licare_code, @partner_name, @contact_person, @email, @mobile_no, @password,
          @address, @country_id, @region_id, @state, @area, @city, @pincode_id, @website, @gst_number, @pan_number,
          @bank_name, @bank_account_number, @bank_ifsc_code, @bank_address,@with_liebherr , @last_working_date,
-         @contract_activation_date, @contract_expiration_date, @created_by)
+         @contract_activation_date, @contract_expiration_date, @created_by , @role)
       `);
     return res.json({
       message: "Child Franchise Master added successfully!",
@@ -8572,28 +8575,28 @@ app.post("/updateservicestatus", authenticateToken, async (req, res) => {
     const sql = `SELECT * FROM awt_servicecontract WHERE id = @dataId`;
 
     // Execute the query to get the user
-    const request = await pool.request()
+    const result = await pool.request()
       .input('dataId', dataId)
       .query(sql);
 
     // Check if records exist
-    if (request.recordset.length > 0) {
-      const status = request.recordset[0].status;
-      console.log(request.recordset[0].status);
+    if (result.recordset.length > 0) {
+      const status = result.recordset[0].status;
+      console.log(result.recordset[0].status);
       let query;
       let seen;
-      if (status == 1) {
+      if (status == 'Active') {
         // If status is 1, deactivate and set activation date
         query = `UPDATE awt_servicecontract
-                 SET status = 0
+                 SET status = 'Inactive'
                  WHERE id = @dataId`;
-        seen = 0;
+        seen = 'Inactive';
       } else {
         // If status is not 1, deactivate and set deactivation date
         query = `UPDATE awt_servicecontract
-                  SET status = 1
+                  SET status = 'Active'
                   WHERE id = @dataId`;
-        seen = 1;
+        seen = 'Active';
       }
 
       // Execute the update query
@@ -10891,7 +10894,7 @@ WHERE au.serial_no = @serial and au.SerialStatus = 'Active' order by au.id desc`
       .query(fallbackSql);
 
 
-    const getpreviouscontract = 'select * from awt_servicecontract where serialNumber = @serial'
+    const getpreviouscontract = `select * from awt_servicecontract where serialNumber = @serial and deleted = 0 order by CASE WHEN status = 'Active' THEN 1 ELSE 0 END desc, id desc`;
 
     const getpreviouscontractresult = await pool.request()
       .input('serial', serial)
@@ -15619,6 +15622,7 @@ app.post("/getgrnmsplist", authenticateToken, async (req, res) => {
       request.input("invoice_number", `%${invoice_number}%`);
     }
 
+
     const result = await request.query(sql);
 
     if (result.recordset.length === 0) {
@@ -15891,6 +15895,8 @@ app.post("/getgrnmspexcel", authenticateToken, async (req, res) => {
       sql += " AND gn.invoice_no LIKE @invoice_number";
       request.input("invoice_number", `%${invoice_number}%`);
     }
+
+
 
     const result = await request.query(sql);
 
@@ -16373,9 +16379,15 @@ app.post('/addgrnspares', authenticateToken, async (req, res) => {
       INSERT INTO awt_cspgrnspare (grn_no, spare_no, spare_title, quantity, created_by, created_date)
       VALUES (@grn_no, @article_code, @article_title, @spare_qty, @created_by, @created_date)
     `;
+    // Only insert into csp_stock if it does not already exist for the same product_code and csp_code
     const Stockadd = `
-      INSERT INTO csp_stock (csp_code,product_code, productname, stock_quantity, created_by, created_date)
-      VALUES (@csp_code ,@product_code, @productname, @stock_quantity, @created_by, @created_date)
+      IF NOT EXISTS (
+      SELECT 1 FROM csp_stock WHERE product_code = @product_code AND csp_code = @csp_code
+      )
+      BEGIN
+      INSERT INTO csp_stock (csp_code, product_code, productname, stock_quantity, created_by, created_date)
+      VALUES (@csp_code, @product_code, @productname, @stock_quantity, @created_by, @created_date)
+      END
     `;
 
     const duplicateCheckQuery = `
@@ -21187,7 +21199,7 @@ app.get("/getinwardLiebherr", authenticateToken, async (req, res) => {
 
     if (assigncsp !== "ALL") {
       const formattedCSPs = assigncsp.split(",").map(csp => `'${csp.trim()}'`).join(",");
-      sqlQuery += ` AND s.Address_code IN (${formattedCSPs})`;
+      sqlQuery += ` AND a.csp_code IN (${formattedCSPs})`;
     }
 
     if (fromDate && toDate) {
@@ -21339,7 +21351,7 @@ app.get("/getinwardLiebherrexcel", authenticateToken, async (req, res) => {
 
     if (assigncsp !== "ALL") {
       const formattedCSPs = assigncsp.split(",").map(csp => `'${csp.trim()}'`).join(",");
-      sqlQuery += ` AND s.Address_code IN (${formattedCSPs})`;
+      sqlQuery += ` AND a.csp_code IN (${formattedCSPs})`;
     }
 
     if (fromDate && toDate) {
