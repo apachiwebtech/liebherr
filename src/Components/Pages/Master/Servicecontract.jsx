@@ -142,7 +142,6 @@ const Servicecontract = () => {
       setPurchase(response.data[0].purchaseDate)
       SetValue({
         ...response.data[0],
-        // Rename keys to match your Value structure
         schemename: response.data[0].scheme_name,
         customerName: response.data[0].customerName,
         customerId: response.data[0].customerID,

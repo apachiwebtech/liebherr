@@ -1,43 +1,53 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Base_Url, secretKey } from '../../Utils/Base_Url';
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useSelector } from 'react-redux';
 import md5 from "js-md5";
 import { SyncLoader } from 'react-spinners';
 import CryptoJS from 'crypto-js';
+import { Autocomplete, TextField } from "@mui/material";
 import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 import { useDispatch } from "react-redux";
+import _debounce from "lodash.debounce";
 import { getRoleData } from "../../Store/Role/role-action";
 import "react-datepicker/dist/react-datepicker.css";
 import Ratecardtabs from './Ratecardtabs';
 const AddRatecard = () => {
     // Step 1: Add this state to track errors
     const { loaders, axiosInstance } = useAxiosLoader();
-    const { engineerid } = useParams();
-    const [Childfranchise, setChildfranchise] = useState([]);
-    const [Parentfranchise, setParentfranchise] = useState([]);
+    const [text, setText] = useState("");
+    const { rateid } = useParams();
+    const navigate = useNavigate();
+    const [ProductType, setProducttype] = useState([])
+    const [ProductClass, setProductClass] = useState([])
+    const [ProductLine, setProductLine] = useState([])
+    const [csp_code, setCspcode] = useState([]);
     const token = localStorage.getItem("token");
     const [errors, setErrors] = useState({});
     const [users, setUsers] = useState([]);
     const [filteredUsers, setFilteredUsers] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
     const [currentPage, setCurrentPage] = useState(0);
+    const [selectcsp, setSelectedCsp] = useState(null);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [duplicateError, setDuplicateError] = useState('');
-    const [selectedDate, setSelectedDate] = useState('');
-    const [joining_date, setJoiningDate] = useState('');
 
     const created_by = localStorage.getItem("userId"); // Get user ID from localStorage
     const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
 
-    const formatDate = (date) => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, "0"); // Ensure two digits
-        const day = String(date.getDate()).padStart(2, "0"); // Ensure two digits
-        return `${year}-${month}-${day}`;
-    };
+    try {
+        rateid = rateid.replace(/-/g, '+').replace(/_/g, '/');
+        const bytes = CryptoJS.AES.decrypt(rateid, secretKey);
+        const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+        rateid = parseInt(decrypted, 10)
+    } catch (error) {
+        console.log("Error".error)
+    }
+
+
     const [formData, setFormData] = useState({
+        csp_code: '',
         call_type: '',
         class_city: '',
         ProductType: '',
@@ -51,56 +61,43 @@ const AddRatecard = () => {
         transportation: '',
     });
 
-    const fetchEngineerpopulate = async (ratecardid) => {
-
+    const fetchratecardpopulate = async (rateid) => {
         try {
-            const response = await axiosInstance.get(`${Base_Url}/getengineerpopulate/${engineerid}`, {
+
+            const response = await axiosInstance.get(`${Base_Url}/getratecardpopulate/${rateid}`, {
                 headers: {
-                    Authorization: token, // Send token in headers
+                    Authorization: token,
                 },
             });
             setFormData({
                 ...response.data[0],
-                // Rename keys to match your formData structure
-                title: response.data[0].title,
-                mfranchise_id: response.data[0].mfranchise_id,
-                cfranchise_id: response.data[0].cfranchise_id,
-                mobile_no: response.data[0].mobile_no,
-                password: response.data[0].password,
-                email: response.data[0].email,
-                employee_code: response.data[0].employee_code,
-                personal_email: response.data[0].personal_email,
-                personal_mobile: response.data[0].personal_mobile,
-                dob: response.data[0].dob,
-                blood_group: response.data[0].blood_group,
-                academic_qualification: response.data[0].academic_qualification,
-                joining_date: response.data[0].joining_date,
-                passport_picture: response.data[0].passport_picture,
-                resume: response.data[0].resume,
+                csp_code: response.data[0].csp_code,
+                call_type: response.data[0].call_type,
+                class_city: response.data[0].class_city,
+                ProductType: response.data[0].ProductType,
+                ProductLine: response.data[0].ProductLine,
+                ProductClass: response.data[0].ProductClass,
+                Within_24_Hours: response.data[0].Within_24_Hours,
+                Within_48_Hours: response.data[0].Within_48_Hours,
+                Within_96_Hours: response.data[0].Within_96_Hours,
+                MoreThan96_Hours: response.data[0].MoreThan96_Hours,
+                gas_charging: response.data[0].gas_charging,
+                transportation: response.data[0].transportation
             });
-
-
             setIsEdit(true);
 
-            if (response.data[0].mfranchise_id) {
-                fetchParentfranchise(response.data[0].mfranchise_id);
-            }
-            if (response.data[0].cfranchise_id) {
-                fetchChildfranchise(response.data[0].cfranchise_id);
-            }
-
-
-
         } catch (error) {
-            console.error('Error fetching Enginnerdata:', error);
-            setFormData([]);
+            console.error("Error fetching Rate Card:", error);
         }
     };
 
 
-    const fetchParentfranchise = async () => {
+
+
+    const fetchCspcode = async () => {
         try {
-            const response = await axiosInstance.get(`${Base_Url}/getparentfranchise`, {
+            const response = await axiosInstance.post(`${Base_Url}/getcspdata`,
+                { param: text }, {
                 headers: {
                     Authorization: token,
                 },
@@ -110,30 +107,72 @@ const AddRatecard = () => {
             const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
             const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
             const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
-            setParentfranchise(decryptedData);
+            setCspcode(decryptedData);
         } catch (error) {
-            console.error("Error fetching Parentfranchise:", error);
+            console.error("Error fetching csp_code:", error);
+        }
+    };
+    const handleSearchChangeCsp = (newValue) => {
+        setSelectedCsp(newValue);
+        // If an option is selected, update msp_code and msp_name
+        if (newValue) {
+            setFormData(prevState => ({
+                ...prevState,
+                csp_code: newValue.licare_code || "",
+                csp_name: newValue.title || ""  // <-- Adjust property name if different
+            }));
+        } else {
+            setFormData(prevState => ({
+                ...prevState,
+                csp_code: "",
+                csp_name: ""
+            }));
         }
     };
 
-    const fetchChildfranchise = async (mfranchise_id) => {
-        try {
-            const response = await axiosInstance.get(`${Base_Url}/getchildfranchise/${mfranchise_id}`, {
+    const handleInputChangeCsp = _debounce((newValue) => {
+        setText(newValue);
+        fetchCspcode();
+    }, 100);
+
+    async function getproducttype() {
+        axiosInstance.get(`${Base_Url}/product_type`
+            , {
                 headers: {
-                    Authorization: token,
+                    Authorization: token, // Send token in headers
                 },
-            }
-            );
-            setChildfranchise(response.data);
-        } catch (error) {
-            console.error('Error fetching Childfranchise:', error);
-        }
-    };
+            })
+            .then((res) => {
+                setProducttype(res.data)
+            })
+    }
+    async function getproductline() {
+        axiosInstance.get(`${Base_Url}/fetchproductline`
+            , {
+                headers: {
+                    Authorization: token, // Send token in headers
+                },
+            })
+            .then((res) => {
+                setProductLine(res.data)
+            })
+    }
+    async function getproductClass() {
+        axiosInstance.get(`${Base_Url}/fetchproductclass`
+            , {
+                headers: {
+                    Authorization: token, // Send token in headers
+                },
+            })
+            .then((res) => {
+                setProductClass(res.data)
+            })
+    }
 
 
     const fetchUsers = async () => {
         try {
-            const response = await axiosInstance.get(`${Base_Url}/getrate`, {
+            const response = await axiosInstance.get(`${Base_Url}/getratedata`, {
                 headers: {
                     Authorization: token,
                 },
@@ -152,23 +191,21 @@ const AddRatecard = () => {
 
     useEffect(() => {
         fetchUsers();
-        fetchParentfranchise();
+        fetchCspcode();
+        getproducttype();
+        getproductline();
+        getproductClass();
 
-        if (engineerid != 0) {
-            fetchEngineerpopulate(engineerid);
+        if (rateid != 0) {
+            fetchratecardpopulate(rateid);
         }
+
     }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
-        switch (name) {
-            case "mfranchise_id":
-                fetchChildfranchise(value);
-                break;
-            default:
-                break;
-        }
+
     };
 
 
@@ -176,28 +213,43 @@ const AddRatecard = () => {
     // Step 2: Add form validation function
     const validateForm = () => {
         const newErrors = {};
-        if (!formData.title.trim()) {
-            newErrors.title = "Engineer Name Field is required.";
-        }
 
         // Check if the cfranchise_id is empty
-        if (!formData.cfranchise_id) {
-            newErrors.cfranchise_id = "Child Franchise selection is required.";
+        if (!formData.csp_code) {
+            newErrors.csp_code = "Csp Code selection is required.";
         }
-        if (!formData.mfranchise_id) {
-            newErrors.mfranchise_id = "Main Franchise selection is required.";
+        if (!formData.call_type) {
+            newErrors.call_type = "Call Type selection is required.";
         }
-        if (!formData.email) {
-            newErrors.email = "Engineer Email Field is required.";
+        if (!formData.class_city) {
+            newErrors.class_city = "Class City  selection is required.";
         }
-        if (!formData.mobile_no) {
-            newErrors.mobile_no = "Engineer Mobile No Field is required.";
+        if (!formData.ProductType) {
+            newErrors.ProductType = "Product Type Selection is required.";
         }
-        if (!formData.password) {
-            newErrors.password = "Engineer Password Field is required.";
+        if (!formData.ProductLine) {
+            newErrors.ProductLine = "Product Line Selection is required.";
         }
-        if (!formData.title) {
-            newErrors.title = "Engineer Name Field is required.";
+        if (!formData.ProductClass) {
+            newErrors.ProductClass = "Product Class Selection is required.";
+        }
+        if (!formData.Within_24_Hours) {
+            newErrors.Within_24_Hours = "Within 24 Hours Field is required.";
+        }
+        if (!formData.Within_48_Hours) {
+            newErrors.Within_48_Hours = "Within 48 Hours Field is required.";
+        }
+        if (!formData.Within_96_Hours) {
+            newErrors.Within_96_Hours = "Within 96 Hours Field is required.";
+        }
+        if (!formData.MoreThan96_Hours) {
+            newErrors.MoreThan96_Hours = "More Than 96 Hours Field is required.";
+        }
+        if (!formData.gas_charging) {
+            newErrors.gas_charging = "Gas Charging Field is required.";
+        }
+        if (!formData.transportation) {
+            newErrors.transportation = "Transportation Field is required.";
         }
         return newErrors;
     };
@@ -214,9 +266,6 @@ const AddRatecard = () => {
         }
         const payload = {
             ...formData,
-            joining_date: joining_date,
-            dob: selectedDate,
-            password: md5(formData.password),
             created_by,
         }
 
@@ -235,111 +284,62 @@ const AddRatecard = () => {
             if (confirmSubmission) {
                 if (isEdit) {
 
-                    const formDataToSend = new FormData();
-                    formDataToSend.append('encryptedData', encryptedData);
-
-                    // Append files
-                    if (formData.passport_picture) {
-                        formDataToSend.append('passport_picture', formData.passport_picture);
-                    }
-                    if (formData.resume) {
-                        formDataToSend.append('resume', formData.resume);
-                    }
-                    if (formData.photo_id_proof) {
-                        formDataToSend.append('photo_id_proof', formData.photo_id_proof);
-                    }
-                    if (formData.gov_address_proof) {
-                        formDataToSend.append('gov_address_proof', formData.gov_address_proof);
-                    }
 
                     // For update, include duplicate check
-                    await axiosInstance.post(`${Base_Url}/putengineer`, formDataToSend
-                        , {
-                            headers: {
-                                Authorization: token,
-                            },
-                        })
+                    await axiosInstance.post(`${Base_Url}/putratecard`, { formData, created_by }, {
+                        headers: {
+                            Authorization: token,
+                        },
+                    })
                         .then(response => {
-                            alert("Engineer Updated")
+                            alert("Rate Card Updated")
+
                             setFormData({
-                                title: '',
-                                mfranchise_id: '',
-                                cfranchise_id: '',
-                                password: '',
-                                email: '',
-                                mobile_no: '',
-                                employee_code: '',
-                                personal_email: '',
-                                personal_mobile: '',
-                                dob: '',
-                                blood_group: '',
-                                academic_qualification: '',
-                                joining_date: '',
-                                passport_picture: '',
-                                resume: '',
-                                photo_id_proof: '',
-                                gov_address_proof: '',
-                                permanent_address: '',
-                                current_address: ''
+                                csp_code: '',
+                                call_type: '',
+                                class_city: '',
+                                ProductType: '',
+                                ProductLine: '',
+                                ProductClass: '',
+                                Within_24_Hours: '',
+                                Within_48_Hours: '',
+                                Within_96_Hours: '',
+                                MoreThan96_Hours: '',
+                                gas_charging: '',
+                                transportation: '',
                             })
                             fetchUsers();
+                            navigate('/ratecard');
                         })
                         .catch(error => {
                             if (error.response && error.response.status === 409) {
-                                setDuplicateError('Duplicate entry,Email and Mobile No Credential already exists!'); // Show duplicate error for update
+                                setDuplicateError('Duplicate entry Product Type,Line And Class Credential already exists!'); // Show duplicate error for update
                             }
                         });
                 } else {
 
-
-
-                    const formDataToSend = new FormData();
-                    formDataToSend.append('encryptedData', encryptedData);
-
-                    // Append files
-                    if (formData.passport_picture) {
-                        formDataToSend.append('passport_picture', formData.passport_picture);
-                    }
-                    if (formData.resume) {
-                        formDataToSend.append('resume', formData.resume);
-                    }
-                    if (formData.photo_id_proof) {
-                        formDataToSend.append('photo_id_proof', formData.photo_id_proof);
-                    }
-                    if (formData.gov_address_proof) {
-                        formDataToSend.append('gov_address_proof', formData.gov_address_proof);
-                    }
-                    // For insert, include duplicate check
-                    await axiosInstance.post(`${Base_Url}/postengineer`, formDataToSend
+                    await axiosInstance.post(`${Base_Url}/postratecard`, { formData, created_by }
                         , {
                             headers: {
                                 Authorization: token,
-                                'Content-Type': 'multipart/form-data'
                             },
                         }
                     )
                         .then(response => {
-                            alert("Engineer Added")
+                            alert("Rate Card Added")
                             setFormData({
-                                title: '',
-                                mfranchise_id: '',
-                                cfranchise_id: '',
-                                password: '',
-                                email: '',
-                                mobile_no: '',
-                                employee_code: '',
-                                personal_email: '',
-                                personal_mobile: '',
-                                dob: '',
-                                blood_group: '',
-                                academic_qualification: '',
-                                joining_date: '',
-                                passport_picture: '',
-                                resume: '',
-                                photo_id_proof: '',
-                                gov_address_proof: '',
-                                permanent_address: '',
-                                current_address: ''
+                                csp_code: '',
+                                call_type: '',
+                                class_city: '',
+                                ProductType: '',
+                                ProductLine: '',
+                                ProductClass: '',
+                                Within_24_Hours: '',
+                                Within_48_Hours: '',
+                                Within_96_Hours: '',
+                                MoreThan96_Hours: '',
+                                gas_charging: '',
+                                transportation: '',
                             })
                             fetchUsers();
                         })
@@ -405,56 +405,250 @@ const AddRatecard = () => {
                                 <div className="col-12">
                                     <form onSubmit={handleSubmit} className="col-12">
                                         <div className='row'>
-                                            <div className="col-md-3">
-                                                <label htmlFor="Master  Franchise" className="form-label pb-0 dropdown-label">Master Service Partner<span className="text-danger">*</span></label>
-                                                <select className='form-select dropdown-select' name='mfranchise_id' value={formData.mfranchise_id} onChange={handleChange} >
-                                                    <option value="">Select Master Service Partner</option>
-                                                    {Parentfranchise.map((pf) => (
-                                                        <option key={pf.id} value={pf.licarecode}>{pf.title}</option>
-                                                    ))}
-                                                </select>
-                                                {errors.mfranchise_id && <small className="text-danger">{errors.mfranchise_id}</small>} {/* Show error for Child Franchise selection */}
+                                            <div className="col-3 mb-3">
+                                                <label
+                                                    htmlFor="cspcodeinput"
+                                                    className="input-field"
+                                                >
+                                                    Csp Code<span className="text-danger">*</span>
+                                                    {isEdit && formData.csp_code && (
+                                                        <span className="ms-2 text-primary"> Current-({formData.csp_code})</span>
+                                                    )} </label>
+                                                <Autocomplete
+                                                    size="small"
+                                                    disablePortal
+                                                    options={csp_code}
+                                                    value={selectcsp}
+                                                    getOptionLabel={(option) => option.licare_code || ""}
+                                                    onChange={(e, newValue) => handleSearchChangeCsp(newValue)}
+                                                    onInputChange={(e, newInputValue) => handleInputChangeCsp(newInputValue)}
+                                                    renderInput={(params) => (
+                                                        <TextField
+                                                            {...params}
+                                                            label="Enter Csp Code"
+                                                            variant="outlined"
+                                                        />
+                                                    )}
+                                                />
+                                                {errors.csp_code && (
+                                                    <small className="text-danger">
+                                                        {errors.csp_code}
+                                                    </small>
+                                                )}
+
                                             </div>
                                             <div className="col-md-3">
-                                                <label htmlFor="Child Franchise" className="form-label pb-0 dropdown-label">Child Service Partner<span className="text-danger">*</span></label>
-                                                <select className='form-select dropdown-select' name='cfranchise_id' value={formData.cfranchise_id} onChange={handleChange} >
-                                                    <option value="">Select Child Service Partner</option>
-                                                    {Childfranchise.map((pf) => (
-                                                        <option key={pf.id} value={pf.licare_code}>{pf.title}</option>
-                                                    ))}
-                                                </select>
-                                                {errors.cfranchise_id && <small className="text-danger">{errors.cfranchise_id}</small>} {/* Show error for Child Franchise selection */}
-                                            </div>
-                                            <div className="col-md-3">
-                                                <label htmlFor="academicQualificationInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>Academic Qualification</label>
+                                                <label htmlFor="callTypeInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>Call Type</label>
                                                 <select
                                                     className="form-select"
-                                                    name="academic_qualification"
-                                                    id="academicQualificationInput"
-                                                    value={formData.academic_qualification}  // Updated value to match "academicQualification"
+                                                    name="call_type"
+                                                    id="callTypeInput"
+                                                    value={formData.call_type}
                                                     onChange={handleChange}
                                                 >
-                                                    <option value="">Select Academic Qualification</option>  // Placeholder option
-                                                    <option value="Ssc">SSC</option>
-                                                    <option value="Hsc">HSC</option>
-                                                    <option value="Graduate">Graduate</option>
-                                                    <option value="Postgraduate">Postgraduate</option>
-                                                    <option value="Diploma">Diploma</option>
-                                                    <option value="Iti">ITI</option>
-                                                    <option value="Engineering">Engineering</option>
-                                                    <option value="Other">Other</option>
+                                                    <option value="">Select Call Type</option>
+                                                    <option value="VISIT">VISIT</option>
+                                                    <option value="BREAKDOWN">BREAKDOWN</option>
+                                                    <option value="DEMO">DEMO</option>
+                                                    <option value="INSTALLATION">INSTALLATION</option>
+                                                    <option value="HELPDESK">HELPDESK</option>
+                                                    <option value="MAINTENANCE">MAINTENANCE</option>
 
                                                     {/* Add more options as necessary */}
                                                 </select>
-                                                {errors.academic_qualification && <small className="text-danger">{errors.academic_qualification}</small>}
+                                                {errors.call_type && <small className="text-danger">{errors.call_type}</small>}
+                                            </div>
+                                            <div className="col-md-3">
+                                                <label htmlFor="classcityInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>Class City</label>
+                                                <select
+                                                    className="form-select"
+                                                    name="class_city"
+                                                    id="classcityInput"
+                                                    value={formData.class_city}
+                                                    onChange={handleChange}
+                                                >
+                                                    <option value="">Select Class City </option>
+                                                    <option value="LOCAL">LOCAL</option>
+                                                    <option value="UPCOUNTRY">UPCOUNTRY</option>
+
+                                                    {/* Add more options as necessary */}
+                                                </select>
+                                                {errors.class_city && <small className="text-danger">{errors.class_city}</small>}
+
+                                            </div>
+
+                                            <div className="col-md-3">
+                                                <label
+                                                    htmlFor="ProductType"
+                                                    className="form-label pb-0 dropdown-label"
+                                                >
+                                                    Product Type<span className='text-danger'>*</span>
+                                                </label>
+                                                <select
+                                                    className="form-select dropdown-select"
+                                                    name="ProductType"
+                                                    value={formData.ProductType}
+                                                    onChange={handleChange}
+                                                >
+                                                    <option value="">Select Product Type</option>
+
+                                                    {ProductType.map((item) => {
+                                                        return (
+                                                            <option value={item.product_type}>{item.product_type}</option>
+                                                        )
+                                                    })}
+
+                                                </select>
+                                                {errors.ProductType && <small className="text-danger">{errors.ProductType}</small>}
                                                 {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
+
+                                            </div>
+
+
+
+                                        </div>
+                                        <div className='row'>
+
+                                            <div className="col-md-3">
+                                                <label
+                                                    htmlFor="ProductLine"
+                                                    className="form-label pb-0 dropdown-label"
+                                                >
+                                                    Product Line<span className='text-danger'>*</span>
+                                                </label>
+                                                <select
+                                                    className="form-select dropdown-select"
+                                                    name="ProductLine"
+                                                    value={formData.ProductLine}
+                                                    onChange={handleChange}
+                                                >
+                                                    <option value="">Select Product Line</option>
+
+                                                    {ProductLine.map((item) => {
+                                                        return (
+                                                            <option value={item.product_line}>{item.product_line}</option>
+                                                        )
+                                                    })}
+
+                                                </select>
+                                                {errors.ProductLine && <small className="text-danger">{errors.ProductLine}</small>}
+                                                {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
+
+                                            </div>
+
+                                            <div className="col-md-3">
+                                                <label
+                                                    htmlFor="ProductClass"
+                                                    className="form-label pb-0 dropdown-label"
+                                                >
+                                                    Product Class<span className='text-danger'>*</span>
+                                                </label>
+                                                <select
+                                                    className="form-select dropdown-select"
+                                                    name="ProductClass"
+                                                    value={formData.ProductClass}
+                                                    onChange={handleChange}
+                                                >
+                                                    <option value="">Select Product Class</option>
+
+                                                    {ProductClass.map((item) => {
+                                                        return (
+                                                            <option value={item.product_class}>{item.product_class}</option>
+                                                        )
+                                                    })}
+
+                                                </select>
+                                                {errors.ProductClass && <small className="text-danger">{errors.ProductClass}</small>}
+                                                {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
+
+                                            </div>
+                                            <div className="col-md-3">
+                                                <label className="input-field">Within 24 Hours<span className="text-danger">*</span></label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    name="Within_24_Hours"
+                                                    value={formData.Within_24_Hours}
+                                                    onChange={handleChange}
+                                                    placeholder="Enter Within 24 Hours "
+                                                />
+                                                {errors.Within_24_Hours && <small className="text-danger">{errors.Within_24_Hours}</small>}
+                                            </div>
+
+                                            <div className="col-md-3">
+                                                <label className="input-field">Within 48 Hours<span className="text-danger">*</span></label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    name="Within_48_Hours"
+                                                    value={formData.Within_48_Hours}
+                                                    onChange={handleChange}
+                                                    placeholder="Enter Within 48 Hours"
+                                                />
+                                                {errors.Within_48_Hours && <small className="text-danger">{errors.Within_48_Hours}</small>}
+                                            </div>
+
+
+
+                                        </div>
+                                        <div className='row' style={{ marginTop: '10px' }}>
+                                            <div className="col-md-3">
+                                                <label className="input-field">Within 96 Hours<span className="text-danger">*</span></label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    name="Within_96_Hours"
+                                                    value={formData.Within_96_Hours}
+                                                    onChange={handleChange}
+                                                    placeholder="Enter Within 96 Hours"
+                                                />
+                                                {errors.Within_96_Hours && <small className="text-danger">{errors.Within_96_Hours}</small>}
+                                            </div>
+
+                                            <div className="col-md-3">
+                                                <label className="input-field"> More Than 96 Hours <span className="text-danger">*</span></label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    name="MoreThan96_Hours"
+                                                    value={formData.MoreThan96_Hours}
+                                                    onChange={handleChange}
+                                                    placeholder="Enter More Than 96 Hours"
+                                                />
+                                                {errors.MoreThan96_Hours && <small className="text-danger">{errors.MoreThan96_Hours}</small>}
+                                            </div>
+
+                                            <div className="col-md-3">
+                                                <label className="input-field"> Gas Charging  <span className="text-danger">*</span></label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    name="gas_charging"
+                                                    value={formData.gas_charging}
+                                                    onChange={handleChange}
+                                                    placeholder="Enter Gas Charging "
+                                                />
+                                                {errors.gas_charging && <small className="text-danger">{errors.gas_charging}</small>}
+                                            </div>
+
+                                            <div className="col-md-3">
+                                                <label className="input-field"> Transportation <span className="text-danger">*</span></label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    name="transportation"
+                                                    value={formData.transportation}
+                                                    onChange={handleChange}
+                                                    placeholder="Enter Transportation"
+                                                />
+                                                {errors.transportation && <small className="text-danger">{errors.transportation}</small>}
                                             </div>
                                         </div>
                                         {roleaccess > 2 ? <div className="text-right">
                                             <button className="btn btn-liebherr" type="submit" style={{ marginTop: '15px' }}>
                                                 {isEdit ? "Update" : "Submit"}
                                             </button>
-                                        </div> : null}  
+                                        </div> : null}
 
                                     </form>
                                 </div>

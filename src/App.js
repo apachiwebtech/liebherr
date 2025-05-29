@@ -815,6 +815,11 @@ const Router = createBrowserRouter([
 
       },
       {
+        path: "/addrate/:rateid",
+        element: <ProtectedRoute><AddRatecard /></ProtectedRoute>,
+
+      },
+      {
         path: "/registercomaplaint",
         element: <ProtectedRoute><Registercomplaint /></ProtectedRoute>,
 
@@ -997,11 +1002,11 @@ const Router = createBrowserRouter([
         path: "/inwardLiebherr",
         element: <InwardLiebherr />,
       },
-            {
+      {
         path: "/outward",
         element: <Outward />,
       },
-            {
+      {
         path: "/inwardOthers",
         element: <InwardOthers />,
       },

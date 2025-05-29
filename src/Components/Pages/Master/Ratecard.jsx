@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
+import { useNavigate } from 'react-router-dom';
 import { Base_Url, secretKey } from "../../Utils/Base_Url";
 import Ratecardtabs from "./Ratecardtabs";
 import { useSelector } from 'react-redux';
@@ -15,17 +16,12 @@ const Ratecard = () => {
   // Step 1: Add this state to track errors
   const { loaders, axiosInstance } = useAxiosLoader();
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
-  const [isEdit, setIsEdit] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [excelData, setExcelData] = useState([]);
   const licare_code = localStorage.getItem("licare_code");
-  const [duplicateError, setDuplicateError] = useState(""); // State to track duplicate error
   const token = localStorage.getItem("token"); // Get token from localStorage
-  const createdBy = 1; // Static value for created_by
-  const updatedBy = 2; // Static value for updated_by
   const [pageSize, setPageSize] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
 
@@ -37,9 +33,7 @@ const Ratecard = () => {
     fetchUsers(page); // Fetch data for the new page
   };
 
-  const [formData, setFormData] = useState({
-    Ratecard: "",
-  });
+
 
   const [searchFilters, setSearchFilters] = useState({
     class_city: '',
@@ -138,87 +132,16 @@ const Ratecard = () => {
   useEffect(() => {
     fetchUsers();
   }, []);
-
+  const navigate = useNavigate()
 
   // Step 2: Add form validation function
-  const validateForm = () => {
-    const newErrors = {}; // Initialize an empty error object
-    if (!formData.Ratecard.trim()) {
-      // Check if the Ratecard is empty
-      newErrors.Ratecard = "Ratecard Field is required."; // Set error message if Ratecard is empty
-    }
-    return newErrors; // Return the error object
+  const sendtoedit = async (id) => {
+    id = id.toString()
+    // let encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
+    // encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    navigate(`/addrate/${id}`)
   };
 
-  //handlesubmit form
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const validationErrors = validateForm();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      return;
-    }
-
-    setDuplicateError(""); // Clear duplicate error before submitting
-
-    try {
-      const confirmSubmission = window.confirm(
-        "Do you want to submit the data?"
-      );
-      if (confirmSubmission) {
-        if (isEdit) {
-          // For update, include 'updated_by'
-          await axios
-            .post(`${Base_Url}/putratedata`, {
-              ...formData,
-              updated_by: updatedBy,
-            }, {
-              headers: {
-                Authorization: token, // Send token in headers
-              },
-            })
-            .then((response) => {
-              //window.location.reload();
-              setFormData({
-                Ratecard: "",
-              });
-              fetchUsers();
-            })
-            .catch((error) => {
-              if (error.response && error.response.status === 409) {
-                setDuplicateError("Duplicate entry, Ratecard already exists!"); // Show duplicate error for update
-              }
-            });
-        } else {
-          // For insert, include 'created_by'
-          await axios
-            .post(`${Base_Url}/postratedata`, {
-              ...formData,
-              created_by: createdBy,
-            }, {
-              headers: {
-                Authorization: token, // Send token in headers
-              },
-            })
-            .then((response) => {
-              // window.location.reload();
-              setFormData({
-                Ratecard: "",
-              });
-              fetchUsers();
-            })
-            .catch((error) => {
-              if (error.response && error.response.status === 409) {
-                setDuplicateError("Duplicate entry, Ratecard already exists!"); // Show duplicate error for insert
-              }
-            });
-        }
-      }
-    } catch (error) {
-      console.error("Error during form submission:", error);
-    }
-  };
 
   const deleted = async (id) => {
     const confirm = window.confirm("Are you sure you want to delete ?");
@@ -231,27 +154,15 @@ const Ratecard = () => {
           },
         });
         // alert(response.data[0]);
-        window.location.reload();
+        // window.location.reload();
+        fetchUsers();
       } catch (error) {
         console.error("Error deleting user:", error);
       }
     }
   };
 
-  const edit = async (id) => {
-    try {
-      const response = await axiosInstance.get(`${Base_Url}/requestratedata/${id}`, {
-        headers: {
-          Authorization: token, // Send token in headers
-        },
-      });
-      setFormData(response.data);
-      setIsEdit(true);
-      console.log(response.data);
-    } catch (error) {
-      console.error("Error editing user:", error);
-    }
-  };
+
 
 
 
@@ -393,25 +304,25 @@ const Ratecard = () => {
             >
               <div className="row mb-3">
 
-              <div className="col-md-2">
-                <div className="form-group">
-                  <label>Call Type</label>
-                  <select
-                    className="form-control"
-                    name="call_type"
-                    value={searchFilters.call_type}
-                    onChange={handleFilterChange}
-                  >
-                    <option value=""> SELECT</option>
-                    <option value="INSTALLATION">INSTALLATION</option>
-                    <option value="BREAKDOWN">BREAKDOWN</option>
-                    <option value="VISIT">VISIT</option>
-                    <option value="DEMO">DEMO</option>
-                    <option value="MAINTENANCE">MAINTENANCE</option>
-                    <option value="HELPDESK">HELPDESK</option>
-                  </select>
+                <div className="col-md-2">
+                  <div className="form-group">
+                    <label>Call Type</label>
+                    <select
+                      className="form-control"
+                      name="call_type"
+                      value={searchFilters.call_type}
+                      onChange={handleFilterChange}
+                    >
+                      <option value=""> SELECT</option>
+                      <option value="INSTALLATION">INSTALLATION</option>
+                      <option value="BREAKDOWN">BREAKDOWN</option>
+                      <option value="VISIT">VISIT</option>
+                      <option value="DEMO">DEMO</option>
+                      <option value="MAINTENANCE">MAINTENANCE</option>
+                      <option value="HELPDESK">HELPDESK</option>
+                    </select>
+                  </div>
                 </div>
-              </div>
 
 
                 <div className="col-md-2">
@@ -536,6 +447,9 @@ const Ratecard = () => {
                       <th width="10%">Product Type</th>
                       <th width="10%">Product Line</th>
                       <th width="10%">Product Class</th>
+                      {roleaccess > 3 ? <th width="5%">Edit</th> : null}
+                      {roleaccess > 4 ? <th width="5%">Delete</th> : null}
+
                     </tr>
                   </thead>
                   <tbody>
@@ -550,8 +464,33 @@ const Ratecard = () => {
                           <td>{item.ProductType}</td>
                           <td>{item.ProductLine}</td>
                           <td>{item.ProductClass}</td>
+                          <td>
+                            {roleaccess > 3 ?
+                              <button
+                                className='btn'
+                                onClick={() => sendtoedit(item.id)}
+                                title="Edit"
+                                style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                              >
+                                <FaPencilAlt />
+                              </button>
+                              : null}
+                          </td>
+                          <td>
+                            {roleaccess > 4 ? <td >
+                              <button
+                                className='btn'
+                                onClick={() => deleted(item.id)}
+                                title="Delete"
+                                style={{ backgroundColor: 'transparent', border: 'none', color: 'red', fontSize: '20px' }}
+                                disabled={roleaccess > 4 ? false : true}
+                              >
+                                <FaTrash />
+                              </button>
+                            </td> : null}
+                          </td>
 
-                          
+
                         </tr>
                       )
                     })}

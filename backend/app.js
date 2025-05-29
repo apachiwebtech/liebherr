@@ -1233,7 +1233,7 @@ app.get("/getdistrictcity/:geostateID", authenticateToken, async (req, res) => {
 
     const sql = `
       SELECT * FROM awt_district
-      WHERE geostate_id = ${geostateID}
+      WHERE transportation = ${geostateID}
       AND deleted = 0
     `;
 
@@ -7188,7 +7188,7 @@ app.post("/postchildfranchise", authenticateToken, async (req, res) => {
 
     let latestLicare = countResult.recordset[0].count || 0;
 
-    latestLicare = Number(latestLicare) || 0; 
+    latestLicare = Number(latestLicare) || 0;
 
     const newcount = latestLicare + 1;
 
@@ -7200,7 +7200,7 @@ app.post("/postchildfranchise", authenticateToken, async (req, res) => {
 
 
     // Insert the new child franchise if no duplicates or soft-deleted records found
-     await pool.request()
+    await pool.request()
       .input('title', sql.VarChar, title)
       .input('pfranchise_id', sql.Int, pfranchise_id)
       .input('licare_code', sql.VarChar, licarecode)
@@ -21897,6 +21897,244 @@ app.get("/downloadstockexcel", authenticateToken, async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.status(500).send('Error generating Stock Excel file');
+  }
+});
+
+
+// rate card add 
+app.post("/putratecard", authenticateToken, async (req, res) => {
+  const { created_by, formData } = req.body;
+
+  const {
+    id,
+    csp_code,
+    call_type,
+    class_city,
+    ProductType,
+    ProductLine,
+    ProductClass,
+    Within_24_Hours,
+    Within_48_Hours,
+    Within_96_Hours,
+    MoreThan96_Hours,
+    gas_charging,
+    transportation
+  } = formData;
+
+  try {
+    const pool = await poolPromise;
+
+    // Step 1: Duplicate Check Query
+    const duplicateCheckSQL = `
+      SELECT * FROM rate_card
+      WHERE ProductType = @ProductType
+      AND ProductLine = @ProductLine
+      AND ProductClass = @ProductClass
+      AND deleted = 0
+      AND id != @id
+    `;
+
+    console.log("Executing Duplicate Check SQL:", duplicateCheckSQL);
+
+    const duplicateCheckResult = await pool.request()
+      .input('ProductType', ProductType)
+      .input('ProductLine', ProductLine)
+      .input('ProductClass', ProductClass)
+      .input('id', id)
+      .query(duplicateCheckSQL);
+
+    if (duplicateCheckResult.recordset.length > 0) {
+      return res.status(409).json({
+        message: "Duplicate entry, Rate Card already exists!"
+      });
+    }
+
+    // Step 2: Update Query
+    const updateSQL = `
+      UPDATE rate_card
+      SET
+        csp_code = @csp_code,
+        call_type = @call_type,
+        class_city = @class_city,
+        ProductType = @ProductType,
+        ProductLine = @ProductLine,
+        ProductClass = @ProductClass,
+        Within_24_Hours = @Within_24_Hours,
+        Within_48_Hours = @Within_48_Hours,
+        Within_96_Hours = @Within_96_Hours,
+        MoreThan96_Hours = @MoreThan96_Hours,
+        gas_charging = @gas_charging,
+        transportation = @transportation,
+        updated_by = @created_by
+      WHERE id = @id
+    `;
+
+    console.log("Executing Update SQL:", updateSQL);
+
+    const result = await pool.request()
+      .input('csp_code', csp_code)
+      .input('call_type', call_type)
+      .input('class_city', class_city)
+      .input('ProductType', ProductType)
+      .input('ProductLine', ProductLine)
+      .input('ProductClass', ProductClass)
+      .input('Within_24_Hours', Within_24_Hours)
+      .input('Within_48_Hours', Within_48_Hours)
+      .input('Within_96_Hours', Within_96_Hours)
+      .input('MoreThan96_Hours', MoreThan96_Hours)
+      .input('gas_charging', gas_charging)
+      .input('transportation', transportation)
+      .input('created_by', created_by)
+      .input('id', id)
+      .query(updateSQL);
+
+    console.log("Rows affected:", result.rowsAffected);
+    return res.json({
+      message: "Rate Card updated successfully!"
+    });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "An error occurred while processing the request" });
+  }
+});
+
+app.post("/postratecard", authenticateToken, async (req, res) => {
+  const {
+    csp_code, id, call_type, class_city, ProductType, ProductLine,
+    ProductClass, Within_24_Hours, Within_48_Hours, Within_96_Hours,
+    MoreThan96_Hours, gas_charging,
+    transportation, created_by
+  } = req.body;
+
+  const pool = await poolPromise;
+
+  try {
+
+    // Use the poolPromise to get the connection pool
+
+    // Check if the data already exists and is not deleted
+    const checkDuplicateResult = await pool.request()
+      .input('ProductType', ProductType)
+      .input('ProductLine', ProductLine)
+      .input('ProductClass', ProductClass)
+      .query(`
+        SELECT * FROM rate_card
+      WHERE ProductType = @ProductType
+      AND ProductLine = @ProductLine
+      AND ProductClass = @ProductClass
+      AND deleted = 0
+      `);
+
+
+    if (checkDuplicateResult.recordset.length > 0) {
+      return res.status(409).json({
+        message: "Duplicate entry, Rate Card already exists!",
+      });
+    }
+
+    const checkSoftDeletedResult = await pool.request()
+      .input('ProductType', ProductType)
+      .input('ProductLine', ProductLine)
+      .input('ProductClass', ProductClass)
+      .query(`
+        SELECT * FROM rate_card
+      WHERE ProductType = @ProductType
+      AND ProductLine = @ProductLine
+      AND ProductClass = @ProductClass
+      AND deleted = 1
+      `);
+
+    if (checkSoftDeletedResult.recordset.length > 0) {
+      // Restore the soft-deleted record with updated data
+      await pool.request()
+        .input('csp_code', sql.VarChar, csp_code)
+        .input('call_type', sql.VarChar, call_type)
+        .input('class_city', sql.VarChar, class_city)
+        .input('ProductType', sql.VarChar, ProductType)
+        .input('ProductLine', sql.VarChar, ProductLine)
+        .input('ProductClass', sql.VarChar, ProductClass)
+        .input('Within_24_Hours', sql.VarChar, Within_24_Hours)
+        .input('Within_48_Hours', sql.VarChar, Within_48_Hours)
+        .input('Within_96_Hours', sql.VarChar, Within_96_Hours)
+        .input('MoreThan96_Hours', sql.VarChar, MoreThan96_Hours)
+        .input('gas_charging', sql.VarChar, gas_charging)
+        .input('transportation', sql.VarChar, transportation)
+
+        .query(`
+          UPDATE rate_card
+          SET
+            csp_code = @csp_code,
+            call_type = @call_type,
+            class_city = @class_city,
+            ProductType = @ProductType,
+            ProductLine = @ProductLine,
+            ProductClass = @ProductClass,
+            Within_24_Hours = @Within_24_Hours,
+            Within_48_Hours = @Within_48_Hours,
+            Within_96_Hours = @Within_96_Hours,
+            MoreThan96_Hours = @MoreThan96_Hours,
+            gas_charging = @gas_charging,
+            transportation = @transportation,
+            created_by = @created_by,            
+            deleted = 0
+          WHERE ProductType = @ProductType
+          AND ProductLine = @ProductLine
+          AND ProductClass = @ProductClass
+        `);
+
+      return res.json({
+        message: "Soft-deleted Rate Card restored successfully with updated data!",
+      });
+    }
+    // Insert the new child franchise if no duplicates or soft-deleted records found
+    await pool.request()
+      .input('csp_code', sql.VarChar, csp_code)
+      .input('call_type', sql.VarChar, call_type)
+      .input('class_city', sql.VarChar, class_city)
+      .input('ProductType', sql.VarChar, ProductType)
+      .input('ProductLine', sql.VarChar, ProductLine)
+      .input('ProductClass', sql.VarChar, ProductClass)
+      .input('Within_24_Hours', sql.VarChar, Within_24_Hours)
+      .input('Within_48_Hours', sql.VarChar, Within_48_Hours)
+      .input('Within_96_Hours', sql.VarChar, Within_96_Hours)
+      .input('MoreThan96_Hours', sql.VarChar, MoreThan96_Hours)
+      .input('gas_charging', sql.VarChar, gas_charging)
+      .input('transportation', sql.VarChar, transportation)
+      .input('created_by', sql.VarChar, created_by)
+      .query(`
+        INSERT INTO rate_card
+        (csp_code, call_type, class_city, ProductType, ProductLine, ProductClass, Within_24_Hours, Within_48_Hours, Within_96_Hours,
+         MoreThan96_Hours, gas_charging,  transportation,created_by)
+        VALUES
+        (@csp_code, @call_type, @class_city, @ProductType, @ProductLine, @ProductClass, @Within_24_Hours, @Within_48_Hours,
+         @Within_96_Hours, @MoreThan96_Hours, @gas_charging,  @transportation,@created_by)
+      `);
+    return res.json({
+      message: "Rate Card added successfully!",
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while processing the request' });
+  }
+});
+
+
+app.get("/getratecardpopulate/:rateid", authenticateToken, async (req, res) => {
+  const { rateid } = req.params;
+
+  try {
+    const pool = await poolPromise;
+    const sql = `
+      SELECT * FROM rate_card WHERE deleted = 0 AND id = ${rateid}
+    `;
+    const result = await pool.request().query(sql);
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Error fetching rate card for ID:", rateid, err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+    // return res.json(err)
   }
 });
 

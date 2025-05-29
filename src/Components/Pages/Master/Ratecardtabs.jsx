@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import Ratecard from "./Ratecard";
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Base_Url, secretKey } from '../../Utils/Base_Url';
 import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 import CryptoJS from 'crypto-js';
@@ -12,12 +12,16 @@ function Ratecardtabs() {
   const [activeTab, setActiveTab] = useState("Ratecard");
   const [status, setStatus] = useState([])
   const token = localStorage.getItem("token");
+  const location = useLocation(); // Get current path
 
   useEffect(() => {
     getpageroledata()
-    setActiveTab(window.location.pathname);
-
-  }, [window.location.pathname]);
+    if (location.pathname.startsWith("/ratecard")) {
+      setActiveTab("/ratecard");
+    } else if (location.pathname.startsWith("/addrate")) {
+      setActiveTab("/addrate");
+    }
+  }, [location.pathname]);
 
 
   const Decrypt = (encrypted) => {
@@ -106,53 +110,49 @@ function Ratecardtabs() {
                     <Link to={`/ratecard`}>
                       <li className="nav-item">
                         <button
-                          className={`nav-link ${activeTab === "/ratecard" ? "active" : "onClick={() => setActiveTab('Ratecard')}"
+                          className={`nav-link ${activeTab === "/ratecard" ? "active" : ""
                             }`}
 
                         >
                           RATE CARD MATRIX
                         </button>
-                      </li
-                      ></Link>
+                      </li></Link>
                   }
                   {status.addratepage == 1 &&
                     <Link to={`/addrate`}>
                       <li className="nav-item">
                         <button
-                          className={`nav-link ${activeTab === "/addrate" ? "active" : "onClick={() => setActiveTab('Ratecard')}"
+                          className={`nav-link ${activeTab === "/addrate" ? "active" : ""
                             }`}
 
                         >
-                          ADD RATE CARD 
+                          ADD RATE CARD
                         </button>
-                      </li
-                      ></Link>
+                      </li></Link>
                   }
                   {status.masterpage == 1 &&
                     <Link to={`/master_warrenty`}>
                       <li className="nav-item">
                         <button
-                          className={`nav-link ${activeTab === "/master_warrenty" ? "active" : "onClick={() => setActiveTab('Ratecard')}"
+                          className={`nav-link ${activeTab === "/master_warrenty" ? "active" : ""
                             }`}
 
                         >
                           MASTER WARRANTY
                         </button>
-                      </li
-                      ></Link>
+                      </li></Link>
                   }
                   {status.postsalepage == 1 &&
                     <Link to={`/post_sale_warrenty`}>
                       <li className="nav-item">
                         <button
-                          className={`nav-link ${activeTab === "/post_sale_warrenty" ? "active" : "onClick={() => setActiveTab('Ratecard')}"
+                          className={`nav-link ${activeTab === "/post_sale_warrenty" ? "active" : ""
                             }`}
 
                         >
                           POST SALE WARRANTY
                         </button>
-                      </li
-                      ></Link>
+                      </li></Link>
                   }
 
                 </ul>
@@ -174,5 +174,4 @@ function Ratecardtabs() {
     </>
   );
 }
-
 export default Ratecardtabs;
