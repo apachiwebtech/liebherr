@@ -1,6 +1,6 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link,useLocation } from 'react-router-dom';
 import { Base_Url, secretKey } from '../../Utils/Base_Url';
 import CryptoJS from 'crypto-js';
 import axios from "axios";
@@ -10,13 +10,31 @@ function Grntab() {
     const [activeTab, setActiveTab] = useState('/location');
     const [status, setStatus] = useState([])
     const token = localStorage.getItem("token");
+    const location = useLocation(); // Get current path
 
 
     useEffect(() => {
         getpageroledata()
-        setActiveTab(window.location.pathname);
-
-    }, [window.location.pathname]);
+        if (location.pathname.startsWith("/inwardLiebherr")) {
+            setActiveTab("/inwardLiebherr");
+        } else if (location.pathname.startsWith("/inwardOthers")) {
+            setActiveTab("/inwardOthers");
+        } else if (location.pathname.startsWith("/grnadminlist")) {
+            setActiveTab("/grnadminlist");
+        } else if (location.pathname.startsWith("/outward")) {
+            setActiveTab("/outward");
+        } else if (location.pathname.startsWith("/grnadminoutlist")) {
+            setActiveTab("/grnadminoutlist");
+        } else if (location.pathname.startsWith("/stock")) {
+            setActiveTab("/stock");
+        }
+        else if (location.pathname.startsWith("/addmsl")) {
+            setActiveTab("/addmsl");
+        }
+        else if (location.pathname.startsWith("/msl")) {
+            setActiveTab("/msl");
+        }
+    }, [location.pathname]);
 
     const Decrypt = (encrypted) => {
         encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
@@ -120,7 +138,7 @@ function Grntab() {
                                     {status.outward == 1 &&
                                         <Link to={`/outward`}><li className="nav-item">
                                             <button className={`nav-link ${activeTab === "/outward" ? "active" : ""}`}>
-                                                 OUTWARD
+                                                OUTWARD
                                             </button>
                                         </li></Link>
                                     }

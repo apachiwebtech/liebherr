@@ -479,14 +479,17 @@ const AddMsl = () => {
                                                 className="input-field"
                                             >
                                                 Msp Code<span className="text-danger">*</span>
-                                            </label>
+                                                {isEdit && formData.msp_code && (
+                                                    <span className="ms-2 text-primary"> Current-({formData.msp_code})</span>
+                                                )} </label>
                                             <Autocomplete
                                                 size="small"
                                                 disablePortal
                                                 options={mspdata}
                                                 value={selectmsp}
                                                 getOptionLabel={(option) => option?.licarecode || ""}
-                                                onChange={(e, newValue) => setSelectedMsp(newValue)}
+                                                onChange={(e, newValue) => handleSearchChange(newValue)}
+                                                onInputChange={(e, newInputValue) => handleInputChange(newInputValue)}
                                                 renderInput={(params) => (
                                                     <TextField
                                                         {...params}
@@ -544,7 +547,10 @@ const AddMsl = () => {
                                                 htmlFor="cspcodeinput"
                                                 className="input-field"
                                             >
-                                                Csp Code<span className="text-danger">*</span> </label>
+                                                Csp Code<span className="text-danger">*</span>
+                                                {isEdit && formData.csp_code && (
+                                                    <span className="ms-2 text-primary"> Current-({formData.csp_code})</span>
+                                                )} </label>
                                             <Autocomplete
                                                 size="small"
                                                 disablePortal
