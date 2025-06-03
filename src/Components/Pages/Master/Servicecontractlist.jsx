@@ -2,16 +2,19 @@ import axios from 'axios';
 import * as XLSX from "xlsx";
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
-import { FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
+import { FaPencilAlt, FaTrash, FaEye, FaFilePdf, FaDownload, FaArrowCircleDown, FaArrowAltCircleDown } from 'react-icons/fa';
 import { Base_Url, secretKey } from '../../Utils/Base_Url';
 import Servicecontracttabs from './Servicecontracttabs';
 import Servicecontract from './Servicecontract';
 import { SyncLoader } from 'react-spinners';
+import { pdf } from '@react-pdf/renderer';
 import { useAxiosLoader } from '../../Layout/UseAxiosLoader';
 import CryptoJS from 'crypto-js';
 import { useDispatch } from "react-redux";
 import { getRoleData } from "../../Store/Role/role-action";
 import { useSelector } from 'react-redux';
+import AmcCertificate from '../Reports/AmcCertificate';
+import EwCertificate from '../Reports/EwCertificate';
 
 export function Servicecontractlist(params) {
     const { loaders, axiosInstance } = useAxiosLoader();
@@ -19,11 +22,24 @@ export function Servicecontractlist(params) {
     const [Servicecontractdata, setServicecontractdata] = useState([]);
     const [loader, setLoader] = useState(false);
     const [isEdit, setIsEdit] = useState(false);
+    const [amcvalue, setValue] = useState({});
     const [filteredData, setFilteredData] = useState([]);
     const token = localStorage.getItem("token"); // Get token from localStorage
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const [totalCount, setTotalCount] = useState(0);
+    let { contractNumber } = useParams()
+
+    try {
+        contractNumber = contractNumber.replace(/-/g, '+').replace(/_/g, '/');
+        const bytes = CryptoJS.AES.decrypt(contractNumber, secretKey);
+        const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+        contractNumber = parseInt(decrypted, 10)
+    } catch (error) {
+        console.log("Error".error)
+    }
+
+
 
     const totalPages = Math.ceil(totalCount / pageSize);
 
@@ -323,7 +339,7 @@ export function Servicecontractlist(params) {
             axios.post(`${Base_Url}/uploadserviceexcel`, { jsonData: jsonData }, {
                 headers: {
                     Authorization: token,
-                    'Content-Type': 'multipart/form-data', 
+                    'Content-Type': 'multipart/form-data',
                 },
             })
                 .then((res) => {
@@ -349,6 +365,86 @@ export function Servicecontractlist(params) {
 
 
     //import excel end 
+
+    async function getamcpdf(contractNum) {
+        try {
+            const res = await axiosInstance.post(`${Base_Url}/getamcpdf`, { contractNumber: contractNum }, {
+                headers: {
+                    Authorization: token, // Send token in headers
+                },
+            });
+            // Decrypt the response data
+            const encryptedData = res.data.encryptedData;
+            const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+            const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+            console.log(decryptedData);
+
+            setValue(decryptedData[0]);
+            Blob(decryptedData[0]);
+            console.log(decryptedData[0], 'abc');
+
+        } catch (error) {
+            console.error('Error fetching amc details:', error);
+        }
+    }
+
+    async function getewpdf(contractNum) {
+        try {
+            const res = await axiosInstance.post(`${Base_Url}/getewpdf`, { contractNumber: contractNum }, {
+                headers: {
+                    Authorization: token, // Send token in headers
+                },
+            });
+            // Decrypt the response data
+            const encryptedData = res.data.encryptedData;
+            const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+            const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+            console.log(decryptedData);
+
+            setValue(decryptedData[0]);
+            Blob2(decryptedData[0]);
+
+        } catch (error) {
+            console.error('Error fetching amc details:', error);
+        }
+    }
+
+
+
+    async function downloadPDF(value) {
+        await getamcpdf(value)
+
+    }
+    async function downloadPDF2(value) {
+        await getewpdf(value)
+
+
+    }
+
+    const Blob = async (data) => {
+        try {
+            const blob = await pdf(<AmcCertificate value={data} />).toBlob();
+            const url = URL.createObjectURL(blob);
+            window.open(url);
+            URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error('Error generating PDF:', err);
+        }
+    };
+
+
+    const Blob2 = async (data1) => {
+
+        try {
+
+            const blob = await pdf(<EwCertificate value={data1} />).toBlob();
+            const url = URL.createObjectURL(blob);
+            window.open(url);
+            URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error('Error generating PDF:', err);
+        }
+    };
 
     // Role Right 
 
@@ -530,6 +626,8 @@ export function Servicecontractlist(params) {
                                         <th width="10%">Serial Number</th>
                                         <th width="10%">Start Date</th>
                                         <th width="10%">End Date</th>
+                                        {roleaccess > 1 ? <th width="5%">AMC Certificate</th> : null}
+                                        {roleaccess > 1 ? <th width="5%">Extended Warranty Certificate</th> : null}
                                         {/* <th width="8%">Approval Status</th> */}
                                         {roleaccess > 3 ? <th width="8%">Contract Status</th> : null}
                                         <th width="5%">{roleaccess <= 3 ? "View" : "Edit"}</th>
@@ -549,8 +647,28 @@ export function Servicecontractlist(params) {
                                                 <td>{item.contractType}</td>
                                                 <td >{item.productName}</td>
                                                 <td >{item.serialNumber}</td>
-                                                <td >{item.startDate &&  formatDate(item.startDate)}</td>
+                                                <td >{item.startDate && formatDate(item.startDate)}</td>
                                                 <td >{item.endDate && formatDate(item.endDate)}</td>
+                                                {roleaccess > 1 ? <td >
+                                                    <button
+                                                        className='btn'
+                                                        onClick={() => downloadPDF(item.contractNumber)}
+                                                        style={{ backgroundColor: 'transparent', border: 'none', color: 'black', fontSize: '20px' }}
+
+                                                    >
+                                                        <FaArrowAltCircleDown />
+                                                    </button>
+                                                </td> : null}
+                                                {roleaccess > 1 ? <td >
+                                                    <button
+                                                        className='btn'
+                                                        onClick={() => downloadPDF2(item.contractNumber)}
+                                                        style={{ backgroundColor: 'transparent', border: 'none', color: 'black', fontSize: '20px' }}
+
+                                                    >
+                                                        <FaArrowAltCircleDown />
+                                                    </button>
+                                                </td> : null}
 
 
                                                 {roleaccess > 3 ? <td >

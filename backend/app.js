@@ -22138,6 +22138,111 @@ app.get("/getratecardpopulate/:rateid", authenticateToken, async (req, res) => {
   }
 });
 
+app.post("/getamcpdf", authenticateToken, async (req, res) => {
+  const { contractNumber } = req.body;
+
+  try {
+    const pool = await poolPromise;
+
+    const sql = `
+      SELECT 
+  s.customerID,s.contractNumber, s.customerName, s.startDate, s.endDate, 
+  c.mobileno, c.alt_mobileno, c.email, s.serialNumber, 
+  cl.address, cl.geocity_id, cl.geostate_id, cl.pincode_id ,
+  ct.ModelNumber,ct.invoice_date,ct.sevice_partner,ct.sales_partner
+FROM awt_servicecontract AS s 
+LEFT JOIN awt_customer AS c ON c.customer_id = s.customerID 
+LEFT JOIN awt_customerlocation AS cl ON cl.customer_id = c.customer_id
+   AND cl.id = (
+       SELECT TOP 1 id 
+       FROM awt_customerlocation 
+       WHERE customer_id = c.customer_id 
+       ORDER BY id DESC
+   )
+LEFT JOIN complaint_ticket as ct ON ct.customer_id = s.customerID 
+AND ct.id = (
+		Select Top 1 id FROM complaint_ticket
+		Where customer_id = s.customerID
+		ORDER BY id DESC
+		) 
+      WHERE s.deleted = 0 AND s.contractNumber = '${contractNumber}'
+    `;
+
+    const result = await pool.request().query(sql);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ error: "No AMC record found" });
+    }
+
+    const CryptoJS = require("crypto-js");
+    const SECRET_KEY = secretKey; // Same as frontend
+
+    const encryptedData = CryptoJS.AES.encrypt(
+      JSON.stringify(result.recordset),
+      SECRET_KEY
+    ).toString();
+
+    return res.status(200).json({ encryptedData });
+
+  } catch (err) {
+    console.error("Error fetching AMC details:", err);
+    return res.status(500).json({ error: "An error occurred while fetching data" });
+  }
+});
+
+app.post("/getewpdf", authenticateToken, async (req, res) => {
+  const { contractNumber } = req.body;
+
+  try {
+    const pool = await poolPromise;
+
+    const sql = `
+      SELECT 
+  s.customerID,s.contractNumber, s.customerName, s.startDate, s.endDate, 
+  c.mobileno, c.alt_mobileno, c.email, s.serialNumber, 
+  cl.address, cl.geocity_id, cl.geostate_id, cl.pincode_id ,
+  ct.ModelNumber,ct.invoice_date,ct.sevice_partner,ct.sales_partner
+FROM awt_servicecontract AS s 
+LEFT JOIN awt_customer AS c ON c.customer_id = s.customerID 
+LEFT JOIN awt_customerlocation AS cl ON cl.customer_id = c.customer_id
+   AND cl.id = (
+       SELECT TOP 1 id 
+       FROM awt_customerlocation 
+       WHERE customer_id = c.customer_id 
+       ORDER BY id DESC
+   )
+LEFT JOIN complaint_ticket as ct ON ct.customer_id = s.customerID 
+AND ct.id = (
+		Select Top 1 id FROM complaint_ticket
+		Where customer_id = s.customerID
+		ORDER BY id DESC
+		) 
+      WHERE s.deleted = 0 AND s.contractNumber = '${contractNumber}'
+    `;
+
+    const result = await pool.request().query(sql);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ error: "No AMC record found" });
+    }
+
+    const CryptoJS = require("crypto-js");
+    const SECRET_KEY = secretKey; // Same as frontend
+
+    const encryptedData = CryptoJS.AES.encrypt(
+      JSON.stringify(result.recordset),
+      SECRET_KEY
+    ).toString();
+
+    return res.status(200).json({ encryptedData });
+
+  } catch (err) {
+    console.error("Error fetching AMC details:", err);
+    return res.status(500).json({ error: "An error occurred while fetching data" });
+  }
+});
+
+
 
 
 
