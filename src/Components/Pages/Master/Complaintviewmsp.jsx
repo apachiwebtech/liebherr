@@ -32,6 +32,7 @@ export function Complaintviewmsp(params) {
   const [activity, setactivity] = useState([]);
   const [engremark, setEngRemark] = useState([]);
   const [model, setModel] = useState('');
+  const [amctype, setamctype] = useState('')
   let { complaintid } = useParams();
   const [data, setData] = useState([])
   const [warranty_status_data, setWarranty_status_data] = useState('OUT OF WARRANTY')
@@ -1129,7 +1130,9 @@ export function Complaintviewmsp(params) {
         },
       });
 
-      if (!response.data || response.data.length === 0) {
+      console.log(response.data, "response.data");
+
+      if (!response.data.data || response.data.data.length === 0) {
         alert("This serial does not exist.");
         setComplaintview((prevstate) => ({
           ...prevstate,
@@ -1143,7 +1146,18 @@ export function Complaintviewmsp(params) {
 
 
 
-      const serialData = response.data[0];
+      const serialData = response.data.data[0];
+      let amcstaus = response.data.amcstaus || '';
+      let amctype = response.data.amctype || '';
+
+      console.log(serialData, "serialData");
+
+
+      if (amctype) {
+        setamctype(amctype)
+      } else {
+        setamctype('')
+      }
 
 
       if (serialData?.ModelNumber) {
@@ -1164,7 +1178,17 @@ export function Complaintviewmsp(params) {
 
           const purchaseDate = new Date(serialData.purchase_date);
           if (!isNaN(purchaseDate)) {
-            getDateAfterOneYear(purchaseDate);
+            if (amcstaus) {
+
+              setWarranty_status_data(amcstaus);
+              setComplaintview((prev) => ({
+                ...prev,
+                warranty_status: amcstaus
+              }))
+
+            } else {
+              getDateAfterOneYear(purchaseDate);
+            }
           } else {
             console.error("Invalid purchase_date format", serialData.purchase_date);
           }
@@ -1180,7 +1204,16 @@ export function Complaintviewmsp(params) {
 
           const purchaseDate = new Date(serialData.purchase_date);
           if (!isNaN(purchaseDate)) {
-            getDateAfterOneYear(purchaseDate);
+            if (amcstaus) {
+              setWarranty_status_data(amcstaus);
+              setComplaintview((prev) => ({
+                ...prev,
+                warranty_status: amcstaus
+              }))
+
+            } else {
+              getDateAfterOneYear(purchaseDate);
+            }
           } else {
             console.error("Invalid purchase_date format", serialData.purchase_date);
           }
@@ -1190,6 +1223,8 @@ export function Complaintviewmsp(params) {
             purchase_date: serialData.purchase_date,
             item_code: serialData.ItemNumber
           }));
+
+
         } else {
           alert("This serial no already allocated");
           setComplaintview((prevstate) => ({
@@ -1203,6 +1238,29 @@ export function Complaintviewmsp(params) {
 
       if (!serialData?.customer_classification || serialData.customer_classification == complaintview.customer_class) {
         console.log("Matched");
+
+        const purchaseDate = new Date(serialData.purchase_date);
+        if (!isNaN(purchaseDate)) {
+          if (amcstaus) {
+            setWarranty_status_data(amcstaus);
+            setComplaintview((prev) => ({
+              ...prev,
+              warranty_status: amcstaus
+            }))
+
+          } else {
+            getDateAfterOneYear(purchaseDate);
+          }
+        } else {
+          console.error("Invalid purchase_date format", serialData.purchase_date);
+        }
+        setComplaintview((prevstate) => ({
+          ...prevstate,
+          ModelNumber: serialData.ModelNumber,
+          purchase_date: serialData.purchase_date,
+          item_code: serialData.ItemNumber
+        }));
+
       } else {
         alert("Classification is different");
         setComplaintview((prevstate) => ({
@@ -1219,89 +1277,7 @@ export function Complaintviewmsp(params) {
 
 
 
-  //handlesubmitticketdata strat for serial no,model number, engineer_id and call_status and form data
-  // const handleSubmitTicketFormData = (e) => {
-  //   e.preventDefault();
 
-
-  //   if (addedEngineers.length > 0) {
-
-  //     const data = {
-  //       serial_no: String(complaintview.serial_no) || '',
-  //       ModelNumber: complaintview.ModelNumber || '',
-  //       engineer_id: complaintview.engineer_id || '',
-  //       call_status: callstatusid || '',
-  //       sub_call_status: complaintview.sub_call_status || '',
-  //       updated_by: created_by || '',
-  //       ticket_no: complaintview.ticket_no || '',
-  //       group_code: groupstatusid || '',
-  //       site_defect: complaintview.site_defect || '',
-  //       defect_type: complaintview.defect_type || '',
-  //       engineerdata: addedEngineers.map((item) => item.engineer_id),
-  //       engineername: addedEngineers.map((item) => item.title),
-  //       activity_code: complaintview.activity_code || ''
-  //     };
-
-  //     axiosInstance.post(`${Base_Url}/ticketFormData`, data, {
-  //       headers: {
-  //         Authorization: token, // Send token in headers
-  //       },
-  //     })
-  //       .then((response) => {
-  //         // setComplaintview({
-  //         //   ...complaintview,
-  //         //   serial_no: '',
-  //         //   ModelNumber: '',
-  //         //   engineer_id: '',
-  //         //   call_status: '',
-  //         // });
-  //         // fetchComplaintview(complaintid);
-  //         fetchComplaintDetails(complaintid)
-
-  //         setTicketUpdateSuccess({
-  //           message: 'Enginerer added successfully!',
-  //           visible: true,
-  //           type: 'success',
-  //         });
-
-  //         // Hide the message after 3 seconds
-  //         setTimeout(() => {
-  //           setTicketUpdateSuccess({
-  //             message: '',
-  //             visible: false,
-  //             type: 'success',
-  //           });
-  //         }, 3000);
-  //       })
-  //       .catch((error) => {
-  //         console.error('Error updating ticket:', error);
-  //         setTicketUpdateSuccess({
-  //           message: 'Error updating ticket. Please try again.',
-  //           visible: true,
-  //           type: 'error',
-  //         });
-
-  //         setTimeout(() => {
-  //           setTicketUpdateSuccess({
-  //             message: '',
-  //             visible: false,
-  //             type: 'error',
-  //           });
-  //         }, 3000);
-  //       });
-  //   } else {
-
-
-  //     if (addedEngineers.length === 0) {
-  //       alert('Please Add the Engineer');
-  //     }
-  //   }
-
-
-
-  // };
-
-  //handkesubmitticketdata end
 
   // New handler for Attachment 2 preview
   const handleAttachment2Click = (attachment) => {
@@ -2386,13 +2362,13 @@ export function Complaintviewmsp(params) {
                       className='form-control'
                       name="purchase_date"
                       aria-describedby="Anidate"
-
+                      disabled={amctype === 'AMC' || amctype === 'ExtWarranty'}
                       maxDate={new Date().toISOString().split("T")[0]}
                     /> : formatDate(complaintview.purchase_date)}</p>
                   </div>
 
                   <div className="col-md-3">
-                    <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Warranty Status</p>
+                    <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Warranty Status : {amctype}</p>
                     <p style={{ fontSize: "14px" }}>{complaintview.warranty_status ? complaintview.warranty_status : warranty_status_data} </p>
                   </div>
 

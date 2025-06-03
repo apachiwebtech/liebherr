@@ -183,11 +183,11 @@ const Uniqueproduct = () => {
 
         const data = await response.json();
 
-        if (data.length > 0) {
+        if (data.data.length > 0) {
           setFormData((prev) => ({
             ...prev,
-            product: data[0].ModelNumber, // Auto-fill product field with ModelNumber
-            ItemNumber: data[0].ItemNumber, // Auto-fill product field with ModelNumber
+            product: data.data[0].ModelNumber, // Auto-fill product field with ModelNumber
+            ItemNumber: data.data[0].ItemNumber, // Auto-fill product field with ModelNumber
           }));
           setIsProductDisabled(true);
         } else {

@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { FaPencilAlt, FaTrash } from "react-icons/fa";
+import { FaEye, FaPencilAlt, FaTrash } from "react-icons/fa";
 import { Base_Url, secretKey } from "../../Utils/Base_Url";
 import { Navigate, useParams } from "react-router-dom";
 import Servicecontracttabs from "./Servicecontracttabs";
@@ -8,10 +8,13 @@ import { SyncLoader } from 'react-spinners';
 import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 import CryptoJS from 'crypto-js';
 import DatePicker from "react-datepicker";
+import _debounce from 'lodash.debounce';
 import "react-datepicker/dist/react-datepicker.css";
 import { useDispatch } from "react-redux";
 import { getRoleData } from "../../Store/Role/role-action";
 import { useSelector } from 'react-redux';
+import { file } from "jszip";
+import { Autocomplete, TextField } from "@mui/material";
 const Servicecontract = () => {
   // Step 1: Add this state to track errors
   const { loaders, axiosInstance } = useAxiosLoader();
@@ -21,18 +24,23 @@ const Servicecontract = () => {
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [contarctlist, setContarctlist] = useState([]);
+  const [selectedsceme, setselectedsceme] = useState(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [duplicateError, setDuplicateError] = useState(""); // State to track duplicate error
   const token = localStorage.getItem("token"); // Get token from localStorage
+  const created_by = localStorage.getItem("licare_code"); // Get token from localStorage
   const [successMessage, setSuccessMessage] = useState('');
   const [startDate, setStartDate] = useState(null);
   const [enddate, setEndDate] = useState(null);
   const [purchase_date, setPurchase] = useState(null);
-  const createdBy = 1; // Static value for created_by
-  const updatedBy = 2; // Static value for updated_by
+  const isEditMode = serviceid !== undefined;
+  const [scemedata, setScemedata] = useState([]);
+  const [scemetext, setScemeText] = useState("");
 
   // const formatDate = (date) => {
   //   const year = date.getFullYear();
@@ -83,6 +91,17 @@ const Servicecontract = () => {
 
   };
 
+  const handlePreviewClick = (passport_picture) => {
+
+    if (passport_picture) {
+      const fileUrl = `${Base_Url}/uploads/${passport_picture}`; // Make sure this URL is correct
+      setPreviewUrl(fileUrl);
+      setPreviewOpen(true);
+    } else {
+      alert('No file available for preview.');
+    }
+  };
+
   try {
     serviceid = serviceid.replace(/-/g, '+').replace(/_/g, '/');
     const bytes = CryptoJS.AES.decrypt(serviceid, secretKey);
@@ -107,8 +126,8 @@ const Servicecontract = () => {
     startDate: "",
     endDate: "",
     contractamt: "",
-    ContrctRemark : "",
-    file : ''
+    ContrctRemark: "",
+    file: ''
   });
 
   const fetchUsers = async () => {
@@ -155,7 +174,7 @@ const Servicecontract = () => {
         startDate: response.data[0].startDate,
         endDate: response.data[0].endDate,
         contractamt: response.data[0].contarct_amt,
-        ContrctRemark : response.data
+        ContrctRemark: response.data[0].remark
       });
 
 
@@ -275,7 +294,7 @@ const Servicecontract = () => {
     if (isEmpty(Value.productName)) newErrors.productName = "Product Name is required.";
     if (isEmpty(Value.customerName)) newErrors.customerName = "Customer Name is required.";
     if (isEmpty(Value.customerId)) newErrors.customerId = "Customer Id is required.";
-    if (isEmpty(Value.schemename)) newErrors.schemename = "Sceme Name Field is required.";
+    if (isEmpty(selectedsceme.sceme_name)) newErrors.schemename = "Sceme Name Field is required.";
     if (isEmpty(purchase_date)) newErrors.purchasedate = "Date is required.";
     if (isEmpty(Value.contractamt)) newErrors.contractamt = "Amount is required.";
 
@@ -299,6 +318,8 @@ const Servicecontract = () => {
       purchasedate: purchase_date,
       startDate: startDate,
       endDate: enddate,
+      schemename : selectedsceme ? selectedsceme.sceme_name :'',
+      created_by: created_by, // Include created_by for insert
     }
 
     const encryptedData = CryptoJS.AES.encrypt(
@@ -318,9 +339,11 @@ const Servicecontract = () => {
           await axios
             .post(`${Base_Url}/putservicecontract`, {
               encryptedData,
+              file: Value.file, // Include file in the request
             }, {
               headers: {
                 Authorization: token, // Send token in headers
+                "Content-Type": "multipart/form-data",
               },
             })
             .then((response) => {
@@ -359,10 +382,12 @@ const Servicecontract = () => {
           // For insert, include 'created_by'
           await axios
             .post(`${Base_Url}/postservicecontract`, {
-              encryptedData
+              encryptedData,
+              file: Value.file, // Include file in the request
             }, {
               headers: {
                 Authorization: token, // Send token in headers
+                "Content-Type": "multipart/form-data",
               },
             })
             .then((response) => {
@@ -403,7 +428,12 @@ const Servicecontract = () => {
 
 
 
-
+  const handlefileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      SetValue((prev) => ({ ...prev, file: file }));
+    }
+  }
 
 
 
@@ -499,6 +529,35 @@ const Servicecontract = () => {
       handlestartenddatecalculation();
     }
   }, [Value.duration, Value.goodwillmonth, purchase_date]);
+
+  const handleSearchScemeChange = (newValue) => {
+    setselectedsceme(newValue);
+  };
+
+  const fetchSceme = async () => {
+    try {
+      const response = await axios.post(`${Base_Url}/getscemesearch`, { param: scemetext }, {
+        headers: {
+          Authorization: token, // Send token in headers
+        },
+      });
+      setScemedata(response.data)
+    }
+    catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
+
+  const handleInputScemeChange = _debounce((newValue) => {
+    console.log(newValue);
+
+    // Update the text state
+    setScemeText(newValue);
+
+    // Check if newValue is not blank and has more than 4 words
+
+    fetchSceme();
+  }, 100);
 
 
 
@@ -728,14 +787,15 @@ const Servicecontract = () => {
                       >
                         Scheme Name <span className="text-danger">*</span>
                       </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        name="schemename"
-                        id="SchemenameInput"
-                        value={Value.schemename}
-                        onChange={handleChange}
-                        placeholder="Enter Scheme Name"
+                      <Autocomplete
+                        size="small"
+                        disablePortal
+                        options={scemedata}
+                        value={selectedsceme}
+                        getOptionLabel={(option) => option.sceme_name}
+                        onChange={(e, newValue) => handleSearchScemeChange(newValue)}
+                        onInputChange={(e, newInputValue) => handleInputScemeChange(newInputValue)}
+                        renderInput={(params) => <TextField {...params} label="Enter Engineer.." variant="outlined" />}
                       />
                       {errors.schemename && (
                         <small className="text-danger">
@@ -867,8 +927,46 @@ const Servicecontract = () => {
                         Remark
                       </label>
                       <div>
-                        <textarea value={Value.ContrctRemark} className="form-control" name="ContrctRemark" id="ContrctRemark" ></textarea>
+                        <textarea value={Value.ContrctRemark} className="form-control" onChange={handleChange} name="ContrctRemark" id="ContrctRemark" ></textarea>
                       </div>
+                    </div>
+                    <div className="col-3 mb-3">
+                      <label htmlFor="EndDateInput" className="input-field">
+                        Attachment
+                      </label>
+                      {isEditMode && (
+                        <button
+                          type="button"
+                          className="btn btn-outline-secondary"
+                          onClick={() => handlePreviewClick(Value.file_upload)}
+
+                          title="Preview"
+                          style={{
+                            border: 'none',    // Remove border
+                            background: 'transparent',  // Transparent background
+                            padding: '0', // Remove padding around the icon
+                            marginLeft: '10px'
+                          }}
+                        >
+                          <FaEye style={{ color: 'blue' }} />
+                        </button>
+                      )}
+                      <div>
+                        <input
+                          type="file"
+                          className="form-control"
+                          accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,.eml"
+                          name="file"
+                          id=""
+                          onChange={(e) => {
+                            handlefileChange(e)
+                          }}
+                          placeholder="Enter Goodwill Month"
+                        />
+                      </div>
+                      {errors.endDate && (
+                        <small className="text-danger">{errors.endDate}</small>
+                      )}
                     </div>
 
 
@@ -885,6 +983,54 @@ const Servicecontract = () => {
               </div>
             </div>
           </div>
+          {previewOpen && (
+            <div
+              style={{
+                position: 'fixed',
+                top: 0, left: 0, right: 0, bottom: 0,
+                backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 9999
+              }}
+              onClick={() => setPreviewOpen(false)}
+            >
+              <div
+                style={{
+                  background: 'white',
+                  padding: '1rem',
+                  borderRadius: '10px',
+                  maxWidth: '90%',
+                  maxHeight: '90%',
+                  overflow: 'auto',
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  style={{ float: 'right', marginBottom: '10px', background: 'transparent', border: 'none', fontSize: '20px' }}
+                  onClick={() => setPreviewOpen(false)}
+                >
+                  ✖
+                </button>
+
+                {previewUrl.endsWith('.pdf') ? (
+                  <iframe
+                    src={previewUrl}
+                    title="Preview PDF"
+                    width="600"
+                    height="500"
+                  />
+                ) : (
+                  <img
+                    src={previewUrl}
+                    alt="Preview"
+                    style={{ maxWidth: '100%', maxHeight: '80vh' }}
+                  />
+                )}
+              </div>
+            </div>
+          )}
 
           {contarctlist.length > 0 && <div className="card mb-3 tab_box">
             <div className="card-body" style={{ flex: "1 1 auto", padding: "13px 28px" }}>

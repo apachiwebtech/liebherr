@@ -8335,9 +8335,13 @@ app.get("/getservicecontract", authenticateToken,
   });
 
 // Insert for Servicecontract
-app.post("/postservicecontract", authenticateToken, async (req, res) => {
+app.post("/postservicecontract", authenticateToken, upload.single('file'), async (req, res) => {
   const { encryptedData } = req.body;
   const decryptedData = decryptData(encryptedData, secretKey)
+
+  const file = req.file;
+  const filename = file?.filename || null;
+
   const {
     schemename,
     customerName,
@@ -8351,10 +8355,13 @@ app.post("/postservicecontract", authenticateToken, async (req, res) => {
     goodwillmonth,
     startDate,
     endDate,
-    purchasedate
+    purchasedate,
+    created_by,
+    ContrctRemark
   } = JSON.parse(decryptedData);
 
-  console.log()
+  const created_date = new Date().toISOString().slice(0, 19).replace('T', ' '); // Format: YYYY-MM-DD HH:MM:SS
+
 
   try {
     const pool = await poolPromise;
@@ -8401,8 +8408,12 @@ app.post("/postservicecontract", authenticateToken, async (req, res) => {
         startDate,
         endDate,
         purchaseDate,
-        status, 
-        deleted
+        status,
+        file_upload, 
+        remark,
+        deleted,
+        created_date,
+        created_by
       ) VALUES (
         '${contractCode}',
         '${schemename}',
@@ -8419,11 +8430,14 @@ app.post("/postservicecontract", authenticateToken, async (req, res) => {
         '${endDate}',
         '${purchasedate}',
         'Active',
-        0
+        '${filename}',
+        '${ContrctRemark}',
+        0,
+        '${created_date}',
+        '${created_by}'
       )
     `;
 
-    console.log("Executing Insert SQL:", insertSql);
     await pool.request().query(insertSql);
     return res.json({ message: "Service Contract added successfully!" });
 
@@ -8457,9 +8471,11 @@ app.get("/requestservicecontract/:id", authenticateToken, async (req, res) => {
 //update for service contract
 
 
-app.post("/putservicecontract", authenticateToken, async (req, res) => {
+app.post("/putservicecontract", authenticateToken, upload.single('file'), async (req, res) => {
   const { encryptedData } = req.body;
   const decryptedData = decryptData(encryptedData, secretKey);
+
+
 
   const {
     id,
@@ -9609,11 +9625,20 @@ app.post("/add_new_ticket", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
-    const productdetail = `select * from awt_uniqueproductmaster where CustomerID = '${customerId}' and serial_no = '${serial_no}'`
-    const productdetailquery = await pool.request()
-      .query(productdetail);
+    const productdetailquery = await pool
+      .request()
+      .input("customerId", sql.NVarChar, customerId)
+      .input("serial_no", sql.NVarChar, serial_no)
+      .query(`
+    SELECT * FROM awt_uniqueproductmaster
+    WHERE CustomerID = @customerId AND serial_no = @serial_no
+  `);
 
-    console.log(productdetail);
+    if (productdetailquery.recordset.length === 0) {
+      return res.status(404).json({ error: "Product not found with given serial number and customer ID." });
+    }
+
+
 
     const details = productdetailquery.recordset[0];
 
@@ -9622,9 +9647,6 @@ app.post("/add_new_ticket", authenticateToken, async (req, res) => {
 
     // Format the date as yyyy-mm-dd
     const purchaseDateFormatted = purchaseDate.toISOString().slice(0, 10);
-
-    console.log(purchaseDateFormatted); // Outputs: yyyy-mm-dd
-
 
 
     // Insert complaint ticket and return the inserted ID
@@ -10800,18 +10822,51 @@ WHERE au.serial_no = @serial and au.SerialStatus = 'Active' order by au.id asc `
       .query(lastfallbacksql);
 
 
+    const checkamc = `
+    SELECT TOP 1 * 
+    FROM awt_servicecontract 
+    WHERE serialNumber = '${serial}' 
+      AND status = 'Active' 
+    ORDER BY created_date DESC`;
+
+    const checkamcResult = await pool.request().query(checkamc);
+
+
+    let status;
+    let amctype;
+
+    // Check if we got a result
+    if (checkamcResult.recordset.length > 0) {
+      const startDate = checkamcResult.recordset[0].startDate; // assuming format: 'yyyy-mm-dd'
+      const endDate = checkamcResult.recordset[0].endDate;
+      amctype = checkamcResult.recordset[0].contractType;
+      const currentDate = new Date();
+      const isActive = currentDate >= new Date(startDate) && currentDate <= new Date(endDate);
+
+
+      if (isActive === true) {
+        console.log(true, "isActive - AMC is active for the given serial number.");
+        status = "WARRANTY"
+      } else if (isActive === false) {
+        console.log(false, "isActive - AMC is not active for the given serial number.");
+        status = "OUT OF WARRANTY"
+      }
+    } else {
+      console.log(false, "isActive - No AMC found for the given serial number.");
+    }
+
 
 
     if (fallbackResult.recordset.length !== 0) {
 
-      return res.json(fallbackResult.recordset);
+      return res.json({ data: fallbackResult.recordset, amcstaus: status || '', amctype: amctype || '' });
 
     } else if (lastfallbackResult.recordset.length !== 0) {
 
-      return res.json(lastfallbackResult.recordset);
+      return res.json({ data: lastfallbackResult.recordset, amcstaus: status, amctype: amctype, amcstaus: status || '', amctype: amctype || '' });
     }
     else {
-      return res.json(result.recordset);
+      return res.json({ data: result.recordset });
 
     }
 
@@ -10846,17 +10901,53 @@ au.CustomerID as customer_id , au.ModelNumber , au.address , au.region , au.stat
 FROM awt_uniqueproductmaster as au left join awt_customer as ac on ac.customer_id = au.CustomerID
 WHERE au.serial_no = @serial and au.SerialStatus = 'Active' order by au.id desc`;
 
+
+    const checkamc = `
+    SELECT TOP 1 * 
+    FROM awt_servicecontract 
+    WHERE serialNumber = '${serial}' 
+      AND status = 'Active' 
+    ORDER BY created_date DESC`;
+
+    const checkamcResult = await pool.request().query(checkamc);
+
+
+    let status;
+    let amctype;
+
+    // Check if we got a result
+    if (checkamcResult.recordset.length > 0) {
+      const startDate = checkamcResult.recordset[0].startDate; // assuming format: 'yyyy-mm-dd'
+      const endDate = checkamcResult.recordset[0].endDate;
+      amctype = checkamcResult.recordset[0].contractType;
+      const currentDate = new Date();
+      const isActive = currentDate >= new Date(startDate) && currentDate <= new Date(endDate);
+
+
+      if (isActive === true) {
+        console.log(true, "isActive - AMC is active for the given serial number.");
+        status = "WARRANTY"
+      } else if (isActive === false) {
+        console.log(false, "isActive - AMC is not active for the given serial number.");
+        status = "OUT OF WARRANTY"
+      }
+    } else {
+      console.log(false, "isActive - No AMC found for the given serial number.");
+    }
+
+
+
     const fallbackResult = await pool.request()
       .input('serial', serial)
       .query(fallbackSql);
 
     if (fallbackResult.recordset.length !== 0) {
 
-      return res.json(fallbackResult.recordset);
+      return res.json({ data: fallbackResult.recordset, amcstaus: status || '', amctype: amctype || '' });
 
     } else {
 
-      return res.json(result.recordset);
+      return res.json({ data: result.recordset });
 
     }
 
@@ -10935,11 +11026,45 @@ app.get("/getmobserial/:serial", authenticateToken, async (req, res) => {
     const sql = `select lhi.serial_no , lhi.DESCRIPTION as ModelNumber , ACCOUNT as customer_id , ALLOCATIONSTATUS as allocation , CUSTOMERCLASSIFICATION as customerClassification ,spm.SalesPartner ,spm.SalesAM , asl.ItemNumber from SERIAL_API_VW as lhi LEFT JOIN SalesPartnerMaster AS spm  ON lhi.DealerCode = spm.BPcode left join awt_serial_list as asl on asl.serial_no = lhi.serial_no where lhi.serial_no = @serial`;
 
 
-    const fallbackSql = `SELECT allocation = 'Allocated', ac.customer_classification ,
-    au.CustomerID as customer_id , au.ModelNumber ,au.serial_no,au.ModelName 
+    const fallbackSql = `SELECT allocation = 'Allocated', au.customer_classification ,
+    au.CustomerID as customer_id , au.ModelNumber ,au.serial_no,au.ModelName,au.purchase_date,au.SalesDealer as SalesPartner,au.SubDealer as SalesAM ,au.address , au.region , au.state ,au.district , au.city , au.pincode , ac.salutation , ac.customer_fname ,ac.customer_lname , ac.customer_type , ac.mobileno , ac.alt_mobileno,ac.email 
     FROM awt_uniqueproductmaster as au
     left join awt_customer as ac on ac.customer_id = au.CustomerID
     WHERE au.serial_no = @serial order by au.id desc`;
+
+
+    const checkamc = `
+    SELECT TOP 1 * 
+    FROM awt_servicecontract 
+    WHERE serialNumber = '${serial}' 
+      AND status = 'Active' 
+    ORDER BY created_date DESC`;
+
+    const checkamcResult = await pool.request().query(checkamc);
+
+
+    let status;
+    let amctype;
+
+    // Check if we got a result
+    if (checkamcResult.recordset.length > 0) {
+      const startDate = checkamcResult.recordset[0].startDate; // assuming format: 'yyyy-mm-dd'
+      const endDate = checkamcResult.recordset[0].endDate;
+      amctype = checkamcResult.recordset[0].contractType;
+      const currentDate = new Date();
+      const isActive = currentDate >= new Date(startDate) && currentDate <= new Date(endDate);
+
+
+      if (isActive === true) {
+        console.log(true, "isActive - AMC is active for the given serial number.");
+        status = "WARRANTY"
+      } else if (isActive === false) {
+        console.log(false, "isActive - AMC is not active for the given serial number.");
+        status = "OUT OF WARRANTY"
+      }
+    } else {
+      console.log(false, "isActive - No AMC found for the given serial number.");
+    }
 
 
 
@@ -10955,13 +11080,16 @@ app.get("/getmobserial/:serial", authenticateToken, async (req, res) => {
 
 
 
+
+
+
     if (fallbackResult.recordset.length !== 0) {
 
-      return res.json(fallbackResult.recordset);
+      return res.json({ data: fallbackResult.recordset, amcstaus: status || '', amctype: amctype || '' });
 
     } else {
 
-      return res.json(result.recordset);
+      return res.json({ data: result.recordset });
 
     }
 
@@ -13573,107 +13701,90 @@ app.post('/assign_role', authenticateToken, async (req, res) => {
 app.post("/getcomplainticketdump", authenticateToken, async (req, res) => {
 
   const { startDate, endDate, licare_code } = req.body;
-
-  // Helper function to format dates
-  // function excelformatDate(dateStr) {
-  //   if (!dateStr) return ""; // Guard clause for null/undefined
-  //   const date = new Date(dateStr);
-  //   if (isNaN(date)) return dateStr; // Return original if invalid date
-  //   const day = String(date.getDate()).padStart(2, '0');
-  //   const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
-  //   const year = date.getFullYear();
-  //   return `${day}-${month}-${year}`;
-  // }
-
-  const excelformatDate = (dateString) => {
-    const date = new Date(dateString);
-    const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
-    return date.toLocaleDateString('en-GB', options).replace(/\//g, '-');
-  };
-
   try {
+    // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
-    const getcsp = `SELECT * FROM lhi_user WHERE Usercode = '${licare_code}'`
-    const getcspresilt = await pool.request().query(getcsp)
-    const assigncsp = getcspresilt.recordset[0]?.assigncsp
+    const getcsp = `select * from lhi_user where Usercode = '${licare_code}'`
 
-    let sql = `
-      SELECT 
-        ct.id,
-        ct.ticket_no as TicketNumber,
-        ct.ticket_date as CreateDate,
-        ct.customer_id as CustomerID,
-        ct.salutation as Salutation,
-        ct.customer_name as CustomerName,
-        ct.address as Address,
-        ct.city as City,
-        ct.area AS District,
-        ct.state as State,
-        ct.pincode as PINCODE,
-        ct.customer_class AS CustomerClassification,
-        ct.customer_mobile as MobileNumber,
-        ct.alt_mobile as AlternateMobileNumber,
-        ct.customer_email as CustomerEmailID,
-        ct.call_type as CustomerType,
-        ct.mode_of_contact AS CallCategory,
-        ct.ModelNumber,
-        ct.serial_no as SerialNumber,
-        ct.purchase_date as PurchaseDate,
-        ct.warranty_status AS WarrantyType,
-        ct.call_status as CallStatus,
-        ct.sub_call_status as CallSubStatus,
-        ct.specification AS FaultDescription,
-        scf.remark AS FeedbackStatus,
-        acr.remark AS FinalRemark,
-        ct.closed_date AS FieldCompletedDate,
-        ct.call_remark AS AdditionalInfo,
-        ct.mother_branch as LiebherrBranch,
-        ct.msp as MasterServicePartnerCode,
-        ct.sevice_partner AS MasterServicePartnerName,
-        ct.csp as ChildServicePartnerCode,
-        ct.child_service_partner as ChildServicePartnerName,
-        ct.assigned_to AS EngineerName,
-        ct.visit_count AS CountOfVisit,
-        ct.call_charges AS CallChargeable,
-        ct.payment_collected as FieldChargeable,
-        ct.call_priority AS Priority,
-        ct.totp AS TOTP
-      FROM complaint_ticket ct
-      LEFT JOIN (
-          SELECT acr1.ticket_no, acr1.remark, acr1.created_date
-          FROM awt_complaintremark acr1
-          JOIN (
-              SELECT ticket_no, MAX(id) AS max_id
-              FROM awt_complaintremark
-              WHERE created_date LIKE '%2025%' AND updated_by IS NULL
-              GROUP BY ticket_no
-          ) latest ON acr1.id = latest.max_id
-      ) acr ON ct.ticket_no = acr.ticket_no
-      LEFT JOIN awt_service_contact_form as scf ON ct.ticket_no = scf.ticket_no
-      WHERE ct.deleted = 0  
-        AND ct.ticket_date >= '${startDate}' 
-        AND ct.ticket_date <= '${endDate}'
-    `;
+
+    const getcspresilt = await pool.request().query(getcsp)
+
+    const assigncsp = getcspresilt.recordset[0].assigncsp
+
+    let sql;
+
+
+    sql = `SELECT 
+    ct.id,
+    ct.ticket_no,
+    ct.ticket_date,
+    ct.customer_id,
+    ct.customer_name,
+    ct.address,
+    ct.state,
+    ct.city,
+    ct.area as District,
+    ct.pincode,
+    ct.customer_class as CustomerClassification,
+    ct.customer_mobile,
+    ct.customer_email,
+    ct.alt_mobile,
+    ct.call_type,
+    ct.mode_of_contact as CallCategory,
+    ct.ModelNumber,
+    ct.serial_no,
+    ct.purchase_date,
+    ct.warranty_status as WarrantyType,
+    ct.call_status,
+    ct.sub_call_status,
+    ct.specification as FaultDescription,
+    acr.remark AS FinalRemark,
+    ct.closed_date as FieldCompletedDate,
+    ct.call_remark as AdditionalInfo,
+    ct.mother_branch,
+    ct.msp,
+    ct.sevice_partner as MasterServicePartnerName,
+    ct.csp,
+    ct.child_service_partner,
+    ct.assigned_to as EngineerName,
+    ct.visit_count as CountOfVisit,
+    ct.call_charges as CallChargeable,
+    ct.call_priority as Priority,
+    ct.totp as TOTP
+FROM complaint_ticket ct
+LEFT JOIN (
+    SELECT acr1.ticket_no, acr1.remark, acr1.created_date
+    FROM awt_complaintremark acr1
+    JOIN (
+        SELECT ticket_no, MAX(id) AS max_id
+        FROM awt_complaintremark
+        WHERE created_date LIKE '%2025%' AND updated_by IS NULL
+        GROUP BY ticket_no
+    ) latest ON acr1.id = latest.max_id
+) acr ON ct.ticket_no = acr.ticket_no
+WHERE ct.deleted = 0 
+  AND ct.ticket_date >= '${startDate}' 
+  AND ct.ticket_date <= '${endDate}'
+`
+
+
 
     if (assigncsp !== 'ALL') {
+      // Convert to an array and wrap each value in single quotes
       const formattedCspList = assigncsp.split(",").map(csp => `'${csp.trim()}'`).join(",");
+
+      // Directly inject the formatted values into the SQL query
       sql += ` AND ct.csp IN (${formattedCspList})`;
     }
 
     sql += ` ORDER BY RIGHT(ct.ticket_no , 4) ASC`;
 
+
+
+
+
     const result = await pool.request().query(sql);
-
-    // Format date fields in the result
-    const formattedData = result.recordset.map(record => ({
-      ...record,
-      CreateDate: excelformatDate(record.CreateDate),
-      PurchaseDate: excelformatDate(record.PurchaseDate),
-      FieldCompletedDate: excelformatDate(record.FieldCompletedDate)
-    }));
-
-    return res.json(formattedData);
-
+    return res.json(result.recordset);
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'An error occurred while fetching data' });
@@ -14823,6 +14934,33 @@ app.post("/getsearcheng", authenticateToken, async (req, res) => {
     const result = await pool.request()
       .input('param', `%${param}%`)
       .input('licare_code', licare_code)
+      .query(sql);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "No results found" });
+    }
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+});
+app.post("/getscemesearch", authenticateToken, async (req, res) => {
+  const { param } = req.body;
+
+  if (!param) {
+    return res.status(400).json({ message: "Invalid parameter" });
+  }
+
+  try {
+    const pool = await poolPromise;
+
+    // Parameterized query with a limit
+    const sql = `select * from sceme_name where sceme_name like @param and deleted = 0`;
+
+    const result = await pool.request()
+      .input('param', `%${param}%`)
       .query(sql);
 
     if (result.recordset.length === 0) {
@@ -16379,15 +16517,9 @@ app.post('/addgrnspares', authenticateToken, async (req, res) => {
       INSERT INTO awt_cspgrnspare (grn_no, spare_no, spare_title, quantity, created_by, created_date)
       VALUES (@grn_no, @article_code, @article_title, @spare_qty, @created_by, @created_date)
     `;
-    // Only insert into csp_stock if it does not already exist for the same product_code and csp_code
     const Stockadd = `
-      IF NOT EXISTS (
-      SELECT 1 FROM csp_stock WHERE product_code = @product_code AND csp_code = @csp_code
-      )
-      BEGIN
-      INSERT INTO csp_stock (csp_code, product_code, productname, stock_quantity, created_by, created_date)
-      VALUES (@csp_code, @product_code, @productname, @stock_quantity, @created_by, @created_date)
-      END
+      INSERT INTO csp_stock (csp_code,product_code, productname, stock_quantity, created_by, created_date)
+      VALUES (@csp_code ,@product_code, @productname, @stock_quantity, @created_by, @created_date)
     `;
 
     const duplicateCheckQuery = `
@@ -21687,15 +21819,11 @@ app.post("/getfaultcodedump", authenticateToken, async (req, res) => {
 
     sql = `SELECT
 ct.ticket_no as TicketNumber,
-g.defectgrouptitle as FaultGroup,
-t.defect_title as FaultType,
-s.dsite_title as FaultLocation,
-a.title  as Activity 
+ct.group_code as FaultGroup,
+ct.defect_type as FaultType,
+ct.site_defect as FaultLocation,
+ct.activity_code  as Activity 
 FROM complaint_ticket ct 
-LEFT JOIN  awt_defectgroup as g on g.defectgroupcode = ct.group_code 
-LEFT JOIN  awt_typeofdefect as t on t.defect_code = ct.defect_type
-LEFT JOIN awt_site_defect as s on s.dsite_code = ct.site_defect
-LEFT JOIN awt_activity as a on a.code = ct.activity_code
 WHERE ct.deleted = 0 
   AND ct.ticket_date >= '${startDate}' 
   AND ct.ticket_date <= '${endDate}'  `

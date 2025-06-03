@@ -23,6 +23,7 @@ function Details() {
   const [callstatus, setcallstatus] = useState([])
   const [remark, setremark] = useState([])
   const { id } = useParams();
+  const [amctype, setamctype] = useState('')
   const [activity, setactivity] = useState([]);
   const [otppart, setotppart] = useState(true);
   const [iscomplate, setIscomplate] = useState(false)
@@ -863,78 +864,93 @@ function Details() {
 
 
   const handlegetmodel = async (value) => {
-
-    setserial(value)
-
+    const serial = value?.serial_no || value;
+    setserial(serial);
 
     try {
-      const response = await axios.get(
-        `${Base_Url}/getmobserial/${value || value.serial_no}`, {
+      const response = await axios.get(`${Base_Url}/getmobserial/${serial}`, {
         headers: {
-          Authorization: token, // Send token in headers
+          Authorization: token,
         },
-      }
-      );
+      });
 
+      const result = response.data?.data[0];
 
+      console.log(result);
 
-      if (!response.data || response.data.length === 0) {
+      if (!result) {
         alert("This serial does not exist.");
-        setserial(''); // Resetting serial number to 0
-        setModelNumber(''); // Clearing the model number
+        setserial('');
+        setModelNumber('');
         return;
       }
 
-      if (response.data && response.data[0] && response.data[0].ModelNumber) {
+      const isNewSerial = result.customer_id === null || result.customer_id === 'null';
+      const isSameCustomer = result.customer_id === data.customer_id;
+      const hasClassification = result.customer_classification !== null && result.customer_classification !== undefined;
+      const isClassificationMatch = result.customer_classification === data.customer_class;
+
+      let amcstaus = response.data.amcstaus || '';
+      let amctype = response.data.amctype || '';
 
 
-
-        if (response.data[0].customer_id == 'null' || response.data[0].customer_id == null) {
-          alert("New serial no")
-          getspare(response.data[0].ItemNumber)
-          getprice(response.data[0].ModelNumber)
-          setModelNumber(response.data[0].ModelNumber)
-          setallocation(response.data[0].allocation)
-          setItemcode(response.data[0].ItemNumber)
-        }
-        else if (response.data[0].customer_id == data.customer_id) {
-          alert("Serial no matched")
-          getspare(response.data[0].ItemNumber)
-          getprice(response.data[0].ModelNumber)
-          setModelNumber(response.data[0].ModelNumber)
-          setItemcode(response.data[0].ItemNumber)
-        }
-        else {
-          setserial('')
-          setModelNumber('')
-          alert("This serial no already allocated")
-        }
-
-      }
-
-
-
-      if ((response.data && response.data[0] && response.data[0].customer_classification == 'null') || (response.data && response.data[0] && response.data[0].customer_classification == null)) {
-        console.log("Classification not found")
-      }
-      else if (response.data && response.data[0] && response.data[0].customer_classification == data.customer_class) {
-
-        console.log("Matched")
-
+      if (amctype) {
+        setamctype(amctype)
       } else {
-        alert("Classification is different")
-        setserial('')
-        setsparedata('')
-        setModelNumber('')
+        setamctype('')
       }
 
+      // If classification is present but doesn't match, reject
+      if (hasClassification && !isClassificationMatch) {
+        alert("Classification is different");
+        setserial('');
+        setsparedata('');
+        setModelNumber('');
+        return;
+      }
 
+      if (isNewSerial) {
+        alert("New serial no");
+        getspare(result.ItemNumber);
+        getprice(result.ModelNumber);
+        setModelNumber(result.ModelNumber);
+        setallocation(result.allocation);
+        setItemcode(result.ItemNumber);
 
+      } else if (isSameCustomer) {
+        alert("Serial no matched");
+        getspare(result.ItemNumber);
+        getprice(result.ModelNumber);
+        setModelNumber(result.ModelNumber);
+        setItemcode(result.ItemNumber);
+        const purchaseDate = new Date(result.purchase_date);
+        setValue((prev) => ({
+          ...prev,
+          purchase_date: result.purchase_date
+        }))
+        if (!isNaN(purchaseDate)) {
+          if (amcstaus) {
 
+            setValue((prev) => ({
+              ...prev,
+              warranty_status: amcstaus
+            }))
+
+          } else {
+            getDateAfterOneYear(purchaseDate);
+          }
+        } else {
+          console.error("Invalid purchase_date format", result.purchase_date);
+        }
+      } else {
+        alert("This serial no already allocated");
+        setserial('');
+        setModelNumber('');
+      }
     } catch (error) {
       console.error("Error fetching serial details:", error);
     }
-  }
+  };
 
 
   const getDateAfterOneYear = (value) => {
@@ -1119,7 +1135,7 @@ function Details() {
                       dateFormat="dd-MM-yyyy"
                       placeholderText="DD-MM-YYYY"
                       className='form-control'
-                      disabled={data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false}
+                      disabled={data.call_status == 'Closed' || data.call_status == 'Completed' || amctype === 'AMC' || amctype === 'ExtWarranty' ? true : false}
                       name="purchase_date"
                       aria-describedby="Anidate"
                       maxDate={new Date().toISOString().split("T")[0]}
@@ -1233,7 +1249,7 @@ function Details() {
                   </div>
                   <div class="mb-3">
                     <div class="form-group">
-                      <label for="val-actioncode">Warranty Status</label>
+                      <label for="val-actioncode">Warranty Status : {amctype}</label>
                       <select name="warranty_status" disabled onChange={handleChange} value={Value.warranty_status} class="form-control" id="val_warranty_status">
                         {/* <option>Select Warranty Status</option> */}
                         <option value="OUT OF WARRANTY" selected>Out Warranty</option>

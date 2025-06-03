@@ -11,7 +11,12 @@ import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 import CryptoJS from 'crypto-js';
 import { useDispatch } from "react-redux";
 import { getRoleData } from "../../Store/Role/role-action";
-
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 
 const Childfranchisemaster = () => {
   const { loaders, axiosInstance } = useAxiosLoader();
@@ -29,13 +34,7 @@ const Childfranchisemaster = () => {
   });
   const [duplicateError, setDuplicateError] = useState("");
   const [isEdit, setIsEdit] = useState(false);
-
-  const [countries, setCountries] = useState([]);
-  const [regions, setRegions] = useState([]);
-  const [state, setState] = useState([])
-  const [area, setdistricts] = useState([])
-  const [city, setCity] = useState([])
-  const [pincode, setPincode] = useState([])
+  const [open, setOpen] = useState(false);
   const created_by = localStorage.getItem("userId"); // Get user ID from localStorage
   const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
 
@@ -49,6 +48,14 @@ const Childfranchisemaster = () => {
     console.log("Error".error)
   }
 
+
+  const handleopen = () => {
+    setOpen(true);
+  }
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
 
   const [formData, setFormData] = useState({
@@ -255,7 +262,7 @@ const Childfranchisemaster = () => {
   // Step 2: Add form validation function
   const validateForm = () => {
     const newErrors = {};
-  
+
     const requiredFields = {
       pfranchise_id: "Parent Franchise selection is required.",
       title: "Child Franchise Field is required.",
@@ -266,16 +273,16 @@ const Childfranchisemaster = () => {
       address: "Address is required.",
       partner_name: "Partner Name is required.",
     };
-  
+
     for (const key in requiredFields) {
       if (!formData[key] || !formData[key].toString().trim()) {
         newErrors[key] = requiredFields[key];
       }
     }
-  
+
     return newErrors;
   };
-  
+
 
   const navigate = useNavigate()
 
@@ -308,7 +315,7 @@ const Childfranchisemaster = () => {
             password: md5(formData.password || '') // Ensure password is not null before hashing
           }).map(([key, value]) => [key, value == null ? '' : String(value)])
         );
-        
+
 
 
         if (isEdit) {
@@ -817,7 +824,10 @@ const Childfranchisemaster = () => {
                   </div>
 
                   <div className="col-md-6">
-                    <label className="input-field">Address<span className="text-danger">*</span></label>
+                    <div className="d-flex justify-content-between align-items-center">
+                      <label className="input-field">Address<span className="text-danger">*</span></label>
+                      <span className="text-primary" style={{ cursor: "pointer" }} onClick={handleopen}>Add Address +</span>
+                    </div>
                     <textarea
                       className="form-control"
                       name="address"
@@ -840,6 +850,89 @@ const Childfranchisemaster = () => {
                   </div> : null}
                 </div>
               </form>
+
+              <Dialog
+                open={open}
+                onClose={handleClose}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+                fullWidth
+                maxWidth="lg"
+              >
+                <DialogTitle id="alert-dialog-title">Add Address</DialogTitle>
+                <DialogContent style={{ width: "100%" }}>
+                  <div className="row">
+                    {/* Form Section */}
+                    <div className="col-md-4 mb-3">
+                      <div className="row">
+                        <div className="col-md-12 mb-2">
+                          <label className="input-field">Address Code <span className="text-danger">*</span></label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            name="address_code"
+                            value={formData.address_code}
+                            onChange={handleChange}
+                          />
+                        </div>
+                        <div className="col-md-12 mb-2">
+                          <label className="input-field">
+                            Address <span className="text-danger">*</span>
+                          </label>
+                          <textarea
+                            className="form-control"
+                            name="address"
+                            value={formData.address}
+                            onChange={handleChange}
+                            placeholder="Enter Address"
+                            rows="3"
+                          />
+                          {errors.address && <small className="text-danger">{errors.address}</small>}
+                        </div>
+                        <div className="col-md-12 text-right">
+                          <button className="btn btn-sm btn-primary">Submit</button>
+
+                        </div>
+                      </div>
+
+
+                    </div>
+
+                    {/* Table Section */}
+                    <div className="col-md-8 mb-3">
+                      <table className="table table-bordered">
+                        <thead>
+                          <tr>
+                            <th>Address Code</th>
+                            <th>Address</th>
+                            <th>Edit</th>
+                            <th>Delete</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td>A5646465</td>
+                            <td>Goregaon East</td>
+                            <td>
+                              <button className="btn btn-sm btn-primary">Edit</button>
+                            </td>
+                            <td>
+                              <button className="btn btn-sm btn-danger">Delete</button>
+                            </td>
+                          </tr>
+                          {/* Add more rows dynamically if needed */}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={handleClose} autoFocus>
+                    Close
+                  </Button>
+                </DialogActions>
+              </Dialog>
+
             </div>
           </div>
         </div>

@@ -36,6 +36,7 @@ export function Complaintview(params) {
   const [uniquesparepart, setuniquesparepart] = useState([]);
   const [quotation, setQuotation] = useState([]);
   const [activity, setactivity] = useState([]);
+  const [amctype, setamctype] = useState('')
   const [engremark, setEngRemark] = useState([]);
   let { complaintid } = useParams();
   const [open, setOpen] = React.useState(false);
@@ -290,7 +291,7 @@ export function Complaintview(params) {
   const handleVisitEdit = () => {
 
     const data = {
-      visit_count : complaintview.visit_count,
+      visit_count: complaintview.visit_count,
       ticket_no: complaintview.ticket_no,
       updated_by: created_by
     }
@@ -445,7 +446,6 @@ export function Complaintview(params) {
 
   const getDateAfterOneYear = (value) => {
 
-    console.log(value, "purchase")
     try {
       // Ensure value is in a recognized format
       const purchase_date = new Date(value);
@@ -1359,7 +1359,7 @@ export function Complaintview(params) {
         },
       });
 
-      if (!response.data || response.data.length === 0) {
+      if (!response.data.data || response.data.data.length === 0) {
         alert("This serial does not exist.");
         setComplaintview((prevstate) => ({
           ...prevstate,
@@ -1373,7 +1373,16 @@ export function Complaintview(params) {
 
 
 
-      const serialData = response.data[0];
+      const serialData = response.data.data[0];
+      let amcstaus = response.data.amcstaus || '';
+      let amctype = response.data.amctype || '';
+
+
+      if (amctype) {
+        setamctype(amctype)
+      } else {
+        setamctype('')
+      }
 
 
       if (serialData?.ModelNumber) {
@@ -1394,7 +1403,17 @@ export function Complaintview(params) {
 
           const purchaseDate = new Date(serialData.purchase_date);
           if (!isNaN(purchaseDate)) {
-            getDateAfterOneYear(purchaseDate);
+            if (amcstaus) {
+
+              setWarranty_status_data(amcstaus);
+              setComplaintview((prev) => ({
+                ...prev,
+                warranty_status: amcstaus
+              }))
+
+            } else {
+              getDateAfterOneYear(purchaseDate);
+            }
           } else {
             console.error("Invalid purchase_date format", serialData.purchase_date);
           }
@@ -1410,7 +1429,16 @@ export function Complaintview(params) {
 
           const purchaseDate = new Date(serialData.purchase_date);
           if (!isNaN(purchaseDate)) {
-            getDateAfterOneYear(purchaseDate);
+            if (amcstaus) {
+              setWarranty_status_data(amcstaus);
+              setComplaintview((prev) => ({
+                ...prev,
+                warranty_status: amcstaus
+              }))
+
+            } else {
+              getDateAfterOneYear(purchaseDate);
+            }
           } else {
             console.error("Invalid purchase_date format", serialData.purchase_date);
           }
@@ -1432,7 +1460,28 @@ export function Complaintview(params) {
       }
 
       if (!serialData?.customer_classification || serialData.customer_classification == complaintview.customer_class) {
-        console.log("Matched");
+
+        const purchaseDate = new Date(serialData.purchase_date);
+        if (!isNaN(purchaseDate)) {
+          if (amcstaus) {
+            setWarranty_status_data(amcstaus);
+            setComplaintview((prev) => ({
+              ...prev,
+              warranty_status: amcstaus
+            }))
+
+          } else {
+            getDateAfterOneYear(purchaseDate);
+          }
+        } else {
+          console.error("Invalid purchase_date format", serialData.purchase_date);
+        }
+        setComplaintview((prevstate) => ({
+          ...prevstate,
+          ModelNumber: serialData.ModelNumber,
+          purchase_date: serialData.purchase_date,
+          item_code: serialData.ItemNumber
+        }));
       } else {
         alert("Classification is different");
         setComplaintview((prevstate) => ({
@@ -2555,15 +2604,14 @@ export function Complaintview(params) {
                       <p style={{ fontSize: "14px" }}>{purchase_date == null || purchase_date == '' || purchase_date == 'null' ? <DatePicker
                         selected={complaintview.purchase_date}
                         onChange={(date) => {
-
                           getDateAfterOneYear(date);
                         }}
                         dateFormat="dd-MM-yyyy"
                         placeholderText="DD-MM-YYYY"
                         className='form-control'
+                        disabled={amctype === 'AMC' || amctype === 'ExtWarranty'}
                         name="purchase_date"
                         aria-describedby="Anidate"
-
                         maxDate={new Date().toISOString().split("T")[0]}
                       /> : formatDate(complaintview.purchase_date)} </p>
                     </div>
@@ -2599,7 +2647,7 @@ export function Complaintview(params) {
                       </DialogActions>
                     </Dialog>
                     <div className="col-md-3">
-                      <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Warranty Status</p>
+                      <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Warranty Status : {amctype}</p>
                       <p style={{ fontSize: "14px" }}>{complaintview.warranty_status ? complaintview.warranty_status : warranty_status_data} </p>
                     </div>
 
@@ -3076,6 +3124,27 @@ export function Complaintview(params) {
                   </div>
                 </div>
               </div>
+            {roleaccess > 4 && <div className="my-2">
+                <div className="card p-3">
+                  <div className="col-md-12 mb-2">
+                    <label className="input-field">
+                      Final Remark 
+                    </label>
+                    <textarea
+                      className="form-control"
+                      name="address"
+                      onChange={handleChange}
+                      placeholder="Enter Remark"
+                      rows="2"
+                    />
+                  </div>
+                  <div className="text-right">
+                    <button className="btn btn-sm btn-primary">Submit</button>
+                  </div>
+                </div>
+
+              </div> } 
+           
 
               {/* Remark List Section */}
               <div className="mt-3" id="remarksSection">
@@ -3473,13 +3542,13 @@ export function Complaintview(params) {
 
 
                   <div className="my-3 ">
-                    <h4 className="pname" style={{ fontSize: "14px" }}>Visit Count {roleaccess > 4 ? <span className="mx-1"><EditIcon onClick={() =>setEditVisit(true)} style={{ fontSize: "13px" }} /></span> : null}</h4> 
+                    <h4 className="pname" style={{ fontSize: "14px" }}>Visit Count {roleaccess > 4 ? <span className="mx-1"><EditIcon onClick={() => setEditVisit(true)} style={{ fontSize: "13px" }} /></span> : null}</h4>
                     <select
                       name="visit_count"
                       className="form-control"
-                      disabled = {editvisit == true ? false : true}
+                      disabled={editvisit == true ? false : true}
                       style={{ fontSize: "14px" }}
-                      value={editvisit == true ?  complaintview.visit_count : updatedata.visit_count}
+                      value={editvisit == true ? complaintview.visit_count : updatedata.visit_count}
                       onChange={handleModelChange}
                     >
                       <option value='0'>0</option>
@@ -3489,7 +3558,7 @@ export function Complaintview(params) {
                       <option value='4'>4</option>
                     </select>
 
-                   {editvisit == true && <button className="btn btn-sm btn-primary my-2 float-end" onClick={handleVisitEdit}>Submit</button>}
+                    {editvisit == true && <button className="btn btn-sm btn-primary my-2 float-end" onClick={handleVisitEdit}>Submit</button>}
                   </div>
 
 

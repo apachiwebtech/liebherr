@@ -44,6 +44,7 @@ export function Registercomplaint(params) {
   const [ticketid, setTicketid] = useState('')
   const [serialhide, setserialHide] = useState('')
   const [purchasehide, setpurchseHide] = useState('')
+  const [amctype, setamctype] = useState('')
   const [classificationid, setClassification] = useState('')
   const token = localStorage.getItem("token");
   const fileInputRef = useRef();
@@ -85,7 +86,7 @@ export function Registercomplaint(params) {
     Comp_id = decrypted
 
   } catch (error) {
-    console.log("Error".error)
+    console.log("Error")
   }
 
   const [files2, setFiles2] = useState([]); // New state for Attachment 2 files
@@ -317,7 +318,7 @@ export function Registercomplaint(params) {
         newErrors.serial = "Serial No. Should be 9 digits";
       }
     }
-    
+
 
     if (!value.pincode) {
       isValid = false;
@@ -844,7 +845,6 @@ export function Registercomplaint(params) {
   const navigate = useNavigate()
 
 
-  console.log(value.customer_id, "cuys")
 
 
   const handlesubmit = (e) => {
@@ -900,14 +900,14 @@ export function Registercomplaint(params) {
         awhatsapp: String(checkboxes.awhatsaap),
         ticket_id: String(ticketid),
         mother_branch: value.mother_branch || '',
-        item_code : value.item_code || ''
+        item_code: value.item_code || ''
       };
 
 
 
       if (validateForm()) {
 
-    
+
 
         axiosInstance.post(`${Base_Url}/add_complaintt`, data, {
           headers: {
@@ -986,7 +986,7 @@ export function Registercomplaint(params) {
       awhatsapp: checkboxes.awhatsaap || 0,
       ticket_no: Comp_id,
       mother_branch: value.mother_branch || '',
-      item_code : value.item_code || ''
+      item_code: value.item_code || ''
     };
 
 
@@ -1200,14 +1200,29 @@ export function Registercomplaint(params) {
       }
       );
 
-      
 
-      setClassification(response.data[0].customerClassification)
+      if (!response.data || !response.data.data[0]) {
+        setpurchase_data('');
+        return;
+      }
 
-      const purchase_date = response.data[0].purchase_date
+      const data = response.data.data[0];
+      let amcstaus = response.data.amcstaus || '';
+      let amctype = response.data.amctype || '';
+
+      if (amctype) {
+        setamctype(amctype)
+      } else{
+        setamctype('')
+      }
+
+
+      setClassification(data.customerClassification)
+
+      const purchase_date = data.purchase_date
 
       if (purchase_date) {
-        setpurchseHide(response.data[0].purchase_date)
+        setpurchseHide(data.purchase_date)
         const date = new Date(purchase_date);
         // Format the date as YYYY-MM-DD
         const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -1221,35 +1236,40 @@ export function Registercomplaint(params) {
         const formattedDate2 = date2.toString();
 
         setpurchase_data(formattedDate);
-        getDateAfterOneYear(formattedDate2)
+
+        if (amcstaus) {
+
+          setWarranty_status_data(amcstaus);
+
+        } else {
+
+          getDateAfterOneYear(formattedDate2)
+        }
       } else {
         setpurchase_data('');  // or handle it accordingly (e.g., leave it as null)
       }
 
 
 
-      if (response.data && response.data[0]) {
 
+      setValue({
+        ...value,
+        model: data.ModelNumber || "", // Default to an empty string if null/undefined
+        serial: data.serial_no || "",
+        sales_partner: data.SalesPartner || "",
+        classification: data.customerClassification || "",
+        salutation: data.salutation || "",
+        customer_name: data.customer_fname || "",
+        cust_type: data.customer_type || "",
+        mobile: data.mobileno || "",
+        alt_mobile: data.alt_mobileno || "",
+        email: data.email || "",
+        address: data.address || "",
+        customer_id: data.customer_id || "",
+        pincode: data.pincode || '',
+        item_code: data.ItemNumber || ''
+      });
 
-        const data = response.data[0];
-        setValue({
-          ...value,
-          model: data.ModelNumber || "", // Default to an empty string if null/undefined
-          serial: data.serial_no || "",
-          sales_partner: data.SalesPartner || "",
-          classification: data.customerClassification || "",
-          salutation: data.salutation || "",
-          customer_name: data.customer_fname || "",
-          cust_type: data.customer_type || "",
-          mobile: data.mobileno || "",
-          alt_mobile: data.alt_mobileno || "",
-          email: data.email || "",
-          address: data.address || "",
-          customer_id: data.customer_id || "",
-          pincode: data.pincode || '',
-          item_code : data.ItemNumber || ''
-        });
-      }
 
 
     } catch (error) {
@@ -1342,7 +1362,12 @@ export function Registercomplaint(params) {
 
 
 
-  const addnewticket = (product_id) => {
+  const addnewticket = async (product_id) => {
+
+    if (!product_id) {
+      console.error("Product ID is required to add a new ticket.");
+      return;
+    }
 
     setForm(true)
     const data = {
@@ -1360,24 +1385,29 @@ export function Registercomplaint(params) {
       product_id: product_id
     }
 
-    axiosInstance.post(`${Base_Url}/add_new_ticket`, data, {
-      headers: {
-        Authorization: token, // Send token in headers
-      },
+    try {
+      const res = await axiosInstance.post(`${Base_Url}/add_new_ticket`, data, {
+        headers: {
+          Authorization: token,
+        },
+      });
+
+      if (res.data) {
+        const row = res.data.rowdata?.[0];
+        if (row) {
+          setTicketid(res.data.id)
+          setserialHide(res.data.rowdata[0].serial_no)
+          setpurchseHide(res.data.rowdata[0].purchase_date)
+          setadd_new_ticketdata(res.data.rowdata[0])
+          setModelNumber(res.data.rowdata[0].ModelNumber)
+          getDateAfterOneYear(res.data.rowdata[0].purchase_date)
+        }
+      }
+    } catch (err) {
+      console.error("Error creating ticket:", err);
     }
-    )
-      .then((res) => {
-        setTicketid(res.data.id)
-        setserialHide(res.data.rowdata[0].serial_no)
-        setpurchseHide(res.data.rowdata[0].purchase_date)
-        setadd_new_ticketdata(res.data.rowdata[0])
-        setModelNumber(res.data.rowdata[0].ModelNumber)
-        getDateAfterOneYear(res.data.rowdata[0].invoice_date)
 
 
-      }).catch((err) => {
-        console.log(err)
-      })
   }
 
 
@@ -1700,18 +1730,11 @@ export function Registercomplaint(params) {
                                 onHandleChange(e);
                               }
                             }}
-                            // onBlur={(e) => {
-                            //   if (e.target.value.length == 9) {
-                            //     // Call your API function here
-                            //     fetchserial(e.target.value)
-
-                            //     setpurchase_data("");
-                            //     setValue(prevState => ({
-                            //       ...prevState,
-                            //       model: ""
-                            //     }));
-                            //   }
-                            // }}
+                            onBlur={(e) => {
+                              if (e.target.value.length == 9) {
+                                fetchserial(e.target.value)
+                              }
+                            }}
                             onKeyDown={handleKeyDown}
                             className="form-control"
                             placeholder="Enter.."
@@ -1780,7 +1803,7 @@ export function Registercomplaint(params) {
 
                     {/* Add Warranty Status field */}
                     <div className="col-md-3">
-                      <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Warranty Status</p>
+                      <p style={{ fontSize: "11px", marginBottom: "5px", fontWeight: "bold" }}>Warranty Status : {amctype || ''}</p>
                       <div className="mb-3">
                         <select className="form-control" onChange={onHandleChange} value={warranty_status_data} name="warrenty_status" disabled>   {/* disabled={warranty_status_data == '' ? false : true */}
                           <option value="">Select Option</option>
@@ -2059,10 +2082,10 @@ export function Registercomplaint(params) {
                       <div className="col-md-3">
                         <div className="mb-3">
                           <label htmlFor="exampleFormControlInput1" className="form-label">Pincode <span className="text-danger">*</span></label>
-                          <input type="number" className="form-control" value={value.pincode} onKeyDown={handleKeyDown} name="pincode" onChange={(e) =>{
-                                if (e.target.value.length <= 6) {
-                                  onHandleChange(e);
-                                }
+                          <input type="number" className="form-control" value={value.pincode} onKeyDown={handleKeyDown} name="pincode" onChange={(e) => {
+                            if (e.target.value.length <= 6) {
+                              onHandleChange(e);
+                            }
                           }} placeholder="" />
                           {errors.pincode && <span style={{ fontSize: "12px" }} className="text-danger">{errors.pincode}</span>}
                         </div>
