@@ -7084,7 +7084,7 @@ app.post("/postchildfranchise", authenticateToken, async (req, res) => {
     city, contact_person, contract_activation_date, contract_expiration_date,
     country_id, email, gst_number, last_working_date, licare_code, mobile_no,
     pan_number, partner_name, password, pfranchise_id, pincode_id, region_id,
-    state, title, website, with_liebherr, created_by
+    state, title, website, with_liebherr, address_code, created_by
   } = req.body;
 
   const pool = await poolPromise;
@@ -7132,7 +7132,7 @@ app.post("/postchildfranchise", authenticateToken, async (req, res) => {
         .input('city', sql.VarChar, city)
         .input('pincode_id', sql.Int, pincode_id)
         .input('website', sql.VarChar, website)
-        // .input('created_by', sql.VarChar, created_by)
+        .input('created_by', sql.VarChar, created_by)
         .input('gst_number', sql.VarChar, gst_number)
         .input('pan_number', sql.VarChar, pan_number)
         .input('bank_name', sql.VarChar, bank_name)
@@ -7143,6 +7143,7 @@ app.post("/postchildfranchise", authenticateToken, async (req, res) => {
         .input('last_working_date', sql.DateTime, last_working_date || null)
         .input('contract_activation_date', sql.DateTime, contract_activation_date || null)
         .input('contract_expiration_date', sql.DateTime, contract_expiration_date || null)
+        .input('address_code', sql.VarChar, address_code)
         .query(`
           UPDATE awt_childfranchisemaster
           SET
@@ -7159,7 +7160,7 @@ app.post("/postchildfranchise", authenticateToken, async (req, res) => {
             geostate_id = @state,
             area_id = @area,
             geocity_id = @city,
-             created_by = @created_by,
+            created_by = @created_by,
             pincode_id = @pincode_id,
             webste = @website,
             gstno = @gst_number,
@@ -7172,9 +7173,12 @@ app.post("/postchildfranchise", authenticateToken, async (req, res) => {
             lastworkinddate = @last_working_date,
             contractacti = @contract_activation_date,
             contractexpir = @contract_expiration_date,
+            address_code = @address_code
             deleted = 0
           WHERE title = @title AND pfranchise_id = @pfranchise_id
         `);
+
+
 
       return res.json({
         message: "Soft-deleted Child Franchise Master restored successfully with updated data!",
@@ -7228,17 +7232,37 @@ app.post("/postchildfranchise", authenticateToken, async (req, res) => {
       .input('contract_expiration_date', sql.DateTime, contract_expiration_date || null)
       .input('with_liebherr', sql.DateTime, with_liebherr || null)
       .input('created_by', sql.VarChar, created_by)
+      .input('address_code', sql.VarChar, address_code)
       .input('role', '2')
       .query(`
         INSERT INTO awt_childfranchisemaster
         (title, pfranchise_id, licare_code, partner_name, contact_person, email, mobile_no, password, address,
          country_id, region_id, geostate_id, area_id, geocity_id, pincode_id, webste, gstno, panno, bankname,
-         bankacc, bankifsc, bankaddress, withliebher, lastworkinddate, contractacti, contractexpir, created_by , Role)
+         bankacc, bankifsc, bankaddress, withliebher, lastworkinddate, contractacti, contractexpir, created_by , Role,address_code)
         VALUES
         (@title, @pfranchise_id, @licare_code, @partner_name, @contact_person, @email, @mobile_no, @password,
          @address, @country_id, @region_id, @state, @area, @city, @pincode_id, @website, @gst_number, @pan_number,
          @bank_name, @bank_account_number, @bank_ifsc_code, @bank_address,@with_liebherr , @last_working_date,
-         @contract_activation_date, @contract_expiration_date, @created_by , @role)
+         @contract_activation_date, @contract_expiration_date, @created_by , @role,@address_code)
+      `);
+
+    const countResult1 = await pool.request()
+      .input('csp_code', sql.VarChar, licare_code)
+      .query(`SELECT COUNT(*) as count FROM Address_code WHERE csp_code = @csp_code AND deleted = 0`);
+
+    const existingCount = countResult1.recordset[0].count;
+    const default_address = existingCount > 0 ? 0 : 1;
+
+    await pool.request()
+      .input('address_code', sql.VarChar, address_code)
+      .input('pfranchise_id', sql.Int, pfranchise_id)
+      .input('licare_code', sql.VarChar, licarecode)
+      .input('address', sql.VarChar, address)
+      .input('default_address', sql.Int, default_address)
+      .input('created_by', sql.VarChar, created_by)
+      .query(`
+        INSERT INTO Address_code (address_code, msp_code, csp_code, address,default_address, created_by)
+        VALUES (@address_code, @pfranchise_id, @licare_code, @address,@default_address, @created_by)
       `);
     return res.json({
       message: "Child Franchise Master added successfully!",
@@ -7257,7 +7281,7 @@ app.post("/putchildfranchise", authenticateToken, async (req, res) => {
     email, mobile_no, password, address, country_id, region_id, state,
     area, city, pincode_id, website, gst_number, pan_number, bank_name,
     bank_account_number, bank_ifsc_code, bank_address, with_liebherr,
-    last_working_date, contract_activation_date, contract_expiration_date, created_by
+    last_working_date, contract_activation_date, contract_expiration_date, address_code, created_by
   } = req.body;
 
   try {
@@ -7314,6 +7338,7 @@ app.post("/putchildfranchise", authenticateToken, async (req, res) => {
         lastworkinddate = @last_working_date,
         contractacti = @contract_activation_date,
         contractexpir = @contract_expiration_date,
+        address_code = @address_code,
         updated_by = @created_by
       WHERE id = @id
     `;
@@ -7347,12 +7372,15 @@ app.post("/putchildfranchise", authenticateToken, async (req, res) => {
       .input('last_working_date', last_working_date)
       .input('contract_activation_date', contract_activation_date)
       .input('contract_expiration_date', contract_expiration_date)
+      .input('address_code', address_code)
       .input('created_by', created_by)
       .input('id', id)
       .query(updateSQL);
 
+
     return res.json({
       message: "Child Franchise updated successfully!"
+
     });
 
   } catch (err) {
@@ -22369,6 +22397,373 @@ AND ct.id = (
     return res.status(500).json({ error: "An error occurred while fetching data" });
   }
 });
+
+app.post("/getaddress", authenticateToken, async (req, res) => {
+  const { childid } = req.body;
+
+  try {
+    const pool = await poolPromise;
+
+    // Step 1: Get licare_code from awt_childfranchisemaster table
+    const licareResult = await pool
+      .request()
+      .input("childid", sql.Int, childid)
+      .query("SELECT licare_code FROM awt_childfranchisemaster WHERE id = @childid AND deleted = 0");
+
+
+    if (licareResult.recordset.length === 0) {
+      return res.status(404).json({ error: "licare_code not found" });
+    }
+
+    const licare_code = licareResult.recordset[0].licare_code;
+
+
+    // Step 2: Use licare_code to get address
+    const addressResult = await pool
+      .request()
+      .input("csp_code", sql.VarChar, licare_code)
+      .query("SELECT * FROM Address_code WHERE deleted = 0 AND csp_code = @csp_code");
+
+    const CryptoJS = require("crypto-js");
+    const SECRET_KEY = secretKey;
+
+    const encryptedData = CryptoJS.AES.encrypt(
+      JSON.stringify(addressResult.recordset),
+      SECRET_KEY
+    ).toString();
+
+    return res.status(200).json({ encryptedData });
+
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ error: "Database error occurred" });
+  }
+});
+
+app.post("/postaddaddress", authenticateToken, async (req, res) => {
+  const { address_code, address, created_by, childid } = req.body;
+
+  const pool = await poolPromise;
+
+  try {
+    // Fetch msp_code and csp_code
+    const franchiseResult = await pool.request()
+      .input('created_by', sql.VarChar, created_by)
+      .input("childid", sql.Int, childid)
+      .query(`
+        SELECT pfranchise_id, licare_code 
+        FROM awt_childfranchisemaster 
+        WHERE id = @childid AND deleted = 0
+      `);
+
+    if (franchiseResult.recordset.length === 0) {
+      return res.status(404).json({ message: "Franchise data not found for the given user." });
+    }
+
+    const { pfranchise_id, licare_code } = franchiseResult.recordset[0];
+
+    // Count how many active addresses already exist for this csp_code
+    const countResult = await pool.request()
+      .input('csp_code', sql.VarChar, licare_code)
+      .query(`SELECT COUNT(*) as count FROM Address_code WHERE csp_code = @csp_code AND deleted = 0`);
+
+    const existingCount = countResult.recordset[0].count;
+    const default_address = existingCount > 0 ? 0 : 1;
+
+    // Check for duplicate (active)
+    const checkDuplicateResult = await pool.request()
+      .input('address_code', sql.VarChar, address_code)
+      .query(`
+        SELECT * FROM Address_code WHERE address_code = @address_code AND deleted = 0
+      `);
+
+    if (checkDuplicateResult.recordset.length > 0) {
+      return res.status(409).json({
+        message: "Duplicate entry, Address Code already exists!",
+      });
+    }
+
+    // Check if soft-deleted
+    const checkSoftDeletedResult = await pool.request()
+      .input('address_code', sql.VarChar, address_code)
+      .query(`
+        SELECT * FROM Address_code WHERE address_code = @address_code AND deleted = 1
+      `);
+
+    if (checkSoftDeletedResult.recordset.length > 0) {
+      await pool.request()
+        .input('address_code', sql.VarChar, address_code)
+        .input('address', sql.Text, address)
+        .input('created_by', sql.VarChar, created_by)
+        .input('msp_code', sql.VarChar, pfranchise_id)
+        .input('csp_code', sql.VarChar, licare_code)
+        .input('default_address', sql.Int, default_address)
+        .query(`
+          UPDATE Address_code
+          SET
+            address = @address,
+            created_by = @created_by,
+            msp_code = @msp_code,
+            csp_code = @csp_code,
+            default_address = @default_address,
+            deleted = 0
+          WHERE address_code = @address_code
+        `);
+
+      return res.json({
+        message: "Soft-deleted Address restored successfully with updated data!",
+      });
+    }
+
+    // Insert new address with default_address
+    await pool.request()
+      .input('address_code', sql.VarChar, address_code)
+      .input('address', sql.Text, address)
+      .input('created_by', sql.VarChar, created_by)
+      .input('msp_code', sql.VarChar, pfranchise_id)
+      .input('csp_code', sql.VarChar, licare_code)
+      .input('default_address', sql.Int, default_address)
+      .query(`
+        INSERT INTO Address_code
+          (address_code, address, created_by, msp_code, csp_code, default_address)
+        VALUES
+          (@address_code, @address, @created_by, @msp_code, @csp_code, @default_address)
+      `);
+
+    return res.json({
+      message: "Address added successfully!",
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while processing the request' });
+  }
+});
+
+
+
+app.post("/putaddress", authenticateToken, async (req, res) => {
+  const { address_code, id, address, created_by, updateid } = req.body;
+
+  const pool = await poolPromise;
+  try {
+    console.log(updateid, 'edit ')
+
+
+    // Step 1: Duplicate Check Query
+    const duplicateCheckSQL = `
+      SELECT * FROM Address_code
+      WHERE address_code = @address_code
+      AND deleted = 0
+      AND id != @updateid
+    `;
+
+    console.log("Executing Duplicate Check SQL:", duplicateCheckSQL);
+
+    const duplicateCheckResult = await pool.request()
+      .input('address_code', address_code)
+      .input('updateid', updateid)
+      .query(duplicateCheckSQL);
+
+    if (duplicateCheckResult.recordset.length > 0) {
+      return res.status(409).json({
+        message: "Duplicate entry, Address Code already exists!"
+      });
+    }
+
+    // Step 2: Update Query
+    const updateSQL = `
+      UPDATE Address_code
+      SET
+        address_code = @address_code,
+        address = @address,
+        updated_by = @created_by
+      WHERE id = @updateid
+    `;
+
+    console.log("Executing Update SQL:", updateSQL);
+
+    await pool.request()
+      .input('address_code', address_code)
+      .input('address', address)
+      .input('created_by', created_by)
+      .input('updateid', updateid)
+      .query(updateSQL);
+
+    return res.json({
+      message: "Address updated successfully!"
+    });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "An error occurred while processing the request" });
+  }
+});
+
+app.post("/deleteaddress", authenticateToken, async (req, res) => {
+  const { deleteid } = req.body;
+
+  try {
+    const pool = await poolPromise;
+
+    // Step 1: Get csp_code and default status for the address to be deleted
+    const getAddress = await pool.request()
+      .input("deleteid", sql.Int, deleteid)
+      .query(`
+        SELECT csp_code, default_address 
+        FROM Address_code 
+        WHERE id = @deleteid AND deleted = 0
+      `);
+
+    if (getAddress.recordset.length === 0) {
+      return res.status(404).json({ message: "Address not found or already deleted." });
+    }
+
+    const { csp_code, default_address } = getAddress.recordset[0];
+
+    // Step 2: Delete the current address (soft delete)
+    await pool.request()
+      .input("deleteid", sql.Int, deleteid)
+      .query(`
+        UPDATE Address_code SET deleted = 1, default_address = 0 WHERE id = @deleteid
+      `);
+
+    // Step 3: If deleted address was default, promote another one and update awt_childfranchisemaster
+    if (default_address === 1) {
+      const nextAddress = await pool.request()
+        .input("csp_code", sql.VarChar, csp_code)
+        .query(`
+          SELECT TOP 1 id, address_code, address
+          FROM Address_code 
+          WHERE csp_code = @csp_code AND deleted = 0 
+          ORDER BY id ASC
+        `);
+
+      console.log("Next default candidate:", nextAddress.recordset);
+
+      if (nextAddress.recordset.length > 0) {
+        const { id: nextDefaultId, address_code, address } = nextAddress.recordset[0];
+
+        // Update default_address flag on the newly promoted address
+        await pool.request()
+          .input("nextDefaultId", sql.Int, nextDefaultId)
+          .query(`
+            UPDATE Address_code SET default_address = 1 WHERE id = @nextDefaultId
+          `);
+
+        console.log(`Default reassigned to ID: ${nextDefaultId}`);
+
+        // Update awt_childfranchisemaster with new default address_code and address
+        await pool.request()
+          .input("csp_code", sql.VarChar, csp_code)
+          .input("address_code", sql.VarChar, address_code)
+          .input("address", sql.VarChar, address)
+          .query(`
+            UPDATE awt_childfranchisemaster 
+            SET address_code = @address_code, address = @address 
+            WHERE licare_code = @csp_code
+          `);
+
+        console.log(`awt_childfranchisemaster updated for csp_code: ${csp_code}`);
+
+      } else {
+        console.log("No available address to reassign as default.");
+        // Optional: You might want to clear the address_code and address in awt_childfranchisemaster
+      }
+    }
+
+    return res.status(200).json({ message: "Address deleted successfully." });
+
+  } catch (err) {
+    console.error("Delete error:", err);
+    return res.status(500).json({ message: "Server error while deleting address." });
+  }
+});
+
+
+
+
+
+
+app.get("/requestaddress/:editid", authenticateToken, async (req, res) => {
+  const { editid } = req.params;
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+
+    const sql = `SELECT * FROM Address_code WHERE id = ${editid} AND deleted = 0`;
+
+    const result = await pool.request().query(sql);
+
+    if (result.recordset.length > 0) {
+      res.json(result.recordset[0]);
+    } else {
+      res.status(404).json({ message: "Data not found" });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Database error", error: err });
+  }
+});
+
+app.post("/setdefaultaddress", authenticateToken, async (req, res) => {
+  const { defaultid } = req.body;
+
+  try {
+    const pool = await poolPromise;
+
+    // Step 1: Get csp_code for the given defaultid
+    const result = await pool.request()
+      .input("defaultid", sql.Int, defaultid)
+      .query("SELECT csp_code FROM Address_code WHERE id = @defaultid AND deleted = 0");
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "Address not found" });
+    }
+
+    const csp_code = result.recordset[0].csp_code;
+
+    // Step 2: Reset all default flags for the same csp_code
+    await pool.request()
+      .input("csp_code", sql.VarChar, csp_code)
+      .query("UPDATE Address_code SET default_address = 0 WHERE csp_code = @csp_code AND deleted = 0");
+
+    // Step 3: Set default_address = 1 for the selected address
+    await pool.request()
+      .input("defaultid", sql.Int, defaultid)
+      .query("UPDATE Address_code SET default_address = 1 WHERE id = @defaultid");
+
+    // Step 4: Fetch updated address_code and address for the selected defaultid
+    const addressResult = await pool.request()
+      .input("defaultid", sql.Int, defaultid)
+      .query("SELECT address_code, address, csp_code FROM Address_code WHERE id = @defaultid AND deleted = 0");
+
+    const { address_code, address } = addressResult.recordset[0];
+
+    // Step 5: Update awt_childfranchisemaster table with new address details
+    await pool.request()
+      .input("address_code", sql.VarChar, address_code)
+      .input("address", sql.VarChar, address)
+      .input("csp_code", sql.VarChar, csp_code)
+      .query(`
+        UPDATE awt_childfranchisemaster 
+        SET address_code = @address_code, address = @address 
+        WHERE licare_code = @csp_code AND deleted = 0
+      `);
+
+    res.status(200).json({ message: "Default address updated successfully" });
+  } catch (error) {
+    console.error("Error updating default address:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+
+
+
+
+
+
 
 
 

@@ -29,6 +29,7 @@ export function Servicecontractlist(params) {
     const [pageSize, setPageSize] = useState(10);
     const [totalCount, setTotalCount] = useState(0);
     let { contractNumber } = useParams()
+    
 
     try {
         contractNumber = contractNumber.replace(/-/g, '+').replace(/_/g, '/');

@@ -21,10 +21,14 @@ import DialogTitle from '@mui/material/DialogTitle';
 const Childfranchisemaster = () => {
   const { loaders, axiosInstance } = useAxiosLoader();
   let { childid } = useParams();
+  let { licare_code } = useParams();
   const token = localStorage.getItem("token");
   const [Parentfranchise, setParentfranchise] = useState([]);
+  const [address, setAddress] = useState([]);
   const [errors, setErrors] = useState({});
+  const [errors1, setErrors1] = useState({});
   const [users, setUsers] = useState([]);
+  const [updateid, setEditid] = useState('');
   const [locations, setlocations] = useState({
     country: '',
     region: '',
@@ -34,6 +38,7 @@ const Childfranchisemaster = () => {
   });
   const [duplicateError, setDuplicateError] = useState("");
   const [isEdit, setIsEdit] = useState(false);
+  const [edit, setedit] = useState(false);
   const [open, setOpen] = useState(false);
   const created_by = localStorage.getItem("userId"); // Get user ID from localStorage
   const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
@@ -48,9 +53,19 @@ const Childfranchisemaster = () => {
     console.log("Error".error)
   }
 
+  try {
+    licare_code = licare_code.replace(/-/g, '+').replace(/_/g, '/');
+    const bytes = CryptoJS.AES.decrypt(licare_code, secretKey);
+    const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+    licare_code = parseInt(decrypted, 10)
+  } catch (error) {
+    console.log("Error".error)
+  }
+
 
   const handleopen = () => {
     setOpen(true);
+
   }
 
   const handleClose = () => {
@@ -85,6 +100,12 @@ const Childfranchisemaster = () => {
     contract_activation_date: "",
     contract_expiration_date: "",
     with_liebherr: "",
+    address_code: "",
+  });
+
+  const [formData1, setFormData1] = useState({
+    address_code: "",
+    address: "",
   });
 
   const fetchchildfranchisepopulate = async (childid) => {
@@ -123,7 +144,9 @@ const Childfranchisemaster = () => {
         last_working_date: response.data[0].lastworkinddate,
         contract_activation_date: response.data[0].contractacti,
         contract_expiration_date: response.data[0].contractexpir,
-        with_liebherr: response.data[0].withliebher
+        with_liebherr: response.data[0].withliebher,
+        address_code: response.data[0].address_code
+
       });
 
       setlocations({
@@ -141,10 +164,6 @@ const Childfranchisemaster = () => {
   };
 
   // End Fetch Child Franchise Deatils for populate
-
-
-
-
   const fetchParentfranchise = async () => {
     try {
       const response = await axiosInstance.get(`${Base_Url}/getparentfranchise`, {
@@ -157,7 +176,6 @@ const Childfranchisemaster = () => {
       const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
       const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
       const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
-      console.log("pf", decryptedData);
       setParentfranchise(decryptedData);
     } catch (error) {
       console.error("Error fetching Parentfranchise:", error);
@@ -175,7 +193,6 @@ const Childfranchisemaster = () => {
       const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
       const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
       const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
-      console.log(decryptedData);
       setUsers(decryptedData);
       // setFilteredUsers(response.data);
     } catch (error) {
@@ -190,6 +207,8 @@ const Childfranchisemaster = () => {
 
     fetchUsers();
     fetchParentfranchise();
+    fetchaddress(licare_code);
+
 
 
     if (childid && childid !== '0') {
@@ -272,10 +291,28 @@ const Childfranchisemaster = () => {
       password: "Password is required.",
       address: "Address is required.",
       partner_name: "Partner Name is required.",
+      address_code: "Address Code is Required"
     };
 
     for (const key in requiredFields) {
       if (!formData[key] || !formData[key].toString().trim()) {
+        newErrors[key] = requiredFields[key];
+      }
+    }
+
+    return newErrors;
+  };
+
+  const validateForm1 = () => {
+    const newErrors = {};
+
+    const requiredFields = {
+      address_code: "Address Code  is required.",
+      address: "Address is required.",
+    };
+
+    for (const key in requiredFields) {
+      if (!formData1[key] || !formData1[key].toString().trim()) {
         newErrors[key] = requiredFields[key];
       }
     }
@@ -353,7 +390,8 @@ const Childfranchisemaster = () => {
                 last_working_date: "",
                 contract_activation_date: "",
                 contract_expiration_date: "",
-                with_liebherr: ""
+                with_liebherr: "",
+                address_code: "",
               });
               fetchUsers();
               setIsEdit(false);
@@ -401,7 +439,8 @@ const Childfranchisemaster = () => {
                 last_working_date: "",
                 contract_activation_date: "",
                 contract_expiration_date: "",
-                with_liebherr: ""
+                with_liebherr: "",
+                address_code: "",
               });
               navigate('/Childfranchiselist')
               fetchUsers();
@@ -419,6 +458,186 @@ const Childfranchisemaster = () => {
       console.error("Error during form submission:", error);
     }
   };
+
+  // Add Address Start
+  const fetchaddress = async () => {
+    try {
+      const response = await axios.post(
+        `${Base_Url}/getaddress`,
+        { childid: String(childid) },
+        {
+          headers: {
+            Authorization: token,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const encryptedData = response.data.encryptedData;
+
+      // Decrypt data
+      const bytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+      const decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+      setAddress(decryptedData);
+
+    } catch (error) {
+      console.error("Error fetching address:", error);
+    }
+  };
+
+  const handleaddressSubmit = async (e) => {
+    e.preventDefault();
+    const validationErrors1 = validateForm1();
+    if (Object.keys(validationErrors1).length > 0) {
+      console.log("Validation Errors:", validationErrors1);
+      setErrors1(validationErrors1);
+      return;
+    }
+    setDuplicateError("");
+
+    try {
+      const confirmSubmission = window.confirm(
+        "Do you want to submit the data?"
+      );
+      if (confirmSubmission) {
+        if (edit) {
+          await axios
+            .post(`${Base_Url}/putaddress`, { ...formData1, created_by, updateid:String(updateid) }, {
+              headers: {
+                Authorization: token,
+              },
+            })
+            .then((response) => {
+
+              setFormData1({
+                address_code: "",
+                address: "",
+              });
+              fetchaddress();
+              setedit(false);
+            })
+            .catch((error) => {
+              if (error.response && error.response.status === 409) {
+                setDuplicateError(
+                  "Duplicate entry, Address Code already exists!"
+                );
+              }
+            });
+        } else {
+
+          await axiosInstance.post(`${Base_Url}/postaddaddress`, { ...formData1, created_by, childid:String(childid) }, {
+            headers: {
+              Authorization: token,
+            },
+          })
+            .then((response) => {
+
+
+              setFormData1({
+                address_code: "",
+                address: ""
+              });
+              fetchaddress();
+            })
+            .catch((error) => {
+              if (error.response && error.response.status === 409) {
+                setDuplicateError(
+                  "Duplicate entry, Address Code already exists!"
+                );
+              }
+            });
+        }
+      }
+    } catch (error) {
+      console.error("Error during form submission:", error);
+    }
+  };
+
+  const handleChange1 = (e) => {
+    const { name, value } = e.target;
+
+    setFormData1(prevState => ({
+      ...prevState,
+      [name]: value
+    }));
+  };
+
+  const handleDeleteAddress = async (deleteid) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this address?");
+    if (!confirmDelete) {
+      return; // User canceled
+    }
+
+    try {
+      const response = await axios.post(`${Base_Url}/deleteaddress`, {
+        deleteid:String(deleteid),
+      }, {
+        headers: {
+          Authorization: token,
+        },
+      });
+
+      alert(response.data.message);
+      fetchaddress(); // Refresh the list
+      fetchchildfranchisepopulate(childid);
+
+    } catch (error) {
+      console.error("Delete failed:", error);
+      alert("Failed to delete address.");
+    }
+  };
+
+
+  const requestaddress = async (editid) => {
+
+    setEditid(editid)
+    try {
+      const response = await axiosInstance.get(`${Base_Url}/requestaddress/${editid}`, {
+        headers: { Authorization: token },
+      });
+
+      console.log("Response from API:", response.data); // Check structure
+      setFormData1(response.data);
+      setedit(true);
+    } catch (error) {
+      console.error("Error editing user:", error);
+    }
+  };
+
+  const handleSetDefault = async (defaultid) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await axios.post(`${Base_Url}/setdefaultaddress`, { defaultid:String(defaultid) }, {
+        headers: {
+          Authorization: token,
+        },
+      });
+
+      if (response.status === 200) {
+        fetchaddress(); // Refresh list
+        fetchchildfranchisepopulate(childid);
+      } else {
+        console.error("Failed to set default address");
+      }
+    } catch (error) {
+      console.error("Error while setting default address:", error);
+    }
+  };
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // Add Address End
 
   // Role Right 
 
@@ -809,6 +1028,19 @@ const Childfranchisemaster = () => {
                       onChange={handleChange}
                     />
                   </div>
+                  <div className="col-md-3">
+                    <label className="input-field">Address Code</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="address_code"
+                      value={formData.address_code}
+                      onChange={handleChange}
+                      disabled={isEdit}
+                      placeholder="Enter Address Code"
+                    />
+                    {errors.address_code && <small className="text-danger">{errors.address_code}</small>}
+                  </div>
 
 
                   <div className="col-md-6">
@@ -826,13 +1058,23 @@ const Childfranchisemaster = () => {
                   <div className="col-md-6">
                     <div className="d-flex justify-content-between align-items-center">
                       <label className="input-field">Address<span className="text-danger">*</span></label>
-                      <span className="text-primary" style={{ cursor: "pointer" }} onClick={handleopen}>Add Address +</span>
+                      {isEdit && (
+                        <span
+                          className="text-primary"
+                          style={{ cursor: "pointer" }}
+                          onClick={handleopen}
+                        >
+                          Add Address +
+                        </span>
+                      )}
+
                     </div>
                     <textarea
                       className="form-control"
                       name="address"
                       value={formData.address}
                       onChange={handleChange}
+                      disabled={isEdit}
                       placeholder="Enter Address"
                       rows="3"
                     />
@@ -863,6 +1105,7 @@ const Childfranchisemaster = () => {
                 <DialogContent style={{ width: "100%" }}>
                   <div className="row">
                     {/* Form Section */}
+
                     <div className="col-md-4 mb-3">
                       <div className="row">
                         <div className="col-md-12 mb-2">
@@ -871,9 +1114,13 @@ const Childfranchisemaster = () => {
                             type="text"
                             className="form-control"
                             name="address_code"
-                            value={formData.address_code}
-                            onChange={handleChange}
+                            value={formData1.address_code}
+                            onChange={handleChange1}
+                            placeholder="Enter Address Code"
                           />
+                          {errors1.address_code && (
+                            <small className="text-danger">{errors1.address_code}</small>
+                          )}
                         </div>
                         <div className="col-md-12 mb-2">
                           <label className="input-field">
@@ -882,22 +1129,41 @@ const Childfranchisemaster = () => {
                           <textarea
                             className="form-control"
                             name="address"
-                            value={formData.address}
-                            onChange={handleChange}
+                            value={formData1.address}
+                            onChange={handleChange1}
                             placeholder="Enter Address"
                             rows="3"
                           />
-                          {errors.address && <small className="text-danger">{errors.address}</small>}
+                          {errors1.address && (
+                            <small className="text-danger">{errors1.address}</small>
+                          )}
                         </div>
                         <div className="col-md-12 text-right">
-                          <button className="btn btn-sm btn-primary">Submit</button>
+
+                          <button
+                            className="btn btn-sm btn-danger"
+                            style={{ marginRight: '5px' }}
+                            onClick={() => {
+                              setFormData1({
+                                address_code: "",
+                                address: "",
+                                // reset other fields here
+                              });
+                              setedit(false)
+                            }}
+                          >
+                            Clear
+                          </button>
+
+                          {edit ? <button className="btn btn-sm btn-primary" onClick={handleaddressSubmit}> Update</button>
+                            : <button className="btn btn-sm btn-primary" onClick={handleaddressSubmit}> Submit</button>}
+
 
                         </div>
                       </div>
 
 
                     </div>
-
                     {/* Table Section */}
                     <div className="col-md-8 mb-3">
                       <table className="table table-bordered">
@@ -907,23 +1173,40 @@ const Childfranchisemaster = () => {
                             <th>Address</th>
                             <th>Edit</th>
                             <th>Delete</th>
+                            <th>Default Address</th>
                           </tr>
                         </thead>
                         <tbody>
-                          <tr>
-                            <td>A5646465</td>
-                            <td>Goregaon East</td>
-                            <td>
-                              <button className="btn btn-sm btn-primary">Edit</button>
-                            </td>
-                            <td>
-                              <button className="btn btn-sm btn-danger">Delete</button>
-                            </td>
-                          </tr>
+                          {address.map((item) => {
+                            return (
+                              <tr key={item.id}>
+                                <td>{item.address_code}</td>
+                                <td>{item.address}</td>
+                                <td>
+                                  <button className="btn btn-sm btn-primary" onClick={() => requestaddress(item.id)}>Edit</button>
+                                </td>
+                                <td>
+                                  <button className="btn btn-sm btn-danger" onClick={() => handleDeleteAddress(item.id)}> Delete</button>
+                                </td>
+                                <td>
+                                  <button
+                                    className={`btn btn-sm ${item.default_address === 1 ? 'btn-secondary' : 'btn-success'}`}
+                                    disabled={item.default_address === 1}
+                                    onClick={() => handleSetDefault(item.id)}
+                                  >
+                                    {item.default_address === 1 ? "Default" : "Set as Default"}
+                                  </button>
+
+                                </td>
+
+                              </tr>
+                            )
+                          })}
                           {/* Add more rows dynamically if needed */}
                         </tbody>
                       </table>
                     </div>
+
                   </div>
                 </DialogContent>
                 <DialogActions>
@@ -936,8 +1219,8 @@ const Childfranchisemaster = () => {
             </div>
           </div>
         </div>
-      </div> : null}
-    </div>
+      </div > : null}
+    </div >
   );
 };
 
