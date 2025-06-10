@@ -287,7 +287,7 @@ const EngineerMaster = () => {
       alert('No file available for preview.');
     }
   };
-  
+
   const handlePreviewClick3 = (gov_address_proof) => {
 
     if (gov_address_proof) {
@@ -325,6 +325,9 @@ const EngineerMaster = () => {
     }
     if (!formData.title) {
       newErrors.title = "Engineer Name Field is required.";
+    }
+    if (!formData.employee_code) {
+      newErrors.employee_code = "Employee Code  selection is required.";
     }
     return newErrors;
   };

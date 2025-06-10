@@ -9,6 +9,8 @@ import * as XLSX from "xlsx";
 import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 import { useDispatch } from "react-redux";
 import { getRoleData } from "../../Store/Role/role-action";
+import { useNavigate } from "react-router-dom";
+import { FaPencilAlt, FaTrash } from "react-icons/fa";
 
 const PostSaleWarrenty = () => {
 
@@ -242,6 +244,34 @@ const PostSaleWarrenty = () => {
 
   // export to excel end 
 
+  const navigate = useNavigate()
+
+  const sendtoedit = async (id) => {
+    id = id.toString()
+    // let encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
+    // encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    navigate(`/addpostsalewarranty/${id}`)
+  };
+
+
+  const deleted = async (id) => {
+    const confirm = window.confirm("Are you sure you want to delete ?");
+
+    if (confirm) {
+      try {
+        const response = await axiosInstance.post(`${Base_Url}/deletepostsalewarrenty`, { id }, {
+          headers: {
+            Authorization: token, // Send token in headers
+          },
+        });
+        // alert(response.data[0]);
+        // window.location.reload();
+        fetchUsers();
+      } catch (error) {
+        console.error("Error deleting user:", error);
+      }
+    }
+  };
   // Role Right 
 
 
@@ -417,11 +447,6 @@ const PostSaleWarrenty = () => {
                   <thead>
                     <tr>
                       <th width="3%">#</th>
-                      <th width="10%">Item_code</th>
-                      <th width="10%">Serial_no</th>
-                      <th width="10%">Customer_Name</th>
-                      <th width="10%">Customer_Email</th>
-                      <th width="10%">Customer_Mobile</th>
                       <th width="10%">Product_Type</th>
                       <th width="10%">Product_Line</th>
                       <th width="10%">Product_Class</th>
@@ -431,6 +456,8 @@ const PostSaleWarrenty = () => {
                       <th width="10%">Warrenty_amount</th>
                       <th width="10%">Is_Scheme</th>
                       <th width="10%">Scheme_Name</th>
+                      {roleaccess > 3 ? <th width="5%">Edit</th> : null}
+                      {roleaccess > 4 ? <th width="5%">Delete</th> : null}
 
 
 
@@ -442,13 +469,7 @@ const PostSaleWarrenty = () => {
                       const displayIndex = (currentPage - 1) * pageSize + index + 1;
                       return (
                         <tr key={item.id}>
-                          <td>{displayIndex}</td>
-                          <td>{item.item_code}</td>
-                          <td>{item.serial_no}</td>
-                          <td>{item.customer_name}</td>
-                          <td>{item.customer_email}</td>
-                          <td>{item.customer_mobile}</td>
-                          <td>{item.Producttype}</td>
+                          <td>{displayIndex}</td>                          <td>{item.Producttype}</td>
                           <td>{item.ProductLine}</td>
                           <td>{item.ProductClass}</td>
                           <td>{item.ServiceType}</td>
@@ -457,6 +478,31 @@ const PostSaleWarrenty = () => {
                           <td>{item.warranty_amount}</td>
                           <td>{item.is_scheme}</td>
                           <td>{item.scheme_name}</td>
+                          <td>
+                            {roleaccess > 3 ?
+                              <button
+                                className='btn'
+                                onClick={() => sendtoedit(item.id)}
+                                title="Edit"
+                                style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                              >
+                                <FaPencilAlt />
+                              </button>
+                              : null}
+                          </td>
+                          <td>
+                            {roleaccess > 4 ? <td >
+                              <button
+                                className='btn'
+                                onClick={() => deleted(item.id)}
+                                title="Delete"
+                                style={{ backgroundColor: 'transparent', border: 'none', color: 'red', fontSize: '20px' }}
+                                disabled={roleaccess > 4 ? false : true}
+                              >
+                                <FaTrash />
+                              </button>
+                            </td> : null}
+                          </td>
 
 
                         </tr>

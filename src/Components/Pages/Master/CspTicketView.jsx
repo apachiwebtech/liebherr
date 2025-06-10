@@ -29,6 +29,9 @@ export function CspTicketView(params) {
   const [addedSpareParts, setAddedSpareParts] = useState([]);
   const [uniquesparepart, setuniquesparepart] = useState([]);
   const [quotation, setQuotation] = useState([]);
+  const [addresscode, setAddressCode] = useState([]); // Current attachment for modal
+  const [selectedAddress, setSelectedAddress] = useState("");
+  const [addresscodeid, setAddressCodeId] = useState(''); // Current attachment for modal
   const [activity, setactivity] = useState([]);
   const [engremark, setEngRemark] = useState([]);
   const [model, setModel] = useState('');
@@ -1520,6 +1523,45 @@ export function CspTicketView(params) {
 
   };
 
+  const getAddressCode = async (complaintid) => {
+    try {
+      const response = await axiosInstance.get(`${Base_Url}/getaddresscode`, {
+        headers: {
+          Authorization: token,
+        },
+        params: {
+          complaintid: String(complaintid)
+        }
+      });
+
+      // Decrypt the response data
+      const encryptedData = response.data.encryptedData;
+      const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+      const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+
+      setAddressCode(decryptedData);
+    } catch (error) {
+      console.error("Error fetching AddressCode:", error);
+    }
+  };
+
+  // Handles dropdown selection change and updates the selected address
+  const handleAddressChange = (e) => {
+    const selectedCode = e.target.value;
+    setAddressCodeId(selectedCode);
+
+    const matchedAddress = addresscode.find(item => item.address_code === selectedCode);
+    setSelectedAddress(matchedAddress?.address || "");
+  };
+
+  // Prefills the address if complaintview already has an address_code
+  useEffect(() => {
+    if (!complaintview?.address_code || addresscode.length === 0) return;
+
+    const matchedAddress = addresscode.find(item => item.address_code === complaintview.address_code);
+    setSelectedAddress(matchedAddress?.address || "");
+  }, [addresscode, complaintview]);
+
 
 
 
@@ -1573,6 +1615,7 @@ export function CspTicketView(params) {
   useEffect(() => {
     getcallstatus()
     // getsubcallstatus()
+    getAddressCode(complaintid)
 
     getgroupdefect()
     getdefecttype()
@@ -2479,6 +2522,37 @@ export function CspTicketView(params) {
                                 />
 
                               </div>
+
+                              {(complaintview.call_status == 'Spares' && ((complaintview.sub_call_status == 'Spare Required' || complaintview.sub_call_status == 'Spare Ordered'))) &&
+                                <div className="mb-3 col-lg-4">
+                                  <h4 className="pname" style={{ fontSize: "14px" }}>Address Code</h4>
+                                  <select name="address_code" className="form-control" style={{ fontSize: "14px" }} onChange={handleAddressChange}>
+                                    <option value="">Select</option>
+                                    {addresscode.map((value) => (
+                                      <option key={value.address_code} value={value.address_code}>
+                                        {value.address_code}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+
+                              }
+
+
+                              {(complaintview.call_status == 'Spares' && ((complaintview.sub_call_status == 'Spare Required' || complaintview.sub_call_status == 'Spare Ordered'))) &&
+                                <div className="mb-3 col-lg-8">
+                                  <h4 className="pname" style={{ fontSize: "14px" }}>Address</h4>
+                                  <textarea
+                                    className="form-control"
+                                    name="address"
+                                    id="addressInput"
+                                    value={selectedAddress}
+                                    placeholder="Enter  Address"
+                                    rows="2"  // Adjust the number of rows (height) as needed
+                                  />
+                                </div>
+
+                              }
                               {(complaintview.call_status == 'Spares' || ((complaintview.call_status == 'Approval' && complaintview.sub_call_status == 'Customer Approval / Quotation'))) &&
 
                                 <div className=" py-1 my-2">

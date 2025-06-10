@@ -178,6 +178,8 @@ import MspGrn from './Components/Pages/Master/MspGrn';
 import InwardLiebherr from './Components/Pages/Grn/InwardLiebherr';
 import InwardOthers from './Components/Pages/Grn/InwardOthers';
 import Outward from './Components/Pages/Grn/Outward';
+import AddMasterWarrenty from './Components/Pages/Master/AddMasterWarrenty';
+import AddPostWarranty from './Components/Pages/Master/AddPostWarranty';
 
 
 
@@ -985,6 +987,23 @@ const Router = createBrowserRouter([
       {
         path: "/addrate",
         element: <ProtectedRoute><AddRatecard /></ProtectedRoute>
+      },
+      {
+        path: "/addmasterwarrenty",
+        element: <ProtectedRoute><AddMasterWarrenty /></ProtectedRoute>
+      },
+      {
+        path: "/addmasterwarrenty/:masterwarrentyid",
+        element: <ProtectedRoute><AddMasterWarrenty /></ProtectedRoute>,
+
+      },
+            {
+        path: "/addpostsalewarranty",
+        element: <ProtectedRoute><AddPostWarranty /></ProtectedRoute>
+      },
+            {
+        path: "/addpostsalewarranty/:postsaleid",
+        element: <ProtectedRoute><AddPostWarranty /></ProtectedRoute>
       },
       {
         path: "/engineerapprove",

@@ -9,6 +9,8 @@ import * as XLSX from "xlsx";
 import { useAxiosLoader } from "../../Layout/UseAxiosLoader";
 import { useDispatch } from "react-redux";
 import { getRoleData } from "../../Store/Role/role-action";
+import { FaPencilAlt, FaTrash } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 
 
@@ -240,6 +242,33 @@ const Master_Warrenty = () => {
   };
 
   // export to excel end 
+  const navigate = useNavigate()
+
+  const sendtoedit = async (id) => {
+    id = id.toString()
+    // let encrypted = CryptoJS.AES.encrypt(id, secretKey).toString();
+    // encrypted = encrypted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    navigate(`/addmasterwarrenty/${id}`)
+  };
+
+  const deleted = async (id) => {
+    const confirm = window.confirm("Are you sure you want to delete ?");
+
+    if (confirm) {
+      try {
+        const response = await axiosInstance.post(`${Base_Url}/deletemasterwarrenty`, { id }, {
+          headers: {
+            Authorization: token, // Send token in headers
+          },
+        });
+        // alert(response.data[0]);
+        // window.location.reload();
+        fetchUsers();
+      } catch (error) {
+        console.error("Error deleting user:", error);
+      }
+    }
+  };
 
   // Role Right 
 
@@ -419,14 +448,14 @@ const Master_Warrenty = () => {
                   <thead>
                     <tr>
                       <th width="3%">#</th>
-                      <th width="10%">Csp_Code</th>
-                      <th width="10%">Item_code</th>
                       <th width="10%">Product_Type</th>
                       <th width="10%">Product_Line</th>
                       <th width="10%">Product_Class</th>
                       <th width="10%">Service_Type</th>
                       <th width="10%">Warrenty_year</th>
                       <th width="10%">Compressor_Warrenty</th>
+                      {roleaccess > 3 ? <th width="5%">Edit</th> : null}
+                      {roleaccess > 4 ? <th width="5%">Delete</th> : null}
                       {/* <th width="10%">Warrenty_amount</th>
                       <th width="10%">Is_Scheme</th>
                       <th width="10%">Scheme_Name</th> */}
@@ -442,8 +471,6 @@ const Master_Warrenty = () => {
                       return (
                         <tr key={item.id}>
                           <td>{displayIndex}</td>
-                          <td>{item.csp_code}</td>
-                          <td>{item.item_code}</td>
                           <td>{item.Product_Type}</td>
                           <td>{item.Product_Line}</td>
                           <td>{item.Product_Class}</td>
@@ -453,6 +480,31 @@ const Master_Warrenty = () => {
                           {/* <td>{item.warrenty_amount}</td>
                           <td>{item.is_scheme}</td>
                           <td>{item.scheme_name}</td> */}
+                          <td>
+                            {roleaccess > 3 ?
+                              <button
+                                className='btn'
+                                onClick={() => sendtoedit(item.id)}
+                                title="Edit"
+                                style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
+                              >
+                                <FaPencilAlt />
+                              </button>
+                              : null}
+                          </td>
+                          <td>
+                            {roleaccess > 4 ? <td >
+                              <button
+                                className='btn'
+                                onClick={() => deleted(item.id)}
+                                title="Delete"
+                                style={{ backgroundColor: 'transparent', border: 'none', color: 'red', fontSize: '20px' }}
+                                disabled={roleaccess > 4 ? false : true}
+                              >
+                                <FaTrash />
+                              </button>
+                            </td> : null}
+                          </td>
 
 
                         </tr>

@@ -2,53 +2,34 @@ import React from 'react';
 import Logo from '../../../images/Liebherr-logo-768x432.png'
 import Rating from '@mui/material/Rating';
 import { Base_Url, secretKey } from '../../Utils/Base_Url';
-import { useParams, useSearchParams } from 'react-router-dom';
-import { useState,useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import CryptoJS from 'crypto-js';
 import axios from 'axios';
 
 const ContactForm = () => {
     const token = localStorage.getItem("token");
     const [searchParams] = useSearchParams();
-    const ticketId = searchParams.get('ticket'); // 'BH0425-0028'
+    const encryptedTicket = searchParams.get('ticket');
 
-    console.log(ticketId , "RRR")
+    const [ticketNo, setTicketNo] = useState("");
     const [formState, setFormState] = useState({
         rating1: 0,
         remark: "",
         rating2: 0
     });
     const [errors, setErrors] = useState({});
-    const [isSubmitted, setIsSubmitted] = useState(false); // Track submission status
-    const [serverError, setServerError] = useState(""); // Handle server error messages
-    let { email, customerId, ticketNo } = useParams();
+    const [isSubmitted, setIsSubmitted] = useState(false);
+    const [serverError, setServerError] = useState("");
 
-    // Decrypt URL parameters
-    try {
-        email = email.replace(/-/g, '+').replace(/_/g, '/');
-        const bytes = CryptoJS.AES.decrypt(email, secretKey);
-        email = bytes.toString(CryptoJS.enc.Utf8);
-    } catch (error) {
-        console.log("Error", error);
-    }
+    // Decrypt ticket number from query param
+    useEffect(() => {
+        if (encryptedTicket) {
+            setTicketNo(encryptedTicket); // No decryption, just set directly
+        }
+    }, [encryptedTicket]);
 
-    try {
-        customerId = customerId.replace(/-/g, '+').replace(/_/g, '/');
-        const bytes = CryptoJS.AES.decrypt(customerId, secretKey);
-        customerId = bytes.toString(CryptoJS.enc.Utf8);
-    } catch (error) {
-        console.log("Error", error);
-    }
 
-    try {
-        ticketNo = ticketNo.replace(/-/g, '+').replace(/_/g, '/');
-        const bytes = CryptoJS.AES.decrypt(ticketNo, secretKey);
-        ticketNo = bytes.toString(CryptoJS.enc.Utf8);
-    } catch (error) {
-        console.log("Error", error);
-    }
-
-    // Dynamically set the style for rating1
     let rating1Style = "";
     if (formState.rating1 <= 6) {
         rating1Style = 'bg-danger text-white';
@@ -58,7 +39,6 @@ const ContactForm = () => {
         rating1Style = 'bg-success text-white';
     }
 
-    // Form validation
     const validateForm = () => {
         let isValid = true;
         if (!formState.rating1) {
@@ -72,7 +52,6 @@ const ContactForm = () => {
         return isValid;
     };
 
-    // Handle form submission
     const handleSubmit = (e) => {
         e.preventDefault();
         setErrors({});
@@ -83,9 +62,7 @@ const ContactForm = () => {
                 rating1: String(formState.rating1),
                 remark: String(formState.remark),
                 rating2: formState.rating2,
-                email: email,
-                ticketNo: ticketNo,
-                customerId: customerId
+                ticketNo: ticketNo
             };
 
             axios.post(`${Base_Url}/awt_service_contact`, data, {
@@ -94,37 +71,39 @@ const ContactForm = () => {
                     'x-api-key': 'a8f2b3c4-d5e6-7f8g-h9i0-12345jklmn67'
                 }
             })
-            .then((res) => {
-                console.log(res);
-                setIsSubmitted(true); // Prevent further submissions
-            })
-            .catch((err) => {
-                console.log(err);
-                setServerError(err.response?.data?.message || "Already Submitted Your Response");
-            });
+                .then((res) => {
+                    setIsSubmitted(true);
+                    window.alert("Data submitted successfully");
+                })
+                .catch((err) => {
+                    setServerError(err.response?.data?.message || "Already Submitted Your Response");
+                });
         }
     };
 
-    useEffect(() => {
-        axios.get(`${Base_Url}/awt_service_contact/check`, {
-            params: { customerId, ticketNo },
-            headers: {
-                Authorization: token,
-                'x-api-key': 'a8f2b3c4-d5e6-7f8g-h9i0-12345jklmn67'
-            }
-        })
-        .then((res) => {
-            if (res.data.exists) {
-                setIsSubmitted(true); // Disable the form if already submitted
-            }
-        })
-        .catch((err) => {
-            console.log(err);
-        });
-    }, [customerId, ticketNo, token]);
 
+    useEffect(() => {
+        if (ticketNo) {
+            axios.get(`${Base_Url}/awt_service_contact/check`, {
+                params: { ticketNo },
+                headers: {
+                    Authorization: token,
+                    'x-api-key': 'a8f2b3c4-d5e6-7f8g-h9i0-12345jklmn67'
+                }
+            })
+                .then((res) => {
+                    if (res.data.exists) {
+                        setIsSubmitted(true);
+                    }
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+        }
+    }, [ticketNo, token]);
 
     return (
+        // ⬇️ Unchanged full JSX form code remains same
         <div className="container my-5 col-md-8" style={{ fontFamily: 'Arial, sans-serif' }}>
             <div className='mb-3'><img src={Logo} alt="Liebherr Logo" /></div>
             <div className="card shadow-sm rounded-0 border-0" style={{ backgroundColor: "#d7d7d7" }}>
@@ -132,8 +111,7 @@ const ContactForm = () => {
                     <form onSubmit={handleSubmit}>
                         <h5 className="mb-3 fw-bold">Feedback Form</h5>
                         {serverError && <p className="text-danger">{serverError}</p>}
-                        
-                        {/* Rating 1 */}
+
                         <label htmlFor="q1" className="form-label">
                             Would you recommend the Liebherr brand to your friends and relatives based on your experience? <span className="text-danger">*</span>
                         </label>
@@ -143,11 +121,10 @@ const ContactForm = () => {
                                     {Array.from({ length: 10 }, (_, i) => i + 1).map((num) => (
                                         <div
                                             key={num}
-                                            className={`${num !== 10 ? "border-end border-dark" : ""} py-2 ${
-                                                num <= formState.rating1
-                                                    ? rating1Style
-                                                    : 'bg-white text-black'
-                                            }`}
+                                            className={`${num !== 10 ? "border-end border-dark" : ""} py-2 ${num <= formState.rating1
+                                                ? rating1Style
+                                                : 'bg-white text-black'
+                                                }`}
                                             onClick={() =>
                                                 setFormState((prev) => ({ ...prev, rating1: num }))
                                             }
@@ -161,7 +138,6 @@ const ContactForm = () => {
                         </div>
                         {errors.rating1 && <p className='text-danger mt-1'>{errors.rating1}</p>}
 
-                        {/* Remarks */}
                         <label htmlFor="q2" className="form-label mt-3">Remarks / Feedback</label>
                         <textarea
                             id='q2'
@@ -171,7 +147,6 @@ const ContactForm = () => {
                             onChange={(e) => setFormState((prev) => ({ ...prev, remark: e.target.value }))}
                         ></textarea>
 
-                        {/* Rating 2 */}
                         <label htmlFor="q3" className="form-label mt-3">
                             Help us to serve you better by Rating Service Engineer <span className="text-danger">*</span>
                         </label>
@@ -186,7 +161,6 @@ const ContactForm = () => {
                         </div>
                         {errors.rating2 && <p className='text-danger mt-1'>{errors.rating2}</p>}
 
-                        {/* Submit Button */}
                         <div className="mt-4">
                             <button type="submit" className="btn btn-primary" disabled={isSubmitted}>
                                 {isSubmitted ? "Form Already Submitted" : "Submit"}
@@ -200,5 +174,3 @@ const ContactForm = () => {
 };
 
 export default ContactForm;
-
-

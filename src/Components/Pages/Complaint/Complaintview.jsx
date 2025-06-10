@@ -113,6 +113,10 @@ export function Complaintview(params) {
     collected_amount: ''
   });
 
+  const [formDataRemark, setFormDataRemark] = useState({
+    final_remark: ''
+  });
+
 
 
 
@@ -144,6 +148,9 @@ export function Complaintview(params) {
   const [currentAttachment, setCurrentAttachment] = useState(""); // Current attachment for modal
   const [callstatus, setCallstatus] = useState([]); // Current attachment for modal
   const [subcallstatus, setsubCallstatus] = useState([]); // Current attachment for modal
+  const [addresscode, setAddressCode] = useState([]); // Current attachment for modal
+  const [selectedAddress, setSelectedAddress] = useState("");
+  const [addresscodeid, setAddressCodeId] = useState(''); // Current attachment for modal
   const [callstatusid, setCallstatusid] = useState(""); // Current attachment for modal
   const [callid, setCallid] = useState(""); // Current attachment for modal
   const created_by = localStorage.getItem("licare_code"); // Get user ID from localStorage
@@ -163,11 +170,9 @@ export function Complaintview(params) {
     visible: false,
     type: 'success' // can be 'success' or 'error'
   });
-
   const handleClickOpen = () => {
     setOpen(true);
   };
-
   const handleClose = () => {
     window.location.reload()
     setOpen(false);
@@ -175,21 +180,17 @@ export function Complaintview(params) {
   const handleClickOpen2 = () => {
     setOpen2(true);
   };
-
   const handleClose2 = () => {
     window.location.reload()
     setOpen2(false);
   };
-
   const handleClickOpen3 = () => {
     setOpen3(true);
   };
-
   const handleClose3 = () => {
     window.location.reload()
     setOpen3(false);
   };
-
   //update serial no
   const handleupdateserial = () => {
 
@@ -230,10 +231,7 @@ export function Complaintview(params) {
         console.log(err)
       })
   };
-
-
   //resend otp
-
   const resendotp = () => {
 
     const data = {
@@ -255,9 +253,7 @@ export function Complaintview(params) {
         console.log(err);
       });
   }
-
   //for updating group codes
-
   const updatedefectcode = () => {
 
     const data = {
@@ -285,9 +281,7 @@ export function Complaintview(params) {
         console.log(err);
       });
   }
-
   //for updating group codes
-
   const handleVisitEdit = () => {
 
     const data = {
@@ -295,8 +289,6 @@ export function Complaintview(params) {
       ticket_no: complaintview.ticket_no,
       updated_by: created_by
     }
-
-
     axios.post(`${Base_Url}/update_visit_count`, data, {
       headers: {
         Authorization: token,
@@ -313,7 +305,6 @@ export function Complaintview(params) {
         console.log(err);
       });
   }
-
   //update purchase date
   const handleupdatepurchase = () => {
 
@@ -336,8 +327,6 @@ export function Complaintview(params) {
         console.log(err)
       })
   };
-
-
   const saveEditedRemark = (remark_id) => {
     // Update logic here (e.g., API call or state update)
     const data = {
@@ -362,7 +351,6 @@ export function Complaintview(params) {
 
 
   };
-
   //update purchase date
   const handleupdatefeilddate = () => {
 
@@ -384,17 +372,12 @@ export function Complaintview(params) {
         console.log(err)
       })
   };
-
-
   const handlefeilddatechange = (date) => {
     setComplaintview((prev) => ({
       ...prev,
       closed_date: date, // Ensure date is stored as a Date object
     }));
   };
-
-
-
   const handleChange = (e) => {
     setComplaintview((prev) => ({ ...prev, [e.target.name]: e.target.value }))
 
@@ -417,15 +400,6 @@ export function Complaintview(params) {
     }));
 
   }
-
-
-
-
-
-
-
-
-
   async function getProduct(params) {
 
     axiosInstance.get(`${Base_Url}/product_master`, {
@@ -441,9 +415,6 @@ export function Complaintview(params) {
       })
 
   }
-
-
-
   const getDateAfterOneYear = (value) => {
 
     try {
@@ -515,7 +486,6 @@ export function Complaintview(params) {
       return null; // Return null for invalid dates
     }
   };
-
   async function getEngineer(params) {
 
     try {
@@ -575,7 +545,6 @@ export function Complaintview(params) {
 
 
   }
-
   async function getHelplhi(params) {
 
     try {
@@ -602,8 +571,6 @@ export function Complaintview(params) {
 
 
   }
-
-
   async function getSpare(params) {
 
 
@@ -633,9 +600,6 @@ export function Complaintview(params) {
 
 
   }
-
-
-
   async function getgroupdefect(params) {
     try {
       const res = await axiosInstance.get(`${Base_Url}/getcom`, {
@@ -661,7 +625,6 @@ export function Complaintview(params) {
       setGroupDefect([]); // Set empty array on error
     }
   }
-
   async function getactivity(params) {
     try {
       const res = await axiosInstance.get(`${Base_Url}/getactivity`, {
@@ -685,7 +648,6 @@ export function Complaintview(params) {
       setactivity([]); // Set empty array on error
     }
   }
-
   async function getdefecttype(params) {
 
 
@@ -752,7 +714,6 @@ export function Complaintview(params) {
 
 
   }
-
   async function getsitecode(params) {
 
 
@@ -817,7 +778,6 @@ export function Complaintview(params) {
 
 
   }
-
   async function getcallstatus(params) {
     try {
       const res = await axiosInstance.get(`${Base_Url}/getcallstatus`, {
@@ -839,7 +799,6 @@ export function Complaintview(params) {
 
 
   }
-
   const getsubcallstatus = async (value) => {
     setsubCallstatus([])
 
@@ -883,6 +842,46 @@ export function Complaintview(params) {
 
   };
 
+  // End Fetch Child Franchise Deatils for populate
+  const getAddressCode = async (complaintid) => {
+    try {
+      const response = await axiosInstance.get(`${Base_Url}/getaddresscode`, {
+        headers: {
+          Authorization: token,
+        },
+        params: {
+          complaintid: String(complaintid)
+        }
+      });
+
+      // Decrypt the response data
+      const encryptedData = response.data.encryptedData;
+      const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+      const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+
+      setAddressCode(decryptedData);
+    } catch (error) {
+      console.error("Error fetching AddressCode:", error);
+    }
+  };
+
+  // Handles dropdown selection change and updates the selected address
+  const handleAddressChange = (e) => {
+    const selectedCode = e.target.value;
+    setAddressCodeId(selectedCode);
+
+    const matchedAddress = addresscode.find(item => item.address_code === selectedCode);
+    setSelectedAddress(matchedAddress?.address || "");
+  };
+
+  // Prefills the address if complaintview already has an address_code
+  useEffect(() => {
+    if (!complaintview?.address_code || addresscode.length === 0) return;
+
+    const matchedAddress = addresscode.find(item => item.address_code === complaintview.address_code);
+    setSelectedAddress(matchedAddress?.address || "");
+  }, [addresscode, complaintview]);
+
 
   const AddEngineer = () => {
 
@@ -919,9 +918,6 @@ export function Complaintview(params) {
     }
 
   };
-
-
-
   const addInTab = (ticket_no, ticket_id) => {
     console.log(ticket_no, ticket_id, "ticket_no, ticket_id");
 
@@ -947,8 +943,6 @@ export function Complaintview(params) {
     // navigate(`/complaintview/${ticket_id}`)
     sendtoedit(ticket_id)
   };
-
-
   const validateForm = () => {
     let isValid = true;
     const newErrors = { ...errors };
@@ -967,15 +961,9 @@ export function Complaintview(params) {
     }, 5000);
     return isValid;
   }
-
-
-
-
-
   const handlesparechange = (value) => {
     setspareid(value)
   }
-
   const handleAddSparePart = () => {
     const selectedSparePart = spare.find(
       (part) => part.id === parseInt(spareid)
@@ -1035,7 +1023,6 @@ export function Complaintview(params) {
 
     setQuantity(""); // Reset quantity input
   };
-
   const GenerateQuotation = () => {
 
 
@@ -1082,9 +1069,6 @@ export function Complaintview(params) {
         console.error("Error adding quotation:", error);
       });
   };
-
-
-
   const handleRemoveSparePart = (id) => {
 
     const confirm = window.confirm("Are you sure?")
@@ -1105,7 +1089,6 @@ export function Complaintview(params) {
 
 
   };
-
   const handleRemoveEngineer = (id) => {
     const updatedEngineers = addedEngineers.filter((eng) => eng.id !== id);
     setAddedEngineers(updatedEngineers); // Update the state (assuming you use React's useState)
@@ -1125,10 +1108,6 @@ export function Complaintview(params) {
       })
 
   };
-
-
-
-
   const fetchComplaintDetails = async () => {
     try {
       const response = await axiosInstance.get(
@@ -1147,8 +1126,6 @@ export function Complaintview(params) {
       console.error("Error fetching ticket details:", error);
     }
   };
-
-
   const fetchComplaintview = async (complaintid) => {
     try {
       const response = await axiosInstance.get(
@@ -1198,8 +1175,6 @@ export function Complaintview(params) {
       console.error("Error fetching ticket view:", error);
     }
   };
-
-
   async function getupdateengineer(ticket_no) {
     axiosInstance.post(`${Base_Url}/getuniqueengineer`, { ticket_no: ticket_no }, {
       headers: {
@@ -1215,7 +1190,6 @@ export function Complaintview(params) {
         console.log(err)
       })
   }
-
   async function getupdatespare(id) {
 
     axiosInstance.post(`${Base_Url}/getupdatesparelist`, { ticket_no: id }, {
@@ -1242,7 +1216,6 @@ export function Complaintview(params) {
         setuniquesparepart(res.data)
       })
   }
-
   const fetchComplaintDuplicate = async () => {
     try {
       const response = await axiosInstance.get(
@@ -1257,7 +1230,6 @@ export function Complaintview(params) {
       console.error("Error fetching ticket details:", error);
     }
   };
-
   // New function to fetch Attachment 2 list
   const fetchAttachment2Details = async () => {
     try {
@@ -1274,19 +1246,15 @@ export function Complaintview(params) {
       console.error("Error fetching attachment 2 details:", error);
     }
   };
-
   // New handler for Attachment 2
   const handleFile2Change = (e) => {
     setFiles2(e.target.files);
   };
-
   const handleengchange = (value) => {
 
 
     setEngType(value)
   }
-
-
   // New submit handler for Attachment 2
   const handleAttachment2Submit = async (e) => {
     e.preventDefault();
@@ -1328,7 +1296,6 @@ export function Complaintview(params) {
       );
     }
   };
-
   const handleModelChange = (e) => {
     const { name, value } = e.target;
 
@@ -1347,8 +1314,6 @@ export function Complaintview(params) {
 
 
   };
-
-
   const handlegetmodel = async (value) => {
     try {
       const serial = value?.serial_no || value;
@@ -1495,19 +1460,14 @@ export function Complaintview(params) {
       console.error("Error fetching serial details:", error);
     }
   };
-
-
-
   // New handler for Attachment 2 preview
   const handleAttachment2Click = (attachment) => {
     setCurrentAttachment2(attachment);
     setIsModal2Open(true);
   };
-
   const handleFileChange = (e) => {
     setFiles(e.target.files);
   };
-
   const handleSubmit = async (e) => {
 
     e.preventDefault();
@@ -1722,9 +1682,14 @@ export function Complaintview(params) {
 
 
   };
-
-
-
+  // useEffect(() => {
+  //   if (
+  //     complaintview.call_status === 'Closed' &&
+  //     (complaintview.sub_call_status === 'Spare Required' || complaintview.sub_call_status === 'Spare Ordered')
+  //   ) {
+  //     getaddresscode();
+  //   }
+  // }, [complaintview.call_status, complaintview.sub_call_status]);
 
 
   useEffect(() => {
@@ -1757,9 +1722,6 @@ export function Complaintview(params) {
 
 
   }, [complaintid, complaintview.ticket_no, complaintview.customer_mobile]);
-
-
-
   useEffect(() => {
     if (engtype == "Franchisee") {
 
@@ -1776,17 +1738,15 @@ export function Complaintview(params) {
 
 
   }, [engtype])
-
   useEffect(() => {
     getcallstatus()
     // getsubcallstatus()
+    getAddressCode(complaintid)
 
     getgroupdefect()
     getdefecttype()
     getsitecode()
   }, [])
-
-
   const formatDate = (dateString) => {
     const date = new Date(dateString);
 
@@ -1796,8 +1756,6 @@ export function Complaintview(params) {
 
     return `${day}-${month}-${year}`;
   };
-
-
   const formatDate1 = (dateString) => {
     const date = new Date(dateString);
     const day = String(date.getDate()).padStart(2, "0");
@@ -1808,7 +1766,6 @@ export function Complaintview(params) {
 
     return `${day}-${month}-${year} ${hour}:${min}`;
   }
-
   const successMessageStyle = {
     padding: '10px 15px',
     marginTop: '10px',
@@ -1822,13 +1779,8 @@ export function Complaintview(params) {
     color: TicketUpdateSuccess.type === 'success' ? '#155724' : '#721c24',
     border: TicketUpdateSuccess.type === 'success' ? '1px solid #c3e6cb' : '1px solid #f5c6cb'
   };
-
   const navigate = useNavigate();
-
-
   //Attachments Download
-
-
   const downloadZip = async (fileNames) => {
     const zip = new JSZip();
 
@@ -1859,8 +1811,6 @@ export function Complaintview(params) {
       console.error('Error generating zip:', error);
     }
   };
-
-
   const downloadAllZip = (allAttachments) => {
     const zip = new JSZip();
     const folder = zip.folder("attachments"); // Create a folder inside the ZIP
@@ -1896,7 +1846,6 @@ export function Complaintview(params) {
       })
       .catch((error) => console.error("Error while creating ZIP:", error));
   };
-
   const downloadFile = (fileName) => {
     const fileUrl = `${Base_Url}/uploads/${fileName}`; // Construct the file URL
     fetch(fileUrl)
@@ -1922,22 +1871,13 @@ export function Complaintview(params) {
         console.error('Error downloading the file:', error);
       });
   };
-
-
-
-
-
   let allAttachments = [];
   attachments.forEach(item => {
     const fileNames = item.attachment.split(',');
     const filewithurl = `${Base_Url}/uploads/${fileNames}`
     allAttachments = allAttachments.concat(filewithurl);
   });
-
-
   // This is for Ticket Tab
-
-
   const handleDeleteTab = (ticket_id) => {
 
     const updatedTickets = JSON.parse(localStorage.getItem('tabticket')) || [];
@@ -1957,8 +1897,6 @@ export function Complaintview(params) {
     }
     setTicketTab(newTicketList);
   };
-
-
   const sendtoedit = async (id) => {
     // alert(id)
     id = id.toString()
@@ -1968,38 +1906,24 @@ export function Complaintview(params) {
     // alert(encrypted)
     navigate(`/complaintview/${encrypted}`)
   };
-
-
-  // Role Right 
-
-
+  // Role Right
   const Decrypt = (encrypted) => {
     encrypted = encrypted.replace(/-/g, '+').replace(/_/g, '/'); // Reverse URL-safe changes
     const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
     return bytes.toString(CryptoJS.enc.Utf8); // Convert bytes to original string
   };
-
   const storedEncryptedRole = localStorage.getItem("Userrole");
   const decryptedRole = Decrypt(storedEncryptedRole);
-
   const role_id = decryptedRole
-
   const roledata = {
     role: decryptedRole,
     pageid: String(43)
   }
-
   const dispatch = useDispatch()
   const roleaccess = useSelector((state) => state.roleAssign?.roleAssign[0]?.accessid);
-
-
   useEffect(() => {
     dispatch(getRoleData(roledata))
   }, [])
-
-
-
-
   async function getEngineerRemark(ticket_no) {
 
     axios.post(`${Base_Url}/getengineerremark`, { ticket_no: ticket_no }, {
@@ -2014,18 +1938,11 @@ export function Complaintview(params) {
         console.log(err)
       })
   }
-
-
   //For Pdf
-
   async function downloadPDF(id) {
 
     Blob()
   }
-
-
-
-
   const Blob = async () => {
 
     try {
@@ -2037,7 +1954,6 @@ export function Complaintview(params) {
       console.error('Error generating PDF:', err);
     }
   };
-
   const SendjobCard = async () => {
 
     try {
@@ -2065,10 +1981,6 @@ export function Complaintview(params) {
       console.error('Error generating PDF:', err);
     }
   };
-
-
-
-
   async function getquotedetails123(oid) {
     try {
       const res = await axiosInstance.post(`${Base_Url}/getquotedetails`, { quotaion_id: oid }, {
@@ -2092,7 +2004,6 @@ export function Complaintview(params) {
       console.error('Error fetching quote details:', error);
     }
   }
-
   async function getquotespare(quote_id) {
     try {
       const res = await axiosInstance.post(`${Base_Url}/getquotationspare`, { quote_id: quote_id }, {
@@ -2114,7 +2025,6 @@ export function Complaintview(params) {
       return null; // Return null in case of error to avoid breaking execution
     }
   }
-
   async function getcspformticket(ticketId) {
     try {
       const res = await axiosInstance.post(`${Base_Url}/getcspformticket`, { ticket_no: ticketId }, {
@@ -2137,7 +2047,6 @@ export function Complaintview(params) {
       return null;
     }
   }
-
   const Blobs = async (data, spare112, cspdata1) => {
     try {
 
@@ -2151,7 +2060,30 @@ export function Complaintview(params) {
     }
   };
 
+  // final remark start 
+  const handleRemarkSubmit = async (e) => {
+    e.preventDefault();
 
+    try {
+
+      await axiosInstance.post(`${Base_Url}/postfinalremark`, {
+        ...formDataRemark, complaintid: String(complaintid)
+      }, {
+        headers: {
+          Authorization: token,
+        },
+      });
+
+      // Reset form
+      setFormDataRemark({
+        final_remark: ""
+      });
+      fetchComplaintDetails()
+
+    } catch (error) {
+      console.error("Submission error:", error);
+    }
+  };
 
 
 
@@ -2768,6 +2700,37 @@ export function Complaintview(params) {
 
                                 </div>
 
+                                {(complaintview.call_status == 'Spares' && ((complaintview.sub_call_status == 'Spare Required' || complaintview.sub_call_status == 'Spare Ordered'))) &&
+                                  <div className="mb-3 col-lg-4">
+                                    <h4 className="pname" style={{ fontSize: "14px" }}>Address Code</h4>
+                                    <select name="address_code" className="form-control" style={{ fontSize: "14px" }} onChange={handleAddressChange}>
+                                      <option value="">Select</option>
+                                      {addresscode.map((value) => (
+                                        <option key={value.address_code} value={value.address_code}>
+                                          {value.address_code}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </div>
+
+                                }
+
+
+                                {(complaintview.call_status == 'Spares' && ((complaintview.sub_call_status == 'Spare Required' || complaintview.sub_call_status == 'Spare Ordered'))) &&
+                                  <div className="mb-3 col-lg-8">
+                                    <h4 className="pname" style={{ fontSize: "14px" }}>Address</h4>
+                                    <textarea
+                                      className="form-control"
+                                      name="address"
+                                      id="addressInput"
+                                      value={selectedAddress}  
+                                      placeholder="Enter  Address"
+                                      rows="2"  // Adjust the number of rows (height) as needed
+                                    />
+                                  </div>
+
+                                }
+
 
                                 {(complaintview.call_status == 'Spares' || ((complaintview.call_status == 'Approval' && complaintview.sub_call_status == 'Customer Approval / Quotation'))) &&
 
@@ -3124,27 +3087,30 @@ export function Complaintview(params) {
                   </div>
                 </div>
               </div>
-            {roleaccess > 4 && <div className="my-2">
+              {roleaccess > 4 && closestatus == 'Closed' && subclosestatus == 'Fully' && <div className="my-2">
                 <div className="card p-3">
                   <div className="col-md-12 mb-2">
                     <label className="input-field">
-                      Final Remark 
+                      Final Remark
                     </label>
                     <textarea
                       className="form-control"
-                      name="address"
-                      onChange={handleChange}
+                      name="final_remark"
+                      onChange={(e) =>
+                        setFormDataRemark({ ...formDataRemark, final_remark: e.target.value })
+                      }
+                      value={formDataRemark.final_remark}
                       placeholder="Enter Remark"
                       rows="2"
                     />
                   </div>
                   <div className="text-right">
-                    <button className="btn btn-sm btn-primary">Submit</button>
+                    <button className="btn btn-sm btn-primary" onClick={handleRemarkSubmit}>Submit</button>
                   </div>
                 </div>
 
-              </div> } 
-           
+              </div>}
+
 
               {/* Remark List Section */}
               <div className="mt-3" id="remarksSection">
@@ -3769,7 +3735,8 @@ export function Complaintview(params) {
 
             </div>
           </div>
-        </div> : null}
+        </div > : null
+      }
 
     </>
 

@@ -13,15 +13,16 @@ import _debounce from "lodash.debounce";
 import { getRoleData } from "../../Store/Role/role-action";
 import "react-datepicker/dist/react-datepicker.css";
 import Ratecardtabs from './Ratecardtabs';
-const AddRatecard = () => {
+import DatePicker from 'react-datepicker';
+const AddMasterWarrenty = () => {
     // Step 1: Add this state to track errors
     const { loaders, axiosInstance } = useAxiosLoader();
     const [text, setText] = useState("");
-    const { rateid } = useParams();
+    const { masterwarrentyid } = useParams();
     const navigate = useNavigate();
-    const [ProductType, setProducttype] = useState([])
-    const [ProductClass, setProductClass] = useState([])
-    const [ProductLine, setProductLine] = useState([])
+    const [Product_Type, setProducttype] = useState([])
+    const [Product_Class, setProduct_Class] = useState([])
+    const [Product_Line, setProduct_Line] = useState([])
     const [csp_code, setCspcode] = useState([]);
     const token = localStorage.getItem("token");
     const [errors, setErrors] = useState({});
@@ -29,6 +30,8 @@ const AddRatecard = () => {
     const [filteredUsers, setFilteredUsers] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
     const [currentPage, setCurrentPage] = useState(0);
+    const [scheme_startdate, setStartDate] = useState('');
+    const [scheme_enddate, setEndDate] = useState('');
     const [selectcsp, setSelectedCsp] = useState(null);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [duplicateError, setDuplicateError] = useState('');
@@ -36,104 +39,130 @@ const AddRatecard = () => {
     const created_by = localStorage.getItem("userId"); // Get user ID from localStorage
     const Lhiuser = localStorage.getItem("Lhiuser"); // Get Lhiuser from localStorage
 
+    const formatDate = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0"); // Ensure two digits
+        const day = String(date.getDate()).padStart(2, "0"); // Ensure two digits
+        return `${year}-${month}-${day}`;
+    };
+
     try {
-        rateid = rateid.replace(/-/g, '+').replace(/_/g, '/');
-        const bytes = CryptoJS.AES.decrypt(rateid, secretKey);
+        masterwarrentyid = masterwarrentyid.replace(/-/g, '+').replace(/_/g, '/');
+        const bytes = CryptoJS.AES.decrypt(masterwarrentyid, secretKey);
         const decrypted = bytes.toString(CryptoJS.enc.Utf8);
-        rateid = parseInt(decrypted, 10)
+        masterwarrentyid = parseInt(decrypted, 10)
     } catch (error) {
         console.log("Error".error)
     }
 
 
     const [formData, setFormData] = useState({
-        csp_code: '',
-        call_type: '',
-        class_city: '',
-        ProductType: '',
-        ProductLine: '',
-        ProductClass: '',
-        Within_24_Hours: '',
-        Within_48_Hours: '',
-        Within_96_Hours: '',
-        MoreThan96_Hours: '',
-        gas_charging: '',
-        transportation: '',
+        Product_Type: '',
+        Product_Line: '',
+        Product_Class: '',
+        Service_Type: '',
+        warrenty_year: '',
+        compressor_warrenty: '',
+        warrenty_amount: '',
+        is_scheme: '',
+        scheme_name: '',
+        scheme_startdate: '',
+        scheme_enddate: '',
     });
 
-    const fetchratecardpopulate = async (rateid) => {
+    const fetchmasterwarrentypopulate = async (masterwarrentyid) => {
         try {
 
-            const response = await axiosInstance.get(`${Base_Url}/getratecardpopulate/${rateid}`, {
+            const response = await axiosInstance.get(`${Base_Url}/getmasterwarrentypopulate/${masterwarrentyid}`, {
                 headers: {
                     Authorization: token,
                 },
             });
+            setStartDate(response.data[0].scheme_startdate)
+            setEndDate(response.data[0].scheme_enddate)
             setFormData({
                 ...response.data[0],
-                csp_code: response.data[0].csp_code,
-                call_type: response.data[0].call_type,
-                class_city: response.data[0].class_city,
-                ProductType: response.data[0].ProductType,
-                ProductLine: response.data[0].ProductLine,
-                ProductClass: response.data[0].ProductClass,
-                Within_24_Hours: response.data[0].Within_24_Hours,
-                Within_48_Hours: response.data[0].Within_48_Hours,
-                Within_96_Hours: response.data[0].Within_96_Hours,
-                MoreThan96_Hours: response.data[0].MoreThan96_Hours,
-                gas_charging: response.data[0].gas_charging,
-                transportation: response.data[0].transportation
+                Product_Type: response.data[0].Product_Type,
+                Product_Line: response.data[0].Product_Line,
+                Product_Class: response.data[0].Product_Class,
+                Service_Type: response.data[0].Service_Type,
+                warrenty_year: response.data[0].warrenty_year,
+                compressor_warrenty: response.data[0].compressor_warrenty,
+                warrenty_amount: response.data[0].warrenty_amount,
+                is_scheme: response.data[0].is_scheme,
+                scheme_name: response.data[0].scheme_name,
+                scheme_startdate: response.data[0].scheme_startdate,
+                scheme_enddate: response.data[0].scheme_enddate,
             });
             setIsEdit(true);
 
         } catch (error) {
-            console.error("Error fetching Rate Card:", error);
+            console.error("Error fetching Master Warrenty:", error);
         }
+    };
+
+    const handleDateChange = (date) => {
+
+
+        if (date) {
+            const formattedDate = formatDate(date);
+            setStartDate(formattedDate)
+        }
+
+    };
+    const handleDateChange2 = (date) => {
+
+
+        if (date) {
+            const formattedDate = formatDate(date);
+            setEndDate(formattedDate)
+        }
+
     };
 
 
 
 
-    const fetchCspcode = async () => {
-        try {
-            const response = await axiosInstance.post(`${Base_Url}/getcspdata`,
-                { param: text }, {
-                headers: {
-                    Authorization: token,
-                },
-            }
-            );
-            // Decrypt the response data
-            const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
-            const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
-            const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
-            setCspcode(decryptedData);
-        } catch (error) {
-            console.error("Error fetching csp_code:", error);
-        }
-    };
-    const handleSearchChangeCsp = (newValue) => {
-        setSelectedCsp(newValue);
-        // If an option is selected, update msp_code and msp_name
-        if (newValue) {
-            setFormData(prevState => ({
-                ...prevState,
-                csp_code: newValue.licare_code || "",
-                csp_name: newValue.title || ""  // <-- Adjust property name if different
-            }));
-        } else {
-            setFormData(prevState => ({
-                ...prevState,
-                csp_code: "",
-                csp_name: ""
-            }));
-        }
-    };
+    // const fetchCspcode = async () => {
+    //     try {
+    //         const response = await axiosInstance.post(`${Base_Url}/getcspdata`,
+    //             { param: text }, {
+    //             headers: {
+    //                 Authorization: token,
+    //             },
+    //         }
+    //         );
+    //         // Decrypt the response data
+    //         const encryptedData = response.data.encryptedData; // Assuming response contains { encryptedData }
+    //         const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+    //         const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
+    //         setCspcode(decryptedData);
+    //     } catch (error) {
+    //         console.error("Error fetching csp_code:", error);
+    //     }
+    // };
+    // const handleSearchChangeCsp = (newValue) => {
+    //     setSelectedCsp(newValue);
+    //     // If an option is selected, update msp_code and msp_name
+    //     if (newValue) {
+    //         setFormData(prevState => ({
+    //             ...prevState,
+    //             csp_code: newValue.licare_code || "",
+    //             csp_name: newValue.title || ""  // <-- Adjust property name if different
+    //         }));
+    //     } else {
+    //         setFormData(prevState => ({
+    //             ...prevState,
+    //             csp_code: "",
+    //             csp_name: ""
+    //         }));
+    //     }
+    // };
 
-    const handleInputChangeCsp = _debounce((newValue) => {
-        setText(newValue);
-        fetchCspcode();
-    }, 100);
+    // const handleInputChangeCsp = _debounce((newValue) => {
+    //     setText(newValue);
+    //     fetchCspcode();
+    // }, 100);
 
     async function getproducttype() {
         axiosInstance.get(`${Base_Url}/product_type`
@@ -154,7 +183,7 @@ const AddRatecard = () => {
                 },
             })
             .then((res) => {
-                setProductLine(res.data)
+                setProduct_Line(res.data)
             })
     }
     async function getproductClass() {
@@ -165,14 +194,14 @@ const AddRatecard = () => {
                 },
             })
             .then((res) => {
-                setProductClass(res.data)
+                setProduct_Class(res.data)
             })
     }
 
 
     const fetchUsers = async () => {
         try {
-            const response = await axiosInstance.get(`${Base_Url}/getratedata`, {
+            const response = await axiosInstance.get(`${Base_Url}/getmasterwarrenty`, {
                 headers: {
                     Authorization: token,
                 },
@@ -191,13 +220,13 @@ const AddRatecard = () => {
 
     useEffect(() => {
         fetchUsers();
-        fetchCspcode();
+        // fetchCspcode();
         getproducttype();
         getproductline();
         getproductClass();
 
-        if (rateid != 0) {
-            fetchratecardpopulate(rateid);
+        if (masterwarrentyid != 0) {
+            fetchmasterwarrentypopulate(masterwarrentyid);
         }
 
     }, []);
@@ -214,43 +243,39 @@ const AddRatecard = () => {
     const validateForm = () => {
         const newErrors = {};
 
-        // Check if the cfranchise_id is empty
-        if (!formData.csp_code) {
-            newErrors.csp_code = "Csp Code selection is required.";
+        if (!formData.Service_Type) {
+            newErrors.Service_Type = "Service Type selection is required.";
         }
-        if (!formData.call_type) {
-            newErrors.call_type = "Call Type selection is required.";
+        if (!formData.Product_Type) {
+            newErrors.Product_Type = "Product Type Selection is required.";
         }
-        if (!formData.class_city) {
-            newErrors.class_city = "Class City  selection is required.";
+        if (!formData.Product_Line) {
+            newErrors.Product_Line = "Product Line Selection is required.";
         }
-        if (!formData.ProductType) {
-            newErrors.ProductType = "Product Type Selection is required.";
+        if (!formData.Product_Class) {
+            newErrors.Product_Class = "Product Class Selection is required.";
         }
-        if (!formData.ProductLine) {
-            newErrors.ProductLine = "Product Line Selection is required.";
+        if (!formData.warrenty_year) {
+            newErrors.warrenty_year = "Warranty Year  Field is required.";
         }
-        if (!formData.ProductClass) {
-            newErrors.ProductClass = "Product Class Selection is required.";
+        if (!formData.compressor_warrenty) {
+            newErrors.compressor_warrenty = "Compressor Warranty Field is required.";
         }
-        if (!formData.Within_24_Hours) {
-            newErrors.Within_24_Hours = "Within 24 Hours Field is required.";
+        if (!formData.warrenty_amount) {
+            newErrors.warrenty_amount = "Warranty Amount is required.";
         }
-        if (!formData.Within_48_Hours) {
-            newErrors.Within_48_Hours = "Within 48 Hours Field is required.";
+        if (!formData.is_scheme) {
+            newErrors.is_scheme = "IS Scheme  Field is required.";
         }
-        if (!formData.Within_96_Hours) {
-            newErrors.Within_96_Hours = "Within 96 Hours Field is required.";
+        if (!formData.scheme_name) {
+            newErrors.scheme_name = "Scheme Name  Field is required.";
         }
-        if (!formData.MoreThan96_Hours) {
-            newErrors.MoreThan96_Hours = "More Than 96 Hours Field is required.";
-        }
-        if (!formData.gas_charging) {
-            newErrors.gas_charging = "Gas Charging Field is required.";
-        }
-        if (!formData.transportation) {
-            newErrors.transportation = "Transportation Field is required.";
-        }
+        // if (!scheme_startdate.scheme_startdate) {
+        //     newErrors.scheme_startdate = "Scheme Start Date  is required.";
+        // }
+        // if (!scheme_enddate.scheme_enddate) {
+        //     newErrors.scheme_enddate = "Scheme End  Date  is required.";
+        // }
         return newErrors;
     };
 
@@ -266,8 +291,10 @@ const AddRatecard = () => {
         }
         const payload = {
             ...formData,
-            created_by,
-        }
+            scheme_startdate: scheme_startdate, // from state
+            scheme_enddate: scheme_enddate,     // from state
+            created_by, // or whatever you use
+        };
 
         console.log(payload, "TTT")
 
@@ -286,30 +313,29 @@ const AddRatecard = () => {
 
 
                     // For update, include duplicate check
-                    await axiosInstance.post(`${Base_Url}/putratecard`,  payload , {
+                    await axiosInstance.post(`${Base_Url}/putmasterwarrenty`, payload, {
                         headers: {
                             Authorization: token,
                         },
                     })
                         .then(response => {
-                            alert("Rate Card Updated")
+                            alert("Master Warranty Updated")
 
                             setFormData({
-                                csp_code: '',
-                                call_type: '',
-                                class_city: '',
-                                ProductType: '',
-                                ProductLine: '',
-                                ProductClass: '',
-                                Within_24_Hours: '',
-                                Within_48_Hours: '',
-                                Within_96_Hours: '',
-                                MoreThan96_Hours: '',
-                                gas_charging: '',
-                                transportation: '',
+                                Service_Type: '',
+                                Product_Type: '',
+                                Product_Line: '',
+                                Product_Class: '',
+                                warrenty_year: '',
+                                compressor_warrenty: '',
+                                warrenty_amount: '',
+                                is_scheme: '',
+                                scheme_name: '',
+                                scheme_startdate: '',
+                                scheme_enddate: '',
                             })
                             fetchUsers();
-                            navigate('/ratecard');
+                            navigate('/master_warrenty');
                         })
                         .catch(error => {
                             if (error.response && error.response.status === 409) {
@@ -318,7 +344,7 @@ const AddRatecard = () => {
                         });
                 } else {
 
-                    await axiosInstance.post(`${Base_Url}/postratecard`,  payload 
+                    await axiosInstance.post(`${Base_Url}/postmasterwarrenty`, payload
                         , {
                             headers: {
                                 Authorization: token,
@@ -326,20 +352,18 @@ const AddRatecard = () => {
                         }
                     )
                         .then(response => {
-                            alert("Rate Card Added")
+                            alert("Master Warranty Added")
                             setFormData({
                                 csp_code: '',
-                                call_type: '',
+                                Service_Type: '',
                                 class_city: '',
-                                ProductType: '',
-                                ProductLine: '',
-                                ProductClass: '',
-                                Within_24_Hours: '',
-                                Within_48_Hours: '',
-                                Within_96_Hours: '',
-                                MoreThan96_Hours: '',
-                                gas_charging: '',
-                                transportation: '',
+                                Product_Type: '',
+                                Product_Line: '',
+                                Product_Class: '',
+                                warrenty_year: '',
+                                compressor_warrenty: '',
+                                warrenty_amount: '',
+                                is_scheme: '',
                             })
                             fetchUsers();
                         })
@@ -376,7 +400,7 @@ const AddRatecard = () => {
 
     const roledata = {
         role: decryptedRole,
-        pageid: String(66)
+        pageid: String(72)
     }
 
     const dispatch = useDispatch()
@@ -405,7 +429,7 @@ const AddRatecard = () => {
                                 <div className="col-12">
                                     <form onSubmit={handleSubmit} className="col-12">
                                         <div className='row'>
-                                            <div className="col-3 mb-3">
+                                            {/* <div className="col-3 mb-3">
                                                 <label
                                                     htmlFor="cspcodeinput"
                                                     className="input-field"
@@ -436,72 +460,104 @@ const AddRatecard = () => {
                                                     </small>
                                                 )}
 
-                                            </div>
-                                            <div className="col-md-3">
-                                                <label htmlFor="callTypeInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>Call Type</label>
-                                                <select
-                                                    className="form-select"
-                                                    name="call_type"
-                                                    id="callTypeInput"
-                                                    value={formData.call_type}
-                                                    onChange={handleChange}
-                                                >
-                                                    <option value="">Select Call Type</option>
-                                                    <option value="VISIT">VISIT</option>
-                                                    <option value="BREAKDOWN">BREAKDOWN</option>
-                                                    <option value="DEMO">DEMO</option>
-                                                    <option value="INSTALLATION">INSTALLATION</option>
-                                                    <option value="HELPDESK">HELPDESK</option>
-                                                    <option value="MAINTENANCE">MAINTENANCE</option>
-
-                                                    {/* Add more options as necessary */}
-                                                </select>
-                                                {errors.call_type && <small className="text-danger">{errors.call_type}</small>}
-                                            </div>
-                                            <div className="col-md-3">
-                                                <label htmlFor="classcityInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>Class City</label>
-                                                <select
-                                                    className="form-select"
-                                                    name="class_city"
-                                                    id="classcityInput"
-                                                    value={formData.class_city}
-                                                    onChange={handleChange}
-                                                >
-                                                    <option value="">Select Class City </option>
-                                                    <option value="LOCAL">LOCAL</option>
-                                                    <option value="UPCOUNTRY">UPCOUNTRY</option>
-
-                                                    {/* Add more options as necessary */}
-                                                </select>
-                                                {errors.class_city && <small className="text-danger">{errors.class_city}</small>}
-
-                                            </div>
+                                            </div> */}
 
                                             <div className="col-md-3">
                                                 <label
-                                                    htmlFor="ProductType"
+                                                    htmlFor="Product_Type"
                                                     className="form-label pb-0 dropdown-label"
                                                 >
                                                     Product Type<span className='text-danger'>*</span>
                                                 </label>
                                                 <select
                                                     className="form-select dropdown-select"
-                                                    name="ProductType"
-                                                    value={formData.ProductType}
+                                                    name="Product_Type"
+                                                    value={formData.Product_Type}
                                                     onChange={handleChange}
                                                 >
                                                     <option value="">Select Product Type</option>
 
-                                                    {ProductType.map((item) => {
+                                                    {Product_Type.map((item) => {
                                                         return (
                                                             <option value={item.product_type}>{item.product_type}</option>
                                                         )
                                                     })}
 
                                                 </select>
-                                                {errors.ProductType && <small className="text-danger">{errors.ProductType}</small>}
+                                                {errors.Product_Type && <small className="text-danger">{errors.Product_Type}</small>}
                                                 {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
 
+                                            </div>
+                                            <div className="col-md-3">
+                                                <label
+                                                    htmlFor="Product_Line"
+                                                    className="form-label pb-0 dropdown-label"
+                                                >
+                                                    Product Line<span className='text-danger'>*</span>
+                                                </label>
+                                                <select
+                                                    className="form-select dropdown-select"
+                                                    name="Product_Line"
+                                                    value={formData.Product_Line}
+                                                    onChange={handleChange}
+                                                >
+                                                    <option value="">Select Product Line</option>
+
+                                                    {Product_Line.map((item) => {
+                                                        return (
+                                                            <option value={item.product_line}>{item.product_line}</option>
+                                                        )
+                                                    })}
+
+                                                </select>
+                                                {errors.Product_Line && <small className="text-danger">{errors.Product_Line}</small>}
+                                                {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
+
+                                            </div>
+
+                                            <div className="col-md-3">
+                                                <label
+                                                    htmlFor="Product_Class"
+                                                    className="form-label pb-0 dropdown-label"
+                                                >
+                                                    Product Class<span className='text-danger'>*</span>
+                                                </label>
+                                                <select
+                                                    className="form-select dropdown-select"
+                                                    name="Product_Class"
+                                                    value={formData.Product_Class}
+                                                    onChange={handleChange}
+                                                >
+                                                    <option value="">Select Product Class</option>
+
+                                                    {Product_Class.map((item) => {
+                                                        return (
+                                                            <option value={item.product_class}>{item.product_class}</option>
+                                                        )
+                                                    })}
+
+                                                </select>
+                                                {errors.Product_Class && <small className="text-danger">{errors.Product_Class}</small>}
+                                                {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
+
+                                            </div>
+                                            <div className="col-md-3">
+                                                <label htmlFor="ServiceTypeInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>Service Type</label>
+                                                <select
+                                                    className="form-select"
+                                                    name="Service_Type"
+                                                    id="ServiceTypeInput"
+                                                    value={formData.Service_Type}
+                                                    onChange={handleChange}
+                                                >
+                                                    <option value="">Select Service  Type</option>
+                                                    <option value="PRODUCT WARRANTY">Product Warranty </option>
+                                                    <option value="BREAKDOWN">BREAKDOWN</option>
+                                                    <option value="DEMO">DEMO</option>
+
+                                                    {/* Add more options as necessary */}
+                                                </select>
+                                                {errors.Service_Type && <small className="text-danger">{errors.Service_Type}</small>}
                                             </div>
 
 
@@ -509,140 +565,114 @@ const AddRatecard = () => {
                                         </div>
                                         <div className='row'>
 
+
                                             <div className="col-md-3">
-                                                <label
-                                                    htmlFor="ProductLine"
-                                                    className="form-label pb-0 dropdown-label"
-                                                >
-                                                    Product Line<span className='text-danger'>*</span>
-                                                </label>
-                                                <select
-                                                    className="form-select dropdown-select"
-                                                    name="ProductLine"
-                                                    value={formData.ProductLine}
+                                                <label className="input-field">Warranty Year<span className="text-danger">*</span></label>
+                                                <input
+                                                    type="number"
+                                                    className="form-control"
+                                                    name="warrenty_year"
+                                                    value={formData.warrenty_year}
                                                     onChange={handleChange}
-                                                >
-                                                    <option value="">Select Product Line</option>
-
-                                                    {ProductLine.map((item) => {
-                                                        return (
-                                                            <option value={item.product_line}>{item.product_line}</option>
-                                                        )
-                                                    })}
-
-                                                </select>
-                                                {errors.ProductLine && <small className="text-danger">{errors.ProductLine}</small>}
-                                                {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
-
+                                                    placeholder="Enter Warranty Year "
+                                                />
+                                                {errors.warrenty_year && <small className="text-danger">{errors.warrenty_year}</small>}
                                             </div>
 
                                             <div className="col-md-3">
-                                                <label
-                                                    htmlFor="ProductClass"
-                                                    className="form-label pb-0 dropdown-label"
-                                                >
-                                                    Product Class<span className='text-danger'>*</span>
-                                                </label>
-                                                <select
-                                                    className="form-select dropdown-select"
-                                                    name="ProductClass"
-                                                    value={formData.ProductClass}
+                                                <label className="input-field">Compressor Warranty <span className="text-danger">*</span></label>
+                                                <input
+                                                    type="number"
+                                                    className="form-control"
+                                                    name="compressor_warrenty"
+                                                    value={formData.compressor_warrenty}
                                                     onChange={handleChange}
-                                                >
-                                                    <option value="">Select Product Class</option>
-
-                                                    {ProductClass.map((item) => {
-                                                        return (
-                                                            <option value={item.product_class}>{item.product_class}</option>
-                                                        )
-                                                    })}
-
-                                                </select>
-                                                {errors.ProductClass && <small className="text-danger">{errors.ProductClass}</small>}
-                                                {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
-
+                                                    placeholder="Enter Compressor Warranty "
+                                                />
+                                                {errors.compressor_warrenty && <small className="text-danger">{errors.compressor_warrenty}</small>}
                                             </div>
                                             <div className="col-md-3">
-                                                <label className="input-field">Within 24 Hours<span className="text-danger">*</span></label>
+                                                <label className="input-field">Warranty Amount<span className="text-danger">*</span></label>
+                                                <input
+                                                    type="number"
+                                                    className="form-control"
+                                                    name="warrenty_amount"
+                                                    value={formData.warrenty_amount}
+                                                    onChange={handleChange}
+                                                    placeholder="Enter Warranty Amount"
+                                                />
+                                                {errors.warrenty_amount && <small className="text-danger">{errors.warrenty_amount}</small>}
+                                            </div>
+
+                                            <div className="col-md-3">
+                                                <label className="input-field"> Is Scheme  <span className="text-danger">*</span></label>
                                                 <input
                                                     type="text"
                                                     className="form-control"
-                                                    name="Within_24_Hours"
-                                                    value={formData.Within_24_Hours}
+                                                    name="is_scheme"
+                                                    value={formData.is_scheme}
                                                     onChange={handleChange}
-                                                    placeholder="Enter Within 24 Hours "
+                                                    placeholder="Enter Is Scheme "
                                                 />
-                                                {errors.Within_24_Hours && <small className="text-danger">{errors.Within_24_Hours}</small>}
-                                            </div>
-
-                                            <div className="col-md-3">
-                                                <label className="input-field">Within 48 Hours<span className="text-danger">*</span></label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    name="Within_48_Hours"
-                                                    value={formData.Within_48_Hours}
-                                                    onChange={handleChange}
-                                                    placeholder="Enter Within 48 Hours"
-                                                />
-                                                {errors.Within_48_Hours && <small className="text-danger">{errors.Within_48_Hours}</small>}
+                                                {errors.is_scheme && <small className="text-danger">{errors.is_scheme}</small>}
                                             </div>
 
 
 
                                         </div>
                                         <div className='row' style={{ marginTop: '10px' }}>
+
+
                                             <div className="col-md-3">
-                                                <label className="input-field">Within 96 Hours<span className="text-danger">*</span></label>
+                                                <label className="input-field"> Scheme Name  <span className="text-danger">*</span></label>
+
                                                 <input
                                                     type="text"
                                                     className="form-control"
-                                                    name="Within_96_Hours"
-                                                    value={formData.Within_96_Hours}
+                                                    name="scheme_name"
+                                                    value={formData.scheme_name}
                                                     onChange={handleChange}
-                                                    placeholder="Enter Within 96 Hours"
+                                                    placeholder="Enter Scheme Name "
                                                 />
-                                                {errors.Within_96_Hours && <small className="text-danger">{errors.Within_96_Hours}</small>}
+                                                {errors.scheme_name && <small className="text-danger">{errors.scheme_name}</small>}
                                             </div>
 
                                             <div className="col-md-3">
-                                                <label className="input-field"> More Than 96 Hours <span className="text-danger">*</span></label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    name="MoreThan96_Hours"
-                                                    value={formData.MoreThan96_Hours}
-                                                    onChange={handleChange}
-                                                    placeholder="Enter More Than 96 Hours"
+                                                <label className="input-field d-block mb-1">
+                                                    Scheme StartDate <span className="text-danger">*</span>
+                                                </label>
+                                                <DatePicker
+                                                    selected={scheme_startdate}
+                                                    onChange={handleDateChange}
+                                                    dateFormat="dd-MM-yyyy"
+                                                    placeholderText="DD-MM-YYYY"
+                                                    className='form-control'
+                                                    name="scheme_startdate"
+                                                    aria-describedby="startdateinput"
                                                 />
-                                                {errors.MoreThan96_Hours && <small className="text-danger">{errors.MoreThan96_Hours}</small>}
+                                                {errors.scheme_startdate && (
+                                                    <small className="text-danger">{errors.scheme_startdate}</small>
+                                                )}
                                             </div>
 
                                             <div className="col-md-3">
-                                                <label className="input-field"> Gas Charging  <span className="text-danger">*</span></label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    name="gas_charging"
-                                                    value={formData.gas_charging}
-                                                    onChange={handleChange}
-                                                    placeholder="Enter Gas Charging "
+                                                <label className="input-field d-block mb-1">
+                                                    Scheme EndDate <span className="text-danger">*</span>
+                                                </label>
+                                                <DatePicker
+                                                    selected={scheme_enddate}
+                                                    onChange={handleDateChange2}
+                                                    dateFormat="dd-MM-yyyy"
+                                                    placeholderText="DD-MM-YYYY"
+                                                    className='form-control'
+                                                    name="scheme_enddate"
+                                                    aria-describedby="startdateinput"
                                                 />
-                                                {errors.gas_charging && <small className="text-danger">{errors.gas_charging}</small>}
+                                                {errors.scheme_enddate && (
+                                                    <small className="text-danger">{errors.scheme_enddate}</small>
+                                                )}
                                             </div>
 
-                                            <div className="col-md-3">
-                                                <label className="input-field"> Transportation <span className="text-danger">*</span></label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    name="transportation"
-                                                    value={formData.transportation}
-                                                    onChange={handleChange}
-                                                    placeholder="Enter Transportation"
-                                                />
-                                                {errors.transportation && <small className="text-danger">{errors.transportation}</small>}
-                                            </div>
                                         </div>
                                         {roleaccess > 2 ? <div className="text-right">
                                             <button className="btn btn-liebherr" type="submit" style={{ marginTop: '15px' }}>
@@ -661,4 +691,4 @@ const AddRatecard = () => {
     );
 };
 
-export default AddRatecard;
+export default AddMasterWarrenty;

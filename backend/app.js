@@ -12310,86 +12310,114 @@ app.post("/getquotationspare", authenticateToken, async (req, res) => {
 })
 
 // const API_KEY = "a8f2b3c4-d5e6-7f8g-h9i0-12345jklmn67";
-
 app.post("/awt_service_contact", authenticateToken, async (req, res) => {
-  // Validate API key
-  const apiKey = req.header('x-api-key'); // Get API key from request header
-
+  const apiKey = req.header('x-api-key');
   if (apiKey !== API_KEY) {
     return res.status(403).json({ error: 'Forbidden: Invalid API key' });
   }
 
   try {
-    const { rating1, remark, rating2, email, customerId, ticketNo } = req.body;
+    const { rating1, remark, rating2, ticketNo } = req.body;
+
+    if (!rating1 || !rating2 || !ticketNo) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
 
     const pool = await poolPromise;
 
-    // Check if the entry already exists
-    const checkSql = `
-      SELECT COUNT(*) AS count
-      FROM awt_service_contact_form
-      WHERE customer_id = @customerId AND ticket_no = @ticketNo
-    `;
+    // Step 1: Get customer_id from complaint_ticket
+    const ticketResult = await pool.request()
+      .input('ticketNo', ticketNo)
+      .query(`
+        SELECT customer_id 
+        FROM complaint_ticket 
+        WHERE ticket_no = @ticketNo
+      `);
 
-    const checkRequest = pool.request()
-      .input('customerId', customerId)
-      .input('ticketNo', ticketNo);
+    if (ticketResult.recordset.length === 0) {
+      return res.status(404).json({ message: "No complaint ticket found with this ticket number" });
+    }
 
-    const result = await checkRequest.query(checkSql);
+    const customer_id = ticketResult.recordset[0].customer_id;
 
-    if (result.recordset[0].count > 0) {
+    // Step 2: Get email from awt_customer
+    const customerResult = await pool.request()
+      .input('customerId', customer_id)
+      .query(`
+        SELECT email 
+        FROM awt_customer 
+        WHERE customer_id = @customerId
+      `);
+
+    if (customerResult.recordset.length === 0) {
+      return res.status(404).json({ message: "No customer found with this customer ID" });
+    }
+
+    const email = customerResult.recordset[0].email;
+
+    // Step 3: Check for duplicate submission
+    const checkResult = await pool.request()
+      .input('ticketNo', ticketNo)
+      .query(`
+        SELECT COUNT(*) AS count 
+        FROM awt_service_contact_form 
+        WHERE ticket_no = @ticketNo
+      `);
+
+    if (checkResult.recordset[0].count > 0) {
       return res.status(400).json({ message: "Response already submitted" });
     }
 
-    // Insert new entry
-    const insertSql = `
-      INSERT INTO awt_service_contact_form (
-        customer_id, ticket_no, email, rating1, remark, rating2, created_date
-      ) VALUES (
-        @customerId, @ticketNo, @email, @rating1, @remark, @rating2, GETDATE()
-      )`;
-
-    const request = pool.request()
-      .input('customerId', customerId)
+    // Step 4: Insert feedback
+    await pool.request()
       .input('ticketNo', ticketNo)
+      .input('customerId', customer_id)
       .input('email', email)
       .input('rating1', rating1)
-      .input('remark', remark)
-      .input('rating2', rating2);
+      .input('remark', remark || '')
+      .input('rating2', rating2)
+      .query(`
+        INSERT INTO awt_service_contact_form (
+          ticket_no, customer_id, email, rating1, remark, rating2, created_date
+        ) VALUES (
+          @ticketNo, @customerId, @email, @rating1, @remark, @rating2, GETDATE()
+        )
+      `);
 
-    await request.query(insertSql);
-
-    res.send({ message: "Contact form submitted successfully" });
+    res.status(200).json({ message: "Contact form submitted successfully" });
   } catch (err) {
-    console.log("Error /awt_service_contact", err);
-    res.status(500).send({ error: "Error occurred", details: err.message });
+    console.log("Error in /awt_service_contact:", err);
+    res.status(500).json({ error: "Internal server error", details: err.message });
   }
 });
+
 
 app.get("/awt_service_contact/check", authenticateToken, async (req, res) => {
   const { customerId, ticketNo } = req.query;
 
+  if (!customerId || !ticketNo) {
+    return res.status(400).json({ error: "Missing required query parameters" });
+  }
+
   try {
     const pool = await poolPromise;
 
-    const checkSql = `
-      SELECT COUNT(*) AS count
-      FROM awt_service_contact_form
-      WHERE customer_id = @customerId AND ticket_no = @ticketNo
-    `;
-
-    const request = pool.request()
+    const result = await pool.request()
       .input('customerId', customerId)
-      .input('ticketNo', ticketNo);
+      .input('ticketNo', ticketNo)
+      .query(`
+        SELECT COUNT(*) AS count
+        FROM awt_service_contact_form
+        WHERE customer_id = @customerId AND ticket_no = @ticketNo
+      `);
 
-    const result = await request.query(checkSql);
-
-    res.send({ exists: result.recordset[0].count > 0 });
+    res.status(200).json({ exists: result.recordset[0].count > 0 });
   } catch (err) {
-    console.log("Error /awt_service_contact/check", err);
-    res.status(500).send({ error: "Error occurred", details: err.message });
+    console.log("Error in /awt_service_contact/check:", err);
+    res.status(500).json({ error: "Internal server error", details: err.message });
   }
 });
+
 
 
 app.post("/query", authenticateToken, async (req, res) => {
@@ -13577,7 +13605,7 @@ app.post('/getfaultroledata', authenticateToken, async (req, res) => {
   }
 });
 app.post('/getratecardroledata', authenticateToken, async (req, res) => {
-  const { role, ratecardpage, masterpage, postsalepage, addratepage } = req.body;
+  const { role, ratecardpage, masterpage, postsalepage, addratepage, addmasterwarrentypage, addpostsalewarrantypage } = req.body;
 
   // Function to convert comma-separated strings into arrays
   const parseIds = (ids) => (typeof ids === "string" && ids.trim() !== "" ? ids.split(",").map(Number) : []);
@@ -13588,6 +13616,8 @@ app.post('/getratecardroledata', authenticateToken, async (req, res) => {
     masterpage: parseIds(masterpage),
     postsalepage: parseIds(postsalepage),
     addratepage: parseIds(addratepage),
+    addmasterwarrentypage: parseIds(addmasterwarrentypage),
+    addpostsalewarrantypage: parseIds(addpostsalewarrantypage)
   };
 
   try {
@@ -21501,7 +21531,7 @@ app.get("/getinwardLiebherrexcel", authenticateToken, async (req, res) => {
         SELECT  
           s.id, s.Address_code, s.InvoiceDate, s.InvoiceNumber, s.Invoice_bpcode, 
           s.Invoice_bpName, s.Invoice_qty, s.Item_Code, s.Item_Description, 
-          s.Service_Type, s.Order_Line_Number, s.Order_Number, a.csp_code, agn.status,
+          s.Service_Type, s.Order_Line_Number, s.Order_Number, a.csp_code, agn.status,a.msp_code,
           ROW_NUMBER() OVER (PARTITION BY s.InvoiceNumber ORDER BY s.InvoiceDate DESC) AS rn
         FROM Shipment_Parts AS s 
         LEFT JOIN Address_code AS a ON a.address_code = s.Address_code 
@@ -22059,9 +22089,7 @@ app.get("/downloadstockexcel", authenticateToken, async (req, res) => {
 
 // rate card add 
 app.post("/putratecard", authenticateToken, async (req, res) => {
-  const { created_by, formData } = req.body;
-
-  const {
+  const { created_by, 
     id,
     csp_code,
     call_type,
@@ -22074,8 +22102,8 @@ app.post("/putratecard", authenticateToken, async (req, res) => {
     Within_96_Hours,
     MoreThan96_Hours,
     gas_charging,
-    transportation
-  } = formData;
+    transportation } = req.body;
+
 
   try {
     const pool = await poolPromise;
@@ -22679,11 +22707,6 @@ app.post("/deleteaddress", authenticateToken, async (req, res) => {
   }
 });
 
-
-
-
-
-
 app.get("/requestaddress/:editid", authenticateToken, async (req, res) => {
   const { editid } = req.params;
 
@@ -22757,6 +22780,593 @@ app.post("/setdefaultaddress", authenticateToken, async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
+
+app.post("/postfinalremark", authenticateToken, async (req, res) => {
+  const { complaintid, final_remark } = req.body;
+
+  const pool = await poolPromise;
+
+  try {
+    // Step 1: Fetch ticket_no from complaint_ticket using complaintid
+    const ticketResult = await pool.request()
+      .input("complaintid", sql.Int, complaintid)
+      .query(`
+        SELECT ticket_no FROM complaint_ticket WHERE id = @complaintid 
+      `);
+
+    console.log("ticketResult:", ticketResult.recordset);
+
+    if (ticketResult.recordset.length === 0) {
+      return res.status(404).json({ message: "Complaint ticket not found." });
+    }
+
+    const ticket_no = ticketResult.recordset[0].ticket_no;
+
+    // Step 2: Insert remark into awt_complaintremark including ticket_no
+    await pool.request()
+      .input("ticket_no", sql.VarChar, ticket_no)
+      .input("final_remark", sql.Text, final_remark)
+      .query(`
+        INSERT INTO awt_complaintremark (ticket_no, remark)
+        VALUES (@ticket_no, @final_remark)
+      `);
+
+    // Step 3: Update final_remark in complaint_ticket using ticket_no
+    await pool.request()
+      .input("ticket_no", sql.VarChar, ticket_no)
+      .input("final_remark", sql.Text, final_remark)
+      .query(`
+        UPDATE complaint_ticket
+        SET final_remark = @final_remark
+        WHERE ticket_no = @ticket_no
+      `);
+
+    return res.json({
+      message: "Final remark saved and complaint ticket updated successfully.",
+    });
+
+  } catch (error) {
+    console.error("Error posting final remark:", error);
+    return res.status(500).json({ error: "Failed to post final remark." });
+  }
+});
+
+app.get("/getaddresscode", authenticateToken, async (req, res) => {
+  const { complaintid } = req.query;
+
+  if (!complaintid) {
+    return res.status(400).json({ message: "Missing complaintid in query parameters." });
+  }
+
+  try {
+    const pool = await poolPromise;
+
+    // Step 1: Fetch msp and csp from complaint_ticket for given complaintid
+    const ticketResult = await pool.request()
+      .input("complaintid", sql.Int, complaintid)
+      .query(`
+        SELECT csp
+        FROM complaint_ticket
+        WHERE id = @complaintid
+      `);
+
+    if (ticketResult.recordset.length === 0) {
+      return res.status(404).json({ message: "Complaint ticket not found." });
+    }
+
+    const { msp, csp } = ticketResult.recordset[0];
+
+    // Step 2: Fetch from Address_Code where msp_code and csp_code match
+    const addressResult = await pool.request()
+      .input("csp", sql.VarChar, csp)
+      .query(`
+        SELECT *
+        FROM Address_Code
+        WHERE deleted = 0 AND   csp_code = @csp
+      `);
+
+    // Step 3: Encrypt and return
+    const jsonData = JSON.stringify(addressResult.recordset);
+    const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
+
+    return res.json({ encryptedData });
+
+  } catch (error) {
+    console.error("Error fetching address code:", error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+});
+
+// Add Master Warranty 
+
+app.post("/postmasterwarrenty", authenticateToken, async (req, res) => {
+  const {
+    id, Service_Type, warrenty_amount, Product_Type, Product_Line,
+    Product_Class, warrenty_year, compressor_warrenty, is_scheme,
+    scheme_name, scheme_startdate,
+    scheme_enddate, created_by
+  } = req.body;
+
+  const pool = await poolPromise;
+
+  try {
+
+    // Use the poolPromise to get the connection pool
+
+    // Check if the data already exists and is not deleted
+    const checkDuplicateResult = await pool.request()
+      .input('Product_Type', Product_Type)
+      .input('Product_Line', Product_Line)
+      .input('Product_Class', Product_Class)
+      .query(`
+        SELECT * FROM Master_warrenty
+      WHERE Product_Type = @Product_Type
+      AND Product_Line = @Product_Line
+      AND Product_Class = @Product_Class
+      AND deleted = 0
+      `);
+
+
+    if (checkDuplicateResult.recordset.length > 0) {
+      return res.status(409).json({
+        message: "Duplicate entry, Master Warrenty already exists!",
+      });
+    }
+
+    const checkSoftDeletedResult = await pool.request()
+      .input('Product_Type', Product_Type)
+      .input('Product_Line', Product_Line)
+      .input('Product_Class', Product_Class)
+      .query(`
+        SELECT * FROM Master_warrenty
+      WHERE Product_Type = @Product_Type
+      AND Product_Line = @Product_Line
+      AND Product_Class = @Product_Class
+      AND deleted = 1
+      `);
+
+    if (checkSoftDeletedResult.recordset.length > 0) {
+      // Restore the soft-deleted record with updated data
+      await pool.request()
+        .input('Service_Type', sql.VarChar, Service_Type)
+        .input('warrenty_amount', sql.Int, warrenty_amount)
+        .input('Product_Type', sql.VarChar, Product_Type)
+        .input('Product_Line', sql.VarChar, Product_Line)
+        .input('Product_Class', sql.VarChar, Product_Class)
+        .input('warrenty_year', sql.Int, warrenty_year)
+        .input('compressor_warrenty', sql.Int, compressor_warrenty)
+        .input('is_scheme', sql.VarChar, is_scheme)
+        .input('scheme_name', sql.VarChar, scheme_name)
+        .input('scheme_startdate', sql.DateTime, scheme_startdate)
+        .input('scheme_enddate', sql.DateTime, scheme_enddate)
+
+        .query(`
+          UPDATE Master_warrenty
+          SET
+            Service_Type = @Service_Type,
+            warrenty_amount = @warrenty_amount,
+            Product_Type = @Product_Type,
+            Product_Line = @Product_Line,
+            Product_Class = @Product_Class,
+            warrenty_year = @warrenty_year,
+            compressor_warrenty = @compressor_warrenty,
+            is_scheme = @is_scheme,
+            scheme_name = @scheme_name,
+            scheme_startdate = @scheme_startdate,
+            scheme_enddate = @scheme_enddate,
+            created_by = @created_by,            
+            deleted = 0
+          WHERE Product_Type = @Product_Type
+          AND Product_Line = @Product_Line
+          AND Product_Class = @Product_Class
+        `);
+
+      return res.json({
+        message: "Soft-deleted Master Warranty restored successfully with updated data!",
+      });
+    }
+    // Insert the new child franchise if no duplicates or soft-deleted records found
+    await pool.request()
+      .input('Service_Type', sql.VarChar, Service_Type)
+      .input('warrenty_amount', sql.Int, warrenty_amount)
+      .input('Product_Type', sql.VarChar, Product_Type)
+      .input('Product_Line', sql.VarChar, Product_Line)
+      .input('Product_Class', sql.VarChar, Product_Class)
+      .input('warrenty_year', sql.Int, warrenty_year)
+      .input('compressor_warrenty', sql.Int, compressor_warrenty)
+      .input('is_scheme', sql.VarChar, is_scheme)
+      .input('scheme_name', sql.VarChar, scheme_name)
+      .input('scheme_startdate', sql.DateTime, scheme_startdate)
+      .input('scheme_enddate', sql.DateTime, scheme_enddate)
+      .input('created_by', sql.VarChar, created_by)
+      .query(`
+        INSERT INTO Master_warrenty
+        ( Service_Type, warrenty_amount, Product_Type, Product_Line, Product_Class, warrenty_year, compressor_warrenty, is_scheme,
+         scheme_name, scheme_startdate,  scheme_enddate,created_by)
+        VALUES
+        ( @Service_Type, @warrenty_amount, @Product_Type, @Product_Line, @Product_Class, @warrenty_year, @compressor_warrenty,
+         @is_scheme, @scheme_name, @scheme_startdate,  @scheme_enddate,@created_by)
+      `);
+    return res.json({
+      message: "Master Warranty added successfully!",
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while processing the request' });
+  }
+});
+
+app.post("/deletemasterwarrenty", authenticateToken, async (req, res) => {
+  const { id } = req.body;
+
+  try {
+    const pool = await poolPromise;
+
+    // SQL query to mark rate card as deleted
+    const sql = `UPDATE Master_warrenty SET deleted = 1 WHERE id = ${id}`;
+    const result = await pool.request().query(sql);
+
+    return res.json(result);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Error updating rate card" });
+  }
+});
+
+app.get("/getmasterwarrentypopulate/:masterwarrentyid", authenticateToken, async (req, res) => {
+  const { masterwarrentyid } = req.params;
+
+  try {
+    const pool = await poolPromise;
+    const sql = `
+      SELECT * FROM Master_warrenty WHERE deleted = 0 AND id = ${masterwarrentyid}
+    `;
+    const result = await pool.request().query(sql);
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Error fetching Master Warranty for ID:", masterwarrentyid, err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+    // return res.json(err)
+  }
+});
+
+app.post("/putmasterwarrenty", authenticateToken, async (req, res) => {
+  const { created_by, id,
+    Service_Type,
+    Product_Type,
+    Product_Line,
+    Product_Class,
+    warrenty_year,
+    compressor_warrenty,
+    warrenty_amount,
+    is_scheme,
+    scheme_name,
+    scheme_startdate,
+    scheme_enddate, } = req.body;
+
+
+
+  try {
+    const pool = await poolPromise;
+
+    // Step 1: Duplicate Check Query
+    const duplicateCheckSQL = `
+      SELECT * FROM Master_warrenty
+      WHERE Product_Type = @Product_Type
+      AND Product_Line = @Product_Line
+      AND Product_Class = @Product_Class
+      AND deleted = 0
+      AND id != @id
+    `;
+
+    console.log("Executing Duplicate Check SQL:", duplicateCheckSQL);
+
+    const duplicateCheckResult = await pool.request()
+      .input('Product_Type', Product_Type)
+      .input('Product_Line', Product_Line)
+      .input('Product_Class', Product_Class)
+      .input('id', id)
+      .query(duplicateCheckSQL);
+
+    if (duplicateCheckResult.recordset.length > 0) {
+      return res.status(409).json({
+        message: "Duplicate entry, Master Warranty already exists!"
+      });
+    }
+
+    // Step 2: Update Query
+    const updateSQL = `
+      UPDATE Master_warrenty
+      SET
+        Product_Type = @Product_Type,
+        Product_Line = @Product_Line,
+        Product_Class = @Product_Class,        
+        Service_Type = @Service_Type,
+        warrenty_year = @warrenty_year,
+        compressor_warrenty = @compressor_warrenty,
+        warrenty_amount = @warrenty_amount,
+        is_scheme = @is_scheme,
+        scheme_name = @scheme_name,
+        scheme_startdate = @scheme_startdate,
+        scheme_enddate = @scheme_enddate,
+        updated_by = @created_by
+      WHERE id = @id
+    `;
+
+    console.log("Executing Update SQL:", updateSQL);
+
+    const result = await pool.request()
+      .input('Product_Type', Product_Type)
+      .input('Product_Line', Product_Line)
+      .input('Product_Class', Product_Class)
+      .input('Service_Type', Service_Type)
+      .input('warrenty_year', warrenty_year)
+      .input('compressor_warrenty', compressor_warrenty)
+      .input('warrenty_amount', warrenty_amount)
+      .input('is_scheme', is_scheme)
+      .input('scheme_name', scheme_name)
+      .input('scheme_startdate', scheme_startdate)
+      .input('scheme_enddate', scheme_enddate)
+      .input('created_by', created_by)
+      .input('id', id)
+      .query(updateSQL);
+
+    console.log("Rows affected:", result.rowsAffected);
+    return res.json({
+      message: "Master Warrenty updated successfully!"
+    });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "An error occurred while processing the request" });
+  }
+});
+
+app.post("/postpostsale", authenticateToken, async (req, res) => {
+  const { ServiceType, warranty_amount, Producttype, ProductLine,
+    ProductClass, warranty_year, compressor_warranty, is_scheme,
+    scheme_name, scheme_startdate,
+    scheme_enddate, created_by
+  } = req.body;
+
+  const pool = await poolPromise;
+
+  try {
+
+    // Use the poolPromise to get the connection pool
+
+    // Check if the data already exists and is not deleted
+    const checkDuplicateResult = await pool.request()
+      .input('Producttype', Producttype)
+      .input('ProductLine', ProductLine)
+      .input('ProductClass', ProductClass)
+      .query(`
+        SELECT * FROM post_sale_warrenty  
+      WHERE Producttype = @Producttype
+      AND ProductLine = @ProductLine
+      AND ProductClass = @ProductClass
+      AND deleted = 0
+      `);
+
+
+    if (checkDuplicateResult.recordset.length > 0) {
+      return res.status(409).json({
+        message: "Duplicate entry, Post Sale  Warrenty already exists!",
+      });
+    }
+
+    const checkSoftDeletedResult = await pool.request()
+      .input('Producttype', Producttype)
+      .input('ProductLine', ProductLine)
+      .input('ProductClass', ProductClass)
+      .query(`
+        SELECT * FROM post_sale_warrenty
+      WHERE Producttype = @Producttype
+      AND ProductLine = @ProductLine
+      AND ProductClass = @ProductClass
+      AND deleted = 1
+      `);
+
+    if (checkSoftDeletedResult.recordset.length > 0) {
+      // Restore the soft-deleted record with updated data
+      await pool.request()
+        .input('ServiceType', sql.VarChar, ServiceType)
+        .input('warranty_amount', sql.Int, warranty_amount)
+        .input('Producttype', sql.VarChar, Producttype)
+        .input('ProductLine', sql.VarChar, ProductLine)
+        .input('ProductClass', sql.VarChar, ProductClass)
+        .input('warranty_year', sql.VarChar, warranty_year)
+        .input('compressor_warranty', sql.Int, compressor_warranty)
+        .input('is_scheme', sql.VarChar, is_scheme)
+        .input('scheme_name', sql.VarChar, scheme_name)
+        .input('scheme_startdate', sql.DateTime, scheme_startdate)
+        .input('scheme_enddate', sql.DateTime, scheme_enddate)
+
+        .query(`
+          UPDATE post_sale_warrenty
+          SET
+            ServiceType = @ServiceType,
+            warranty_amount = @warranty_amount,
+            Producttype = @Producttype,
+            ProductLine = @ProductLine,
+            ProductClass = @ProductClass,
+            warranty_year = @warranty_year,
+            compressor_warranty = @compressor_warranty,
+            is_scheme = @is_scheme,
+            scheme_name = @scheme_name,
+            scheme_startdate = @scheme_startdate,
+            scheme_enddate = @scheme_enddate,
+            created_by = @created_by,            
+            deleted = 0
+          WHERE Producttype = @Producttype
+          AND ProductLine = @ProductLine
+          AND ProductClass = @ProductClass
+        `);
+
+      return res.json({
+        message: "Soft-deleted Post Sale Warranty restored successfully with updated data!",
+      });
+    }
+    // Insert the new child franchise if no duplicates or soft-deleted records found
+    await pool.request()
+      .input('ServiceType', sql.VarChar, ServiceType)
+      .input('warranty_amount', sql.Int, warranty_amount)
+      .input('Producttype', sql.VarChar, Producttype)
+      .input('ProductLine', sql.VarChar, ProductLine)
+      .input('ProductClass', sql.VarChar, ProductClass)
+      .input('warranty_year', sql.Int, warranty_year)
+      .input('compressor_warranty', sql.Int, compressor_warranty)
+      .input('is_scheme', sql.VarChar, is_scheme)
+      .input('scheme_name', sql.VarChar, scheme_name)
+      .input('scheme_startdate', sql.DateTime, scheme_startdate)
+      .input('scheme_enddate', sql.DateTime, scheme_enddate)
+      .input('created_by', sql.VarChar, created_by)
+      .query(`
+        INSERT INTO post_sale_warrenty
+        ( ServiceType, warranty_amount, Producttype, ProductLine, ProductClass, warranty_year, compressor_warranty, is_scheme,
+         scheme_name, scheme_startdate,  scheme_enddate,created_by)
+        VALUES
+        ( @ServiceType, @warranty_amount, @Producttype, @ProductLine, @ProductClass, @warranty_year, @compressor_warranty,
+         @is_scheme, @scheme_name, @scheme_startdate,  @scheme_enddate,@created_by)
+      `);
+    return res.json({
+      message: "Post Sale Warranty added successfully!",
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while processing the request' });
+  }
+});
+
+app.get("/getpostsalepopulate/:postsaleid", authenticateToken, async (req, res) => {
+  const { postsaleid } = req.params;
+
+  try {
+    const pool = await poolPromise;
+    const sql = `
+      SELECT * FROM post_sale_warrenty WHERE deleted = 0 AND id = ${postsaleid}
+    `;
+    const result = await pool.request().query(sql);
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("Error fetching Master Warranty for ID:", postsaleid, err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+    // return res.json(err)
+  }
+});
+
+app.post("/deletepostsalewarrenty", authenticateToken, async (req, res) => {
+  const { id } = req.body;
+
+  try {
+    const pool = await poolPromise;
+
+    // SQL query to mark Post Sale Warranty  as deleted
+    const sql = `UPDATE post_sale_warrenty SET deleted = 1 WHERE id = ${id}`;
+    const result = await pool.request().query(sql);
+
+    return res.json(result);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Error updating Post Sale Warrenty" });
+  }
+});
+
+app.post("/putpostsale", authenticateToken, async (req, res) => {
+  const { created_by, id,
+    ServiceType,
+    Producttype,
+    ProductLine,
+    ProductClass,
+    warranty_year,
+    compressor_warranty,
+    warranty_amount,
+    is_scheme,
+    scheme_name,
+    scheme_startdate,
+    scheme_enddate, } = req.body;
+
+
+
+  try {
+    const pool = await poolPromise;
+
+    // Step 1: Duplicate Check Query
+    const duplicateCheckSQL = `
+      SELECT * FROM post_sale_warrenty
+      WHERE Producttype = @Producttype
+      AND ProductLine = @ProductLine
+      AND ProductClass = @ProductClass
+      AND deleted = 0
+      AND id != @id
+    `;
+
+    console.log("Executing Duplicate Check SQL:", duplicateCheckSQL);
+
+    const duplicateCheckResult = await pool.request()
+      .input('Producttype', Producttype)
+      .input('ProductLine', ProductLine)
+      .input('ProductClass', ProductClass)
+      .input('id', id)
+      .query(duplicateCheckSQL);
+
+    if (duplicateCheckResult.recordset.length > 0) {
+      return res.status(409).json({
+        message: "Duplicate entry, Post Sale  Warranty already exists!"
+      });
+    }
+
+    // Step 2: Update Query
+    const updateSQL = `
+      UPDATE post_sale_warrenty 
+      SET
+        Producttype = @Producttype,
+        ProductLine = @ProductLine,
+        ProductClass = @ProductClass,        
+        ServiceType = @ServiceType,
+        warranty_year = @warranty_year,
+        compressor_warranty = @compressor_warranty,
+        warranty_amount = @warranty_amount,
+        is_scheme = @is_scheme,
+        scheme_name = @scheme_name,
+        scheme_startdate = @scheme_startdate,
+        scheme_enddate = @scheme_enddate,
+        updated_by = @created_by
+      WHERE id = @id
+    `;
+
+    console.log("Executing Update SQL:", updateSQL);
+
+    const result = await pool.request()
+      .input('Producttype', Producttype)
+      .input('ProductLine', ProductLine)
+      .input('ProductClass', ProductClass)
+      .input('ServiceType', ServiceType)
+      .input('warranty_year', warranty_year)
+      .input('compressor_warranty', compressor_warranty)
+      .input('warranty_amount', warranty_amount)
+      .input('is_scheme', is_scheme)
+      .input('scheme_name', scheme_name)
+      .input('scheme_startdate', scheme_startdate)
+      .input('scheme_enddate', scheme_enddate)
+      .input('created_by', created_by)
+      .input('id', id)
+      .query(updateSQL);
+
+    console.log("Rows affected:", result.rowsAffected);
+    return res.json({
+      message: "Post Sale  Warrenty updated successfully!"
+    });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "An error occurred while processing the request" });
+  }
+});
+
+
 
 
 

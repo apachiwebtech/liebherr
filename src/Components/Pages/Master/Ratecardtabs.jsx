@@ -20,6 +20,14 @@ function Ratecardtabs() {
       setActiveTab("/ratecard");
     } else if (location.pathname.startsWith("/addrate")) {
       setActiveTab("/addrate");
+    } else if (location.pathname.startsWith("/master_warrenty")) {
+      setActiveTab("/master_warrenty");
+    } else if (location.pathname.startsWith("/post_sale_warrenty")) {
+      setActiveTab("/post_sale_warrenty");
+    } else if (location.pathname.startsWith("/addmasterwarrenty")) {
+      setActiveTab("/addmasterwarrenty");
+    } else if (location.pathname.startsWith("/addpostsalewarranty")) {
+      setActiveTab("/addpostsalewarranty");
     }
   }, [location.pathname]);
 
@@ -42,6 +50,8 @@ function Ratecardtabs() {
       masterpage: '38',
       postsalepage: '39',
       addratepage: '66',
+      addmasterwarrentypage: '72',
+      addpostsalewarrantypage: '73',
     }
 
 
@@ -106,18 +116,6 @@ function Ratecardtabs() {
                 }}
               >
                 <ul className="nav nav-tabs ">
-                  {status.ratecardpage == 1 &&
-                    <Link to={`/ratecard`}>
-                      <li className="nav-item">
-                        <button
-                          className={`nav-link ${activeTab === "/ratecard" ? "active" : ""
-                            }`}
-
-                        >
-                          RATE CARD MATRIX
-                        </button>
-                      </li></Link>
-                  }
                   {status.addratepage == 1 &&
                     <Link to={`/addrate`}>
                       <li className="nav-item">
@@ -130,6 +128,30 @@ function Ratecardtabs() {
                         </button>
                       </li></Link>
                   }
+                  {status.ratecardpage == 1 &&
+                    <Link to={`/ratecard`}>
+                      <li className="nav-item">
+                        <button
+                          className={`nav-link ${activeTab === "/ratecard" ? "active" : ""
+                            }`}
+
+                        >
+                          RATE CARD MATRIX
+                        </button>
+                      </li></Link>
+                  }
+                  {status.addmasterwarrentypage == 1 &&
+                    <Link to={`/addmasterwarrenty`}>
+                      <li className="nav-item">
+                        <button
+                          className={`nav-link ${activeTab === "/addmasterwarrenty" ? "active" : ""
+                            }`}
+
+                        >
+                          ADD MASTER WARRANTY
+                        </button>
+                      </li></Link>
+                  }
                   {status.masterpage == 1 &&
                     <Link to={`/master_warrenty`}>
                       <li className="nav-item">
@@ -139,6 +161,18 @@ function Ratecardtabs() {
 
                         >
                           MASTER WARRANTY
+                        </button>
+                      </li></Link>
+                  }
+                  {status.addpostsalewarrantypage == 1 &&
+                    <Link to={`/addpostsalewarranty`}>
+                      <li className="nav-item">
+                        <button
+                          className={`nav-link ${activeTab === "/addpostsalewarranty" ? "active" : ""
+                            }`}
+
+                        >
+                          ADD POST SALE WARRANTY
                         </button>
                       </li></Link>
                   }

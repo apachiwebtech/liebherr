@@ -270,6 +270,8 @@ export function InwardLiebherr(params) {
 
             const worksheet = XLSX.utils.json_to_sheet(
                 decryptedData.map((item) => ({
+                    MspCode: item.msp_code,
+                    CspCode: item.csp_code,
                     InvoiceNumber: item.InvoiceNumber,
                     InvoiceDate: item.InvoiceDate ? formatDate(item.InvoiceDate) : '',
                     ReceivedFrom: item.received_from,
@@ -584,6 +586,7 @@ export function InwardLiebherr(params) {
                                     <thead>
                                         <tr>
                                             <th width="5%">#</th>
+                                            <th width = "10%"> Csp Code</th>
                                             <th width="15%">Invoice No</th>
                                             <th width="15%">Invoice Date</th>
                                             <th width="20%">Received From</th>
@@ -600,6 +603,7 @@ export function InwardLiebherr(params) {
                                             return (
                                                 <tr key={index}>
                                                     <td>{displayIndex}</td>
+                                                    <td>{item.csp_code}</td>
                                                     <td>{item.InvoiceNumber}</td>
                                                     <td>{formatDate(item.InvoiceDate)}</td>
                                                     <td>Liebherr</td>
@@ -767,6 +771,7 @@ export function InwardLiebherr(params) {
                                                             <thead>
                                                                 <tr>
                                                                     <th>#</th>
+
                                                                     <th>Article Code</th>
                                                                     <th>Article Description</th>
                                                                     <th>Invoice Qty</th>
