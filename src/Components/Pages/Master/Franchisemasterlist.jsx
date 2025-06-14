@@ -188,27 +188,34 @@ export function Franchisemasterlist(params) {
   const navigate = useNavigate()
 
   // export to excel 
+  const formatDate = (inputDate) => {
+    if (!inputDate) return "";
+    const date = new Date(inputDate);
+    if (isNaN(date.getTime())) return "";
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
   const exportToExcel = async () => {
     try {
-      // Fetch all customer data without pagination
       const response = await axiosInstance.get(`${Base_Url}/getmasterfranchiselist`, {
         headers: {
           Authorization: token,
         },
         params: {
-          pageSize: totalCount, // Fetch all data
-          page: 1, // Start from the first page
+          pageSize: totalCount,
+          page: 1,
         },
       });
 
       const decryptedData = CryptoJS.AES.decrypt(response.data.encryptedData, secretKey).toString(CryptoJS.enc.Utf8);
-      const allMasterFranchiseData =JSON.parse(decryptedData);
-      // Create a new workbook
+      const allMasterFranchiseData = JSON.parse(decryptedData);
+
       const workbook = XLSX.utils.book_new();
 
-      // Convert data to a worksheet
       const worksheet = XLSX.utils.json_to_sheet(allMasterFranchiseData.map(user => ({
-
         "Name": user.title,
         "ContactPerson": user.contact_person,
         "Email": user.email,
@@ -226,25 +233,22 @@ export function Franchisemasterlist(params) {
         "Bank Name": user.bankname,
         "BankAccountNumber": user.bankacc,
         "IfscCode": user.bankifsc,
-        "WithLiebherr": user.withliebher,
-        "LastWorkingDate": user.lastworkinddate,
-        "ContractActivationdate": user.contractacti,
-        "ContractExpirationDate": user.contractexpir,
+        "WithLiebherr": formatDate(user.withliebher),
+        "LastWorkingDate": formatDate(user.lastworkinddate),
+        "ContractActivationdate": formatDate(user.contractacti),
+        "ContractExpirationDate": formatDate(user.contractexpir),
         "BankAddress": user.bankaddress,
         "LicareCode": user.licarecode,
-        "PartnerName": user.partner_name, // Add fields you want to export
-
+        "PartnerName": user.partner_name,
       })));
 
-      // Append the worksheet to the workbook
       XLSX.utils.book_append_sheet(workbook, worksheet, "MasterFranchise");
-
-      // Export the workbook
       XLSX.writeFile(workbook, "MasterFranchise.xlsx");
     } catch (error) {
       console.error("Error exporting data to Excel:", error);
     }
   };
+
 
   // export to excel end 
   // Role Right 
@@ -453,7 +457,7 @@ export function Franchisemasterlist(params) {
                             onClick={() => sendtoedit(item.id)}
                             title="Edit"
                             style={{ backgroundColor: 'transparent', border: 'none', color: 'blue', fontSize: '20px' }}
-                            
+
                           >
                             <FaEye />
                           </button>

@@ -266,7 +266,8 @@ export function Msl(params) {
                     CspCode: item.csp_code,
                     ArticleCode: item.item,
                     ArticleDescription: item.item_description,
-                    TotalCSPStock: item.stock,
+                    TotalCSPStock: item.stock_quantity,
+                    MslStock: item.stock,
                 }))
             );
 
@@ -418,7 +419,7 @@ export function Msl(params) {
                                             <th width="15%">Csp Name</th>
                                             <th width="10%">Article Code</th>
                                             <th width="20%">Article Description</th>
-                                            <th width="10%">Total Csp Stock</th>
+                                            <th width="10%"> Msl Stock</th>
                                            {roleaccess > 3 ? <th widht="10%">Edit</th> :null}
 
                                         </tr>

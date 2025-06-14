@@ -59,11 +59,7 @@ export function Customerlist(params) {
 
     });
 
-    const formatDate = (dateString) => {
-        const date = new Date(dateString); // Parse the date string
-        const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
-        return date.toLocaleDateString('en-GB', options).replace(/\//g, '-'); // Convert to 'DD-MM-YYYY' format
-    };
+
 
 
     const fetchCustomerlist = async (page) => {
@@ -146,6 +142,8 @@ export function Customerlist(params) {
             }
         }
     };
+
+
 
     const fetchFilteredData = async () => {
         try {

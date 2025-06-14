@@ -29,7 +29,14 @@ export function Engineerlist(params) {
         setCurrentPage(page);
         fetchEngineerlist(page); // Fetch data for the new page
     };
+    const formatDate = (isoString) => {
+        const date = new Date(isoString);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Ensure two-digit month
+        const day = String(date.getDate()).padStart(2, '0'); // Ensure two-digit day
 
+        return `${day}-${month}-${year}`;
+    };      
 
 
     const [formData, setFormData] = useState({
@@ -205,10 +212,10 @@ export function Engineerlist(params) {
                 "Employee Code": user.employee_code,
                 "Personal Email": user.personal_email,
                 "Personal MobileNumber": user.personal_mobile,
-                "Date of Birth": user.dob,
+                "Date of Birth": formatDate(user.dob),
                 "Blood Group": user.blood_group,
                 "Academic Qualification": user.academic_qualification,
-                "Joining Date": user.joining_date,
+                "Joining Date": formatDate(user.joining_date),
                 "Passport Picture": user.passport_picture,
                 "Resume": user.resume,
                 "PhotoProof": user.photo_proof,

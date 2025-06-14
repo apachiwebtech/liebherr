@@ -158,7 +158,6 @@ export function BussinePartner(params) {
     // export to excel 
     const exportToExcel = async () => {
         try {
-            // Fetch all customer data without pagination
             const response = await axiosInstance.get(`${Base_Url}/getbussinesspartner`, {
                 headers: {
                     Authorization: token,
@@ -168,13 +167,14 @@ export function BussinePartner(params) {
                     page: 1, // Start from the first page
                 },
             });
-            const allBussinessdata = response.data.data;
-            // Create a new workbook
+
+            // 🔓 Decrypt the data
+            const decryptedData = CryptoJS.AES.decrypt(response.data.encryptedData, secretKey).toString(CryptoJS.enc.Utf8);
+            const allBussinessdata = JSON.parse(decryptedData);
+
             const workbook = XLSX.utils.book_new();
 
-            // Convert data to a worksheet
             const worksheet = XLSX.utils.json_to_sheet(allBussinessdata.map(user => ({
-
                 "Bp Code": user.Bp_code,
                 "Title": user.title,
                 "Partner name": user.partner_name,
@@ -192,23 +192,20 @@ export function BussinePartner(params) {
                 "Licare Id": user.Licare_Ac_Id,
                 "Licare Code": user.Licare_code,
                 "Vendor Name": user.Vendor_Name,
-                "With Liebherr": user.withliebher,
-                "Last Working Date": user.lastworkingdate,
+                "With Liebherr": user.withliebher ,
+                "Last Working Date": user.lastworkingdate ? formatDate(user.lastworkingdate) : '',
                 "Contract Active": user.contractactive,
-                "Contract Expire": user.contractexpire,
-
-
+                "Contract Expire": user.contractexpire ? formatDate(user.contractexpire) : '',
             })));
 
-            // Append the worksheet to the workbook
             XLSX.utils.book_append_sheet(workbook, worksheet, "BussinessPartner");
-
-            // Export the workbook
             XLSX.writeFile(workbook, "BussinessPartner.xlsx");
+
         } catch (error) {
             console.error("Error exporting data to Excel:", error);
         }
     };
+
 
     // export to excel end 
 
@@ -424,9 +421,9 @@ export function BussinePartner(params) {
                                                     <td>{item.Licare_code}</td>
                                                     <td>{item.Vendor_Name}</td>
                                                     <td>{item.withliebher}</td>
-                                                    <td>{formatDate(item.lastworkingdate)}</td>
+                                                    <td>{item.lastworkingdate ? formatDate(item.lastworkingdate) : ''}</td>
                                                     <td>{item.contractactive}</td>
-                                                    <td>{formatDate(item.contractexpire)}</td>
+                                                    <td>{item.contractexpire ? formatDate(item.contractexpire) : ''}</td>
 
                                                 </tr>
                                             )

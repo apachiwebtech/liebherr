@@ -23,13 +23,48 @@ const Complaintreport = () => {
   const licare_code = localStorage.getItem("licare_code");
 
 
-  function excelformatDate(dateStr) {
-    const date = new Date(dateStr);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
-  }
+
+  const columnMapping = {
+    id: "Ticket ID",
+    ticket_no: "Ticket Number",
+    ticket_date: "Ticket Date",
+    customer_id: "Customer ID",
+    customer_name: "Customer Name",
+    address: "Address",
+    state: "State",
+    city: "City",
+    District: "District",
+    pincode: "Pincode",
+    CustomerClassification: "Customer Classification",
+    customer_mobile: "Customer Mobile",
+    customer_email: "Customer Email",
+    alt_mobile: "Alternate Mobile",
+    call_type: "Call Type",
+    CallCategory: "Call Category",
+    ModelNumber: "Model Number",
+    serial_no: "Serial Number",
+    purchase_date: "Purchase Date",
+    WarrantyType: "Warranty Status",
+    call_status: "Call Status",
+    sub_call_status: "Call Sub Status",
+    FaultDescription: "Fault Description",
+    FinalRemark: "Final Remark",
+    FieldCompletedDate: "Field Completed Date",
+    AdditionalInfo: "Additional Info",
+    mother_branch: "Liebherr Branch",
+    msp: "Master Service Partner Code",
+    MasterServicePartnerName: "Master Service Partner Name",
+    csp: "Child Service Partner Code",
+    child_service_partner: "Child Service Partner Name",
+    EngineerName: "Engineer Name",
+    CountOfVisit: "Count Of Visit",
+    CallChargeable: "Call Charges",
+    Priority: "Priority",
+    TOTP: "TOTP"
+  };
+
+
+
 
   const fetchData = async () => {
     setError(''); // Clear any previous errors
@@ -56,27 +91,28 @@ const Complaintreport = () => {
         headers: { Authorization: token },
       });
 
+      const rawData = response.data;
 
-      if (response.data && response.data.length > 0) {
-        // Format date fields
-        const formattedData = response.data.map(item => {
-          const formattedItem = { ...item };
-          if (roleaccess <= 4) {
-            delete formattedItem.TOTP;
+      const dateFields = [
+        "ticket_date",
+        "purchase_date",
+        "FieldCompletedDate"
+      ];
+      const formattedData = rawData.map(item => {
+        const row = {};
+        for (const [backendKey, frontendLabel] of Object.entries(columnMapping)) {
+          let value = item[backendKey] ?? "";
+
+          if (dateFields.includes(backendKey) && value) {
+            value = formatDate(value); // Apply date formatting
           }
-          return formattedItem;
-        });
 
+          row[frontendLabel] = value;
+        }
+        return row;
+      });
 
-
-        // Extract and set column names dynamically
-        setColumns(Object.keys(formattedData[0]));
-
-        // Ensure all data is loaded before exporting
-        await exportToExcel(formattedData);
-      } else {
-        setError("No data available for the selected date range.");
-      }
+      exportToExcel(formattedData);
     } catch (error) {
       console.error("Error fetching data:", error);
       setError("Failed to fetch data. Please try again.");
@@ -116,12 +152,21 @@ const Complaintreport = () => {
     const month = String(date.getMonth() + 1).padStart(2, '0'); // Ensure two-digit month
     const day = String(date.getDate()).padStart(2, '0'); // Ensure two-digit day
 
+    return `${day}-${month}-${year}`;
+  };
+
+  const formatDate2 = (isoString) => {
+    const date = new Date(isoString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Ensure two-digit month
+    const day = String(date.getDate()).padStart(2, '0'); // Ensure two-digit day
+
     return `${year}-${month}-${day}`;
   };
 
   const handleStartDateChange = (date) => {
     if (date) {
-      const formattedDate = formatDate(date);
+      const formattedDate = formatDate2(date);
       setStartdate(formattedDate);
     } else {
       setStartdate('');
@@ -130,7 +175,7 @@ const Complaintreport = () => {
 
   const handleEndDateChange = (date) => {
     if (date) {
-      const formattedDate = formatDate(date);
+      const formattedDate = formatDate2(date);
       setEnddate(formattedDate);
     } else {
       setEnddate('');

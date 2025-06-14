@@ -221,7 +221,7 @@ export function Quotationlist(params) {
                     EngineerName: item.engineer_name,
                     QuotationFor: "Spare Parts",
                     QuotationNumber: item.quotationNumber,        
-                    QuotationDate: item.quotationDate,                    
+                    QuotationDate: item.quotationDate ? formatDate(item.quotationDate) : '',                    
                     QuotationAmount: item.price,
                     QuoteStatus: item.status,
                 }))

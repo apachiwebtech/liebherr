@@ -186,6 +186,14 @@ export function ChildFranchiselist(params) {
         setIsOpen((prev) => ({ ...prev, [rowId]: !prev[rowId] }));
     };
 
+    const formatDate = (isoString) => {
+        const date = new Date(isoString);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // two-digit month
+        const day = String(date.getDate()).padStart(2, '0'); // two-digit day
+        return `${day}-${month}-${year}`;
+    };
+
     const navigate = useNavigate()
 
     // export to excel 
@@ -227,10 +235,10 @@ export function ChildFranchiselist(params) {
                 "Bank Name": user.bankname,
                 "BankAccountNumber": user.bankacc,
                 "IfscCode": user.bankifsc,
-                "WithLiebherr": user.with_liebher,
-                "LastWorkingDate": user.lastworkinddate,
-                "ContractActivationdate": user.contractacti,
-                "ContractExpirationDate": user.contractexpir,
+                "WithLiebherr": user.withliebher ? formatDate(user.withliebher) : null,
+                "LastWorkingDate": user.lastworkinddate ? formatDate(user.lastworkinddate): null,
+                "ContractActivationdate": user.contractacti ? formatDate(user.contractacti) : null,
+                "ContractExpirationDate": user.contract_expir ? formatDate(user.contractexpir) : null,
                 "BankAddress": user.bankaddress,
                 "LicareCode": user.licare_code,
                 "PartnerName": user.partner_name,

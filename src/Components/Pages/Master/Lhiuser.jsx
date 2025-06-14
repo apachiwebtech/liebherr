@@ -339,7 +339,7 @@ const Lhiuser = () => {
                   Role: "",
                   Designation: "",
                   Reporting_to: "",
-                  employee_type :""
+                  employee_type: ""
 
                 });
                 fetchUsers();
@@ -377,7 +377,7 @@ const Lhiuser = () => {
                   Role: "",
                   Designation: "",
                   Reporting_to: "",
-                  employee_type :""
+                  employee_type: ""
                 });
                 fetchUsers();
                 fetchCsp();
@@ -473,6 +473,16 @@ const Lhiuser = () => {
   const indexOfFirstUser = indexOfLastUser - itemsPerPage;
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
+
+  const formatDate = (isoString) => {
+    const date = new Date(isoString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Ensure two-digit month
+    const day = String(date.getDate()).padStart(2, '0'); // Ensure two-digit day
+
+    return `${day}-${month}-${year}`;
+  };
+
   // export to excel 
   const exportToExcel = () => {
     // Create a new workbook
@@ -490,9 +500,9 @@ const Lhiuser = () => {
       "Designation ": user.designation,
       "Roles": user.Role,
       "ReportingTo": user.Reporting_to,
-      "Activation Date": user.activation_date,
-      "DeActivationDate": user.deactivation_date,
-      "AssignCsp" : user.assigncsp
+      "Activation Date": formatDate(user.activation_date),
+      "DeActivationDate": formatDate(user.deactivation_date),
+      "AssignCsp": user.assigncsp
     })));
 
     // Append the worksheet to the workbook

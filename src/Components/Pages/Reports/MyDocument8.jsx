@@ -283,6 +283,14 @@ const MyDocument8 = ({ data, spare, csp }) => {
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{formatDate(data.ticketdate)}</Text>
 
                         </View>
+                        <View style={[{ width: '20%' }]}>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Quotation Number :</Text>
+                        </View>
+                        <View style={[{ width: '30%', borderRight: '1px solid black' }]}>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.quotationNumber}</Text>
+
+                        </View>
+
 
 
                     </View>
@@ -297,8 +305,11 @@ const MyDocument8 = ({ data, spare, csp }) => {
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.ticketId}</Text>
 
                         </View>
-                        <View style={[styles.tableCol, { width: '50%', borderStyle: 'solid', borderBottomWidth: '1px' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}></Text>
+                        <View style={[ { width: '20%', borderBottom: '1px solid black',borderTop:'1px solid black' }]}>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Quotation Date :</Text>
+                        </View>
+                        <View style={[{ width: '30%', borderRight: '1px solid black', borderBottom: '1px solid black',borderTop:'1px solid black' }]}>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{formatDate(data.quotationDate)}</Text>
 
                         </View>
 
@@ -419,7 +430,7 @@ const MyDocument8 = ({ data, spare, csp }) => {
 
                         </div>
                         <View style={[styles.tableCol, { width: '65%' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Total Value in Words :{numberToWords(grandtotal + Number(data.service_charges))} {numberToWords(grandtotal  + Number(data.service_charges)) == '' ? null : "Rupees Only."}</Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Total Value in Words :{numberToWords(grandtotal + Number(data.service_charges))} {numberToWords(grandtotal + Number(data.service_charges)) == '' ? null : "Rupees Only."}</Text>
                         </View>
                         <View style={[styles.tableCol, { width: '17%' }]}>
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Grand Amount</Text>

@@ -427,7 +427,7 @@ export function Complaintlist(params) {
               RequestedEmail: item.requested_email,
               RequestedMobile: item.requested_mobile,
               SalesPartner2: item.sales_partner2,
-              FinalRemark: item.final_remark?.match(/<b>Remark:<\/b>\s*([^<]*)/i)?.[1].trim() || '',
+              FinalRemark: item.final_remark ? (String(item.final_remark).match(/<b>Remark:<\/b>\s*([^<]*)/i)?.[1] || '').trim() : '',
               Remark: item.final_remark
             };
           }
@@ -484,7 +484,7 @@ export function Complaintlist(params) {
             RequestedEmail: item.requested_email,
             RequestedMobile: item.requested_mobile,
             SalesPartner2: item.sales_partner2,
-            FinalRemark: item.final_remark?.match(/<b>Remark:<\/b>\s*([^<]*)/i)?.[1].trim() || '',
+            FinalRemark: item.final_remark ? (String(item.final_remark).match(/<b>Remark:<\/b>\s*([^<]*)/i)?.[1] || '').trim() : '',
             Remark: item.final_remark
           }
 

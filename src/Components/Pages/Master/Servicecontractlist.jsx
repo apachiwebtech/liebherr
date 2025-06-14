@@ -235,8 +235,8 @@ export function Servicecontractlist(params) {
             "ContractType": user.contractType,
             "ProductName": user.productName,
             "SerialNumber": user.serialNumber,
-            "StartDate": user.startDate,
-            "EndDate": user.endDate,
+            "StartDate": formatDate(user.startDate),
+            "EndDate": formatDate(user.endDate),
 
 
         })));

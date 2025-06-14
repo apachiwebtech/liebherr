@@ -105,7 +105,7 @@ export function Productspare() {
             const params = new URLSearchParams();
 
             // Add all filters to params
-            Object.entries().forEach(([key, value]) => {
+            Object.entries(searchFilters).forEach(([key, value]) => {
                 if (value) { // Only add if value is not empty
                     params.append(key, value);
                 }
@@ -169,7 +169,7 @@ export function Productspare() {
     const validateForm = () => {
         const newErrors = {};
         if (!selectmodel) {
-            newErrors.ModelNumber = "Model number is required.";
+            newErrors.ModelNumber = "Model number or Product Code is required.";
         }
         setErrors(newErrors);
         return newErrors;
@@ -190,50 +190,70 @@ export function Productspare() {
 
     // export to excel 
     const exportToExcel = async () => {
-        // const item_code = selectmodel.item_code
-        const response = await axiosInstance.get(`${Base_Url}/getspareexcel`, {
-            headers: {
-                Authorization: token,
-            },
-            params: {
-                pageSize: totalCount, // Fetch all data
-                page: 1, // Start from the first page
-            },
-        });
-        // Create a new workbook
-        const decryptedData = CryptoJS.AES.decrypt(response.data.encryptedData, secretKey).toString(CryptoJS.enc.Utf8);
-        const allSpareData = JSON.parse(decryptedData);
-        // Create a new workbook
-        const workbook = XLSX.utils.book_new();
+        try {
+            const response = await axiosInstance.get(`${Base_Url}/getspareexcel`, {
+                headers: {
+                    Authorization: token,
+                },
+                params: {
+                    item_code: selectmodel.item_code,  // ✅ REQUIRED
+                    page: 1,
+                    pageSize: totalCount,  // ✅ Pull all records
+                },
+            });
 
-        // Convert data to a worksheet
-        const worksheet = XLSX.utils.json_to_sheet(allSpareData.map(user => ({
-            "ProductCode": user.ProductCode,
-            "Product Description": user.ModelNumber,
-            "ItemCode": user.title,
-            "ItemDescription": user.ItemDescription,
-            "BOM Qty": user.BOMQty,
-            "PriceGroup": user.PriceGroup,
-            "ProductType": user.ProductType,
-            "Product Class": user.ProductClass,
-            "Product Line": user.ProductLine,
-            "Product Nature": user.PartNature,
-            "Product Warranty Type": user.Warranty,
-            "Product Returnable Type": user.Returnable,
-            "Manufacturer": user.Manufactured,
-            "Serialized": user.Serialized,
-            "Status": user.Status
-        })));
+            const decryptedData = CryptoJS.AES.decrypt(response.data.encryptedData, secretKey).toString(CryptoJS.enc.Utf8);
+            const allSpareData = JSON.parse(decryptedData);
 
-        // Append the worksheet to the workbook
-        XLSX.utils.book_append_sheet(workbook, worksheet, "SpareListing");
+            const workbook = XLSX.utils.book_new();
 
-        // Export the workbook
-        XLSX.writeFile(workbook, "SpareListing.xlsx");
+            const worksheet = XLSX.utils.json_to_sheet(allSpareData.map(user => ({
+                "Product Code": user.ProductCode,
+                "Product Description": user.ModelNumber,
+                "Item Code": user.title,
+                "Item Description": user.ItemDescription,
+                "BOM Qty": user.BOMQty,
+                "PriceGroup": user.PriceGroup,
+                "ProductType": user.ProductType,
+                "Product Class": user.ProductClass,
+                "Product Line": user.ProductLine,
+                "Product Nature": user.PartNature,
+                "Product Warranty Type": user.Warranty,
+                "Product Returnable Type": user.Returnable,
+                "Manufacturer": user.Manufactured,
+                "Serialized": user.Serialized,
+                "Status": user.Status
+            })));
+
+            XLSX.utils.book_append_sheet(workbook, worksheet, "SpareListing");
+            XLSX.writeFile(workbook, "SpareListing.xlsx");
+        } catch (err) {
+            console.error("Export error:", err);
+        }
     };
 
 
-    
+    const exportSpareall = async () => {
+        try {
+            const response = await axiosInstance.get(`${Base_Url}/downloadsparedumpexcel`, {
+                headers: { Authorization: token },
+                responseType: 'blob', // Important to handle file
+            });
+
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'SpareAll.xlsx'); // File name
+            document.body.appendChild(link);
+            link.click();
+        } catch (error) {
+            console.error('Error downloading SpareAll Excel:', error);
+        }
+    };
+
+
+
+
     const importexcel = (event) => {
         setLoader(true);
         const file = event?.target?.files ? event.target.files[0] : null;
@@ -401,22 +421,47 @@ export function Productspare() {
                                     disablePortal
                                     options={modeldata}
                                     value={selectmodel}
-                                    getOptionLabel={(option) => option.item_description || ""}
+                                    getOptionLabel={(option) =>
+                                        option.item_description && option.item_code
+                                            ? `${option.item_description} - ${option.item_code}`
+                                            : ""
+                                    }
                                     onChange={(e, newValue) => handleSearchChange(newValue)}
                                     onInputChange={(e, newInputValue) => handleInputChange(newInputValue)}
+                                    renderOption={(props, option) => (
+                                        <li {...props}>
+                                            <div>
+                                                <strong>{option.item_description}</strong>
+                                                <br />
+                                                <small>{option.item_code}</small>
+                                            </div>
+                                        </li>
+                                    )}
                                     renderInput={(params) => (
                                         <TextField
                                             {...params}
-                                            label="Enter Model Number"
+                                            label="Enter Model Number or Product Code"
                                             variant="outlined"
                                             error={!!errors.ModelNumber}
                                             helperText={errors.ModelNumber}
                                         />
                                     )}
                                 />
+
                             </div>
+
                             <div className="text-right">
-                                <button className="btn btn-primary" type="submit">
+                                <button
+                                    className="btn btn-primary"
+                                    type="button"
+                                    onClick={exportSpareall}
+                                >
+                                    Export All
+                                </button>
+                                <button className="btn btn-primary" type="submit"
+                                    style={{
+                                        marginLeft: '5px',
+                                    }}>
                                     Submit
                                 </button>
                             </div>
@@ -436,6 +481,7 @@ export function Productspare() {
                                 style={{ width: '30%' }}>
                                 Import Spares
                             </button>
+
                         </div>
 
 

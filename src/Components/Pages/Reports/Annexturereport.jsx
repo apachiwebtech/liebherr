@@ -25,6 +25,75 @@ const AnnextureReport = () => {
     const token = localStorage.getItem("token");
     const licare_code = localStorage.getItem("licare_code");
 
+    const columnMapping = {
+        TicketNumber: "Ticket Number",
+        CreateDate: "Create Date",
+        CustomerID: "Customer ID",
+        CustomerName: "Customer Name",
+        TicketType: "Ticket Type",
+        CallCategory: "Call Category",
+        CallStatus: "Call Status",
+        Address: "Address",
+        District: "District",
+        City: "City",
+        State: "State",
+        Pincode: "Pincode",
+        csp: "Child Service Partner Code",
+        mother_branch: "Liebherr Branch",
+        customer_class: "Customer Classification",
+        AgeingDays: "Ageing Days",
+        serial_no: "Serial Number",
+        ModelNumber: "Model Number",
+        sales_partner: "Primary Dealer",
+        purchase_date: "Purchase Date",
+        assigned_to: "Engineer Name",
+        updated_date: "Last Updated",
+        closed_date: "Field Complete Date",
+        created_by: "Create User",
+        mode_of_contact: "Mode of Contact",
+        updated_by: "Last Modify User",
+        visit_count: "Count Of Visit",
+        child_service_partner: "Child Service Partner Name",
+        spare_consumed: "Spare Consumed",
+        gas_charges_flag: "Gas Charging",
+        msp: "Master Service Partner Code",
+        sevice_partner: "Master Service Partner Name",
+        sub_call_status: "Call Sub Status",
+        class_city: "Class Of City",
+        call_charges: "Ticket Charges",
+        TotalTicketCharges: "Total Ticket Charges",
+        salutation: "Salutation",
+        warranty_status: "Warranty Status",
+        age_bracket: "Age Bracket",
+    };
+
+    const columnMapping2 = {
+        TicketNumber: "Ticket Number",
+        CreateDate: "Create Date",
+        CustomerID: "Customer ID",
+        CustomerName: "Customer Name",
+        State: "State",
+        CustomerClassification: "Customer Classification",
+        CallStatus: "Call Status",
+        FieldCompleteDate: "Field Complete Date",
+        ModelNumber: "Model Number",
+        SerialNumber: "Serial Number",
+        WarrantyType: "Warranty Status",
+        ChildServicePartnerCode: "Child Service Partner Code",
+        ChildServicePartnerName: "Child Service Partner Name",
+        MasterServicePartnerCode: "Master Service Partner Code",
+        MasterServicePartnerName: "Master Service Partner Name",
+        ItemCode: "Item Code",
+        ItemDescription: "Item Description",
+        Quantity: "Quantity",
+        TypeofApproval: "Type of Approval",
+        PartReturnableType: "Part Returnable Type",
+        PriceGroup: "Price Group",
+        BasicSpareCost: "Basic Spare Cost",
+        TotalBasicSpareCost: "Total Basic Spare Cost"
+    };
+
+
 
     const fetchMsps = async () => {
 
@@ -84,18 +153,37 @@ const AnnextureReport = () => {
                 headers: { Authorization: token },
             });
 
-            console.log("API Response:", response.data);
+            const rawData = response.data;
 
-            if (response.data && response.data.length > 0) {
-                setColumns(Object.keys(response.data[0])); // Extract column names
-
-                await exportToExcel(response.data); // Export data to Excel
-
-                // Reset form only after successful processing
-                resetForm();
-            } else {
+            if (!rawData || rawData.length === 0) {
                 setError("No data available for the selected date range.");
+                return;
             }
+
+            // Step 4: Map backend data to formatted frontend data
+            const dateFields = [
+                "CreateDate",
+                "purchase_date",
+                "updated_date",
+                "closed_date"
+            ];
+
+            const formattedData = rawData.map(item => {
+                const row = {};
+                for (const [backendKey, frontendLabel] of Object.entries(columnMapping)) {
+                    let value = item[backendKey] ?? "";
+
+                    if (dateFields.includes(backendKey) && value) {
+                        value = formatDate2(value); // Apply date formatting
+                    }
+
+                    row[frontendLabel] = value;
+                }
+                return row;
+            });
+
+            exportToExcel(formattedData);
+
 
         } catch (error) {
             console.error("Error fetching data:", error);
@@ -134,18 +222,35 @@ const AnnextureReport = () => {
                 headers: { Authorization: token },
             });
 
-            console.log("API Response:", response.data);
+            const rawData = response.data;
 
-            if (response.data && response.data.length > 0) {
-                setColumns(Object.keys(response.data[0])); // Extract column names
-
-                await exportToExcel(response.data); // Export data to Excel
-
-                // Reset form only after successful processing
-                resetForm();
-            } else {
+            if (!rawData || rawData.length === 0) {
                 setError("No data available for the selected date range.");
+                return;
             }
+
+            // Step 4: Map backend data to formatted frontend data
+            const dateFields2 = [
+                "CreateDate",
+                "FieldCompleteDate",
+            ];
+
+            const formattedData = rawData.map(item => {
+                const row = {};
+                for (const [backendKey, frontendLabel] of Object.entries(columnMapping2)) {
+                    let value = item[backendKey] ?? "";
+
+                    if (dateFields2.includes(backendKey) && value) {
+                        value = formatDate2(value); // Apply date formatting
+                    }
+
+                    row[frontendLabel] = value;
+                }
+                return row;
+            });
+
+            exportToExcel(formattedData);
+
 
         } catch (error) {
             console.error("Error fetching data:", error);
@@ -169,7 +274,7 @@ const AnnextureReport = () => {
         const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
         const dataBlob = new Blob([excelBuffer], { type: "application/octet-stream" });
 
-        saveAs(dataBlob, "ExportedData.xlsx");
+        saveAs(dataBlob, "Annexture Report.xlsx");
     };
 
 
@@ -182,6 +287,15 @@ const AnnextureReport = () => {
         const day = String(date.getDate()).padStart(2, '0'); // Ensure two-digit day
 
         return `${year}-${month}-${day}`;
+    };
+
+    const formatDate2 = (isoString) => {
+        const date = new Date(isoString);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Ensure two-digit month
+        const day = String(date.getDate()).padStart(2, '0'); // Ensure two-digit day
+
+        return `${day}-${month}-${year}`;
     };
 
     const handleStartDateChange = (date) => {

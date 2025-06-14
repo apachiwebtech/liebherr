@@ -2239,56 +2239,72 @@ WHERE
   }
 });
 
+
 app.get("/downloadcustomerexcel", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
-    // Fetch all customers who are not deleted
-    const result = await pool.request().query(`SELECT 
-    c.customer_id as CustomerID,
-	c.customer_fname as CustomerName,
-	s.Address,
-	s.geocity_id as City,
-	s.district_id as District,
-	s.geostate_id as State,
-	s.pincode_id as Pincode,
-	c.customer_classification as CustomerClassification,
-	c.mobileno as MobileNumber,
-	c.alt_mobileno as AlternateMobileNumber,
-	c.email as CustomerEmailID,
-	c.customer_type as CustomerType,
-	c.updated_by as LastModifiedBy,
-	c.updated_date as LastModifiedDate
-FROM 
-    awt_customer AS c
-LEFT JOIN (
-    SELECT 
-        customer_id, 
-		geostate_id,
-		geocity_id,
-		pincode_id,
-		district_id,
-        STRING_AGG(CAST(address AS VARCHAR(MAX)), ',') AS Address
-    FROM 
-        awt_customerlocation
-    GROUP BY 
-        customer_id,
-		geostate_id,
-		geocity_id,
-		pincode_id,
-		district_id
-) AS s ON s.customer_id = c.customer_id
-WHERE 
-    c.deleted = 0`);
+    const result = await pool.request().query(`
+      SELECT 
+        c.customer_id as CustomerID,
+        c.customer_fname as CustomerName,
+        s.Address,
+        s.geocity_id as City,
+        s.district_id as District,
+        s.geostate_id as State,
+        s.pincode_id as Pincode,
+        c.customer_classification as CustomerClassification,
+        c.mobileno as MobileNumber,
+        c.alt_mobileno as AlternateMobileNumber,
+        c.email as CustomerEmailID,
+        c.customer_type as CustomerType,
+        c.updated_by as LastModifiedBy,
+        c.updated_date as LastModifiedDate
+      FROM 
+        awt_customer AS c
+      LEFT JOIN (
+        SELECT 
+          customer_id, 
+          geostate_id,
+          geocity_id,
+          pincode_id,
+          district_id,
+          STRING_AGG(CAST(address AS VARCHAR(MAX)), ',') AS Address
+        FROM 
+          awt_customerlocation
+        GROUP BY 
+          customer_id,
+          geostate_id,
+          geocity_id,
+          pincode_id,
+          district_id
+      ) AS s ON s.customer_id = c.customer_id
+      WHERE 
+        c.deleted = 0
+    `);
+
     const customers = result.recordset;
 
-    // Create a new workbook and worksheet
+    // 👇 Use your formatDate logic exactly
+    const formatDate = (isoString) => {
+      const date = new Date(isoString);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0'); // two-digit month
+      const day = String(date.getDate()).padStart(2, '0'); // two-digit day
+      return `${day}-${month}-${year}`;
+    };
+
+    // Format LastModifiedDate using your function
+    const formattedCustomers = customers.map(customer => ({
+      ...customer,
+      LastModifiedDate: customer.LastModifiedDate ? formatDate(customer.LastModifiedDate) : '',
+      [' ']: 'Active' // You can add conditional logic here if needed
+    }));
+
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Customer');
 
-    // Define columns
     worksheet.columns = [
-
       { header: 'CustomerID', key: 'CustomerID' },
       { header: 'CustomerName', key: 'CustomerName' },
       { header: 'Address', key: 'Address' },
@@ -2301,21 +2317,16 @@ WHERE
       { header: 'Alternate Mobileno', key: 'AlternateMobileNumber' },
       { header: 'CustomerEmailID', key: 'CustomerEmailID' },
       { header: 'CustomerType', key: 'CustomerType' },
-      { header: 'Status', key: 'CustomerEmailID' },
-      { header: 'CustomerType', key: 'CustomerType' },
+      { header: 'Status', key: ' ' },
       { header: 'LastModifiedBy', key: 'LastModifiedBy' },
       { header: 'LastModifiedDate', key: 'LastModifiedDate' },
-
     ];
 
-    // Add all customer data as rows
-    worksheet.addRows(customers);
+    worksheet.addRows(formattedCustomers);
 
-    // Set headers for file download
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', 'attachment; filename=Customer.xlsx');
 
-    // Write and download
     await workbook.xlsx.write(res);
     res.end();
   } catch (err) {
@@ -2323,6 +2334,7 @@ WHERE
     return res.status(500).send('Error generating Customer Excel file');
   }
 });
+
 
 app.get("/downloadenquiryexcel", authenticateToken, async (req, res) => {
   try {
@@ -17263,7 +17275,7 @@ app.post("/getmodelno", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
-    const sql = `SELECT top 20 * FROM product_master WHERE item_description LIKE @param`;
+    const sql = `SELECT top 20 * FROM product_master WHERE item_description LIKE @param OR item_code LIKE @param;`;
 
     const result = await pool.request()
       .input("param", `%${param}%`)
@@ -17420,43 +17432,54 @@ app.get("/getsparelisting", authenticateToken, async (req, res) => {
     return res.status(500).json({ message: "An error occurred while fetching the complaint list" });
   }
 });
-
-
-
 app.get("/getspareexcel", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
+    const request = pool.request(); // ✅ Fix: Declare request
+
     const {
+      item_code,
+      ProductCode = "",
+      ItemDescription = "",
+      title = "",
       page = 1,
       pageSize = 10,
-
     } = req.query;
 
-    // Debug log
+    // ✅ Ensure offset and pageSize are numbers
+    const offset = (parseInt(page) - 1) * parseInt(pageSize);
 
     let sql = `
-       SELECT s.* FROM Spare_parts as s WHERE s.deleted = 0
+      SELECT s.* 
+      FROM Spare_parts AS s 
+      WHERE s.ProductCode LIKE '%${item_code}%' AND s.deleted = 0
     `;
 
-    // Pagination logic: Calculate offset based on the page number
-    const offset = (page - 1) * pageSize;
+    if (ProductCode) sql += ` AND s.ProductCode LIKE '%${ProductCode}%'`; // You are using item_code here again, maybe check this?
+    if (title) sql += ` AND s.title LIKE '%${title}%'`;
+    if (ItemDescription) sql += ` AND s.ItemDescription LIKE '%${ItemDescription}%'`;
 
-    // Add pagination to the SQL query (OFFSET and FETCH NEXT)
-    sql += ` ORDER BY s.id OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+    // ✅ Fix: remove quotes around offset and pageSize — they must be integers
+    sql += ` ORDER BY s.id OFFSET ${offset} ROWS FETCH NEXT ${parseInt(pageSize)} ROWS ONLY`;
 
-    // return res.json({sql:sql})
-    const result = await pool.request().query(sql);
+    const result = await request.query(sql);
 
-    // Get the total count of records for pagination
-    let countSql = `SELECT COUNT(*) as totalCount FROM Spare_parts WHERE deleted = 0`;
+    // ✅ Fix for count query
+    let countSql = `
+      SELECT COUNT(*) as totalCount 
+      FROM Spare_parts 
+      WHERE ProductCode LIKE '%${item_code}%' AND deleted = 0
+    `;
+    if (ProductCode) countSql += ` AND ProductCode LIKE '%${ProductCode}%'`; // Again, you're using item_code
+    if (ItemDescription) countSql += ` AND ItemDescription LIKE '%${ItemDescription}%'`;
+    if (title) countSql += ` AND title LIKE '%${title}%'`;
 
-    // return res.json({countSql:countSql})
-
-    const countResult = await pool.request().query(countSql);
+    const countResult = await request.query(countSql);
     const totalCount = countResult.recordset[0].totalCount;
-    // Convert data to JSON string and encrypt it
+
     const jsonData = JSON.stringify(result.recordset);
     const encryptedData = CryptoJS.AES.encrypt(jsonData, secretKey).toString();
+
     return res.json({
       encryptedData,
       totalCount,
@@ -17464,8 +17487,53 @@ app.get("/getspareexcel", authenticateToken, async (req, res) => {
       pageSize,
     });
   } catch (err) {
+    console.error("API Error:", err);
+    return res.status(500).json({ message: "An error occurred while fetching spare list" });
+  }
+});
+
+
+app.get("/downloadsparedumpexcel", authenticateToken, async (req, res) => {
+  try {
+    const pool = await poolPromise;
+
+    const result = await pool.request().query(`
+      SELECT 
+        s.* FROM Spare_parts AS s WHERE s.deleted = 0
+    `);
+
+    const spare = result.recordset;
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Spare');
+
+    worksheet.columns = [
+      { header: 'Product Code', key: 'ProductCode' },
+      { header: 'Model Number', key: 'ModelNumber' },
+      { header: 'Item Code ', key: 'title' },
+      { header: 'Item Description', key: 'ItemDescription' },
+      { header: 'BOM Qty', key: 'BOMQty' },
+      { header: 'Price Group', key: 'PriceGroup' },
+      { header: 'Product Type', key: 'ProductType' },
+      { header: 'Product Class', key: 'ProductClass' },
+      { header: 'Product Line', key: 'ProductLine' },
+      { header: 'Product Nature', key: 'PartNature' },
+      { header: 'Product Warranty Type', key: 'Warranty' },
+      { header: 'Product Returnable Type', key: 'Returnable' },
+      { header: 'Manufacturer', key: 'Manufactured' },
+      { header: 'Serialized', key: 'Serialized' },
+      { header: 'Status', key: 'Status' },
+    ];
+
+    worksheet.addRows(spare);
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename=SpareListALL.xlsx');
+
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: "An error occurred while fetching the complaint list" });
+    return res.status(500).send('Error generating Sparelist Excel file');
   }
 });
 
@@ -18043,7 +18111,7 @@ app.get("/getpincodelist", authenticateToken, async (req, res) => {
     if (region) countSql += ` AND region LIKE '%${region}%'`;
     if (state) countSql += ` AND state LIKE '%${state}%'`;
     if (city) countSql += ` AND city LIKE '%${city}%'`;
-    if (csp_name) countSql += ` AND csp_name LIKE '%${csp_name}%'`;
+    if (csp_name) countSql += ` AND csp_name LIK  }%'`;
     if (msp_name) countSql += ` AND msp_name LIKE '%${msp_name}%'`;
     if (customer_classification) countSql += ` AND customer_classification LIKE '%${customer_classification}%'`;
     if (call_type) countSql += ` AND call_type LIKE '%${call_type}%'`;
@@ -19282,58 +19350,120 @@ app.post("/getannexturedata", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
-    let sql = `SELECT
-ct.ticket_no as TicketNumber,
-ct.ticket_date as CreateDate,
-ct.customer_id as CustomerID,
-ct.customer_name as CustomerName,
-ct.ticket_type as TicketType,
-ct.mode_of_contact as CallCategory,
-ct.call_status as CallStatus,
-ct.address as Address,
-ct.area as District,
-ct.city as City,
-ct.state as State,
-ct.pincode as Pincode,
-ct.csp as ChildServicePartnerCode,
-ct.mother_branch as LiebherrBranch,
-ct.customer_class as CustomerClassification,
-DATEDIFF(DAY, ct.ticket_date, GETDATE()) AS AgeingDays,
-ct.serial_no as SerialNumber,
-ct.ModelNumber,
-ct.sales_partner as PrimaryDealer,
-ct.purchase_date as PurchaseDate,
-ct.assigned_to as EngineerName,
-ct.updated_date as LastUpdated,
-ct.closed_date as FieldCompleteDate,
-ct.created_by as CreateUser,
-ct.mode_of_contact as ModeOfContact,
-ct.updated_by as LastModifyUser,
-ct.visit_count as CountOfVisit,
-ct.child_service_partner as ChildServicePartnerName,
-ct.gas_charges as GasCharging,
-ct.msp as MasterServicePartnerCode,
-ct.sevice_partner as MasterServicePartnerName,
-ct.sub_call_status as CallSubStatus,
-ct.class_city as ClassOfCity,
-ct.call_charges as TicketCharges,
-ISNULL(TRY_CAST(ct.collected_amount AS FLOAT), 0) +
-ISNULL(TRY_CAST(ct.transport_charge AS FLOAT), 0) +
-ISNULL(TRY_CAST(ct.mandays_charges AS FLOAT), 0) +
-ISNULL(TRY_CAST(ct.gas_charges AS FLOAT), 0) +
-ISNULL(TRY_CAST(ct.service_charges AS FLOAT), 0) AS TotalTicketCharges,
-ct.salutation as Salutation,
-ct.warranty_status as WarrantyStatus
-FROM complaint_ticket as ct
-WHERE deleted = 0 
-AND ct.ticket_date >= @startDate 
-AND ct.ticket_date <= @endDate`;
+    let sql = `
+      SELECT
+        ct.ticket_no as TicketNumber,
+        ct.ticket_date as CreateDate,
+        ct.customer_id as CustomerID,
+        ct.customer_name as CustomerName,
+        ct.ticket_type as TicketType,
+        ct.mode_of_contact as CallCategory,
+        ct.call_status as CallStatus,
+        ct.address as Address,
+        ct.area as District,
+        ct.city as City,
+        ct.state as State,
+        ct.pincode as Pincode,
+        ct.csp,
+        ct.mother_branch,
+        ct.customer_class,
+        DATEDIFF(DAY, ct.ticket_date, GETDATE()) AS AgeingDays,
+        CASE
+          WHEN DATEDIFF(DAY, ct.ticket_date, GETDATE()) BETWEEN 0 AND 2 THEN '0-2'
+          WHEN DATEDIFF(DAY, ct.ticket_date, GETDATE()) BETWEEN 3 AND 5 THEN '3-5'
+          WHEN DATEDIFF(DAY, ct.ticket_date, GETDATE()) BETWEEN 6 AND 10 THEN 'Above 5'
+          WHEN DATEDIFF(DAY, ct.ticket_date, GETDATE()) BETWEEN 11 AND 20 THEN 'Above 10'
+          WHEN DATEDIFF(DAY, ct.ticket_date, GETDATE()) BETWEEN 21 AND 30 THEN 'Above 20'
+          WHEN DATEDIFF(DAY, ct.ticket_date, GETDATE()) BETWEEN 31 AND 60 THEN 'Above 30'
+          WHEN DATEDIFF(DAY, ct.ticket_date, GETDATE()) BETWEEN 61 AND 90 THEN 'Above 60'
+          WHEN DATEDIFF(DAY, ct.ticket_date, GETDATE()) BETWEEN 91 AND 120 THEN 'Above 90'
+          WHEN DATEDIFF(DAY, ct.ticket_date, GETDATE()) > 120 THEN 'Above 120'
+          ELSE ' '
+        END AS age_bracket,
+        ct.serial_no,
+        ct.ModelNumber,
+        ct.sales_partner,
+        ct.purchase_date,
+        ct.assigned_to,
+        ct.updated_date,
+        ct.closed_date,
+        ct.created_by,
+        ct.updated_by,
+        ct.visit_count,
+        ct.child_service_partner,
+        ct.gas_charges,
+        CASE
+          WHEN ISNULL(TRY_CAST(ct.gas_charges AS FLOAT), 0) > 0 THEN 'Yes'
+          ELSE 'No'
+        END AS gas_charges_flag,
+        CASE
+          WHEN ct.call_status = 'Closed' AND COUNT(us.article_code) > 0 THEN 'Yes'
+          ELSE 'No'
+        END AS spare_consumed,
+        ct.msp,
+        ct.sevice_partner,
+        ct.sub_call_status,
+        ct.class_city,
+        ct.call_charges as TicketCharges,
+        ISNULL(TRY_CAST(ct.collected_amount AS FLOAT), 0) +
+        ISNULL(TRY_CAST(ct.transport_charge AS FLOAT), 0) +
+        ISNULL(TRY_CAST(ct.mandays_charges AS FLOAT), 0) +
+        ISNULL(TRY_CAST(ct.gas_charges AS FLOAT), 0) +
+        ISNULL(TRY_CAST(ct.service_charges AS FLOAT), 0) AS TotalTicketCharges,
+        ct.salutation,
+        ct.warranty_status
+      FROM complaint_ticket as ct
+      LEFT JOIN awt_uniquespare as us ON us.ticketId = ct.ticket_no
+      WHERE ct.deleted = 0 AND ct.ticket_date > '2025-03-01'
+    `;
 
     if (msp) {
-      sql += " AND msp = @msp"; // Add MSP filter if selected
+      sql += ` AND ct.msp = @msp`;
     }
 
-    sql += ` ORDER BY RIGHT(ct.ticket_no , 4) ASC`;
+    sql += `
+      GROUP BY
+        ct.ticket_no,
+        ct.ticket_date,
+        ct.customer_id,
+        ct.customer_name,
+        ct.ticket_type,
+        ct.mode_of_contact,
+        ct.call_status,
+        ct.address,
+        ct.area,
+        ct.city,
+        ct.state,
+        ct.pincode,
+        ct.csp,
+        ct.mother_branch,
+        ct.customer_class,
+        ct.serial_no,
+        ct.ModelNumber,
+        ct.sales_partner,
+        ct.purchase_date,
+        ct.assigned_to,
+        ct.updated_date,
+        ct.closed_date,
+        ct.created_by,
+        ct.updated_by,
+        ct.visit_count,
+        ct.child_service_partner,
+        ct.gas_charges,
+        ct.msp,
+        ct.sevice_partner,
+        ct.sub_call_status,
+        ct.class_city,
+        ct.call_charges,
+        ct.collected_amount,
+        ct.transport_charge,
+        ct.mandays_charges,
+        ct.service_charges,
+        ct.salutation,
+        ct.warranty_status
+
+      ORDER BY RIGHT(ct.ticket_no , 4) ASC
+    `;
 
     const request = pool.request();
     request.input("startDate", startDate);
@@ -19347,6 +19477,7 @@ AND ct.ticket_date <= @endDate`;
     return res.status(500).json({ error: "An error occurred while fetching data" });
   }
 });
+
 
 app.post("/transferproduct", authenticateToken, async (req, res) => {
   const { serial_no, customer_id, Modelno, product_id, newaddress, ItemNumber } = req.body;
@@ -20723,8 +20854,26 @@ app.get("/getmslexcel", authenticateToken, async (req, res) => {
     } = req.query;
 
     let sql = `
-       SELECT m.* FROM Msl as m  WHERE m.deleted = 0
+SELECT 
+  m.id,
+  m.msp_code,
+  m.csp_code,
+  m.msp_name,
+  m.csp_name,
+  m.item,
+  CAST(m.item_description AS VARCHAR(MAX)) AS item_description,
+  m.stock,
+
+  (
+    SELECT TOP 1 c.stock_quantity 
+    FROM csp_stock AS c 
+    WHERE c.csp_code = m.csp_code AND c.product_code = m.item
+  ) AS stock_quantity
+
+FROM Msl AS m
+WHERE m.deleted = 0
     `;
+
 
 
     if (msp_code) {
@@ -20747,9 +20896,30 @@ app.get("/getmslexcel", authenticateToken, async (req, res) => {
     // Add pagination to the SQL query (OFFSET and FETCH NEXT)
     sql += ` ORDER BY m.id OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
 
+
     const result = await pool.request().query(sql);
 
-    let countSql = `SELECT COUNT(*) as totalCount FROM Msl WHERE deleted = 0`;
+    let countSql = `SELECT COUNT(*) AS totalCount
+FROM (
+  SELECT 
+  m.id,
+  m.msp_code,
+  m.csp_code,
+  m.msp_name,
+  m.csp_name,
+  m.item,
+  CAST(m.item_description AS VARCHAR(MAX)) AS item_description,
+  m.stock,
+
+  (
+    SELECT TOP 1 c.stock_quantity 
+    FROM csp_stock AS c 
+    WHERE c.csp_code = m.csp_code AND c.product_code = m.item
+  ) AS stock_quantity
+
+FROM Msl AS m
+WHERE m.deleted = 0
+) AS grouped;`;
     if (msp_code) countSql += ` AND msp_code LIKE '%${msp_code}%'`;
     if (csp_code) countSql += ` AND csp_code LIKE '%${csp_code}%'`;
     if (item) countSql += ` AND item LIKE '%${item}%'`;
@@ -21906,15 +22076,14 @@ app.post("/getassetreportdump", authenticateToken, async (req, res) => {
   const { startDate, endDate, licare_code } = req.body;
 
   // Date formatting function
-  function excelformatDate(dateStr) {
-    if (!dateStr) return ""; // If empty/null
-    const date = new Date(dateStr);
-    if (isNaN(date)) return dateStr; // Return original if not a valid date
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
+  const formatDate = (isoString) => {
+    const date = new Date(isoString);
     const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Ensure two-digit month
+    const day = String(date.getDate()).padStart(2, '0'); // Ensure two-digit day
+
     return `${day}-${month}-${year}`;
-  }
+  };
 
   try {
     const pool = await poolPromise;
@@ -21929,7 +22098,7 @@ app.post("/getassetreportdump", authenticateToken, async (req, res) => {
         sl.ItemNumber as ItemCode,
         sl.ModelNumber as ItemDescription,
         u.InvoiceDate,
-        u.InvoiceNumber,
+        u.InvoiceNumber,  
         u.warranty_sdate as WarrantyStartDate,
         u.warranty_edate as WarrantyEndDate,
         u.SalesDealer as PrimaryDealerName,
@@ -21940,8 +22109,8 @@ app.post("/getassetreportdump", authenticateToken, async (req, res) => {
       FROM awt_uniqueproductmaster as u 
       LEFT JOIN awt_serial_list as sl on sl.serial_no = u.serial_no 
       WHERE u.deleted = 0 
-        AND u.InvoiceDate >= '${startDate}' 
-        AND u.InvoiceDate <= '${endDate}'  
+        AND u.purchase_date >= '${startDate}' 
+        AND u.purchase_date <= '${endDate}'  
       ORDER BY RIGHT(u.serial_no , 4) ASC
     `;
 
@@ -21950,10 +22119,10 @@ app.post("/getassetreportdump", authenticateToken, async (req, res) => {
     // Format date fields
     const formattedData = result.recordset.map(record => ({
       ...record,
-      InvoiceDate: excelformatDate(record.InvoiceDate),
-      WarrantyStartDate: excelformatDate(record.WarrantyStartDate),
-      WarrantyEndDate: excelformatDate(record.WarrantyEndDate),
-      LastModifiedDate: excelformatDate(record.LastModifiedDate)
+      InvoiceDate: formatDate(record.InvoiceDate),
+      WarrantyStartDate: formatDate(record.WarrantyStartDate),
+      WarrantyEndDate: formatDate(record.WarrantyEndDate),
+      LastModifiedDate: formatDate(record.LastModifiedDate)
     }));
 
     return res.json(formattedData);
@@ -22089,7 +22258,7 @@ app.get("/downloadstockexcel", authenticateToken, async (req, res) => {
 
 // rate card add 
 app.post("/putratecard", authenticateToken, async (req, res) => {
-  const { created_by, 
+  const { created_by,
     id,
     csp_code,
     call_type,
