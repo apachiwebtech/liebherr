@@ -3720,7 +3720,7 @@ app.get("/getcomplaintview/:complaintid", authenticateToken, async (req, res) =>
 });
 
 app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
-  const { ticket_no, note, created_by, call_status, call_status_id, sub_call_status, group_code, site_defect, defect_type, activity_code, serial_no, ModelNumber, purchase_date, warrenty_status, engineerdata, engineername, ticket_type, call_city, ticket_start_date, mandaysprice, gas_chargs, gas_transportation, transportation_charge, visit_count, customer_mobile, totp, complete_date, allocation, dealercustid, item_code, nps_link, customer_email, customer_id, sparedata, spareqty, state_id, payment_collected, collected_amount } = req.body;
+  const { ticket_no, note, created_by, call_status, call_status_id, sub_call_status, group_code, site_defect, defect_type, activity_code, serial_no, ModelNumber, purchase_date, warrenty_status, engineerdata, engineername, ticket_type, call_city, ticket_start_date, mandaysprice, gas_chargs, gas_transportation, transportation_charge, visit_count, customer_mobile, totp, complete_date, allocation, dealercustid, item_code, nps_link, customer_email, customer_id, sparedata, spareqty, state_id, payment_collected, collected_amount,spare_address,address_code } = req.body;
 
   const username = process.env.TATA_USER;
   const password = process.env.PASSWORD;
@@ -3778,150 +3778,150 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
   }
 
 
-  // if (
-  //   call_status === 'Closed' &&
-  //   Array.isArray(sparedata) && sparedata.length > 0 &&
-  //   Array.isArray(spareqty) && spareqty.length > 0 &&
-  //   (['', 'null', null, '0'].includes(state_id)) &&
-  //   Array.isArray(engineerdata) && engineerdata.length > 0
+  if (
+    call_status === 'Closed' &&
+    Array.isArray(sparedata) && sparedata.length > 0 &&
+    Array.isArray(spareqty) && spareqty.length > 0 &&
+    (['', 'null', null, '0'].includes(state_id)) &&
+    Array.isArray(engineerdata) && engineerdata.length > 0
 
-  // ) {
+  ) {
 
-  //   try {
+    try {
 
-  //     const primaryEngineer = engineerdata[0];
+      const primaryEngineer = engineerdata[0];
 
-  //     const pool = await poolPromise;
-  //     const request = pool.request();
+      const pool = await poolPromise;
+      const request = pool.request();
 
-  //     request.input('eng_code', primaryEngineer);
+      request.input('eng_code', primaryEngineer);
 
-  //     const paramNames = sparedata.map((code, i) => {
-  //       const paramName = `code${i}`;
-  //       request.input(paramName, code);
-  //       return `@${paramName}`;
-  //     });
+      const paramNames = sparedata.map((code, i) => {
+        const paramName = `code${i}`;
+        request.input(paramName, code);
+        return `@${paramName}`;
+      });
 
-  //     const sql = `
-  //     SELECT product_code, stock_quantity 
-  //     FROM engineer_stock 
-  //     WHERE eng_code = @eng_code 
-  //       AND product_code IN (${paramNames.join(',')})
-  //   `;
+      const sql = `
+      SELECT product_code, stock_quantity 
+      FROM engineer_stock 
+      WHERE eng_code = @eng_code 
+        AND product_code IN (${paramNames.join(',')})
+    `;
 
-  //     const result = await request.query(sql);
+      const result = await request.query(sql);
 
-  //     const stockMap = new Map(result.recordset.map(item => [item.product_code, item.stock_quantity]));
+      const stockMap = new Map(result.recordset.map(item => [item.product_code, item.stock_quantity]));
 
-  //     console.log(stockMap)
+      console.log(stockMap)
 
-  //     const unavailableItems = sparedata
-  //       .map((code, i) => ({
-  //         code,
-  //         qty: parseInt(spareqty[i], 10),
-  //         available: stockMap.get(code) || 0,
-  //       }))
-  //       .filter(item => item.available < item.qty);
-
-
-  //     console.log(unavailableItems)
-
-  //     if (unavailableItems.length > 0) {
-  //       // Check other engineers (excluding the primary)
-  //       const fallbackRequest = pool.request();
-  //       fallbackRequest.input('eng_code', primaryEngineer);
-
-  //       // Input all product codes
-  //       sparedata.forEach((code, i) => {
-  //         fallbackRequest.input(`prod${i}`, code);
-  //       });
+      const unavailableItems = sparedata
+        .map((code, i) => ({
+          code,
+          qty: parseInt(spareqty[i], 10),
+          available: stockMap.get(code) || 0,
+        }))
+        .filter(item => item.available < item.qty);
 
 
+      console.log(unavailableItems)
 
-  //       const prodParams = sparedata.map((_, i) => `@prod${i}`).join(',');
+      if (unavailableItems.length > 0) {
+        // Check other engineers (excluding the primary)
+        const fallbackRequest = pool.request();
+        fallbackRequest.input('eng_code', primaryEngineer);
 
-  //       const fallbackSql = `
-  //       SELECT eng_code, product_code, stock_quantity 
-  //       FROM engineer_stock 
-  //       WHERE eng_code != @eng_code AND product_code IN (${prodParams})
-  //       ORDER BY stock_quantity DESC
-  //     `;
+        // Input all product codes
+        sparedata.forEach((code, i) => {
+          fallbackRequest.input(`prod${i}`, code);
+        });
 
 
 
+        const prodParams = sparedata.map((_, i) => `@prod${i}`).join(',');
+
+        const fallbackSql = `
+        SELECT eng_code, product_code, stock_quantity 
+        FROM engineer_stock 
+        WHERE eng_code != @eng_code AND product_code IN (${prodParams})
+        ORDER BY stock_quantity DESC
+      `;
 
 
-  //       const fallbackResult = await fallbackRequest.query(fallbackSql);
-
-  //       const stockUsed = new Map(); // key: eng_code, value: array of { product_code, qty_to_deduct }
-
-  //       for (const item of unavailableItems) {
-  //         const matching = fallbackResult.recordset.find(row =>
-  //           row.product_code === item.code && row.stock_quantity >= item.qty
-  //         );
-
-  //         if (matching) {
-  //           if (!stockUsed.has(matching.eng_code)) {
-  //             stockUsed.set(matching.eng_code, []);
-  //           }
-  //           stockUsed.get(matching.eng_code).push({
-  //             product_code: item.code,
-  //             qty_to_deduct: item.qty,
-  //           });
-  //         } else {
-  //           return res.json({ message: `No engineer has enough stock for ${item.code}`, status: 0 });
-  //         }
-  //       }
-
-  //       // All alternate engineers found — proceed to update
-  //       const updateAltRequest = pool.request();
-  //       const updateQueries = [];
-
-  //       let counter = 0;
-  //       for (const [eng, items] of stockUsed.entries()) {
-  //         updateAltRequest.input(`eng_${eng}`, eng);
-  //         for (const item of items) {
-  //           const qtyParam = `qty${counter}`;
-  //           const codeParam = `code${counter}`;
-  //           updateAltRequest.input(qtyParam, item.qty_to_deduct);
-  //           updateAltRequest.input(codeParam, item.product_code);
-  //           updateQueries.push(`
-  //           UPDATE engineer_stock 
-  //           SET stock_quantity = stock_quantity - @${qtyParam} 
-  //           WHERE eng_code = @eng_${eng} AND product_code = @${codeParam};
-  //         `);
-  //           counter++;
-  //         }
-  //       }
-
-  //       await updateAltRequest.query(updateQueries.join('\n'));
-  //     } else {
-  //       // All stock available from primary engineer
-  //       const updateRequest = pool.request();
-  //       updateRequest.input('eng_code', primaryEngineer);
-
-  //       const updateQueries = sparedata.map((code, i) => {
-  //         const qtyParam = `qty${i}`;
-  //         const codeParam = `code${i}`;
-  //         updateRequest.input(qtyParam, parseInt(spareqty[i], 10));
-  //         updateRequest.input(codeParam, code);
-  //         return `
-  //         UPDATE engineer_stock 
-  //         SET stock_quantity = stock_quantity - @${qtyParam}
-  //         WHERE eng_code = @eng_code AND product_code = @${codeParam};
-  //       `;
-  //       });
-
-  //       await updateRequest.query(updateQueries.join('\n'));
-  //     }
-
-  //   } catch (err) {
-  //     console.error('Error in stock logic:', err);
-  //     return res.status(500).json({ message: 'Internal server error', error: err.message });
-  //   }
 
 
-  // }
+
+        const fallbackResult = await fallbackRequest.query(fallbackSql);
+
+        const stockUsed = new Map(); // key: eng_code, value: array of { product_code, qty_to_deduct }
+
+        for (const item of unavailableItems) {
+          const matching = fallbackResult.recordset.find(row =>
+            row.product_code === item.code && row.stock_quantity >= item.qty
+          );
+
+          if (matching) {
+            if (!stockUsed.has(matching.eng_code)) {
+              stockUsed.set(matching.eng_code, []);
+            }
+            stockUsed.get(matching.eng_code).push({
+              product_code: item.code,
+              qty_to_deduct: item.qty,
+            });
+          } else {
+            return res.json({ message: `No engineer has enough stock for ${item.code}`, status: 0 });
+          }
+        }
+
+        // All alternate engineers found — proceed to update
+        const updateAltRequest = pool.request();
+        const updateQueries = [];
+
+        let counter = 0;
+        for (const [eng, items] of stockUsed.entries()) {
+          updateAltRequest.input(`eng_${eng}`, eng);
+          for (const item of items) {
+            const qtyParam = `qty${counter}`;
+            const codeParam = `code${counter}`;
+            updateAltRequest.input(qtyParam, item.qty_to_deduct);
+            updateAltRequest.input(codeParam, item.product_code);
+            updateQueries.push(`
+            UPDATE engineer_stock 
+            SET stock_quantity = stock_quantity - @${qtyParam} 
+            WHERE eng_code = @eng_${eng} AND product_code = @${codeParam};
+          `);
+            counter++;
+          }
+        }
+
+        await updateAltRequest.query(updateQueries.join('\n'));
+      } else {
+        // All stock available from primary engineer
+        const updateRequest = pool.request();
+        updateRequest.input('eng_code', primaryEngineer);
+
+        const updateQueries = sparedata.map((code, i) => {
+          const qtyParam = `qty${i}`;
+          const codeParam = `code${i}`;
+          updateRequest.input(qtyParam, parseInt(spareqty[i], 10));
+          updateRequest.input(codeParam, code);
+          return `
+          UPDATE engineer_stock 
+          SET stock_quantity = stock_quantity - @${qtyParam}
+          WHERE eng_code = @eng_code AND product_code = @${codeParam};
+        `;
+        });
+
+        await updateRequest.query(updateQueries.join('\n'));
+      }
+
+    } catch (err) {
+      console.error('Error in stock logic:', err);
+      return res.status(500).json({ message: 'Internal server error', error: err.message });
+    }
+
+
+  }
 
 
 
@@ -3961,7 +3961,7 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
 
-    const updateSql = `UPDATE complaint_ticket SET call_status = '${call_status}' , updated_by = '${created_by}', updated_date = '${formattedDate}' , sub_call_status  = '${sub_call_status}' ,group_code = '${group_code}' , defect_type = '${defect_type}' , ModelNumber = '${ModelNumber}',serial_no = '${serial_no}' , site_defect = '${site_defect}' ,activity_code = '${activity_code}' , purchase_date = '${purchase_date}' , warranty_status = '${warrenty_status}' ,engineer_id = '${engineer_id}' ,mandays_charges = '${mandaysprice}',transport_charge = '${transportation_charge}', assigned_to = '${engineer_name}' , call_status_id = '${call_status_id}' , visit_count = '${visit_count}' , item_code ='${item_code}' , payment_collected = '${payment_collected}' , collected_amount = '${collected_amount}' WHERE ticket_no = '${ticket_no}' `;
+    const updateSql = `UPDATE complaint_ticket SET call_status = '${call_status}' , updated_by = '${created_by}', updated_date = '${formattedDate}' , sub_call_status  = '${sub_call_status}' ,group_code = '${group_code}' , defect_type = '${defect_type}' , ModelNumber = '${ModelNumber}',serial_no = '${serial_no}' , site_defect = '${site_defect}' ,activity_code = '${activity_code}' , purchase_date = '${purchase_date}' , warranty_status = '${warrenty_status}' ,engineer_id = '${engineer_id}' ,mandays_charges = '${mandaysprice}',transport_charge = '${transportation_charge}', assigned_to = '${engineer_name}' , call_status_id = '${call_status_id}' , visit_count = '${visit_count}' , item_code ='${item_code}' , payment_collected = '${payment_collected}' , collected_amount = '${collected_amount}' , spare_address = '${spare_address}' , address_code = '${address_code}' WHERE ticket_no = '${ticket_no}'`;
 
     await pool.request().query(updateSql);
 
@@ -5171,7 +5171,8 @@ app.post("/add_complaintt", authenticateToken, async (req, res) => {
     return res.json({ message: 'Complaint added successfully!', ticket_no, cust_id });
   } catch (err) {
     console.error("Error inserting complaint:", err.stack);
-    return res.status(500).json({ error: 'An error occurred while adding the complaint', details: err.message });
+    // return res.status(500).json({ error: 'An error occurred while adding the complaint', details: err.message });
+    return res.json(err)
   }
 
   // } else {
@@ -8402,6 +8403,9 @@ app.post("/postservicecontract", authenticateToken, upload.single('file'), async
 
   const created_date = new Date().toISOString().slice(0, 19).replace('T', ' '); // Format: YYYY-MM-DD HH:MM:SS
 
+  const contract_date = new Date().toISOString().slice(0, 10);
+
+
 
   try {
     const pool = await poolPromise;
@@ -8453,6 +8457,7 @@ app.post("/postservicecontract", authenticateToken, upload.single('file'), async
         remark,
         deleted,
         created_date,
+        contractStartDate,
         created_by
       ) VALUES (
         '${contractCode}',
@@ -8474,6 +8479,7 @@ app.post("/postservicecontract", authenticateToken, upload.single('file'), async
         '${ContrctRemark}',
         0,
         '${created_date}',
+        '${contract_date}',
         '${created_by}'
       )
     `;
@@ -10698,6 +10704,8 @@ app.get("/getcomplainlistmsp", authenticateToken, async (req, res) => {
 
 //MSP complaint list
 
+
+
 app.get("/getmspticketexcel", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
@@ -10719,11 +10727,21 @@ app.get("/getmspticketexcel", authenticateToken, async (req, res) => {
 
     // SQL query to fetch complaint tickets with fromDate and toDate filter only.
     sql = `
-      SELECT c.*, e.title as assigned_name,
-               DATEDIFF(day, (c.ticket_date), GETDATE()) AS ageingdays
-        FROM complaint_ticket AS c
-        LEFT JOIN awt_engineermaster AS e ON c.engineer_id = e.engineer_id
-        WHERE c.deleted = 0 AND c.msp = '${licare_code}'
+      SELECT 
+    c.*, 
+    acr.remark as final_remark, 
+    DATEDIFF(DAY, c.ticket_date, GETDATE()) AS ageingdays
+FROM complaint_ticket AS c
+LEFT JOIN (
+    SELECT acr.ticket_no, acr.remark, acr.created_date
+    FROM awt_complaintremark acr
+    JOIN (
+        SELECT ticket_no, MAX(id) AS max_id
+        FROM awt_complaintremark
+        GROUP BY ticket_no
+    ) latest ON acr.id = latest.max_id
+) acr ON c.ticket_no = acr.ticket_no
+WHERE c.deleted = 0 AND c.msp = '${licare_code}'
       AND CAST(c.ticket_date AS DATE) BETWEEN @fromDate AND @toDate
     `;
 
@@ -10736,7 +10754,7 @@ app.get("/getmspticketexcel", authenticateToken, async (req, res) => {
 
 
 
-    sql += `order by RIGHT(ticket_no , 4) asc`
+    sql += `order by RIGHT(c.ticket_no , 4) asc`
 
     console.log(sql)
     // Execute the SQL query
@@ -13955,6 +13973,74 @@ app.post("/getspareconsumption", authenticateToken, async (req, res) => {
     const result = await pool.request()
       .input('closed', 'Closed')
       .query(sql);
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
+
+app.post("/getmspspareconsumption", authenticateToken, async (req, res) => {
+
+  const { startDate, endDate, licare_code, type } = req.body;
+
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+       // Safe parameterized query
+    const cspcode = await pool.request()
+      .input('licare_code', sql.VarChar, licare_code)
+      .query('SELECT licare_code FROM awt_childfranchisemaster WHERE deleted = 0 and pfranchise_id = @licare_code');
+
+    const codes = cspcode.recordset
+      .flatMap(item => item.licare_code.split(','))
+      .map(code => `'${code.trim()}'`);
+    if (codes.length === 0) {
+      return res.json([]); 
+    }
+
+
+    let sqlQuery;
+
+    sqlQuery = `select ct.ticket_no as TicketNumber, au.article_code as ItemCode, au.article_description as ItemDescription,au.quantity as Quantity  from awt_uniquespare as au left join complaint_ticket as ct on ct.ticket_no = au.ticketId where au.deleted = 0 and ct.deleted = 0  and  ${type == 'Pending' ? 'ct.call_status != @closed' : 'ct.call_status = @closed'} AND ct.ticket_date >= '${startDate}' AND ct.ticket_date <= '${endDate}' and ct.csp IN (${codes.join(',')})`
+
+
+
+    sqlQuery += `  ORDER BY RIGHT(ct.ticket_no , 4) ASC`;
+
+
+    const result = await pool.request()
+      .input('closed', 'Closed')
+      .query(sqlQuery);
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+});
+app.post("/getcspspareconsumption", authenticateToken, async (req, res) => {
+
+  const { startDate, endDate, licare_code, type } = req.body;
+
+
+  try {
+    // Use the poolPromise to get the connection pool
+    const pool = await poolPromise;
+       
+
+    let sqlQuery;
+
+    sqlQuery = `select ct.ticket_no as TicketNumber, au.article_code as ItemCode, au.article_description as ItemDescription,au.quantity as Quantity  from awt_uniquespare as au left join complaint_ticket as ct on ct.ticket_no = au.ticketId where au.deleted = 0 and ct.deleted = 0  and  ${type == 'Pending' ? 'ct.call_status != @closed' : 'ct.call_status = @closed'} AND ct.ticket_date >= '${startDate}' AND ct.ticket_date <= '${endDate}' and ct.csp = '${licare_code}'`
+
+
+
+    sqlQuery += `  ORDER BY RIGHT(ct.ticket_no , 4) ASC`;
+
+
+    const result = await pool.request()
+      .input('closed', 'Closed')
+      .query(sqlQuery);
     return res.json(result.recordset);
   } catch (err) {
     console.error(err);
@@ -19299,47 +19385,26 @@ app.get("/getsmsapi", async (req, res) => {
 
   const username = process.env.TATA_USER;
   const password = process.env.PASSWORD;
-
-  const encrypt = (data) => {
-    return CryptoJS.AES.encrypt(data, secretKey).toString();
-  };
-
-  // Encrypt each part
-  // const encryptedEmail = encrypt(customer_email);
-  // const encryptedTicket = encrypt(ticket_no);
-  // const encryptedCustomerId = encrypt(customer_id);
-
-
-
-
-  //     // Build the URL-safe message
-  //     const encryptedPath = `${encodeURIComponent(encryptedEmail)}/${encodeURIComponent(encryptedTicket)}/${encodeURIComponent(encryptedCustomerId)}`;
-
-  const npilink = 'https://test-licare.liebherr.com';
-
-  const npsmsg = `Dear Customer, Greetings from Liebherr! Your Ticket Number is ${ticket_no}. Please share OTP ${otp} with the engineer once the ticket is resolved.`;
-
-
-  const nps_msg = encodeURIComponent(npsmsg);
-
-
-  const npsapiUrl = `https://smsgw.tatatel.co.in:9095/campaignService/campaigns/qs?recipient=${mobile}&dr=false&msg=${nps_msg}&user=${username}&pswd=${password}&sender=LICARE&PE_ID=1201159257274643113&Template_ID=1207173855461934489`;
-
-  console.log(npsapiUrl)
-  await axios.get(npsapiUrl, { httpsAgent });
-
-
-
+  const temp_id = '1207173530305447084'
 
   try {
-    const response = await axios.get(npsapiUrl, { httpsAgent });
-    if (response.data) {
-      return res.json({ message: "Success", data: response.data });
-    }
+
+    const msg = encodeURIComponent(
+      `Dear Customer, Greetings from Liebherr! Your Ticket Number is ${ticket_no}. Please share OTP ${otp} with the engineer once the ticket is resolved.`
+    );
+
+    const tokenResponse = await axios.get(
+      `https://smsgw.tatatel.co.in:9095/campaignService/campaigns/qs?recipient=${mobile}&dr=false&msg=${msg}&user=${username}&pswd=${password}&sender=LICARE&PE_ID=1201159257274643113&Template_ID=${temp_id}`, { httpsAgent }
+    );
+
+    return res.json({ message: "SMS sent successfully", data: tokenResponse.data });
+
+
   } catch (error) {
-    console.error('Error hitting SMS API:', error.response?.data || error.message);
-    return res.status(500).json({ message: 'Failed to send SMS', error: error.message });
+   return res.json(error)
   }
+
+
 });
 
 // FETCH ANNEXTURE DATA 
@@ -19581,11 +19646,15 @@ app.post("/getmsplist", authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
     const sql = `
-      SELECT DISTINCT ct.msp, mf.title 
-      FROM complaint_ticket ct 
-      JOIN awt_franchisemaster mf ON ct.msp = mf.licarecode
-      WHERE ct.msp IS NOT NULL
-      ORDER BY mf.title`;
+      SELECT DISTINCT ct.msp, 
+  CASE 
+    WHEN mf.title = '' THEN mf.partner_name 
+    ELSE mf.title 
+  END AS title
+FROM complaint_ticket ct
+JOIN awt_franchisemaster mf ON ct.msp = mf.licarecode
+WHERE ct.msp IS NOT NULL
+ORDER BY title`;
 
     const result = await pool.request().query(sql);
     return res.json(result.recordset);
@@ -20542,25 +20611,34 @@ app.post('/uploadpinexcel', upload.none(), authenticateToken, async (req, res) =
     return res.status(500).json({ error: 'An error occurred while inserting data' });
   }
 });
+
 app.post('/uploadserviceexcel', upload.none(), authenticateToken, async (req, res) => {
   let { jsonData } = req.body;
 
   let excelData = JSON.parse(jsonData);
 
+
+
+
+
+
   try {
     const pool = await poolPromise;
     pool.config.options.requestTimeout = 600000;
 
+
     for (const item of excelData) {
-      console.log(item.customerName, 'name')
+     
+
+
 
 
       // Check for existing record
       const checkResult = await pool.request()
-        .input('serialNumber', sql.VarChar, item.serialNumber)
-        .input('contractType', sql.VarChar, item.contractType)
-        .input('startDate', sql.DateTime, item.startDate)
-        .input('endDate', sql.DateTime, item.endDate)
+        .input('serialNumber', sql.VarChar, item.serial_number)
+        .input('contractType', sql.VarChar, item.contract_type)
+        .input('startDate', sql.VarChar, item.start_date)
+        .input('endDate', sql.VarChar, item.end_date)
         .query(`
           SELECT 1 FROM awt_servicecontract 
           WHERE serialNumber = @serialNumber AND contractType = @contractType 
@@ -20569,22 +20647,27 @@ app.post('/uploadserviceexcel', upload.none(), authenticateToken, async (req, re
 
       if (checkResult.recordset.length > 0) {
         // Update existing record
+
+         
         await pool.request()
-          .input('serialNumber', sql.VarChar, item.serialNumber)
-          .input('product_code', sql.VarChar, item.product_code)
-          .input('productName', sql.VarChar, item.productName)
-          .input('customerName', sql.VarChar, item.customerName)
-          .input('customerID', sql.VarChar, item.customerID)
-          .input('contractNumber', sql.VarChar, item.contractNumber)
-          .input('contractType', sql.VarChar, item.contractType)
-          .input('contract_amt', sql.Float, item.contarct_amt)
+          .input('serialNumber', sql.VarChar, item.serial_number)
+          .input('product_code', sql.VarChar, item.item_number)
+          .input('productName', sql.VarChar, item.model_number)
+          .input('customerName', sql.VarChar, item.account)
+          .input('customerID', sql.VarChar, item.customer_number)
+          .input('contractNumber', sql.VarChar, item.contract_number)
+          .input('contractType', sql.VarChar, item.contract_type)
+          .input('contract_amt', sql.VarChar, item.contarct_amount)
           .input('goodwill_month', sql.VarChar, item.goodwill_month)
           .input('scheme_name', sql.VarChar, item.scheme_name)
-          .input('duration', sql.VarChar, item.duration)
-          .input('status', sql.VarChar, item.status)
-          .input('startDate', sql.DateTime, item.startDate)
-          .input('endDate', sql.DateTime, item.endDate)
-          .input('purchaseDate', sql.DateTime, item.purchaseDate)
+          .input('duration', sql.VarChar, item.period)
+          .input('status', sql.VarChar, item.current_status)
+          .input('startDate', sql.VarChar, item.start_date ? convertExcelDate(item.start_date) : null)
+          .input('endDate', sql.VarChar, item.end_date ? convertExcelDate(item.end_date ) : null)
+          .input('purchaseDate', sql.VarChar, item.product_purchase_date ? convertExcelDate(item.product_purchase_date) : null)
+          .input('remark', sql.VarChar, item.comments)
+          .input('contractStartDate', sql.VarChar, item.contract_purchase_date ?  convertExcelDate(item.contract_purchase_date) : null)
+          .input('created_date', sql.DateTime, new Date())
           .query(`
             UPDATE awt_servicecontract SET 
               product_code = @product_code,
@@ -20598,7 +20681,9 @@ app.post('/uploadserviceexcel', upload.none(), authenticateToken, async (req, re
               scheme_name = @scheme_name,
               duration = @duration,
               status = @status,
-              purchaseDate = @purchaseDate
+              purchaseDate = @purchaseDate,
+              remark = @remark,
+              contractStartDate = @contractStartDate
             WHERE serialNumber = @serialNumber 
               AND startDate = @startDate 
               AND endDate = @endDate 
@@ -20607,27 +20692,30 @@ app.post('/uploadserviceexcel', upload.none(), authenticateToken, async (req, re
       } else {
         // Insert new record
         await pool.request()
-          .input('serialNumber', sql.VarChar, item.serialNumber)
-          .input('product_code', sql.VarChar, item.product_code)
-          .input('productName', sql.VarChar, item.productName)
-          .input('customerName', sql.VarChar, item.customerName)
-          .input('customerID', sql.VarChar, item.customerID)
-          .input('contractNumber', sql.VarChar, item.contractNumber)
-          .input('contractType', sql.VarChar, item.contractType)
-          .input('contract_amt', sql.Float, item.contarct_amt)
+          .input('serialNumber', sql.VarChar, item.serial_number)
+          .input('product_code', sql.VarChar, item.item_number)
+          .input('productName', sql.VarChar, item.model_number)
+          .input('customerName', sql.VarChar, item.account)
+          .input('customerID', sql.VarChar, item.customer_number)
+          .input('contractNumber', sql.VarChar, item.contract_number)
+          .input('contractType', sql.VarChar, item.contract_type)
+          .input('contract_amt', sql.VarChar, item.contarct_amount)
           .input('goodwill_month', sql.VarChar, item.goodwill_month)
           .input('scheme_name', sql.VarChar, item.scheme_name)
-          .input('duration', sql.VarChar, item.duration)
-          .input('status', sql.VarChar, item.status)
-          .input('startDate', sql.DateTime, item.startDate)
-          .input('endDate', sql.DateTime, item.endDate)
-          .input('purchaseDate', sql.DateTime, item.purchaseDate)
+          .input('duration', sql.VarChar, item.period)
+          .input('status', sql.VarChar, item.current_status)
+          .input('startDate', sql.VarChar, item.start_date ? convertExcelDate(item.start_date) : null)
+          .input('endDate', sql.VarChar, item.end_date ? convertExcelDate(item.end_date ) : null)
+          .input('purchaseDate', sql.VarChar, item.product_purchase_date ? convertExcelDate(item.product_purchase_date) : null)
+          .input('remark', sql.VarChar, item.comments)
+          .input('contractStartDate', sql.VarChar, item.contract_purchase_date ?  convertExcelDate(item.contract_purchase_date) : null)
+          .input('created_date', sql.DateTime, new Date())
           .query(`
             INSERT INTO awt_servicecontract 
-              (serialNumber, product_code, productName, customerName, customerID, contractNumber, contractType, contarct_amt, goodwill_month, scheme_name, duration, status, startDate, endDate, purchaseDate,deleted) 
+              (serialNumber, product_code, productName, customerName, customerID, contractNumber, contractType, contarct_amt, goodwill_month, scheme_name, duration, status, startDate, endDate, purchaseDate,deleted , remark , contractStartDate,created_date) 
             VALUES (
               @serialNumber, @product_code, @productName, @customerName, @customerID, @contractNumber, @contractType, 
-              @contract_amt, @goodwill_month, @scheme_name, @duration, @status, @startDate, @endDate, @purchaseDate,'0'
+              @contract_amt, @goodwill_month, @scheme_name, @duration, @status, @startDate, @endDate, @purchaseDate,'0',@remark,@contractStartDate,@created_date
             )
           `);
       }
@@ -23548,3 +23636,81 @@ app.post("/putpostsale", authenticateToken, async (req, res) => {
 
 
 
+app.get("/getmspticketexcel", authenticateToken, async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    const { fromDate, toDate, licare_code } = req.query;  // Only fromDate, toDate, and licare_code are expected.
+
+    let sql;
+
+
+
+
+    // Check if both fromDate and toDate are provided
+    if (!fromDate || !toDate) {
+      return res.status(400).json({
+        message: "Both 'fromDate' and 'toDate' are required."
+      });
+    }
+
+    const currentDate = new Date().toISOString().split('T')[0];  // Current date to be used for filter if needed.
+
+    // SQL query to fetch complaint tickets with fromDate and toDate filter only.
+    sql = `
+      SELECT 
+    c.*, 
+    acr.remark as final_remark, 
+    DATEDIFF(DAY, c.ticket_date, GETDATE()) AS ageingdays
+FROM complaint_ticket AS c
+LEFT JOIN (
+    SELECT acr.ticket_no, acr.remark, acr.created_date
+    FROM awt_complaintremark acr
+    JOIN (
+        SELECT ticket_no, MAX(id) AS max_id
+        FROM awt_complaintremark
+        GROUP BY ticket_no
+    ) latest ON acr.id = latest.max_id
+) acr ON c.ticket_no = acr.ticket_no
+WHERE c.deleted = 0 AND c.msp = '${licare_code}'
+      AND CAST(c.ticket_date AS DATE) BETWEEN @fromDate AND @toDate
+    `;
+
+    // Define the parameters for the query.
+    let params = [
+      { name: "fromDate", value: fromDate },
+      { name: "toDate", value: toDate }
+    ];
+
+
+
+
+    sql += `order by RIGHT(c.ticket_no , 4) asc`
+
+    console.log(sql)
+    // Execute the SQL query
+    const request = pool.request();
+    params.forEach((param) => request.input(param.name, param.value));
+    const result = await request.query(sql);
+
+
+
+    // If no records are found, return an appropriate message
+    if (result.recordset.length === 0) {
+      return res.status(404).json({
+        message: "No records found for the given date range."
+      });
+    }
+
+    // Return the data as JSON to the frontend
+    return res.json({
+      data: result.recordset
+    });
+
+  } catch (err) {
+    console.error("Error fetching complaint data for Excel export:", err.message);
+    return res.status(500).json({
+      message: "An error occurred while fetching complaint data for Excel export.",
+      err: err.message
+    });
+  }
+});

@@ -120,7 +120,7 @@ const HeaderMsp = (params) => {
                 role="button"
                 aria-expanded="false"
               >
-               GRN
+                GRN
               </Link>
             </li>
             <li
@@ -134,7 +134,7 @@ const HeaderMsp = (params) => {
                 role="button"
                 aria-expanded="false"
               >
-               Stock
+                Stock
               </Link>
             </li>
             {/* <li
@@ -151,9 +151,20 @@ const HeaderMsp = (params) => {
                 Add Users
               </Link>
             </li> */}
-
-
-
+            <li className="nav-item dropdown">
+              <Link className={`nav-link dropdown-toggle site `}
+                to="#"
+                id="navbarDropdown"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                Reports
+              </Link>
+              <ul className="dropdown-menu site" aria-labelledby="navbarDropdown">
+                <li><Link className="dropdown-item" to="/msp/mspsparereport">Spare Consumption Report</Link></li>
+              </ul>
+            </li>
 
           </ul>
 

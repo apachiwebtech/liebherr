@@ -403,10 +403,10 @@ const AnnextureReport = () => {
 
                                 {error && <p className="text-danger">{error}</p>}
                                 <button className="btn btn-primary" onClick={fetchData}>
-                                    Annexture Report 1
+                                    Tickets Visit Claimed Annexure
                                 </button>
                                 <button className="btn btn-primary" style={{ marginLeft: '10px' }} onClick={fetchData2}>
-                                    Annexture Report 2
+                                    Tickets Spares Claimed Annexure
                                 </button>
                             </div>
                         </div>

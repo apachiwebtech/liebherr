@@ -25,6 +25,7 @@ const Servicecontract = () => {
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [contarctlist, setContarctlist] = useState([]);
   const [selectedsceme, setselectedsceme] = useState(null);
+  const [scheme, setscheme] = useState(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [previewUrl, setPreviewUrl] = useState('');
@@ -159,6 +160,7 @@ const Servicecontract = () => {
       setStartDate(response.data[0].startDate)
       setEndDate(response.data[0].endDate)
       setPurchase(response.data[0].purchaseDate)
+      setscheme(response.data[0].scheme_name)
       SetValue({
         ...response.data[0],
         schemename: response.data[0].scheme_name,
@@ -318,7 +320,7 @@ const Servicecontract = () => {
       purchasedate: purchase_date,
       startDate: startDate,
       endDate: enddate,
-      schemename : selectedsceme ? selectedsceme.sceme_name :'',
+      schemename : Value.schemename,
       created_by: created_by, // Include created_by for insert
     }
 
@@ -532,6 +534,11 @@ const Servicecontract = () => {
 
   const handleSearchScemeChange = (newValue) => {
     setselectedsceme(newValue);
+
+    SetValue((prev) =>({
+      ...prev,
+      schemename : newValue.sceme_name
+    }))
   };
 
   const fetchSceme = async () => {
@@ -785,7 +792,7 @@ const Servicecontract = () => {
                         htmlFor="SchemenameInput"
                         className="input-field"
                       >
-                        Scheme Name <span className="text-danger">*</span>
+                        Scheme Name <span className="text-danger">*</span>{scheme && <span className="ms-2 text-primary"> Current-({scheme})</span> }
                       </label>
                       <Autocomplete
                         size="small"
@@ -795,7 +802,7 @@ const Servicecontract = () => {
                         getOptionLabel={(option) => option.sceme_name}
                         onChange={(e, newValue) => handleSearchScemeChange(newValue)}
                         onInputChange={(e, newInputValue) => handleInputScemeChange(newInputValue)}
-                        renderInput={(params) => <TextField {...params} label="Enter Engineer.." variant="outlined" />}
+                        renderInput={(params) => <TextField {...params} label="Enter Scheme.." variant="outlined" />}
                       />
                       {errors.schemename && (
                         <small className="text-danger">

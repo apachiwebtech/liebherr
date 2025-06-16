@@ -137,20 +137,20 @@ const Loginheader = (params) => {
                 GRN
               </Link>
             </li>
-            {/* <li
-              className={`nav-item dropdown ${location.pathname === "/csp/mslcsp" ? "active-class" : ""}`}
-              style={location.pathname === "/csp/mslcsp" ? { background: '#0d6efd', borderRadius: '5px' } : {}}
-            >
-              <Link
-                to={`/csp/mslcsp`}
-                className={`nav-link site ${location.pathname === "/csp/mslcsp" ? "text-light" : ""}`}
+            <li className="nav-item dropdown">
+              <Link className={`nav-link dropdown-toggle site `}
+                to="#"
                 id="navbarDropdown"
                 role="button"
+                data-bs-toggle="dropdown"
                 aria-expanded="false"
               >
-                MSL Listing
+                Reports
               </Link>
-            </li> */}
+              <ul className="dropdown-menu site" aria-labelledby="navbarDropdown">
+                <li><Link className="dropdown-item" to="/csp/cspsparereport">Spare Consumption Report</Link></li>
+              </ul>
+            </li>
 
 
 

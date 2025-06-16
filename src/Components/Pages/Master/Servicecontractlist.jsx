@@ -279,21 +279,21 @@ export function Servicecontractlist(params) {
 
                 const mapKeys = (obj) => {
                     const keyMapping = {
-                        "serial_no": "serialNumber",
+                        "serial_no": "Serial Number",
                         "product_code": "product_code",
-                        "productName": "productName",
-                        "customerName": "customerName",
+                        "productName": "Model Number",
+                        "customerName": "Account",
                         "customerID": "customerID",
-                        "contractNumber": "contractNumber",
-                        "contractType": "contractType",
-                        "contract_amt": "contract_amt",
-                        "goodwill_month": "goodwill_month",
-                        "scheme_name": "scheme_name",
-                        "duration": "duration",
-                        "status": "status",
-                        "startDate": "startDate",
-                        "endDate": "endDate",
-                        "purchaseDate": "purchaseDate"
+                        "contractNumber": "Contract Number",
+                        "contractType": "Contract Type",
+                        "contract_amt": "Contarct Amount",
+                        "goodwill_month": "Goodwill Month",
+                        "scheme_name": "Scheme Name",
+                        "duration": "Period",
+                        "status": "Current Status",
+                        "startDate": "Start Date",
+                        "endDate": "End Date",
+                        "purchaseDate": "Contract Purchase Date"
                     };
 
                     return Object.fromEntries(
@@ -346,6 +346,7 @@ export function Servicecontractlist(params) {
                 .then((res) => {
                     if (res.data) {
                         alert("Uploaded successfully!");
+                        fetchServicecontractlist(1)
                     }
                     console.log(res);
                 })

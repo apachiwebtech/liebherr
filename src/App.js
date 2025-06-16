@@ -180,6 +180,8 @@ import InwardOthers from './Components/Pages/Grn/InwardOthers';
 import Outward from './Components/Pages/Grn/Outward';
 import AddMasterWarrenty from './Components/Pages/Master/AddMasterWarrenty';
 import AddPostWarranty from './Components/Pages/Master/AddPostWarranty';
+import MspSpareReport from './Components/Pages/Reports/MspSpareReport';
+import CspSpareReport from './Components/Pages/Reports/CspSpareReport';
 
 
 
@@ -354,6 +356,10 @@ const Router = createBrowserRouter([
         path: "/msp/mspstock",
         element: <ProtectedRoute><MspStock /></ProtectedRoute>,
       },
+      {
+        path: "/msp/mspsparereport",
+        element: <ProtectedRoute><MspSpareReport /></ProtectedRoute>,
+      },
 
 
 
@@ -456,6 +462,10 @@ const Router = createBrowserRouter([
       {
         path: "/csp/quotation/:qid",
         element: <ProtectedRoute><CspQuotationEdit /></ProtectedRoute>
+      },
+      {
+        path: "/csp/cspsparereport",
+        element: <ProtectedRoute><CspSpareReport /></ProtectedRoute>,
       },
 
     ],
@@ -997,11 +1007,11 @@ const Router = createBrowserRouter([
         element: <ProtectedRoute><AddMasterWarrenty /></ProtectedRoute>,
 
       },
-            {
+      {
         path: "/addpostsalewarranty",
         element: <ProtectedRoute><AddPostWarranty /></ProtectedRoute>
       },
-            {
+      {
         path: "/addpostsalewarranty/:postsaleid",
         element: <ProtectedRoute><AddPostWarranty /></ProtectedRoute>
       },

@@ -91,7 +91,8 @@ function Details() {
     customer_mobile: '',
     item_code: '',
     ticketno: '',
-    collected_amount: ''
+    collected_amount: '',
+    salutation: ''
   })
 
 
@@ -252,10 +253,11 @@ function Details() {
         isValid = false;
         newErrors.activity_code = "Activity is required";
       }
-      if (!Value.otps) {
+      if (Value.salutation != 'Dl' && !Value.otps) {
         isValid = false;
         newErrors.otps = "OTP is required";
       }
+
       if (!Value.causecode || Value.causecode == 'null') {
         isValid = false;
         newErrors.causecode = "Defect code is required";
@@ -301,7 +303,7 @@ function Details() {
 
 
       if (Value.call_status == 'Completed') {
-        if (Value.otps == data.totp) {
+        if (Value.salutation == 'Dl' || Value.otps == data.totp) {
 
           const formData = new FormData();
 
@@ -387,6 +389,7 @@ function Details() {
             .catch((err) => {
               console.log(err);
             });
+
         } else {
           alert("Wrong Otp")
 
@@ -477,6 +480,8 @@ function Details() {
 
   }
 
+  console.log(Value.salutation, "salutation");
+
 
   async function getcomplaintdetails() {
     axios.get(`${Base_Url}/getcomplaintdetails?cid=${id}`, {
@@ -510,7 +515,8 @@ function Details() {
             call_status: res.data.data[0].call_status,
             purchase_date: res.data.data[0].purchase_date,
             customer_mobile: res.data.data[0].customer_mobile,
-            ticketno: res.data.data[0].ticket_no
+            ticketno: res.data.data[0].ticket_no,
+            salutation: res.data.data[0].salutation
           })
 
 
@@ -1161,10 +1167,6 @@ function Details() {
                   </div>
 
 
-
-
-
-
                 </div>
               </div>
             </div>
@@ -1515,7 +1517,7 @@ function Details() {
 
                     <>
 
-                      {Value.call_status == 'Completed' && <div class="mb-3">
+                      {Value.call_status == 'Completed' && Value.salutation != 'Dl' && <div class="mb-3">
                         <div class="form-group">
                           <label for="val-actioncode">Enter OTP - <span className='text-primary' onClick={resendotp} style={{ cursor: "pointer" }}>Resend OTP</span> </label>
                           <input type="text" onChange={handleChange} value={Value.otps} class="form-control" name="otps" id="otps" disabled={data.call_status == 'Closed' || data.call_status == 'Completed' ? true : false} />

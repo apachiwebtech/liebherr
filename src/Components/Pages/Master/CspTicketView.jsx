@@ -104,7 +104,8 @@ export function CspTicketView(params) {
     customer_email: '',
     state_id: '',
     payment_collected: 'No',
-    collected_amount: ''
+    collected_amount: '',
+    address_code:''
   });
 
 
@@ -1378,6 +1379,8 @@ export function CspTicketView(params) {
           customer_name: complaintview.customer_name,
           customer_email: complaintview.customer_email,
           address: complaintview.address,
+          spare_address: selectedAddress,
+          address_code: addresscodeid,
           region: complaintview.region,
           state: complaintview.state,
           city: complaintview.city,
@@ -2544,7 +2547,7 @@ export function CspTicketView(params) {
                                   <h4 className="pname" style={{ fontSize: "14px" }}>Address</h4>
                                   <textarea
                                     className="form-control"
-                                    name="address"
+                                    name="spare_address"
                                     id="addressInput"
                                     value={selectedAddress}
                                     placeholder="Enter  Address"

@@ -586,7 +586,7 @@ const EngineerMaster = () => {
                         {duplicateError && <small className="text-danger">{duplicateError}</small>} {/* Show duplicate error */}
                       </div>
                       <div className="col-md-3">
-                        <label htmlFor="employeeCodeInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>Employee Code</label>
+                        <label htmlFor="employeeCodeInput" className="input-field" style={{ marginBottom: '15px', fontSize: '18px' }}>Employee Code<span className="text-danger">*</span></label>
                         <select
                           className="form-control"
                           name="employee_code"
