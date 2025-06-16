@@ -3720,7 +3720,7 @@ app.get("/getcomplaintview/:complaintid", authenticateToken, async (req, res) =>
 });
 
 app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
-  const { ticket_no, note, created_by, call_status, call_status_id, sub_call_status, group_code, site_defect, defect_type, activity_code, serial_no, ModelNumber, purchase_date, warrenty_status, engineerdata, engineername, ticket_type, call_city, ticket_start_date, mandaysprice, gas_chargs, gas_transportation, transportation_charge, visit_count, customer_mobile, totp, complete_date, allocation, dealercustid, item_code, nps_link, customer_email, customer_id, sparedata, spareqty, state_id, payment_collected, collected_amount,spare_address,address_code } = req.body;
+  const { ticket_no, note, created_by, call_status, call_status_id, sub_call_status, group_code, site_defect, defect_type, activity_code, serial_no, ModelNumber, purchase_date, warrenty_status, engineerdata, engineername, ticket_type, call_city, ticket_start_date, mandaysprice, gas_chargs, gas_transportation, transportation_charge, visit_count, customer_mobile, totp, complete_date, allocation, dealercustid, item_code, nps_link, customer_email, customer_id, sparedata, spareqty, state_id, payment_collected, collected_amount, spare_address, address_code, otp_received } = req.body;
 
   const username = process.env.TATA_USER;
   const password = process.env.PASSWORD;
@@ -3959,9 +3959,16 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
 
 
   try {
-    const pool = await poolPromise;
+    const pool = await poolPromise;``
 
-    const updateSql = `UPDATE complaint_ticket SET call_status = '${call_status}' , updated_by = '${created_by}', updated_date = '${formattedDate}' , sub_call_status  = '${sub_call_status}' ,group_code = '${group_code}' , defect_type = '${defect_type}' , ModelNumber = '${ModelNumber}',serial_no = '${serial_no}' , site_defect = '${site_defect}' ,activity_code = '${activity_code}' , purchase_date = '${purchase_date}' , warranty_status = '${warrenty_status}' ,engineer_id = '${engineer_id}' ,mandays_charges = '${mandaysprice}',transport_charge = '${transportation_charge}', assigned_to = '${engineer_name}' , call_status_id = '${call_status_id}' , visit_count = '${visit_count}' , item_code ='${item_code}' , payment_collected = '${payment_collected}' , collected_amount = '${collected_amount}' , spare_address = '${spare_address}' , address_code = '${address_code}' WHERE ticket_no = '${ticket_no}'`;
+    const updateSql = `UPDATE complaint_ticket SET call_status = '${call_status}' , updated_by = '${created_by}',
+     updated_date = '${formattedDate}' , sub_call_status  = '${sub_call_status}' ,group_code = '${group_code}'
+   , defect_type = '${defect_type}' , ModelNumber = '${ModelNumber}',serial_no = '${serial_no}' ,
+     site_defect = '${site_defect}' ,activity_code = '${activity_code}' , purchase_date = '${purchase_date}'
+    , warranty_status = '${warrenty_status}' ,engineer_id = '${engineer_id}' ,mandays_charges = '${mandaysprice}'
+    ,transport_charge = '${transportation_charge}', assigned_to = '${engineer_name}' , call_status_id = '${call_status_id}' 
+    , visit_count = '${visit_count}' , item_code ='${item_code}' ,     payment_collected = '${payment_collected}' , collected_amount = '${collected_amount}' , spare_address = '${spare_address}' , address_code = '${address_code}'
+     ,state_id = '${otp_received}' WHERE ticket_no = '${ticket_no}'`;
 
     await pool.request().query(updateSql);
 
@@ -13988,7 +13995,7 @@ app.post("/getmspspareconsumption", authenticateToken, async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
-       // Safe parameterized query
+    // Safe parameterized query
     const cspcode = await pool.request()
       .input('licare_code', sql.VarChar, licare_code)
       .query('SELECT licare_code FROM awt_childfranchisemaster WHERE deleted = 0 and pfranchise_id = @licare_code');
@@ -13997,7 +14004,7 @@ app.post("/getmspspareconsumption", authenticateToken, async (req, res) => {
       .flatMap(item => item.licare_code.split(','))
       .map(code => `'${code.trim()}'`);
     if (codes.length === 0) {
-      return res.json([]); 
+      return res.json([]);
     }
 
 
@@ -14027,7 +14034,7 @@ app.post("/getcspspareconsumption", authenticateToken, async (req, res) => {
   try {
     // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
-       
+
 
     let sqlQuery;
 
@@ -19401,7 +19408,7 @@ app.get("/getsmsapi", async (req, res) => {
 
 
   } catch (error) {
-   return res.json(error)
+    return res.json(error)
   }
 
 
@@ -19671,40 +19678,47 @@ app.post("/getannexturereport", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
 
     let sql = `
-        SELECT 
-		ct.ticket_no as TicketNumber,
-		ct.ticket_date as CreateDate,
-		ct.customer_id as CustomerID,
-		ct.customer_name as CustomerName,
-		ct.state as State,
-		ct.customer_class as CustomerClassification,
-		ct.call_status as CallStatus,
-		ct.closed_date as FieldCompleteDate,
-		ct.ModelNumber,
-		ct.serial_no as SerialNumber,
-		ct.warranty_status as WarrantyType,
-		ct.csp as ChildServicePartnerCode,
-		ct.child_service_partner as ChildServicePartnerName,
-		ct.msp as MasterServicePartnerCode,
-		ct.sevice_partner as MasterServicePartnerName,
-		ct.item_code as ItemCode,
-		pm.ItemDescription,
-		ut.quantity as Quantity,
-		pm.Returnable as PartReturnableType,
-    pm.PriceGroup,
-		pg.MRPQuotation as BasicSpareCost,
-		pg.MRPQuotation as TotalBasicSpareCost
-    FROM complaint_ticket ct
-    INNER JOIN awt_uniquespare ut ON ct.ticket_no = ut.ticketId
-		LEFT JOIN Spare_parts pm ON pm.title = ut.article_code
-		LEFT JOIN priceGroup pg ON pm.PriceGroup = pg.PriceGroup
-    WHERE ct.deleted = 0 
+WITH DedupSpare AS (
+    SELECT *,
+        ROW_NUMBER() OVER (PARTITION BY title ORDER BY id DESC) AS rn
+    FROM Spare_parts
+)
+SELECT 
+	ct.ticket_no AS TicketNumber,
+	ct.ticket_date AS CreateDate,
+	ct.customer_id AS CustomerID,
+	ct.customer_name AS CustomerName,
+	ct.state AS State,
+	ct.customer_class AS CustomerClassification,
+	ct.call_status AS CallStatus,
+	ct.closed_date AS FieldCompleteDate,
+	ct.ModelNumber,
+	ct.serial_no AS SerialNumber,
+	ct.warranty_status AS WarrantyType,
+	ct.csp AS ChildServicePartnerCode,
+	ct.child_service_partner AS ChildServicePartnerName,
+	ct.msp AS MasterServicePartnerCode,
+	ct.sevice_partner AS MasterServicePartnerName,
+	ct.item_code AS ItemCode,
+	pm.ItemDescription,
+	ut.quantity AS Quantity,
+	pm.Returnable AS PartReturnableType,
+	pm.PriceGroup,
+	pg.MRPQuotation AS BasicSpareCost,
+	pg.MRPQuotation AS TotalBasicSpareCost
+FROM complaint_ticket ct
+INNER JOIN awt_uniquespare ut ON ct.ticket_no = ut.ticketId
+LEFT JOIN DedupSpare pm ON pm.title = ut.article_code AND pm.rn = 1
+LEFT JOIN priceGroup pg ON pm.PriceGroup = pg.PriceGroup
+WHERE ct.deleted = 0 and ut.deleted = 0 
     AND ct.ticket_date >= @startDate 
     AND ct.ticket_date <= @endDate`;
 
     if (msp) {
       sql += " AND ct.msp = @msp"; // Add MSP filter if selected
     }
+
+    sql += " ORDER BY RIGHT(ct.ticket_no , 4) asc";
 
     const request = pool.request();
     request.input("startDate", startDate);
@@ -20628,7 +20642,7 @@ app.post('/uploadserviceexcel', upload.none(), authenticateToken, async (req, re
 
 
     for (const item of excelData) {
-     
+
 
 
 
@@ -20648,7 +20662,7 @@ app.post('/uploadserviceexcel', upload.none(), authenticateToken, async (req, re
       if (checkResult.recordset.length > 0) {
         // Update existing record
 
-         
+
         await pool.request()
           .input('serialNumber', sql.VarChar, item.serial_number)
           .input('product_code', sql.VarChar, item.item_number)
@@ -20663,10 +20677,10 @@ app.post('/uploadserviceexcel', upload.none(), authenticateToken, async (req, re
           .input('duration', sql.VarChar, item.period)
           .input('status', sql.VarChar, item.current_status)
           .input('startDate', sql.VarChar, item.start_date ? convertExcelDate(item.start_date) : null)
-          .input('endDate', sql.VarChar, item.end_date ? convertExcelDate(item.end_date ) : null)
+          .input('endDate', sql.VarChar, item.end_date ? convertExcelDate(item.end_date) : null)
           .input('purchaseDate', sql.VarChar, item.product_purchase_date ? convertExcelDate(item.product_purchase_date) : null)
           .input('remark', sql.VarChar, item.comments)
-          .input('contractStartDate', sql.VarChar, item.contract_purchase_date ?  convertExcelDate(item.contract_purchase_date) : null)
+          .input('contractStartDate', sql.VarChar, item.contract_purchase_date ? convertExcelDate(item.contract_purchase_date) : null)
           .input('created_date', sql.DateTime, new Date())
           .query(`
             UPDATE awt_servicecontract SET 
@@ -20705,10 +20719,10 @@ app.post('/uploadserviceexcel', upload.none(), authenticateToken, async (req, re
           .input('duration', sql.VarChar, item.period)
           .input('status', sql.VarChar, item.current_status)
           .input('startDate', sql.VarChar, item.start_date ? convertExcelDate(item.start_date) : null)
-          .input('endDate', sql.VarChar, item.end_date ? convertExcelDate(item.end_date ) : null)
+          .input('endDate', sql.VarChar, item.end_date ? convertExcelDate(item.end_date) : null)
           .input('purchaseDate', sql.VarChar, item.product_purchase_date ? convertExcelDate(item.product_purchase_date) : null)
           .input('remark', sql.VarChar, item.comments)
-          .input('contractStartDate', sql.VarChar, item.contract_purchase_date ?  convertExcelDate(item.contract_purchase_date) : null)
+          .input('contractStartDate', sql.VarChar, item.contract_purchase_date ? convertExcelDate(item.contract_purchase_date) : null)
           .input('created_date', sql.DateTime, new Date())
           .query(`
             INSERT INTO awt_servicecontract 

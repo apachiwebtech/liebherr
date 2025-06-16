@@ -105,7 +105,11 @@ export function CspTicketView(params) {
     state_id: '',
     payment_collected: 'No',
     collected_amount: '',
-    address_code:''
+    address_code: ''
+  });
+
+  const [otpreceived, setOtp] = useState({
+    otp_received: ''
   });
 
 
@@ -210,6 +214,14 @@ export function CspTicketView(params) {
     }));
 
   }
+
+
+  const handleotpchange = (e) => {
+    const { name, value } = e.target;
+    if (/^\d{0,4}$/.test(value)) {
+      setOtp((prev) => ({ ...prev, [name]: value }));
+    }
+  };
 
 
 
@@ -947,6 +959,11 @@ export function CspTicketView(params) {
         sub_call_status: "",
       }))
 
+      setOtp((prev) => ({
+        ...prev,
+        otp_received: response.data.state_id
+      }))
+
 
 
 
@@ -1340,6 +1357,13 @@ export function CspTicketView(params) {
       }
     }
 
+    if (complaintview.call_status == 'Completed' && complaintview.sub_call_status == 'Partially') {
+      if (complaintview.totp != otpreceived.otp_received) {
+        alert('Invalid OTP');
+        return;
+      }
+    }
+
 
     const isMaintenanceOrHelpdesk =
       complaintview.ticket_type === 'MAINTENANCE' ||
@@ -1421,6 +1445,7 @@ export function CspTicketView(params) {
           nps_link: `${Base_Url}`,
           note,
           created_by,
+          otp_received: otpreceived.otp_received,
         };
 
         const remarkResponse = await axiosInstance.post(
@@ -2540,6 +2565,28 @@ export function CspTicketView(params) {
                                 </div>
 
                               }
+
+                              {(complaintview.call_status === 'Completed' && complaintview.sub_call_status === 'Partially') && (
+                                <div className="mb-3 col-lg-4">
+                                  <h4 className="otpname" style={{ fontSize: "14px" }}>Otp</h4>
+                                  <input
+                                    type="text" // use text or tel
+                                    inputMode="numeric"
+                                    name="otp_received"
+                                    className="form-control"
+                                    style={{ fontSize: "14px" }}
+                                    placeholder="Enter OTP"
+                                    maxLength={4}
+                                    onChange={(e) => {
+                                      // Remove all non-digit characters
+                                      const onlyDigits = e.target.value.replace(/\D/g, '').slice(0, 4);
+                                      e.target.value = onlyDigits; // update input value
+                                      handleotpchange(e); // call your handler
+                                    }}
+                                  />
+                                </div>
+                              )}
+
 
 
                               {(complaintview.call_status == 'Spares' && ((complaintview.sub_call_status == 'Spare Required' || complaintview.sub_call_status == 'Spare Ordered'))) &&
