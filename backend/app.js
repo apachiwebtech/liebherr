@@ -2247,7 +2247,7 @@ app.get("/downloadcustomerexcel", authenticateToken, async (req, res) => {
     const result = await pool.request().query(`
       SELECT 
         c.customer_id as CustomerID,
-        c.customer_fname as CustomerName,
+        ISNULL(c.customer_fname, '') + ' ' + ISNULL(c.customer_lname, '') AS CustomerName,
         s.Address,
         s.geocity_id as City,
         s.district_id as District,
@@ -2259,7 +2259,7 @@ app.get("/downloadcustomerexcel", authenticateToken, async (req, res) => {
         c.email as CustomerEmailID,
         c.customer_type as CustomerType,
         c.updated_by as LastModifiedBy,
-        c.updated_date as LastModifiedDate
+        FORMAT(TRY_CAST(c.updated_date AS DATETIME), 'dd-MM-yyyy') AS LastModifiedDate
       FROM 
         awt_customer AS c
       LEFT JOIN (
@@ -2280,24 +2280,33 @@ app.get("/downloadcustomerexcel", authenticateToken, async (req, res) => {
           district_id
       ) AS s ON s.customer_id = c.customer_id
       WHERE 
-        c.deleted = 0
+        c.deleted = 0 
+        GROUP BY
+    c.customer_id,
+    c.customer_fname,
+    c.customer_lname,
+    s.Address,
+    s.geocity_id,
+    s.district_id,
+    s.geostate_id,
+    s.pincode_id,
+    c.customer_classification,
+    c.mobileno,
+    c.alt_mobileno,
+    c.email,
+    c.customer_type,
+    c.updated_by,
+    c.updated_date 
     `);
 
     const customers = result.recordset;
 
-    // 👇 Use your formatDate logic exactly
-    const formatDate = (isoString) => {
-      const date = new Date(isoString);
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0'); // two-digit month
-      const day = String(date.getDate()).padStart(2, '0'); // two-digit day
-      return `${day}-${month}-${year}`;
-    };
+
 
     // Format LastModifiedDate using your function
     const formattedCustomers = customers.map(customer => ({
       ...customer,
-      LastModifiedDate: customer.LastModifiedDate ? formatDate(customer.LastModifiedDate) : '',
+      LastModifiedDate: customer.LastModifiedDate,
       [' ']: 'Active' // You can add conditional logic here if needed
     }));
 
@@ -3928,7 +3937,6 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
 
   const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
-  console.log("!!")
 
   let engineer_id;
 
@@ -3959,7 +3967,7 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
 
 
   try {
-    const pool = await poolPromise;``
+    const pool = await poolPromise; ``
 
     const updateSql = `UPDATE complaint_ticket SET call_status = '${call_status}' , updated_by = '${created_by}',
      updated_date = '${formattedDate}' , sub_call_status  = '${sub_call_status}' ,group_code = '${group_code}'
@@ -3968,7 +3976,7 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
     , warranty_status = '${warrenty_status}' ,engineer_id = '${engineer_id}' ,mandays_charges = '${mandaysprice}'
     ,transport_charge = '${transportation_charge}', assigned_to = '${engineer_name}' , call_status_id = '${call_status_id}' 
     , visit_count = '${visit_count}' , item_code ='${item_code}' ,     payment_collected = '${payment_collected}' , collected_amount = '${collected_amount}' , spare_address = '${spare_address}' , address_code = '${address_code}'
-     ,state_id = '${otp_received}' WHERE ticket_no = '${ticket_no}'`;
+     ,state_id = '${otp_received || 0}' WHERE ticket_no = '${ticket_no}'`;
 
     await pool.request().query(updateSql);
 
@@ -4195,9 +4203,9 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
             updatecomplaint = `update complaint_ticket  set service_charges = '${within24}' where ticket_no = '${ticket_no}'`
           } else if (hoursDifference <= 48) {
             updatecomplaint = `update complaint_ticket  set service_charges = '${within48}' where ticket_no = '${ticket_no}'`
-          } else if (hoursDifference <= 98) {
+          } else if (hoursDifference <= 96) {
             updatecomplaint = `update complaint_ticket  set service_charges = '${within98}' where ticket_no = '${ticket_no}'`
-          } else if (hoursDifference >= 98) {
+          } else if (hoursDifference > 96) {
             updatecomplaint = `update complaint_ticket  set service_charges = '${Morethan98}' where ticket_no = '${ticket_no}'`
           }
 
@@ -10140,9 +10148,12 @@ app.get("/getcomplaintexcel", authenticateToken, async (req, res) => {
     sql = `
     SELECT 
     c.*, 
+    scf.remark AS FeedbackStatus,
     acr.remark as final_remark, 
+    c.payment_collected as FieldChargeable,
     DATEDIFF(DAY, c.ticket_date, GETDATE()) AS ageingdays
 FROM complaint_ticket AS c
+ LEFT JOIN awt_service_contact_form as scf ON c.ticket_no = scf.ticket_no
 LEFT JOIN (
     SELECT acr.ticket_no, acr.remark, acr.created_date
     FROM awt_complaintremark acr
@@ -13796,90 +13807,92 @@ app.post('/assign_role', authenticateToken, async (req, res) => {
 app.post("/getcomplainticketdump", authenticateToken, async (req, res) => {
 
   const { startDate, endDate, licare_code } = req.body;
+
+
+
   try {
-    // Use the poolPromise to get the connection pool
     const pool = await poolPromise;
-    const getcsp = `select * from lhi_user where Usercode = '${licare_code}'`
-
-
+    const getcsp = `SELECT * FROM lhi_user WHERE Usercode = '${licare_code}'`
     const getcspresilt = await pool.request().query(getcsp)
+    const assigncsp = getcspresilt.recordset[0]?.assigncsp
 
-    const assigncsp = getcspresilt.recordset[0].assigncsp
-
-    let sql;
-
-
-    sql = `SELECT 
-    ct.id,
-    ct.ticket_no,
-    ct.ticket_date,
-    ct.customer_id,
-    ct.customer_name,
-    ct.address,
-    ct.state,
-    ct.city,
-    ct.area as District,
-    ct.pincode,
-    ct.customer_class as CustomerClassification,
-    ct.customer_mobile,
-    ct.customer_email,
-    ct.alt_mobile,
-    ct.call_type,
-    ct.mode_of_contact as CallCategory,
-    ct.ModelNumber,
-    ct.serial_no,
-    ct.purchase_date,
-    ct.warranty_status as WarrantyType,
-    ct.call_status,
-    ct.sub_call_status,
-    ct.specification as FaultDescription,
-    acr.remark AS FinalRemark,
-    ct.closed_date as FieldCompletedDate,
-    ct.call_remark as AdditionalInfo,
-    ct.mother_branch,
-    ct.msp,
-    ct.sevice_partner as MasterServicePartnerName,
-    ct.csp,
-    ct.child_service_partner,
-    ct.assigned_to as EngineerName,
-    ct.visit_count as CountOfVisit,
-    ct.call_charges as CallChargeable,
-    ct.call_priority as Priority,
-    ct.totp as TOTP
-FROM complaint_ticket ct
-LEFT JOIN (
-    SELECT acr1.ticket_no, acr1.remark, acr1.created_date
-    FROM awt_complaintremark acr1
-    JOIN (
-        SELECT ticket_no, MAX(id) AS max_id
-        FROM awt_complaintremark
-        WHERE created_date LIKE '%2025%' AND updated_by IS NULL
-        GROUP BY ticket_no
-    ) latest ON acr1.id = latest.max_id
-) acr ON ct.ticket_no = acr.ticket_no
-WHERE ct.deleted = 0 
-  AND ct.ticket_date >= '${startDate}' 
-  AND ct.ticket_date <= '${endDate}'
-`
-
-
+    let sql = `
+      SELECT 
+        ct.id,
+        ct.ticket_no as TicketNumber,
+        ct.ticket_date as CreateDate,
+        ct.customer_id as CustomerID,
+        ct.salutation as Salutation,
+        ct.customer_name as CustomerName,
+        ct.address as Address,
+        ct.city as City,
+        ct.area AS District,
+        ct.state as State,
+        ct.pincode as PINCODE,
+        ct.customer_class AS CustomerClassification,
+        ct.customer_mobile as MobileNumber,
+        ct.alt_mobile as AlternateMobileNumber,
+        ct.customer_email as CustomerEmailID,
+        ct.call_type as CustomerType,
+        ct.mode_of_contact AS CallCategory,
+        ct.ModelNumber,
+        ct.serial_no as SerialNumber,
+        ct.purchase_date as PurchaseDate,
+        ct.warranty_status AS WarrantyType,
+        ct.call_status as CallStatus,
+        ct.sub_call_status as CallSubStatus,
+        ct.specification AS FaultDescription,
+        scf.remark AS FeedbackStatus,
+        acr.remark AS FinalRemark,
+        ct.closed_date AS FieldCompletedDate,
+        ct.call_remark AS AdditionalInfo,
+        ct.mother_branch as LiebherrBranch,
+        ct.msp as MasterServicePartnerCode,
+        ct.sevice_partner AS MasterServicePartnerName,
+        ct.csp as ChildServicePartnerCode,
+        ct.child_service_partner as ChildServicePartnerName,
+        ct.assigned_to AS EngineerName,
+        ct.visit_count AS CountOfVisit,
+        ct.call_charges AS CallChargeable,
+        ct.payment_collected as FieldChargeable,
+        ct.call_priority AS Priority,
+        ct.totp AS TOTP
+      FROM complaint_ticket ct
+      LEFT JOIN (
+          SELECT acr1.ticket_no, acr1.remark, acr1.created_date
+          FROM awt_complaintremark acr1
+          JOIN (
+              SELECT ticket_no, MAX(id) AS max_id
+              FROM awt_complaintremark
+              WHERE created_date LIKE '%2025%' AND updated_by IS NULL
+              GROUP BY ticket_no
+          ) latest ON acr1.id = latest.max_id
+      ) acr ON ct.ticket_no = acr.ticket_no
+      LEFT JOIN awt_service_contact_form as scf ON ct.ticket_no = scf.ticket_no
+      WHERE ct.deleted = 0  
+        AND ct.ticket_date >= '${startDate}' 
+        AND ct.ticket_date <= '${endDate}'
+    `;
 
     if (assigncsp !== 'ALL') {
-      // Convert to an array and wrap each value in single quotes
       const formattedCspList = assigncsp.split(",").map(csp => `'${csp.trim()}'`).join(",");
-
-      // Directly inject the formatted values into the SQL query
       sql += ` AND ct.csp IN (${formattedCspList})`;
     }
 
     sql += ` ORDER BY RIGHT(ct.ticket_no , 4) ASC`;
 
-
-
-
-
     const result = await pool.request().query(sql);
+
+    // // Format date fields in the result
+    // const formattedData = result.recordset.map(record => ({
+    //   ...record,
+    //   CreateDate: excelformatDate(record.CreateDate),
+    //   PurchaseDate: excelformatDate(record.PurchaseDate),
+    //   FieldCompletedDate: excelformatDate(record.FieldCompletedDate)
+    // }));
+
     return res.json(result.recordset);
+
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'An error occurred while fetching data' });
@@ -19423,7 +19436,7 @@ app.post("/getannexturedata", authenticateToken, async (req, res) => {
     const pool = await poolPromise;
 
     let sql = `
-      SELECT
+ SELECT
         ct.ticket_no as TicketNumber,
         ct.ticket_date as CreateDate,
         ct.customer_id as CustomerID,
@@ -19461,6 +19474,7 @@ app.post("/getannexturedata", authenticateToken, async (req, res) => {
         ct.closed_date,
         ct.created_by,
         ct.updated_by,
+        CAST(acr.remark AS NVARCHAR(MAX)) as final_remark,
         ct.visit_count,
         ct.child_service_partner,
         ct.gas_charges,
@@ -19475,6 +19489,7 @@ app.post("/getannexturedata", authenticateToken, async (req, res) => {
         ct.msp,
         ct.sevice_partner,
         ct.sub_call_status,
+		pm.productType,
         ct.class_city,
         ct.call_charges as TicketCharges,
         ISNULL(TRY_CAST(ct.collected_amount AS FLOAT), 0) +
@@ -19486,7 +19501,18 @@ app.post("/getannexturedata", authenticateToken, async (req, res) => {
         ct.warranty_status
       FROM complaint_ticket as ct
       LEFT JOIN awt_uniquespare as us ON us.ticketId = ct.ticket_no
-      WHERE ct.deleted = 0 AND ct.ticket_date > '2025-03-01'
+	  left join product_master as pm on pm.item_code = ct.item_code 
+    LEFT JOIN (
+    SELECT acr1.ticket_no, acr1.remark, acr1.created_date
+    FROM awt_complaintremark acr1
+    JOIN (
+        SELECT ticket_no, MAX(id) AS max_id
+        FROM awt_complaintremark
+        WHERE created_date LIKE '%2025%' AND updated_by IS NULL
+        GROUP BY ticket_no
+    ) latest ON acr1.id = latest.max_id
+) acr ON ct.ticket_no = acr.ticket_no
+      WHERE ct.deleted = 0 AND ct.ticket_date > @startDate AND ct.ticket_date < @endDate AND ct.call_status = 'Closed'
     `;
 
     if (msp) {
@@ -19532,7 +19558,9 @@ app.post("/getannexturedata", authenticateToken, async (req, res) => {
         ct.mandays_charges,
         ct.service_charges,
         ct.salutation,
-        ct.warranty_status
+        ct.warranty_status,
+		    pm.productType,
+        CAST(acr.remark AS NVARCHAR(MAX))
 
       ORDER BY RIGHT(ct.ticket_no , 4) ASC
     `;
@@ -19699,7 +19727,7 @@ SELECT
 	ct.child_service_partner AS ChildServicePartnerName,
 	ct.msp AS MasterServicePartnerCode,
 	ct.sevice_partner AS MasterServicePartnerName,
-	ct.item_code AS ItemCode,
+	pm.title AS ItemCode,
 	pm.ItemDescription,
 	ut.quantity AS Quantity,
 	pm.Returnable AS PartReturnableType,
@@ -19710,7 +19738,7 @@ FROM complaint_ticket ct
 INNER JOIN awt_uniquespare ut ON ct.ticket_no = ut.ticketId
 LEFT JOIN DedupSpare pm ON pm.title = ut.article_code AND pm.rn = 1
 LEFT JOIN priceGroup pg ON pm.PriceGroup = pg.PriceGroup
-WHERE ct.deleted = 0 and ut.deleted = 0 
+WHERE ct.deleted = 0 and ut.deleted = 0 and ct.call_status = 'Closed'
     AND ct.ticket_date >= @startDate 
     AND ct.ticket_date <= @endDate`;
 
@@ -20842,7 +20870,7 @@ app.post('/uploadspareexcel', async (req, res) => {
         .input('HSN', sql.VarChar, item.HSN)
         .input('Packed', sql.VarChar, item.Packed)
         .input('Returnable', sql.VarChar, item.Returnable)
-        .input('purchaseDate', sql.VarChar, item.ProductLine)
+        .input('ProductLine', sql.VarChar, item.ProductLine)
         .input('ProductClass', sql.VarChar, item.ProductClass)
         .input('Serialized', sql.VarChar, item.Serialized)
         .query(`
@@ -22187,45 +22215,90 @@ app.post("/getassetreportdump", authenticateToken, async (req, res) => {
     return `${day}-${month}-${year}`;
   };
 
+
+  function formatDateToDDMMYYYY(inputDate) {
+    const date = new Date(inputDate);
+
+    const day = String(date.getDate()).padStart(2, '0');       // dd
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // mm (0-based index)
+    const year = date.getFullYear();                            // yyyy
+
+    return `${day}-${month}-${year}`;
+  }
+
+
+
+  function addOneYearMinusOneDay(dateInput) {
+    const date = new Date(dateInput);
+    if (isNaN(date.getTime())) return '';
+
+    // Add 1 year
+    date.setFullYear(date.getFullYear() + 1);
+
+    // Subtract 1 day
+    date.setDate(date.getDate() - 1);
+
+    return date;
+  }
+
   try {
     const pool = await poolPromise;
 
     let sql = `
-      SELECT
-        u.serial_no as SerialNumber,
-        u.CustomerID,
-        u.CustomerName,
-        u.BranchName as LiebherrBranch,
-        u.SerialStatus as Status,
-        sl.ItemNumber as ItemCode,
-        sl.ModelNumber as ItemDescription,
-        u.InvoiceDate,
-        u.InvoiceNumber,  
-        u.warranty_sdate as WarrantyStartDate,
-        u.warranty_edate as WarrantyEndDate,
-        u.SalesDealer as PrimaryDealerName,
-        u.SubDealer as SecondaryDealerName,
-        u.Notes,
-        u.updated_by as LastModifiedBy,
-        u.updated_date as LastModifiedDate
-      FROM awt_uniqueproductmaster as u 
-      LEFT JOIN awt_serial_list as sl on sl.serial_no = u.serial_no 
-      WHERE u.deleted = 0 
-        AND u.purchase_date >= '${startDate}' 
-        AND u.purchase_date <= '${endDate}'  
-      ORDER BY RIGHT(u.serial_no , 4) ASC
+SELECT 
+    u.serial_no as SerialNumber,
+    u.CustomerID,
+    u.CustomerName,
+    u.BranchName as LiebherrBranch,
+    u.SerialStatus as Status,
+    sl.ItemNumber as ItemCode,
+    sl.ModelNumber as ItemDescription,
+    u.purchase_date as InvoiceDate,
+    u.InvoiceNumber,  
+    u.SalesDealer as PrimaryDealerName,
+    u.SubDealer as SecondaryDealerName,
+    CAST(u.Notes AS NVARCHAR(MAX)) as Notes,
+    u.updated_by as LastModifiedBy,
+    FORMAT(TRY_CAST(u.updated_date AS DATETIME), 'dd-MM-yyyy') AS LastModifiedDate
+FROM awt_uniqueproductmaster as u 
+LEFT JOIN awt_serial_list as sl on sl.serial_no = u.serial_no 
+WHERE u.deleted = 0 
+  AND u.purchase_date >= '${startDate}' 
+  AND u.purchase_date <= '${endDate}'  
+GROUP BY 
+    u.serial_no,
+    u.CustomerID,
+    u.CustomerName,
+    u.BranchName,
+    u.SerialStatus,
+    sl.ItemNumber,
+    sl.ModelNumber,
+    u.purchase_date,
+    u.InvoiceNumber,
+    u.SalesDealer,
+    u.SubDealer,
+    CAST(u.Notes AS NVARCHAR(MAX)),
+    u.updated_by,
+    u.updated_date
+ORDER BY RIGHT(u.serial_no, 4) ASC;
     `;
 
     const result = await pool.request().query(sql);
 
     // Format date fields
-    const formattedData = result.recordset.map(record => ({
-      ...record,
-      InvoiceDate: formatDate(record.InvoiceDate),
-      WarrantyStartDate: formatDate(record.WarrantyStartDate),
-      WarrantyEndDate: formatDate(record.WarrantyEndDate),
-      LastModifiedDate: formatDate(record.LastModifiedDate)
-    }));
+    const formattedData = result.recordset.map(record => {
+      const purchaseDate = record.InvoiceDate ? new Date(record.InvoiceDate) : null;
+      const warrantyStartDate = purchaseDate;
+      const warrantyEndDate = purchaseDate ? addOneYearMinusOneDay(purchaseDate) : null;
+      return {
+        ...record,
+        InvoiceDate: record.InvoiceDate ? formatDate(record.InvoiceDate) : '',
+        WarrantyStartDate: warrantyStartDate ? formatDate(warrantyStartDate) : '',
+        WarrantyEndDate: warrantyEndDate ? formatDate(warrantyEndDate) : '',
+        LastModifiedDate: record.LastModifiedDate
+      }
+
+    });
 
     return res.json(formattedData);
 
@@ -22290,7 +22363,7 @@ app.get("/downloadstockexcel", authenticateToken, async (req, res) => {
     const result = await pool.request().query(`
       SELECT 
         f.licarecode AS licare_code,
-        f.title AS msp,
+        COALESCE(NULLIF(f.title, ''), f.partner_name, 'Unknown MSP') AS msp,
         c.csp_code,
         cf.title AS csp,
         s.Manufactured,
@@ -22300,12 +22373,12 @@ app.get("/downloadstockexcel", authenticateToken, async (req, res) => {
         c.total_stock
       FROM csp_stock AS c 
       LEFT JOIN awt_childfranchisemaster AS cf ON cf.licare_code = c.csp_code 
-      LEFT JOIN awt_franchisemaster AS f ON f.licarecode = cf.pfranchise_id 
+      INNER JOIN awt_franchisemaster AS f ON f.licarecode = cf.pfranchise_id
       LEFT JOIN Spare_parts AS s ON s.title = c.product_code 
       WHERE c.deleted = 0
       GROUP BY 
         f.licarecode,
-        f.title,
+        COALESCE(NULLIF(f.title, ''), f.partner_name, 'Unknown MSP'),
         c.csp_code,
         cf.title,
         s.Manufactured,
@@ -23053,7 +23126,7 @@ app.post("/setdefaultaddress", authenticateToken, async (req, res) => {
 });
 
 app.post("/postfinalremark", authenticateToken, async (req, res) => {
-  const { complaintid, final_remark } = req.body;
+  const { complaintid, final_remark , licare_code } = req.body;
 
   const pool = await poolPromise;
 
@@ -23077,20 +23150,21 @@ app.post("/postfinalremark", authenticateToken, async (req, res) => {
     await pool.request()
       .input("ticket_no", sql.VarChar, ticket_no)
       .input("final_remark", sql.Text, final_remark)
+      .input("created_by", sql.VarChar, licare_code)
       .query(`
-        INSERT INTO awt_complaintremark (ticket_no, remark)
-        VALUES (@ticket_no, @final_remark)
+        INSERT INTO awt_complaintremark (ticket_no, remark,created_by)
+        VALUES (@ticket_no, @final_remark , @created_by)
       `);
 
-    // Step 3: Update final_remark in complaint_ticket using ticket_no
-    await pool.request()
-      .input("ticket_no", sql.VarChar, ticket_no)
-      .input("final_remark", sql.Text, final_remark)
-      .query(`
-        UPDATE complaint_ticket
-        SET final_remark = @final_remark
-        WHERE ticket_no = @ticket_no
-      `);
+    // // Step 3: Update final_remark in complaint_ticket using ticket_no
+    // await pool.request()
+    //   .input("ticket_no", sql.VarChar, ticket_no)
+    //   .input("final_remark", sql.Text, final_remark)
+    //   .query(`
+    //     UPDATE complaint_ticket
+    //     SET final_remark = @final_remark
+    //     WHERE ticket_no = @ticket_no
+    //   `);
 
     return res.json({
       message: "Final remark saved and complaint ticket updated successfully.",

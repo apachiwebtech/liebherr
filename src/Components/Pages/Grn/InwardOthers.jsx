@@ -427,6 +427,7 @@ const InwardOthers = () => {
 
         // Update the text state
         setcspText(newValue);
+        
 
         // Check if newValue is not blank and has more than 4 words
 
@@ -452,6 +453,8 @@ const InwardOthers = () => {
     };
     const handleSearchAllChange = (newValue) => {
         setreciveCsp(newValue);
+        setData([]);
+        setEngineerdata([]);
     };
     const handleSearchEngineerChange = (newValue) => {
         setselectedEngineer(newValue);

@@ -107,6 +107,8 @@ const styles = StyleSheet.create({
 
 const MyDocument8 = ({ data, spare, csp }) => {
 
+
+
     const formatDate = (dateString) => {
         if (!dateString) {
             return dateString; // Return an empty string or a placeholder if dateString is undefined or null
@@ -309,7 +311,7 @@ const MyDocument8 = ({ data, spare, csp }) => {
                             <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>Quotation Date :</Text>
                         </View>
                         <View style={[{ width: '30%', borderRight: '1px solid black', borderBottom: '1px solid black',borderTop:'1px solid black' }]}>
-                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{formatDate(data.quotationDate)}</Text>
+                            <Text style={{ fontSize: '10px', marginTop: 5, marginLeft: 5, color: '#000' }}>{data.created_date ? formatDate(data.created_date) : ''}</Text>
 
                         </View>
 

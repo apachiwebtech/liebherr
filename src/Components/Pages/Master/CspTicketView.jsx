@@ -936,6 +936,12 @@ export function CspTicketView(params) {
       }
       );
 
+      
+      setOtp((prev) => ({
+        ...prev,
+        otp_received: response.data.state_id
+      }))
+
       setpurchase_date(response.data.purchase_date)
       setUpdatedata(response.data)
       setComplaintview(response.data);
@@ -1357,8 +1363,16 @@ export function CspTicketView(params) {
       }
     }
 
-    if (complaintview.call_status == 'Completed' && complaintview.sub_call_status == 'Partially') {
-      if (complaintview.totp != otpreceived.otp_received) {
+    if (complaintview.call_status == 'Closed') {
+
+      const totp = complaintview.totp;
+
+      if (!otpreceived.otp_received) {
+        alert('Please enter OTP');
+        return;
+      }
+
+      if (totp != otpreceived.otp_received) {
         alert('Invalid OTP');
         return;
       }
@@ -2552,13 +2566,13 @@ export function CspTicketView(params) {
                               </div>
 
                               {(complaintview.call_status == 'Spares' && ((complaintview.sub_call_status == 'Spare Required' || complaintview.sub_call_status == 'Spare Ordered'))) &&
-                                <div className="mb-3 col-lg-4">
+                                <div className="mb-3 col-lg-12">
                                   <h4 className="pname" style={{ fontSize: "14px" }}>Address Code</h4>
                                   <select name="address_code" className="form-control" style={{ fontSize: "14px" }} onChange={handleAddressChange}>
                                     <option value="">Select</option>
                                     {addresscode.map((value) => (
                                       <option key={value.address_code} value={value.address_code}>
-                                        {value.address_code}
+                                        {value.address_code} - {value.address}
                                       </option>
                                     ))}
                                   </select>
@@ -2566,7 +2580,7 @@ export function CspTicketView(params) {
 
                               }
 
-                              {(complaintview.call_status === 'Completed' && complaintview.sub_call_status === 'Partially') && (
+                              {(complaintview.call_status === 'Closed') && (
                                 <div className="mb-3 col-lg-4">
                                   <h4 className="otpname" style={{ fontSize: "14px" }}>Otp</h4>
                                   <input
@@ -2575,6 +2589,7 @@ export function CspTicketView(params) {
                                     name="otp_received"
                                     className="form-control"
                                     style={{ fontSize: "14px" }}
+                                    value={otpreceived.otp_received}
                                     placeholder="Enter OTP"
                                     maxLength={4}
                                     onChange={(e) => {
@@ -2589,7 +2604,7 @@ export function CspTicketView(params) {
 
 
 
-                              {(complaintview.call_status == 'Spares' && ((complaintview.sub_call_status == 'Spare Required' || complaintview.sub_call_status == 'Spare Ordered'))) &&
+                              {/* {(complaintview.call_status == 'Spares' && ((complaintview.sub_call_status == 'Spare Required' || complaintview.sub_call_status == 'Spare Ordered'))) &&
                                 <div className="mb-3 col-lg-8">
                                   <h4 className="pname" style={{ fontSize: "14px" }}>Address</h4>
                                   <textarea
@@ -2602,7 +2617,7 @@ export function CspTicketView(params) {
                                   />
                                 </div>
 
-                              }
+                              } */}
                               {(complaintview.call_status == 'Spares' || ((complaintview.call_status == 'Approval' && complaintview.sub_call_status == 'Customer Approval / Quotation'))) &&
 
                                 <div className=" py-1 my-2">

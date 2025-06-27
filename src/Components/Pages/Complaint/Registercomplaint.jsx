@@ -2164,7 +2164,7 @@ export function Registercomplaint(params) {
                         <select className="form-control" onChange={onHandleChange} value={value.cust_type} name="cust_type">
                           <option value="">Select </option>
                           <option value="END CUSTOMER">END CUSTOMER</option>
-                          <option value="DISPLAY/EVENT">DISPLAY / EVENTS</option>
+                          <option value="DISPLAY / EVENTS">DISPLAY / EVENTS</option>
                         </select>
                         {errors.cust_type && <span style={{ fontSize: "12px" }} className="text-danger">{errors.cust_type}</span>}
                       </div>

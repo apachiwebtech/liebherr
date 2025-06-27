@@ -25,40 +25,42 @@ const Complaintreport = () => {
 
 
   const columnMapping = {
-    id: "Ticket ID",
-    ticket_no: "Ticket Number",
-    ticket_date: "Ticket Date",
-    customer_id: "Customer ID",
-    customer_name: "Customer Name",
-    address: "Address",
-    state: "State",
-    city: "City",
+    TicketNumber: "Ticket Number",
+    CreateDate: "Create Date",
+    CustomerID: "Customer ID",
+    Salutation: "Salutation",
+    CustomerName: "Customer Name",
+    Address: "Address",
+    City: "City",
     District: "District",
-    pincode: "Pincode",
+    State: "State",
+    PINCODE: "Pincode",
     CustomerClassification: "Customer Classification",
-    customer_mobile: "Customer Mobile",
-    customer_email: "Customer Email",
-    alt_mobile: "Alternate Mobile",
-    call_type: "Call Type",
+    MobileNumber: "Customer Mobile",
+    AlternateMobileNumber: "Alternate Mobile",
+    CustomerEmailID: "Customer Email",
+    CustomerType: "Call Type",
     CallCategory: "Call Category",
     ModelNumber: "Model Number",
-    serial_no: "Serial Number",
-    purchase_date: "Purchase Date",
-    WarrantyType: "Warranty Status",
-    call_status: "Call Status",
-    sub_call_status: "Call Sub Status",
+    SerialNumber: "Serial Number",
+    PurchaseDate: "Purchase Date",
+    WarrantyType: "Warranty Type",
+    CallStatus: "Call Status",
+    CallSubStatus: "Call Sub Status",
     FaultDescription: "Fault Description",
+    FeedbackStatus: "Feedback Status",
     FinalRemark: "Final Remark",
     FieldCompletedDate: "Field Completed Date",
     AdditionalInfo: "Additional Info",
-    mother_branch: "Liebherr Branch",
-    msp: "Master Service Partner Code",
+    LiebherrBranch: "Liebherr Branch",
+    MasterServicePartnerCode: "Master Service Partner Code",
     MasterServicePartnerName: "Master Service Partner Name",
-    csp: "Child Service Partner Code",
-    child_service_partner: "Child Service Partner Name",
+    ChildServicePartnerCode: "Child Service Partner Code",
+    ChildServicePartnerName: "Child Service Partner Name",
     EngineerName: "Engineer Name",
     CountOfVisit: "Count Of Visit",
-    CallChargeable: "Call Charges",
+    CallChargeable: "Call Chargeable",
+    FieldChargeable: "Field Chargeable",
     Priority: "Priority",
     TOTP: "TOTP"
   };
@@ -94,17 +96,31 @@ const Complaintreport = () => {
       const rawData = response.data;
 
       const dateFields = [
-        "ticket_date",
-        "purchase_date",
+        "CreateDate",
+        "PurchaseDate",
         "FieldCompletedDate"
       ];
+
+      const allowedColumns = { ...columnMapping };
+
+      // Remove TOTP field if role_id is not in allowed list
+      if (![2, 8, 12].includes(Number(role_id))) {
+        delete allowedColumns["TOTP"];
+      }
+
       const formattedData = rawData.map(item => {
         const row = {};
-        for (const [backendKey, frontendLabel] of Object.entries(columnMapping)) {
+        for (const [backendKey, frontendLabel] of Object.entries(allowedColumns)) {
           let value = item[backendKey] ?? "";
 
           if (dateFields.includes(backendKey) && value) {
             value = formatDate(value); // Apply date formatting
+          }
+
+          // Extract plain text from Final Remark HTML if field exists
+          if (backendKey === "FinalRemark") {
+            const extracted = String(value).match(/<b>Remark:<\/b>\s*([^<]*)/i);
+            value = extracted?.[1]?.trim() || "";
           }
 
           row[frontendLabel] = value;
@@ -193,7 +209,7 @@ const Complaintreport = () => {
 
   const storedEncryptedRole = localStorage.getItem("Userrole");
   const decryptedRole = Decrypt(storedEncryptedRole);
-
+  const role_id = decryptedRole
   const roledata = {
     role: decryptedRole,
     pageid: String(46)

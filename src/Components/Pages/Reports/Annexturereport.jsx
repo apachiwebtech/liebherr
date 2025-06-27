@@ -52,6 +52,7 @@ const AnnextureReport = () => {
         created_by: "Create User",
         mode_of_contact: "Mode of Contact",
         updated_by: "Last Modify User",
+        final_remark: "Final Remark",
         visit_count: "Count Of Visit",
         child_service_partner: "Child Service Partner Name",
         spare_consumed: "Spare Consumed",
@@ -59,12 +60,13 @@ const AnnextureReport = () => {
         msp: "Master Service Partner Code",
         sevice_partner: "Master Service Partner Name",
         sub_call_status: "Call Sub Status",
+        productType: "Product Category",
         class_city: "Class Of City",
+        age_bracket: "Age Bracket",
         call_charges: "Ticket Charges",
         TotalTicketCharges: "Total Ticket Charges",
         salutation: "Salutation",
         warranty_status: "Warranty Status",
-        age_bracket: "Age Bracket",
     };
 
     const columnMapping2 = {
@@ -78,7 +80,7 @@ const AnnextureReport = () => {
         FieldCompleteDate: "Field Complete Date",
         ModelNumber: "Model Number",
         SerialNumber: "Serial Number",
-        WarrantyType: "Warranty Status",
+        WarrantyType: "Warranty Type",
         ChildServicePartnerCode: "Child Service Partner Code",
         ChildServicePartnerName: "Child Service Partner Name",
         MasterServicePartnerCode: "Master Service Partner Code",

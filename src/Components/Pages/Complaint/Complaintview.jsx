@@ -2073,7 +2073,7 @@ export function Complaintview(params) {
     try {
 
       await axiosInstance.post(`${Base_Url}/postfinalremark`, {
-        ...formDataRemark, complaintid: String(complaintid)
+        ...formDataRemark, complaintid: String(complaintid) , licare_code : created_by
       }, {
         headers: {
           Authorization: token,
@@ -2707,13 +2707,13 @@ export function Complaintview(params) {
                                 </div>
 
                                 {(complaintview.call_status == 'Spares' && ((complaintview.sub_call_status == 'Spare Required' || complaintview.sub_call_status == 'Spare Ordered'))) &&
-                                  <div className="mb-3 col-lg-4">
+                                  <div className="mb-3 col-lg-12">
                                     <h4 className="pname" style={{ fontSize: "14px" }}>Address Code</h4>
                                     <select name="address_code" className="form-control" style={{ fontSize: "14px" }} onChange={handleAddressChange}>
                                       <option value="">Select</option>
                                       {addresscode.map((value) => (
                                         <option key={value.address_code} value={value.address_code}>
-                                          {value.address_code}
+                                          {value.address_code} - {value.address}
                                         </option>
                                       ))}
                                     </select>
@@ -2722,7 +2722,7 @@ export function Complaintview(params) {
                                 }
 
 
-                                {(complaintview.call_status == 'Spares' && ((complaintview.sub_call_status == 'Spare Required' || complaintview.sub_call_status == 'Spare Ordered'))) &&
+                                {/* {(complaintview.call_status == 'Spares' && ((complaintview.sub_call_status == 'Spare Required' || complaintview.sub_call_status == 'Spare Ordered'))) &&
                                   <div className="mb-3 col-lg-8">
                                     <h4 className="pname" style={{ fontSize: "14px" }}>Address</h4>
                                     <textarea
@@ -2735,7 +2735,7 @@ export function Complaintview(params) {
                                     />
                                   </div>
 
-                                }
+                                } */}
 
 
                                 {(complaintview.call_status == 'Spares' || ((complaintview.call_status == 'Approval' && complaintview.sub_call_status == 'Customer Approval / Quotation'))) &&

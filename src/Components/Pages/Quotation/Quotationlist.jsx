@@ -670,14 +670,14 @@ export function Quotationlist(params) {
                                                 <tr key={item.id}>
                                                     <td >{displayIndex}</td>
                                                     <td>{item.ticketId}</td>
-                                                    <td>{formatDate(item.ticketdate)}</td>
+                                                    <td>{item.ticketdate ? formatDate(item.ticketdate) : ""}</td>
                                                     <td>{item.state}</td>
                                                     <td>{item.customer_class}</td>
                                                     <td>{item.ModelNumber}</td>
                                                     <td>{item.mother_branch}</td>
                                                     <td>Spare Parts</td>
                                                     <td>{item.quotationNumber}</td>
-                                                    <td>{item.quotationDate}</td>
+                                                    <td>{item.created_date ? formatDate(item.created_date) : ''}</td>
                                                     <td>{item.price}</td>
                                                     <td style={{ padding: '0px', textAlign: 'center' }}>
                                                         {item.status}

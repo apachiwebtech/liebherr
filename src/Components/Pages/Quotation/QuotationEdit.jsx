@@ -150,9 +150,7 @@ const QuotationEdit = () => {
     const Blob = async (data) => {
 
         try {
-            console.log(csp,'csp');
-            console.log(spare,'spare');
-            console.log(value,'value');
+
             
             const blob = await pdf(<MyDocument8 data={value} spare={spare} csp={csp[0]} />).toBlob();
             const url = URL.createObjectURL(blob);

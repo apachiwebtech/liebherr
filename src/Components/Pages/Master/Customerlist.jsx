@@ -246,7 +246,7 @@ export function Customerlist(params) {
             // Convert data to a worksheet
             const worksheet = XLSX.utils.json_to_sheet(allCustomerData.map(user => ({
                 "Salutation": user.salutation,
-                "CustomerName": user.customer_fname,
+                "CustomerName": user.customer_fname + (user.customer_lname ? ' ' + user.customer_lname : ''),
                 "customerID": user.customer_id,
                 "CustomerType": user.customer_type,
                 "CustomerClassification": user.customer_classification,

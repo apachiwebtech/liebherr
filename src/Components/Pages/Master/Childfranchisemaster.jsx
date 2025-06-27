@@ -540,8 +540,8 @@ const Childfranchisemaster = () => {
               fetchaddress();
             })
             .catch((error) => {
-              if (error.response && error.response.status === 409) {
-                setDuplicateError(
+              if (error.response && error.response.status == 409) {
+                alert(
                   "Duplicate entry, Address Code already exists!"
                 );
               }
