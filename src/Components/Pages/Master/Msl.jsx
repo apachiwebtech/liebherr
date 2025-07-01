@@ -266,7 +266,7 @@ export function Msl(params) {
                     CspCode: item.csp_code,
                     ArticleCode: item.item,
                     ArticleDescription: item.item_description,
-                    TotalCSPStock: item.stock_quantity || 0,
+                    TotalCSPStock: Number(item.stock_quantity) || 0,
                     MslStock: item.stock,
                 }))
             );

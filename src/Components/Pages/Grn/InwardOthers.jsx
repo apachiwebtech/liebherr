@@ -427,7 +427,7 @@ const InwardOthers = () => {
 
         // Update the text state
         setcspText(newValue);
-        
+
 
         // Check if newValue is not blank and has more than 4 words
 
@@ -455,7 +455,12 @@ const InwardOthers = () => {
         setreciveCsp(newValue);
         setData([]);
         setEngineerdata([]);
+        // Clear 'Received from' related fields
+        setselectedCsp(null);
+        setselectedEngineer(null);
+
     };
+    
     const handleSearchEngineerChange = (newValue) => {
         setselectedEngineer(newValue);
         console.log("Selected:", newValue);

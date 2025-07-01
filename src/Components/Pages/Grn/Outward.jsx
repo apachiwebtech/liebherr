@@ -408,6 +408,8 @@ const Outward = () => {
         setreciveCsp(newValue);
         setData([]);
         setEngData([]);
+        setselectedCsp(null)
+        setselectedEng(null)
     };
     const handleSearchChange = (newValue) => {
         setselectedCsp(newValue);

@@ -22361,31 +22361,43 @@ app.get("/downloadstockexcel", authenticateToken, async (req, res) => {
 
     // Fetch all customers who are not deleted
     const result = await pool.request().query(`
-      SELECT 
-        f.licarecode AS licare_code,
-        COALESCE(NULLIF(f.title, ''), f.partner_name, 'Unknown MSP') AS msp,
-        c.csp_code,
-        cf.title AS csp,
-        s.Manufactured,
-        c.product_code,
-        c.productname,
-        c.stock_quantity,
-        c.total_stock
-      FROM csp_stock AS c 
-      LEFT JOIN awt_childfranchisemaster AS cf ON cf.licare_code = c.csp_code 
-      INNER JOIN awt_franchisemaster AS f ON f.licarecode = cf.pfranchise_id
-      LEFT JOIN Spare_parts AS s ON s.title = c.product_code 
-      WHERE c.deleted = 0
-      GROUP BY 
-        f.licarecode,
-        COALESCE(NULLIF(f.title, ''), f.partner_name, 'Unknown MSP'),
-        c.csp_code,
-        cf.title,
-        s.Manufactured,
-        c.product_code,
-        c.productname,
-        c.stock_quantity,
-        c.total_stock;
+  WITH DistinctFranchise AS (
+    SELECT *
+    FROM (
+        SELECT *, ROW_NUMBER() OVER (PARTITION BY licarecode ORDER BY id) AS rn
+        FROM awt_franchisemaster
+    ) AS x
+    WHERE rn = 1
+)
+
+SELECT 
+    c.csp_code,
+    cf.title AS csp,
+    f.licarecode AS licare_code,
+    COALESCE(NULLIF(f.title, ''), f.partner_name, 'Unknown MSP') AS msp,
+    c.product_code,
+    c.productname,
+    CONVERT(INT , c.stock_quantity) as Physical_Stock,
+    c.total_stock ,
+    SUM(CONVERT(INT, ISNULL(est.stock_quantity , 0))) AS eng_stock
+FROM csp_stock AS c
+LEFT JOIN awt_childfranchisemaster AS cf ON cf.licare_code = c.csp_code
+LEFT JOIN DistinctFranchise AS f ON f.licarecode = cf.pfranchise_id
+LEFT JOIN awt_engineermaster AS eg ON eg.cfranchise_id = cf.licare_code
+LEFT JOIN engineer_stock AS est 
+    ON est.eng_code = eg.engineer_id 
+    AND est.product_code = c.product_code
+WHERE c.deleted = 0 
+GROUP BY 
+    c.csp_code,
+    cf.title,
+    f.licarecode,
+    COALESCE(NULLIF(f.title, ''), f.partner_name, 'Unknown MSP'),
+    c.product_code,
+    c.productname,
+    c.stock_quantity,
+    c.total_stock;
+
     `);
 
     const stocks = result.recordset;
@@ -22393,7 +22405,7 @@ app.get("/downloadstockexcel", authenticateToken, async (req, res) => {
     // Add TotalConsumed to each row
     const updatedStocks = stocks.map(row => ({
       ...row,
-      TotalConsumed: (row.total_stock || 0) - (row.stock_quantity || 0)
+      Total_stock: (Number(row.Physical_Stock) || 0) + (row.eng_stock || 0)
     }));
 
     // Create a new workbook and worksheet
@@ -22406,12 +22418,11 @@ app.get("/downloadstockexcel", authenticateToken, async (req, res) => {
       { header: 'MasterServicePartnerName', key: 'msp' },
       { header: 'ChildServicePartnerCode', key: 'csp_code' },
       { header: 'ChildServicePartnerName', key: 'csp' },
-      { header: 'Manufacturer', key: 'Manufactured' },
       { header: 'ItemCode', key: 'product_code' },
       { header: 'ItemDescription', key: 'productname' },
-      { header: 'TotalBilled', key: '' },
-      { header: 'TotalConsumed', key: 'TotalConsumed' },
-      { header: 'CurrentStocks', key: 'stock_quantity' },
+      { header: 'Physical Stock', key: 'Physical_Stock' },
+      { header: 'Engineer Stock', key: 'eng_stock' },
+      { header: 'Total Stock In Hand', key: 'Total_stock' },
     ];
 
     // Add data to worksheet

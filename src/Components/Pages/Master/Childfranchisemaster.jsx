@@ -398,7 +398,7 @@ const Childfranchisemaster = () => {
             })
             .catch((error) => {
               if (error.response && error.response.status === 409) {
-                setDuplicateError(
+                alert(
                   "Duplicate entry, Child Franchise already exists!"
                 );
               }

@@ -347,8 +347,8 @@ export function Stock(params) {
                                             <th width="15%">CSP Code</th>
                                             <th width="20%">Article Code</th>
                                             <th width="20%">Article Description</th>
-                                            <th width="20%">Physical Stock</th>
-                                            <th width="20%">Total CSP stock</th>
+                                            <th width="20%">CSP Physical Stock</th>
+                                            <th width="20%">Total GRN stock</th>
                                             <th width="10%">Action</th>
                                         </tr>
                                     </thead>
