@@ -4075,7 +4075,7 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
 
       //rate card logic
 
-      const getproductinfo = `select top 1 id, productType ,  productLine , productClass from product_master where item_description = '${ModelNumber}'`;
+      const getproductinfo = `select top 1 id, productType ,  productLineCode , productClass from product_master where item_code = '${item_code}'`;
 
       const productresult = await pool.request().query(getproductinfo)
 
@@ -4145,9 +4145,11 @@ app.post("/addcomplaintremark", authenticateToken, async (req, res) => {
 
       if (productresult.recordset.length > 0) {
 
-        const { productType, productLine, productClass } = productresult.recordset[0];
+        const { productType, productLineCode, productClass } = productresult.recordset[0];
 
-        const getrate = `select * from rate_card where ProductType ='${productType}' AND ProductLine = '${productLine}' AND ProductClass = '${productClass}' AND call_type = '${ticket_type}' AND class_city = '${call_city}' `
+        console.log(productType, productLineCode, productClass , "look")
+
+        const getrate = `select * from rate_card where ProductType ='${productType}' AND ProductLine = '${productLineCode}' AND ProductClass = '${productClass}' AND call_type = '${ticket_type}' AND class_city = '${call_city}' `
 
 
 
